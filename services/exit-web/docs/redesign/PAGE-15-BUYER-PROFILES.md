@@ -34,7 +34,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **False "queued with the banker"; invented sender "James"; unchecked activity claim.** | Intro dialog offers Copy and "Open Outreach" (with plan note), states nothing is sent from here; sign-off placeholder "[Your name]"; "recent activity" sentence only when the buyer has deals in the last 3 years. | ☑ `add04ca` |
-| G2 | **Invented founder-friendliness; fit shown as "interest" with a pulsing dot; appetite/check mislabels.** | Remove founder-friendliness; "Fit · Hot/Warm/Cool" with thresholds, no pulse; "Active-appetite buyers — registry attribute"; "Check-size midpoint"; "median across these N buyers". | ☐ |
+| G2 | **Invented founder-friendliness; fit shown as "interest" with a pulsing dot; appetite/check mislabels.** | Remove founder-friendliness; "Fit · Hot/Warm/Cool" with thresholds, no pulse; "Active-appetite buyers — registry attribute"; "Check-size midpoint"; "median across these N buyers". | ☑ G2-commit |
 | G3 | Banker's-take urgency and overclaim; hidden plan gate. | Plain wording; `requiredEngagement` note. | ☐ |
 | G4 | Demo company unlabelled. | Buyers and intro text on `loadActiveCompany()`; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
@@ -58,3 +58,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 ### G1 — False "queued with the banker"; invented sender; unchecked activity claim
 *Closed by:* `pages/Buyers.tsx`. The intro dialog's "Send introduction →" (toast "Introduction to {buyer} queued with the banker" — nothing was queued) is replaced by **Copy** and **Open Outreach →** (a link to `/console/banker`), with "Outreach requires Active Mandate" for free and Preparation founders and the line "A draft generated from the buyer's thesis and the company's figures. Nothing is sent from this page — copy it, or take it to Outreach." The template's sign-off "Best, James" → "Best, [Your name]"; "your recent activity in the space" appears only when the registry records deals in the last three years, otherwise the sentence cites the check range alone.
 *Verification:* `tsc -b`, eslint clean · Chromium (free): dialog shows the note, "[Your name]", "Outreach requires Active Mandate", Copy, Open Outreach; no "queued" toast path remains; dialog axe 0.
+
+### G2 — Invented founder-friendliness; fit shown as interest; mislabels
+*Closed by:* `pages/Buyers.tsx`. `friendliness()` (type base 78 / 88 / 64 ± retrade) and its "Founder-friendly" field and bar removed. Labels: "Hot · N%" → "Fit: Hot · N%" (the pulsing dot went with G6); filter "Interest level" → "Fit level" with "fit ≥ 60%" / "fit 35–59%"; "Active mandates — recent-12mo activity" → "Active-appetite buyers — registry attribute"; "Median target check — across registry" → "Median check midpoint — across these 12 buyers"; "Avg deal" → "Check midpoint"; "Match" → "Fit probability"; banker's take wording to match. The profiles foot states the thresholds, what appetite and check midpoint are, and that founder-friendliness is not measured.
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 matches for Founder-friendly / recent-12mo / across registry / Avg deal / "interest at" · free 1440/390: 0 errors, axe 0, no overflow.

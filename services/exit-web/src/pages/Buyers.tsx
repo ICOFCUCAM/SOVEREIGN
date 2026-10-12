@@ -16,20 +16,13 @@ import type { BuyerCandidate } from "@exit/engines";
 // primary action generates a warm introduction composed from the buyer thesis,
 // the company profile and the engine's fit reasoning.
 
-// interest level from probability; founder-friendliness from buyer type +
-// retrade history (PE that retrades hard reads less founder-friendly).
+// Fit level from the engine's fit probability (thresholds stated on the page).
+// Founder-friendliness is not measured per buyer, so it is not shown.
 function interest(c: BuyerCandidate): { label: string; pct: number; cls: string } {
   const p = c.probability;
   if (p >= 0.6) return { label: "Hot", pct: Math.round(p * 100), cls: "text-xo-verified" };
   if (p >= 0.35) return { label: "Warm", pct: Math.round(p * 100), cls: "text-xo-caution" };
   return { label: "Cool", pct: Math.round(p * 100), cls: "text-xo-muted" };
-}
-function friendliness(c: BuyerCandidate): { label: string; score: number } {
-  let s = c.buyer.buyerType === "strategic" ? 78 : c.buyer.buyerType === "family_office" ? 88 : 64;
-  const rt = c.outcomes.avgRetradePct;
-  if (rt != null) s += rt < -0.03 ? -18 : rt >= 0 ? 8 : -6;
-  s = Math.max(20, Math.min(96, s));
-  return { label: s >= 80 ? "High" : s >= 60 ? "Moderate" : "Low", score: s };
 }
 function warmIntro(c: BuyerCandidate): string {
   const co = SAMPLE_COMPANY;
@@ -80,10 +73,10 @@ const Buyers: React.FC = () => {
         badge={<span className="text-[12px] text-xo-muted">Profiles ranked</span>} />
 
       <section aria-label="Buyer summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><XMetric label="Active mandates" value={String(activeBucket.length)} sub="recent-12mo activity" /></div>
+        <div className="bg-xo-panel"><XMetric label="Active-appetite buyers" value={String(activeBucket.length)} sub="registry attribute" /></div>
         <div className="bg-xo-panel"><XMetric label="In our sector" value={String(candidates.filter((c) => c.fitDimensions.sectorFit === 1).length)} sub="direct match" /></div>
-        <div className="bg-xo-panel"><XMetric label="Median target check" value={fmtMoney(medianCheckUsd)} sub="across registry" /></div>
-        <div className="bg-xo-panel"><XMetric label="Top match" emphasis value={candidates[0] ? `${(candidates[0].probability * 100).toFixed(0)}%` : "—"} sub={candidates[0]?.buyer.name} /></div>
+        <div className="bg-xo-panel"><XMetric label="Median check midpoint" value={fmtMoney(medianCheckUsd)} sub={`across these ${candidates.length} buyers`} /></div>
+        <div className="bg-xo-panel"><XMetric label="Top fit probability" emphasis value={candidates[0] ? `${(candidates[0].probability * 100).toFixed(0)}%` : "—"} sub={candidates[0]?.buyer.name} /></div>
       </section>
 
       <MarketTape items={tape} />
@@ -108,11 +101,11 @@ const Buyers: React.FC = () => {
               <option value="dormant">Dormant</option>
             </select>
           </Field>
-          <Field label="Interest level">
+          <Field label="Fit level">
             <select className={inputCls} value={filter.interest} onChange={(e) => setFilter((f) => ({ ...f, interest: e.target.value }))}>
-              <option value="all">Any interest</option>
-              <option value="hot">Hot (≥60%)</option>
-              <option value="warm">Warm (35–59%)</option>
+              <option value="all">Any fit</option>
+              <option value="hot">Hot (fit ≥ 60%)</option>
+              <option value="warm">Warm (fit 35–59%)</option>
             </select>
           </Field>
         </div>
@@ -128,9 +121,9 @@ const Buyers: React.FC = () => {
             <div className="px-4 py-3">
               <p className="text-[14px] leading-relaxed">Fire a warm intro to the hottest buyer and open the conversation this week.</p>
               <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-                <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(topCheck)}</span> typical check from {top.buyer.name}; {activeBucket.length} active mandate{activeBucket.length === 1 ? "" : "s"} in play.</TakeCell>
+                <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(topCheck)}</span> check-size midpoint for {top.buyer.name}; {activeBucket.length} active-appetite buyer{activeBucket.length === 1 ? "" : "s"} (registry).</TakeCell>
                 <TakeCell k="If you wait">Hot interest cools — buyers redeploy and the warm window closes without a touch.</TakeCell>
-                <TakeCell k="Pursue">{top.buyer.name} — {it.label.toLowerCase()} interest at {it.pct}%, {top.buyer.buyerType.replace(/_/g, " ")}.</TakeCell>
+                <TakeCell k="Pursue">{top.buyer.name} — fit {it.label.toLowerCase()} at {it.pct}%, {top.buyer.buyerType.replace(/_/g, " ")}.</TakeCell>
                 <TakeCell k="ExitOS does it">ExitOS drafts a personalized warm introduction for each buyer and routes it through the banker.</TakeCell>
               </dl>
               <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Send via The Banker →</Link>
@@ -140,6 +133,7 @@ const Buyers: React.FC = () => {
       })()}
 
       <Section title="Buyer profiles · ranked against your company" className="border border-xo-line"
+        foot="Fit: hot at 60% or more, warm at 35–59%, cool below — the discovery engine's fit score, not measured interest. Appetite is a registry attribute. Check midpoint is the middle of the buyer's stated check range. Founder-friendliness is not measured per buyer, so it is not shown."
         right={<button type="button" onClick={() => setFilterOpen(true)} className="rounded-sm border border-xo-line px-2.5 py-1 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Filter{activeFilters > 0 ? ` · ${activeFilters}` : ""}</button>}>
         {candidates.length === 0 ? (
           <p className="px-4 py-6 text-center text-[13px] text-xo-muted">No buyers match these filters. <button type="button" className="font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" onClick={() => setFilter({ type: "all", appetite: "all", interest: "all" })}>Clear filters</button></p>
@@ -147,7 +141,6 @@ const Buyers: React.FC = () => {
           <ol className="grid grid-cols-1 gap-px bg-xo-line lg:grid-cols-2">
             {candidates.map((c, i) => {
               const it = interest(c);
-              const ff = friendliness(c);
               const avgCheck = (c.buyer.checkSizeLowUsd + c.buyer.checkSizeHighUsd) / 2;
               const lastDeal = c.signals.find((s) => /last deal|acquired|20\d\d/i.test(s.text))?.text;
               return (
@@ -157,16 +150,15 @@ const Buyers: React.FC = () => {
                       <h3 className="text-[15px] font-semibold"><span className="sr-only">Rank {i + 1}: </span>{c.buyer.name}</h3>
                       <span className="text-[11px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</span>
                     </div>
-                    <span className={`shrink-0 text-[12px] font-semibold ${it.cls}`}>{it.label} · {it.pct}%</span>
+                    <span className={`shrink-0 text-[12px] font-semibold ${it.cls}`}>Fit: {it.label} · {it.pct}%</span>
                   </div>
                   <p className="mt-2 text-[12px] leading-snug text-xo-muted">{c.buyer.thesis}</p>
                   <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-xo-line pt-2 sm:grid-cols-3">
                     <Fact label="Appetite" value={c.buyer.appetite} cls={c.buyer.appetite === "active" ? "text-xo-verified capitalize" : c.buyer.appetite === "warm" ? "text-xo-caution capitalize" : "capitalize"} />
-                    <Fact label="Avg deal" value={fmtMoney(avgCheck)} />
+                    <Fact label="Check midpoint" value={fmtMoney(avgCheck)} />
                     <Fact label="To close" value={c.outcomes.medianCloseDays != null ? `~${c.outcomes.medianCloseDays}d` : "—"} />
                     <Fact label="Last acq." value={lastDeal ? lastDeal.replace(/^last deal:?\s*/i, "") : "—"} />
-                    <Fact label="Founder-friendly" value={ff.label} />
-                    <Fact label="Match" value={c.probability.toFixed(2)} />
+                    <Fact label="Fit probability" value={c.probability.toFixed(2)} />
                   </dl>
                   <div className="mt-2 flex justify-end">
                     <button type="button" onClick={() => setIntro({ name: c.buyer.name, text: warmIntro(c) })} className="rounded-sm border border-xo-line px-2.5 py-1 text-[12px] font-semibold text-xo-action hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Warm intro<span className="sr-only"> for {c.buyer.name}</span></button>
