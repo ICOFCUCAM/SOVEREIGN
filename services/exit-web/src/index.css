@@ -7,16 +7,16 @@
 :root {
   color-scheme: dark;
   /* the exchange ink (EE1): kept in step with `ex` in tailwind.config.ts */
-  --ex-0: #040c18; --ex-1: #071a31; --ex-2: #0a2142; --ex-3: #163459;
-  --ex-paper: #f6f8fb; --ex-live: #7CFF9F; --ex-done: #6ee7b7;
-  --ex-hair: rgba(147,197,253,0.18);
+  --ex-0: #111310; --ex-1: #1B1C1A; --ex-2: #242522; --ex-3: #3A3934;
+  --ex-paper: #F8F4EE; --ex-live: #7CFF9F; --ex-done: #6ee7b7;
+  --ex-hair: rgba(180,154,117,0.22);
   /* the hero and insignia (HX2): owner palette */
   --hx-porcelain: #F5F1E9; --hx-graphite: #242522; --hx-shadow: #111310; --hx-bronze: #B49A75; --hx-ivory: #E8E0D2;
-  --ex-glow: rgba(37,99,235,0.18);
+  --ex-glow: rgba(180,154,117,0.12);
   /* the field: a dark chapter's ground, top to floor */
-  --ex-field: linear-gradient(180deg, #05101f 0%, #071a31 50%, #040c18 100%);
+  --ex-field: linear-gradient(180deg, #161614 0%, #1B1C1A 50%, #111310 100%);
   /* a lit seam: the hairline of light that opens a dark chapter */
-  --ex-seam: linear-gradient(90deg, transparent, rgba(147,197,253,0.42) 30%, rgba(147,197,253,0.42) 70%, transparent);
+  --ex-seam: linear-gradient(90deg, transparent, rgba(180,154,117,0.5) 30%, rgba(180,154,117,0.5) 70%, transparent);
 }
 
 html, body, #root { height: 100%; }
@@ -74,15 +74,15 @@ body {
 
 /* light chapters meet on a double hairline set to the text measure (EE14) */
 .ex-light { position: relative; }
-.ex-light + .ex-light::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: min(1384px, calc(100% - 40px)); height: 4px; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; pointer-events: none; }
+.ex-light + .ex-light::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: min(1384px, calc(100% - 40px)); height: 4px; border-top: 1px solid #D8CFC2; border-bottom: 1px solid #E8E1D6; pointer-events: none; }
 
 /* one focus ring and one text link (EE23). The ring is the fallback for any
    control without its own; controls that set a ring keep theirs (higher
    specificity). On ink the ring lightens. */
 :where(header, main, footer) :is(a, button, summary, select, input, [tabindex]):focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
 :where([data-ink], footer) :is(a, button, summary, [tabindex]):focus-visible { outline-color: #60a5fa; }
-.ex-link { display: inline-flex; align-items: center; gap: .75rem; padding-bottom: .55rem; font-weight: 600; color: #0a1018; background: linear-gradient(#2563eb, #2563eb) left bottom / 100% 1px no-repeat; transition: color .3s, background-size .3s; }
-.ex-link:hover { color: #1d4ed8; background-size: 100% 2px; }
+.ex-link { display: inline-flex; align-items: center; gap: .75rem; padding-bottom: .55rem; font-weight: 600; color: #15171A; background: linear-gradient(#9A7E56, #9A7E56) left bottom / 100% 1px no-repeat; transition: color .3s, background-size .3s; }
+.ex-link:hover { color: #7A6344; background-size: 100% 2px; }
 .ex-link:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
 
 /* figures (EE24): old-style in serif running text, lining and proportional in

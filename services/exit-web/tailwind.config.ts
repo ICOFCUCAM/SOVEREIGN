@@ -68,15 +68,16 @@ export default {
         // signal blue and two greens. Mirrored as CSS variables in index.css
         // for gradients written inline.
         ex: {
-          0: "#040c18",          // floor: footers, the deepest fall-off
-          1: "#071a31",          // field: dark chapters
-          2: "#0a2142",          // raised: panels and cards on the field
-          3: "#163459",          // edge: rings and rules on the field
-          paper: "#f6f8fb",      // story chapters
+          // the graphite field (HX5: the hero's identity carried sitewide; was the deep blue ink of EE1)
+          0: "#111310",          // floor: footers, the deepest fall-off
+          1: "#1B1C1A",          // field: dark chapters
+          2: "#242522",          // raised: panels and cards on the field
+          3: "#3A3934",          // edge: rings and rules on the field
+          paper: "#F8F4EE",      // story chapters: warm porcelain
           live: "#7CFF9F",       // the travelling light only
           done: "#6ee7b7",       // closed / positive, on ink
           "done-ink": "#047857", // closed / positive, on paper
-          hair: "rgba(147,197,253,0.18)", // hairline on ink
+          hair: "rgba(180,154,117,0.22)", // bronze hairline on graphite
           // the hero and insignia palette (owner's final correction, HX2)
           porcelain: "#F5F1E9",  // warm porcelain: the hero's editorial page
           graphite: "#242522",   // mineral graphite: the signature field

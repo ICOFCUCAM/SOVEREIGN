@@ -110,7 +110,7 @@ export const TrustStrip: React.FC = () => {
           <div className={`${WRAP} grid grid-cols-2 lg:grid-cols-4`}>
             {heroTrust.map((c, i) => (
               <div key={c.title} className={`flex items-center gap-3.5 py-5 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-6" : ""} ${i % 2 ? "border-l border-slate-200 pl-5 lg:pl-6" : ""}`}>
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center text-blue-600 ring-1 ring-slate-200"><Glyph name={c.icon} /></span>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center text-[#7A6344] ring-1 ring-slate-200"><Glyph name={c.icon} /></span>
                 <div className="min-w-0">
                   <div className="font-editorial text-[22px] font-semibold leading-none text-ink-900">{c.metric}{c.icon === "globe" && <Note n={2} />}</div>
                   <div className="mt-1 text-[12.5px] font-semibold leading-tight text-ink-800">{c.title}</div>
@@ -139,9 +139,9 @@ export const ExchangeSystem: React.FC<{ n: string }> = ({ n }) => {
           </div>
           <ol className="mt-12 grid gap-px border-y border-ink-900 bg-slate-200 sm:grid-cols-2 lg:grid-cols-3">
             {STEPS.map((st, i) => (
-              <li key={st.title} className="bg-[#f6f8fb] py-6 sm:px-6">
-                <span className="font-mono text-[10.5px] text-blue-600">{String(i + 1).padStart(2, "0")} /</span>
-                <div className="mt-5 text-blue-600"><Glyph name={st.icon} size={34} /></div>
+              <li key={st.title} className="bg-[#F8F4EE] py-6 sm:px-6">
+                <span className="font-mono text-[10.5px] text-[#7A6344]">{String(i + 1).padStart(2, "0")} /</span>
+                <div className="mt-5 text-[#7A6344]"><Glyph name={st.icon} size={34} /></div>
                 <h3 className="mt-4 font-editorial text-[24px] font-semibold leading-tight text-ink-900">{st.title}</h3>
                 <p className="mt-2 max-w-xs text-[12.5px] leading-relaxed text-slate-600">{st.body}</p>
               </li>
@@ -152,10 +152,10 @@ export const ExchangeSystem: React.FC<{ n: string }> = ({ n }) => {
             {EXCHANGE_FLOW.map((s, i) => (
               <React.Fragment key={s.title}>
                 <div className="flex items-center gap-2">
-                  <span className="text-blue-600"><Glyph name={s.icon} small /></span>
+                  <span className="text-[#7A6344]"><Glyph name={s.icon} small /></span>
                   <span className="text-[13px] font-semibold text-ink-800">{s.title}</span>
                 </div>
-                {i < EXCHANGE_FLOW.length - 1 && <span className="text-blue-600" aria-hidden>→</span>}
+                {i < EXCHANGE_FLOW.length - 1 && <span className="text-[#7A6344]" aria-hidden>→</span>}
               </React.Fragment>
             ))}
           </div>
@@ -165,7 +165,7 @@ export const ExchangeSystem: React.FC<{ n: string }> = ({ n }) => {
             <div className="mt-4 grid grid-cols-2 border-t border-slate-300 sm:grid-cols-3 lg:grid-cols-5">
               {ECOSYSTEM.map((e, i) => (
                 <div key={e.label} className={`py-5 pr-4 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-5" : ""}`}>
-                  <span className="text-blue-600"><Glyph name={e.icon} /></span>
+                  <span className="text-[#7A6344]"><Glyph name={e.icon} /></span>
                   <div className="mt-3 text-[13px] font-semibold text-ink-900">{t(e.label)}</div>
                   <div className="mt-0.5 font-mono text-[10.5px] text-slate-600">{t(e.meta, { n: e.n })}</div>
                 </div>
@@ -190,7 +190,7 @@ export const BuyerIntelligence: React.FC<{ n: string }> = ({ n }) => {
             <Chapter n={n}>{t("bi.eyebrow")}<Note n={2} /></Chapter>
             <div className="flex flex-wrap items-end justify-between gap-6">
               <h2 className={`${H2} text-ink-900`}><Editorial text={t("bi.h2")} /></h2>
-              <Link to="/console" className="border-b border-blue-600 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-900">{t("bi.link")} ↗</Link>
+              <Link to="/console" className="border-b border-[#9A7E56] pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-900">{t("bi.link")} ↗</Link>
             </div>
           </div>
           <div className="mt-12 grid border-y border-ink-900 sm:grid-cols-2 lg:grid-cols-5">
@@ -206,10 +206,10 @@ export const BuyerIntelligence: React.FC<{ n: string }> = ({ n }) => {
                 <div className="mt-5">
                   <div className="flex items-center justify-between text-[10.5px]">
                     <span className="text-slate-600">Acquisition Appetite</span>
-                    <span className="font-semibold text-blue-600">{b.appetite >= 90 ? "Very High" : "High"}</span>
+                    <span className="font-semibold text-[#7A6344]">{b.appetite >= 90 ? "Very High" : "High"}</span>
                   </div>
                   <div className="mt-1.5 h-1 overflow-hidden bg-slate-100">
-                    <div className="h-full bg-blue-600" style={{ width: `${b.appetite}%` }} />
+                    <div className="h-full bg-[#9A7E56]" style={{ width: `${b.appetite}%` }} />
                   </div>
                 </div>
                 <dl className="mt-4 space-y-2 text-[11px]">
@@ -245,7 +245,7 @@ export const DataProvenance: React.FC<{ n: string }> = ({ n }) => {
               <ol className="mt-8 border-t border-slate-300">
                 {PROVENANCE_PIPELINE.map((p, i) => (
                   <li key={p.stage} className="flex items-baseline gap-4 border-b border-slate-200 py-3">
-                    <span className="font-mono text-[10.5px] text-blue-600">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="font-mono text-[10.5px] text-[#7A6344]">{String(i + 1).padStart(2, "0")}</span>
                     <span className="text-[13px] font-semibold text-ink-900">{p.stage}</span>
                     <span className="ml-auto text-right text-[11.5px] text-slate-600">{p.detail}</span>
                   </li>
@@ -258,7 +258,7 @@ export const DataProvenance: React.FC<{ n: string }> = ({ n }) => {
             {COMMAND_FEATURES.map((f, i) => (
               <div key={f.title} className={`py-5 pr-4 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-4" : ""}`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-blue-600"><Glyph name={f.icon} small /></span>
+                  <span className="text-[#7A6344]"><Glyph name={f.icon} small /></span>
                   <span className="font-mono text-[15px] font-bold text-ink-900">{f.value}<Note n={f.src} /></span>
                 </div>
                 <div className="mt-3 text-[12px] font-bold leading-tight text-ink-900">{f.title}</div>
@@ -284,15 +284,15 @@ export const NegotiationDesk: React.FC<{ n: string }> = ({ n }) => {
             <div>
               <Chapter n={n} dark>{t("neg.eyebrow")}</Chapter>
               <h2 className={`${H2} mt-4 text-white`}><Editorial text={t("neg.h2")} dark /></h2>
-              <p className="mt-6 max-w-md text-[14px] leading-relaxed text-blue-100/70">{t("neg.body")}</p>
-              <Link to="/modules" className="mt-6 inline-block border-b border-blue-300 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white">{t("neg.link")} ↗</Link>
+              <p className="mt-6 max-w-md text-[14px] leading-relaxed text-[#E8E0D2]/70">{t("neg.body")}</p>
+              <Link to="/modules" className="mt-6 inline-block border-b border-[#C9B08A] pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white">{t("neg.link")} ↗</Link>
               <ul className="mt-8 border-t border-white/15">
                 {NEGOTIATION_FEATURES.map((f) => (
                   <li key={f.title} className="flex gap-3 border-b border-white/10 py-4">
-                    <span className="mt-0.5 text-blue-300"><Glyph name={f.icon} small /></span>
+                    <span className="mt-0.5 text-[#C9B08A]"><Glyph name={f.icon} small /></span>
                     <div>
                       <div className="text-sm font-bold text-white">{f.title}</div>
-                      <div className="text-[12px] text-blue-100/60">{f.body}</div>
+                      <div className="text-[12px] text-[#E8E0D2]/60">{f.body}</div>
                     </div>
                   </li>
                 ))}
@@ -300,7 +300,7 @@ export const NegotiationDesk: React.FC<{ n: string }> = ({ n }) => {
             </div>
             {/* the desk — a framed instrument */}
             <div className="border border-white/15 bg-white/[0.03] p-4 sm:p-5">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3 font-mono text-[9.5px] uppercase tracking-[0.14em] text-blue-100/60">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3 font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#E8E0D2]/60">
                 <span>ExitOS / Negotiation desk</span><span className="text-loi-300">Illustrative figures</span>
               </div>
               <div className="mt-4"><OfferTable /></div>
@@ -325,11 +325,11 @@ export const DataRooms: React.FC<{ n: string }> = ({ n }) => {
             <div>
               <Chapter n={n} dark>{t("dr.eyebrow")}</Chapter>
               <h2 className={`${H2} mt-4 text-white`}><Editorial text={t("dr.h2")} dark /></h2>
-              <p className="mt-6 max-w-lg text-[14px] leading-relaxed text-blue-100/70">{t("dr.body")}</p>
-              <Link to="/platform" className="mt-6 inline-block border-b border-blue-300 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white">{t("dr.link")} ↗</Link>
-              <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-[11.5px] text-blue-100/70">
+              <p className="mt-6 max-w-lg text-[14px] leading-relaxed text-[#E8E0D2]/70">{t("dr.body")}</p>
+              <Link to="/platform" className="mt-6 inline-block border-b border-[#C9B08A] pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white">{t("dr.link")} ↗</Link>
+              <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-[11.5px] text-[#E8E0D2]/70">
                 {[["doc", "Document checklist by package"], ["check", "Completeness per package"], ["shield", "Who can see uploads, stated"]].map(([ic, l]) => (
-                  <span key={l} className="flex items-center gap-1.5"><span className="text-blue-300"><Glyph name={ic} small /></span>{l}</span>
+                  <span key={l} className="flex items-center gap-1.5"><span className="text-[#C9B08A]"><Glyph name={ic} small /></span>{l}</span>
                 ))}
               </div>
             </div>
@@ -338,9 +338,9 @@ export const DataRooms: React.FC<{ n: string }> = ({ n }) => {
           <div className="mt-10 grid grid-cols-2 border-y border-white/15 sm:grid-cols-3 lg:grid-cols-6">
             {DATA_ROOMS.map((d, i) => (
               <div key={d.title} className={`py-5 pr-4 ${i > 0 ? "lg:border-l lg:border-white/10 lg:pl-4" : ""}`}>
-                <span className="text-blue-300"><Glyph name={d.icon} small /></span>
+                <span className="text-[#C9B08A]"><Glyph name={d.icon} small /></span>
                 <div className="mt-3 text-[12.5px] font-semibold leading-tight text-white">{d.title}</div>
-                <div className="mt-2 flex items-center gap-1.5 text-[11.5px] text-blue-100/70">
+                <div className="mt-2 flex items-center gap-1.5 text-[11.5px] text-[#E8E0D2]/70">
                   <span>Required for diligence</span>
                 </div>
               </div>
@@ -366,7 +366,7 @@ export const ExampleListings: React.FC<{ n: string }> = ({ n }) => {
               <h2 className={`${H2} text-ink-900`}><Editorial text={t("mp.h2")} /></h2>
               <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
                 <p className="max-w-md text-[14px] leading-relaxed text-slate-600">{t("mp.body")}</p>
-                <Link to="/console/marketplace" className="border-b border-blue-600 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-900">{t("mp.link")} ↗</Link>
+                <Link to="/console/marketplace" className="border-b border-[#9A7E56] pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-900">{t("mp.link")} ↗</Link>
               </div>
             </div>
           </div>
@@ -375,7 +375,7 @@ export const ExampleListings: React.FC<{ n: string }> = ({ n }) => {
             {OPPORTUNITIES.map((o, i) => (
               <div key={o.name} className={`py-6 pr-5 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-5" : ""} border-b border-slate-200 last:border-b-0 lg:border-b-0`}>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-blue-600">{o.sector}</span>
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-[#7A6344]">{o.sector}</span>
                   <span className="font-mono text-[9.5px] uppercase tracking-wide text-slate-600">{o.stage}</span>
                 </div>
                 <div className="mt-4 font-editorial text-[22px] font-semibold text-ink-900">{o.name}</div>
@@ -386,7 +386,7 @@ export const ExampleListings: React.FC<{ n: string }> = ({ n }) => {
                 </div>
                 <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
                   <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-slate-600"><Glyph name="lock" small /> Identity &amp; ask under NDA</span>
-                  <a href="/console" className="text-[12px] font-semibold text-blue-600 hover:text-blue-700">Request NDA &rarr;</a>
+                  <a href="/console" className="text-[12px] font-semibold text-[#7A6344] hover:text-[#6A5539]">Request NDA &rarr;</a>
                 </div>
               </div>
             ))}
@@ -444,14 +444,14 @@ export const Governance: React.FC<{ n: string }> = ({ n }) => {
         <div className={`${WRAP} py-16`}>
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <Chapter n={n} dark>{t("gov.eyebrow")}</Chapter>
-            <div className="text-[11.5px] text-blue-100/60">{t("gov.note")}</div>
+            <div className="text-[11.5px] text-[#E8E0D2]/60">{t("gov.note")}</div>
           </div>
           <div className="mt-8 grid grid-cols-1 border-y border-white/15 sm:grid-cols-2 lg:grid-cols-5">
             {GOVERNANCE.map((g, i) => (
               <div key={g.title} className={`py-6 pr-5 ${i > 0 ? "lg:border-l lg:border-white/10 lg:pl-5" : ""}`}>
-                <span className="text-blue-300"><Glyph name={g.icon} /></span>
+                <span className="text-[#C9B08A]"><Glyph name={g.icon} /></span>
                 <h3 className="mt-4 font-editorial text-[19px] font-semibold text-white">{t(g.title)}</h3>
-                <p className="mt-1.5 text-[11.5px] leading-snug text-blue-100/60">{t(g.body)}</p>
+                <p className="mt-1.5 text-[11.5px] leading-snug text-[#E8E0D2]/60">{t(g.body)}</p>
               </div>
             ))}
           </div>

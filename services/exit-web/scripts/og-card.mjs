@@ -31,23 +31,23 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;1,8..60,600&display=block" rel="stylesheet">
 <style>
 *{margin:0;box-sizing:border-box} body{width:1200px;height:630px;overflow:hidden;font-family:Inter,sans-serif;color:#fff;
-background:radial-gradient(ellipse 70% 90% at 85% 10%,rgba(37,99,235,.35),transparent 60%),linear-gradient(180deg,#05101f 0%,#071a31 55%,#040c18 100%)}
+background:radial-gradient(ellipse 70% 90% at 85% 10%,rgba(180,154,117,.35),transparent 60%),linear-gradient(180deg,#161614 0%,#1B1C1A 55%,#111310 100%)}
 .grid{position:absolute;inset:0;opacity:.06;background-image:repeating-linear-gradient(90deg,#a0bee6 0 1px,transparent 1px 100px),repeating-linear-gradient(0deg,#a0bee6 0 1px,transparent 1px 100px)}
 .wrap{position:absolute;inset:56px 64px 0 64px}
 .top{display:flex;justify-content:space-between;font:500 14px ui-monospace,Menlo,monospace;letter-spacing:.2em;text-transform:uppercase;color:rgba(219,234,254,.75);border-bottom:1px solid rgba(255,255,255,.2);padding-bottom:16px}
 .top b{color:#fff;font:600 22px Inter;letter-spacing:-.01em;text-transform:none}
 h1{margin-top:40px;max-width:600px;font:600 80px/0.93 "Source Serif 4",serif;letter-spacing:-.045em}
-h1 em{display:block;font-style:italic;color:#93c5fd}
+h1 em{display:block;font-style:italic;color:#DCCDB3}
 .route{position:absolute;right:60px;top:150px;width:440px;height:235px}
 .figs{position:absolute;left:64px;right:64px;bottom:56px;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.18)}
 .f{padding-top:20px}.f+.f{border-left:1px solid rgba(255,255,255,.15);padding-left:28px}
 .v{font:600 52px/1 "Source Serif 4",serif;letter-spacing:-.03em}.l{margin-top:8px;font-size:17px;color:rgba(219,234,254,.8)}
-.bar{position:absolute;left:0;right:0;bottom:0;height:8px;background:#2563eb}
+.bar{position:absolute;left:0;right:0;bottom:0;height:8px;background:#9A7E56}
 .ed{position:absolute;right:64px;bottom:198px;font:500 13px ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:rgba(219,234,254,.65)}
 </style></head><body><div class="grid"></div>
-<svg class="route" viewBox="0 0 470 250"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#93c5fd"/><stop offset=".6" stop-color="#60a5fa"/><stop offset="1" stop-color="#6ee7b7"/></linearGradient></defs>
+<svg class="route" viewBox="0 0 470 250"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#DCCDB3"/><stop offset=".6" stop-color="#C9B08A"/><stop offset="1" stop-color="#6ee7b7"/></linearGradient></defs>
 <path d="M10 150 C 60 150, 90 230, 130 220 S 170 40, 200 60 S 230 180, 250 170 S 300 70, 340 60 S 400 200, 420 190 S 450 110, 460 110" fill="none" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
-${[[10,150],[130,220],[200,60],[250,170],[340,60],[420,190],[460,110]].map(([x,y],i,a)=>`<circle cx="${x}" cy="${y}" r="7" fill="${i===a.length-1?'#6ee7b7':'#60a5fa'}" stroke="#e8f1ff" stroke-width="2"/><circle cx="${x}" cy="${y}" r="15" fill="none" stroke="${i===a.length-1?'#6ee7b7':'#93c5fd'}" opacity=".5"/>`).join("")}
+${[[10,150],[130,220],[200,60],[250,170],[340,60],[420,190],[460,110]].map(([x,y],i,a)=>`<circle cx="${x}" cy="${y}" r="7" fill="${i===a.length-1?'#6ee7b7':'#C9B08A'}" stroke="#F3EEE6" stroke-width="2"/><circle cx="${x}" cy="${y}" r="15" fill="none" stroke="${i===a.length-1?'#6ee7b7':'#DCCDB3'}" opacity=".5"/>`).join("")}
 </svg>
 <div class="wrap"><div class="top"><b>ExitOS</b><span>The global acquisition exchange</span></div>
 <h1>The global acquisition exchange <em>for what\u2019s next.</em></h1></div>

@@ -14,7 +14,7 @@ const ProofSection: React.FC<{ proof?: Proof }> = ({ proof = PROOF }) => {
     <section aria-labelledby="proof-h" className="ex-light bg-ex-paper text-ink-900">
       <div className="mx-auto w-full max-w-[1480px] px-5 py-16 sm:px-8 sm:py-20 lg:px-12">
         <div className="border-t-4 border-double border-ink-900 pt-8">
-          <h2 id="proof-h" className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-600">{t("proof.eyebrow")}</h2>
+          <h2 id="proof-h" className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-[#7A6344]">{t("proof.eyebrow")}</h2>
           {q && (
             <figure className="mt-8 max-w-4xl">
               <blockquote className="font-editorial text-[clamp(1.8rem,3.6vw,3.2rem)] font-semibold leading-[1.12] tracking-[-0.02em]">“{q.quote}”</blockquote>
@@ -24,7 +24,7 @@ const ProofSection: React.FC<{ proof?: Proof }> = ({ proof = PROOF }) => {
           {proof.clients.length > 0 && (
             <ul className="mt-12 grid grid-cols-2 gap-px border-y border-slate-300 bg-slate-300 sm:grid-cols-4">
               {proof.clients.map((c) => (
-                <li key={c.name} className="bg-[#f6f8fb] px-5 py-6"><span className="font-editorial text-[1.25rem] font-semibold">{c.name}</span>{c.sector && <span className="mt-1 block text-[12.5px] text-slate-600">{c.sector}</span>}</li>
+                <li key={c.name} className="bg-[#F8F4EE] px-5 py-6"><span className="font-editorial text-[1.25rem] font-semibold">{c.name}</span>{c.sector && <span className="mt-1 block text-[12.5px] text-slate-600">{c.sector}</span>}</li>
               ))}
             </ul>
           )}
@@ -33,7 +33,7 @@ const ProofSection: React.FC<{ proof?: Proof }> = ({ proof = PROOF }) => {
               {proof.press.map((p) => (
                 <li key={p.url}><a href={p.url} target="_blank" rel="noopener noreferrer" className="group block border-t border-ink-900 pt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
                   <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-slate-600">{p.outlet} · {p.date}</span>
-                  <span className="mt-1 block font-editorial text-[1.2rem] font-semibold group-hover:text-blue-700">{p.title} <span aria-hidden>↗</span></span>
+                  <span className="mt-1 block font-editorial text-[1.2rem] font-semibold group-hover:text-[#6A5539]">{p.title} <span aria-hidden>↗</span></span>
                 </a></li>
               ))}
             </ul>

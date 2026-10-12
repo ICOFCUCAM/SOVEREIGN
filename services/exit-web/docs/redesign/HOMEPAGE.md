@@ -486,6 +486,15 @@ Two things a still image cannot do, kept restrained:
 3. **Depth on pointer.** The dial is built in layers, each moving by its own factor as the pointer crosses the hero (far-field lines 14, bezel 7, points 5, rings 4, wedge 3, axes 2; the transaction node does not move), eased over 1.1 s. Written as CSS variables from one pointer handler with requestAnimationFrame — no React re-render. Only for fine pointers that hover (desktop), never under reduced motion.
 4. **A slow sign of life.** After the entrance the wedge sways three degrees either way over 24 s, and a soft glint runs along the horizon curve every 9 s. Both only under `prefers-reduced-motion: no-preference`; checked 0 hero animations and no layer transforms under reduced motion.
 
+### HX5 — the hero's identity carried sitewide (owner: "carry identity sitewide")
+
+The graphite, porcelain and champagne-bronze identity of the hero now runs through the whole homepage, the footer and the marketing pages (Platform, Modules, Pricing), replacing the deep blue ink of phase 13:
+
+- **Tokens.** `ex-0…3` and the CSS variables became the graphite field (#111310 floor, #1B1C1A field, #242522 raised, #3A3934 edge); `ex-paper` warm porcelain #F8F4EE; the glow, seam and hairline bronze. Every dark chapter built on them (board frame, lifecycle band, ledger front page, FAQ card, closing, footer, header ink state) moved with them.
+- **Accents.** Blue text, bars, rules, underlines and button hovers re-mapped to a bronze scale by shade, chosen for contrast (text on paper #7A6344 / #6A5539; on graphite #C9B08A / #DCCDB3 / ivory); primary buttons hover to graphite. Blue is kept only for focus rings (functional).
+- **Unchanged.** The board's ribbon and screen (checked identical); the hero (already in the identity); the share card regenerated in graphite and bronze.
+- **Checks.** vitest 250/250, build, axe 0 on /, /pricing, /platform, /modules at 1440 and 390 (one finding fixed: a 9 px badge on Pricing, now on #6A5539), keyboard 74 stops, reduced motion, board identical.
+
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
 | # | Gate | Status |

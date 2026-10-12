@@ -83,7 +83,7 @@ const Landing: React.FC = () => {
                 [HISTORY_FMT.disclosedValue, t("ribbon.value")],
               ].map(([v, l], i) => (
                 <div key={l} className={`relative pr-3 pt-5 ${i ? "border-l border-slate-300 pl-3 sm:pl-5" : ""}`}>
-                  <span aria-hidden className={`hero-rule absolute -top-px h-[2px] bg-blue-600 ${i ? "left-3 right-3 sm:left-5" : "left-0 right-3"}`} style={{ animationDelay: `${0.2 + i * 0.15}s` }} />
+                  <span aria-hidden className={`hero-rule absolute -top-px h-[2px] bg-[#9A7E56] ${i ? "left-3 right-3 sm:left-5" : "left-0 right-3"}`} style={{ animationDelay: `${0.2 + i * 0.15}s` }} />
                   <div className="font-editorial text-[clamp(1.7rem,2.6vw,2.5rem)] font-semibold leading-none tracking-[-0.03em]"><CountUp value={v} /></div>
                   <div className="mt-2 text-[12.5px] text-slate-600">{l}<Note n={([1, 2, 3] as SourceId[])[i]} first /></div>
                 </div>
@@ -100,11 +100,11 @@ const Landing: React.FC = () => {
                 <ExchangeMap dark compact bare />
               </div>
               {(["left-2 top-2 border-l border-t", "right-2 top-2 border-r border-t", "left-2 bottom-2 border-l border-b", "right-2 bottom-2 border-r border-b"] as const).map((c) => (
-                <span key={c} aria-hidden className={`pointer-events-none absolute h-3 w-3 border-blue-300/40 ${c}`} />
+                <span key={c} aria-hidden className={`pointer-events-none absolute h-3 w-3 border-[#C9B08A]/40 ${c}`} />
               ))}
             </div>
             <figcaption className="mt-4 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
-              <span aria-hidden className="h-3 w-3 shrink-0 bg-blue-600" /><span>{t("lifecycle.title")} · {t("lifecycle.live")}<Note n={6} first /></span>
+              <span aria-hidden className="h-3 w-3 shrink-0 bg-[#9A7E56]" /><span>{t("lifecycle.title")} · {t("lifecycle.live")}<Note n={6} first /></span>
             </figcaption>
           </figure>
         </div>
@@ -119,7 +119,7 @@ const Landing: React.FC = () => {
           </div>
         }>
           {/* the screen: exchange ribbon + board, content unchanged */}
-          <div data-hall-screen className="rounded-ex-md bg-[#0a1626] p-1.5">
+          <div data-hall-screen className="rounded-ex-md bg-[#1B1C1A] p-1.5">
           {/* Bloomberg-style exchange ribbon */}
           <div className="mb-1.5 flex items-center justify-between gap-3 rounded-md bg-black/25 px-3 py-1.5">
             <div className="flex items-center gap-2">
@@ -152,7 +152,7 @@ const Landing: React.FC = () => {
           main p{text-wrap:pretty;hanging-punctuation:first last}
           @media (prefers-reduced-motion: no-preference){.hero-rule{transform-origin:left;animation:heroRule .9s cubic-bezier(.2,.7,.2,1) both}}
           @keyframes exScan{0%{transform:translateY(-100%);opacity:0}8%{opacity:1}50%{opacity:.5}92%{opacity:1}100%{transform:translateY(2000%);opacity:0}}
-          @keyframes exFlash{0%,100%{background:transparent}50%{background:rgba(96,165,250,.10)}}
+          @keyframes exFlash{0%,100%{background:transparent}50%{background:rgba(201,176,138,.10)}}
           @keyframes exTravel{0%{left:0;opacity:0}6%{opacity:1}94%{opacity:1}100%{left:100%;opacity:0}}
         `}</style>
       </section>
@@ -169,7 +169,7 @@ const Landing: React.FC = () => {
           <Chapter n="05">{t("loss.eyebrow")}</Chapter>
           <h2 className="rv-h mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
           <div className="mt-12 grid gap-10 border-t-4 border-double border-ink-900 pt-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] lg:gap-[5vw]">
-            <p className="max-w-md text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-blue-700">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
+            <p className="max-w-md text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-[#6A5539]">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
             {/* comparison matrix, set as a broadsheet table */}
             <div role="region" aria-label="Traditional sale compared with ExitOS" tabIndex={0} className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
               <table className="w-full min-w-[620px] text-left">
@@ -185,7 +185,7 @@ const Landing: React.FC = () => {
                     <tr key={l.problem} className="border-b border-slate-300 last:border-0">
                       <th scope="row" className="py-4 pr-4 align-top font-editorial text-[19px] font-semibold text-ink-900">{l.dimension}</th>
                       <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] text-slate-600"><span className="mr-1.5 text-red-600" aria-hidden>✕</span>{l.problem}</td>
-                      <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] font-medium text-ink-900"><span className="mr-1.5 text-blue-700" aria-hidden>✓</span>{l.fix}</td>
+                      <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] font-medium text-ink-900"><span className="mr-1.5 text-[#6A5539]" aria-hidden>✓</span>{l.fix}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -219,18 +219,18 @@ const Landing: React.FC = () => {
           <div className="ex-seam relative grid overflow-hidden text-white sm:grid-cols-3" style={{ background: "radial-gradient(ellipse 60% 90% at 50% 0%, var(--ex-glow), transparent 70%), linear-gradient(180deg, var(--ex-1), var(--ex-0))" }}>
             {LEDGER_ROWS.slice(0, 3).map((c, i) => (
               <article key={c.target} className={`px-6 py-8 sm:px-7 ${i > 0 ? "sm:border-l sm:border-white/10" : ""} border-b border-white/10 last:border-b-0 sm:border-b-0`}>
-                <div className="flex items-baseline justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-200/75">
+                <div className="flex items-baseline justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[#DCCDB3]/75">
                   <span>{c.sector}</span><time dateTime={c.date}>{c.date}</time>
                 </div>
                 <h3 className="mt-4 font-editorial text-[clamp(1.4rem,2.2vw,1.9rem)] font-semibold leading-[1.1] text-white">
-                  {c.buyer} <span className="italic text-blue-300">{c.status === "Closed" ? "acquired" : c.status === "Terminated" ? "ended its deal for" : "agreed to acquire"}</span> {c.target}
+                  {c.buyer} <span className="italic text-[#C9B08A]">{c.status === "Closed" ? "acquired" : c.status === "Terminated" ? "ended its deal for" : "agreed to acquire"}</span> {c.target}
                 </h3>
                 <div className="mt-5 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-white">{c.value}</div>
-                <div className="mt-2 text-[12px] text-blue-100/70">Disclosed value</div>
+                <div className="mt-2 text-[12px] text-[#E8E0D2]/70">Disclosed value</div>
                 <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-[11px]">
-                  <div><dt className="text-blue-100/70">vs reference</dt><dd className="font-mono text-[14px] font-bold text-blue-300">{c.premium}</dd></div>
-                  <div><dt className="text-blue-100/70">Status</dt><dd className={`font-mono text-[14px] font-bold ${c.status === "Closed" ? "text-ex-done" : c.status === "Terminated" ? "text-slate-300" : "text-amber-300"}`}>{c.status}</dd></div>
-                  <div><dt className="text-blue-100/70">Source</dt><dd className="font-mono text-[12px] font-semibold text-white">{c.sources[0]?.kind ?? "—"}</dd></div>
+                  <div><dt className="text-[#E8E0D2]/70">vs reference</dt><dd className="font-mono text-[14px] font-bold text-[#C9B08A]">{c.premium}</dd></div>
+                  <div><dt className="text-[#E8E0D2]/70">Status</dt><dd className={`font-mono text-[14px] font-bold ${c.status === "Closed" ? "text-ex-done" : c.status === "Terminated" ? "text-slate-300" : "text-amber-300"}`}>{c.status}</dd></div>
+                  <div><dt className="text-[#E8E0D2]/70">Source</dt><dd className="font-mono text-[12px] font-semibold text-white">{c.sources[0]?.kind ?? "—"}</dd></div>
                 </dl>
               </article>
             ))}
@@ -284,16 +284,16 @@ const Landing: React.FC = () => {
           <div className="mt-12 border-t border-ink-900">
             {HOME_MODULES.map(([name, key, v], k) => (
               <details key={name} open={k === 0} className="group border-b border-slate-300">
-                <summary className="grid cursor-pointer list-none grid-cols-[28px_1fr_36px] items-center gap-x-3 gap-y-1.5 py-6 transition-colors hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:grid-cols-[58px_1fr_1fr_44px] sm:gap-x-5 sm:py-7 [&::-webkit-details-marker]:hidden">
-                  <span className="font-mono text-[11px] text-blue-600">0{k + 1}</span>
+                <summary className="grid cursor-pointer list-none grid-cols-[28px_1fr_36px] items-center gap-x-3 gap-y-1.5 py-6 transition-colors hover:bg-[#F8F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:grid-cols-[58px_1fr_1fr_44px] sm:gap-x-5 sm:py-7 [&::-webkit-details-marker]:hidden">
+                  <span className="font-mono text-[11px] text-[#7A6344]">0{k + 1}</span>
                   <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{name}</h3>
                   <div className="col-start-2 row-start-2 max-w-[440px] sm:col-start-3 sm:row-start-1">
                     <p className="text-[14px] leading-relaxed text-slate-600">{t(`mod.${key}`)}</p>
                     <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{t(`mod.${key}.st`, v)}</p>
                   </div>
-                  <span aria-hidden className="col-start-3 row-span-2 row-start-1 grid h-9 w-9 place-items-center justify-self-end rounded-full border border-slate-300 text-[18px] text-blue-600 transition group-open:rotate-45 group-open:border-blue-600 group-open:bg-blue-600 group-open:text-white sm:col-start-4 sm:row-span-1">+</span>
+                  <span aria-hidden className="col-start-3 row-span-2 row-start-1 grid h-9 w-9 place-items-center justify-self-end rounded-full border border-slate-300 text-[18px] text-[#7A6344] transition group-open:rotate-45 group-open:border-[#9A7E56] group-open:bg-[#9A7E56] group-open:text-white sm:col-start-4 sm:row-span-1">+</span>
                 </summary>
-                <div className="mb-7 rounded-ex-sm border border-slate-200 bg-[#f6f8fb] p-5 sm:ml-[78px] sm:p-7">
+                <div className="mb-7 rounded-ex-sm border border-slate-200 bg-[#F8F4EE] p-5 sm:ml-[78px] sm:p-7">
                   <ModulePreview id={key} />
                   <Link to="/modules" className={`${BUTTON.secondary} mt-6`}>{t("mods.open")} <Arrow /></Link>
                 </div>
@@ -320,11 +320,11 @@ const Landing: React.FC = () => {
             </div>
             <div className="flex flex-col gap-3">
               {[1, 2, 3, 4, 5, 6].map((k) => (
-                <details key={k} className="group rounded-ex-sm border border-slate-300 bg-white shadow-ex-1 transition-shadow open:border-blue-600 open:shadow-ex-2">
+                <details key={k} className="group rounded-ex-sm border border-slate-300 bg-white shadow-ex-1 transition-shadow open:border-[#9A7E56] open:shadow-ex-2">
                   <summary className="flex cursor-pointer list-none items-center gap-5 rounded-ex-sm px-5 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:px-6 [&::-webkit-details-marker]:hidden">
-                    <span className="font-mono text-[12px] font-semibold tabular-nums text-blue-600">0{k}</span>
+                    <span className="font-mono text-[12px] font-semibold tabular-nums text-[#7A6344]">0{k}</span>
                     <span className="flex-1 font-editorial text-[clamp(1.15rem,1.7vw,1.45rem)] font-semibold">{t(`faq.q${k}`)}</span>
-                    <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-300 text-[18px] leading-none text-blue-600 transition group-open:rotate-45 group-open:border-blue-600 group-open:bg-blue-600 group-open:text-white">+</span>
+                    <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-300 text-[18px] leading-none text-[#7A6344] transition group-open:rotate-45 group-open:border-[#9A7E56] group-open:bg-[#9A7E56] group-open:text-white">+</span>
                   </summary>
                   <p className="max-w-[62ch] border-t border-slate-200 px-5 pb-6 pt-4 text-[15.5px] leading-relaxed text-slate-700 sm:ml-[52px] sm:border-t-0 sm:px-6 sm:pt-0">{t(`faq.a${k}`)}</p>
                 </details>
@@ -338,9 +338,9 @@ const Landing: React.FC = () => {
       <section id="ch-09" data-ink className="relative overflow-hidden text-white" style={{ background: "var(--ex-field)" }}>
         {/* a quiet film of a meeting under an ink veil (placeholder footage, pre-launch gate G1) */}
         <AmbientVideo src="/media/boardroom-loop.mp4" webm="/media/boardroom-loop.webm" poster="/media/boardroom-poster.jpg" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.38] mix-blend-luminosity" />
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, var(--ex-1) 0%, rgba(7,26,49,0.62) 28%, rgba(7,26,49,0.72) 62%, var(--ex-0) 100%), linear-gradient(90deg, rgba(4,12,24,0.85) 0%, rgba(4,12,24,0.35) 55%, rgba(4,12,24,0.6) 100%)" }} />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, var(--ex-1) 0%, rgba(27,28,26,0.62) 28%, rgba(27,28,26,0.72) 62%, var(--ex-0) 100%), linear-gradient(90deg, rgba(17,19,16,0.85) 0%, rgba(17,19,16,0.35) 55%, rgba(17,19,16,0.6) 100%)" }} />
         {/* the bookend: the hero's ink and light return at the close */}
-        <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 h-[70%] w-[80%] -translate-x-1/2 rounded-[50%] opacity-40 blur-[110px]" style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.55), transparent 70%)" }} />
+        <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 h-[70%] w-[80%] -translate-x-1/2 rounded-[50%] opacity-40 blur-[110px]" style={{ background: "radial-gradient(ellipse at center, rgba(180,154,117,0.55), transparent 70%)" }} />
         <div className={`${WRAP} relative py-20 sm:py-24 lg:py-32`}>
           <div className="border-t-4 border-double border-white/50 pt-8">
             <Chapter n="09" dark>{t("cta.eyebrow")}</Chapter>
@@ -352,8 +352,8 @@ const Landing: React.FC = () => {
               </div>
             </div>
             <div className="mt-10 grid gap-6 border-t border-white/20 pt-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-              <p className="max-w-2xl text-[16px] leading-relaxed text-blue-50/90">{t("cta.body")}</p>
-              <p className="text-[13px] leading-relaxed text-blue-100/75 lg:text-right">{t("cta.foot")}</p>
+              <p className="max-w-2xl text-[16px] leading-relaxed text-[#F3EEE6]/90">{t("cta.body")}</p>
+              <p className="text-[13px] leading-relaxed text-[#E8E0D2]/75 lg:text-right">{t("cta.foot")}</p>
             </div>
           </div>
         </div>

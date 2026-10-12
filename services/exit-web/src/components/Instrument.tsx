@@ -21,10 +21,10 @@ const Instrument: React.FC<{ children: React.ReactNode; head?: React.ReactNode }
         <div className="relative mx-auto max-w-[1380px]">
           {/* the screen's own light on the ground around it */}
           <div aria-hidden className="pointer-events-none absolute -inset-x-[8%] -inset-y-[14%] rounded-[50%] blur-3xl transition-opacity duration-[1400ms]"
-            style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.42), rgba(37,99,235,0.12) 55%, transparent 74%)", opacity: off ? 0.15 : 0.6 }} />
+            style={{ background: "radial-gradient(ellipse at center, rgba(180,154,117,0.42), rgba(180,154,117,0.12) 55%, transparent 74%)", opacity: off ? 0.15 : 0.6 }} />
           {/* fine bezel: a hairline of light along the top edge, a deep shadow below */}
           <div className="relative rounded-ex-lg bg-[#02050a] p-[6px]"
-            style={{ boxShadow: "inset 0 1px 0 rgba(200,225,255,0.16), 0 0 0 1px rgba(160,195,240,0.12), 0 30px 60px -24px rgba(0,0,0,0.8), 0 80px 140px -50px rgba(0,0,0,0.9)" }}>
+            style={{ boxShadow: "inset 0 1px 0 rgba(235,225,205,0.16), 0 0 0 1px rgba(210,190,160,0.12), 0 30px 60px -24px rgba(0,0,0,0.8), 0 80px 140px -50px rgba(0,0,0,0.9)" }}>
             <div ref={screen} className="relative overflow-hidden rounded-ex-md">
               {children}
               {/* power-on: the panel's black fades off the glass */}

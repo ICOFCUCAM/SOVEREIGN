@@ -37,7 +37,7 @@ const Platform: React.FC = () => {
 
       <TrustStrip />
 
-      <section className="border-b border-slate-200 bg-[#f6f8fb]">
+      <section className="border-b border-slate-200 bg-[#F8F4EE]">
         <div className={`${MK.wrap} ${MK.section}`}>
           <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
             <Chapter n="02">Infrastructure</Chapter>
@@ -45,9 +45,9 @@ const Platform: React.FC = () => {
           </div>
           <div className="mt-12 grid gap-px border-y border-ink-900 bg-slate-200 sm:grid-cols-2 lg:grid-cols-4">
             {PILLARS.map((p, i) => (
-              <div key={p.title} className="bg-[#f6f8fb] py-7 sm:px-6">
-                <span className="font-mono text-[10.5px] text-blue-600">{String(i + 1).padStart(2, "0")} /</span>
-                <div className="mt-5 text-blue-600"><Glyph name={p.icon} size={30} /></div>
+              <div key={p.title} className="bg-[#F8F4EE] py-7 sm:px-6">
+                <span className="font-mono text-[10.5px] text-[#7A6344]">{String(i + 1).padStart(2, "0")} /</span>
+                <div className="mt-5 text-[#7A6344]"><Glyph name={p.icon} size={30} /></div>
                 <h3 className="mt-4 font-editorial text-[23px] font-semibold leading-tight text-ink-900">{p.title}</h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-slate-600">{p.body}</p>
               </div>
@@ -64,11 +64,11 @@ const Platform: React.FC = () => {
             {FLOW.map((s, i) => (
               <li key={s.title} className="py-6 sm:px-5" style={{ background: "var(--ex-2)" }}>
                 <div className="flex items-center justify-between">
-                  <span className="text-blue-300"><Glyph name={s.icon} /></span>
-                  <span className="font-mono text-[11px] text-blue-300">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="text-[#C9B08A]"><Glyph name={s.icon} /></span>
+                  <span className="font-mono text-[11px] text-[#C9B08A]">{String(i + 1).padStart(2, "0")}</span>
                 </div>
                 <h3 className="mt-5 font-editorial text-[21px] font-semibold text-white">{s.title}</h3>
-                <p className="mt-1.5 text-[12.5px] leading-snug text-blue-100/70">{s.body}</p>
+                <p className="mt-1.5 text-[12.5px] leading-snug text-[#E8E0D2]/70">{s.body}</p>
               </li>
             ))}
           </ol>
@@ -81,7 +81,7 @@ const Platform: React.FC = () => {
       <GlobalReach n="07" />
       <Governance n="08" />
 
-      <section className="bg-[#f6f8fb]">
+      <section className="bg-[#F8F4EE]">
         <div className={`${MK.wrap} ${MK.section}`}>
           <div className="grid items-end gap-10 lg:grid-cols-[1fr_auto]">
             <div>
