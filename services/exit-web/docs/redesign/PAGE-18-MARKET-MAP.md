@@ -5,7 +5,7 @@
 | Route | `/console/market-map` |
 | Component | `src/pages/MarketMap.tsx` (122 lines) |
 | NAV | "Market Map", founder, **Preparation or Active Mandate** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All four gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `6b74274`)
 
@@ -52,3 +52,12 @@ Market-wide acquisition activity from the registry snapshot: totals, a sector he
 ### G3 — Fake live tape
 *Closed by:* `pages/MarketMap.tsx`: pinging `MarketTape` → dated `RegistryTape` (snapshot date from the market-intelligence extract).
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 5), all tab stops with visible focus; heatfield data table checked · free: Upgrade page · 0 "live" words.
+
+## Known issues
+- Market-wide data; nothing here is company-specific, so there is no demo/intake switch.
+- The shared `TransactionHeatfield` and `LiquidityReactor` components still carry their figures only visually; on this page they are hidden from assistive tech, with the heatfield's data available as a table.
