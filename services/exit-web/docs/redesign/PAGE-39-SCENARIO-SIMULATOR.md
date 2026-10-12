@@ -37,7 +37,7 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 | G4 | Demo only, unlabelled. | Run on the active company; Demo data / Your intake badge. | ☐ |
 | G5 | Unvalidated number inputs. | Text inputs parsed with `parseNumber` (units, ranges), messages, `aria-invalid`; only valid values reach the engines. | ☐ |
 | G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
-| G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☑ G7-commit |
+| G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☑ `ca01086` |
 
 ---
 
