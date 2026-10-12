@@ -31,8 +31,8 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 25 | `/console/nda` | NDA Vault / Access Requests | `Nda` | founder, buyer | Pro | ☑ done · awaiting final review |
 | 26 | `/console/pipeline` | Active Processes | `Pipeline` | founder | none | ☑ done · awaiting final review |
 | 27 | `/console/process-intel` | Process Intelligence | `ProcessIntelligence` | founder | Pro | ☑ done · awaiting final review |
-| 28 | `/console/activity` | Deal Activity | `DealActivity` | founder, buyer | none | ◐ in progress |
-| 29 | `/console/inbox` | Inbox | `FounderInbox` | founder | none | ☐ |
+| 28 | `/console/activity` | Deal Activity | `DealActivity` | founder, buyer | none | ☑ done · awaiting final review |
+| 29 | `/console/inbox` | Inbox | `FounderInbox` | founder | none | ◐ in progress |
 | 30 | `/console/outreach-plan` | Outreach Plan | `OutreachPlan` | founder | Preparation or Pro | ☐ |
 | 31 | `/console/engagement-registry` | Engagement Registry | `EngagementRegistry` | founder | Preparation or Pro | ☐ |
 | 32 | `/console/closing` | Closing Center / Signatures / Escrow | `Closing` | founder | Pro | ☐ |

@@ -5,7 +5,7 @@
 | Route | `/console/activity` |
 | Component | `src/pages/DealActivity.tsx` (115 lines) + `lib/deal-events.ts`, `lib/network-stats.ts` |
 | NAV | "Deal Activity", founder and buyer, no plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `af4bcb4`)
 
@@ -57,3 +57,13 @@ Founder and buyer (free): `h1` none · axe color-contrast ×14 (1440) · no over
 ### G4 — Fake live tape
 *Closed by:* `pages/DealActivity.tsx`: pinging `MarketTape` → dated `RegistryTape` ("Registry · as of" the snapshot date). For buyers the tape omits the "Your activity" entries (they are built from all stored events, so they could show founder actions — same rule as G3). The `useMemo` dependency warning is gone.
 *Verification:* `tsc -b`, eslint clean (0 warnings) · Chromium: 0 "live" words, snapshot date shown; same-browser test — founder tape shows "Your activity · founder viewed Microsoft" ×2, buyer tape shows none · founder free/Pro and buyer free 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint clean (0 warnings) · `vitest` 204/204 · Chromium founder free/Pro and buyer free 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 14), all tab stops with visible focus · 0 "live" / "network" / "moat" words · clear-history confirmation and the buyer filter were exercised on the local backend (see G2, G3).
+
+## Known issues
+- Rates are computed only from this user's recorded events (stated); they stay empty until the events exist.
+- `BuyerProfile` records views with `actorRole: "founder"` whatever the viewer's role (unchanged; buyers are redirected away from that route).
+- Behaviour against the Supabase backend (account event stream, erase) — NOT VERIFIED; tested only on the browser-local backend.
