@@ -55,7 +55,7 @@ const DiligenceAI: React.FC = () => {
 
   return (
     <div data-page="diligence" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Due Diligence" title="AI Due Diligence"
+      <PageHeader eyebrow="◉ Due Diligence · rule-based checks" title="Diligence"
         badge={<span className="text-[12px] text-xo-muted">Buyer + Seller reports · <span className={high > 0 ? "text-xo-risk" : "text-xo-verified"}>{high > 0 ? `${high} high severity` : "Clean"}</span></span>}
         description="Findings recompute from the company profile each time the page opens." />
 
@@ -95,19 +95,9 @@ const DiligenceAI: React.FC = () => {
         </ul>
       </Section>
 
-      {/* Value prop — what a bank charges vs. what ExitOS just did */}
-      <section aria-label="Comparison and exports" className="flex flex-wrap items-center justify-between gap-4 border border-xo-line bg-xo-panel px-4 py-3">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px]">
-          <div>
-            <div className="text-[11px] text-xo-muted">Investment bank</div>
-            <div className="font-mono text-[13px] text-xo-muted line-through">$40,000+ · 4–6 weeks</div>
-          </div>
-          <span aria-hidden className="text-xl text-xo-faint">→</span>
-          <div>
-            <div className="text-[11px] text-xo-verified">ExitOS</div>
-            <div className="font-mono text-[13px] font-semibold text-xo-verified">{findings.length} findings · 2 reports · seconds</div>
-          </div>
-        </div>
+      {/* Exports */}
+      <section aria-label="Exports" className="flex flex-wrap items-center justify-between gap-4 border border-xo-line bg-xo-panel px-4 py-3">
+        <p className="text-[12px] text-xo-muted"><span className="font-semibold text-xo-text">{findings.length} findings · {reports.length} reports</span> from the same checks — export them or open the printable report.</p>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => downloadJson("exitos-diligence-reports.json", reports)} className={BTN_GHOST}>Export data (.json)</button>
           <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className={BTN}>Board-ready report (PDF) →</a>
@@ -134,7 +124,7 @@ const DiligenceAI: React.FC = () => {
 
       {/* ── Generated reports — six, from one scan ───────────────── */}
       <Section title="Generated reports" className="border border-xo-line"
-        right={<span className="text-[11px] text-xo-muted">Six reports an investment bank and law firm would bill thousands for — produced from one scan.</span>}>
+        right={<span className="text-[11px] text-xo-muted">Six views of the same findings.</span>}>
         <div className="px-4 pt-3">
           <div role="group" aria-label="Report" className="flex flex-wrap gap-2">
             {reports.map((r) => <Chip key={r.key} pressed={report.key === r.key} onToggle={() => setReportKey(r.key)}>{r.title}</Chip>)}
