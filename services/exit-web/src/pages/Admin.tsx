@@ -34,13 +34,16 @@ const Admin: React.FC = () => {
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
 
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.trim());
+  const emailMsg = newEmail.trim() === "" ? "" : !emailOk ? "Enter an email address, e.g. operator@example.com." : accounts.some((a) => a.email.toLowerCase() === newEmail.trim().toLowerCase()) ? "That email is already in the sample roster." : "";
+  // Adds a row to the SAMPLE roster on this page only: no account is
+  // created and no access is granted (roles are not server-side yet).
   const createAdmin = (e: React.FormEvent): void => {
     e.preventDefault();
-    if (!newName.trim() || !newEmail.trim()) return;
-    if (accounts.some((a) => a.email.toLowerCase() === newEmail.trim().toLowerCase())) { notify("That email already has an account"); return; }
+    if (!newName.trim() || !emailOk || emailMsg) return;
     setAccounts((prev) => [{ name: newName.trim(), email: newEmail.trim(), role: "admin", plan: "pro", deals: 0 }, ...prev]);
     setNewName(""); setNewEmail("");
-    notify(`Admin account created for ${newEmail.trim()}`);
+    notify("Added to the sample roster — no account was created");
   };
 
   const founders = accounts.filter((a) => a.role === "founder").length;
@@ -63,11 +66,13 @@ const Admin: React.FC = () => {
 
       {/* Provision admins — superadmin only */}
       {isSuper ? (
-        <Section title="Provision admin" className="border border-xo-line" foot="Superadmin only. Create an admin account for an operator on your team.">
+        <Section title="Provision admin" className="border border-xo-line" right={<Provenance kind="demo">Not wired</Provenance>}
+          foot="Superadmin only. This adds a row to the sample roster on this page — it does not create an account or grant access. Admin roles are not server-side yet; in local development the operator email is set by VITE_EXITOS_DEV_OPERATOR_EMAIL.">
           <form onSubmit={createAdmin} className="grid items-end gap-3 px-4 py-4 sm:grid-cols-[1fr_1fr_auto]">
             <div><label htmlFor="adm-name" className={XO_LABEL}>Full name</label><input id="adm-name" className={XO_INPUT} value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Operator name" /></div>
-            <div><label htmlFor="adm-email" className={XO_LABEL}>Work email</label><input id="adm-email" className={XO_INPUT} type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="operator@example.com" /></div>
-            <button type="submit" disabled={!newName.trim() || !newEmail.trim()} className={BTN}>Create admin</button>
+            <div><label htmlFor="adm-email" className={XO_LABEL}>Work email</label><input id="adm-email" className={XO_INPUT} type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="operator@example.com" aria-invalid={emailMsg !== ""} aria-describedby="adm-email-msg" />
+              <span id="adm-email-msg" className="mt-1 block min-h-[1rem] text-[12px] text-xo-risk">{emailMsg}</span></div>
+            <button type="submit" disabled={!newName.trim() || !emailOk || emailMsg !== ""} className={BTN}>Add to sample roster</button>
           </form>
         </Section>
       ) : (
