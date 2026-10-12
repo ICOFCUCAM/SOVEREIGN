@@ -62,7 +62,7 @@ const Investors: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Founder ownership" value={`${(analysis.ownershipByRole.founder * 100).toFixed(1)}%`} sub="of fully-diluted" /></div>
         <div className="bg-xo-panel"><Metric label="Signatory coverage" value={<span className={signatory.meetsThreshold ? "text-xo-verified" : "text-xo-caution"}>{Math.round(signatory.coverageOfShares * 100)}%</span>} sub={signatory.meetsThreshold ? "meets 95%" : "below 95%"} /></div>
         <div className="bg-xo-panel"><Metric label="Drag-along" value={drag.meets ? "Met" : "Short"} sub={`${Math.round(drag.committedPct * 100)}% · ${drag.holdouts.length} holdouts`} /></div>
-        <div className="bg-xo-panel"><Metric label="Net to founders" emphasis value={<span className="text-xo-verified">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span>} sub={selectedOffer.buyerName} /></div>
+        <div className="bg-xo-panel"><Metric label="Founders' risk-adjusted value" emphasis value={<span className="text-xo-verified">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span>} sub={`${selectedOffer.buyerName} · engine NPV (stock −15%, earnout −45%)`} /></div>
       </section>
 
       <MarketTape items={tape} />
@@ -100,7 +100,7 @@ const Investors: React.FC = () => {
             ? <>Keep signatory coverage locked and pre-clear the drag-along before signing.</>
             : <>Secure the <span className="font-semibold">{drag.holdouts.length} drag-along holdout{drag.holdouts.length === 1 ? "" : "s"}</span> to clear the {Math.round(signatory.coverageOfShares * 100)}% threshold.</>}</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span> net to founders on the {selectedOffer.buyerName} offer (after the preference stack).</TakeCell>
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span> risk-adjusted value to the founder group on the {selectedOffer.buyerName} offer (after the preference stack, stock and earnout discounted).</TakeCell>
             <TakeCell k="If you wait">Holdouts and missing signatures can block or delay the close after terms are agreed.</TakeCell>
             <TakeCell k="Who">{drag.holdouts.length > 0 ? <>Chase the holdouts: <span className="text-xo-text">{drag.holdouts.map((h) => h.name).join(", ")}</span>.</> : <>Coverage met — every required signatory is aligned.</>}</TakeCell>
             <TakeCell k="ExitOS does it">ExitOS runs the waterfall per offer, tracks signatory coverage and flags drag-along gaps automatically.</TakeCell>
@@ -158,15 +158,17 @@ const Investors: React.FC = () => {
           foot={selectedWf.waterfall.notes.length > 0 ? selectedWf.waterfall.notes.join(" · ") : undefined}>
           <div className="px-4 py-3">
             {(() => {
-              const TAX = 0.238; // blended LTCG + NIIT estimate
-              const founderGross = selectedWf.waterfall.distributions.filter((d) => d.role === "founder").reduce((s, d) => s + d.grossProceedsUsd, 0);
-              const afterPref = selectedWf.waterfall.netToFoundersUsd; // NPV after preference stack
-              const afterTax = afterPref * (1 - TAX);
+              // Same reading as Liquidity & Transition: nominal amounts for the
+              // founder group; the engine's risk-adjusted value shown apart.
+              const TAX = 0.238; // flat assumption: US federal LTCG 20% + NIIT 3.8%
+              const founders = selectedWf.waterfall.distributions.filter((d) => d.role === "founder");
+              const founderGross = founders.reduce((s, d) => s + d.grossProceedsUsd, 0);
+              const afterTax = founderGross * (1 - TAX);
               const steps = [
                 { label: "Offer headline", value: selectedOffer.headlinePriceUsd, note: selectedOffer.buyerName },
-                { label: "Your gross proceeds", value: founderGross, note: `${(analysis.ownershipByRole.founder * 100).toFixed(1)}% founder stake` },
-                { label: "After preferences", value: afterPref, note: `pref stack ${fmt(selectedWf.waterfall.preferenceTotalUsd)}` },
-                { label: "After taxes", value: afterTax, note: `~${(TAX * 100).toFixed(1)}% est. capital gains` },
+                { label: "Preference stack", value: selectedWf.waterfall.preferenceTotalUsd, note: "paid to preferred holders first" },
+                { label: "Founders' gross", value: founderGross, note: `${founders.length} founder holders · ${(analysis.ownershipByRole.founder * 100).toFixed(1)}% founder stake` },
+                { label: "After taxes", value: afterTax, note: `flat ${(TAX * 100).toFixed(1)}% tax assumption` },
               ];
               return (
                 <div className="border border-xo-line">
@@ -180,6 +182,7 @@ const Investors: React.FC = () => {
                       </li>
                     ))}
                   </ol>
+                  <p className="border-t border-xo-line px-3 py-2 text-[12px] text-xo-muted">Risk-adjusted value (engine): <span className="font-mono font-semibold text-xo-text">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span> before tax — stock discounted 15% and earnout 45%. The steps above assume every tranche pays in full. Tax: a flat {(TAX * 100).toFixed(1)}% (US federal long-term capital gains + NIIT) on the whole amount — no cost basis, state tax or QSBS; ExitOS has no tax model.</p>
                 </div>
               );
             })()}

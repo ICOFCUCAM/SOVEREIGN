@@ -30,7 +30,7 @@ The cap table (fully-diluted ownership, signatory and board flags), signatory co
 ## Gap register — Page 22
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Walk-away cascade mislabelled and mixed** (as Page 10). | Same correction as Page 10 G2/G3: headline → preference stack → founders' gross (founder group) → after the flat tax assumption on gross; risk-adjusted value shown separately and labelled; header metric renamed. | ☐ |
+| G1 | **Walk-away cascade mislabelled and mixed** (as Page 10). | Same correction as Page 10 G2/G3: headline → preference stack → founders' gross (founder group) → after the flat tax assumption on gross; risk-adjusted value shown separately and labelled; header metric renamed. | ☑ G1-commit |
 | G2 | **"Added to the cap-table CRM"** — nothing is saved or calculated. | Say it: a contact list for this session, not saved, not in the cap table or waterfall. | ☐ |
 | G3 | Demo cap table and offers unlabelled. | Badge and line: sample cap table and offers of the demo company (intake has neither). | ☐ |
 | G4 | Fake live tape. | `RegistryTape`. | ☐ |
@@ -50,3 +50,8 @@ The cap table (fully-diluted ownership, signatory and board flags), signatory co
 ### X16 — Shared `Field` hint contrast
 *Closed by:* `lib/ui.tsx` `Field`: hint `text-white/40` → `text-white/60`. No behaviour change.
 *Verification:* `tsc -b` pass · Chromium: Cap Table add-stakeholder dialog axe 0 (was 1).
+
+### G1 — Walk-away cascade mislabelled and mixed (as Page 10)
+*Closed by:* `pages/Investors.tsx`, the same correction as Page 10 G2/G3. Steps: Offer headline → **Preference stack** ("paid to preferred holders first") → **Founders' gross** ("4 founder holders · 39.2% founder stake") → After taxes (flat 23.8 % on the founders' gross). The engine's risk-adjusted value is shown on its own line with its discounts, and the tax assumption is stated (federal LTCG + NIIT, whole amount, no basis / state / QSBS, no tax model). Header metric "Net to founders" → "Founders' risk-adjusted value — engine NPV (stock −15%, earnout −45%)"; banker's take wording to match. *Calculation change:* tax base is nominal gross (was the risk-adjusted value), as on Page 10.
+Arithmetic check (Vista, the default selection): founders' gross $77.8M × 0.762 = $59.3M after tax; risk-adjusted $72.5M.
+*Verification:* `tsc -b`, eslint clean · Chromium: cascade as above · free 1440/390: 0 errors, axe 0, no overflow.
