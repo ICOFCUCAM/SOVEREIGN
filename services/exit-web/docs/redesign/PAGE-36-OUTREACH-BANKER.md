@@ -61,3 +61,7 @@
 
 ### X20 — Shared `Modal` body not keyboard-scrollable (found here) — documented before the fix
 `lib/ui.tsx` `Modal` (made accessible in X13) renders its content in `max-h-[64vh] overflow-y-auto` with nothing focusable inside when the content is text only. With a long introduction letter open, axe reports **scrollable-region-focusable** (a keyboard user cannot scroll the letter). *Fix:* make the body a focusable region named by the dialog title (`tabIndex={0}`, `role="region"`, `aria-labelledby`, visible focus ring). It joins the existing focus trap (which already includes `[tabindex]`). Affects every dialog using `Modal`; behaviour otherwise unchanged.
+
+### X20 — Shared `Modal` body not keyboard-scrollable
+*Closed by:* `lib/ui.tsx` `Modal`: the body is `role="region"`, `aria-labelledby` the dialog title, `tabIndex={0}`, with an inset focus ring.
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: the Banker's introduction dialog axe 1 → **0**; Escape still returns focus to "Draft introduction to Flexport Strategic" · other `Modal` dialogs re-checked — Closing call, Marketplace "Adjust preview", Bid Room "Draft the response", "Brief the banker": axe 0, Escape returns focus to the opener.

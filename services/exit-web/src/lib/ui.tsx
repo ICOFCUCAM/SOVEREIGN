@@ -156,7 +156,7 @@ export const Modal: React.FC<{
           </div>
           <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded-md p-1 text-white/50 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">✕</button>
         </div>
-        <div className="max-h-[64vh] overflow-y-auto px-6 py-5">{children}</div>
+        <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-h-[64vh] overflow-y-auto px-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action">{children}</div>
         {footer && <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-white/10 px-6 py-4">{footer}</div>}
       </div>
     </div>
