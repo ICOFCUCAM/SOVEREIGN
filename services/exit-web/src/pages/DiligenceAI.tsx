@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { fmtMoney, downloadText, downloadJson } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, Chip, Disclosure, Provenance } from "../components/xo";
+import { PageHeader, Section, Metric, Chip, Disclosure, Provenance, ActionLink } from "../components/xo";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE as DEMO_DILIGENCE, VALUATION_CANONICAL } from "../lib/engines";
 import { runDueDiligence } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
-import BankerTake from "../components/BankerTake";
 import {
   discoverFindings, allReports, SOURCE_FILES,
   type DiligenceFinding, type RiskCategory, type Severity,
@@ -72,19 +72,22 @@ const DiligenceAI: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Critical questions" value={String(DILIGENCE.criticalQuestions.length)} sub="acquirers will ask" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
-      <BankerTake
-        next={high > 0
-          ? <>Clear the <span className="text-white">{high} high-severity finding{high === 1 ? "" : "s"}</span> in the Seller Risk Report before opening the data room.</>
-          : <>No high-severity risks — the package is clean enough to open to buyers.</>}
-        stake={<><span className="font-mono font-bold text-red-300">-{fmtMoney(buyerDiscount)}</span> by the illustrative rule — not an estimate of what a buyer would deduct.</>}
-        inaction={<>Buyers who discover these in their own diligence retrade or walk — surfacing them first protects the price.</>}
-        buyer={<>Resolve founder dependency and customer concentration first — they drive the structure a buyer demands.</>}
-        automate={<>ExitOS applies fixed checks to the company profile and drafts the reports. It does not read documents.</>}
-        impact={<>-{fmtMoney(buyerDiscount)}</>}
-        cta={{ label: "Open the data room", to: "/console/data-room" }}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        right={<span className={`text-[13px] font-semibold ${high > 0 ? "text-xo-risk" : "text-xo-verified"}`}>{high > 0 ? `${high} high severity` : "Clean"}</span>}>
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">{high > 0
+            ? <>Clear the <span className="font-semibold">{high} high-severity finding{high === 1 ? "" : "s"}</span> in the Seller Risk Report before opening the data room.</>
+            : <>No high-severity findings — the checks raise nothing that should hold back the data room.</>}</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="At stake"><span className="font-mono text-xo-risk">-{fmtMoney(buyerDiscount)}</span> by the illustrative rule — not an estimate of what a buyer would deduct.</TakeCell>
+            <TakeCell k="If you wait">Buyers who find these in their own diligence retrade or walk — raising them first protects the price.</TakeCell>
+            <TakeCell k="First">Founder dependency and customer concentration — they drive the structure a buyer asks for.</TakeCell>
+            <TakeCell k="What ExitOS does">Applies fixed checks to the company profile and drafts the reports. It does not read documents. <ActionLink to="/console/data-room">Open the data room →</ActionLink></TakeCell>
+          </dl>
+        </div>
+      </Section>
 
       {/* ── Where a buyer would look ─────────────────────────────── */}
       <Section title="Where a buyer would look" className="border border-xo-line"
@@ -224,6 +227,13 @@ const FindingCard: React.FC<{ f: DiligenceFinding; audience: "buyer" | "seller" 
     </div>
     <div className="mt-2 text-[11px] text-xo-muted">A buyer would check: {f.source}</div>
   </li>
+);
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
 );
 
 export default DiligenceAI;

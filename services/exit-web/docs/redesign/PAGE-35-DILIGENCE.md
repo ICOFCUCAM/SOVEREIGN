@@ -36,7 +36,7 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe 0 · no overflow · 0 
 | G3 | **"Buyers would deduct" — an illustrative rule.** | "Illustrative discount (rule)": weights stated, every finding counted regardless of severity, % of the canonical midpoint; not a buyer estimate. | ☑ `7635ecb` |
 | G4 | "AI"; unsourced bank comparison. | "Diligence" (rule-based); remove the $40,000 / 4–6 weeks comparison and "would bill thousands". | ☑ `02e7f22` |
 | G5 | Demo only, unlabelled. | `discoverFindings(company)` (additive parameter) and `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☑ `5517a45` |
-| G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
+| G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☑ G6-commit |
 | G7 | Design: no `h1`; old components. | Rebuild on `xo`. | ☑ `a019bd1` |
 
 ---
@@ -70,3 +70,7 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe 0 · no overflow · 0 
 ### G5 — Demo only, unlabelled
 *Closed by:* `lib/diligence-intel.ts` — additive parameters: `discoverFindings(company = SAMPLE_COMPANY, mid = demo canonical midpoint)`, `buildBuyerReport(findings, mid)`, `allReports(findings, mid)` (defaults keep every existing caller and test unchanged); `pages/DiligenceAI.tsx` passes the active company, its canonical midpoint (`canonicalValuationFor`) and `runDueDiligence(company)` for the question bank; `lib/report-docs.ts` `buildDiligenceReport(company)` now passes the same company and midpoint (the PDF already showed the active company's name over the demo findings). Eyebrow "Demo company: Helios Freight" / "Your intake: …", **Demo data** / **Your intake** badge, and the description names the source.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: demo → 11 findings, illustrative −$49,900,000 (48.5 % of $102,849,415); intake (Northwind Analytics, enterprise SaaS) → 10 findings (no carrier check), −$183,600,000 (45.5 % of $403,509,792) · `/report/diligence`: demo Helios Freight $50M with the carrier item; intake Northwind Analytics $184M, no carrier item; 0 errors · Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G6 — Shared `BankerTake`; fake live tape
+*Closed by:* `pages/DiligenceAI.tsx`. The shared `BankerTake` is replaced by a page-local "Recommended action" `Section` (headline by high-severity count; At stake — the illustrative rule, not a buyer estimate; If you wait; First — founder dependency and concentration; What ExitOS does — fixed checks on the profile, no document reading, with "Open the data room →"). Pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
