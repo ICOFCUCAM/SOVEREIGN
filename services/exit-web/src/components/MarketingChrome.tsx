@@ -174,12 +174,19 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
   const { t } = useI18n();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const ink = useInkUnder() && !menuOpen;
+  // once the page has moved, the header lifts off it with a soft shadow (state changes only at the threshold)
+  const [raised, setRaised] = React.useState(false);
+  React.useEffect(() => {
+    const read = (): void => setRaised(scrollY > 8);
+    read(); addEventListener("scroll", read, { passive: true });
+    return () => removeEventListener("scroll", read);
+  }, []);
   const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
   return (
     <div className="ex-site min-h-screen bg-[#F8F4EE] text-ink-900">
       {/* the first stop for a keyboard: straight past the header to the page */}
       <a href="#main" className="sr-only z-50 bg-ink-900 px-4 py-3 text-[13px] font-semibold text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">{t("nav.skip")}</a>
-      <header className={`sticky top-0 z-40 border-b backdrop-blur transition-colors duration-200 motion-reduce:transition-none ${ink ? "border-white/10 bg-ex-1/85 text-white" : "border-[#E7E1D7] bg-[#F7F4EF]/[0.94]"}`}>
+      <header className={`sticky top-0 z-40 border-b backdrop-blur transition-[color,background-color,border-color,box-shadow] duration-200 motion-reduce:transition-none ${ink ? "border-white/10 bg-ex-1/85 text-white" : "border-[#E7E1D7] bg-[#F7F4EF]/[0.94]"} ${raised ? (ink ? "shadow-[0_10px_30px_-18px_rgba(0,0,0,0.9)]" : "shadow-[0_10px_30px_-18px_rgba(36,37,34,0.45)]") : ""}`}>
         <div className={`${WRAP} grid min-h-[72px] grid-cols-[1fr_auto] items-center gap-5 lg:grid-cols-[1fr_auto_1fr]`}>
           <div className="flex items-center gap-5">
             <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={34} dark={ink} /></button>
