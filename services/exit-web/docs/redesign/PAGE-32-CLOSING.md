@@ -18,7 +18,7 @@ A closing checklist (12 items with owner, due day and status), a close-probabili
 | **"Closing in 6 days — Sentinel Holdings"**, "in signing", "Closing checklist — Sentinel Holdings" | hard-coded | **Invented deal.** In the sample data Sentinel Holdings' NDA is **revoked** (`engines.ts`); no deal has reached closing |
 | Checklist statuses and due days (2 done, 6 in progress, 4 pending; "Fri", "Tue 9am" …) | hard-coded `CLOSING` array | **Invented progress** |
 | "Shareholder consent — **95 % threshold**"; "Regulatory filings — **Form 8023 / NJ-1054**" | hard-coded | Invented specifics (no source; the threshold depends on the company's documents and the filings on counsel's advice) |
-| **"58 % close prob"** / "modeled close probability" meter | `closeProbability`: (done + ½ in progress) / total − 8 % per blocker − 4 % per diligence red flag | A rule run on the **invented statuses**, presented as a probability |
+| **"42 % close prob"** / "modeled close probability" meter ((2 done + ½ × 6 in progress) / 12, no blockers, 0 red flags for the demo) | `closeProbability`: (done + ½ in progress) / total − 8 % per blocker − 4 % per diligence red flag | A rule run on the **invented statuses**, presented as a probability |
 | Deal value in the take | max headline of the sample offers | Sample data, unlabelled |
 | Diligence red flags and critical questions | `runDueDiligence(SAMPLE_COMPANY)` | Engine ✓ on the **demo company only**, unlabelled; saved intakes ignored |
 | Closing call: **"Schedule"** → toast "Closing call scheduled"; "Dial-in issued with the calendar invite"; subtitle "**Tuesday** 08:00" | — | **False actions**: nothing is scheduled, no dial-in exists; the .ics is set to the day after tomorrow, not Tuesday |
