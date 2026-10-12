@@ -126,9 +126,11 @@ export const Chapter: React.FC<{ n: string; children: React.ReactNode; dark?: bo
 
 /** Editorial headline lines: every line but the last in ink, the last in the
  *  accent (italic). Single-line strings accent their last word. */
-export const Editorial: React.FC<{ text: string; dark?: boolean }> = ({ text, dark }) => {
+// `quiet`: the italic keeps the heading's own colour — the blue italic is kept for
+// four homepage headings only, so it stays a signature rather than a formula (EE15)
+export const Editorial: React.FC<{ text: string; dark?: boolean; quiet?: boolean }> = ({ text, dark, quiet }) => {
   const lines = text.split("\n");
-  const accent = dark ? "text-blue-300" : "text-blue-600";
+  const accent = quiet ? "" : dark ? "text-blue-300" : "text-blue-600";
   if (lines.length === 1) {
     const i = text.lastIndexOf(" ");
     if (i < 0) return <em className={`not-italic ${accent}`}>{text}</em>;

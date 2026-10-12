@@ -136,7 +136,7 @@ const Landing: React.FC = () => {
         <div className={`${WRAP} grid items-center gap-12 py-20 sm:py-24 lg:grid-cols-[0.85fr_1.15fr] lg:gap-[clamp(40px,5vw,84px)] lg:py-28`}>
           <div>
             <Chapter n="02">{t("s2.kicker")}</Chapter>
-            <h2 id="s2-h" className="rv-h mt-6 font-editorial text-[clamp(2.6rem,4.2vw,4rem)] font-semibold leading-[1.04] tracking-[-0.035em]">{t("s2.h2")} <em className="italic text-blue-600">{t("s2.h2em")}</em></h2>
+            <h2 id="s2-h" className="rv-h mt-6 font-editorial text-[clamp(2.6rem,4.2vw,4rem)] font-semibold leading-[1.04] tracking-[-0.035em]">{t("s2.h2")} <em className="italic">{t("s2.h2em")}</em></h2>
             <p className="mt-6 max-w-[460px] text-[15px] leading-[1.85] text-slate-600">{t("s2.body")}</p>
             {/* the proof figures, with their notes */}
             <div className="mt-9 grid grid-cols-3 border-t border-ink-900">
@@ -178,7 +178,7 @@ const Landing: React.FC = () => {
         <Instrument head={
           <div className={`${WRAP} relative pb-16 pt-20 text-white`}>
             <Chapter n="03" dark>{t("hall.eyebrow")}</Chapter>
-            <h2 id="hall-h" className="rv-h mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic text-blue-300">{t("hall.h2em")}</em></h2>
+            <h2 id="hall-h" className="rv-h mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic">{t("hall.h2em")}</em></h2>
           </div>
         }>
           {/* the screen: exchange ribbon + board, content unchanged */}
@@ -268,7 +268,7 @@ const Landing: React.FC = () => {
           <div>
             <Chapter n="06">{t("rec.eyebrow")}</Chapter>
             <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
-              <h2 className={`rv-h ${H2} max-w-[20ch] text-ink-900`}><Editorial text={t("rec.h2")} /></h2>
+              <h2 className={`rv-h ${H2} max-w-[20ch] text-ink-900`}><Editorial text={t("rec.h2")} quiet /></h2>
               <p className="max-w-xs text-[13px] leading-relaxed text-slate-600">{t("rec.body")}</p>
             </div>
           </div>
@@ -346,7 +346,7 @@ const Landing: React.FC = () => {
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="border-t-4 border-double border-ink-900 pt-8">
             <Chapter n="07">{t("mods.eyebrow")}</Chapter>
-            <h2 id="mods-h" className="rv-h mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("mods.h2")} /></h2>
+            <h2 id="mods-h" className="rv-h mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("mods.h2")} quiet /></h2>
           </div>
           <div className="mt-12 border-t border-ink-900">
             {HOME_MODULES.map(([name, key, v], k) => (
@@ -379,7 +379,7 @@ const Landing: React.FC = () => {
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-[6vw]">
             <div className="border-t-4 border-double border-ink-900 pt-8">
               <Chapter n="08">{t("faq.eyebrow")}</Chapter>
-              <h2 id="faq-h" className="rv-h mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} /></h2>
+              <h2 id="faq-h" className="rv-h mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} quiet /></h2>
               <div className="mt-10 rounded-[4px] p-6 text-white" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
                 <p className="font-editorial text-[1.35rem] font-semibold leading-snug">{t("faq.more")}</p>
                 <button onClick={() => nav("/pricing")} className={`${BTN} mt-5 bg-white text-ink-900 hover:bg-blue-50`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
