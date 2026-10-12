@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { fmtMoney, downloadText, downloadJson, notify } from "../lib/ui";
+import { fmtMoney, downloadText, downloadJson } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric, Chip, Disclosure } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
@@ -37,14 +37,6 @@ const DiligenceAI: React.FC = () => {
 
   const high = findings.filter((f) => f.severity === "high").length;
   const buyerDiscount = findings.reduce((s, f) => s + f.impactUsd, 0);
-  const [rerunning, setRerunning] = useState(false);
-  const rerun = (): void => {
-    setRerunning(true);
-    setTimeout(() => {
-      setRerunning(false);
-      notify(`Re-ran across ${SOURCE_FILES.length} sources · ${findings.length} findings (${high} high-severity)`);
-    }, 800);
-  };
   const report = reports.find((r) => r.key === reportKey) ?? reports[0];
 
   const reportMarkdown = (r: typeof report): string =>
@@ -63,7 +55,7 @@ const DiligenceAI: React.FC = () => {
     <div data-page="diligence" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Due Diligence" title="AI Due Diligence"
         badge={<span className="text-[12px] text-xo-muted">Buyer + Seller reports · <span className={high > 0 ? "text-xo-risk" : "text-xo-verified"}>{high > 0 ? `${high} high severity` : "Clean"}</span></span>}
-        actions={<button type="button" onClick={rerun} disabled={rerunning} className={BTN_GHOST}>{rerunning ? "Re-running…" : "Re-run analysis"}</button>} />
+        description="Findings recompute from the company profile each time the page opens." />
 
       <section aria-label="Diligence summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Risks discovered" emphasis value={String(findings.length)} sub="across 3 categories" /></div>
