@@ -4,7 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+  /* the exchange ink (EE1): kept in step with `ex` in tailwind.config.ts */
+  --ex-0: #040c18; --ex-1: #071a31; --ex-2: #0a2142; --ex-3: #163459;
+  --ex-paper: #f6f8fb; --ex-live: #7CFF9F; --ex-done: #6ee7b7;
+  --ex-hair: rgba(147,197,253,0.18);
+  --ex-glow: rgba(37,99,235,0.18);
+  /* the field: a dark chapter's ground, top to floor */
+  --ex-field: linear-gradient(180deg, #05101f 0%, #071a31 50%, #040c18 100%);
+  /* a lit seam: the hairline of light that opens a dark chapter */
+  --ex-seam: linear-gradient(90deg, transparent, rgba(147,197,253,0.42) 30%, rgba(147,197,253,0.42) 70%, transparent);
+}
 
 html, body, #root { height: 100%; }
 body {
@@ -55,3 +66,6 @@ body {
   .ex-bezel { transform: rotateY(-11deg) rotateX(2.5deg); transform-origin: center right; }
   .ex-reflection { transform: rotateY(-11deg) rotateX(2.5deg) scaleY(-1); transform-origin: center right; }
 }
+
+/* the lit seam (EE1): put .ex-seam on a relative dark chapter */
+.ex-seam::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 1px; background: var(--ex-seam); pointer-events: none; z-index: 1; }

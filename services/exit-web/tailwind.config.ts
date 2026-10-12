@@ -63,6 +63,21 @@ export default {
           caution: "#fbbf24",    // assumption / prior / gated
           risk: "#f87171",       // negative trend
         },
+        // ── The exchange ink (homepage phase 13, EE1) ───────────────────
+        // One deep blue ink for every dark marketing surface, one paper pair,
+        // signal blue and two greens. Mirrored as CSS variables in index.css
+        // for gradients written inline.
+        ex: {
+          0: "#040c18",          // floor: footers, the deepest fall-off
+          1: "#071a31",          // field: dark chapters
+          2: "#0a2142",          // raised: panels and cards on the field
+          3: "#163459",          // edge: rings and rules on the field
+          paper: "#f6f8fb",      // story chapters
+          live: "#7CFF9F",       // the travelling light only
+          done: "#6ee7b7",       // closed / positive, on ink
+          "done-ink": "#047857", // closed / positive, on paper
+          hair: "rgba(147,197,253,0.18)", // hairline on ink
+        },
         // Deal-stage bands for pipeline visualization
         stage: {
           sourcing:  "#475569",
