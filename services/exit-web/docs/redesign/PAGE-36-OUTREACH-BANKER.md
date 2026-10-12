@@ -35,7 +35,7 @@
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Invented process: live agent, contacts, interest, diligence, activity log, workstream statuses.** | Status says nothing has been sent and no buyer contacted; funnel shows only Identified and Shortlisted (Contacted / Interested / In diligence = 0, "none recorded"); activity lists only what the user did on this page; workstreams state what is drafted vs not started; "Approve next step" removed. | ☑ `0878da2` |
-| G2 | **False sends.** | Remove "Send campaign / introduction / Send"; downloads stay; say the user sends them. | ☑ G2-commit |
+| G2 | **False sends.** | Remove "Send campaign / introduction / Send"; downloads stay; say the user sends them. | ☑ `300ea01` |
 | G3 | Invented signer. | "[Your name]" as on Buyer Profiles and Bid Room. | ☐ |
 | G4 | **Rules of thumb as computed advice; "strategic" anchor; fit as %.** | Advice labelled "general guidance — not computed for this company" where not derived; anchor "Canonical midpoint / high"; "fit score N/100". | ☐ |
 | G5 | Demo only, unlabelled. | Buyers, memoranda and the canonical band for the active company; Demo data / Your intake badge; directives "saved in this browser". | ☐ |
