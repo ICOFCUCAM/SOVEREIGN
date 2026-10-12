@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, Field, inputCls, notify } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { loadActiveCompany } from "../lib/active-company";
@@ -71,7 +72,7 @@ const Investors: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Founders' risk-adjusted value" emphasis value={<span className="text-xo-verified">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span>} sub={`${selectedOffer.buyerName} · engine NPV (stock −15%, earnout −45%)`} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add stakeholder" subtitle="Adds a contact to this session's list. It is not saved and does not change the cap table, signatories or waterfall." size="md"
         footer={<><Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button><Button onClick={submitAdd}>Add to list</Button></>}>

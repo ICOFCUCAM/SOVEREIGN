@@ -33,7 +33,7 @@ The cap table (fully-diluted ownership, signatory and board flags), signatory co
 | G1 | **Walk-away cascade mislabelled and mixed** (as Page 10). | Same correction as Page 10 G2/G3: headline → preference stack → founders' gross (founder group) → after the flat tax assumption on gross; risk-adjusted value shown separately and labelled; header metric renamed. | ☑ `c21bcf1` |
 | G2 | **"Added to the cap-table CRM"** — nothing is saved or calculated. | Say it: a contact list for this session, not saved, not in the cap table or waterfall. | ☑ `420052c` |
 | G3 | Demo cap table and offers unlabelled. | Badge and line: sample cap table and offers of the demo company (intake has neither). | ☑ `d32537f` |
-| G4 | Fake live tape. | `RegistryTape`. | ☐ |
+| G4 | Fake live tape. | `RegistryTape`. | ☑ G4-commit |
 | G5 | Design: no `h1`, contrast, unnamed select, unfocusable scroll regions, name mismatch. | Rebuild on `xo`; `h1` "Cap Table". | ☑ `d093efc` |
 
 ---
@@ -63,3 +63,7 @@ Arithmetic check (Vista, the default selection): founders' gross $77.8M × 0.762
 ### G3 — Demo cap table and offers unlabelled
 *Closed by:* `pages/Investors.tsx`: eyebrow "Demo company: Helios Freight", **Demo data** badge, and "The sample cap table and sample offers of the demo company (Helios Freight)." — with a saved intake: "Your intake has no cap table or offers, so these figures are not yours." (as Page 10 G6).
 *Verification:* `tsc -b`, eslint clean · Chromium demo and intake: DEMO DATA, description as above · 0 errors.
+
+### G4 — Fake live tape
+*Closed by:* `pages/Investors.tsx`: pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus; add-stakeholder dialog axe 0.
