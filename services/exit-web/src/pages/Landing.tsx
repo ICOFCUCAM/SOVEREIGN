@@ -57,10 +57,7 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-48 w-[48%] rounded-[50%] opacity-25 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.22), rgba(70,150,220,0) 70%)" }} aria-hidden />
 
         <div className={`${WRAP} relative pb-12 pt-10 lg:pb-14 lg:pt-14`}>
-          <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
-            <span>{t("hero.eyebrow")}</span>
-            <span className="text-blue-600">Registry snapshot · as of {MARKET_INDEX_FMT.asOf}</span>
-          </div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">{t("hero.eyebrow")}</div>
           <div className="mt-9 grid items-center gap-8 lg:grid-cols-[0.9fr_1.3fr]">
             <div className="min-w-0">
               <h1 className="font-editorial text-[clamp(3rem,5vw,5.1rem)] font-semibold leading-[0.9] tracking-[-0.045em] text-ink-900">
@@ -68,14 +65,11 @@ const Landing: React.FC = () => {
                   <span key={i} className={`block ${i === 1 ? "pl-[8%]" : ""} ${i === h1.length - 1 ? "italic text-blue-600" : ""}`}>{l}</span>
                 ))}
               </h1>
-              <div className="mt-8 grid grid-cols-[44px_minmax(0,1fr)] gap-4 sm:grid-cols-[64px_minmax(0,440px)]">
-                <span className="pt-1 font-mono text-[11px] text-blue-600">01—</span>
-                <div>
-                  <p className="font-serif text-[18px] font-semibold leading-snug text-ink-900">{t("hero.sub")}</p>
-                  <p className="mt-3 text-[14.5px] leading-relaxed text-ink-800">{t("hero.body")}</p>
-                </div>
+              <div className="mt-8 max-w-[440px] border-l-2 border-blue-600 bg-white/80 py-3 pl-4 pr-3 backdrop-blur-sm">
+                <p className="font-editorial text-[20px] font-semibold leading-snug text-ink-900">{t("hero.sub")}</p>
+                <p className="mt-3 text-[14.5px] leading-relaxed text-ink-800">{t("hero.body")}</p>
               </div>
-              <div className="mt-7 flex flex-wrap gap-2.5 sm:ml-[80px]">
+              <div className="mt-7 flex flex-wrap gap-2.5">
                 <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("nav.access")} <Arrow /></button>
                 <button onClick={() => nav("/pricing")} className={`${BTN} border border-ink-900 bg-white/70 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
               </div>

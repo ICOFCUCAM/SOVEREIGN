@@ -271,7 +271,7 @@ Every moved figure keeps its source note. Platform and Modules get the **Sources
 | V2 | **No signature language.** | Carry the ledger's broadsheet treatment (double rule, masthead-style chapter heads, column rules, drop cap) through the thesis and the final call to action, so the homepage reads as one publication. | ☐ |
 | V3 | **Repetitive rhythm.** | Contrast of scale and ground: hero (photo + board) → compact valuation strip (white) → one giant statement on the page ground → dense ledger (white) → full-bleed navy lifecycle with large numerals → back-page call to action. No two consecutive moments share a layout. | ☐ |
 | V4 | **Four typefaces, label noise.** | Marketing pages use Source Serif 4 (expressive), Inter (body) and mono (figures only). Sora (`font-serif`) is removed from marketing pages; the console is unchanged. Small all-caps labels are reduced to one chapter label per moment. | ☐ |
-| V5 | **Hero competes with the board.** | Quieter headline column: the duplicated topline removed (the eyebrow is already in the header), the deck shortened to `hero.sub` with `hero.body` below it. **The board, its bezel, its hall and its size are untouched** (M10). | ☐ |
+| V5 | **Hero competes with the board.** | Quieter headline column: the duplicated topline removed (the eyebrow is already in the header), the deck shortened to `hero.sub` with `hero.body` below it. **The board, its bezel, its hall and its size are untouched** (M10). | ☑ V5-commit |
 | V6 | **Proof that nothing was lost.** | An inventory check (script plus a unit test over a block list) asserting that each of the 17 original blocks and U1, U2 and U4 renders on exactly one marketing page, every source note has a target, and all routes and entry points still resolve. Before/after heights, axe and keyboard on all four routes at 1440 and 390. | ☐ |
 
 ### Order
@@ -567,6 +567,18 @@ Kept: "Access Requests — Request NDA-gated identity and packages, tracked end 
 - Source notes: `/` 11, `/platform` 9, `/modules` 1; 0 missing targets, 0 missing back-links.
 - **Heights:** `/` 11,434 → **5,823 px** at 1440 (target ≤ 6,500) and 20,163 → **9,685 px** at 390 (target ≤ 11,000). `/platform` 6,620 / 11,175; `/modules` 4,937 / 8,781.
 - All four routes, 1440/390: 0 errors, `h1` 1, no overflow. axe 0 on Platform, Modules and Pricing; 0 on the homepage outside the board.
+
+### V5 — A quieter hero column (board untouched)
+*Correction to the plan:* the register said "the duplicated topline removed (the eyebrow is already in the header)". Since M1 the header's topnote reads "A Sovereign Infrastructure", so the eyebrow is not duplicated. The eyebrow stays; the clutter around it goes.
+*Closed by:* `pages/Landing.tsx`, headline column only:
+- The topline's right half, "Registry snapshot · as of {date}", is removed. The date stays in the ledger masthead and in Sources & method (1).
+- The "01—" marker and its offset grid are removed.
+- `hero.sub` moves from Sora (`font-serif`) to the editorial serif, ahead of V4.
+- The deck sits in a single editorial pull-quote: blue left rule, a frosted white backing (`bg-white/80`, backdrop blur) so the two lines read over the hall photograph, at most 440 px wide.
+- The buttons align with the deck.
+
+**The board, its bezel, the reflection, the stage and every hall layer are unchanged.** A script compared them with `20545a37`: the mount, `CommandBoard` through `BoardHeader`, and the hall environment are all identical.
+*Verification:* `tsc -b`, eslint clean · Chromium `/` 1440/390: 0 errors, `h1` 1, no overflow, axe 0 outside the board. Height 5,823 px at 1440 and 9,666 px at 390. Screens: `scratchpad/home/v5b-*`.
 
 ---
 
