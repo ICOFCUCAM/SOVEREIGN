@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, fmtMoney, downloadText, notify } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany } from "../lib/active-company";
-import { DILIGENCE, OFFER_EVALUATIONS } from "../lib/engines";
+import { OFFER_EVALUATIONS } from "../lib/engines";
+import { runDueDiligence } from "@exit/engines";
 import BankerTake from "../components/BankerTake";
 
 // Deal Closing Center. A closing-checklist template whose statuses the
@@ -88,6 +89,8 @@ const Closing: React.FC = () => {
   const done       = CLOSING.filter((c) => c.status === "done").length;
   const inProgress = CLOSING.filter((c) => c.status === "in_progress").length;
   const blocked    = CLOSING.filter((c) => c.status === "blocked").length;
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const DILIGENCE = useMemo(() => runDueDiligence(company), [company]);
   const criticalQs = DILIGENCE.criticalQuestions;
   const redFlags = DILIGENCE.redFlags;
   const prob = closeProbability(done, inProgress, CLOSING.length, blocked, redFlags.length);
@@ -98,7 +101,6 @@ const Closing: React.FC = () => {
   // Closing call — agenda built from the open gating items + diligence flags,
   // plus a downloadable calendar invite.
   const [callOpen, setCallOpen] = useState(false);
-  const { company } = useMemo(() => loadActiveCompany(), []);
   // the invite is for the day after tomorrow, 08:00 local time
   const inviteAt = useMemo(() => { const d = new Date(); d.setDate(d.getDate() + 2); d.setHours(8, 0, 0, 0); return d; }, []);
   const inviteLabel = inviteAt.toLocaleString(undefined, { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -130,8 +132,8 @@ const Closing: React.FC = () => {
 
   return (
     <div data-page="closing" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Operator · Closing" title="Deal Closing Center"
-        badge={<span className="text-[12px] text-xo-muted">Sign · escrow · file · <span className={probTone}>checklist readiness {Math.round(prob * 100)}%</span></span>}
+      <PageHeader eyebrow={`◉ Operator · Closing · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Deal Closing Center"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Sign · escrow · file · <span className={probTone}>checklist readiness {Math.round(prob * 100)}%</span></span></>}
         actions={<>
           <button type="button" onClick={() => window.print()} className={BTN_GHOST}>Print checklist</button>
           <button type="button" onClick={() => setCallOpen(true)} className={BTN}>Closing call</button>
@@ -245,7 +247,8 @@ const Closing: React.FC = () => {
           </ScrollRegion>
         </Section>
 
-        <Section title="From diligence" eyebrow="runDueDiligence" className="lg:col-span-4">
+        <Section title="From diligence" eyebrow={`runDueDiligence · ${company.name}`} className="lg:col-span-4"
+          foot={fromIntake ? "From the diligence engine on your saved intake." : "From the diligence engine on the demo company; save an intake to run it on yours."}>
           <div className="space-y-4 px-4 py-3">
             {redFlags.length > 0 && (
               <div>

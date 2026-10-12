@@ -36,7 +36,7 @@ A closing checklist (12 items with owner, due day and status), a close-probabili
 | G2 | **"Close probability" from invented statuses.** | "Checklist readiness (rule)" computed from the user's statuses and the diligence red flags, with the rule stated; not a probability. | ☑ `1fcb1ac` |
 | G3 | **False "Schedule", dial-in and tracking claims; wrong day.** | Remove "Schedule" and the dial-in line; the invite is a download the user imports and sends; the subtitle shows the invite's real date; no tracking or nudging claims; invite names the active company. | ☑ `2cc24ca` |
 | G4 | Invented item specifics (95 % threshold, Form 8023 / NJ-1054). | Neutral items: "Shareholder consent — at the threshold your documents require"; "Regulatory and tax filings — as counsel advises". | ☑ `ccdf650` |
-| G5 | Diligence on the demo company only, unlabelled. | `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☐ |
+| G5 | Diligence on the demo company only, unlabelled. | `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☑ G5-commit |
 | G6 | Shared `BankerTake` and fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
 | G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☑ `d8a0b6d` |
 
@@ -63,3 +63,7 @@ A closing checklist (12 items with owner, due day and status), a close-probabili
 ### G4 — Invented item specifics
 *Closed by:* `pages/Closing.tsx` (two template titles). "Shareholder consent — 95% threshold" → "Shareholder consent — at the threshold your documents require"; "Regulatory filings — Form 8023 / NJ-1054" → "Regulatory and tax filings — as counsel advises". Both still match the hard-gate rule (`/consent|…|regulatory|…/`), so they stay high-severity gates.
 *Verification:* `tsc -b`, eslint clean · Chromium Pro: 0 "95%", "Form 8023", "NJ-1054"; the new titles appear in the checklist, the take and the call agenda ("[gate] Regulatory and tax filings — as counsel advises — owner Counsel").
+
+### G5 — Diligence on the demo company only, unlabelled
+*Closed by:* `pages/Closing.tsx`. Red flags and critical questions now come from `runDueDiligence(company)` for the active company (was the module-level demo `DILIGENCE`); eyebrow "Demo company: Helios Freight" / "Your intake: …", **Demo data** / **Your intake** badge; the diligence section names the company and says "From the diligence engine on the demo company; save an intake to run it on yours." / "… on your saved intake."
+*Verification:* `tsc -b`, eslint clean · Chromium Pro: demo → Demo data and the demo line; intake (Northwind) → Your intake and its line; for both the engine returns no red flags or critical questions ("clean buyer-facing posture") · 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
