@@ -36,7 +36,7 @@ The acquirer's home: a seat (name, mandate, rank), matched opportunities with a 
 | G3 | **Dead buttons; unlock and submit claims.** | Replace with links to where the action exists (Acquisition Radar for NDA requests and offers, Access Requests for status); remove "unlock on NDA", "data room granted" and "submit an offer from an opportunity". | ☐ |
 | G4 | D1 ask; fit as %; "strategic mid"; watchlist persistence unstated. | Ask = canonical midpoint (display); "fit score N/100"; "canonical midpoint"; "watchlist for this visit". | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, 7 axe failures. | Rebuild on `xo`. | ☑ G6-commit |
+| G6 | Design: no `h1`, 7 axe failures. | Rebuild on `xo`. | ☑ `84463f9` |
 
 ---
 
