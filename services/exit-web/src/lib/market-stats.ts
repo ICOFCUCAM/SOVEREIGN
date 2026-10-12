@@ -163,7 +163,7 @@ export const LEDGER_ALL: readonly LedgerRow[] = [...HISTORY]
       ? `+${Math.round((((e.headlinePriceUsd as number) - e.priorReferencePriceUsd) / e.priorReferencePriceUsd) * 100)}%`
       : "—",
     status: e.status === "closed" ? "Closed" : e.status === "terminated" ? "Terminated" : "Announced",
-    statusColor: e.status === "closed" ? "#047857" : e.status === "terminated" ? "#475569" : "#92400e",
+    statusColor: e.status === "closed" ? "#2F6B4F" : e.status === "terminated" ? "#4B5563" : "#7A5A2E", // the confidence register's inks
     sources: e.sourceRefs.map((r) => ({ kind: SOURCE_KIND[r.kind] ?? r.kind, ref: r.ref })),
     tier: e.confidence,
     valueUsd: e.headlinePriceUsd as number,
