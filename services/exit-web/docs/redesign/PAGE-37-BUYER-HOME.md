@@ -35,7 +35,7 @@ The acquirer's home: a seat (name, mandate, rank), matched opportunities with a 
 | G2 | **The buyer's real activity is missing.** | "Your activity" section from the backend: your NDA requests (status), your deals (stage) and your saved mandate — with links to Access Requests and the Acquisition Radar; empty states that say how to start. | ☑ `b3dcb7c` |
 | G3 | **Dead buttons; unlock and submit claims.** | Replace with links to where the action exists (Acquisition Radar for NDA requests and offers, Access Requests for status); remove "unlock on NDA", "data room granted" and "submit an offer from an opportunity". | ☑ `1b6bbb5` |
 | G4 | D1 ask; fit as %; "strategic mid"; watchlist persistence unstated. | Ask = canonical midpoint (display); "fit score N/100"; "canonical midpoint"; "watchlist for this visit". | ☑ `97476dc` |
-| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ `d7e8018` |
 | G6 | Design: no `h1`, 7 axe failures. | Rebuild on `xo`. | ☑ `84463f9` |
 
 ---
