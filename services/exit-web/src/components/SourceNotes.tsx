@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useI18n } from "../lib/i18n";
 import { MARKET_FMT, HISTORY_FMT, LEDGER_PRICED, LEDGER_TIERS, DEAL_INTEL, DEAL_INTEL_FMT } from "../lib/market-stats";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
@@ -13,7 +13,7 @@ export type SourceId = 1 | 2 | 3 | 4 | 5 | 6;
 export const Note: React.FC<{ n: SourceId; first?: boolean; dark?: boolean }> = ({ n, first, dark }) => (
   <sup className="ml-0.5 align-super text-[0.62em] font-semibold leading-none">
     <a href={`#source-${n}`} id={first ? `cite-${n}` : undefined} aria-label={`Source ${n}`}
-      className={`rounded-sm px-0.5 underline decoration-dotted underline-offset-2 focus-visible:outline-none focus-visible:ring-2 ${dark ? "text-blue-300 focus-visible:ring-blue-300" : "text-blue-700 focus-visible:ring-blue-600"}`}>{n}</a>
+      className={`scroll-mt-28 rounded-sm px-0.5 underline decoration-dotted underline-offset-2 focus-visible:outline-none focus-visible:ring-2 ${dark ? "text-blue-300 focus-visible:ring-blue-300" : "text-blue-700 focus-visible:ring-blue-600"}`}>{n}</a>
   </sup>
 );
 
@@ -28,7 +28,9 @@ const SOURCES: ReadonlyArray<{ n: SourceId; title: string; body: string }> = [
   { n: 6, title: "Typical timeline", body: "The weeks shown for each lifecycle stage are ExitOS's planning assumptions for a run process, not measurements." },
 ];
 
-export const SourcesSection: React.FC<{ only?: readonly SourceId[] }> = ({ only }) => {
+/** The numbered sources. `collapsed` (homepage, AA10) folds the list under its
+ *  heading; following any source note opens it and scrolls to the entry. */
+export const SourcesSection: React.FC<{ only?: readonly SourceId[]; collapsed?: boolean }> = ({ only, collapsed }) => {
   const { t } = useI18n();
   const list = only ? SOURCES.filter((s) => only.includes(s.n)) : SOURCES;
   // The back-link targets the first citation on this page; a page whose
@@ -40,23 +42,52 @@ export const SourcesSection: React.FC<{ only?: readonly SourceId[] }> = ({ only 
       if (a) a.id = `cite-${s.n}`;
     }
   }, [list]);
+  const det = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    if (!collapsed) return;
+    const reveal = (): void => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      if (!id.startsWith("source-") || !det.current) return;
+      det.current.open = true;
+      document.getElementById(id)?.scrollIntoView();
+    };
+    reveal();
+    window.addEventListener("hashchange", reveal);
+    return () => window.removeEventListener("hashchange", reveal);
+  }, [collapsed]);
+  const items = (
+    <ol className="border-t border-ink-900">
+      {list.map((s) => (
+        <li key={s.n} id={`source-${s.n}`} className="grid scroll-mt-28 grid-cols-[32px_minmax(0,1fr)] gap-3 border-b border-slate-200 py-4 target:bg-blue-50/60">
+          <span className="font-mono text-[12px] font-semibold text-blue-700">{s.n}</span>
+          <div>
+            <h3 className="font-editorial text-[18px] font-semibold text-ink-900">{s.title}</h3>
+            <p className="mt-1 text-[13px] leading-relaxed text-slate-600">{s.body}</p>
+            <a href={`#cite-${s.n}`} className="mt-1 inline-block rounded-sm font-mono text-[11px] text-blue-700 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600" aria-label={`Back to where source ${s.n} is first cited`}>↩ back</a>
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+  if (collapsed) return (
+    <section aria-labelledby="sources-h" className="border-t border-slate-200 bg-white">
+      <div className="mx-auto w-full max-w-[1480px] px-5 py-10 sm:px-8 lg:px-12">
+        <details ref={det} className="group">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-sm py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 [&::-webkit-details-marker]:hidden">
+            <h2 id="sources-h" className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-600">{t("src.title")} <span className="text-slate-600">· {list.length}</span></h2>
+            <span aria-hidden className="font-mono text-[18px] leading-none text-ink-900 transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <div className="mt-4 lg:pl-[calc(27.5%+3vw)]">{items}</div>
+        </details>
+      </div>
+    </section>
+  );
   return (
     <section aria-labelledby="sources-h" className="border-t border-slate-200 bg-white">
       <div className="mx-auto w-full max-w-[1480px] px-5 py-14 sm:px-8 lg:px-12">
         <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
           <h2 id="sources-h" className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-600">{t("src.title")}</h2>
-          <ol className="border-t border-ink-900">
-            {list.map((s) => (
-              <li key={s.n} id={`source-${s.n}`} className="grid scroll-mt-28 grid-cols-[32px_minmax(0,1fr)] gap-3 border-b border-slate-200 py-4 target:bg-blue-50/60">
-                <span className="font-mono text-[12px] font-semibold text-blue-700">{s.n}</span>
-                <div>
-                  <h3 className="font-editorial text-[18px] font-semibold text-ink-900">{s.title}</h3>
-                  <p className="mt-1 text-[13px] leading-relaxed text-slate-600">{s.body}</p>
-                  <a href={`#cite-${s.n}`} className="mt-1 inline-block rounded-sm font-mono text-[11px] text-blue-700 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600" aria-label={`Back to where source ${s.n} is first cited`}>↩ back</a>
-                </div>
-              </li>
-            ))}
-          </ol>
+          {items}
         </div>
       </div>
     </section>

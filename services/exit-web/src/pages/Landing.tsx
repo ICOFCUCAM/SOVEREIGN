@@ -299,7 +299,7 @@ const Landing: React.FC = () => {
           </div>
         </div>
       </section>
-      <SourcesSection />
+      <SourcesSection collapsed />
     </MarketingChrome>
   );
 };
