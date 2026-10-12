@@ -5,6 +5,7 @@ import { MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { runStrategySimulator, runInstitutionalValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
+import { parseNumber } from "../lib/intake-fields";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { emitTelemetry } from "../lib/telemetry";
 import BankerTake from "../components/BankerTake";
@@ -218,6 +219,34 @@ const Simulator: React.FC = () => {
   const [preferredType,   setPreferredType]   = useState<BuyerType | "any">("any");
   const [minConfidence,   setMinConfidence]   = useState<"experimental" | "low" | "medium" | "high">("experimental");
   const [activeScenario,  setActiveScenario]  = useState<string>("wait6");
+  // Inputs keep the typed text; only values that parse reach the engines.
+  const [text, setText] = useState({ target: String(Math.round(canonicalMid / 1e5) / 10), cash: "75", earnout: "15", days: "180" });
+  const SPEC = {
+    target:  { min: 0.1, max: 1_000_000, scale: 1e6 },
+    cash:    { min: 0, max: 100 },
+    earnout: { min: 0, max: 100 },
+    days:    { min: 1, max: 3650, integer: true },
+  } as const;
+  const parsed = {
+    target: parseNumber(text.target, SPEC.target),
+    cash: parseNumber(text.cash, SPEC.cash),
+    earnout: parseNumber(text.earnout, SPEC.earnout),
+    days: parseNumber(text.days, SPEC.days),
+  };
+  const onText = (k: keyof typeof text) => (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const v = e.target.value;
+    setText((t) => ({ ...t, [k]: v }));
+    const r = parseNumber(v, SPEC[k]);
+    if (!r.ok) return;
+    if (k === "target") setTargetUsd(r.value);
+    if (k === "cash") setMinCashPct(r.value / 100);
+    if (k === "earnout") setMaxEarnoutPct(r.value / 100);
+    if (k === "days") setMaxTimelineDays(r.value);
+  };
+  const Msg: React.FC<{ id: string; k: keyof typeof text; hint?: string }> = ({ id, k, hint }) => {
+    const r = parsed[k];
+    return <span id={id} className={`mt-1 block text-[12px] ${r.ok ? "text-xo-muted" : "text-xo-risk"}`}>{r.ok ? hint ?? "\u00a0" : `${r.error} The last valid value is used.`}</span>;
+  };
 
   useEffect(() => { emitTelemetry("simulator_viewed", undefined, "/console/simulator"); }, []);
 
@@ -282,24 +311,26 @@ const Simulator: React.FC = () => {
         <Section title="Baseline trajectory" className="lg:col-span-4">
           <div className="space-y-4 px-4 py-4">
             <div>
-              <label htmlFor="sim-target" className={LBL}>Target value (USD)</label>
-              <input id="sim-target" type="number" value={targetUsd} onChange={(e) => setTargetUsd(Number(e.target.value))} step={1_000_000} min={0} aria-describedby="sim-target-hint" className={INP} />
-              <span id="sim-target-hint" className="mt-1 block text-[12px] text-xo-muted">Canonical midpoint: {fmtMoney(canonicalMid)}</span>
+              <label htmlFor="sim-target" className={LBL}>Target value ($M)</label>
+              <input id="sim-target" inputMode="decimal" value={text.target} onChange={onText("target")} aria-invalid={!parsed.target.ok} aria-describedby="sim-target-hint" className={INP} />
+              <Msg id="sim-target-hint" k="target" hint={`Canonical midpoint: ${fmtMoney(canonicalMid)} · using ${fmtMoney(targetUsd)}`} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="sim-cash" className={LBL}>Min cash %</label>
-                <input id="sim-cash" type="number" value={Math.round(minCashPct * 100)} onChange={(e) => setMinCashPct(Math.min(1, Math.max(0, Number(e.target.value) / 100)))} min={0} max={100} step={5} className={INP} />
+                <input id="sim-cash" inputMode="decimal" value={text.cash} onChange={onText("cash")} aria-invalid={!parsed.cash.ok} aria-describedby="sim-cash-msg" className={INP} />
+                <Msg id="sim-cash-msg" k="cash" hint="0–100" />
               </div>
               <div>
                 <label htmlFor="sim-earnout" className={LBL}>Max earnout %</label>
-                <input id="sim-earnout" type="number" value={Math.round(maxEarnoutPct * 100)} onChange={(e) => setMaxEarnoutPct(Math.min(1, Math.max(0, Number(e.target.value) / 100)))} min={0} max={100} step={5} className={INP} />
+                <input id="sim-earnout" inputMode="decimal" value={text.earnout} onChange={onText("earnout")} aria-invalid={!parsed.earnout.ok} aria-describedby="sim-earnout-msg" className={INP} />
+                <Msg id="sim-earnout-msg" k="earnout" hint="0–100" />
               </div>
             </div>
             <div>
               <label htmlFor="sim-days" className={LBL}>Max timeline (days)</label>
-              <input id="sim-days" type="number" value={maxTimelineDays} onChange={(e) => setMaxTimelineDays(Math.max(1, Number(e.target.value)))} min={1} step={15} aria-describedby="sim-days-hint" className={INP} />
-              <span id="sim-days-hint" className="mt-1 block text-[12px] text-xo-muted">Outreach + LOI + diligence + close</span>
+              <input id="sim-days" inputMode="numeric" value={text.days} onChange={onText("days")} aria-invalid={!parsed.days.ok} aria-describedby="sim-days-hint" className={INP} />
+              <Msg id="sim-days-hint" k="days" hint="Outreach + LOI + diligence + close · whole days, 1–3,650" />
             </div>
             <div>
               <label htmlFor="sim-type" className={LBL}>Preferred buyer type</label>
