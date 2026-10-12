@@ -25,11 +25,15 @@ const Orb: React.FC<{ at: [number, number]; s?: number }> = ({ at: [x, y], s = 1
     <circle cx={x} cy={y} r={4 * s} fill="#FFF8EC" />
   </g>
 );
+// the five capability points on the dial, in strip order (01 discover … 05 execute): bearing, radius,
+// and whether the point is drawn as a bronze orb or an ivory point (as the benchmark places them)
+const CAPS: ReadonlyArray<readonly [number, number, "orb" | "dot", number]> = [[331, 224, "dot", 2.8], [270, 185, "orb", 0.85], [317, 110, "dot", 2.3], [206, 161, "orb", 1], [32, 160, "orb", 1]];
+
 const Dot: React.FC<{ at: [number, number]; r?: number }> = ({ at: [x, y], r = 2.5 }) => (
   <g><circle cx={x} cy={y} r={r * 2.4} fill="url(#hx-pt)" /><circle cx={x} cy={y} r={r} fill="#FBF8F2" /></g>
 );
 
-const Dial: React.FC = () => {
+const Dial: React.FC<{ active: number | null; onPoint: (i: number | null) => void; labels: string[] }> = ({ active, onPoint, labels }) => {
   const [w1x, w1y] = P(28, 212), [w2x, w2y] = P(64, 212);
   return (
     <svg viewBox="0 0 500 500" className="hx-dial h-full w-full overflow-visible" fill="none" shapeRendering="geometricPrecision" aria-hidden>
@@ -57,6 +61,7 @@ const Dial: React.FC = () => {
           signature — the upper one faint, rising to the dial; the lower one a bright horizon curve with a flare,
           running on under the wordmark — plus a faint ray from the flare to a small orb, a second faint
           horizontal under the axis and a short ray beside the wordmark */}
+      <g className="hx-fade" style={{ ["--d" as string]: "1.25s" }}>
       <path d="M-300 268 Q-190 232 -100 186 T 46 92" stroke="url(#hx-v-up)" strokeWidth="1" />
       <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="2.5" strokeOpacity=".55" filter="url(#hx-bloom)" />
       <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="1.25" />
@@ -65,8 +70,10 @@ const Dial: React.FC = () => {
       <line x1="9" y1="512" x2="81" y2="430" stroke="#E8D7B8" strokeOpacity=".18" strokeWidth="1" />
       <Orb at={[-5, 533]} s={0.55} />
       <Orb at={[-103, 360]} s={0.45} />
+      </g>
 
       {/* axes across the field, brighter inside the dial */}
+      <g className="hx-fade" style={{ ["--d" as string]: ".3s" }}>
       <line x1="-560" y1={C} x2="1100" y2={C} stroke="url(#hx-axis)" strokeWidth="1" />
       <line x1={C} y1="-400" x2={C} y2="900" stroke={RING} strokeOpacity=".3" strokeWidth="1" />
       <line x1={C - 207} y1={C} x2={C + 207} y2={C} stroke={RING} strokeOpacity=".55" strokeWidth="1" />
@@ -74,12 +81,13 @@ const Dial: React.FC = () => {
       <g stroke={RING} strokeOpacity=".12" strokeWidth="1">
         {[45, 135, 225, 315].map((d) => { const [a, b] = P(d, 59), [c, e] = P(d, 207); return <line key={d} x1={a} y1={b} x2={c} y2={e} />; })}
       </g>
+      </g>
 
       {/* bezel and graduated ring */}
-      <circle cx={C} cy={C} r="266" stroke="#E2D6BF" strokeOpacity=".28" strokeWidth="1.1" strokeDasharray="0.1 6" strokeLinecap="round" />
-      <circle cx={C} cy={C} r="246" stroke="#E2D6BF" strokeOpacity=".5" strokeWidth="1.2" strokeDasharray="0.1 4.4" strokeLinecap="round" />
-      <circle cx={C} cy={C} r="233" stroke={RING} strokeOpacity=".5" strokeWidth="1" />
-      <g stroke="#D9CCB4" strokeLinecap="round">
+      <circle className="hx-fade" style={{ ["--d" as string]: "1s" }} cx={C} cy={C} r="266" stroke="#E2D6BF" strokeOpacity=".28" strokeWidth="1.1" strokeDasharray="0.1 6" strokeLinecap="round" />
+      <circle className="hx-fade" style={{ ["--d" as string]: ".95s" }} cx={C} cy={C} r="246" stroke="#E2D6BF" strokeOpacity=".5" strokeWidth="1.2" strokeDasharray="0.1 4.4" strokeLinecap="round" />
+      <circle className="hx-draw" style={{ ["--d" as string]: ".8s" }} pathLength={1} cx={C} cy={C} r="233" stroke={RING} strokeOpacity=".5" strokeWidth="1" />
+      <g className="hx-fade" style={{ ["--d" as string]: ".75s" }} stroke="#D9CCB4" strokeLinecap="round">
         {Array.from({ length: 180 }, (_, i) => i * 2).map((d) => {
           const major = d % 30 === 0 && d % 90 !== 0;
           const [x1, y1] = P(d, major ? 210 : 216), [x2, y2] = P(d, major ? 228 : 223);
@@ -88,36 +96,50 @@ const Dial: React.FC = () => {
       </g>
 
       {/* market rings */}
-      <circle cx={C} cy={C} r="205" stroke={RING} strokeOpacity=".38" strokeWidth="1" />
-      <circle cx={C} cy={C} r="160" stroke="#C9B08A" strokeOpacity=".85" strokeWidth="1.25" />
-      <circle cx={C} cy={C} r="118" stroke={RING} strokeOpacity=".24" strokeWidth="1" />
-      <circle cx={C} cy={C} r="88" stroke={RING} strokeOpacity=".6" strokeWidth="1.3" strokeDasharray="0.1 4.4" strokeLinecap="round" />
-      <circle cx={C} cy={C} r="60" stroke="#D2BA92" strokeOpacity=".9" strokeWidth="1.25" />
+      <circle className="hx-draw" style={{ ["--d" as string]: ".6s" }} pathLength={1} cx={C} cy={C} r="205" stroke={RING} strokeOpacity=".38" strokeWidth="1" />
+      <circle className="hx-draw" style={{ ["--d" as string]: ".45s" }} pathLength={1} cx={C} cy={C} r="160" stroke="#C9B08A" strokeOpacity=".85" strokeWidth="1.25" />
+      <circle className="hx-draw" style={{ ["--d" as string]: ".35s" }} pathLength={1} cx={C} cy={C} r="118" stroke={RING} strokeOpacity=".24" strokeWidth="1" />
+      <circle className="hx-fade" style={{ ["--d" as string]: ".25s" }} cx={C} cy={C} r="88" stroke={RING} strokeOpacity=".6" strokeWidth="1.3" strokeDasharray="0.1 4.4" strokeLinecap="round" />
+      <circle className="hx-draw" style={{ ["--d" as string]: ".1s" }} pathLength={1} cx={C} cy={C} r="60" stroke="#D2BA92" strokeOpacity=".9" strokeWidth="1.25" />
 
       {/* the aperture: a lit wedge, its leading edge bright */}
+      <g className="hx-open" style={{ ["--d" as string]: "1.1s" }}>
       <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" filter="url(#hx-bloom)" />
       <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" />
       <line x1={C} y1={C} x2={w1x} y2={w1y} stroke="#EFE2C9" strokeOpacity=".18" strokeWidth="1" />
       <line x1={C} y1={C} x2={w2x} y2={w2y} stroke="#F4E8D2" strokeOpacity=".9" strokeWidth="1.5" />
+      </g>
 
       {/* registration marks on the axes */}
+      <g className="hx-fade" style={{ ["--d" as string]: "1.2s" }}>
       {[0, 180].map((d) => { const [x, y] = P(d, 178); return <g key={d} fill="#F2EBDD" fillOpacity=".7"><circle cx={x - 4} cy={y} r="1.3" /><circle cx={x + 4} cy={y} r="1.3" /></g>; })}
       <Dot at={P(90, 170)} r={2.2} /><Dot at={P(90, 181)} r={2.2} />
-
-      {/* registration orbs and points */}
-      <Orb at={P(32, 160)} />
-      <Orb at={P(206, 161)} />
-      <Orb at={P(270, 185)} s={0.85} />
-      <Dot at={P(331, 224)} r={2.8} />
-      <Dot at={P(317, 110)} r={2.3} />
       <Dot at={P(259, 59)} r={2.4} />
       <circle cx={P(121, 160)[0]} cy={P(121, 160)[1]} r="2" fill="#E8D7B8" fillOpacity=".6" />
+      </g>
+
+      {/* the five capability points: each answers to its item in the strip below, and lights it in turn */}
+      {active !== null && (() => { const [x, y] = P(CAPS[active][0], CAPS[active][1]); return <line x1={C} y1={C} x2={x} y2={y} stroke="#E9D7B4" strokeOpacity=".55" strokeWidth="1" strokeDasharray="2 3" />; })()}
+      {CAPS.map(([d, r, kind, s], i) => {
+        const at = P(d, r), on = active === i;
+        const out = P(d, r + 26);
+        return (
+          <g key={d} className="hx-cap hx-fade" style={{ ["--d" as string]: `${1.35 + i * 0.09}s` }} onMouseEnter={() => onPoint(i)} onMouseLeave={() => onPoint(null)}>
+            <circle cx={at[0]} cy={at[1]} r="24" fill="transparent" />
+            {kind === "orb" ? <Orb at={at} s={s} /> : <Dot at={at} r={s} />}
+            <circle cx={at[0]} cy={at[1]} r="15" stroke="#E9D7B4" strokeWidth="1" className="transition-opacity duration-300" opacity={on ? 0.9 : 0} />
+            {on && <text x={out[0]} y={out[1] + 3} textAnchor={out[0] < C - 8 ? "end" : out[0] > C + 8 ? "start" : "middle"} fill="#F1E9DC" fontSize="11" letterSpacing="1.6" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" style={{ textTransform: "uppercase" }}>{labels[i]}</text>}
+          </g>
+        );
+      })}
 
       {/* the transaction node: ice-white in a blue-grey halo */}
+      <g className="hx-fade" style={{ ["--d" as string]: "0s" }}>
       <circle cx={C} cy={C} r="32" fill="url(#hx-halo)" />
       <circle cx={C} cy={C} r="13" fill="url(#hx-glow)" />
       <circle cx={C} cy={C} r="14" stroke="#DCEAF3" strokeOpacity=".95" strokeWidth="1.25" />
       <circle cx={C} cy={C} r="6.5" fill="#FFFFFF" />
+      </g>
     </svg>
   );
 };
@@ -141,6 +163,8 @@ const GRAIN = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg
 const HeroExchange: React.FC = () => {
   const nav = useNavigate();
   const { t } = useI18n();
+  const [cap, setCap] = React.useState<number | null>(null);
+  const labels = [1, 2, 3, 4, 5].map((k) => t(`hx.s${k}`));
   return (
     <section id="ch-01" aria-labelledby="hx-h" className="relative isolate flex flex-col overflow-hidden bg-[#F8F4EE]">
       <div className="hx-grid relative grid lg:min-h-[max(560px,min(41.25vw,780px))] lg:grid-cols-[minmax(0,1.04fr)_minmax(0,1fr)]">
@@ -173,13 +197,13 @@ const HeroExchange: React.FC = () => {
 
         {/* the signature: the insignia's instrument and the wordmark */}
         <div aria-hidden className="hx-sig relative flex flex-col items-center justify-center pb-12 pt-20 sm:pb-16 lg:pb-[3.5%] lg:pt-[1.5%]">
-          <div className="hx-mark relative flex flex-col items-center">
-            <div className="h-[min(78vw,330px)] w-[min(78vw,330px)] sm:h-[420px] sm:w-[420px] lg:h-[min(29.4vw,540px)] lg:w-[min(29.4vw,540px)]"><Dial /></div>
-            <div className="mt-[0.05em] font-editorial font-medium leading-none tracking-[-0.025em] text-transparent"
-              style={{ fontSize: "clamp(3rem, 5.4vw, 6rem)", backgroundImage: "linear-gradient(180deg, #F2E9DA 0%, #DCCDB3 50%, #B39E7E 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", filter: "drop-shadow(0 0 22px rgba(232,220,200,0.14))" }}>
+          <div className="relative flex flex-col items-center">
+            <div className="h-[min(78vw,330px)] w-[min(78vw,330px)] sm:h-[420px] sm:w-[420px] lg:h-[min(29.4vw,540px)] lg:w-[min(29.4vw,540px)]"><Dial active={cap} onPoint={setCap} labels={labels} /></div>
+            <div className="hx-fade mt-[0.05em] font-editorial font-medium leading-none tracking-[-0.025em] text-transparent"
+              style={{ ["--d" as string]: "1.7s", fontSize: "clamp(3rem, 5.4vw, 6rem)", backgroundImage: "linear-gradient(180deg, #F2E9DA 0%, #DCCDB3 50%, #B39E7E 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", filter: "drop-shadow(0 0 22px rgba(232,220,200,0.14))" }}>
               Exit<span className="italic">OS</span>
             </div>
-            <div className="mt-3 flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.3em] text-[#ECE5D8] sm:text-[11px]">
+            <div style={{ ["--d" as string]: "1.95s" }} className="hx-fade mt-3 flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.3em] text-[#ECE5D8] sm:text-[11px]">
               <span className="h-px w-12 bg-[#E3DCCF]/55 sm:w-16" />The acquisition exchange<span className="h-px w-12 bg-[#E3DCCF]/55 sm:w-16" />
             </div>
           </div>
@@ -195,8 +219,9 @@ const HeroExchange: React.FC = () => {
       <div className="relative border-t border-white/[0.06] text-[#EDE7DC]" style={{ backgroundImage: "linear-gradient(180deg, #1B1B19, #151614)" }}>
         <ul aria-label={t("hx.strip")} className="mx-auto grid w-full max-w-[1640px] px-5 sm:px-8 lg:grid-cols-5 lg:px-[max(1.5rem,calc((100vw-1640px)/2+1.5rem))] xl:px-[max(4.5rem,calc((100vw-1640px)/2+2rem))]">
           {[1, 2, 3, 4, 5].map((k, i) => (
-            <li key={k} className={`group relative flex items-center gap-4 py-3.5 lg:items-start lg:py-7 lg:pr-4 ${i ? "border-t border-white/[0.07] lg:border-l lg:border-t-0 lg:pl-5 xl:pl-6" : "lg:pl-0"}`}>
-              <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-ex-bronze/60 text-ex-bronze transition-colors duration-300 group-hover:border-ex-bronze lg:h-14 lg:w-14">
+            <li key={k} onMouseEnter={() => setCap(i)} onMouseLeave={() => setCap(null)} className={`group relative flex items-center gap-4 py-3.5 lg:items-start lg:py-7 lg:pr-4 ${i ? "border-t border-white/[0.07] lg:border-l lg:border-t-0 lg:pl-5 xl:pl-6" : "lg:pl-0"}`}>
+              <span aria-hidden className={`absolute inset-x-0 top-0 hidden h-px origin-left bg-ex-bronze transition-transform duration-500 motion-reduce:transition-none lg:block ${cap === i ? "scale-x-100" : "scale-x-0"}`} />
+              <span aria-hidden className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border text-ex-bronze transition-[border-color,box-shadow] duration-300 lg:h-14 lg:w-14 ${cap === i ? "border-ex-bronze shadow-[0_0_18px_rgba(180,154,117,0.35)]" : "border-ex-bronze/60"}`}>
                 <svg viewBox="0 0 24 24" className="h-5 w-5 lg:h-7 lg:w-7" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">{ICONS[i]}</svg>
               </span>
               <span className="flex min-w-0 items-baseline gap-3 lg:block">
@@ -217,8 +242,20 @@ const HeroExchange: React.FC = () => {
         }
         /* every line a true hairline at any size: widths are screen pixels, not view-box units */
         .hx-dial :is(line,path,circle){vector-effect:non-scaling-stroke}
-        @media (prefers-reduced-motion: no-preference){ .hx-mark{animation:hxMark 1.8s cubic-bezier(.2,.7,.2,1) .2s both} }
-        @keyframes hxMark{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+        /* the tracing rings measure their own length (pathLength), which needs view-box strokes; at this scale
+           one unit is about one pixel, so they stay hairlines */
+        .hx-dial .hx-draw{vector-effect:none}
+        /* the instrument draws itself in, once, from the centre outward: rings trace, the wedge opens, the
+           points light, the wordmark resolves. Only when motion is allowed; the still design is the default. */
+        .hx-cap{cursor:default}
+        @media (prefers-reduced-motion: no-preference){
+          .hx-draw{stroke-dasharray:1;stroke-dashoffset:1;animation:hxDraw 1.25s cubic-bezier(.55,.05,.25,1) var(--d,0s) forwards}
+          .hx-fade{opacity:0;animation:hxFade .9s ease-out var(--d,0s) forwards}
+          .hx-open{opacity:0;transform-box:view-box;transform-origin:250px 250px;animation:hxOpen 1.1s cubic-bezier(.2,.7,.2,1) var(--d,0s) forwards}
+        }
+        @keyframes hxDraw{to{stroke-dashoffset:0}}
+        @keyframes hxFade{to{opacity:1}}
+        @keyframes hxOpen{from{opacity:0;transform:rotate(-14deg)}to{opacity:1;transform:none}}
       `}</style>
     </section>
   );
