@@ -5,7 +5,7 @@
 | Route | `/console/buyer-graph` |
 | Component | `src/pages/BuyerGraph.tsx` (234 lines) + `lib/buyer-dna.ts` |
 | NAV | "Buyer Graph", founder, **Preparation or Active Mandate** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `fa0dd24`)
 
@@ -64,3 +64,12 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 ### G5 — Fake live tape
 *Closed by:* `pages/BuyerGraph.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 12), all tab stops with visible focus · free: Upgrade page · personalisation demo vs intake (demo ranking unchanged) · 0 "live" words.
+
+## Known issues
+- The likelihood score is a fixed composite (formula on the page), not calibrated against outcomes.
+- Sector transactions exist only for the demo sector and are keyword matches; all 17 are unverified in the snapshot.
