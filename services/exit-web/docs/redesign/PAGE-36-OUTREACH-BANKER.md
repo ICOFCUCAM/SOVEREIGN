@@ -38,7 +38,7 @@
 | G2 | **False sends.** | Remove "Send campaign / introduction / Send"; downloads stay; say the user sends them. | ☑ `300ea01` |
 | G3 | Invented signer. | "[Your name]" as on Buyer Profiles and Bid Room. | ☑ `39dcab0` |
 | G4 | **Rules of thumb as computed advice; "strategic" anchor; fit as %.** | Advice labelled "general guidance — not computed for this company" where not derived; anchor "Canonical midpoint / high"; "fit score N/100". | ☑ `6191621` |
-| G5 | Demo only, unlabelled. | Buyers, memoranda and the canonical band for the active company; Demo data / Your intake badge; directives "saved in this browser". | ☐ |
+| G5 | Demo only, unlabelled. | Buyers, memoranda and the canonical band for the active company; Demo data / Your intake badge; directives "saved in this browser". | ☑ G5-commit |
 | G6 | Design: old components. | Rebuild on `xo`. | ☑ `b98943f` |
 
 ---
@@ -80,3 +80,7 @@
 - Anchor options "Strategic mid / Strategic high (stretch)" → **"Canonical midpoint / Canonical high (stretch)"** ($102,849,415 / $173,889,733 — D1); the valuation workstream and advice follow; "counter above strategic-mid" → "above the canonical midpoint".
 - Buyer introductions "89%" → "fit score 89/100" (and the pre-directive value "/100", with screen-reader prefixes), with "Fit score: the discovery engine's weighted fit, 0–100, re-weighted by your directives — not a measured chance of a bid."
 *Verification:* `tsc -b`, eslint clean · Chromium Pro: 0 "strategic mid", "strategic high", "strategic-mid"; 6 "general guidance" markers (4 advice items, the fastest-path answer, the foot); strategy dialog options read "Canonical midpoint — $102,849,415" / "Canonical high (stretch) — $173,889,733"; Buyer introductions tab axe 0 · 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G5 — Demo only, unlabelled
+*Closed by:* `pages/Banker.tsx`. With a saved intake the page builds its buyer pool (`runBuyerDiscovery(company, { limit: 12 })`), diligence, canonical band and the teaser / executive summary / CIM (`useMemorandum` with the Documents page's inputs) for that company; with no intake it keeps the module-level demo values. Eyebrow "Demo company: Helios Freight" / "Your intake: …" and a **Demo data** / **Your intake** badge. Directives: "Stored against the mandate" → "Saved in this browser" (they live in `localStorage`).
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium Pro: demo → best buyer Flexport Strategic, canonical $102,849,415 / $173,889,733; intake (Northwind Analytics) → best buyer Vista Enterprise Software Bolt-On, $403,509,792 / $685,373,250 · 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.

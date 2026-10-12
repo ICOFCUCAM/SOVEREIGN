@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
 import { PageHeader, Section, Chip } from "../components/xo";
-import { BUYERS, DILIGENCE, useMemorandum, VALUATION_CANONICAL } from "../lib/engines";
+import { BUYERS as DEMO_BUYERS, DILIGENCE as DEMO_DILIGENCE, useMemorandum, VALUATION_CANONICAL as DEMO_CANONICAL } from "../lib/engines";
+import { runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type MemorandumInputs } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
+import { Provenance } from "../components/xo";
 import {
   docToMarkdown, docFilename, buyerIntroLetter, introFilename, buyerListCsv,
   structuredDoc, downloadDeliverable,
@@ -41,14 +45,29 @@ const SEQUENCE = [
 
 const Banker: React.FC = () => {
   const [tab, setTab] = useState<Tab>("outreach");
-  const teaser  = useMemorandum("buyer_teaser");
-  const summary = useMemorandum("executive_summary");
-  const cim     = useMemorandum("cim");
+  // The founder's saved intake when there is one; the demo company otherwise
+  // (the same engine inputs the Documents page uses).
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const own = useMemo(() => {
+    if (!fromIntake) return null;
+    const institutional = runInstitutionalValuation(company);
+    const canonical = canonicalValuationFor(company, institutional);
+    const buyers = runBuyerDiscovery(company, { limit: 12 });
+    const diligence = runDueDiligence(company);
+    const memo: Partial<MemorandumInputs> = { company, valuation: canonical, constitution: institutional, readiness: runReadiness(company), buyers, diligence };
+    return { canonical, buyers, diligence, memo };
+  }, [company, fromIntake]);
+  const BUYERS = own?.buyers ?? DEMO_BUYERS;
+  const DILIGENCE = own?.diligence ?? DEMO_DILIGENCE;
+  const VALUATION_CANONICAL = own?.canonical ?? DEMO_CANONICAL;
+  const teaser  = useMemorandum("buyer_teaser", own?.memo);
+  const summary = useMemorandum("executive_summary", own?.memo);
+  const cim     = useMemorandum("cim", own?.memo);
   // ── Banker directives — real mandate intelligence, not a placebo ──
-  // Stored against the mandate, parsed into structured preferences, and applied
+  // Saved in this browser, parsed into structured preferences, and applied
   // here to re-weight the engine's buyer discovery, outreach and valuation.
   const { directives, preferences, add: addDirective, remove: removeDirective } = useDirectives();
-  const { included, excluded } = useMemo(() => applyToBuyers(BUYERS.candidates, preferences), [preferences]);
+  const { included, excluded } = useMemo(() => applyToBuyers(BUYERS.candidates, preferences), [BUYERS, preferences]);
   const adjustedById = useMemo(() => {
     const m = new Map<string, AdjustedBuyer>();
     for (const r of included) m.set(r.candidate.buyer.name, r);
@@ -143,7 +162,8 @@ const Banker: React.FC = () => {
 
   return (
     <div data-page="banker" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="Always-on · Operator" title="The Banker"
+      <PageHeader eyebrow={`Always-on · Operator · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="The Banker"
+        badge={<Provenance kind={fromIntake ? "company" : "demo"} />}
         description="Ranks and shortlists buyers, drafts the outreach, introductions, teaser and executive summary, and applies your directives. It does not contact buyers or run a process — every deliverable is a draft for you to send."
         actions={<button type="button" onClick={() => setBriefOpen(true)} className={BTN}>Brief the banker</button>} />
 
@@ -223,7 +243,7 @@ const Banker: React.FC = () => {
       {/* ── Active banker directives ─────────────────────────────── */}
       <Section title="Active mandate directives" className="border border-xo-line"
         right={<button type="button" onClick={() => setBriefOpen(true)} className={BTN_GHOST}>+ Brief the banker</button>}
-        foot="Stored against the mandate · deterministic parser · re-applied to every recommendation below">
+        foot="Saved in this browser · deterministic parser · re-applied to every recommendation below">
         <div className="px-4 py-3">
           {directives.length === 0 ? (
             <p className="border border-dashed border-xo-line bg-xo-ink p-4 text-[13px] text-xo-muted">
