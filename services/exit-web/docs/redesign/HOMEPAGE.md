@@ -411,7 +411,7 @@ Owner: "I need the hero of the newly uploaded file … from hero to section two.
 | DD1 | The lifecycle chart is drawn for the full page width; set in a half-width box its labels fall to about 8 px and its stage panel crowds. | A `compact` mode for `ExchangeMap`: larger label type and offsets for a narrower box, the stage panel stacked. | closed `cb3e3c23` |
 | DD2 | The homepage opening is not the owner's index(2) hero and section 2. | Hero from index(2): ivory-to-navy field, eyebrow "Intelligence · Opportunities · Execution", "The global acquisition exchange *for what's next.*", body, two actions ("Explore the platform" → /platform; the file's "Watch overview" has no film behind it → "Value my company" → chapter 04), the vertical note, and the five-part capability strip ("verified insights" → "sourced records", per M3). Section 2 "Intelligence meets *opportunity.*" with its copy and "Learn how it works" → /platform; the right-hand box carries our lifecycle graph (compact, interactive); the three proof figures and the edition line move under its copy. The board becomes chapter 03 and every later chapter moves down one (04 value · 05 thesis · 06 ledger · 07 modules · 08 questions · 09 next move); the rail, signature line, phone bar, share-card script and the inventory test follow. EN/FR/ES. | closed `6406eafd` |
 | DD3 | Owner (with a screenshot of the chart alone): "it is this section that should be added" — the box should hold only the graph, not the stage panel, caption bar and tag. | A `bare` mode for `ExchangeMap` (the chart only: grid, week axis, route, stages); the box holds it alone. The lifecycle title and the typical-timeline source note (6) move to one line under the box; the phone keeps its stage list (the chart is too small to read there). | closed `0666f000` |
-| DD4 | Owner: "the hero right dark is supposed to have, like a watermark, the Exit signature." | A faint watermark on the navy side of the hero (desktop): the ExitOS reticle mark drawn large in hairline blue with its emerald centre, the serif "Exit*OS*" signature beneath (the closing wordmark's lettering), decorative and hidden from assistive technology. | open |
+| DD4 | Owner: "the hero right dark is supposed to have, like a watermark, the Exit signature." | A faint watermark on the navy side of the hero (desktop): the ExitOS reticle mark drawn large in hairline blue with its emerald centre, the serif "Exit*OS*" signature beneath (the closing wordmark's lettering), decorative and hidden from assistive technology. | closed `ae1cbd94` |
 
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
@@ -919,6 +919,9 @@ Hero from index(2) in the locked palette: ivory-to-navy field (stacked on phones
 
 ### DD3 — closed 0666f000
 ExchangeMap bare mode (chart only; no tag, caption bar or rule). Section 2's box holds <ExchangeMap dark compact bare /> — non-interactive, role img — and the lifecycle title with source note 6 sits under the box. Phone keeps the stage list. tsc, eslint, vitest 246/246 (inventory: lifecycle still on one page), build; axe 0 on / at 1440/390; keyboard and reduced motion as before; board identical.
+
+### DD4 — closed ae1cbd94
+Hero watermark (desktop, md+): the ExitOS reticle — outer and inner hairline circles, four ticks, emerald centre — at min(30vw, 440px) in blue-300 at 6–20% opacity, with the serif 'ExitOS' signature (italic OS, gradient text) beneath; aria-hidden. vitest 246/246, build; axe 0 at 1440/390; keyboard 129/0; reduced motion 0 outside the board.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
