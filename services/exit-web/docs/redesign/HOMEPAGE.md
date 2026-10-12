@@ -447,7 +447,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE23 | Focus rings and link underlines vary. | One focus ring and one underline treatment in signal blue. | closed `9765567b` |
 | EE24 | Figures mix old-style and lining at random. | Old-style in running text, tabular lining in tables and statistics. | closed `687524cf` |
 | EE25 | Radii run from 4 to 12 px and shadows are one-off. | One radius scale and three shadow levels. | closed `d6a9e37f` |
-| EE26 | The share card and phone bar still use the old navy. | Repainted in the ink scale. | open |
+| EE26 | The share card and phone bar still use the old navy. | Repainted in the ink scale. | closed `572d6c85` |
 | EE27 | Pricing and other marketing pages do not use the new tokens. | Tokens carried to the marketing pages' darks. | open |
 | EE28 | New colour pairs are unchecked. | A contrast audit of the new pairs (≥ 4.5:1 for text) with fixes. | open |
 | EE29 | The whole set needs one final verification. | Full checks: vitest, build, axe on marketing routes at 1440/390, keyboard, reduced motion, board identity. | open |
@@ -1050,6 +1050,9 @@ Figures set by role in index.css for every marketing page: old-style in serif ru
 
 ### EE25 — closed d6a9e37f
 Radius scale ex-xs 3 / ex-sm 4 / ex-md 6 / ex-lg 10 px and shadows ex-1 (hairline lift), ex-2 (card), ex-3 (object), ex-bezel (framed instrument) in tailwind.config; homepage chapters, QuickValue, LedgerTable, Instrument (bezel 12→10, screen 7→6), ModulePreview and ChapterRail moved onto them. Board ribbon and CommandBoard checked identical to the original.
+
+### EE26 — closed 572d6c85
+Phone action bar on ex-1; the share card's ground on the ink field (ex-0 → ex-1 → ex-0) and its closing node in done-green; public/og/exitos-card.png regenerated from the live page (figures and edition read from chapter 02, unchanged).
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
