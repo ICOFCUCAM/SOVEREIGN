@@ -10,6 +10,7 @@ import CountUp from "../components/CountUp";
 import ChapterRail from "../components/ChapterRail";
 import ModulePreview from "../components/ModulePreview";
 import SignatureLine from "../components/SignatureLine";
+import AmbientVideo from "../components/AmbientVideo";
 import ExchangeMap from "../components/ExchangeMap";
 import { Note, SourcesSection, type SourceId } from "../components/SourceNotes";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
@@ -326,6 +327,9 @@ const Landing: React.FC = () => {
 
       {/* ===== 08 · THE NEXT MOVE — the back page ===== */}
       <section id="ch-08" className="relative overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#05101f 0%,#06182E 55%,#030a15 100%)" }}>
+        {/* a quiet film of a meeting under a navy veil (placeholder footage, pre-launch gate G1) */}
+        <AmbientVideo src="/media/boardroom-loop.mp4" webm="/media/boardroom-loop.webm" poster="/media/boardroom-poster.jpg" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.38] mix-blend-luminosity" />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg,#05101f 0%,rgba(6,24,46,0.62) 28%,rgba(6,24,46,0.72) 62%,#030a15 100%), linear-gradient(90deg,rgba(3,10,21,0.85) 0%,rgba(3,10,21,0.35) 55%,rgba(3,10,21,0.6) 100%)" }} />
         {/* the bookend: the hero's navy and light return at the close */}
         <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 h-[70%] w-[80%] -translate-x-1/2 rounded-[50%] opacity-40 blur-[110px]" style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.55), transparent 70%)" }} />
         <div className={`${WRAP} relative py-20 sm:py-24 lg:py-32`}>

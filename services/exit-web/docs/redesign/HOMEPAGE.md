@@ -393,6 +393,11 @@ Built and judged as previews (designs 10–17), then adopted onto this branch on
 | BB7 | Further premiumisation and iconicity. | A signature line in the right margin joining the chapters and drawing as you read; a navy bookend with the ExitOS wordmark; module rows opening to their engine structure (`MODULE_PREVIEW`: readiness weights, methodologies, formats, packages — never a sample company's scores); one chapter-reveal motion system; the hero's edition line ("Edition of {date} · from the registry's daily refresh"); typography finishing (balanced headlines, pretty paragraphs, hanging punctuation, old-style figures in serif text). | closed `f4fe56e5` |
 | BB8 | Owner uploaded two videos and asked to use the good one. | `public/1.mp4` graded to the navy palette, trimmed to a seamless 4.6 s loop, compressed to 1.4 MB (MP4 + WebM, poster), played muted behind chapter 08 under a navy veil; loads only near view, pauses off-screen, never plays under reduced motion. Placeholder — pre-launch gate G1. `public/2.mp4` not used (another product's invented figures). | open |
 | BB9 | `BoardRoom.tsx` (BB2–BB3) is unused since BB4. | Remove it; the hall component `TradingHall.tsx` stays for the dev-only hero lab. | open |
+## Pre-launch gates (before the site goes live for business, when Stripe is added)
+
+| # | Gate | Status |
+|---|---|---|
+| G1 | **Placeholder footage.** The closing chapter's background film is the owner's uploaded `public/1.mp4` (a meeting), graded to the navy palette, trimmed to a seamless 4.6 s loop and compressed (7.6 MB → 1.4 MB) as `services/exit-web/public/media/boardroom-loop.mp4`. Before launch: confirm it shows a genuine ExitOS event and hold written consent from every recognisable person — or replace it. (`public/2.mp4` was not used: its tablet shows another product's invented figures.) | open — owner decision 2026-10-12: use as placeholder now |
 
 ## Closure log
 
