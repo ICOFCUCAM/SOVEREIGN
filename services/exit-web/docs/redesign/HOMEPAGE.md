@@ -436,7 +436,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE12 | Five thousand pixels of light in the middle with no dark pause. | The ledger's head: an ink strip of the three largest recorded deals (records only). | closed `16769221` |
 | EE13 | Chapter openers vary in position and form. | One chapter opener: number, rule, label at the same measure everywhere. | closed `3420f2db` |
 | EE14 | Light chapters meet with bare background changes. | A double hairline between light chapters. | closed `f6f6b030` |
-| EE15 | Every heading carries the blue italic word; the device is a formula. | The italic kept on four headings (hero, 04, 05, 09); others plain serif. | open |
+| EE15 | Every heading carries the blue italic word; the device is a formula. | The italic kept on four headings (hero, 04, 05, 09); others plain serif. | closed `fc43efa6` |
 | EE16 | The footer drops from the dark closing to pale grey. | Footer in the deepest ink, continuing the closing chapter. | open |
 | EE17 | The page opens with the mark but does not close with it. | A large faint ExitOS signature across the footer, matching the hero watermark. | open |
 | EE18 | Footer hierarchy is flat. | Footer columns with a heading rule, link hover, the legal line set small. | open |
@@ -1017,6 +1017,9 @@ Chapter opener (the shared Chapter component, used on every marketing page): the
 
 ### EE14 — closed f6f6b030
 Light chapters (04, 05, 06, 07, proof, 08) carry .ex-light; where two meet, a double hairline set to the text measure replaces the full-bleed border, so the paper changes read as a ruled page rather than a seam.
+
+### EE15 — closed fc43efa6
+The blue italic is kept on four homepage headings: the hero, 04 (worth?), 05 (exit) and 09 (market). Chapters 02, 03, 06, 07 and 08 keep the italic in the heading's own colour (new `quiet` prop on Editorial), so the device still sets the cadence but colour is spent where it counts. Other pages are unchanged.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
