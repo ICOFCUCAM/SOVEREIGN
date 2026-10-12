@@ -386,7 +386,7 @@ Built and judged as previews (designs 10–17), then adopted onto this branch on
 |---|---|---|---|
 | BB1 | The light hero lacks the opening drama of design 6; the hall's pilasters read as glowing plastic, stand apart from the screen, and the ceiling shows stray diagonals. | Dark navy hero (same content, figures and fixes as design 9; the lifecycle chart in light lines on navy). Pilasters slimmed to matte stone hugging the portal, architrave between them only, quieter ceiling. | closed `8504d48b` |
 | BB2 | Owner: "the wall looks unreal … more natural like it is in a house". | A boardroom wall: navy-stained oak slats with grain, recessed downlights washing the slats, a thin-bezel display with real shadow and backlight, a fluted credenza, a stone floor. | closed `a6cfe912` |
-| BB3 | Design 11's room still read as computer-made (uniform slats and light, glowing light blobs, an empty room, an oversized screen); the valuation chapter opens on an empty form. | Timber and light variation, real downlight trims, a styled credenza (books, stone sphere, vases), the screen sized to the wall, a power-on as the screen enters view; a labelled worked example in the valuation chapter computed by the same engine. | open |
+| BB3 | Design 11's room still read as computer-made (uniform slats and light, glowing light blobs, an empty room, an oversized screen); the valuation chapter opens on an empty form. | Timber and light variation, real downlight trims, a styled credenza (books, stone sphere, vases), the screen sized to the wall, a power-on as the screen enters view; a labelled worked example in the valuation chapter computed by the same engine. | closed `ef1aa228` |
 | BB4 | Owner asked whether a drawn room belongs on an iconic site; it does not (a mockup, uncanny, shrinks the product). | The board as the instrument: large and flat on deep navy, a fine bezel, its own glow, the power-on kept (hook shared in `lib/use-power-on.ts`). | open |
 | BB5 | Owner: add professional widgets to the sections. | Interactive lifecycle (stages select a panel: what happens, the module that runs it; EN/FR/ES); valuation range bar; a searchable, filterable, sortable ledger over all priced deals (`LEDGER_ALL`); a chapter index; a questions chapter (07) answered only from the Pricing and Platform pages, buyer prices left out pending the open decision; count-up hero figures. The back page becomes chapter 08. | open |
 | BB6 | Owner: "the visual presence of the newly added widgets are not felt". | Each widget given weight: a large stage panel with previous/next and a progress strip; the valuation result in a navy card with a gradient gauge, ticks and a midpoint pin; the ledger in a toolbar panel with status counts, a navy summary strip and value bars; a dark chapter rail with a progress line and a reading bar; question cards with a briefing prompt; larger hero figures with drawn rules. | open |
@@ -850,6 +850,9 @@ Preview design 10. Dark hero with the lifecycle chart on navy (ExchangeMap gains
 
 ### BB2 — closed a6cfe912
 Preview design 11 (BoardRoom.tsx). tsc, vitest 243/243; axe 0, keyboard 113/0, reduced motion 0 outside the board when built.
+
+### BB3 — closed ef1aa228
+Preview design 12. Power-on verified (overlay 1 → 0 on entering view, skipped under reduced motion); example = engine result $112.2M–$323.2M for Vertical SaaS / $40M / 45%. tsc, vitest 243/243; axe 0, keyboard 113/0.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
