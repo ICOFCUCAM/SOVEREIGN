@@ -97,7 +97,7 @@ const Terminal: React.FC = () => {
 
   // action queue — recommended next moves, derived from the engines (not invented)
   const actions: { label: string; meta: string; to: string }[] = [
-    ...(lead ? [{ label: `Open outreach · ${lead.profile.name}`, meta: `${lead.probability.pct}% likely · exp. ${fmtUsdShort(lead.exp.expectedClose)}`, to: "/console/banker" }] : []),
+    ...(lead ? [{ label: `Open outreach · ${lead.profile.name}`, meta: `likelihood ${lead.probability.pct}/100 · exp. ${fmtUsdShort(lead.exp.expectedClose)}`, to: "/console/banker" }] : []),
     ...ra.weaknesses.slice(0, 3).map((w) => ({ label: w.dimension, meta: `readiness · +${fmtUsdShort(w.valuationUpliftUsd)} uplift`, to: "/console/readiness" })),
     { label: "Prepare NDA package", meta: "gate buyer access on signature", to: "/console/nda" },
     { label: "Assemble CIM", meta: "the institutional memorandum", to: "/console/documents" },
@@ -173,8 +173,8 @@ const Terminal: React.FC = () => {
         <section aria-label="Decision metrics" className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 lg:col-span-7 lg:grid-cols-3">
           {[
             <Metric key="m" label="Most likely buyer" emphasis provenance="registry"
-              value={lead ? `${lead.probability.pct}%` : "—"}
-              sub={lead ? <><Link to={`/console/buyer/${lead.profile.buyer_id}`} className="inline-block py-1 text-xo-action hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{lead.profile.name}</Link> · acquisition probability</> : "No ranked buyer"} />,
+              value={lead ? `${lead.probability.pct}/100` : "—"}
+              sub={lead ? <><Link to={`/console/buyer/${lead.profile.buyer_id}`} className="inline-block py-1 text-xo-action hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{lead.profile.name}</Link> · likelihood score (composite, not a probability)</> : "No ranked buyer"} />,
             <Metric key="q" label="Qualified buyers" provenance="model" value={String(INST.buyerUniverse.qualified)} sub={`of ${INST.buyerUniverse.scored} scored · ${activeAcquirers} active in the registry`} />,
             <Metric key="c" label="Confidence" provenance="model" value={`${INST.confidence.score}%`} sub={`${INST.confidence.tier} · ${INST.comparablesUsed} comparables`} />,
             <Metric key="p" label="Applied premium" provenance={INST.premium.basis === "neutral_prior" ? "prior" : "model"} value={`+${pct(INST.premium.appliedPct)}`} sub={`${PREMIUM_BASIS[INST.premium.basis]} · range ${pct(INST.premium.rangeLowPct)}–${pct(INST.premium.rangeHighPct)}`} />,
@@ -189,7 +189,7 @@ const Terminal: React.FC = () => {
         {[
           { k: "Where you stand", body: <>Strategic value <span className="font-mono text-xo-text">{fmtUsdShort(INST.headline.mid)}</span>, readiness <span className="font-mono text-xo-text">{Math.round(ra.currentScore)}</span>, {INST.buyerUniverse.qualified} qualified buyers.</> },
           { k: "Market context", body: <>{activeAcquirers} acquirers with indexed activity; {INST.comparablesUsed} comparable transactions on record (latest {INST.provenanceSummary.mostRecentDataDate ?? "—"}).</> },
-          { k: "Recommended next move", body: lead ? <>Open outreach to <Link to={`/console/buyer/${lead.profile.buyer_id}`} className="inline-block py-1 font-semibold text-xo-action hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{lead.profile.name}</Link> — {lead.probability.pct}% probability, close-weighted {fmtUsdShort(lead.exp.expectedClose)}.</> : <>List on the exchange to surface the buyer set.</> },
+          { k: "Recommended next move", body: lead ? <>Open outreach to <Link to={`/console/buyer/${lead.profile.buyer_id}`} className="inline-block py-1 font-semibold text-xo-action hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{lead.profile.name}</Link> — likelihood score {lead.probability.pct}/100, close-weighted {fmtUsdShort(lead.exp.expectedClose)}.</> : <>List on the exchange to surface the buyer set.</> },
           { k: "Expected outcome", body: <>Strategic range <span className="font-mono text-xo-text">{fmtUsdShort(INST.headline.low)}–{fmtUsdShort(INST.headline.high)}</span>, close {closeRange}, +{fmtUsdShort(uplift)} from readiness.</> },
         ].map((c) => (
           <div key={c.k} className="bg-xo-panel px-4 py-3">
@@ -202,7 +202,7 @@ const Terminal: React.FC = () => {
       {lead && (
         <p className="border-l-2 border-xo-brass bg-xo-panel px-4 py-2.5 text-[13px] leading-relaxed text-xo-muted">
           <Link to={`/console/buyer/${lead.profile.buyer_id}`} className="font-semibold text-xo-text hover:underline rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{lead.profile.name}</Link>{" "}
-          is <span className="font-mono font-semibold text-xo-verified">{lead.probability.pct}%</span> likely to acquire a company like {company.name}.{" "}
+          has the highest likelihood score — <span className="font-mono font-semibold text-xo-verified">{lead.probability.pct}/100</span>, a composite of appetite, sector overlap, velocity and recency, not a probability — to acquire a company like {company.name}.{" "}
           {buyerRationale(lead.profile, BASELINE, tokens, company.sector).thesis}{" "}
           Their own record: premium {leadPremium != null ? <span className="font-mono text-xo-text">+{pct(leadPremium)}</span> : "not disclosed"} · median close {leadCloseDays != null ? <span className="font-mono text-xo-text">{leadCloseDays}d</span> : "not disclosed"}.
         </p>
@@ -218,7 +218,7 @@ const Terminal: React.FC = () => {
               <thead className="text-left text-[11px] font-medium text-xo-faint">
                 <tr className="border-b border-xo-line">
                   <th scope="col" className="px-4 py-2 font-medium">Buyer</th>
-                  <th scope="col" className="px-2 py-2 text-right font-medium">Probability</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Likelihood</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Expected offer</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Close-weighted</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Premium</th>
@@ -244,7 +244,7 @@ const Terminal: React.FC = () => {
                         </th>
                         <td className="px-2 py-2 text-right">
                           <Evidence meta={{ methodology: why.thesis, source: "DNA engine · valuation framework", confidence: `${INST.confidence.score}% · ${INST.confidence.tier}` }}>
-                            <Bar value={r.probability.pct} label={`${r.probability.pct}%`} width="w-12" />
+                            <Bar value={r.probability.pct} label={`${r.probability.pct}/100`} width="w-12" />
                           </Evidence>
                         </td>
                         <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-text">{fmtUsdShort(r.exp.expectedOffer)}</td>
@@ -265,7 +265,7 @@ const Terminal: React.FC = () => {
                               </ul>
                             </div>
                             <div>
-                              <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-faint">Probability {r.probability.pct}% =</h3>
+                              <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-faint">Likelihood score {r.probability.pct}/100 =</h3>
                               <dl className="mt-1 divide-y divide-xo-line/60">
                                 <Fact k="Appetite (max 50)" v={r.probability.appetite} />
                                 <Fact k="Sector overlap (max 34)" v={r.probability.overlap} />
