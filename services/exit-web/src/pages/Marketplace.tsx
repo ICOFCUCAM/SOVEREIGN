@@ -6,7 +6,7 @@ import { PageHeader, Section, Metric, Chip, Provenance, XO_INPUT, XO_LABEL } fro
 import { parseNumber } from "../lib/intake-fields";
 import { useAuth } from "../lib/auth";
 import { buildMarketTape } from "../lib/market-tape";
-import { LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES, useMemorandum } from "../lib/engines";
+import { LISTING_PUBLIC as ENGINE_PUBLIC, LISTING_PRIVATE as ENGINE_PRIVATE, LISTING_MATCHES, VALUATION_CANONICAL, useMemorandum } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
 // Exit Marketplace — "Become the banker." The sell-side pack gathers the
@@ -38,6 +38,20 @@ interface PipelineStep {
   title: string;
   detail: React.ReactNode;   // what the step produced (shown once prepared)
 }
+
+// D1: the console shows one enterprise value — the canonical (institutional)
+// headline. The listing engine prices the ask from the strategic report, so
+// the asking band and the ideal buyer's check size are re-based on the
+// canonical band here (display only; the engine's matching is unchanged).
+type EngineListing = typeof ENGINE_PRIVATE;
+const withCanonicalAsk = (l: EngineListing, h: { low: number; mid: number; high: number }): EngineListing => ({
+  ...l,
+  askingPriceUsd: { ...l.askingPriceUsd, low: h.low, mid: h.mid, high: h.high },
+  idealBuyerProfile: { ...l.idealBuyerProfile, checkSizeUsd: { ...l.idealBuyerProfile.checkSizeUsd, low: h.low, high: h.high } },
+});
+const LISTING_PRIVATE = withCanonicalAsk(ENGINE_PRIVATE, VALUATION_CANONICAL.headline);
+const LISTING_PUBLIC = withCanonicalAsk(ENGINE_PUBLIC, VALUATION_CANONICAL.headline);
+const fit = (score: number): string => `${(score * 100).toFixed(0)}/100`;
 
 // Buyers share this route ("Browse Opportunities") but must only ever see
 // the anonymized public listing — never the founder's identity, private
@@ -119,7 +133,7 @@ const FounderMarketplace: React.FC = () => {
     { key: "anon",    title: "Anonymized public view",
       detail: `Buyers would see it as "${LISTING_PUBLIC.title}" — switch to "Public listing" below to check it` },
     { key: "buyers",  title: "Buyers matched",
-      detail: `${matches.length} matched buyers · top fit ${matches[0] ? (matches[0].matchScore * 100).toFixed(0) : "0"}%` },
+      detail: `${matches.length} matched buyers · top fit score ${matches[0] ? fit(matches[0].matchScore) : "—"}` },
     { key: "outreach", title: "Outreach — not started",
       detail: <>ExitOS does not contact buyers from here. Plan who to approach in the <Link to="/console/outreach-plan" className={LINK}>Outreach Plan</Link>.</> },
   ];
@@ -158,7 +172,7 @@ const FounderMarketplace: React.FC = () => {
         stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(listing.askingPriceUsd.mid)}</span> asking · band {fmtMoney(listing.askingPriceUsd.low)}–{fmtMoney(listing.askingPriceUsd.high)}.</>}
         inaction={<>Without a listing, buyers on the exchange cannot discover you — and bankers charge 1–2% to run a process.</>}
         buyer={matches[0]
-          ? <><span className="text-white">{matches[0].buyerName}</span> — {(matches[0].matchScore * 100).toFixed(0)}% match, top of {matches.length}.</>
+          ? <><span className="text-white">{matches[0].buyerName}</span> — fit score {fit(matches[0].matchScore)}, top of {matches.length}.</>
           : "No matches yet."}
         automate={<>Drafts the teaser and CIM, builds the anonymized view and matches buyers. It does not publish the listing or contact buyers.</>}
         impact={<>{fmtMoney(listing.askingPriceUsd.mid)}</>}
@@ -283,13 +297,14 @@ const FounderMarketplace: React.FC = () => {
         </Section>
 
         <div className="flex flex-col gap-px bg-xo-line lg:col-span-4">
-          <Section title="Matched buyers" eyebrow="matchBuyersToListing">
+          <Section title="Matched buyers" eyebrow="matchBuyersToListing"
+            foot="Fit score: the discovery engine's weighted fit (sector, size, geography, activity), 0–100 — not a measured chance of a bid.">
             <ul>
               {matches.slice(0, 8).map((m) => (
                 <li key={m.buyerName} className="border-b border-xo-line px-4 py-3 last:border-0">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="font-medium">{m.buyerName}</span>
-                    <span className="font-mono text-[12px] tabular-nums">{(m.matchScore * 100).toFixed(0)}%</span>
+                    <span className="font-mono text-[12px] tabular-nums"><span className="sr-only">fit score </span>{fit(m.matchScore)}</span>
                   </div>
                   <div className={`mt-0.5 text-[11px] font-semibold ${TYPE_STYLE[m.buyerType] ?? "text-xo-muted"}`}>{m.buyerType.replace(/_/g, " ")}</div>
                   <p className="mt-1.5 text-[12px] leading-snug text-xo-muted">{m.rationale}</p>
@@ -301,8 +316,8 @@ const FounderMarketplace: React.FC = () => {
           <Section title="Marketplace mechanics" className="flex-1">
             <ul className="space-y-2 px-4 py-3 text-[12px] text-xo-muted">
               <li className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-verified" /> Listings publish anonymized by default</li>
-              <li className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-verified" /> Buyers request NDA → de-anonymized data shared</li>
-              <li className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-verified" /> Engagement signals feed the negotiation engine</li>
+              <li className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-verified" /> Buyers request an NDA; you mark it executed in your Inbox. Nothing is revealed automatically — you share identity and data yourself</li>
+              <li className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-verified" /> Buyer interest, NDA requests and offers arrive in your Inbox</li>
               <li className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-verified" /> Success fee on closed deals · founder-paid</li>
             </ul>
           </Section>
@@ -314,7 +329,7 @@ const FounderMarketplace: React.FC = () => {
         footer={<><Button variant="ghost" onClick={() => { setOverride({ askMid: null, note: "" }); setEditOpen(false); notify("Preview reset to engine values"); }}>Reset</Button><Button disabled={!askParse.ok} onClick={() => { if (!askParse.ok) return; setOverride({ askMid: askParse.value, note: editNote.trim() }); setEditOpen(false); notify("Preview updated — not saved or published"); }}>Apply to preview</Button></>}>
         <div className="space-y-4">
           <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
-            Engine band: {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {baseListing.sector.replace(/_/g, " ")}
+            Valuation band (canonical, as everywhere in the console): {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {baseListing.sector.replace(/_/g, " ")}
           </p>
           <div>
             <label htmlFor="mkt-ask" className={XO_LABEL}>Asking price, mid ($M)</label>
