@@ -64,11 +64,14 @@ const Calibration: React.FC = () => {
 
       {summary && (
         <>
-          <section aria-label="Calibration summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+          <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">Demo tenant only. Error = (realized − predicted) ÷ predicted — negative means the deal closed below the prediction. The prediction recorded for each run is the strategic-report midpoint, not the canonical value the console shows (open item X21).</p>
+
+          <section aria-label="Calibration summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
             <div className="bg-xo-panel"><Metric label="Predictions made" value={String(summary.totalRuns)} sub="completed exit runs" /></div>
             <div className="bg-xo-panel"><Metric label="Closes recorded" emphasis value={String(summary.totalCloses)} sub="basis for calibration" /></div>
-            <div className="bg-xo-panel"><Metric label="Mean error" value={PCT(summary.meanErrorPct, true)} sub={summary.totalCloses === 0 ? "no closes yet" : "predicted vs realized"} /></div>
-            <div className="bg-xo-panel"><Metric label="Median |error|" value={summary.mae == null ? "—" : PCT(summary.mae)} sub={summary.totalCloses === 0 ? "no closes yet" : "absolute deviation"} /></div>
+            <div className="bg-xo-panel"><Metric label="Mean error" value={PCT(summary.meanErrorPct, true)} sub={summary.totalCloses === 0 ? "no closes yet" : "signed — direction of the miss"} /></div>
+            <div className="bg-xo-panel"><Metric label="Median error" value={PCT(summary.medianErrorPct, true)} sub={summary.totalCloses === 0 ? "no closes yet" : "signed — middle close"} /></div>
+            <div className="bg-xo-panel"><Metric label="Mean absolute error" value={summary.mae == null ? "—" : PCT(summary.mae)} sub={summary.totalCloses === 0 ? "no closes yet" : "average size of the miss"} /></div>
           </section>
 
           {summary.totalCloses === 0 && (

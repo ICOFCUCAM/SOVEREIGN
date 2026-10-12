@@ -36,7 +36,7 @@ The page calls the production edge function. Tests stub that call with **synthet
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Self-learning overclaims.** | Say the dashboard measures error for review; nothing feeds back into the engines automatically; re-calibration is a deliberate change. | ☑ `542e82e` |
-| G2 | **"Median \|error\|" shows the mean; sign and scope unstated.** | "Mean absolute error" (and the median error beside it); "error = (realized − predicted) ÷ predicted; negative = closed below the prediction"; "demo tenant"; the prediction recorded is the strategic-report midpoint (X21). | ☐ |
+| G2 | **"Median \|error\|" shows the mean; sign and scope unstated.** | "Mean absolute error" (and the median error beside it); "error = (realized − predicted) ÷ predicted; negative = closed below the prediction"; "demo tenant"; the prediction recorded is the strategic-report midpoint (X21). | ☑ G2-commit |
 | G3 | Design: old components; overflow at 390. | Rebuild on `xo`; tables in scroll regions. | ☑ `c576de8` |
 
 ---
@@ -50,3 +50,7 @@ The page calls the production edge function. Tests stub that call with **synthet
 ### G1 — Self-learning overclaims
 *Closed by:* `pages/Calibration.tsx` (text). "The valuation engine learns from every close … so future predictions correct against measured error" → "Measures how far recorded predictions were from realized close prices … Nothing here feeds back into the engines automatically — re-calibrating them is a deliberate change made against these figures."; "the engine has not yet learned anything from itself" → "Until then there is nothing to measure."; "the valuation engine's sector multipliers can be re-calibrated against measured error rather than priors" → "They do not change the engines by themselves; they are the evidence for re-calibrating the sector multipliers by hand."; file comment ("the muscle the engine eventually self-corrects against") corrected.
 *Verification:* `tsc -b`, eslint clean · Chromium superadmin (stubbed, empty state): 0 "learns from every close", "correct against measured error", "learned anything", "self-correct"; the new description shown; 1440/390 axe 0, no overflow.
+
+### G2 — "Median |error|" shows the mean; sign and scope unstated
+*Closed by:* `pages/Calibration.tsx` (labels; data unchanged). "Median |error| — absolute deviation" (it showed `mae`, the mean of absolute errors) → **"Mean absolute error — average size of the miss"**; a "Median error" metric now shows the real median (`medianErrorPct`); "Mean error" sub → "signed — direction of the miss"; a note: "Demo tenant only. Error = (realized − predicted) ÷ predicted — negative means the deal closed below the prediction. The prediction recorded for each run is the strategic-report midpoint, not the canonical value the console shows (open item X21)."
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium superadmin, stubbed populated state (fixture: mean −6.2 %, median −5.0 %, MAE 8.0 %): "Mean error −6.2% · Median error −5.0% · Mean absolute error 8.0%" and the note shown; 0 "Median |error|"; 1440/390 axe 0, no overflow.
