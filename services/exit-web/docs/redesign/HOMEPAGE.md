@@ -450,7 +450,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE26 | The share card and phone bar still use the old navy. | Repainted in the ink scale. | closed `572d6c85` |
 | EE27 | Pricing and other marketing pages do not use the new tokens. | Tokens carried to the marketing pages' darks. | closed `d41ad6dd` |
 | EE28 | New colour pairs are unchecked. | A contrast audit of the new pairs (≥ 4.5:1 for text) with fixes. | closed `d31d4ad4` |
-| EE29 | The whole set needs one final verification. | Full checks: vitest, build, axe on marketing routes at 1440/390, keyboard, reduced motion, board identity. | open |
+| EE29 | The whole set needs one final verification. | Full checks: vitest, build, axe on marketing routes at 1440/390, keyboard, reduced motion, board identity. | closed `b4b2af22` |
 | EE30 | The owner needs to see the result. | Design 20 preview with before/after, and this log. | open |
 
 ### The paper rule (EE6)
@@ -1069,6 +1069,9 @@ Platform, Modules and Pricing (with the ExchangeBlocks they share) on the system
 
 ### EE28 — closed d31d4ad4
 Contrast audit (axe color-contrast, every element on the page, after a full scroll so every reveal has fired): /, /pricing, /platform, /modules at 1440 and 390 — 0 violations; the homepage again with the header in its ink state over the board — 0. One finding fixed: the header's colour change ran 500 ms, so for a moment light-mode text sat on the still-dark bar when scrolling back up (axe caught it mid-fade); now 200 ms. The axe harness now waits for the header to settle after returning to the top.
+
+### EE29 — closed b4b2af22
+Full verification recorded in 'Phase 13 verification' above: tsc, eslint, vitest 246/246, build, axe 0 on four routes at two widths and in the ink-header state, a full keyboard pass, reduced motion, board identity, phone overflow.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
