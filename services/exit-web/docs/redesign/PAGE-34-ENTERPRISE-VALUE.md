@@ -32,7 +32,7 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 ## Gap register — Page 34
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **"Blended $823M" and "Comparable $2.25B" presented as valuations.** | Remove the blended figure; show the comparable figure as "Median precedent deal size — other companies' deals, not a value for this company"; drop its methodology bar; bar scale from the canonical band. Calculation of the canonical value untouched. | ☐ |
+| G1 | **"Blended $823M" and "Comparable $2.25B" presented as valuations.** | Remove the blended figure; show the comparable figure as "Median precedent deal size — other companies' deals, not a value for this company"; drop its methodology bar; bar scale from the canonical band. Calculation of the canonical value untouched. | ☑ G1-commit |
 | G2 | DCF presented without its simplification; "not assumption" claims. | "DCF sensitivity" — EBITDA used as a free-cash-flow proxy, assumptions set by you, not the valuation; remove "not assumption" / "no number without a source" claims; methodology title fixed. | ☐ |
 | G3 | "Strategic-buyer basis"; acquirer fit shown as probability. | "Institutional framework — the console value (D1)"; "fit probability — not a measured chance of a bid". | ☐ |
 | G4 | Demo only, unlabelled. | `runInstitutionalValuation(company)` and `valuationFacts` for the active company; DCF base from it; Demo data / Your intake badge. | ☐ |
@@ -53,3 +53,7 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 ### G6 — Design
 *Closed by:* `pages/Valuation.tsx` rebuilt on `xo` (`PageHeader` `h1` "Enterprise Value"; seven metrics; the command state as a definition list; the fact sheet as a real `dl` with Evidence tooltips; DCF sliders with `label`/`id` pairs; methodology bars `aria-hidden` beside their figures; acquirers and comparables as tables with row headers, comparables in a `ScrollRegion` (fixes scrollable-region-focusable); hex accents replaced by xo tokens). Content carried over verbatim; the shared `BankerTake` stays until G5; G1–G5 follow. The rebuilt fact sheet exposed a shared tooltip overflow, fixed first as X19.
 *Verification:* `tsc -b`, eslint clean · Chromium free/Pro 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 33 + 1), all tab stops with visible focus.
+
+### G1 — "Blended $823M" and "Comparable $2.25B" presented as valuations
+*Closed by:* `pages/Valuation.tsx`. The **"Blended $823,056,180 — baseline·DCF·comps"** metric is removed (it averaged the baseline, the DCF and the median deal size of the comparables — other companies' acquisition prices — and stood at 8× the canonical $102.8M). "Comparable $2,250,000,000 — 12 precedents" → **"Median precedent deal size — 12 precedents · other companies' deals, not a value for this company"**; its methodology bar is removed; the bar scale is the largest figure drawn (DCF, canonical high, framework methods) × 1.1 instead of blended × 1.8; the JSON export drops `blended` and names the figure `medianPrecedentDealSizeUsd`. The canonical midpoint, band and framework methods are untouched.
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 "Blended" / "823,056,180"; the median deal size shows with its qualifier · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
