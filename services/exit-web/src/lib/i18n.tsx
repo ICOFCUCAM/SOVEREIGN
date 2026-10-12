@@ -14,6 +14,7 @@ type Dict = Record<string, string>;
 
 const en: Dict = {
   // chrome
+  "nav.skip": "Skip to content",
   "nav.platform": "Platform",
   "nav.modules": "Modules",
   "nav.pricing": "Pricing",
@@ -237,6 +238,7 @@ const en: Dict = {
 };
 
 const fr: Dict = {
+  "nav.skip": "Aller au contenu",
   "nav.platform": "Plateforme",
   "nav.modules": "Modules",
   "nav.pricing": "Tarifs",
@@ -443,6 +445,7 @@ const fr: Dict = {
 };
 
 const es: Dict = {
+  "nav.skip": "Saltar al contenido",
   "nav.platform": "Plataforma",
   "nav.modules": "Módulos",
   "nav.pricing": "Precios",

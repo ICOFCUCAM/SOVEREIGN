@@ -177,6 +177,8 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
   const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
   return (
     <div className="ex-site min-h-screen bg-[#F8F4EE] text-ink-900">
+      {/* the first stop for a keyboard: straight past the header to the page */}
+      <a href="#main" className="sr-only z-50 bg-ink-900 px-4 py-3 text-[13px] font-semibold text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">{t("nav.skip")}</a>
       <header className={`sticky top-0 z-40 border-b backdrop-blur transition-colors duration-200 motion-reduce:transition-none ${ink ? "border-white/10 bg-ex-1/85 text-white" : "border-[#E7E1D7] bg-[#F7F4EF]/[0.94]"}`}>
         <div className={`${WRAP} grid min-h-[72px] grid-cols-[1fr_auto] items-center gap-5 lg:grid-cols-[1fr_auto_1fr]`}>
           <div className="flex items-center gap-5">
@@ -220,7 +222,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
         )}
       </header>
 
-      <main>{children}</main>
+      <main id="main" tabIndex={-1} className="focus:outline-none">{children}</main>
 
       {/* the footer continues the close in the deepest ink (EE16) */}
       <footer data-ink className="ex-seam relative overflow-hidden bg-ex-0 text-white">

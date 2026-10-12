@@ -14,7 +14,7 @@ import Pricing from "./Pricing";
 
 const PAGES: Record<string, React.FC> = { "/": Landing, "/platform": Platform, "/modules": Modules, "/pricing": Pricing };
 const text = (C: React.FC): string =>
-  (renderToStaticMarkup(<MemoryRouter><I18nProvider><C /></I18nProvider></MemoryRouter>).match(/<main>([\s\S]*)<\/main>/)?.[1] ?? "")
+  (renderToStaticMarkup(<MemoryRouter><I18nProvider><C /></I18nProvider></MemoryRouter>).match(/<main[^>]*>([\s\S]*)<\/main>/)?.[1] ?? "")
     .replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'").replace(/\s+/g, " ");
 
 const BLOCKS: Record<string, string> = {
