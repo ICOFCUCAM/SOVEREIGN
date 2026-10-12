@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, fmtMoney } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { useMemorandum, VALUATION_CANONICAL } from "../lib/engines";
@@ -130,7 +131,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
         <div className="bg-xo-panel"><Metric label="Consistency flags" emphasis value={<span className={flags.length === 0 ? "text-xo-verified" : "text-xo-caution"}>{flags.length}</span>} sub="four rule-based checks" /></div>
       </section>
 
-      <MarketTape items={buildMarketTape()} />
+      <RegistryTape items={buildMarketTape()} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <Modal open={libraryOpen} onClose={() => setLibraryOpen(false)} title="Document library" subtitle={`${KINDS.length} acquisition documents — generated from the engines`}>
         <ul className="space-y-2">
