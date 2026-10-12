@@ -8,6 +8,7 @@ import Instrument from "../components/Instrument";
 import LedgerTable from "../components/LedgerTable";
 import CountUp from "../components/CountUp";
 import ChapterRail from "../components/ChapterRail";
+import LifecycleBand from "../components/LifecycleBand";
 import PhoneActionBar from "../components/PhoneActionBar";
 import ProofSection from "../components/ProofSection";
 import ModulePreview from "../components/ModulePreview";
@@ -35,8 +36,6 @@ const HOME_MODULES: ReadonlyArray<[string, string, Record<string, number>]> = [
 // Company marks are brand-coloured monogram placeholders.
 
 const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
-// the original lifecycle rail (DD6): stage key and its typical week, as in note 6
-const LIFECYCLE: ReadonlyArray<readonly [string, string]> = [["lc.signal", "day 0"], ["lc.discovery", "wk 1"], ["lc.nda", "wk 1–2"], ["lc.cim", "wk 2"], ["lc.meetings", "wk 2–3"], ["lc.loi", "wk 4–6"], ["lc.diligence", "wk 6–9"], ["lc.closing", "wk 10+"]];
 const H2 = "font-editorial text-[clamp(2.25rem,4.6vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.035em]";
 const BTN = "inline-flex items-center gap-5 px-5 py-3.5 text-[12px] font-semibold transition";
 
@@ -68,11 +67,13 @@ const Landing: React.FC = () => {
         <SignatureLine />
       {/* ===== 01 · HERO — after the owner's index(2).html (DD2), in the locked palette ===== */}
       <section id="ch-01" className="relative isolate flex min-h-[min(880px,calc(100vh-72px))] flex-col overflow-hidden">
-        {/* the field: ivory on the left, near-black on the right (owner, DD5) (stacked on phones) */}
-        <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(ellipse 50% 70% at 82% 40%, rgba(255,255,255,0.045), transparent 70%), linear-gradient(180deg,#07090c 0%,#050608 70%,#030405 100%)" }} />
-        <div aria-hidden className="absolute inset-0 hidden md:block" style={{ background: "linear-gradient(90deg, rgba(246,248,251,0.98) 0%, rgba(246,248,251,0.94) 28%, rgba(246,248,251,0.38) 45%, rgba(0,0,0,0.08) 61%, rgba(0,0,0,0.32) 100%)" }} />
+        {/* the field: ivory on the left, deep petrol ink on the right (owner, DD5 → DD7), stacked on phones; the seam eased (DD7) */}
+        <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(ellipse 55% 75% at 80% 38%, rgba(56,120,150,0.16), transparent 70%), linear-gradient(180deg,#0d2130 0%,#0a1a26 60%,#07131c 100%)" }} />
+        {/* a fine grain on the black, and the floor darkening toward the strip; the ivory is laid over both */}
+        <div aria-hidden className="absolute inset-0 opacity-[0.07] mix-blend-screen" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
+        <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(4,12,18,0.55), transparent 22%)" }} />
+        <div aria-hidden className="absolute inset-0 hidden md:block" style={{ background: "linear-gradient(90deg, #f6f8fb 0%, #f6f8fb 30%, rgba(246,248,251,0.97) 35%, rgba(246,248,251,0.9) 40%, rgba(246,248,251,0.78) 44%, rgba(246,248,251,0.6) 48%, rgba(246,248,251,0.4) 52%, rgba(246,248,251,0.22) 56%, rgba(246,248,251,0.1) 60%, rgba(246,248,251,0.03) 64%, transparent 68%)" }} />
         <div aria-hidden className="absolute inset-0 md:hidden" style={{ background: "linear-gradient(180deg, rgba(246,248,251,0.99) 0%, rgba(246,248,251,0.96) 70%, rgba(246,248,251,0) 100%)" }} />
-        <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.62), transparent 20%, transparent 75%, rgba(0,0,0,0.12))" }} />
 
         <div className={`${WRAP} relative flex flex-1 items-center py-16 lg:py-20`}>
           <div className="max-w-[640px] text-ink-900">
@@ -87,30 +88,36 @@ const Landing: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* the watermark on the black side: the ExitOS mark and signature, faint (owner, DD4) */}
-        <div aria-hidden className="pointer-events-none absolute right-[9%] top-1/2 hidden -translate-y-[56%] select-none flex-col items-center md:flex">
-          <svg viewBox="0 0 100 100" className="h-[min(30vw,440px)] w-[min(30vw,440px)]" fill="none">
-            <circle cx="50" cy="50" r="33" stroke="rgba(255,255,255,0.11)" strokeWidth="1.1" />
-            <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.045)" strokeWidth="0.6" />
-            <g stroke="rgba(255,255,255,0.14)" strokeWidth="1.1" strokeLinecap="round">
-              <line x1="50" y1="11" x2="50" y2="21" /><line x1="50" y1="79" x2="50" y2="89" />
-              <line x1="11" y1="50" x2="21" y2="50" /><line x1="79" y1="50" x2="89" y2="50" />
+        {/* the watermark on the black side: the ExitOS mark and signature, faint (owner, DD4; refined DD7) */}
+        <div aria-hidden className="pointer-events-none absolute right-[11%] top-1/2 hidden -translate-y-[56%] select-none flex-col items-center md:flex">
+          <svg viewBox="0 0 100 100" className="h-[min(28vw,420px)] w-[min(28vw,420px)]" fill="none">
+            <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.05)" strokeWidth="0.35" />
+            <circle cx="50" cy="50" r="33" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+            <circle cx="50" cy="50" r="22" stroke="rgba(255,255,255,0.05)" strokeWidth="0.35" strokeDasharray="0.6 2.2" />
+            <g stroke="rgba(255,255,255,0.08)" strokeWidth="0.3">
+              {Array.from({ length: 72 }, (_, k) => { const a = (k * 5 * Math.PI) / 180, r1 = k % 6 ? 42 : 40; return <line key={k} x1={50 + r1 * Math.cos(a)} y1={50 + r1 * Math.sin(a)} x2={50 + 44 * Math.cos(a)} y2={50 + 44 * Math.sin(a)} />; })}
             </g>
-            <circle cx="50" cy="50" r="10.5" fill="rgba(52,211,153,0.16)" stroke="rgba(52,211,153,0.3)" strokeWidth="0.6" />
+            <g stroke="rgba(255,255,255,0.16)" strokeWidth="0.5" strokeLinecap="round">
+              <line x1="50" y1="13" x2="50" y2="24" /><line x1="50" y1="76" x2="50" y2="87" />
+              <line x1="13" y1="50" x2="24" y2="50" /><line x1="76" y1="50" x2="87" y2="50" />
+            </g>
+            <circle cx="50" cy="50" r="1.6" fill="rgba(52,211,153,0.55)" />
+            <circle cx="50" cy="50" r="5" stroke="rgba(52,211,153,0.2)" strokeWidth="0.4" />
           </svg>
-          <div className="-mt-[2vw] font-editorial font-semibold leading-none tracking-[-0.05em] text-transparent"
-            style={{ fontSize: "min(7.5vw, 112px)", backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.035))", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
+          <div className="-mt-[1.6vw] font-editorial font-semibold leading-none tracking-[-0.05em] text-transparent"
+            style={{ fontSize: "min(7vw, 104px)", backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04))", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
             Exit<span className="italic">OS</span>
           </div>
+          <div className="mt-4 flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.42em] text-white/20"><span className="h-px w-8 bg-white/15" />The acquisition exchange<span className="h-px w-8 bg-white/15" /></div>
         </div>
         {/* the vertical note on the black side */}
-        <div aria-hidden className="absolute bottom-40 right-[3.5%] hidden flex-col items-center gap-4 lg:flex">
-          <span className="font-mono text-[9.5px] uppercase tracking-[0.24em] text-white/70" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>{t("hx.note")}</span>
-          <span className="h-11 w-px bg-white/40" />
+        <div aria-hidden className="absolute bottom-40 right-[88px] hidden flex-col items-center gap-4 lg:flex">
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.24em] text-white/55" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>{t("hx.note")}</span>
+          <span className="h-11 w-px bg-white/25" />
         </div>
 
         {/* the capability strip */}
-        <ul aria-label={t("hx.strip")} className="relative grid border-t border-white/15 bg-[#030405]/95 text-white sm:grid-cols-2 lg:grid-cols-5">
+        <ul aria-label={t("hx.strip")} className="relative grid border-t border-white/15 bg-[#06111a]/95 text-white sm:grid-cols-2 lg:grid-cols-5">
           {([["◎", 1], ["♧", 2], ["↗", 3], ["▤", 4], ["⌁", 5]] as const).map(([icon, k], i) => (
             <li key={k} className={`flex gap-4 px-5 py-6 sm:px-8 lg:px-6 ${i ? "border-t border-white/10 sm:border-t-0 lg:border-l" : ""} ${i % 2 ? "sm:border-l" : ""} sm:border-white/10 lg:first:pl-[max(1.5rem,calc((100vw-1480px)/2+3rem))]`}>
               <span aria-hidden className="font-editorial text-[26px] leading-none text-blue-300">{icon}</span>
@@ -204,36 +211,11 @@ const Landing: React.FC = () => {
           @keyframes exScan{0%{transform:translateY(-100%);opacity:0}8%{opacity:1}50%{opacity:.5}92%{opacity:1}100%{transform:translateY(2000%);opacity:0}}
           @keyframes exFlash{0%,100%{background:transparent}50%{background:rgba(96,165,250,.10)}}
           @keyframes exTravel{0%{left:0;opacity:0}6%{opacity:1}94%{opacity:1}100%{left:100%;opacity:0}}
-          .lc-travel{left:0;opacity:0}
-          @media (prefers-reduced-motion: no-preference){.lc-travel{animation:exTravel 7s linear infinite}}
         `}</style>
       </section>
 
-      {/* the acquisition lifecycle — the original rail band, restored after the board (owner, DD6) */}
-      <section aria-label={t("lifecycle.title")} className="border-b border-white/10 text-white" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
-        <div className={`${WRAP} py-9`}>
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-            <h2 className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-300">{t("lifecycle.title")}</h2>
-            <div className="flex items-center gap-1.5">
-              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-300">{t("lifecycle.live")}<Note n={6} dark /></span>
-            </div>
-          </div>
-          <div className="relative mt-7">
-            <div aria-hidden className="pointer-events-none absolute left-0 right-0 top-[11px] hidden h-px lg:block" style={{ background: "linear-gradient(90deg, transparent, rgba(96,165,250,.45) 6%, rgba(96,165,250,.45) 94%, transparent)" }} />
-            <div aria-hidden className="lc-travel pointer-events-none absolute top-[7px] hidden h-2 w-2 rounded-full lg:block" style={{ background: "#7CFF9F", boxShadow: "0 0 8px 2px rgba(124,255,159,.8)" }} />
-            <ol className="grid grid-cols-2 gap-y-6 sm:grid-cols-4 lg:grid-cols-8">
-              {LIFECYCLE.map(([s, w], i) => (
-                <li key={s} className="relative flex flex-col items-center text-center">
-                  <span aria-hidden className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#0A1F3A] font-mono text-[10px] font-bold text-blue-200 ring-1 ring-blue-400/40">{i + 1}</span>
-                  <span className="mt-2.5 px-1 text-[11px] font-semibold leading-tight text-white/85">{t(s)}</span>
-                  <span className="mt-0.5 font-mono text-[9px] uppercase tracking-wide text-blue-300/70">{w}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </section>
+      {/* the acquisition lifecycle — the original rail, set as an interlude after the board (owner, DD6/DD7) */}
+      <LifecycleBand />
 
       {/* ===== 04 · VALUE YOUR COMPANY — the working product moment ===== */}
       <QuickValue n="04" />
