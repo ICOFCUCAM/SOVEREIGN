@@ -8,7 +8,7 @@ import { listingFromCompany, allListings } from "../lib/listings";
 import {
   eventsForSubject, ndaRequestsForListing, signNda, offersForListing, resolveOffer,
   dealsForListing, advanceDeal, DEAL_STAGES, dealStageIndex, allMandates,
-  type NdaRequest, type Offer, type Deal, type DealStage, type Mandate,
+  listingDestination, type NdaRequest, type Offer, type Deal, type DealStage, type Mandate,
 } from "../lib/exit-api";
 import { matchCompanyToCriteria } from "../lib/acquirer";
 import { captureDealEvent, subscribe, type DealEvent } from "../lib/deal-events";
@@ -17,12 +17,12 @@ import type { Region } from "@exit/engines";
 const DEMO_LISTING_ID = "lst-demo-helios";
 const usdShort = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(1)}B` : `$${Math.round(n / 1e6)}M`);
 
-// FOUNDER INBOX — the demand side as the founder sees it. Buyers on the
-// network express interest, request NDAs and submit offers against the
-// founder's anonymized listing. NDA requests and offers are FIRST-CLASS
-// records (not just telemetry): the founder executes an NDA to release
-// identity, and accepts/declines offers — every action attributed and
-// resolved under owner-scoped RLS. Nothing is fabricated; the inbox shows
+// FOUNDER INBOX — the demand side as the founder sees it. Buyers express
+// interest, request NDAs and submit offers against the founder's anonymized
+// listing. NDA requests and offers are records (not just telemetry): the
+// founder marks an NDA executed and accepts/declines offers. Marking an NDA
+// executed changes the record only — no document is signed and nothing
+// reveals the company to the buyer. Nothing is fabricated; the inbox shows
 // only what actually arrived.
 
 const timeAgo = (iso: string): string => {
@@ -38,7 +38,7 @@ const INCOMING: Record<string, { verb: string; tone: string }> = {
   listing_viewed: { verb: "viewed your listing", tone: "text-xo-muted" },
   expressed_interest: { verb: "expressed interest", tone: "text-xo-action" },
   nda_requested: { verb: "requested an NDA", tone: "text-xo-caution" },
-  nda_signed: { verb: "— NDA executed, identity released", tone: "text-xo-verified" },
+  nda_signed: { verb: "marked the NDA executed", tone: "text-xo-verified" },
   loi_issued: { verb: "submitted an offer", tone: "text-xo-action" },
 };
 const OFFER_TONE: Record<string, string> = {
@@ -110,10 +110,10 @@ const FounderInbox: React.FC = () => {
 
       <section aria-label="Inbox summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-6">
         <div className="bg-xo-panel"><Metric label="Qualified buyers" emphasis value={String(matched.filter((x) => x.qualified).length)} sub={`of ${matched.length} matching mandates`} /></div>
-        <div className="bg-xo-panel"><Metric label="Live deals" value={String(deals.length)} sub={`${deals.filter((d) => d.stage === "closed").length} closed`} /></div>
+        <div className="bg-xo-panel"><Metric label="Open deals" value={String(deals.length)} sub={`${deals.filter((d) => d.stage === "closed").length} closed`} /></div>
         <div className="bg-xo-panel"><Metric label="Interest expressed" value={String(interested)} sub="from buyers" /></div>
         <div className="bg-xo-panel"><Metric label="NDA requests" value={String(ndas.length)} sub={`${pendingNdas.length} awaiting · ${executedNdas.length} done`} /></div>
-        <div className="bg-xo-panel"><Metric label="NDAs executed" value={String(executedNdas.length)} sub="identity released" /></div>
+        <div className="bg-xo-panel"><Metric label="NDAs executed" value={String(executedNdas.length)} sub="marked signed" /></div>
         <div className="bg-xo-panel"><Metric label="Offers" value={String(offers.length)} sub={`${openOffers.length} open`} /></div>
       </section>
 
@@ -128,7 +128,7 @@ const FounderInbox: React.FC = () => {
 
       {/* marketplace liquidity — qualified buyer mandates matching this listing */}
       <Section title="Qualified buyers · mandates matching your listing" className="border border-xo-line"
-        foot="Buyers who published an acquisition mandate that matches your sector, geography, check size and growth. Identities stay withheld until they sign — this is your demand, before you run a process.">
+        foot="Buyers who published an acquisition mandate that matches your sector, geography, check size and growth. Buyers are shown anonymously — this is your demand, before you run a process.">
         {matched.length ? (
           <ul>
             {matched.map(({ m, score, qualified }) => (
@@ -147,7 +147,7 @@ const FounderInbox: React.FC = () => {
 
       {/* deal pipeline — advance each transaction through the lifecycle */}
       <Section title="Deal pipeline · advance each transaction" className="border border-xo-line"
-        foot="One deal per buyer. Advancing a stage captures telemetry that feeds buyer DNA, response and close-rate models. Buyers stay anonymous until they sign.">
+        foot="One deal per buyer. Advancing a stage updates the deal record and adds an event to your Deal Activity record; it does not change any model. Buyers are shown anonymously.">
         {deals.length ? (
           <ul>
             {deals.map((d) => {
@@ -179,13 +179,13 @@ const FounderInbox: React.FC = () => {
               );
             })}
           </ul>
-        ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No open deals yet. A deal opens the moment a buyer expresses interest in {listing.code}.</p>}
+        ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No open deals yet. A deal opens when a buyer requests an NDA or submits an offer on {listing.code}.</p>}
       </Section>
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
         {/* pending NDA requests — first-class records to resolve */}
         <Section title="NDA requests · awaiting you"
-          foot="Executing releases your identity to the requesting buyer and opens diligence. Counterparties stay anonymous to you until they sign.">
+          foot="Execute NDA marks the request signed; the buyer sees “NDA signed”. ExitOS does not send or sign an NDA document and does not reveal your company to the buyer — share it yourself once the NDA is in place. Buyers are shown anonymously.">
           {pendingNdas.length ? (
             <ul>
               {pendingNdas.map((r) => (
@@ -227,7 +227,7 @@ const FounderInbox: React.FC = () => {
 
       {/* incoming activity feed */}
       <Section title={`Incoming activity · ${listing.code}`} className="border border-xo-line"
-        foot="Buyer identities stay withheld until they sign — you see the interest and the request, never scraped contact data. Every NDA and offer is a record resolved through the exit-api under owner-scoped security.">
+        foot={`Buyers are shown anonymously — you see the interest and the request, never scraped contact data. NDA requests and offers are records ${listingDestination() === "exchange" ? "on the exchange backend" : "stored in this browser"}.`}>
         {events.length ? (
           <ul>
             {events.map((e) => {
