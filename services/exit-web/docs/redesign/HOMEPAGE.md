@@ -453,6 +453,10 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE29 | The whole set needs one final verification. | Full checks: vitest, build, axe on marketing routes at 1440/390, keyboard, reduced motion, board identity. | open |
 | EE30 | The owner needs to see the result. | Design 20 preview with before/after, and this log. | open |
 
+### The paper rule (EE6)
+
+Story chapters sit on ivory (`ex-paper`, #f6f8fb): 02 the opening argument, 05 the thesis, the proof section, 08 questions. Working chapters, where the reader does something, sit on white: 04 value your company, 06 the ledger, 07 the modules. Dark chapters are ink: the hero's right field, 03 the board with the lifecycle band, 09 the close and the footer.
+
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
 | # | Gate | Status |

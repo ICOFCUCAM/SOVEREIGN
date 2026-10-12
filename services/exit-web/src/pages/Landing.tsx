@@ -131,7 +131,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ===== 02 · INTELLIGENCE MEETS OPPORTUNITY — index(2) section 2, with our lifecycle graph in its box (DD2) ===== */}
-      <section id="ch-02" aria-labelledby="s2-h" className="border-b border-slate-200 bg-[#f6f8fb] text-ink-900">
+      <section id="ch-02" aria-labelledby="s2-h" className="border-b border-slate-200 bg-ex-paper text-ink-900">
         <div className={`${WRAP} grid items-center gap-12 py-20 sm:py-24 lg:grid-cols-[0.85fr_1.15fr] lg:gap-[clamp(40px,5vw,84px)] lg:py-28`}>
           <div>
             <Chapter n="02">{t("s2.kicker")}</Chapter>
@@ -221,7 +221,7 @@ const Landing: React.FC = () => {
       <QuickValue n="04" />
 
       {/* ===== 05 · THE THESIS — one statement, set like a front page ===== */}
-      <section id="ch-05" className="border-b border-slate-200 bg-[#f6f8fb]">
+      <section id="ch-05" className="border-b border-slate-200 bg-ex-paper">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <Chapter n="05">{t("loss.eyebrow")}</Chapter>
           <h2 className="rv-h mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
@@ -364,7 +364,7 @@ const Landing: React.FC = () => {
       <ProofSection />
 
       {/* ===== 08 · QUESTIONS — what founders ask first, answered from the Pricing and Platform pages ===== */}
-      <section id="ch-08" aria-labelledby="faq-h" className="border-b border-slate-200 bg-[#f6f8fb] text-ink-900">
+      <section id="ch-08" aria-labelledby="faq-h" className="border-b border-slate-200 bg-ex-paper text-ink-900">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-[6vw]">
             <div className="border-t-4 border-double border-ink-900 pt-8">
