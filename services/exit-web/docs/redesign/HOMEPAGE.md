@@ -218,7 +218,7 @@ U1 + U2 + U4 first: a live product moment, a signature look and visible proof, w
 | # | Upgrade | Status |
 |---|---|---|
 | U1 | Value your company in 30 seconds | ☑ `7e3680d0` |
-| U2 | The broadsheet ledger | ☐ |
+| U2 | The broadsheet ledger | ☑ U2-commit |
 | U4 | Numbered source notes | ☐ |
 
 
@@ -448,6 +448,26 @@ Kept: "Access Requests — Request NDA-gated identity and packages, tracked end 
 - **Bundle (honest note).** The lazy chunk is only 1.4 kB because the valuation engine is already in the main bundle (the console shares it). The main bundle grew from 1,252.3 kB to 1,261.1 kB (+8.8 kB: the strings and the component).
 - Homepage height: 9,585 → 9,907 px at 1440.
 - Screens: `scratchpad/home/u1-*`.
+
+### U2 — The broadsheet ledger
+*Closed by:*
+- **`lib/market-stats.ts`** (additive exports):
+  - `LEDGER_ROWS`: the 13 newest priced history entries, in the board's order, each with the announced date, target, acquirer, sector, value, premium (when a reference exists), status, every source (SEC 8-K / 10-K, Wikidata, press release, with its reference) and the record's confidence tier.
+  - `LEDGER_TIERS`: tier counts across the history.
+  - `LEDGER_PRICED`: entries with a disclosed price.
+- **`pages/Landing.tsx`**, chapter 06 (heading, intro, sources line and the "Run the valuation" bridge kept):
+  - **Masthead** under a double rule: "Disclosed acquisitions · **The ExitOS Ledger** · Index as of {date} · 61 recorded deals, 53 priced".
+  - **Front page**: the three newest deals as stories, each with sector and date, a headline whose verb follows the status ("acquired" when closed, "agreed to acquire" when announced, "ended its deal for" when terminated), the value, premium versus reference, status and first source.
+  - **The ledger table** (a labelled scroll region on phones): the next 10 entries with announced date, target (row header), acquirer, sector, value, status and every source reference.
+  - A line under the table states the record tier honestly: "Record tier: **61 unverified** — not re-checked against the primary filing in this build". In the engine, every history entry is tier `unverified`.
+- **Correction found while building.** The existing sources line said "benchmark set: **61 priced** events", but 61 is the number of recorded deals, of which **53** carry a price. It now reads "61 recorded deals (53 priced)".
+- The board is untouched (M10).
+
+*Verification:*
+- `tsc -b`, eslint clean · `vitest` 222/222.
+- Chromium `/`: 3 front-page stories and 10 table rows, values matching the snapshot (for example DB Schenker $15.8B, Closed, press release + Wikidata). axe 0 on the section at 1440 and 390, and 0 outside the board page-wide; no overflow; all tab stops with visible focus.
+- Height: 9,907 → 10,560 px at 1440; 17,977 → 18,868 px at 390. U7 (mobile folding) would address this if chosen.
+- Screens: `scratchpad/home/u2-*`.
 
 ---
 

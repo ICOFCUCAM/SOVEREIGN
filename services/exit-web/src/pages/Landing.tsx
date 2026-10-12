@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Glyph, Mark, Arrow, Chapter, Editorial } from "../components/MarketingChrome";
-import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS, TOP_JURISDICTIONS, type BoardTx } from "../lib/market-stats";
+import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL_FMT, REGISTRY_CARDS, TOP_JURISDICTIONS, type BoardTx } from "../lib/market-stats";
 import { useI18n } from "../lib/i18n";
 import QuickValue from "../components/QuickValue";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
@@ -386,7 +386,7 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 06 · THE TRANSACTION RECORD ===== */}
+      {/* ===== 06 · THE TRANSACTION RECORD — the ledger ===== */}
       <section className="border-b border-slate-200 bg-white">
         <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
           <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
@@ -396,23 +396,65 @@ const Landing: React.FC = () => {
               <p className="max-w-xs text-[13px] leading-relaxed text-slate-600">{t("rec.body")}</p>
             </div>
           </div>
-          <div className="mt-12 grid border-y border-ink-900 sm:grid-cols-3">
-            {TRANSACTIONS.slice(0, 3).map((c, i) => (
-              <div key={c.company} className={`py-8 pr-6 ${i > 0 ? "sm:border-l sm:border-slate-200 sm:pl-6" : ""} border-b border-slate-200 last:border-b-0 sm:border-b-0`}>
-                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">{c.industry}</div>
-                <div className="mt-4 text-[11px] font-medium uppercase tracking-wide text-slate-600">{c.company} &mdash; acquired by</div>
-                <div className="mt-1 flex items-center gap-2 text-base font-bold text-ink-900"><Mark name={c.buyer} size={20} />{c.buyer}</div>
-                <div className="mt-6 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-ink-900">{c.offer}</div>
-                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Disclosed Value</div>
-                <div className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 text-[11px]">
-                  <div><div className="font-mono text-[14px] font-bold text-blue-600">{c.premium.replace(/ vs reference$/, "")}</div><div className="mt-0.5 text-slate-600">vs reference</div></div>
-                  <div><div className="font-mono text-[14px] font-bold text-ink-900">{c.status}</div><div className="mt-0.5 text-slate-600">Status</div></div>
-                  <div><div className="font-mono text-[14px] font-bold text-ink-900">{c.age}</div><div className="mt-0.5 text-slate-600">Period</div></div>
+
+          {/* masthead */}
+          <div className="mt-12 border-t-4 border-double border-ink-900 pt-3">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-ink-900 pb-3">
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Disclosed acquisitions</span>
+              <span className="font-editorial text-[clamp(1.6rem,3vw,2.4rem)] font-semibold uppercase tracking-[0.06em] text-ink-900">The ExitOS Ledger</span>
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Index as of {MARKET_INDEX_FMT.asOf} · {HISTORY_FMT.events} recorded deals, {LEDGER_PRICED} priced</span>
+            </div>
+          </div>
+
+          {/* front page — the three latest deals */}
+          <div className="grid border-b border-ink-900 sm:grid-cols-3">
+            {LEDGER_ROWS.slice(0, 3).map((c, i) => (
+              <article key={c.target} className={`py-7 pr-6 ${i > 0 ? "sm:border-l sm:border-slate-300 sm:pl-6" : ""} border-b border-slate-200 last:border-b-0 sm:border-b-0`}>
+                <div className="flex items-baseline justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
+                  <span>{c.sector}</span><time dateTime={c.date}>{c.date}</time>
                 </div>
-              </div>
+                <h3 className="mt-4 font-editorial text-[clamp(1.4rem,2.2vw,1.9rem)] font-semibold leading-[1.1] text-ink-900">
+                  {c.buyer} <span className="italic text-blue-700">{c.status === "Closed" ? "acquired" : c.status === "Terminated" ? "ended its deal for" : "agreed to acquire"}</span> {c.target}
+                </h3>
+                <div className="mt-5 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-ink-900">{c.value}</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Disclosed Value</div>
+                <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 text-[11px]">
+                  <div><dt className="text-slate-600">vs reference</dt><dd className="font-mono text-[14px] font-bold text-blue-700">{c.premium}</dd></div>
+                  <div><dt className="text-slate-600">Status</dt><dd className="font-mono text-[14px] font-bold" style={{ color: c.statusColor }}>{c.status}</dd></div>
+                  <div><dt className="text-slate-600">Source</dt><dd className="font-mono text-[12px] font-semibold text-ink-900">{c.sources[0]?.kind ?? "—"}</dd></div>
+                </dl>
+              </article>
             ))}
           </div>
-          <div className="mt-5 text-[11px] text-slate-600">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} priced events · {HISTORY_FMT.disclosedValue} disclosed value</div>
+
+          {/* the ledger table */}
+          <div role="region" aria-label="Earlier disclosed acquisitions" tabIndex={0} className="mt-8 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+            <table className="w-full min-w-[820px] text-left text-[13px]">
+              <caption className="pb-3 text-left font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Earlier entries · newest first</caption>
+              <thead>
+                <tr className="border-y border-ink-900 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">
+                  {["Announced", "Target", "Acquirer", "Sector", "Value", "Status", "Source"].map((h) => <th key={h} scope="col" className={`py-2.5 pr-4 font-semibold ${h === "Value" ? "text-right" : ""}`}>{h}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {LEDGER_ROWS.slice(3).map((r) => (
+                  <tr key={r.date + r.target} className="border-b border-slate-200">
+                    <td className="py-2.5 pr-4 font-mono tabular-nums text-slate-600"><time dateTime={r.date}>{r.date}</time></td>
+                    <th scope="row" className="py-2.5 pr-4 font-editorial text-[15px] font-semibold text-ink-900">{r.target}</th>
+                    <td className="py-2.5 pr-4 text-ink-800">{r.buyer}</td>
+                    <td className="py-2.5 pr-4 text-slate-600">{r.sector}</td>
+                    <td className="py-2.5 pr-4 text-right font-mono font-semibold tabular-nums text-ink-900">{r.value}</td>
+                    <td className="py-2.5 pr-4 font-mono text-[12px] font-semibold" style={{ color: r.statusColor }}>{r.status}</td>
+                    <td className="py-2.5 font-mono text-[11px] text-slate-600">{r.sources.map((x) => `${x.kind} ${x.ref}`).join(" · ")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-[11.5px] leading-relaxed text-slate-600">
+            Every entry is curated from the source shown. Record tier: {Object.entries(LEDGER_TIERS).map(([k, n]) => `${n} ${k}`).join(", ")} — not re-checked against the primary filing in this build.
+          </p>
+          <div className="mt-5 text-[11px] text-slate-600">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} recorded deals ({LEDGER_PRICED} priced) · {HISTORY_FMT.disclosedValue} disclosed value</div>
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-slate-300 px-5 py-4">
             <span className="text-[13.5px] text-slate-700">{t("rec.bridge")}</span>
             <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("rec.run")} <Arrow /></button>
