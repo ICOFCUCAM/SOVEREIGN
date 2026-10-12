@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric } from "../components/xo";
+import { PageHeader, Section, Metric, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany } from "../lib/active-company";
 import { listingFromCompany, allListings } from "../lib/listings";
@@ -14,6 +14,7 @@ import { matchCompanyToCriteria } from "../lib/acquirer";
 import { captureDealEvent, subscribe, type DealEvent } from "../lib/deal-events";
 import type { Region } from "@exit/engines";
 
+const DEMO_LISTING_ID = "lst-demo-helios";
 const usdShort = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(1)}B` : `$${Math.round(n / 1e6)}M`);
 
 // FOUNDER INBOX — the demand side as the founder sees it. Buyers on the
@@ -45,10 +46,11 @@ const OFFER_TONE: Record<string, string> = {
 };
 
 const FounderInbox: React.FC = () => {
-  const { company } = useMemo(() => loadActiveCompany(), []);
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
   // the founder's own listing id is deterministic from their company; the
-  // inbox tracks interest landing on it whether or not it's listed yet.
-  const listing = useMemo(() => listingFromCompany(company), [company]);
+  // inbox tracks interest landing on it whether or not it's listed yet. With
+  // no intake the demo company is the exchange's seeded demo listing.
+  const listing = useMemo(() => listingFromCompany(company, fromIntake ? undefined : DEMO_LISTING_ID), [company, fromIntake]);
   const isLive = useMemo(() => allListings().some((l) => l.id === listing.id), [listing.id]);
 
   const [events, setEvents] = useState<DealEvent[]>([]);
@@ -100,9 +102,11 @@ const FounderInbox: React.FC = () => {
 
   return (
     <div data-page="inbox" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Founder · Demand" title="Inbox"
-        badge={<span className={`rounded-sm border px-1.5 py-px text-[11px] font-semibold ${isLive ? "border-xo-verified/50 text-xo-verified" : "border-xo-caution/50 text-xo-caution"}`}>{isLive ? "Listed" : "Draft"}</span>}
-        description={<>{company.name} · <span className="font-mono">{listing.code}</span> · {listing.publicView.sector} · {listing.publicView.region} · revenue {usd(listing.publicView.revenueUsd)}</>} />
+      <PageHeader eyebrow={`◉ Founder · Demand · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Inbox"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className={`rounded-sm border px-1.5 py-px text-[11px] font-semibold ${isLive ? "border-xo-verified/50 text-xo-verified" : "border-xo-caution/50 text-xo-caution"}`}>{isLive ? "Listed" : "Draft"}</span></>}
+        description={<>Listing <span className="font-mono">{listing.code}</span> · {listing.publicView.sector} · {listing.publicView.region} · revenue {usd(listing.publicView.revenueUsd)}. {fromIntake
+          ? "Your company's listing, from your saved intake."
+          : <>No intake saved, so this shows the demo company's listing on the exchange — requests and offers here come from anyone using the demo. <Link to="/console/intake" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Save an intake</Link> to see your own.</>}</>} />
 
       <section aria-label="Inbox summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-6">
         <div className="bg-xo-panel"><Metric label="Qualified buyers" emphasis value={String(matched.filter((x) => x.qualified).length)} sub={`of ${matched.length} matching mandates`} /></div>
