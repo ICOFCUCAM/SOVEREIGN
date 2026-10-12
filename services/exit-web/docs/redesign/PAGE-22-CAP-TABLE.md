@@ -34,7 +34,7 @@ The cap table (fully-diluted ownership, signatory and board flags), signatory co
 | G2 | **"Added to the cap-table CRM"** — nothing is saved or calculated. | Say it: a contact list for this session, not saved, not in the cap table or waterfall. | ☐ |
 | G3 | Demo cap table and offers unlabelled. | Badge and line: sample cap table and offers of the demo company (intake has neither). | ☐ |
 | G4 | Fake live tape. | `RegistryTape`. | ☐ |
-| G5 | Design: no `h1`, contrast, unnamed select, unfocusable scroll regions, name mismatch. | Rebuild on `xo`; `h1` "Cap Table". | ☑ G5-commit |
+| G5 | Design: no `h1`, contrast, unnamed select, unfocusable scroll regions, name mismatch. | Rebuild on `xo`; `h1` "Cap Table". | ☑ `d093efc` |
 
 ---
 
