@@ -14,13 +14,14 @@ const wx = (wk: number): number => X0 + (Math.sqrt(wk) / Math.sqrt(WK_MAX)) * (X
 const AXIS_Y = 478;
 const TICKS = [0, 1, 2, 4, 6, 8, 10];
 
-// colours, so the figure can be set on navy or on paper
+// colours: set on paper, like a printed chart, so the trading hall stays the
+// page's one dark moment (AA8). The palette is the locked one, interchanged.
 const C = {
-  ground: "linear-gradient(180deg,#05101f,#071a31 60%,#05101f)",
-  grid: "rgba(160,190,230,0.10)", axis: "rgba(160,190,230,0.22)",
-  link: "#93c5fd", node: "#60a5fa", end: "#45E38A", nodeEdge: "#e8f1ff",
-  ring: "#93c5fd", text: "#e8edf5", sub: "#93c5fd", halo: "#05101f",
-  routeA: "#93c5fd", routeB: "#60a5fa",
+  ground: "#ffffff",
+  grid: "rgba(10,16,24,0.06)", axis: "rgba(10,16,24,0.28)",
+  link: "#2563eb", node: "#2563eb", end: "#059669", nodeEdge: "#ffffff",
+  ring: "#2563eb", text: "#0a1018", sub: "#1d4ed8", halo: "#ffffff",
+  routeA: "#1d4ed8", routeB: "#2563eb",
 };
 
 // stage, typical window (as shown), the week it is placed at, lane (y), label side
@@ -29,7 +30,7 @@ const STAGES: ReadonlyArray<[string, string, number, number, "above" | "below"]>
   ["lc.discovery", "wk 1", 1, 410, "below"],
   ["lc.nda", "wk 1–2", 1.5, 150, "above"],
   ["lc.cim", "wk 2", 2, 310, "below"],
-  ["lc.meetings", "wk 2–3", 2.5, 220, "above"],
+  ["lc.meetings", "wk 2–3", 2.5, 205, "below"],
   ["lc.loi", "wk 4–6", 5, 140, "above"],
   ["lc.diligence", "wk 6–9", 7.5, 360, "below"],
   ["lc.closing", "wk 10+", 10, 250, "below"],
@@ -65,7 +66,7 @@ const ExchangeMap: React.FC = () => {
   // "d 0" → "day 0", "wk 1–2" → "wk 1–2" in the reader's language
   const fmtWk = (w: string): string => w.startsWith("d ") ? `${t("xm.day")} ${w.slice(2)}` : `${t("xm.wk")} ${w.slice(3)}`;
   return (
-    <figure className="relative m-0 overflow-hidden border-y border-white/10" style={{ background: C.ground }}>
+    <figure className="relative m-0 overflow-hidden border border-ink-900" style={{ background: C.ground }}>
       <style>{STYLE}</style>
       <svg viewBox={`0 ${TOP} ${W} ${H + 30}`} className="block w-full" role="img" aria-label={t("lifecycle.title")}>
         <defs>
@@ -87,7 +88,7 @@ const ExchangeMap: React.FC = () => {
           {TICKS.map((wk) => <text key={wk} x={wx(wk)} y={AXIS_Y + 18} textAnchor="middle">{wk === 0 ? `${t("xm.wk")} 0` : wk}</text>)}
         </g>
         {/* cross-links */}
-        <g fill="none" stroke={C.link} strokeWidth="1.4" opacity="0.55">
+        <g fill="none" stroke={C.link} strokeWidth="1.4" opacity="0.45">
           {LINKS.map(([a, b, lift, kind], i) => <path key={i} d={arc(P[a]!, P[b]!, lift)} strokeDasharray={kind === "dot" ? "1.5 5" : "6 6"} strokeLinecap="round" />)}
         </g>
         {/* the route, in stage order */}
@@ -109,22 +110,22 @@ const ExchangeMap: React.FC = () => {
         })}
       </svg>
       {/* on a phone the map labels are too small to read: the stages as a list */}
-      <ol className="grid grid-cols-2 gap-x-4 gap-y-2 border-t border-white/10 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.14em] sm:hidden">
+      <ol className="grid grid-cols-2 gap-x-4 gap-y-2 border-t border-slate-300 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.14em] sm:hidden">
         {STAGES.map(([key, wk], i) => (
-          <li key={key} className="text-white/85"><span className={i === STAGES.length - 1 ? "text-emerald-300" : "text-blue-300"}>{String(i + 1).padStart(2, "0")}</span> {t(key)} <span className="block normal-case tracking-normal text-blue-200/80">{fmtWk(wk)}</span></li>
+          <li key={key} className="text-ink-900"><span className={i === STAGES.length - 1 ? "text-emerald-700" : "text-blue-700"}>{String(i + 1).padStart(2, "0")}</span> {t(key)} <span className="block normal-case tracking-normal text-slate-600">{fmtWk(wk)}</span></li>
         ))}
       </ol>
 
       {/* corner tag */}
       <div aria-hidden className="absolute right-6 top-6 hidden items-center sm:flex">
-        <span className="border border-white/30 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/80">{t("xm.tag")}</span>
+        <span className="border border-ink-900 bg-white px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-900">{t("xm.tag")}</span>
         <span className="h-[34px] w-[10px] bg-blue-600" />
       </div>
       {/* footer row */}
-      <figcaption className="relative flex flex-wrap items-center justify-between gap-3 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.2em] sm:px-6">
-        <span className="flex items-center gap-3 text-white/70"><span aria-hidden className="h-4 w-4 bg-blue-600" /><span className="text-blue-300">01</span> / {t("xm.discover")}</span>
-        <span className="text-blue-200">{t("xm.note")}</span>
-        <span className="text-white/70"><span className="text-blue-300">02</span> / {t("xm.trace")} <span aria-hidden>↓</span></span>
+      <figcaption className="relative flex flex-wrap items-center justify-between gap-3 border-t border-slate-300 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.2em] sm:px-6">
+        <span className="flex items-center gap-3 text-slate-600"><span aria-hidden className="h-4 w-4 bg-blue-600" /><span className="text-blue-700">01</span> / {t("xm.discover")}</span>
+        <span className="text-slate-600">{t("xm.note")}</span>
+        <span className="text-slate-600"><span className="text-blue-700">02</span> / {t("xm.trace")} <span aria-hidden>↓</span></span>
       </figcaption>
       <div aria-hidden className="h-1 bg-blue-600" />
     </figure>

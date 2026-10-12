@@ -514,7 +514,7 @@ const Vault: React.FC = () => (
 // continents read (like a network world-map). [lon,lat] → SVG via project().
 const MAP_W = 960, MAP_H = 480;
 const project = (lon: number, lat: number): [number, number] => [((lon + 180) / 360) * MAP_W, ((90 - lat) / 180) * MAP_H];
-export const LANDMASS: [number, number][][] = [
+const LANDMASS: [number, number][][] = [
   // North America
   [[-168,66],[-150,70],[-120,70],[-95,69],[-80,73],[-60,83],[-55,60],[-66,49],[-72,46],[-76,38],[-81,31],[-81,25],[-90,29],[-97,26],[-105,22],[-114,30],[-124,40],[-124,48],[-130,55],[-140,60],[-155,58],[-166,55]],
   // Greenland
