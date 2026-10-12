@@ -30,7 +30,7 @@ Founder and buyer (free): `h1` none · axe color-contrast ×14 (1440) · no over
 |---|---|---|---|
 | G1 | **"Network-wide moat" overclaims; "this session".** | Say the figures are your own recorded actions (this browser, or your account when connected); "stored events"; no network claims. | ☑ `ed8522d` |
 | G2 | **"Clear" erases history without confirmation.** | Inline confirmation stating exactly what is erased (this browser's record, and the account's stored events when connected). | ☑ `bf9815d` |
-| G3 | Buyer sees founder events recorded in the same browser. | Buyer view filters to events with `actorRole: "buyer"`. | ☑ G3-commit |
+| G3 | Buyer sees founder events recorded in the same browser. | Buyer view filters to events with `actorRole: "buyer"`. | ☑ `aecff92` |
 | G4 | Fake live tape. | `RegistryTape`. | ☐ |
 | G5 | Design: no `h1`, 14 contrast failures. | Rebuild on `xo`. | ☑ `f8a9ca3` |
 
