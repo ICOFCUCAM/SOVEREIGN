@@ -7,6 +7,7 @@ import { ExchangeMark } from "./ExchangeMark";
 import InstitutionalRibbon from "./InstitutionalRibbon";
 import LayerBar from "./LayerBar";
 import LayerSubNav from "./LayerSubNav";
+import TermsDialog from "./TermsDialog";
 import { guideState, markVisited, onGuideChange, setGuideHidden, ESSENTIALS, loadAllToolsOpen, saveAllToolsOpen } from "../lib/onboarding";
 
 // Role-aware console rail. The navigation is driven by the access policy:
@@ -33,6 +34,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const nav = useNavigate();
   const loc = useLocation();
   const [navOpen, setNavOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
 
   const role: Role = session?.role ?? "founder";
   const plan: Plan = session?.plan ?? "free";
@@ -165,6 +167,8 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <span className="rounded bg-white/10 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-white/70">{ROLE_LABEL[role]}</span>
               <span className={`rounded px-1.5 py-0.5 font-semibold uppercase tracking-wide ${plan === "pro" ? "bg-deal-600/25 text-deal-300" : plan === "starter" ? "bg-loi-500/20 text-loi-300" : "bg-white/10 text-white/55"}`}>{plan}</span>
             </div>
+            <button type="button" onClick={() => setTermsOpen(true)}
+              className="mb-2 block rounded text-xs font-semibold text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">Plain-language terms</button>
             {showGuideLink && (
               <Link to={role === "buyer" ? "/console/buyer-portal" : "/console"} onClick={() => setGuideHidden(false)}
                 className="mb-2 block text-xs font-semibold text-white/70 hover:text-white">Show the Start-here guide</Link>
@@ -217,6 +221,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             : <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</div>}
         </main>
       </div>
+      <TermsDialog open={termsOpen} onClose={() => setTermsOpen(false)} />
       <Toast />
     </div>
   );
