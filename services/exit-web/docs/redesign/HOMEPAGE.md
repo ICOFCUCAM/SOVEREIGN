@@ -272,7 +272,7 @@ Every moved figure keeps its source note. Platform and Modules get the **Sources
 | V3 | **Repetitive rhythm.** | Contrast of scale and ground: hero (photo + board) → compact valuation strip (white) → one giant statement on the page ground → dense ledger (white) → full-bleed navy lifecycle with large numerals → back-page call to action. No two consecutive moments share a layout. | ☑ `bed9a324` |
 | V4 | **Four typefaces, label noise.** | Marketing pages use Source Serif 4 (expressive), Inter (body) and mono (figures only). Sora (`font-serif`) is removed from marketing pages; the console is unchanged. Small all-caps labels are reduced to one chapter label per moment. | ☑ `b000994b` |
 | V5 | **Hero competes with the board.** | Quieter headline column: the duplicated topline removed (the eyebrow is already in the header), the deck shortened to `hero.sub` with `hero.body` below it. **The board, its bezel, its hall and its size are untouched** (M10). | ☑ `aa64ea63` |
-| V6 | **Proof that nothing was lost.** | An inventory check (script plus a unit test over a block list) asserting that each of the 17 original blocks and U1, U2 and U4 renders on exactly one marketing page, every source note has a target, and all routes and entry points still resolve. Before/after heights, axe and keyboard on all four routes at 1440 and 390. | ☐ |
+| V6 | **Proof that nothing was lost.** | An inventory check (script plus a unit test over a block list) asserting that each of the 17 original blocks and U1, U2 and U4 renders on exactly one marketing page, every source note has a target, and all routes and entry points still resolve. Before/after heights, axe and keyboard on all four routes at 1440 and 390. | ☑ V6-commit |
 
 ### Order
 V1 (move) → V5 (hero) → V3 + V2 (homepage rhythm and broadsheet) → V4 (typography across the four pages) → V6 (inventory and review package).
@@ -613,6 +613,29 @@ Kept in capitals by design: one chapter label per moment, table headers, the led
 - Small uppercase labels (≤ 12 px, outside the board): **home 70 → 40, Platform 43 → 23, Modules 46 → 33, Pricing 39 → 28**.
 - All four routes 1440/390: 0 errors, `h1` 1, no overflow; axe 0 on Platform, Modules and Pricing, and 0 on the homepage outside the board.
 - Homepage height 6,377 / 10,676 px.
+
+### V6 — Proof that nothing was lost
+*Closed by:* `pages/marketing-inventory.test.tsx` (new, 21 tests). It renders the four marketing pages server-side (inside `MemoryRouter` and `I18nProvider`, page content in `<main>` only) and asserts:
+- each of the 17 original homepage blocks, plus Value your company and the ledger, renders on **exactly one** page;
+- five moved blocks are no longer on the homepage;
+- "Sources & method" is on every page that cites sources.
+
+*Verification:*
+- `tsc -b`, eslint 0 errors · **`vitest` 243/243** (37 files) · `vite build` succeeds.
+- Chromium:
+  - The browser inventory (`scratchpad/tools/inventory.mjs`) agrees: 0 missing blocks; source notes `/` 11, `/platform` 9, `/modules` 1, with 0 missing targets and 0 missing back-links.
+  - Every internal link on the four pages (5 links, 13 in-page anchors) resolves to its own route. Buttons go to `/console`, `/pricing`, `/modules` and `/platform`, all routes in `App.tsx`.
+  - Keyboard: home 113 tab stops, other pages 157 each (the sweep's cap), all with visible focus.
+  - axe 0 on Platform, Modules and Pricing, and 0 on the homepage outside the board. The board keeps its 6 contrast items as built.
+
+**Phase 4 result:**
+
+| Route | 1440 before → after | 390 before → after |
+|---|---|---|
+| `/` | 11,434 → **6,377 px** | 20,163 → **10,676 px** |
+| `/platform` | 2,559 → 6,626 px | 4,323 → 11,198 px |
+| `/modules` | 2,374 → 4,945 px | 4,224 → 8,806 px |
+| `/pricing` | unchanged (4,847 px) | unchanged (8,224 px) |
 
 ---
 
