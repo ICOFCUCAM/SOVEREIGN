@@ -29,8 +29,8 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 23 | `/console/negotiator` | Bid Room | `Negotiator` | founder | Pro | ☑ done · awaiting final review |
 | 24 | `/console/documents` | Documents | `Documents` | founder | Preparation or Pro | ☑ done · awaiting final review |
 | 25 | `/console/nda` | NDA Vault / Access Requests | `Nda` | founder, buyer | Pro | ☑ done · awaiting final review |
-| 26 | `/console/pipeline` | Active Processes | `Pipeline` | founder | none | ◐ in progress |
-| 27 | `/console/process-intel` | Process Intelligence | `ProcessIntelligence` | founder | Pro | ☐ |
+| 26 | `/console/pipeline` | Active Processes | `Pipeline` | founder | none | ☑ done · awaiting final review |
+| 27 | `/console/process-intel` | Process Intelligence | `ProcessIntelligence` | founder | Pro | ◐ in progress |
 | 28 | `/console/activity` | Deal Activity | `DealActivity` | founder, buyer | none | ☐ |
 | 29 | `/console/inbox` | Inbox | `FounderInbox` | founder | none | ☐ |
 | 30 | `/console/outreach-plan` | Outreach Plan | `OutreachPlan` | founder | Preparation or Pro | ☐ |

@@ -5,7 +5,7 @@
 | Route | `/console/pipeline` |
 | Component | `src/pages/Pipeline.tsx` (262 lines) |
 | NAV | "Active Processes", group Exchange, founder, no plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `e25bdb7`)
 
@@ -60,3 +60,12 @@ Totals now reflect only the sample offers: **2 active deals** (was 5), pipeline 
 ### G4 — Demo offers unlabelled
 *Closed by:* `pages/Pipeline.tsx`: **Demo data** badge and "The demo company's sample offers (Helios Freight) and its top discovery candidates. Saved intakes hold no offers, so this page stays on demo data."
 *Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · 0 "live" words, 0 pinging elements.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 11), all tab stops with visible focus · 0 "live" words · totals now from the sample offers only.
+
+## Known issues
+- No real pipeline exists yet: offers are the demo company's samples; candidates come from discovery (labelled).
+- Close probabilities are fixed rules (stated); no stage-conversion benchmark is shown until one can be sourced.
