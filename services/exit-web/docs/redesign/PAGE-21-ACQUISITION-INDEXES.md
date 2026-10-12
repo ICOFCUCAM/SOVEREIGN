@@ -5,7 +5,7 @@
 | Route | `/console/indexes` |
 | Component | `src/pages/Indexes.tsx` (107 lines) |
 | NAV | "Acquisition Indexes", founder, **Preparation or Active Mandate** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All four gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `b1a25bb`)
 
@@ -53,3 +53,12 @@ Per-sector indexes from the registry snapshot: volume, 12-month trend, buyers, m
 ### G3 — Fake live tape
 *Closed by:* `pages/Indexes.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 8), all tab stops with visible focus · free: Upgrade page · 0 "live" words.
+
+## Known issues
+- 12-month windows hold very few deals in this snapshot (most sectors under 10), so trends are mostly "small sample"; they will mean more as coverage of recent deals grows.
+- Sorting by trend still ranks on the percentage (unchanged); the counts beside it show how little is behind it.
