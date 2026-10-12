@@ -35,7 +35,7 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe 0 · no overflow · 0 
 | G2 | **Invented facts and a fake re-run.** | Unverified findings worded as checks to make ("Confirm key agreements are in the data room", "Prepare a litigation schedule"); the logistics-only vendor item shown only for logistics; "108 % net retention" taken from the profile's own `netRetentionPct` (omitted when absent); "Re-run analysis" removed (findings recompute from the profile on load). | ☑ `3e8d6fa` |
 | G3 | **"Buyers would deduct" — an illustrative rule.** | "Illustrative discount (rule)": weights stated, every finding counted regardless of severity, % of the canonical midpoint; not a buyer estimate. | ☑ `7635ecb` |
 | G4 | "AI"; unsourced bank comparison. | "Diligence" (rule-based); remove the $40,000 / 4–6 weeks comparison and "would bill thousands". | ☑ `02e7f22` |
-| G5 | Demo only, unlabelled. | `discoverFindings(company)` (additive parameter) and `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☑ G5-commit |
+| G5 | Demo only, unlabelled. | `discoverFindings(company)` (additive parameter) and `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☑ `5517a45` |
 | G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
 | G7 | Design: no `h1`; old components. | Rebuild on `xo`. | ☑ `a019bd1` |
 
