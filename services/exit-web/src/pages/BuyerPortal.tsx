@@ -133,7 +133,7 @@ const BuyerPortal: React.FC = () => {
                   </dl>
                   <div className="mt-2 flex gap-2">
                     <button type="button" aria-pressed={watch.includes(o.code)} onClick={() => toggle(o.code)} className={BTN_GHOST}>{watch.includes(o.code) ? "★ Watching" : "☆ Watch"}</button>
-                    <button type="button" className={BTN}>{o.hasDataRoom ? "Open data room" : "Request access"}</button>
+                    <Link to="/console/acquisition-radar" className={BTN}>Open on the Acquisition Radar →</Link>
                   </div>
                 </li>
               ))}
@@ -146,12 +146,11 @@ const BuyerPortal: React.FC = () => {
                 <li key={o.code} className="flex flex-wrap items-center justify-between gap-2 border-b border-xo-line py-2 last:border-0">
                   <div>
                     <h3 className="font-mono text-[13px] font-semibold">{o.code}</h3>
-                    <div className="text-[12px] text-xo-muted">{o.sector} · {o.hasDataRoom ? `data room granted · ${PORTAL_STATS.diligencePackages} packages` : "identity and packages unlock on NDA"}</div>
+                    <div className="text-[12px] text-xo-muted">{o.sector} · {o.hasDataRoom ? `the demo seat's NDA is active · ${PORTAL_STATS.diligencePackages} diligence packages in the demo` : "the demo seat has no NDA on this listing — nothing is shared automatically"}</div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {o.hasDataRoom
-                      ? <><span className="text-[12px] font-semibold text-xo-verified">Active</span><button type="button" className={BTN_GHOST}>Open</button></>
-                      : <button type="button" className={BTN}>Request NDA</button>}
+                    {o.hasDataRoom && <span className="text-[12px] font-semibold text-xo-verified">NDA active</span>}
+                    <Link to="/console/acquisition-radar" className={BTN_GHOST}>Request your own NDA on the Radar →</Link>
                   </div>
                 </li>
               ))}
@@ -160,7 +159,7 @@ const BuyerPortal: React.FC = () => {
 
           {tab === "negotiations" && (
             <ul>
-              {PORTAL_NEGOTIATIONS.length === 0 && <li className="py-6 text-center text-[13px] text-xo-muted">No offers in motion. Submit an offer from an opportunity to open a negotiation.</li>}
+              {PORTAL_NEGOTIATIONS.length === 0 && <li className="py-6 text-center text-[13px] text-xo-muted">The demo seat has no offers. Make your own indicative offers on the <Link to="/console/acquisition-radar" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar</Link>.</li>}
               {PORTAL_NEGOTIATIONS.map((n) => (
                 <li key={n.code} className="flex flex-wrap items-center justify-between gap-2 border-b border-xo-line py-2 last:border-0">
                   <div>
@@ -170,7 +169,6 @@ const BuyerPortal: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-[12px] capitalize">{n.stage}</span>
                     <span className="text-[12px] text-xo-muted">{n.status}</span>
-                    <button type="button" className={BTN}>Respond</button>
                   </div>
                 </li>
               ))}
