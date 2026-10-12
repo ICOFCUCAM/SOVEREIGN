@@ -27,20 +27,21 @@ const EngagementRegistry: React.FC = () => {
   return (
     <div data-page="engagement-registry" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Buyer Console" title="Engagement Registry"
-        badge={<span className="text-[12px] text-xo-muted">Who to contact · how likely</span>} />
+        badge={<span className="text-[12px] text-xo-muted">Who to contact · engagement estimate</span>}
+        description="Engagement estimate (0–100) = the buyer's acquisition-appetite score (cadence, acceleration, recency, breadth, stated themes, geography) × a contact-confidence factor (High 1, Medium 0.85, Low 0.6). Once a buyer's own responses are recorded, it becomes 60% response rate + 40% appetite. High is 65 or more, Moderate 40 or more. An estimate of willingness to engage, not a probability of response." />
 
       <section aria-label="Registry summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Buyers in registry" value={String(rows.length)} sub="ranked by engagement" /></div>
-        <div className="bg-xo-panel"><Metric label="High engagement" emphasis value={String(high)} sub="likely to respond" /></div>
-        <div className="bg-xo-panel"><Metric label="Response history" value={String(withHistory)} sub="real processes" /></div>
-        <div className="bg-xo-panel"><Metric label="Top buyer" emphasis value={rows[0]?.buyerName ?? "—"} sub={`${rows[0]?.engagementLikelihood.score ?? 0}% engagement`} /></div>
+        <div className="bg-xo-panel"><Metric label="Buyers shown" value={String(rows.length)} sub="top 40 by engagement estimate" /></div>
+        <div className="bg-xo-panel"><Metric label="High engagement estimate" emphasis value={String(high)} sub="estimate of 65 or more" /></div>
+        <div className="bg-xo-panel"><Metric label="With response history" value={String(withHistory)} sub="buyers with recorded responses of their own" /></div>
+        <div className="bg-xo-panel"><Metric label="Top buyer" emphasis value={rows[0]?.buyerName ?? "—"} sub={`engagement estimate ${rows[0]?.engagementLikelihood.score ?? 0}/100`} /></div>
       </section>
 
       <MarketTape items={tape} />
 
       <Section title="Buyer engagement registry" className="border border-xo-line"
         right={<span className="flex items-center gap-2"><label htmlFor="er-search" className="text-[11px] text-xo-muted">Search buyer</label><input id="er-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="e.g. Microsoft" className={`${XO_INPUT} h-8 w-40 py-1 text-[12px]`} /></span>}
-        foot="NDA / LOI conversion populate from the platform's own processes (— until a buyer has run one). Close rate is from the registry where disclosed. Engagement likelihood sharpens with every real process. ExitOS surfaces the path, never personal contacts.">
+        foot="NDA / LOI conversion appear once a buyer's own responses are recorded on ExitOS (— until then; your own views and interest do not count). Close rate is from the registry where disclosed. ExitOS surfaces the path, never personal contacts.">
         <p role="status" className="sr-only">{filtered.length} of {rows.length} buyers shown</p>
         <ScrollRegion label="Buyer engagement registry table">
           <table className="w-full min-w-[960px] text-[12px]">
@@ -54,7 +55,7 @@ const EngagementRegistry: React.FC = () => {
                 <th scope="col" className="px-2 py-2 text-right font-medium">NDA</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">LOI</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">Close</th>
-                <th scope="col" className="px-4 py-2 text-right font-medium">Engagement</th>
+                <th scope="col" className="px-4 py-2 text-right font-medium">Engagement estimate</th>
               </tr>
             </thead>
             <tbody>
@@ -72,7 +73,8 @@ const EngagementRegistry: React.FC = () => {
                   <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{r.loiConversionPct != null ? `${r.loiConversionPct}%` : "—"}</td>
                   <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{r.closeRatePct != null ? `${r.closeRatePct}%` : "—"}</td>
                   <td className="px-4 py-2 text-right">
-                    <span className={`font-mono font-semibold tabular-nums ${LIK[r.engagementLikelihood.tier]}`} title={r.engagementLikelihood.basis}>{r.engagementLikelihood.score}%</span>
+                    <span className={`font-mono font-semibold tabular-nums ${LIK[r.engagementLikelihood.tier]}`} title={r.engagementLikelihood.basis}>{r.engagementLikelihood.score}<span className="text-[11px] font-normal text-xo-muted">/100</span></span>
+                    <div className="text-[10px] text-xo-faint">{r.processesRun > 0 ? "with response history" : "appetite estimate"}</div>
                   </td>
                 </tr>
               ))}
