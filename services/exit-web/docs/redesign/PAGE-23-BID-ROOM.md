@@ -37,7 +37,7 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 |---|---|---|---|
 | G1 | **"Leading bid" / "your strongest bid" show the first offer, not the engine's leader.** | Default selection and the leading-bid metric follow `OFFER_COMPARISON.leader`; the banker's take names the leader. | ☑ `9e4d5fa` |
 | G2 | **False "Counter sent".** | Copy only, and "Nothing is sent from ExitOS"; no sent state. | ☑ `b042c31` |
-| G3 | **Invented sender and hard-coded demo facts in the draft.** | "[Your name]"; company name and growth from the company profile; no "competitive process" claim beyond the offer count. | ☐ |
+| G3 | **Invented sender and hard-coded demo facts in the draft.** | "[Your name]"; company name and growth from the company profile; no "competitive process" claim beyond the offer count. | ☑ G3-commit |
 | G4 | **"AI / autonomous" overclaims**; counter rule unexplained; "strategic mid" (D1). | "Standard negotiating positions (templates) — not legal advice"; counter rule stated; "enterprise value (institutional)". | ☐ |
 | G5 | Unvalidated amounts; demo offers unlabelled. | `parseNumber` with walk ≤ minimum ≤ ideal checks; badge and line for sample offers. | ☐ |
 | G6 | Design: old primitives, draft overlay not a dialog, tape. | Rebuild on `xo`; draft in the shared `Modal`; `RegistryTape`. | ☑ `2bf306b` |
@@ -57,3 +57,7 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 ### G2 — False "Counter sent"
 *Closed by:* `pages/Negotiator.tsx`. The draft dialog's "Send counter →" (toast "Counter sent to {buyer}", then "Sent ✓ · resend") is removed with its state. The footer reads "Nothing is sent from ExitOS — copy the draft into your own email." and offers **Copy draft**.
 *Verification:* `tsc -b`, eslint clean · Chromium: the dialog shows the note and "Copy draft"; no send control.
+
+### G3 — Invented sender and hard-coded facts in the draft
+*Closed by:* `pages/Negotiator.tsx`. The draft is signed "**[Your name]** — on behalf of {company}" (was "James — on behalf of Helios Freight"); the subject line and signature take the company name from `SAMPLE_COMPANY` (the offers' company) instead of the hard-coded "Helios Freight"; ARR growth comes from the profile (`SAMPLE_COMPANY.growth.arrGrowthYoyPct`, 42 %) instead of the constant `0.42`, and prints as a whole percent; "the competitive process underway" → "the other offers we have received" (the offer count is stated below it).
+*Verification:* `tsc -b`, eslint clean · Chromium: draft begins "Re: Acquisition of Helios Freight — response to your $165,000,000 proposal", ends "[Your name] — on behalf of Helios Freight"; 0 "James".

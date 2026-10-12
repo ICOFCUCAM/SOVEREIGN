@@ -3,6 +3,7 @@ import { Button, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../l
 import { PageHeader, Section, Metric, XO_INPUT, XO_LABEL } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
+import { SAMPLE_COMPANY } from "../lib/profile";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_CANONICAL } from "../lib/engines";
 
@@ -44,7 +45,9 @@ function generateCounter(offer: Offer, reserve: Reserve) {
   ];
   return { counterPrice, upliftPct, cashPct, stockPct, earnoutPct, justification, strategicMid };
 }
-const SAMPLE_GROWTH = 0.42; // ARR growth from company profile (Helios)
+// The offers belong to the demo company, so the draft and justification use
+// its profile rather than hard-coded figures.
+const SAMPLE_GROWTH = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
 
 // Autonomous Negotiation — the founder sets their lines (minimum, ideal,
 // walk-away) and the AI generates the deal terms a junior banker + lawyer
@@ -98,24 +101,24 @@ const Negotiator: React.FC = () => {
   const terms = autonomousTerms(active?.offer, { minUsd, idealUsd, walkUsd });
 
   const draftText = active && counter
-    ? `Re: Acquisition of Helios Freight — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
+    ? `Re: Acquisition of ${SAMPLE_COMPANY.name} — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
 
 Dear ${active.offer.buyerName} team,
 
-Thank you for the proposal. We value the engagement and believe a transaction is achievable. After review against our valuation and the competitive process underway, we are countering as follows:
+Thank you for the proposal. We value the engagement and believe a transaction is achievable. After review against our valuation and the other offers we have received, we are countering as follows:
 
   • Headline consideration: ${fmtMoney(counter.counterPrice)} (a ${counter.upliftPct.toFixed(0)}% increase on the submitted bid)
   • Consideration mix: ${(counter.cashPct * 100).toFixed(0)}% cash / ${(counter.stockPct * 100).toFixed(0)}% stock / ${(counter.earnoutPct * 100).toFixed(0)}% earnout
 
 This reflects:
-  - ${SAMPLE_GROWTH * 100}% ARR growth and the forward trajectory of the business
+  - ${(SAMPLE_GROWTH * 100).toFixed(0)}% ARR growth and the forward trajectory of the business
   - a strategic-buyer valuation midpoint of ${fmtMoney(counter.strategicMid)}
   - ${NEGOTIATION_STATE.activeOffers} active offer(s) currently in our process
 
 We are prepared to move quickly toward a definitive agreement on these terms. We propose a call this week to align on structure and timeline.
 
 Best regards,
-James — on behalf of Helios Freight`
+[Your name] — on behalf of ${SAMPLE_COMPANY.name}`
     : "";
 
   return (
