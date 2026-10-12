@@ -34,8 +34,12 @@ The cap table (fully-diluted ownership, signatory and board flags), signatory co
 | G2 | **"Added to the cap-table CRM"** — nothing is saved or calculated. | Say it: a contact list for this session, not saved, not in the cap table or waterfall. | ☐ |
 | G3 | Demo cap table and offers unlabelled. | Badge and line: sample cap table and offers of the demo company (intake has neither). | ☐ |
 | G4 | Fake live tape. | `RegistryTape`. | ☐ |
-| G5 | Design: no `h1`, contrast, unnamed select, unfocusable scroll regions, name mismatch. | Rebuild on `xo`; `h1` "Cap Table". | ☐ |
+| G5 | Design: no `h1`, contrast, unnamed select, unfocusable scroll regions, name mismatch. | Rebuild on `xo`; `h1` "Cap Table". | ☑ G5-commit |
 
 ---
 
 ## Closure log
+
+### G5 — Design
+*Closed by:* `pages/Investors.tsx` rebuilt on `xo` (`PageHeader` `h1` **"Cap Table"** — the NAV name; "Investor CRM" kept in the eyebrow; five metrics; banker's take as a page-local definition list (shared `BankerTake` no longer used here); warnings as a labelled section; cap table and stakeholder waterfall as tables with row headers inside keyboard-reachable `ScrollRegion`s; the offer selector has a label; walk-away steps as an ordered list; signatory roster as lists). The add-stakeholder dialog is the shared `Modal` (accessible since X13). Content carried over verbatim; G1–G4 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium (free — no plan gate) 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 12 contrast + unnamed select + 2 scroll regions), all tab stops with visible focus; add-stakeholder dialog: role dialog, focus inside, axe 0, Escape closes.
