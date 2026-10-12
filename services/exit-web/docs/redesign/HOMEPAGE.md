@@ -518,6 +518,17 @@ Same composition, copy, CTAs, header and rail; chapter 02 onward untouched. The 
 
 ## Closure log
 
+### HX7 — thirty refinements (owner: "30 autonomous premiumization commits")
+
+One commit each, verified before the next; the hero (HX6), the command board and its ribbon untouched (checked identical).
+
+- **Speed and steadiness.** Fonts linked from the document with preconnects, not @imported after the CSS (1). Reading progress and the rail's active chapter read from scroll positions into a CSS variable / a state that changes only per chapter, no React work per frame (4, 24). Chapter 04 holds the worked valuation's space from first paint: the page no longer jumps 300–620 px when it arrives (8). Chapter 02's figures count when first seen, not below the fold (23).
+- **Palette.** Porcelain/graphite canvas, warm scrollbar and bronze selection (2); native controls light on light chapters, dark on ink (18). The last stock colours left in the editorial chapters re-inked: red crosses (5), emerald/blue/amber tiers and statuses (10, 15), mint footer markers (13), and the lifecycle band's and chapter 02's green "lamps", which read as live status on an editorial timeline (16, 17). Fine paper grain on the porcelain chapters (14); the footer sign-off in the signature's champagne (26).
+- **Layout and reading.** Chapter 05 sets the record's medians as figures with their samples (6, 25; note 4 extended to the closed share); the worked valuation shows the engine's assumptions beside it (7); the ledger's front page drops empty reference cells (9); questions as a ruled list (11); smooth disclosures where supported (12); a slimmer rail that clears the text (20); typographic apostrophes in EN/FR/ES (19); the sources panel explains its notes (28).
+- **Interaction.** Chapter jumps clear the sticky header and glide (3); ledger rows take a bronze rule on hover (15); module rows answer the pointer (29); the header lifts with a shadow once the page moves (27).
+- **Access and print.** Skip link to <main> on every marketing page (22); a print stylesheet: no fixed furniture or film, headings and board shown, 13 A4 pages (21); the comparison matrix readable on phones (5).
+- **Checks.** tsc and vitest 252/252 at every commit; eslint 0 errors (1 pre-existing warning elsewhere); build; board and ribbon identical; no overflow at 1920–390; FR/ES render; reduced motion unchanged in the hero; axe 0 on /platform and /pricing at 1440 and 390. On / the remaining findings are the ones present before this pass: the owner-locked board's small labels (8–9 px, 3.8–4.4:1) and one reading on the hero's primary button (white on #15181C, reported as 1.08:1 because axe resolves the transparent instrument layers as its ground; visually 17:1).
+
 ### M1 — Rebuild on the `index(9)` skeleton
 *Closed by:*
 - **`components/MarketingChrome.tsx`.**
