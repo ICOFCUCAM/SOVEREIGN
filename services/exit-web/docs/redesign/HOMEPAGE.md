@@ -112,6 +112,7 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 | M7 | **Accessibility.** | A `main` landmark in the chrome (all marketing pages); contrast ≥ 4.5:1 for text (locked colours kept, opacities/shade steps within the same palette adjusted); the empty table header labelled; the drill-down as a real dialog (focus, Escape, `aria-modal`); the scrolling matrix keyboard-focusable; decorative map and graphics `aria-hidden`. Target: axe 0 on `/` at 1440 and 390. | ☑ `1fbe0c4f` |
 | M8 | **Motion ignores reduced-motion.** | All homepage animations (ticker, scan, travelling dots, SVG `animateMotion`) honour `prefers-reduced-motion: reduce` — no animation when set. | ☑ `1797ccb2` |
 | M9 | **i18n.** | Every copy change above is made in EN, FR and ES together; new strings get keys in all three. | ☑ with M2 `ce76fa8f`, M3 `53ade1c7`, M5 `868699d9` (EN/FR/ES changed together; M1, M4, M6–M8 changed no i18n text) |
+| M10 | **The command board was not kept as built** (owner, 2026-10-12: "i told you to use my same board without changing anything. that board is more advanced than what you design"). M1 kept `CommandBoard` itself, but it dropped the board's presentation: the 3D wall mount (`ex-bezel`, rotateY −11°/rotateX 2.5° at lg+), the rounded bezel (`rounded-[20px]`, ribbon `rounded-md`), the polished-floor reflection (`ex-reflection`), the `perspective: 2000px` stage and `lg:translate-x-16 lg:-translate-y-6` offset, the larger board column (`0.9fr / 1.3fr`), and the trading-hall environment (full-strength photo, ceiling light grid, glass-wall mullions, floor heat field, the white wash, the floor sheen and the ambient light under the board). | Restore the original hero environment and the mounted display **verbatim** from `20545a37` (bezel, ribbon, `CommandBoard`, reflection, perspective, offsets, column ratio, every hall layer). Only the headline column keeps the skeleton treatment (editorial `h1`, "01—" deck, square buttons), sized to fit the original narrower column. | ☐ |
 
 ### M1 mapping — current blocks into the skeleton's chapters
 | Skeleton slot | ExitOS content placed there |
@@ -335,6 +336,7 @@ Kept: "Access Requests — Request NDA-gated identity and packages, tracked end 
 ---
 
 ## Owner decisions
+- **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
 - **The hero command board stays exactly as built** (owner, 2026-10-12, during M2: "use the same live screen which is built as a real screen. dont change it"). The board and its bezel — "Live Market", "System Status · Live", "Live Transactions", the session clock, the moving scores and heat bars, the scan sweep and the ticker — are left unchanged by M2–M8. The data it shows is the registry snapshot and the disclosed-deal history (real records); the "live" styling is the owner's choice and is listed here so it is not mistaken for an oversight.
 
 ## Open decisions for the owner
