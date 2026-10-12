@@ -269,7 +269,7 @@ Every moved figure keeps its source note. Platform and Modules get the **Sources
 |---|---|---|---|
 | V1 | **Homepage too long; blocks belong elsewhere.** | Move the ten blocks above to Platform and Modules (content verbatim, source notes and "Sources & method" on those pages). Homepage keeps the six moments. Targets: homepage ≤ 6,500 px at 1440 and ≤ 11,000 px at 390. | ☑ `c9ebb10d` |
 | V2 | **No signature language.** | Carry the ledger's broadsheet treatment (double rule, masthead-style chapter heads, column rules, drop cap) through the thesis and the final call to action, so the homepage reads as one publication. | ☐ |
-| V3 | **Repetitive rhythm.** | Contrast of scale and ground: hero (photo + board) → compact valuation strip (white) → one giant statement on the page ground → dense ledger (white) → full-bleed navy lifecycle with large numerals → back-page call to action. No two consecutive moments share a layout. | ☐ |
+| V3 | **Repetitive rhythm.** | Contrast of scale and ground: hero (photo + board) → compact valuation strip (white) → one giant statement on the page ground → dense ledger (white) → full-bleed navy lifecycle with large numerals → back-page call to action. No two consecutive moments share a layout. | ☑ V3-commit |
 | V4 | **Four typefaces, label noise.** | Marketing pages use Source Serif 4 (expressive), Inter (body) and mono (figures only). Sora (`font-serif`) is removed from marketing pages; the console is unchanged. Small all-caps labels are reduced to one chapter label per moment. | ☐ |
 | V5 | **Hero competes with the board.** | Quieter headline column: the duplicated topline removed (the eyebrow is already in the header), the deck shortened to `hero.sub` with `hero.body` below it. **The board, its bezel, its hall and its size are untouched** (M10). | ☑ `aa64ea63` |
 | V6 | **Proof that nothing was lost.** | An inventory check (script plus a unit test over a block list) asserting that each of the 17 original blocks and U1, U2 and U4 renders on exactly one marketing page, every source note has a target, and all routes and entry points still resolve. Before/after heights, axe and keyboard on all four routes at 1440 and 390. | ☐ |
@@ -579,6 +579,24 @@ Kept: "Access Requests — Request NDA-gated identity and packages, tracked end 
 
 **The board, its bezel, the reflection, the stage and every hall layer are unchanged.** A script compared them with `20545a37`: the mount, `CommandBoard` through `BoardHeader`, and the hall environment are all identical.
 *Verification:* `tsc -b`, eslint clean · Chromium `/` 1440/390: 0 errors, `h1` 1, no overflow, axe 0 outside the board. Height 5,823 px at 1440 and 9,666 px at 390. Screens: `scratchpad/home/v5b-*`.
+
+### V3 + V2 — Rhythm and the broadsheet language (closed together)
+*Why one commit:* the new order (V3) and the broadsheet treatment (V2) are the same rewrite of the same three sections. Splitting them would have meant styling sections twice. Both rows point to this commit.
+*Closed by:* `pages/Landing.tsx` and `lib/i18n.tsx` (`ledger.read` in EN/FR/ES). The six moments now run:
+1. **Hero** (photo, board, pull-quote): unchanged by this gap.
+2. **Value your company:** white, compact.
+3. **02 The thesis.** On the page ground: `loss.h2` as one giant statement (`clamp(3rem, 7.4vw, 7.6rem)`), a double rule, then a drop-cap paragraph (the medians, note 4) beside the matrix. The matrix is now a real `<table>` with a hidden "Dimension" header, row headers and column rules.
+4. **03 The ledger.** White. The table sits beside a **"How to read this record"** sidebar under a double rule; this is the confidence register, kept on the homepage, sticky on wide screens. Table dates no longer wrap.
+5. **04 How a sale runs.** The page's one full-bleed navy moment. The label is "Typical timeline" (note 6), the `h2` is the lifecycle title, and the eight stages appear as large editorial numerals 01–08 with their names and typical weeks (4 × 2; 2 columns on phones).
+6. **05 The next move.** The back page: a double rule, the giant `cta.h2`, the two buttons, then a ruled colophon row with `cta.body` and `cta.foot`.
+
+After these: Sources & method, then the footer. Chapter labels are renumbered 02–05, one per moment; no two consecutive moments share a layout or ground.
+*Verification:*
+- `tsc -b`, eslint clean · `vitest` 222/222.
+- Chromium `/` 1440/390: 0 errors, `h1` 1, no overflow. axe 0 outside the board (the matrix and ledger regions are labelled and focusable); 113 tab stops, all with visible focus. Reduced motion: 0 animations outside the board.
+- Inventory: 0 missing blocks, notes 11/9/1 with 0 missing targets.
+- **Height: 6,368 px at 1440 (target ≤ 6,500) and 10,633 px at 390 (target ≤ 11,000)**, down from 11,434 / 20,163 before Phase 4.
+- Screens: `scratchpad/home/v3-*`.
 
 ---
 

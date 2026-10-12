@@ -125,6 +125,7 @@ const en: Dict = {
   "cta.open": "Open Acquisition Workspace",
   "cta.brief": "Request a Private Briefing",
   // quick value
+  "ledger.read": "How to read this record",
   "src.title": "Sources & method",
   "qv.eyebrow": "Value your company · 30 seconds",
   "qv.h2": "What is your company worth?",
@@ -254,6 +255,7 @@ const fr: Dict = {
   "cta.open": "Ouvrir l'espace d'acquisition",
   "cta.brief": "Demander un briefing privé",
   // quick value
+  "ledger.read": "Comment lire ce registre",
   "src.title": "Sources et méthode",
   "qv.eyebrow": "Valorisez votre entreprise · 30 secondes",
   "qv.h2": "Combien vaut votre entreprise ?",
@@ -382,6 +384,7 @@ const es: Dict = {
   "cta.open": "Abrir el espacio de adquisición",
   "cta.brief": "Solicitar un briefing privado",
   // quick value
+  "ledger.read": "Cómo leer este registro",
   "src.title": "Fuentes y método",
   "qv.eyebrow": "Valore su empresa · 30 segundos",
   "qv.h2": "¿Cuánto vale su empresa?",

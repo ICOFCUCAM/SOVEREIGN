@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { MarketingChrome, Glyph, Mark, Arrow, Chapter, Editorial } from "../components/MarketingChrome";
+import { MarketingChrome, Mark, Arrow, Chapter, Editorial } from "../components/MarketingChrome";
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL_FMT, type BoardTx } from "../lib/market-stats";
 import { useI18n } from "../lib/i18n";
 import QuickValue from "../components/QuickValue";
@@ -157,58 +157,33 @@ const Landing: React.FC = () => {
       {/* ===== VALUE YOUR COMPANY — the working product moment ===== */}
       <QuickValue />
 
-      {/* ===== BAND · THE ACQUISITION LIFECYCLE ===== */}
-      <section aria-label={t("lifecycle.title")} className="text-white" style={{ background: NAVY }}>
-        <div className={`${WRAP} py-6`}>
-          <div className="flex items-center justify-between gap-3">
-            <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-300">{t("lifecycle.title")}<Note n={6} first dark /></div>
-            <div className="hidden font-mono text-[9.5px] uppercase tracking-[0.16em] text-blue-200 sm:block">{t("lifecycle.live")}</div>
-          </div>
-          <div className="relative mt-5">
-            <ol className="grid grid-cols-2 gap-y-4 border-t border-white/15 pt-4 sm:grid-cols-4 lg:grid-cols-8">
-              {LIFECYCLE.map(([s, w], i) => (
-                <li key={s} className="flex items-baseline gap-2 pr-3">
-                  <span className="font-mono text-[10px] text-blue-300">{String(i + 1).padStart(2, "0")}</span>
-                  <span>
-                    <span className="block font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-white/90">{t(s)}</span>
-                    <span className="block font-mono text-[9.5px] uppercase tracking-wide text-blue-300/70">{w}</span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 02 · THE THESIS — why founders lose millions ===== */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
-          <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
-            <Chapter n="02">{t("loss.eyebrow")}</Chapter>
-            <div>
-              <h2 className={`${H2} max-w-[18ch] text-ink-900`}><Editorial text={t("loss.h2")} /></h2>
-              <p className="mt-6 max-w-xl text-[14px] leading-relaxed text-slate-600">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
-            </div>
-          </div>
-          {/* comparison matrix: Traditional vs ExitOS */}
-          <div role="region" aria-label="Traditional sale compared with ExitOS" tabIndex={0} className="mt-12 overflow-x-auto border-y border-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 lg:ml-[calc(27.5%+3vw)]">
-            <div className="min-w-[620px]">
-              <div className="grid grid-cols-[1.1fr_1fr_1fr] border-b border-slate-200">
-                <div className="px-4 py-3" />
-                <div className="px-4 py-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-600">Traditional Sale</div>
-                <div className="bg-ink-900 px-4 py-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white">With ExitOS</div>
-              </div>
-              {LOSSES.map((l) => (
-                <div key={l.problem} className="grid grid-cols-[1.1fr_1fr_1fr] border-b border-slate-200 last:border-0">
-                  <div className="flex items-center px-4 py-4 font-editorial text-[17px] font-semibold text-ink-900">{l.dimension}</div>
-                  <div className="flex items-center gap-2 px-4 py-4 text-[12.5px] text-slate-600">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center text-red-500"><Glyph name="x" small /></span>{l.problem}
-                  </div>
-                  <div className="flex items-center gap-2 bg-blue-50/40 px-4 py-4 text-[12.5px] font-medium text-ink-800">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center text-blue-600"><Glyph name="check" small /></span>{l.fix}
-                  </div>
-                </div>
-              ))}
+      {/* ===== 02 · THE THESIS — one statement, set like a front page ===== */}
+      <section className="border-b border-slate-200 bg-[#f6f8fb]">
+        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
+          <Chapter n="02">{t("loss.eyebrow")}</Chapter>
+          <h2 className="mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
+          <div className="mt-12 grid gap-10 border-t-4 border-double border-ink-900 pt-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] lg:gap-[5vw]">
+            <p className="max-w-md text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-blue-700">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
+            {/* comparison matrix, set as a broadsheet table */}
+            <div role="region" aria-label="Traditional sale compared with ExitOS" tabIndex={0} className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+              <table className="w-full min-w-[620px] text-left">
+                <thead>
+                  <tr className="border-b border-ink-900 font-mono text-[10.5px] uppercase tracking-[0.14em]">
+                    <th scope="col" className="py-3 pr-4 font-semibold text-slate-600"><span className="sr-only">Dimension</span></th>
+                    <th scope="col" className="border-l border-slate-300 px-4 py-3 font-semibold text-slate-600">Traditional Sale</th>
+                    <th scope="col" className="border-l border-slate-300 px-4 py-3 font-semibold text-ink-900">With ExitOS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {LOSSES.map((l) => (
+                    <tr key={l.problem} className="border-b border-slate-300 last:border-0">
+                      <th scope="row" className="py-4 pr-4 align-top font-editorial text-[19px] font-semibold text-ink-900">{l.dimension}</th>
+                      <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] text-slate-600"><span className="mr-1.5 text-red-600" aria-hidden>✕</span>{l.problem}</td>
+                      <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] font-medium text-ink-900"><span className="mr-1.5 text-blue-700" aria-hidden>✓</span>{l.fix}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -218,7 +193,7 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200 bg-white">
         <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
           <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
-            <Chapter n="06">{t("rec.eyebrow")}</Chapter>
+            <Chapter n="03">{t("rec.eyebrow")}</Chapter>
             <div className="flex flex-wrap items-end justify-between gap-6">
               <h2 className={`${H2} max-w-[20ch] text-ink-900`}><Editorial text={t("rec.h2")} /></h2>
               <p className="max-w-xs text-[13px] leading-relaxed text-slate-600">{t("rec.body")}</p>
@@ -255,8 +230,9 @@ const Landing: React.FC = () => {
             ))}
           </div>
 
+          <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
           {/* the ledger table */}
-          <div role="region" aria-label="Earlier disclosed acquisitions" tabIndex={0} className="mt-8 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+          <div role="region" aria-label="Earlier disclosed acquisitions" tabIndex={0} className="min-w-0 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
             <table className="w-full min-w-[820px] text-left text-[13px]">
               <caption className="pb-3 text-left font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Earlier entries · newest first</caption>
               <thead>
@@ -267,7 +243,7 @@ const Landing: React.FC = () => {
               <tbody>
                 {LEDGER_ROWS.slice(3).map((r) => (
                   <tr key={r.date + r.target} className="border-b border-slate-200">
-                    <td className="py-2.5 pr-4 font-mono tabular-nums text-slate-600"><time dateTime={r.date}>{r.date}</time></td>
+                    <td className="whitespace-nowrap py-2.5 pr-4 font-mono tabular-nums text-slate-600"><time dateTime={r.date}>{r.date}</time></td>
                     <th scope="row" className="py-2.5 pr-4 font-editorial text-[15px] font-semibold text-ink-900">{r.target}</th>
                     <td className="py-2.5 pr-4 text-ink-800">{r.buyer}</td>
                     <td className="py-2.5 pr-4 text-slate-600">{r.sector}</td>
@@ -279,7 +255,8 @@ const Landing: React.FC = () => {
               </tbody>
             </table>
           </div>
-          <div className="mt-10 max-w-3xl">
+          <aside aria-labelledby="ledger-read" className="self-start border-t-4 border-double border-ink-900 pt-3 lg:sticky lg:top-24">
+            <h3 id="ledger-read" className="font-editorial text-[18px] font-semibold text-ink-900">{t("ledger.read")}</h3>
           {/* confidence-tier register */}
             <div className="border-y border-ink-900">
               <div className="flex items-center justify-between border-b border-slate-200 py-3">
@@ -301,6 +278,7 @@ const Landing: React.FC = () => {
                 {HISTORY_FMT.events} disclosed events on record · sources: SEC EDGAR 8-K filings, Wikidata, press disclosures · refreshed with the registry<Note n={3} />
               </div>
             </div>
+          </aside>
           </div>
           <p className="mt-3 text-[11.5px] leading-relaxed text-slate-600">
             Every entry is curated from the source shown. Record tier: {Object.entries(LEDGER_TIERS).map(([k, n]) => `${n} ${k}`).join(", ")} — not re-checked against the primary filing in this build.
@@ -313,21 +291,44 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 12 · THE NEXT MOVE — final CTA ===== */}
-      <section className="bg-[#f6f8fb]">
-        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
-          <div className="grid items-end gap-10 lg:grid-cols-[1fr_auto]">
+      {/* ===== 04 · HOW A SALE RUNS — the one dark moment ===== */}
+      <section aria-labelledby="lifecycle-h" className="text-white" style={{ background: NAVY }}>
+        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
+          <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
-              <Chapter n="12">{t("cta.eyebrow")}</Chapter>
-              <h2 className="mt-5 font-editorial text-[clamp(2.6rem,6vw,5.4rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-ink-900"><Editorial text={t("cta.h2")} /></h2>
-              <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-slate-600">{t("cta.body")}</p>
-            </div>
-            <div className="flex flex-wrap gap-2.5 lg:flex-col lg:items-stretch">
-              <button onClick={() => nav("/console")} className={`${BTN} justify-between bg-ink-900 text-white hover:bg-ink-800`}>{t("cta.open")} <Arrow /></button>
-              <button onClick={() => nav("/pricing")} className={`${BTN} justify-between border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
+              <Chapter n="04" dark>{t("lifecycle.live")}<Note n={6} first dark /></Chapter>
+              <h2 id="lifecycle-h" className="mt-5 max-w-[20ch] font-editorial text-[clamp(2.4rem,4.8vw,4.6rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-white">{t("lifecycle.title")}</h2>
             </div>
           </div>
-          <p className="mt-10 border-t border-slate-300 pt-5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-slate-600">{t("cta.foot")}</p>
+          <ol className="mt-14 grid grid-cols-2 border-t border-white/25 sm:grid-cols-4">
+            {LIFECYCLE.map(([st, w], i) => (
+              <li key={st} className={`border-b border-white/15 py-7 pr-5 ${i % 4 !== 0 ? "sm:border-l sm:border-white/15 sm:pl-6" : ""} ${i % 2 === 1 ? "border-l border-white/15 pl-5 sm:pl-6" : ""}`}>
+                <span className="block font-editorial text-[clamp(3rem,5vw,4.6rem)] font-semibold leading-none tabular-nums text-blue-300">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mt-4 block font-editorial text-[20px] font-semibold text-white">{t(st)}</span>
+                <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-blue-100/80">{w}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ===== 05 · THE NEXT MOVE — the back page ===== */}
+      <section className="bg-white">
+        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
+          <div className="border-t-4 border-double border-ink-900 pt-8">
+            <Chapter n="05">{t("cta.eyebrow")}</Chapter>
+            <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1fr_auto]">
+              <h2 className="font-editorial text-[clamp(3rem,7vw,7rem)] font-semibold leading-[0.94] tracking-[-0.05em] text-ink-900"><Editorial text={t("cta.h2")} /></h2>
+              <div className="flex flex-wrap gap-2.5 lg:flex-col lg:items-stretch">
+                <button onClick={() => nav("/console")} className={`${BTN} justify-between bg-ink-900 text-white hover:bg-ink-800`}>{t("cta.open")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={`${BTN} justify-between border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
+              </div>
+            </div>
+            <div className="mt-10 grid gap-6 border-t border-ink-900 pt-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+              <p className="max-w-2xl text-[16px] leading-relaxed text-ink-800">{t("cta.body")}</p>
+              <p className="font-mono text-[11px] uppercase leading-relaxed tracking-[0.12em] text-slate-600 lg:text-right">{t("cta.foot")}</p>
+            </div>
+          </div>
         </div>
       </section>
       <SourcesSection />
