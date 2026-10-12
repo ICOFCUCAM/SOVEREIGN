@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { MarketTape, Evidence } from "../lib/workstation";
+import { Evidence } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
 import { PageHeader, Section, Metric, ScrollRegion, Chip, Provenance, XO_INPUT } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { BuyerNetworkReactor } from "../components/Reactor";
@@ -125,7 +126,7 @@ const BuyerGraph: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Events indexed" value={MARKET_INDEX_FMT.events} sub={`as of ${MARKET_INDEX_FMT.asOf}`} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Buyer network reactor" className="lg:col-span-3"

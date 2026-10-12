@@ -34,7 +34,7 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 | G2 | **Keyword-matched transactions presented as sector comparables; verification hidden.** | Title "Transactions matching the sector keywords"; per-row verification status; note that keyword matches can include unrelated deals. | ☑ `b06ece9` |
 | G3 | Duplicate "Active acquirers — with live cadence"; recommended actions unlabelled. | Remove the duplicate; label actions "suggested (rule)". | ☑ `b73b6d4` |
 | G4 | Ranking and overlap fixed to the demo company. | Tokens from `sectorTokensFor(loadActiveCompany().sector)`; badge; transactions labelled as the demo sector when the company's sector differs. | ☑ `8f9fac1` |
-| G5 | Fake live tape. | `RegistryTape`. | ☐ |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
 | G6 | Design: no `h1`, 11 contrast failures, unfocusable scroll region, filter semantics. | Rebuild on `xo` (`Chip`s, labelled search, `ScrollRegion`). | ☑ `a1ba835` |
 
 ---
@@ -60,3 +60,7 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 ### G4 — Ranking and overlap fixed to the demo company
 *Closed by:* `pages/BuyerGraph.tsx`, `lib/buyer-dna.ts` (`recommendedAction(p, tokens?)` — additive optional parameter, default unchanged). Ranking, "Your overlap" and suggested actions use `sectorTokensFor(loadActiveCompany().sector)`; the ranking foot names the company and its keywords; eyebrow and **Demo data / Your intake** badge. The transaction file only holds keyword matches for the demo sector, so for another sector the section title adds "(demo company's sector)". `pages/Intake.tsx` lists "Buyer Graph (ranking)".
 *Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · scratch test: the demo ranking with `sectorTokensFor("logistics_freight")` is identical to the previous fixed tokens (top 12 unchanged) · Chromium: demo → "Ranked for Helios Freight (sector keywords: logistic, freight, …)"; intake → "Ranked for Northwind Analytics (sector keywords: software, saas, enterprise, …)", YOUR INTAKE, transactions marked as the demo company's sector.
+
+### G5 — Fake live tape
+*Closed by:* `pages/BuyerGraph.tsx`: pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
