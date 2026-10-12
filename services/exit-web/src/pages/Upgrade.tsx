@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { PageHeader } from "../components/xo";
 import { useAuth } from "../lib/auth";
 import { homeFor, type Plan } from "../lib/access";
+import { BUYER_TIERS } from "../lib/buyer-pricing";
 
 // In-console mandate selector — shown when a plan hits a surface it can't
 // reach. The institutional ladder: Listed Founder (free — listed and
@@ -11,7 +12,8 @@ import { homeFor, type Plan } from "../lib/access";
 // and Institutional (custom). Choosing a tier switches the in-memory session
 // plan (demo mode: no payment, nothing persisted) and drops the founder back
 // into the work. Plan gating keys are unchanged: prep
-// backs Preparation, pro backs Active Mandate.
+// backs Preparation, pro backs Active Mandate. Buyers see the buyer ladder
+// from lib/buyer-pricing (CC1): Observer = free, Buyer Access = pro.
 
 interface Tier {
   readonly plan: Plan;
@@ -47,6 +49,13 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
       features: ["Dedicated managing director & deal team", "Custom buyer sourcing", "Legal & escrow coordination", "Single-tenant deployment & priority support"], contact: true },
   ];
 
+  // Buyers see the buyer ladder (same source as the public Pricing page, CC1).
+  const BUYER_LADDER: readonly Tier[] = BUYER_TIERS.map((b) => ({
+    plan: b.plan ?? "free", name: b.name, price: b.price, priceSub: b.priceSub, purpose: b.purpose, blurb: b.headline,
+    features: b.features, highlight: b.plan === "pro" && current !== "pro", contact: b.plan === null,
+  }));
+  const LADDER = isBuyer ? BUYER_LADDER : TIERS;
+
   const act = (t: Tier): void => {
     if (t.contact) { navigate("/pricing"); return; }
     if (t.plan === "free") return;
@@ -60,7 +69,9 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
   return (
     <div data-page="upgrade" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="Select a mandate" title="Choose your engagement"
-        description={feature
+        description={isBuyer
+          ? `${feature ? `${feature} requires Buyer Access. ` : ""}Buyer Observer browses the exchange for free. Buyer Access ($299 a month) unlocks NDA requests and the Deal Room. Premium Buyer Access is admitted by request.`
+          : feature
           ? `${feature} requires an active engagement. Preparation makes you market-ready; an Active Mandate runs the process — its 2.5% success fee is paid only on close.`
           : "Listed Founder gets you discovered for free. Preparation makes you market-ready. An Active Mandate runs the live process for $995 a month — its 2.5% success fee is paid only when you close."} />
 
@@ -71,20 +82,20 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
 
       {isBuyer && (
         <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[13px] text-xo-muted">
-          <span className="font-semibold text-xo-text">For buyers:</span> the tiers below are written for founders. The Active Mandate plan unlocks the buyer Deal Room and Access Requests; Preparation unlocks nothing for buyers. Buyer pricing is not published yet.
+          <span className="font-semibold text-xo-text">Buyer plans</span> — the same prices as the public Pricing page. Buyer Access unlocks the Deal Room and Access Requests; Premium is admitted by request.
         </p>
       )}
 
-      <ul className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        {TIERS.map((t) => {
-          const isCurrent = !t.contact && t.plan === current && t.name !== "Institutional";
+      <ul className={`grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 ${isBuyer ? "xl:grid-cols-3" : "xl:grid-cols-4"}`}>
+        {LADDER.map((t) => {
+          const isCurrent = !t.contact && t.plan === current;
           const tone = t.contact ? "text-xo-action" : t.plan === "pro" ? "text-xo-verified" : t.plan === "prep" ? "text-xo-caution" : "text-xo-muted";
           return (
             <li key={t.name} className={`flex flex-col bg-xo-panel ${t.highlight ? "ring-1 ring-inset ring-xo-verified/50" : ""}`}>
               <div className="border-b border-xo-line px-4 py-4">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className={`text-[12px] font-semibold uppercase tracking-[0.14em] ${tone}`}>{t.name}</h2>
-                  {t.highlight && <span className="rounded-sm border border-xo-verified/50 px-1.5 py-px text-[11px] font-semibold text-xo-verified">Recommended for a live process</span>}
+                  {t.highlight && <span className="rounded-sm border border-xo-verified/50 px-1.5 py-px text-[11px] font-semibold text-xo-verified">{isBuyer ? "To engage on deals" : "Recommended for a live process"}</span>}
                 </div>
                 <div className="mt-1 flex items-baseline gap-2">
                   <span className="font-mono text-3xl font-semibold tabular-nums">{t.price}</span>
@@ -96,22 +107,22 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
               <div className="flex flex-1 flex-col px-4 py-4">
                 <ul className="space-y-2 text-[13px]">
                   {t.features.map((f) => (
-                    <li key={f} className="flex items-baseline gap-2"><span aria-hidden className={t.name === "Listed Founder" ? "text-xo-muted" : "text-xo-verified"}>{t.name === "Listed Founder" ? "•" : "✓"}</span>{f}</li>
+                    <li key={f} className="flex items-baseline gap-2"><span aria-hidden className={(t.name === "Listed Founder" || t.name === "Buyer Observer") ? "text-xo-muted" : "text-xo-verified"}>{(t.name === "Listed Founder" || t.name === "Buyer Observer") ? "•" : "✓"}</span>{f}</li>
                   ))}
                 </ul>
                 <div className="mt-auto pt-5">
                   {isCurrent ? (
                     <p className="text-[12px] font-semibold text-xo-muted">Your current engagement</p>
-                  ) : t.name === "Listed Founder" ? (
+                  ) : t.name === "Listed Founder" || t.name === "Buyer Observer" ? (
                     <p className="text-[12px] text-xo-muted">Free — the exchange entry point</p>
                   ) : isBuyer && t.plan === "prep" ? (
                     <p className="text-[12px] text-xo-muted">For founders — unlocks nothing for buyers</p>
                   ) : (
                     <button type="button" onClick={() => act(t)} aria-describedby={t.contact ? undefined : "upgrade-demo"} className={t.plan === "pro" && !t.contact ? BTN : BTN_GHOST}>
-                      {t.contact ? "Request a briefing →" : t.plan === "prep" ? "Prepare my company →" : "Launch a mandate →"}
+                      {t.contact ? (isBuyer ? "Request Premium access →" : "Request a briefing →") : isBuyer ? "Activate buyer access →" : t.plan === "prep" ? "Prepare my company →" : "Launch a mandate →"}
                     </button>
                   )}
-                  {!isCurrent && !t.contact && t.name !== "Listed Founder" && !(isBuyer && t.plan === "prep") && <p className="mt-1.5 text-[11px] text-xo-muted">Demo switch — no payment</p>}
+                  {!isCurrent && !t.contact && t.name !== "Listed Founder" && t.name !== "Buyer Observer" && !(isBuyer && t.plan === "prep") && <p className="mt-1.5 text-[11px] text-xo-muted">Demo switch — no payment</p>}
                 </div>
               </div>
             </li>

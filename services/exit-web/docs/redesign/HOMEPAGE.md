@@ -891,5 +891,5 @@ BoardRoom.tsx removed (no imports anywhere since BB4). TradingHall.tsx stays for
 - **The hero command board stays exactly as built** (owner, 2026-10-12, during M2: "use the same live screen which is built as a real screen. dont change it"). The board and its bezel — "Live Market", "System Status · Live", "Live Transactions", the session clock, the moving scores and heat bars, the scan sweep and the ticker — are left unchanged by M2–M8. The data it shows is the registry snapshot and the disclosed-deal history (real records); the "live" styling is the owner's choice and is listed here so it is not mistaken for an oversight.
 
 ## Open decisions for the owner
-- **Buyer pricing.** Pricing publishes Buyer Access $299/month and Premium $2,499/month; Upgrade says "Buyer pricing is not published yet" (Page 41 G3), and `access.ts` has no buyer plan. Which is right?
+- **Buyer pricing.** Pricing publishes Buyer Access $299/month and Premium $2,499/month; Upgrade says "Buyer pricing is not published yet" (Page 41 G3), and `access.ts` has no buyer plan. Which is right? **Resolved 2026-10-12 (owner: "balance buyer pricing"): see CC1.**
 - **Security and compliance claims** (M3): restore any of SOC 2, audit trail, access logs, encryption or buyer verification only with evidence (a report, a log, a check in the code).

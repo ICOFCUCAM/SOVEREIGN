@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { BUYER_TIERS as BUYER } from "../lib/buyer-pricing";
 import { MarketingChrome, Arrow, Chapter, Editorial, MK, PageHero } from "../components/MarketingChrome";
 import { ENGINE_COUNTS } from "../lib/module-stats";
 
@@ -114,30 +115,14 @@ const COMPARISON: readonly CompRow[] = [
   { capability: "Success Fee", banker: "3–10% of deal", exitos: "2.5%, paid only on close" },
 ];
 
-const BUYER_TIERS: readonly Tier[] = [
-  {
-    key: "buyer-free", badge: "Free", name: "Buyer Observer", price: "$0", priceSub: "to browse",
-    purpose: "Browse the exchange",
-    headline: "Browse anonymized opportunities. Upgrade to engage.",
-    features: ["Browse anonymized opportunities", "Acquisition radar (view)", "No NDA requests or deal-room access"],
-    cta: "Start free",
-  },
-  {
-    key: "buyer-basic", badge: "Buyer", name: "Buyer Access", price: "$299", priceSub: "/ month",
-    purpose: "Engage on diligence",
-    headline: "Browse anonymized listings. Request NDA-gated diligence.",
-    features: ["Search and filter the exchange", "View anonymized listing detail", "Request NDA to unlock identity & packages", "Up to 10 active inquiries"],
-    cta: "Activate buyer access",
-  },
-  {
-    key: "buyer-premium", badge: "Buyer Premium", name: "Premium Buyer Access", price: "$2,499", priceSub: "/ month",
-    tone: "mandate", highlight: true, highlightLabel: "Active acquirer tier",
-    purpose: "First look + outbound",
-    headline: "Active acquirer tier. Matched introductions before public listing.",
-    features: ["Everything in Buyer Access", "Outbound matched introductions before public listing", "Priority NDA processing", "Saved searches + matching alerts", "Quarterly market briefings", "Dedicated buyer-relationship lead"],
-    cta: "Activate Premium",
-  },
-];
+// Buyer tiers come from the shared source (lib/buyer-pricing, CC1); this page
+// adds only its card presentation.
+const BUYER_TIERS: readonly Tier[] = BUYER.map((b) => ({
+  key: b.key, name: b.name, price: b.price, priceSub: b.priceSub, purpose: b.purpose, headline: b.headline, features: b.features,
+  badge: b.key === "buyer-free" ? "Free" : b.key === "buyer-basic" ? "Buyer" : "Buyer Premium",
+  cta: b.key === "buyer-free" ? "Start free" : b.key === "buyer-basic" ? "Activate buyer access" : "Request Premium access",
+  ...(b.key === "buyer-premium" ? { tone: "mandate" as const, highlight: true, highlightLabel: "Active acquirer tier" } : {}),
+}));
 
 const Pricing: React.FC = () => {
   const nav = useNavigate();
@@ -229,7 +214,7 @@ const Pricing: React.FC = () => {
             <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-amber-700">05 / The other side of the exchange</div>
             <div>
               <h2 className={`${MK.h2} text-ink-900`}><Editorial text="Buyer access. Premium matching." /></h2>
-              <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-slate-600">Buyers subscribe for browse + NDA-gated diligence; premium adds outbound matched introductions before a company lists publicly.</p>
+              <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-slate-600">Browsing is free. Buyer Access adds NDA-gated diligence and the deal room; Premium adds matched introductions before a company lists publicly, admitted by request.</p>
             </div>
           </div>
           <div className="mt-12 grid gap-px border-y border-ink-900 bg-slate-200 sm:grid-cols-2 lg:grid-cols-3">
