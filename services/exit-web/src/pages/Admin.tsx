@@ -1,24 +1,26 @@
 import React, { useState } from "react";
 import { notify } from "../lib/ui";
-import { PageHeader, Section, Metric, ScrollRegion, XO_INPUT, XO_LABEL } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 import { useAuth } from "../lib/auth";
 import { ROLE_LABEL, type Role, type Plan } from "../lib/access";
 import { CHANNELS } from "../lib/social-publish";
 import { useEngineStatus, usePublishHistory, ENGINE_ENDPOINT } from "../lib/distribution-engine";
 
-// Admin console — the back office. Account roster, plan mix and system status,
-// plus the superadmin's ability to provision admin accounts. Illustrative data
-// in demo mode; wires to the identity service in production.
+// Admin console — the back office. A labelled sample roster, platform facts
+// and the distribution engine's real status. There is no account directory
+// or server-side role service yet, so nothing here provisions access.
 
 interface Account { name: string; email: string; role: Role; plan: Plan; deals: number }
 
+// A SAMPLE roster — illustrative accounts, not real users. ExitOS has no
+// account directory yet; addresses use the reserved example.com domain.
 const SEED: Account[] = [
   { name: "Platform owner", email: "owner@example.com", role: "superadmin", plan: "pro", deals: 0 },
-  { name: "James Okafor", email: "founder@helios.co", role: "founder", plan: "pro", deals: 1 },
-  { name: "Dana Reyes", email: "dana@northwind.io", role: "founder", plan: "free", deals: 0 },
-  { name: "Amazon Strategic", email: "corpdev@amazon-strategic.com", role: "buyer", plan: "pro", deals: 4 },
-  { name: "Pritzker Private Capital", email: "deals@pritzker.com", role: "buyer", plan: "free", deals: 0 },
-  { name: "Ops · Calibration", email: "ops@exitos.com", role: "admin", plan: "pro", deals: 0 },
+  { name: "Sample founder · Helios Freight", email: "founder.helios@example.com", role: "founder", plan: "pro", deals: 1 },
+  { name: "Sample founder · Northwind", email: "founder.northwind@example.com", role: "founder", plan: "free", deals: 0 },
+  { name: "Sample buyer · strategic", email: "buyer.strategic@example.com", role: "buyer", plan: "pro", deals: 4 },
+  { name: "Sample buyer · private capital", email: "buyer.capital@example.com", role: "buyer", plan: "free", deals: 0 },
+  { name: "Ops · Calibration", email: "ops.calibration@example.com", role: "admin", plan: "pro", deals: 0 },
 ];
 
 const ROLE_STYLE: Record<Role, string> = {
@@ -50,13 +52,13 @@ const Admin: React.FC = () => {
   return (
     <div data-page="admin" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="Internal · Operator" title="Admin Console"
-        description={`Signed in as ${ROLE_LABEL[session?.role ?? "admin"]}. Account roster, plan mix and platform status.`} />
+        description={`Signed in as ${ROLE_LABEL[session?.role ?? "admin"]}. A sample account roster (illustrative), platform facts and the distribution engine.`} />
 
       <section aria-label="Roster summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Accounts" emphasis value={String(accounts.length)} sub="across all roles" /></div>
-        <div className="bg-xo-panel"><Metric label="Founders" value={String(founders)} sub="seller side" /></div>
-        <div className="bg-xo-panel"><Metric label="Buyers" value={String(buyers)} sub="buy side" /></div>
-        <div className="bg-xo-panel"><Metric label="Pro subscriptions" value={`${pro}/${accounts.length}`} sub="paid plans" /></div>
+        <div className="bg-xo-panel"><Metric label="Accounts" emphasis value={String(accounts.length)} sub="sample roster" provenance="demo" /></div>
+        <div className="bg-xo-panel"><Metric label="Founders" value={String(founders)} sub="sample · seller side" /></div>
+        <div className="bg-xo-panel"><Metric label="Buyers" value={String(buyers)} sub="sample · buy side" /></div>
+        <div className="bg-xo-panel"><Metric label="Pro subscriptions" value={`${pro}/${accounts.length}`} sub="sample · paid plans" /></div>
       </section>
 
       {/* Provision admins — superadmin only */}
@@ -64,7 +66,7 @@ const Admin: React.FC = () => {
         <Section title="Provision admin" className="border border-xo-line" foot="Superadmin only. Create an admin account for an operator on your team.">
           <form onSubmit={createAdmin} className="grid items-end gap-3 px-4 py-4 sm:grid-cols-[1fr_1fr_auto]">
             <div><label htmlFor="adm-name" className={XO_LABEL}>Full name</label><input id="adm-name" className={XO_INPUT} value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Operator name" /></div>
-            <div><label htmlFor="adm-email" className={XO_LABEL}>Work email</label><input id="adm-email" className={XO_INPUT} type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="operator@exitos.com" /></div>
+            <div><label htmlFor="adm-email" className={XO_LABEL}>Work email</label><input id="adm-email" className={XO_INPUT} type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="operator@example.com" /></div>
             <button type="submit" disabled={!newName.trim() || !newEmail.trim()} className={BTN}>Create admin</button>
           </form>
         </Section>
@@ -72,7 +74,8 @@ const Admin: React.FC = () => {
         <p className="border border-xo-line bg-xo-panel p-4 text-[13px] text-xo-muted">Admin provisioning is restricted to the superadmin.</p>
       )}
 
-      <Section title="Accounts" className="border border-xo-line">
+      <Section title="Accounts — sample roster" className="border border-xo-line" right={<Provenance kind="demo">Sample</Provenance>}
+        foot="Illustrative accounts, not real users. ExitOS has no account directory yet; a real roster needs a server-side identity service.">
         <ScrollRegion label="Accounts table">
           <table className="w-full min-w-[560px] text-[13px]">
             <thead className="text-left text-[11px] text-xo-muted">

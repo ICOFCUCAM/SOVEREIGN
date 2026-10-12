@@ -28,7 +28,7 @@ Signed in as the dev operator (`ops@example.com` → superadmin). All Supabase f
 ## Gap register — Page 40
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Invented roster presented as real, on real domains.** | Label it "Sample roster — illustrative, not real users; ExitOS has no account directory yet"; emails on reserved `example.com`; KPIs say "sample". | ☐ |
+| G1 | **Invented roster presented as real, on real domains.** | Label it "Sample roster — illustrative, not real users; ExitOS has no account directory yet"; emails on reserved `example.com`; KPIs say "sample". | ☑ G1-commit |
 | G2 | **"Create admin" provisions nothing.** | "Add to sample roster" with the plain statement that it creates no account and grants no access (admin roles are not server-side yet; in development the operator email is set by `VITE_EXITOS_DEV_OPERATOR_EMAIL`); validate the email. | ☐ |
 | G3 | **Hard-coded "operational" status.** | Facts instead of health: engines run in the browser (nothing to monitor); marketplace storage = exchange backend or this browser (`listingDestination()`); identity = demo sessions created in the browser. | ☐ |
 | G4 | Distribution wording ("Activating", "live"). | "Not connected" / "N channel(s) connected". | ☐ |
@@ -41,3 +41,7 @@ Signed in as the dev operator (`ops@example.com` → superadmin). All Supabase f
 ### G5 — Design
 *Closed by:* `pages/Admin.tsx` rebuilt on `xo` (`PageHeader` `h1`; four metrics; provisioning form with `label`/`id` pairs; the roster as a table with row headers in a `ScrollRegion` (fixes the 390 overflow); platform status and the distribution engine as titled `Section`s with `dl`/lists; publish results in words ("✓ published" / "✗ failed"); the "view" link carries the channel in its accessible name; hex and shared components replaced). Content carried over verbatim; G1–G4 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium superadmin, all function calls stubbed (distribution status "none connected" and "LinkedIn connected") at 1440/390: 0 errors, `h1` 1, **no overflow** (was overflowing at 390), axe 0.
+
+### G1 — Invented roster presented as real, on real domains
+*Closed by:* `pages/Admin.tsx`. The roster is labelled **"Accounts — sample roster"** with a Sample badge and the foot "Illustrative accounts, not real users. ExitOS has no account directory yet; a real roster needs a server-side identity service."; the four KPIs say "sample" (Accounts carries a Demo data tag); the page description says "A sample account roster (illustrative)". The invented people and real-domain addresses are replaced by role samples on the reserved `example.com` domain ("James Okafor — founder@helios.co" → "Sample founder · Helios Freight — founder.helios@example.com"; "Pritzker Private Capital — deals@pritzker.com" → "Sample buyer · private capital — buyer.capital@example.com"; likewise northwind.io, amazon-strategic.com, exitos.com; the form placeholder too). File comment corrected.
+*Verification:* `tsc -b`, eslint clean · Chromium superadmin (stubbed): the labelled roster and foot shown; 0 `pritzker.com`, `helios.co`, `northwind.io`, `amazon-strategic.com`, `exitos.com` in the page source · 1440/390: axe 0, no overflow, 0 errors.
