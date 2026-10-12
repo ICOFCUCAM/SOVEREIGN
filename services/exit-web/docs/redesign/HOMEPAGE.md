@@ -378,6 +378,22 @@ Self-critique of the homepage after Z3 (1440 px: 8,839 px tall; 390 px: 12,560 p
 | AA9 | The ledger heading reads as centred: it sits in the right-hand column of a two-column grid while every other heading is flush left. | Chapter label above a flush-left headline, as in every other chapter. | closed `62c60936` |
 | AA10 | The "Sources & method" list is long for a homepage. | Collapsed by default under its heading; it opens automatically when a source note is followed, so every note still lands on its entry. | closed `94080f60` |
 
+## Phase 10 — Designs 10–17, adopted (owner: "15 is good … yes", 2026-10-12)
+
+Built and judged as previews (designs 10–17), then adopted onto this branch one gap per commit. Board markup identical to the original throughout; every gap verified with tsc, eslint, vitest, build, axe at 1440/390, the keyboard sweep and the reduced-motion check.
+
+| # | Gap | Close by | Status |
+|---|---|---|---|
+| BB1 | The light hero lacks the opening drama of design 6; the hall's pilasters read as glowing plastic, stand apart from the screen, and the ceiling shows stray diagonals. | Dark navy hero (same content, figures and fixes as design 9; the lifecycle chart in light lines on navy). Pilasters slimmed to matte stone hugging the portal, architrave between them only, quieter ceiling. | open |
+| BB2 | Owner: "the wall looks unreal … more natural like it is in a house". | A boardroom wall: navy-stained oak slats with grain, recessed downlights washing the slats, a thin-bezel display with real shadow and backlight, a fluted credenza, a stone floor. | open |
+| BB3 | Design 11's room still read as computer-made (uniform slats and light, glowing light blobs, an empty room, an oversized screen); the valuation chapter opens on an empty form. | Timber and light variation, real downlight trims, a styled credenza (books, stone sphere, vases), the screen sized to the wall, a power-on as the screen enters view; a labelled worked example in the valuation chapter computed by the same engine. | open |
+| BB4 | Owner asked whether a drawn room belongs on an iconic site; it does not (a mockup, uncanny, shrinks the product). | The board as the instrument: large and flat on deep navy, a fine bezel, its own glow, the power-on kept (hook shared in `lib/use-power-on.ts`). | open |
+| BB5 | Owner: add professional widgets to the sections. | Interactive lifecycle (stages select a panel: what happens, the module that runs it; EN/FR/ES); valuation range bar; a searchable, filterable, sortable ledger over all priced deals (`LEDGER_ALL`); a chapter index; a questions chapter (07) answered only from the Pricing and Platform pages, buyer prices left out pending the open decision; count-up hero figures. The back page becomes chapter 08. | open |
+| BB6 | Owner: "the visual presence of the newly added widgets are not felt". | Each widget given weight: a large stage panel with previous/next and a progress strip; the valuation result in a navy card with a gradient gauge, ticks and a midpoint pin; the ledger in a toolbar panel with status counts, a navy summary strip and value bars; a dark chapter rail with a progress line and a reading bar; question cards with a briefing prompt; larger hero figures with drawn rules. | open |
+| BB7 | Further premiumisation and iconicity. | A signature line in the right margin joining the chapters and drawing as you read; a navy bookend with the ExitOS wordmark; module rows opening to their engine structure (`MODULE_PREVIEW`: readiness weights, methodologies, formats, packages — never a sample company's scores); one chapter-reveal motion system; the hero's edition line ("Edition of {date} · from the registry's daily refresh"); typography finishing (balanced headlines, pretty paragraphs, hanging punctuation, old-style figures in serif text). | open |
+| BB8 | Owner uploaded two videos and asked to use the good one. | `public/1.mp4` graded to the navy palette, trimmed to a seamless 4.6 s loop, compressed to 1.4 MB (MP4 + WebM, poster), played muted behind chapter 08 under a navy veil; loads only near view, pauses off-screen, never plays under reduced motion. Placeholder — pre-launch gate G1. `public/2.mp4` not used (another product's invented figures). | open |
+| BB9 | `BoardRoom.tsx` (BB2–BB3) is unused since BB4. | Remove it; the hall component `TradingHall.tsx` stays for the dev-only hero lab. | open |
+
 ## Closure log
 
 ### M1 — Rebuild on the `index(9)` skeleton
