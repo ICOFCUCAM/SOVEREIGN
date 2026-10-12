@@ -35,7 +35,7 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe color-contrast ×39 (1
 | G1 | **The founder's own clicks counted as buyer response history.** | In `engagement-registry.ts`, count only events a **buyer** performed (`actorRole: "buyer"`) as response history — today none target a buyer, so every score is the stated appetite estimate and "Response history" reads 0 until real buyer responses exist. Calculation change, documented. | ☑ `d6b3754` |
 | G2 | **Score shown as a percentage and "likely to respond"; rule hidden.** | "Engagement estimate N/100"; rule stated on the page (appetite × contact-confidence factor; tiers); "High engagement — estimate ≥ 65". | ☑ `b386c88` |
 | G3 | Not company-specific; column sources unstated. | Say the ranking is the same for every company; "Indexed deals · last 12m" (mostly unverified); "Typical contact role"; "Contact confidence" with its rule; "Close rate (registry, where disclosed)"; "Intent (stated themes)". | ☑ `04c1102` |
-| G4 | Fake live tape. | `RegistryTape`. | ☐ |
+| G4 | Fake live tape. | `RegistryTape`. | ☑ G4-commit |
 | G5 | Design: no `h1`, 39 contrast failures, unlabelled search. | Rebuild on `xo`; labelled search. | ☑ `210cec4` |
 
 ---
@@ -58,3 +58,7 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe color-contrast ×39 (1
 ### G3 — Not company-specific; column sources unstated
 *Closed by:* `pages/EngagementRegistry.tsx` (labels). A note above the table: "The ranking does not depend on your company: the engagement estimate uses only each buyer's own record, so this list is the same for every company. For buyers ranked against your company, see the Outreach Plan." Columns "Intent" → "Stated themes", "History" → "Indexed deals · 12m", "Outreach path" → "Typical contact role", "Contact" → "Contact confidence", "Close" → "Close rate (registry)"; the foot adds "Indexed deals are registry entries, most of them unverified. Contact confidence is a rule on indexed deals — High at 40 or more, Medium at 8 or more, otherwise Low. The contact role is the one typical for the buyer type, never a named person".
 *Verification:* `tsc -b`, eslint clean · probe: `engagementRegistry` for logistics, enterprise-SaaS and empty tokens returns the identical 40 buyers and scores (`identical: true`) · Chromium Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, 43 tab stops with visible focus.
+
+### G4 — Fake live tape
+*Closed by:* `pages/EngagementRegistry.tsx`: pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.

@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric, ScrollRegion, XO_INPUT } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { engagementRegistry } from "../lib/engagement-registry";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 
 // BUYER ENGAGEMENT REGISTRY — the consolidated internal registry. For every
 // buyer: acquisition DNA, strategic intent, history, outreach path, contact
@@ -37,7 +38,7 @@ const EngagementRegistry: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Top buyer" emphasis value={rows[0]?.buyerName ?? "—"} sub={`engagement estimate ${rows[0]?.engagementLikelihood.score ?? 0}/100`} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">The ranking does not depend on your company: the engagement estimate uses only each buyer's own record, so this list is the same for every company. For buyers ranked against your company, see the <Link to="/console/outreach-plan" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Outreach Plan</Link>.</p>
 
