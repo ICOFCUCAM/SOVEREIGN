@@ -152,7 +152,7 @@ const Landing: React.FC = () => {
               ))}
             </div>
             <p data-edition className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-ex-done-ink" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</p>
-            <Link to="/platform" className="mt-8 inline-flex items-center gap-3 border-b border-blue-600 pb-2.5 text-[13px] font-semibold text-ink-900 transition hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">{t("s2.link")} <span aria-hidden>→</span></Link>
+            <Link to="/platform" className="ex-link mt-8 text-[13px]">{t("s2.link")} <Arrow /></Link>
           </div>
           {/* the right-hand box: the lifecycle graph alone (DD3), its caption beneath */}
           <figure className="m-0 min-w-0">
@@ -361,7 +361,7 @@ const Landing: React.FC = () => {
                 </summary>
                 <div className="mb-7 rounded-[4px] border border-slate-200 bg-[#f6f8fb] p-5 sm:ml-[78px] sm:p-7">
                   <ModulePreview id={key} />
-                  <Link to="/modules" className="mt-6 inline-flex items-center gap-3 border border-ink-900 px-4 py-2.5 text-[12px] font-semibold text-ink-900 transition hover:bg-ink-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">{t("mods.open")} <span aria-hidden>→</span></Link>
+                  <Link to="/modules" className={`${BUTTON.secondary} mt-6`}>{t("mods.open")} <Arrow /></Link>
                 </div>
               </details>
             ))}

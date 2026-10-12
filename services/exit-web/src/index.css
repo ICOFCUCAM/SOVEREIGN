@@ -73,3 +73,12 @@ body {
 /* light chapters meet on a double hairline set to the text measure (EE14) */
 .ex-light { position: relative; }
 .ex-light + .ex-light::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: min(1384px, calc(100% - 40px)); height: 4px; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #e2e8f0; pointer-events: none; }
+
+/* one focus ring and one text link (EE23). The ring is the fallback for any
+   control without its own; controls that set a ring keep theirs (higher
+   specificity). On ink the ring lightens. */
+:where(header, main, footer) :is(a, button, summary, select, input, [tabindex]):focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+:where([data-ink], footer) :is(a, button, summary, [tabindex]):focus-visible { outline-color: #60a5fa; }
+.ex-link { display: inline-flex; align-items: center; gap: .75rem; padding-bottom: .55rem; font-weight: 600; color: #0a1018; background: linear-gradient(#2563eb, #2563eb) left bottom / 100% 1px no-repeat; transition: color .3s, background-size .3s; }
+.ex-link:hover { color: #1d4ed8; background-size: 100% 2px; }
+.ex-link:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
