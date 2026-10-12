@@ -416,6 +416,43 @@ Owner: "I need the hero of the newly uploaded file … from hero to section two.
 | DD6 | Owner: "import the acquisition lifecycle [band from the earlier version] … copy the finesse and premium and employ it in the new site." | The original rail from 20545a37 restored as a band after the board (chapter 03 → into 04): the title, one hairline rail, eight numbered rings with stage and typical weeks, and the travelling green light along the rail (off under reduced motion). The original's "● Live process" with a pinging dot is not restored (removed in M2 as a fake live indicator); the band reads "Typical timeline" with a steady dot and the source note (6). | closed `718eea80` |
 | DD7 | Owner: "the acquisition lifecycle is not as premium as the one I refer you to. That hero is not professionally polished." Then: "the blue seems better than black, can you select a better color?" | Lifecycle band rebuilt as its own component (LifecycleBand.tsx): a lit seam parting it from the board, faint grid and glow, the title split into a mono eyebrow and a serif heading ("Signal → closing"), eight larger stations on one rail running from the first centre to the last, a blue-to-emerald rail, a comet-tailed travelling light (motion-safe), serif stage names, the closing station in emerald, and a vertical route on phones. Hero: the dark field moves from black to a deep petrol ink (#0d2130 → #07131c) after the owner's index(2).html reference; a wide eased ivory-to-ink blend in place of the muddy grey plateau; the bottom fade no longer greys the ivory; fine grain on the dark; the watermark redrawn as a finer instrument dial with a tagline; the vertical note moved clear of the signature line. | closed `8568b5ff` |
 
+## Phase 13 — Balance and premiumisation: one colour system (owner: "take your recommendation", 2026-10-12)
+
+Owner chose the deep blue ink for every dark surface and no champagne accent. Blue and green only; the board's own colours are out of scope (board identical).
+
+| # | Gap | Close by | Status |
+|---|---|---|---|
+| EE1 | Darks and accents are hand-typed per section (14 near-black navies, 6 blues, 5 greens); no shared vocabulary. | One `ex` token set in tailwind.config and CSS variables in index.css: ink scale ex-0…ex-3, paper / white, signal blue, two greens (live, done), one hairline. | open |
+| EE2 | The hero's petrol (#0d2130) is a different hue family from every other dark section. | The ink scale derived as a deep blue ink; the hero dark moved onto it with a quiet blue glow behind the watermark. | open |
+| EE3 | Landing sections use ad hoc navy hex values. | Landing.tsx darks replaced by the ink variables. | open |
+| EE4 | Components (Instrument, ExchangeMap, LedgerTable, QuickValue, LifecycleBand) carry their own navies. | Component darks replaced by the ink variables (board content untouched). | open |
+| EE5 | Five greens and six blues outside the board. | Reduced to live green (#7CFF9F) and done green (emerald-300 on dark / emerald-700 on paper); blues to blue-600 (paper), blue-400/300 (dark). | open |
+| EE6 | Ivory and white alternate without a rule. | Paper rhythm: ivory for story chapters, white for working chapters; written down here. | open |
+| EE7 | The capability strip is a flat dark bar. | A lit top seam, hairline glyphs and a hover lift on each capability. | open |
+| EE8 | The headline's large type is set at default spacing. | Optical tightening on the display lines and a hanging 'T'. | open |
+| EE9 | The watermark appears flat on load. | A slow fade-up of the watermark on first load; none under reduced motion. | open |
+| EE10 | Hero, chapter 02 box, board and band make four dark blocks in a row. | The chapter 02 chart presented as a framed ink panel on paper with its own lit edge, read as an object. | open |
+| EE11 | Board and band read as two separate dark slabs. | The instrument chapter (03 + band) set as one continuous ink chapter with a single floor gradient. | open |
+| EE12 | Five thousand pixels of light in the middle with no dark pause. | The ledger's head: an ink strip of the three largest recorded deals (records only). | open |
+| EE13 | Chapter openers vary in position and form. | One chapter opener: number, rule, label at the same measure everywhere. | open |
+| EE14 | Light chapters meet with bare background changes. | A double hairline between light chapters. | open |
+| EE15 | Every heading carries the blue italic word; the device is a formula. | The italic kept on four headings (hero, 04, 05, 09); others plain serif. | open |
+| EE16 | The footer drops from the dark closing to pale grey. | Footer in the deepest ink, continuing the closing chapter. | open |
+| EE17 | The page opens with the mark but does not close with it. | A large faint ExitOS signature across the footer, matching the hero watermark. | open |
+| EE18 | Footer hierarchy is flat. | Footer columns with a heading rule, link hover, the legal line set small. | open |
+| EE19 | No way back from the end of a long page. | A back-to-top control at the foot of the signature line. | open |
+| EE20 | Footer status dots read as live indicators. | Steady done-green dots, labelled as statements, no pulse. | open |
+| EE21 | The header stays white over dark chapters. | The header turns ink over dark chapters (logo, links, CTA re-coloured). | open |
+| EE22 | Primary and secondary buttons vary in size, weight and arrow. | One primary and one secondary button style used across the homepage. | open |
+| EE23 | Focus rings and link underlines vary. | One focus ring and one underline treatment in signal blue. | open |
+| EE24 | Figures mix old-style and lining at random. | Old-style in running text, tabular lining in tables and statistics. | open |
+| EE25 | Radii run from 4 to 12 px and shadows are one-off. | One radius scale and three shadow levels. | open |
+| EE26 | The share card and phone bar still use the old navy. | Repainted in the ink scale. | open |
+| EE27 | Pricing and other marketing pages do not use the new tokens. | Tokens carried to the marketing pages' darks. | open |
+| EE28 | New colour pairs are unchecked. | A contrast audit of the new pairs (≥ 4.5:1 for text) with fixes. | open |
+| EE29 | The whole set needs one final verification. | Full checks: vitest, build, axe on marketing routes at 1440/390, keyboard, reduced motion, board identity. | open |
+| EE30 | The owner needs to see the result. | Design 20 preview with before/after, and this log. | open |
+
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
 | # | Gate | Status |
