@@ -435,7 +435,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE11 | Board and band read as two separate dark slabs. | The instrument chapter (03 + band) set as one continuous ink chapter with a single floor gradient. | closed `821735ae` |
 | EE12 | Five thousand pixels of light in the middle with no dark pause. | The ledger's head: an ink strip of the three largest recorded deals (records only). | closed `16769221` |
 | EE13 | Chapter openers vary in position and form. | One chapter opener: number, rule, label at the same measure everywhere. | closed `3420f2db` |
-| EE14 | Light chapters meet with bare background changes. | A double hairline between light chapters. | open |
+| EE14 | Light chapters meet with bare background changes. | A double hairline between light chapters. | closed `f6f6b030` |
 | EE15 | Every heading carries the blue italic word; the device is a formula. | The italic kept on four headings (hero, 04, 05, 09); others plain serif. | open |
 | EE16 | The footer drops from the dark closing to pale grey. | Footer in the deepest ink, continuing the closing chapter. | open |
 | EE17 | The page opens with the mark but does not close with it. | A large faint ExitOS signature across the footer, matching the hero watermark. | open |
@@ -1014,6 +1014,9 @@ The ledger's front page (the three latest recorded deals, unchanged data) is pri
 
 ### EE13 — closed 3420f2db
 Chapter opener (the shared Chapter component, used on every marketing page): the number set in the serif at 15 px, a short rule, then the mono label; the slash kept for screen readers only. Also: the capability strip's rings and gaps tightened so the titles hold one line at 1440.
+
+### EE14 — closed f6f6b030
+Light chapters (04, 05, 06, 07, proof, 08) carry .ex-light; where two meet, a double hairline set to the text measure replaces the full-bleed border, so the paper changes read as a ruled page rather than a seam.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
