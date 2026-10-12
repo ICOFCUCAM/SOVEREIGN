@@ -32,7 +32,7 @@ const RangeBar: React.FC<{ low: number; mid: number; high: number; muted?: boole
       <div className="relative h-4 rounded-full bg-white/10 ring-1 ring-inset ring-white/10">
         {ticks.map((v) => <span key={v} className="absolute inset-y-0 w-px bg-white/15" style={{ left: pc(v) }} />)}
         <div className={`absolute inset-y-0 origin-left rounded-full motion-safe:transition-transform motion-safe:duration-[900ms] motion-safe:ease-out ${muted ? "opacity-60" : ""}`}
-          style={{ left: pc(low), width: `calc(${pc(high)} - ${pc(low)})`, transform: on ? "scaleX(1)" : "scaleX(0)", background: "linear-gradient(90deg,#3b82f6,#60a5fa 55%,#93c5fd)", boxShadow: muted ? "none" : "0 0 18px rgba(96,165,250,0.55)" }} />
+          style={{ left: pc(low), width: `calc(${pc(high)} - ${pc(low)})`, transform: on ? "scaleX(1)" : "scaleX(0)", background: "linear-gradient(90deg,#2563eb,#60a5fa 55%,#93c5fd)", boxShadow: muted ? "none" : "0 0 18px rgba(96,165,250,0.55)" }} />
         <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: pc(mid) }}>
           <span className="block h-7 w-7 rounded-full border-[3px] border-white bg-blue-600 shadow-[0_0_0_6px_rgba(37,99,235,0.25)]" />
         </div>
