@@ -56,13 +56,13 @@ const Platform: React.FC = () => {
         </div>
       </section>
 
-      <section className="text-white" style={{ background: MK.navy }}>
+      <section data-ink className="ex-seam relative text-white" style={{ background: MK.navy }}>
         <div className={`${MK.wrap} ${MK.section}`}>
           <Chapter n="03" dark>End to end</Chapter>
           <h2 className={`${MK.h2} mt-4 text-white`}><Editorial text="The whole exit, on one exchange." dark /></h2>
           <ol className="mt-12 grid gap-px border-y border-white/20 bg-white/10 sm:grid-cols-2 lg:grid-cols-6">
             {FLOW.map((s, i) => (
-              <li key={s.title} className="py-6 sm:px-5" style={{ background: "#08203B" }}>
+              <li key={s.title} className="py-6 sm:px-5" style={{ background: "var(--ex-2)" }}>
                 <div className="flex items-center justify-between">
                   <span className="text-blue-300"><Glyph name={s.icon} /></span>
                   <span className="font-mono text-[11px] text-blue-300">{String(i + 1).padStart(2, "0")}</span>

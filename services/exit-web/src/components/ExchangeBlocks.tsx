@@ -10,7 +10,8 @@ import { Note, type SourceId } from "./SourceNotes";
 // notes are carried over unchanged; only the chapter number is a prop.
 
 const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
-const NAVY = "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)";
+// dark blocks on the exchange ink (EE27)
+const NAVY = "var(--ex-field)";
 const H2 = "font-editorial text-[clamp(2.25rem,4.6vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.035em]";
 
 const ECOSYSTEM = [
@@ -277,7 +278,7 @@ export const NegotiationDesk: React.FC<{ n: string }> = ({ n }) => {
   return (
     <>
       {/* ===== 07–08 · THE WORKING ENVIRONMENT (dark) — negotiation desk + data rooms ===== */}
-      <section className="text-white" style={{ background: NAVY }}>
+      <section data-ink className="ex-seam relative text-white" style={{ background: NAVY }}>
         <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
           <div className="grid items-center gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-[6vw]">
             <div>
@@ -317,7 +318,7 @@ export const DataRooms: React.FC<{ n: string }> = ({ n }) => {
   const { t } = useI18n();
   return (
     <>
-      <section className="text-white" style={{ background: NAVY }}>
+      <section data-ink className="ex-seam relative text-white" style={{ background: NAVY }}>
         <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
           {/* data rooms */}
           <div className="grid items-center gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-[6vw]">
@@ -439,7 +440,7 @@ export const Governance: React.FC<{ n: string }> = ({ n }) => {
   return (
     <>
       {/* ===== 11 · GOVERNANCE & CONTROLS ===== */}
-      <section className="text-white" style={{ background: NAVY }}>
+      <section data-ink className="ex-seam relative text-white" style={{ background: NAVY }}>
         <div className={`${WRAP} py-16`}>
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <Chapter n={n} dark>{t("gov.eyebrow")}</Chapter>
@@ -465,7 +466,7 @@ export const Governance: React.FC<{ n: string }> = ({ n }) => {
 // illustration of the desk's scoring; on a live process the same table runs
 // against the founder's actual offers and reservation lines.
 const OfferTable: React.FC = () => (
-  <div className="overflow-hidden rounded-lg p-4 text-white" style={{ background: "linear-gradient(180deg,#08203B,#06182E)" }}>
+  <div className="overflow-hidden rounded-lg p-4 text-white" style={{ background: "linear-gradient(180deg, var(--ex-2), var(--ex-1))" }}>
     <div className="flex items-center justify-between">
       <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">Cross-Bid Comparison</div>
       <div className="text-[9px] uppercase tracking-wide text-white/35">scored vs reservation lines</div>

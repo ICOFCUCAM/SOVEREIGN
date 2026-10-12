@@ -10,7 +10,7 @@ import { FOUNDER_MODULES, BUYER_MODULES, type Mod } from "../lib/module-list";
 // the live engines (see lib/module-stats.ts), never typed in by hand.
 
 const ModCard: React.FC<{ m: Mod; dark?: boolean }> = ({ m, dark }) => (
-  <div className={`flex flex-col py-6 sm:px-6 ${dark ? "" : "bg-[#f6f8fb]"}`} style={dark ? { background: "#08203B" } : undefined}>
+  <div className={`flex flex-col py-6 sm:px-6 ${dark ? "" : "bg-ex-paper"}`} style={dark ? { background: "var(--ex-2)" } : undefined}>
     <div className="flex items-center gap-3">
       <span className={dark ? "text-blue-300" : "text-blue-600"}><Glyph name={m.icon} /></span>
       <h3 className={`font-editorial text-[21px] font-semibold ${dark ? "text-white" : "text-ink-900"}`}>{m.name}</h3>
@@ -51,7 +51,7 @@ const Modules: React.FC = () => {
       <BuyerIntelligence n="04" />
       <ExampleListings n="05" />
 
-      <section className="text-white" style={{ background: MK.navy }}>
+      <section data-ink className="ex-seam relative text-white" style={{ background: MK.navy }}>
         <div className={`${MK.wrap} ${MK.section}`}>
           <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
             <Chapter n="06" dark>Buyer side</Chapter>

@@ -103,8 +103,9 @@ export const MK = {
   section: "py-14 sm:py-20 lg:py-24",
   h1: "font-editorial text-[clamp(2.8rem,6vw,6rem)] font-semibold leading-[0.95] tracking-[-0.045em]",
   h2: "font-editorial text-[clamp(2.25rem,4.6vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.035em]",
-  btn: "inline-flex items-center gap-5 px-5 py-3.5 text-[12px] font-semibold transition",
-  navy: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)",
+  // the button base and the dark ground follow the homepage system (EE22, EE27)
+  btn: BTN_BASE,
+  navy: "var(--ex-field)",
 } as const;
 
 /** The marketing page hero: chapter label, editorial h1, numbered deck, actions. */
