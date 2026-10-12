@@ -8,11 +8,9 @@ import { SAMPLE_COMPANY } from "../lib/profile";
 import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
 
-// AI Red Team — reads the generated document like a hostile buyer's analyst.
-// It scans every section for numeric claims (growth, margin, retention, ARR,
-// customers) and cross-checks each against the TRUE company profile. Any claim
-// that diverges materially from source-of-truth becomes a flagged challenge —
-// the gap a buyer will find in diligence.
+// Consistency check (rule-based) — scans the generated text for growth, gross
+// margin and net-retention claims and compares each with the company profile;
+// also flags a missing concentration disclosure. Four checks, nothing more.
 interface RedFlag {
   readonly metric: string;
   readonly claimed: string;
@@ -96,7 +94,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
   return (
     <div data-page="documents" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Workspace · Documents" title="Document Generator"
-        badge={<span className="text-[12px] text-xo-muted">Engine-composed · {flags.length > 0 ? `${flags.length} flags` : "Defensible"}</span>}
+        badge={<span className="text-[12px] text-xo-muted">Engine-composed · {flags.length > 0 ? `${flags.length} consistency flags` : "no conflicts in the four checks"}</span>}
         actions={<>
           <span className="text-[12px] text-xo-faint">Nothing is sent from ExitOS — download a draft to share it.</span>
           <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
@@ -109,7 +107,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
         <div className="bg-xo-panel"><Metric label="Templates" value={String(KINDS.length)} sub="document kinds" /></div>
         <div className="bg-xo-panel"><Metric label="Word count" value={doc ? String(doc.wordCount) : "—"} sub="current document" /></div>
         <div className="bg-xo-panel"><Metric label="Anonymized" value={doc?.anonymized ? "Yes" : "No"} sub={doc?.kind === "buyer_teaser" ? "teaser default" : "founder-named"} /></div>
-        <div className="bg-xo-panel"><Metric label="Red Team flags" emphasis value={<span className={flags.length === 0 ? "text-xo-verified" : "text-xo-caution"}>{flags.length}</span>} sub={flags.length === 0 ? "no challenges" : "challenges detected"} /></div>
+        <div className="bg-xo-panel"><Metric label="Consistency flags" emphasis value={<span className={flags.length === 0 ? "text-xo-verified" : "text-xo-caution"}>{flags.length}</span>} sub="four rule-based checks" /></div>
       </section>
 
       <MarketTape items={buildMarketTape()} />
@@ -136,22 +134,23 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
       <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line">
         <div className="px-4 py-3">
           <p className="text-[14px] leading-relaxed">{flags.length > 0
-            ? <>Reconcile the <span className="font-semibold">{flags.length} Red Team flag{flags.length === 1 ? "" : "s"}</span> before this document reaches a buyer.</>
-            : <>This draft is defensible — issue it to the process.</>}</p>
+            ? <>Reconcile the <span className="font-semibold">{flags.length} consistency flag{flags.length === 1 ? "" : "s"}</span> before this document reaches a buyer.</>
+            : <>No conflicts found in the four consistency checks — review the full draft before it reaches a buyer.</>}</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
             <TakeCell k="At stake">A <span className="font-mono font-semibold text-xo-verified">{fmtMoney(VALUATION_CANONICAL.headline.mid)}</span> outcome hinges on a narrative buyers can't pick apart.</TakeCell>
             <TakeCell k="If you wait">Every unreconciled claim is a retrade lever a buyer's analyst finds in diligence.</TakeCell>
             <TakeCell k="Buyer">The buyer's analyst reads this adversarially — close the gaps before they do.</TakeCell>
-            <TakeCell k="ExitOS does it">ExitOS generates each document from the engines and red-teams it against your real financials.</TakeCell>
+            <TakeCell k="What ExitOS does">Generates each document from templates and the engines, then checks four figures (ARR growth, gross margin, net retention, a concentration disclosure) against the company profile.</TakeCell>
           </dl>
         </div>
       </Section>
 
       {doc && (
-        <Section title={`AI Red Team · ${doc.kind.replace(/_/g, " ")}`} className="border border-xo-line"
+        <Section title={`Consistency check · ${doc.kind.replace(/_/g, " ")}`} eyebrow="Rule-based · four checks" className="border border-xo-line"
+          foot="Checks: ARR growth, gross margin and net retention claims in the text against the profile (3-point tolerance), and whether a top-10 customer concentration of 35% or more is mentioned. Other claims are not checked."
           right={<span className="text-[12px] text-xo-muted">{flags.length} claim{flags.length === 1 ? "" : "s"} to reconcile before buyer review</span>}>
           {flags.length === 0 ? (
-            <p className="px-4 py-3 text-[13px] text-xo-muted">No contradictions between document claims and source financials. This draft is defensible in diligence.</p>
+            <p className="px-4 py-3 text-[13px] text-xo-muted">No conflicts found in these four checks. Other claims in the draft are not checked — review it before use.</p>
           ) : (
             <ul className="divide-y divide-xo-line">
               {flags.map((f) => (
@@ -197,7 +196,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
           ) : (
             <article>
               <header className="mb-5 border-b border-xo-line pb-3">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">Prepared by ExitOS Advisory</div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">Generated by ExitOS from templates — review before use</div>
                 <h2 className="mt-1 font-serif text-[22px] font-semibold">{doc.title}</h2>
                 <div className="mt-1 flex flex-wrap gap-3 text-[12px] text-xo-faint">
                   <span>{doc.sections.length} sections</span><span aria-hidden>·</span><span>{doc.wordCount} words</span>
