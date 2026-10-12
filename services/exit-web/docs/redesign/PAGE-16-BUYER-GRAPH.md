@@ -35,8 +35,12 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 | G3 | Duplicate "Active acquirers — with live cadence"; recommended actions unlabelled. | Remove the duplicate; label actions "suggested (rule)". | ☐ |
 | G4 | Ranking and overlap fixed to the demo company. | Tokens from `sectorTokensFor(loadActiveCompany().sector)`; badge; transactions labelled as the demo sector when the company's sector differs. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, 11 contrast failures, unfocusable scroll region, filter semantics. | Rebuild on `xo` (`Chip`s, labelled search, `ScrollRegion`). | ☐ |
+| G6 | Design: no `h1`, 11 contrast failures, unfocusable scroll region, filter semantics. | Rebuild on `xo` (`Chip`s, labelled search, `ScrollRegion`). | ☑ G6-commit |
 
 ---
 
 ## Closure log
+
+### G6 — Design
+*Closed by:* `pages/BuyerGraph.tsx` rebuilt on `xo` (`PageHeader` `h1` with the sources and as-of date in the badge and the PDF report announced as a new tab; five metrics; decorative reactor hidden from assistive tech; both tables with row headers inside keyboard-reachable `ScrollRegion`s; type filters as `Chip` toggles with `aria-pressed`; labelled search; DNA cards as a list with `h3`s and definition lists; source links named per buyer). Content carried over verbatim; G1–G5 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Preparation 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 11 contrast + 1 unfocusable scroll region), all tab stops with visible focus.
