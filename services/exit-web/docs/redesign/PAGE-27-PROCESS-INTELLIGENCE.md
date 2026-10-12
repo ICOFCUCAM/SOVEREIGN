@@ -28,7 +28,7 @@ A funnel (matched → NDA → LOI → closed) with conversions and median times,
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Sample fixtures presented as real, live process telemetry.** | Badge and line: sample NDAs and offers of the demo company; the foot says what the figures will mean once real processes run; no PitchBook claim. | ☑ `a7cc360` |
-| G2 | Mislabels ("qualified buyers engaged", "first touch"). | "Matched by the engine — not contacted"; "from match → …". | ☐ |
+| G2 | Mislabels ("qualified buyers engaged", "first touch"). | "Matched by the engine — not contacted"; "from match → …". | ☑ G2-commit |
 | G3 | Fake live tape. | `RegistryTape`. | ☐ |
 | G4 | Design: no `h1`, 9 contrast failures. | Rebuild on `xo`. | ☑ `712682f` |
 
@@ -43,3 +43,7 @@ A funnel (matched → NDA → LOI → closed) with conversions and median times,
 ### G1 — Sample fixtures presented as real, live telemetry
 *Closed by:* `pages/ProcessIntelligence.tsx` (text only). **Demo data** badge; "Buyer-response moat" → "Buyer-response funnel"; description "Built from the demo company's sample NDAs and offers (Helios Freight) — no real process has run yet. Saved intakes hold no NDAs or offers."; table foot "Derived from the platform's own NDA and offer events … neither a banker nor PitchBook has" → "Derived from the sample NDA and offer records and their timestamps. Once real processes run on ExitOS, the same table will show measured response times per buyer."; file comment corrected.
 *Verification:* eslint clean · Chromium: 0 "PitchBook" / "real process events"; description present.
+
+### G2 — Mislabels
+*Closed by:* `pages/ProcessIntelligence.tsx` (labels). Funnel "Matched — qualified buyers engaged" → "matched by the engine — not contacted"; metrics "first touch → signed / LOI" → "from match → signed / LOI" (the times are measured from the match event; no first touch exists).
+*Verification:* eslint clean · Chromium: 0 "qualified buyers engaged" / "first touch".

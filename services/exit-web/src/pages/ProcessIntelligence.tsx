@@ -11,7 +11,7 @@ import { BUYER_RESPONSES, PROCESS_FUNNEL } from "../lib/process-intel";
 
 const F = PROCESS_FUNNEL;
 const stages: ReadonlyArray<{ label: string; n: number; note: string }> = [
-  { label: "Matched", n: F.matched, note: "qualified buyers engaged" },
+  { label: "Matched", n: F.matched, note: "matched by the engine — not contacted" },
   { label: "NDA signed", n: F.ndaSigned, note: F.ndaConversionPct != null ? `${F.ndaConversionPct}% of matched` : "—" },
   { label: "LOI issued", n: F.loiIssued, note: F.loiConversionPct != null ? `${F.loiConversionPct}% of NDAs` : "—" },
   { label: "Closed", n: F.closed, note: "definitive" },
@@ -27,8 +27,8 @@ const ProcessIntelligence: React.FC = () => {
         description={`Built from the demo company's sample NDAs and offers (${SAMPLE_COMPANY.name}) — no real process has run yet. Saved intakes hold no NDAs or offers.`} />
 
       <section aria-label="Process summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Median time to NDA" emphasis value={F.medianTimeToNdaDays != null ? `${F.medianTimeToNdaDays}d` : "—"} sub="first touch → signed" /></div>
-        <div className="bg-xo-panel"><Metric label="Median time to LOI" value={F.medianTimeToLoiDays != null ? `${F.medianTimeToLoiDays}d` : "—"} sub="first touch → LOI" /></div>
+        <div className="bg-xo-panel"><Metric label="Median time to NDA" emphasis value={F.medianTimeToNdaDays != null ? `${F.medianTimeToNdaDays}d` : "—"} sub="from match → signed" /></div>
+        <div className="bg-xo-panel"><Metric label="Median time to LOI" value={F.medianTimeToLoiDays != null ? `${F.medianTimeToLoiDays}d` : "—"} sub="from match → LOI" /></div>
         <div className="bg-xo-panel"><Metric label="NDA conversion" value={F.ndaConversionPct != null ? `${F.ndaConversionPct}%` : "—"} sub="matched → signed" /></div>
         <div className="bg-xo-panel"><Metric label="Walk-aways" value={String(F.walkedAway)} sub="declined / lapsed" /></div>
       </section>
