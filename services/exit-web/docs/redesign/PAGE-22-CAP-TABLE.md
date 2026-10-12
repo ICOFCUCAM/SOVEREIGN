@@ -5,7 +5,7 @@
 | Route | `/console/investors` |
 | Component | `src/pages/Investors.tsx` (260 lines) |
 | NAV | "Cap Table", group Mandate, founder, no plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed, plus shared X16. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `ff2113a`)
 
@@ -67,3 +67,13 @@ Arithmetic check (Vista, the default selection): founders' gross $77.8M × 0.762
 ### G4 — Fake live tape
 *Closed by:* `pages/Investors.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus; add-stakeholder dialog axe 0.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 15), all tab stops with visible focus · add-stakeholder dialog: role dialog, focus in/out, axe 0 (after X16) · cascade arithmetic checked against the engine · demo label with and without intake · 0 "live" words.
+
+## Known issues
+- Sample cap table and offers only; no founder-entered cap table exists yet.
+- Contacts added here are session-only (stated on the page).
+- Tax is a flat assumption (stated on the page).
