@@ -214,6 +214,14 @@ Owner direction, 2026-10-12: "propose further iconic upgrade of the homepage", t
 ### Proposed order
 U1 + U2 + U4 first: a live product moment, a signature look and visible proof, with no new data. Then U3, U5, U7, U6.
 
+### Gap register — Phase 3 (owner, 2026-10-12: "yes build" for U1, U2, U4)
+| # | Upgrade | Status |
+|---|---|---|
+| U1 | Value your company in 30 seconds | ☐ |
+| U2 | The broadsheet ledger | ☐ |
+| U4 | Numbered source notes | ☐ |
+
+
 ---
 
 ## Closure log
