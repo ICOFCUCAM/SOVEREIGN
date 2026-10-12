@@ -8,6 +8,8 @@ import Instrument from "../components/Instrument";
 import LedgerTable from "../components/LedgerTable";
 import CountUp from "../components/CountUp";
 import ChapterRail from "../components/ChapterRail";
+import ModulePreview from "../components/ModulePreview";
+import SignatureLine from "../components/SignatureLine";
 import ExchangeMap from "../components/ExchangeMap";
 import { Note, SourcesSection, type SourceId } from "../components/SourceNotes";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
@@ -38,18 +40,36 @@ const BTN = "inline-flex items-center gap-5 px-5 py-3.5 text-[12px] font-semibol
 const heroLines = (s: string): string[] =>
   s.split("\n").map((l, i) => (l === l.toUpperCase() ? (i === 0 ? l.charAt(0) + l.slice(1).toLowerCase() : l.toLowerCase()) : l));
 
+/** Chapter arrivals: each chapter's headline rises into place the first time it
+ *  enters the view. Chapters already in view on load are shown at once; nothing
+ *  is hidden when the reader prefers reduced motion or the observer is missing. */
+const useChapterReveal = (): void => {
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const secs = [...document.querySelectorAll<HTMLElement>('[id^="ch-"]')];
+    for (const el of secs) if (el.getBoundingClientRect().top < innerHeight) el.classList.add("rv-in");
+    document.documentElement.classList.add("rv-on");
+    const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { e.target.classList.add("rv-in"); io.unobserve(e.target); } }, { rootMargin: "0px 0px -15% 0px" });
+    for (const el of secs) if (!el.classList.contains("rv-in")) io.observe(el);
+    return () => { io.disconnect(); document.documentElement.classList.remove("rv-on"); };
+  }, []);
+};
+
 const Landing: React.FC = () => {
+  useChapterReveal();
   const nav = useNavigate();
   const { t } = useI18n();
   const h1 = heroLines(t("hero.h1"));
   return (
     <MarketingChrome active="home">
       <ChapterRail />
+      <div className="relative">
+        <SignatureLine />
       {/* ===== 01 · HERO — the deal atlas (Z1/Z2, after the owner's index(8).html, on the homepage spec) ===== */}
       <section id="ch-01" className="text-white" style={{ background: "linear-gradient(180deg,#030a15 0%,#06182E 70%,#05101f 100%)" }}>
         <div className={`${WRAP} pt-8`}>
           <div className="flex justify-between gap-6 border-b border-white/20 pb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-100/75">
-            <span>{t("hero.eyebrow")}</span><span className="text-right">{t("hero.asof")} {MARKET_INDEX_FMT.asOf}</span>
+            <span>{t("hero.eyebrow")}</span><span className="flex items-center justify-end gap-2 text-right"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</span>
           </div>
           <div className="grid items-end gap-10 py-12 sm:py-14 lg:grid-cols-[minmax(0,1.4fr)_minmax(270px,0.6fr)] lg:gap-[6%] lg:py-16">
             <h1 className="max-w-[12ch] font-editorial text-[clamp(3.4rem,8.4vw,8.8rem)] font-semibold leading-[0.9] tracking-[-0.05em]">
@@ -90,7 +110,7 @@ const Landing: React.FC = () => {
         <Instrument head={
           <div className={`${WRAP} relative pb-16 pt-20 text-white`}>
             <Chapter n="02" dark>{t("hall.eyebrow")}</Chapter>
-            <h2 id="hall-h" className="mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic text-blue-300">{t("hall.h2em")}</em></h2>
+            <h2 id="hall-h" className="rv-h mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic text-blue-300">{t("hall.h2em")}</em></h2>
           </div>
         }>
           {/* the screen: exchange ribbon + board, content unchanged */}
@@ -121,6 +141,11 @@ const Landing: React.FC = () => {
         <style>{`
           @keyframes exTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
           @keyframes heroRule{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+          .rv-on .rv-h{transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1s cubic-bezier(.2,.7,.2,1)}
+          .rv-on [id^="ch-"]:not(.rv-in) .rv-h{opacity:0;transform:translateY(30px)}
+          main h1,main h2,main h3{text-wrap:balance}
+          main p{text-wrap:pretty;hanging-punctuation:first last}
+          main p.font-editorial{font-variant-numeric:oldstyle-nums proportional-nums}
           @media (prefers-reduced-motion: no-preference){.hero-rule{transform-origin:left;animation:heroRule .9s cubic-bezier(.2,.7,.2,1) both}}
           @keyframes exScan{0%{transform:translateY(-100%);opacity:0}8%{opacity:1}50%{opacity:.5}92%{opacity:1}100%{transform:translateY(2000%);opacity:0}}
           @keyframes exFlash{0%,100%{background:transparent}50%{background:rgba(96,165,250,.10)}}
@@ -135,7 +160,7 @@ const Landing: React.FC = () => {
       <section id="ch-04" className="border-b border-slate-200 bg-[#f6f8fb]">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <Chapter n="04">{t("loss.eyebrow")}</Chapter>
-          <h2 className="mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
+          <h2 className="rv-h mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
           <div className="mt-12 grid gap-10 border-t-4 border-double border-ink-900 pt-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] lg:gap-[5vw]">
             <p className="max-w-md text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-blue-700">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
             {/* comparison matrix, set as a broadsheet table */}
@@ -169,7 +194,7 @@ const Landing: React.FC = () => {
           <div>
             <Chapter n="05">{t("rec.eyebrow")}</Chapter>
             <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
-              <h2 className={`${H2} max-w-[20ch] text-ink-900`}><Editorial text={t("rec.h2")} /></h2>
+              <h2 className={`rv-h ${H2} max-w-[20ch] text-ink-900`}><Editorial text={t("rec.h2")} /></h2>
               <p className="max-w-xs text-[13px] leading-relaxed text-slate-600">{t("rec.body")}</p>
             </div>
           </div>
@@ -247,19 +272,25 @@ const Landing: React.FC = () => {
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="border-t-4 border-double border-ink-900 pt-8">
             <Chapter n="06">{t("mods.eyebrow")}</Chapter>
-            <h2 id="mods-h" className="mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("mods.h2")} /></h2>
+            <h2 id="mods-h" className="rv-h mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("mods.h2")} /></h2>
           </div>
           <div className="mt-12 border-t border-ink-900">
             {HOME_MODULES.map(([name, key, v], k) => (
-              <Link key={name} to="/modules" className="group grid grid-cols-[28px_1fr_22px] items-center gap-x-3 gap-y-1.5 border-b border-slate-300 py-6 transition-[background-color,padding] hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 motion-safe:hover:px-3 sm:grid-cols-[58px_1fr_1fr_35px] sm:gap-x-5 sm:py-7">
-                <span className="font-mono text-[11px] text-blue-600">0{k + 1}</span>
-                <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{name}</h3>
-                <div className="col-start-2 row-start-2 max-w-[440px] sm:col-start-3 sm:row-start-1">
-                  <p className="text-[14px] leading-relaxed text-slate-600">{t(`mod.${key}`)}</p>
-                  <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{t(`mod.${key}.st`, v)}</p>
+              <details key={name} open={k === 0} className="group border-b border-slate-300">
+                <summary className="grid cursor-pointer list-none grid-cols-[28px_1fr_36px] items-center gap-x-3 gap-y-1.5 py-6 transition-colors hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:grid-cols-[58px_1fr_1fr_44px] sm:gap-x-5 sm:py-7 [&::-webkit-details-marker]:hidden">
+                  <span className="font-mono text-[11px] text-blue-600">0{k + 1}</span>
+                  <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{name}</h3>
+                  <div className="col-start-2 row-start-2 max-w-[440px] sm:col-start-3 sm:row-start-1">
+                    <p className="text-[14px] leading-relaxed text-slate-600">{t(`mod.${key}`)}</p>
+                    <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{t(`mod.${key}.st`, v)}</p>
+                  </div>
+                  <span aria-hidden className="col-start-3 row-span-2 row-start-1 grid h-9 w-9 place-items-center justify-self-end rounded-full border border-slate-300 text-[18px] text-blue-600 transition group-open:rotate-45 group-open:border-blue-600 group-open:bg-blue-600 group-open:text-white sm:col-start-4 sm:row-span-1">+</span>
+                </summary>
+                <div className="mb-7 rounded-[4px] border border-slate-200 bg-[#f6f8fb] p-5 sm:ml-[78px] sm:p-7">
+                  <ModulePreview id={key} />
+                  <Link to="/modules" className="mt-6 inline-flex items-center gap-3 border border-ink-900 px-4 py-2.5 text-[12px] font-semibold text-ink-900 transition hover:bg-ink-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">{t("mods.open")} <span aria-hidden>→</span></Link>
                 </div>
-                <span aria-hidden className="col-start-3 row-span-2 row-start-1 text-right text-[22px] transition-transform group-hover:text-blue-600 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5 sm:col-start-4 sm:row-span-1">↗</span>
-              </Link>
+              </details>
             ))}
           </div>
         </div>
@@ -271,7 +302,7 @@ const Landing: React.FC = () => {
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-[6vw]">
             <div className="border-t-4 border-double border-ink-900 pt-8">
               <Chapter n="07">{t("faq.eyebrow")}</Chapter>
-              <h2 id="faq-h" className="mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} /></h2>
+              <h2 id="faq-h" className="rv-h mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} /></h2>
               <div className="mt-10 rounded-[4px] p-6 text-white" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
                 <p className="font-editorial text-[1.35rem] font-semibold leading-snug">{t("faq.more")}</p>
                 <button onClick={() => nav("/pricing")} className={`${BTN} mt-5 bg-white text-ink-900 hover:bg-blue-50`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
@@ -294,24 +325,33 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ===== 08 · THE NEXT MOVE — the back page ===== */}
-      <section id="ch-08" className="bg-white">
-        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
-          <div className="border-t-4 border-double border-ink-900 pt-8">
-            <Chapter n="08">{t("cta.eyebrow")}</Chapter>
+      <section id="ch-08" className="relative overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#05101f 0%,#06182E 55%,#030a15 100%)" }}>
+        {/* the bookend: the hero's navy and light return at the close */}
+        <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 h-[70%] w-[80%] -translate-x-1/2 rounded-[50%] opacity-40 blur-[110px]" style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.55), transparent 70%)" }} />
+        <div className={`${WRAP} relative py-20 sm:py-24 lg:py-32`}>
+          <div className="border-t-4 border-double border-white/50 pt-8">
+            <Chapter n="08" dark>{t("cta.eyebrow")}</Chapter>
             <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1fr_auto]">
-              <h2 className="font-editorial text-[clamp(3rem,7vw,7rem)] font-semibold leading-[0.94] tracking-[-0.05em] text-ink-900"><Editorial text={t("cta.h2")} /></h2>
+              <h2 className="rv-h font-editorial text-[clamp(3rem,7vw,7rem)] font-semibold leading-[0.94] tracking-[-0.05em] text-white"><Editorial text={t("cta.h2")} dark /></h2>
               <div className="flex flex-wrap gap-2.5 lg:flex-col lg:items-stretch">
-                <button onClick={() => nav("/console")} className={`${BTN} justify-between bg-ink-900 text-white hover:bg-ink-800`}>{t("cta.open")} <Arrow /></button>
-                <button onClick={() => nav("/pricing")} className={`${BTN} justify-between border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
+                <button onClick={() => nav("/console")} className={`${BTN} justify-between bg-white text-ink-900 hover:bg-blue-50`}>{t("cta.open")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={`${BTN} justify-between border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
               </div>
             </div>
-            <div className="mt-10 grid gap-6 border-t border-ink-900 pt-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-              <p className="max-w-2xl text-[16px] leading-relaxed text-ink-800">{t("cta.body")}</p>
-              <p className="text-[13px] leading-relaxed text-slate-600 lg:text-right">{t("cta.foot")}</p>
+            <div className="mt-10 grid gap-6 border-t border-white/20 pt-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+              <p className="max-w-2xl text-[16px] leading-relaxed text-blue-50/90">{t("cta.body")}</p>
+              <p className="text-[13px] leading-relaxed text-blue-100/75 lg:text-right">{t("cta.foot")}</p>
             </div>
           </div>
         </div>
+        {/* the sign-off: the wordmark, set at the width of the page */}
+        <div aria-hidden className={`${WRAP} relative select-none overflow-hidden pb-6`}>
+          <div className="font-editorial font-semibold leading-[0.8] tracking-[-0.06em] text-transparent" style={{ fontSize: "clamp(6rem, 24vw, 22rem)", backgroundImage: "linear-gradient(180deg, rgba(147,197,253,0.55) 0%, rgba(147,197,253,0.10) 85%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
+            Exit<span className="italic">OS</span>
+          </div>
+        </div>
       </section>
+      </div>
       <SourcesSection collapsed />
     </MarketingChrome>
   );

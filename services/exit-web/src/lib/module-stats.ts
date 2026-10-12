@@ -40,6 +40,20 @@ export const MODULE_NUMS = {
   artifactsIndexed: DD_ARTIFACTS,
 } as const;
 
+/** What each module is made of, for the homepage's module previews: the
+ *  engines' structure (dimensions and their weights, methodologies, formats,
+ *  packages), never a sample company's scores. */
+const KIND_LABEL: Record<(typeof DOC_KINDS)[number], string> = {
+  cim: "Confidential information memorandum", executive_summary: "Executive summary", investor_deck: "Investor deck",
+  buyer_teaser: "Buyer teaser", dd_room_index: "Data-room index",
+};
+export const MODULE_PREVIEW = {
+  readiness: READINESS.dimensions.map((d) => ({ name: d.name, weight: d.weight })),
+  valuation: VALUATION_STANDARD.methodologies.map((m) => m.name),
+  documents: DOC_KINDS.map((k) => KIND_LABEL[k]),
+  dataRoom: DILIGENCE.documents.map((d) => ({ name: d.title, artifacts: d.artifacts.length })),
+} as const;
+
 /** Structural engine counts for copy that states a number. */
 export const ENGINE_COUNTS = {
   readinessDimensions: READINESS.dimensions.length,

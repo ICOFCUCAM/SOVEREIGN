@@ -92,7 +92,7 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
         <div className="border-t-4 border-double border-ink-900 pt-8">
           <Chapter n={n}>{t("qv.eyebrow")}</Chapter>
           <div className="mt-6 grid items-end gap-6 lg:grid-cols-[1fr_0.6fr] lg:gap-[6vw]">
-            <h2 id={`${id}-h`} className="max-w-[16ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-ink-900"><Editorial text={t("qv.h2")} /></h2>
+            <h2 id={`${id}-h`} className="rv-h max-w-[16ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-ink-900"><Editorial text={t("qv.h2")} /></h2>
             <p className="max-w-sm text-[15px] leading-relaxed text-slate-600">{t("qv.body")}<Note n={5} first /></p>
           </div>
         </div>
