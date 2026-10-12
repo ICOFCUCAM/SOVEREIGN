@@ -16,10 +16,14 @@ const { indexes, as_of } = ACQ_INDEXES;
 const totalVol = indexes.reduce((s, i) => s + i.volume, 0);
 const totalDisclosed = indexes.reduce((s, i) => s + i.totalDisclosedUsd, 0);
 
-const Trend: React.FC<{ pct: number | null }> = ({ pct }) => {
-  if (pct == null) return <span className="text-xo-faint">—</span>;
+// Trends on small windows swing wildly (3 → 5 deals is +67%), so the counts
+// are always shown and windows under 10 deals are marked.
+const SMALL = 10;
+const Trend: React.FC<{ pct: number | null; now: number; prior: number }> = ({ pct, now, prior }) => {
+  const counts = <span className="ml-1 text-[11px] text-xo-faint">({now} vs {prior}{now < SMALL && prior < SMALL ? ", small sample" : ""})</span>;
+  if (pct == null) return <span className="text-xo-faint">—{counts}</span>;
   const up = pct >= 0;
-  return <span className={`font-mono tabular-nums ${up ? "text-xo-verified" : "text-xo-risk"}`}><span aria-hidden>{up ? "▲" : "▼"} </span><span className="sr-only">{up ? "up " : "down "}</span>{Math.abs(Math.round(pct * 100))}%</span>;
+  return <span className={`font-mono tabular-nums ${up ? "text-xo-verified" : "text-xo-risk"}`}><span aria-hidden>{up ? "▲" : "▼"} </span><span className="sr-only">{up ? "up " : "down "}</span>{Math.abs(Math.round(pct * 100))}%{counts}</span>;
 };
 
 const Indexes: React.FC = () => {
@@ -43,7 +47,7 @@ const Indexes: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Sector indexes" value={String(indexes.length)} /></div>
         <div className="bg-xo-panel"><Metric label="Indexed acquisitions" emphasis value={totalVol.toLocaleString()} sub="across sectors" /></div>
         <div className="bg-xo-panel"><Metric label="Disclosed value" value={fmtUsd(totalDisclosed)} sub="priced deals" /></div>
-        <div className="bg-xo-panel"><Metric label="Hottest sector" value={<span className="capitalize">{hottest?.sector ?? "—"}</span>} sub={hottest?.trendPct != null ? `${hottest.trendPct >= 0 ? "+" : ""}${Math.round(hottest.trendPct * 100)}% 12m` : undefined} /></div>
+        <div className="bg-xo-panel"><Metric label="Largest 12-month change" value={<span className="capitalize">{hottest?.sector ?? "—"}</span>} sub={hottest?.trendPct != null ? `${hottest.trendPct >= 0 ? "+" : ""}${Math.round(hottest.trendPct * 100)}% 12m · ${hottest.volume12m} vs ${hottest.volumePrior12m} deals${hottest.volume12m < SMALL && hottest.volumePrior12m < SMALL ? " (small sample)" : ""}` : undefined} /></div>
       </section>
 
       <MarketTape items={tape} />
@@ -64,14 +68,14 @@ const Indexes: React.FC = () => {
               <Chip key={k} pressed={sort === k} onToggle={() => setSort(k)}>{l}</Chip>
             ))}
           </div>}
-          foot={`${ACQ_INDEXES.source}. Volume = indexed acquisitions mapped to the ExitOS taxonomy; trend = trailing-12m vs prior-12m; median deal from disclosed values only.`}>
+          foot={`${ACQ_INDEXES.source}. Volume = indexed acquisitions mapped to the ExitOS taxonomy; trend = trailing-12m vs prior-12m deal count (both counts shown; under 10 deals in both windows is marked small sample); median deal from disclosed values only.`}>
           <ScrollRegion label="Acquisition indexes table">
-            <table className="w-full min-w-[640px] text-[12px]">
+            <table className="w-full min-w-[760px] text-[12px]">
               <thead className="text-left text-[11px] text-xo-faint">
                 <tr className="border-b border-xo-line">
                   <th scope="col" className="px-3 py-2 font-medium">Index</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Volume</th>
-                  <th scope="col" className="px-2 py-2 text-right font-medium">12m trend</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">12m trend (deals vs prior 12m)</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Active buyers</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Median deal</th>
                   <th scope="col" className="px-3 py-2 text-right font-medium">Disclosed value</th>
@@ -85,7 +89,7 @@ const Indexes: React.FC = () => {
                       <span aria-hidden className="ml-2 inline-block h-1 w-20 overflow-hidden rounded-full bg-xo-line align-middle"><span className="block h-full rounded-full bg-xo-action" style={{ width: `${(i.volume / maxVol) * 100}%` }} /></span>
                     </th>
                     <td className="px-2 py-1.5 text-right font-mono tabular-nums">{i.volume.toLocaleString()}</td>
-                    <td className="px-2 py-1.5 text-right"><Trend pct={i.trendPct} /></td>
+                    <td className="px-2 py-1.5 text-right"><Trend pct={i.trendPct} now={i.volume12m} prior={i.volumePrior12m} /></td>
                     <td className="px-2 py-1.5 text-right font-mono tabular-nums text-xo-muted">{i.activeBuyers}</td>
                     <td className="px-2 py-1.5 text-right font-mono tabular-nums text-xo-muted">{i.medianDealUsd != null ? fmtUsd(i.medianDealUsd) : "—"}</td>
                     <td className="px-3 py-1.5 text-right font-mono tabular-nums text-xo-verified">{i.totalDisclosedUsd > 0 ? fmtUsd(i.totalDisclosedUsd) : "—"}</td>

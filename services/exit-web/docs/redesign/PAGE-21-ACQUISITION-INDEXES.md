@@ -29,7 +29,7 @@ Per-sector indexes from the registry snapshot: volume, 12-month trend, buyers, m
 ## Gap register — Page 21
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Trends on tiny counts; "hottest sector" decided by a few deals.** | Show the counts beside each trend ("5 vs 3"); mark trends under 10 deals in both windows "small sample"; the hottest-sector metric shows its counts. | ☐ |
+| G1 | **Trends on tiny counts; "hottest sector" decided by a few deals.** | Show the counts beside each trend ("5 vs 3"); mark trends under 10 deals in both windows "small sample"; the hottest-sector metric shows its counts. | ☑ G1-commit |
 | G2 | Mislabels: "Active buyers" (all-time distinct acquirers); "verified" comment; hover-only heatfield. | "Distinct acquirers (all years)"; comment corrected; heatfield hidden with the table as its text equivalent. | ☐ |
 | G3 | Fake live tape. | `RegistryTape`. | ☐ |
 | G4 | Design: no `h1`, contrast failures, unfocusable scroll region, sort semantics. | Rebuild on `xo` (`Chip` sort, `ScrollRegion`). | ☑ `6090ed3` |
@@ -41,3 +41,7 @@ Per-sector indexes from the registry snapshot: volume, 12-month trend, buyers, m
 ### G4 — Design
 *Closed by:* `pages/Indexes.tsx` rebuilt on `xo` (`PageHeader` `h1` with source and as-of date; four metrics; heatfield and reactor hidden from assistive tech — the table carries the same figures; sort as `Chip` toggles with `aria-pressed`; table with row headers in a keyboard-reachable `ScrollRegion`; trend arrows carry "up/down" for screen readers). Content carried over verbatim; G1–G3 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Preparation 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 7 + 1), all tab stops with visible focus.
+
+### G1 — Trends on tiny counts
+*Closed by:* `pages/Indexes.tsx` (display only; trend formula and sort unchanged). Every trend shows its counts — "▲ 67% (5 vs 3, small sample)" — and windows with fewer than 10 deals in both are marked **small sample**; sectors with no prior-window deals show "— (N vs 0)". Column header "12m trend (deals vs prior 12m)". "Hottest sector" → **"Largest 12-month change"** with "· 5 vs 3 deals (small sample)". Table foot explains the counts and the threshold.
+*Verification:* `tsc -b`, eslint clean · Chromium: "Largest 12-month change Software +67% 12m · 5 vs 3 deals (small sample)" · Preparation 1440/390: 0 errors, axe 0, no overflow.
