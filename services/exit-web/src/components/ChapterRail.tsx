@@ -13,13 +13,18 @@ const CHAPTERS: ReadonlyArray<[string, string]> = [
 const ChapterRail: React.FC = () => {
   const { t } = useI18n();
   const [active, setActive] = useState("01");
+  // the chapter in view is the last one whose top has passed the middle of the window — read from positions
+  // on scroll (once a frame at most), so a jump of any length (a link, Home/End, the scrollbar) marks the right
+  // chapter; React re-renders only when the chapter changes
   useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver((es) => {
-      for (const e of es) if (e.isIntersecting) setActive(e.target.id.slice(3));
-    }, { rootMargin: "-45% 0px -50% 0px" });
-    for (const [n] of CHAPTERS) { const el = document.getElementById(`ch-${n}`); if (el) io.observe(el); }
-    return () => io.disconnect();
+    let raf = 0;
+    const read = (): void => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => {
+      let cur = "01";
+      for (const [n] of CHAPTERS) { const el = document.getElementById(`ch-${n}`); if (el && el.getBoundingClientRect().top <= innerHeight * 0.5) cur = n; }
+      setActive(cur);
+    }); };
+    read(); addEventListener("scroll", read, { passive: true }); addEventListener("resize", read);
+    return () => { cancelAnimationFrame(raf); removeEventListener("scroll", read); removeEventListener("resize", read); };
   }, []);
   // reading progress through the page, for the bar at the top and the rail's line: written to a CSS variable
   // on the root (no re-render while scrolling)
