@@ -5,7 +5,7 @@
 | Route | `/console/process-intel` |
 | Component | `src/pages/ProcessIntelligence.tsx` (85 lines) + `lib/process-intel.ts` |
 | NAV | "Process Intelligence", founder, **Active Mandate (Pro)** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All four gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `d01b7ec`)
 
@@ -51,3 +51,11 @@ A funnel (matched → NDA → LOI → closed) with conversions and median times,
 ### G3 — Fake live tape
 *Closed by:* `pages/ProcessIntelligence.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page) and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 9), all tab stops with visible focus · free: Upgrade page · 0 "live" words.
+
+## Known issues
+- Everything on the page comes from sample NDAs and offers (labelled); it becomes meaningful only once real processes are recorded.
