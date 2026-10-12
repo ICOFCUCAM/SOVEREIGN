@@ -78,8 +78,8 @@ const Landing: React.FC = () => {
         <div className={`${WRAP} relative flex flex-1 items-center py-16 lg:py-20`}>
           <div className="max-w-[640px] text-ink-900">
             <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.3em]"><span aria-hidden className="h-px w-7 bg-blue-600" />{t("hx.eyebrow")}</div>
-            <h1 className="mt-7 font-editorial text-[clamp(3.1rem,5.6vw,5.5rem)] font-semibold leading-[0.99] tracking-[-0.045em]">
-              {t("hx.h1")} <em className="italic text-blue-600">{t("hx.h1em")}</em>
+            <h1 className="mt-7 -ml-[0.045em] font-editorial text-[clamp(3.1rem,5.6vw,5.5rem)] font-semibold leading-[0.97] tracking-[-0.045em] [font-kerning:normal] [font-optical-sizing:auto] [font-feature-settings:'kern','liga','calt']">
+              {t("hx.h1")} <em className="-ml-[0.02em] italic tracking-[-0.035em] text-blue-600">{t("hx.h1em")}</em>
             </h1>
             <p className="mt-6 max-w-[440px] text-[15px] leading-[1.85] text-slate-700">{t("hx.body")}</p>
             <div className="mt-8 flex flex-wrap gap-2.5">
