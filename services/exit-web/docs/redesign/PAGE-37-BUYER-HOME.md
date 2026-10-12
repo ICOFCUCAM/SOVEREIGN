@@ -36,8 +36,12 @@ The acquirer's home: a seat (name, mandate, rank), matched opportunities with a 
 | G3 | **Dead buttons; unlock and submit claims.** | Replace with links to where the action exists (Acquisition Radar for NDA requests and offers, Access Requests for status); remove "unlock on NDA", "data room granted" and "submit an offer from an opportunity". | ☐ |
 | G4 | D1 ask; fit as %; "strategic mid"; watchlist persistence unstated. | Ask = canonical midpoint (display); "fit score N/100"; "canonical midpoint"; "watchlist for this visit". | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, 7 axe failures. | Rebuild on `xo`. | ☐ |
+| G6 | Design: no `h1`, 7 axe failures. | Rebuild on `xo`. | ☑ G6-commit |
 
 ---
 
 ## Closure log
+
+### G6 — Design
+*Closed by:* `pages/BuyerPortal.tsx` rebuilt on `xo` (`PageHeader` `h1`; four metrics; the workstation as a titled `Section` whose view switcher is a labelled group of `Chip`s (`aria-pressed`); opportunities, diligence and negotiations as lists with `h3`s and `dl`s; stages in words; the watch toggle announces its state (`aria-pressed`); shared `Button`/`StageBadge` replaced; 24px+ targets). Content carried over verbatim; G1–G5 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium buyer free/Pro 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 4 contrast + 3 target-size), all tab stops with visible focus · after switching to Opportunities, Diligence, Negotiations and Watchlist: axe 0, no overflow.
