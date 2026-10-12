@@ -29,7 +29,7 @@ const PAPER = {
   routeA: "#1d4ed8", routeB: "#2563eb",
 };
 const NAVY = {
-  ground: "linear-gradient(180deg,#05101f,#071a31 60%,#05101f)",
+  ground: "linear-gradient(180deg, var(--ex-0), var(--ex-1) 60%, var(--ex-0))",
   grid: "rgba(160,190,230,0.08)", axis: "rgba(160,190,230,0.26)",
   link: "#93c5fd", node: "#60a5fa", end: "#45E38A", nodeEdge: "#e8f1ff",
   ring: "#93c5fd", text: "#e8edf5", sub: "#93c5fd", halo: "#05101f",

@@ -3,14 +3,14 @@ import { usePowerOn } from "../lib/use-power-on";
 
 // THE INSTRUMENT — the exchange board presented as the product itself, not as
 // a television in a drawn room (owner review of design 12). Large and flat on
-// the deep navy ground, framed only by a fine bezel and its own light; the one
+// the deep ink ground, framed only by a fine bezel and its own light; the one
 // moment is the screen switching on as it comes into view. The screen's
 // content is passed in unchanged. Locked palette.
 
 const Instrument: React.FC<{ children: React.ReactNode; head?: React.ReactNode }> = ({ children, head }) => {
   const [screen, off] = usePowerOn();
   return (
-    <div className="relative isolate overflow-hidden" style={{ background: "linear-gradient(180deg,#05101f 0%,#071a31 45%,#06152a 75%,#040c18 100%)" }}>
+    <div className="relative isolate overflow-hidden" style={{ background: "var(--ex-field)" }}>
       {/* the exchange grid, barely there, gathered around the screen */}
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]"
         style={{ backgroundImage: "repeating-linear-gradient(90deg, #a0bee6 0 1px, transparent 1px 120px), repeating-linear-gradient(0deg, #a0bee6 0 1px, transparent 1px 120px)", maskImage: "radial-gradient(ellipse 70% 60% at 50% 62%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 62%, #000, transparent 75%)" }} />

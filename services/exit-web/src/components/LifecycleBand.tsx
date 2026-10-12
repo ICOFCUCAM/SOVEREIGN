@@ -16,7 +16,7 @@ const LifecycleBand: React.FC = () => {
   const [eyebrow, heading = ""] = t("lifecycle.title").split(" · ");
   const last = LIFECYCLE.length - 1;
   return (
-    <section aria-labelledby="lc-h" className="relative isolate overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#040c18 0%,#071a31 55%,#05101f 100%)" }}>
+    <section aria-labelledby="lc-h" className="relative isolate overflow-hidden text-white" style={{ background: "linear-gradient(180deg, var(--ex-0) 0%, var(--ex-1) 55%, #05101f 100%)" }}>
       {/* the lit seam that parts the band from the board above */}
       <div aria-hidden className="absolute inset-x-0 top-0 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(147,197,253,0.45) 30%, rgba(147,197,253,0.45) 70%, transparent)" }} />
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]"
@@ -46,7 +46,7 @@ const LifecycleBand: React.FC = () => {
           <ol className="relative grid gap-7 lg:grid-cols-8 lg:gap-0">
             {LIFECYCLE.map(([s, w], i) => (
               <li key={s} className="group flex items-center gap-5 lg:flex-col lg:gap-0 lg:text-center">
-                <span aria-hidden className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-bold ring-1 transition duration-300 group-hover:scale-110 ${i === last ? "bg-[#06261f] text-emerald-200 ring-emerald-300/70 shadow-[0_0_0_6px_rgba(16,185,129,0.08),0_0_24px_rgba(52,211,153,0.35)]" : "bg-[#071a31] text-blue-100 ring-blue-300/40 shadow-[0_0_0_6px_rgba(37,99,235,0.07)] group-hover:ring-blue-200"}`}>
+                <span aria-hidden className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-bold ring-1 transition duration-300 group-hover:scale-110 ${i === last ? "bg-[#06261f] text-emerald-200 ring-emerald-300/70 shadow-[0_0_0_6px_rgba(16,185,129,0.08),0_0_24px_rgba(52,211,153,0.35)]" : "bg-ex-1 text-blue-100 ring-blue-300/40 shadow-[0_0_0_6px_rgba(37,99,235,0.07)] group-hover:ring-blue-200"}`}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="lg:mt-5 lg:px-2">

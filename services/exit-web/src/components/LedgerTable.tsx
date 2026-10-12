@@ -68,7 +68,7 @@ const LedgerTable: React.FC = () => {
       </div>
 
       {/* what the current view adds up to */}
-      <dl className="mt-4 grid grid-cols-3 overflow-hidden rounded-[4px] text-white" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
+      <dl className="mt-4 grid grid-cols-3 overflow-hidden rounded-[4px] text-white" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
         {([["Matching deals", String(rows.length), ""], ["Disclosed value", rows.length ? usd(total) : "—", ""], ["Largest", largest ? largest.value : "—", largest ? `${largest.target} · ${largest.buyer}` : ""]] as const).map(([k, v, sub], i) => (
           <div key={k} className={`min-w-0 px-4 py-4 sm:px-6 ${i ? "border-l border-white/10" : ""}`}>
             <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-blue-200/80">{k}</dt>
