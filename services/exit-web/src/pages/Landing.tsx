@@ -121,7 +121,7 @@ const Landing: React.FC = () => {
         `}</style>
       </section>
 
-      {/* ===== VALUE YOUR COMPANY — the working product moment ===== */}
+      {/* ===== 03 · VALUE YOUR COMPANY — the working product moment ===== */}
       <QuickValue />
 
       {/* ===== 04 · THE THESIS — one statement, set like a front page ===== */}

@@ -4,7 +4,7 @@ import { useI18n } from "../lib/i18n";
 import { SECTORS, type Sector } from "../lib/company-intake";
 import { sectorLabel } from "../lib/market-stats";
 import { parseNumber } from "../lib/intake-fields";
-import { Editorial } from "./MarketingChrome";
+import { Chapter, Editorial } from "./MarketingChrome";
 import { Note } from "./SourceNotes";
 
 // "Value your company in 30 seconds" — the homepage's working product moment.
@@ -15,10 +15,10 @@ import { Note } from "./SourceNotes";
 
 type QV = typeof import("../lib/quick-value");
 const usd = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
-const FIELD = "w-full border border-slate-300 bg-white px-3 py-2.5 text-[14px] text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600";
-const LABEL = "mb-1.5 block text-[12.5px] font-medium text-slate-700";
+const FIELD = "w-full border border-ink-900 bg-white px-4 py-3.5 text-[16px] text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600";
+const LABEL = "mb-2 block text-[13px] font-medium text-slate-700";
 
-const QuickValue: React.FC = () => {
+const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
   const { t } = useI18n();
   const id = useId();
   const [sector, setSector] = useState<Sector>("vertical_saas");
@@ -45,16 +45,18 @@ const QuickValue: React.FC = () => {
   };
 
   return (
-    <section aria-labelledby={`${id}-h`} className="border-b border-slate-200 bg-white">
-      <div className="mx-auto w-full max-w-[1480px] px-5 py-14 sm:px-8 lg:px-12 lg:py-16">
-        <div className="grid gap-10 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
-          <div>
-            <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-600">{t("qv.eyebrow")}</div>
-            <h2 id={`${id}-h`} className="mt-4 font-editorial text-[clamp(2rem,3.4vw,3.2rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-ink-900"><Editorial text={t("qv.h2")} /></h2>
-            <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-slate-600">{t("qv.body")}<Note n={5} first /></p>
+    <section aria-labelledby={`${id}-h`} className="border-b border-slate-200 bg-[#f6f8fb]">
+      <div className="mx-auto w-full max-w-[1480px] px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
+        <div className="border-t-4 border-double border-ink-900 pt-8">
+          <Chapter n={n}>{t("qv.eyebrow")}</Chapter>
+          <div className="mt-6 grid items-end gap-6 lg:grid-cols-[1fr_0.6fr] lg:gap-[6vw]">
+            <h2 id={`${id}-h`} className="max-w-[16ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-ink-900"><Editorial text={t("qv.h2")} /></h2>
+            <p className="max-w-sm text-[15px] leading-relaxed text-slate-600">{t("qv.body")}<Note n={5} first /></p>
           </div>
+        </div>
+        <div className="mt-12">
           <div>
-            <form onSubmit={submit} onFocus={() => { void load(); }} noValidate className="grid items-start gap-3 sm:grid-cols-[1.3fr_1fr_1fr_auto]">
+            <form onSubmit={submit} onFocus={() => { void load(); }} noValidate className="grid items-start gap-4 sm:grid-cols-[1.4fr_1fr_1fr_auto]">
               <div>
                 <label htmlFor={`${id}-s`} className={LABEL}>{t("qv.sector")}</label>
                 <select id={`${id}-s`} value={sector} onChange={(e) => setSector(e.target.value as Sector)} className={FIELD}>
@@ -73,14 +75,14 @@ const QuickValue: React.FC = () => {
                   aria-invalid={!!errs.growth} aria-describedby={errs.growth ? `${id}-ge` : undefined} className={FIELD} />
                 {errs.growth && <p id={`${id}-ge`} className="mt-1 text-[12px] text-red-700">{errs.growth}</p>}
               </div>
-              <div className="sm:pt-[25px]">
-                <button type="submit" disabled={busy} className="inline-flex w-full items-center justify-between gap-5 bg-ink-900 px-5 py-3 text-[12px] font-semibold text-white transition hover:bg-ink-800 disabled:opacity-70">
+              <div className="sm:pt-[29px]">
+                <button type="submit" disabled={busy} className="inline-flex w-full items-center justify-between gap-6 bg-ink-900 px-6 py-[17px] text-[13px] font-semibold text-white transition hover:bg-ink-800 disabled:opacity-70">
                   {busy ? t("qv.working") : t("qv.go")} <span aria-hidden>→</span>
                 </button>
               </div>
             </form>
 
-            <div aria-live="polite" className="mt-8 border-t border-ink-900 pt-6">
+            <div aria-live="polite" className="mt-10 border-t border-ink-900 pt-8">
               {result && mod ? (
                 <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
                   <div>
@@ -88,13 +90,12 @@ const QuickValue: React.FC = () => {
                       <span className="text-[12.5px] text-slate-600">{t("qv.range")}</span>
                       <span className="border border-blue-600/50 px-1.5 py-px font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-blue-700">{t("qv.model")}</span>
                     </div>
-                    <div className="mt-3 font-editorial text-[clamp(2.4rem,4.6vw,4rem)] font-semibold leading-none tabular-nums tracking-[-0.03em] text-ink-900">
+                    <div className="mt-3 font-editorial text-[clamp(2.8rem,6.4vw,6rem)] font-semibold leading-none tabular-nums tracking-[-0.03em] text-ink-900">
                       {usd(result.low)} <span className="text-slate-400">–</span> {usd(result.high)}
                     </div>
                     <div className="mt-2 text-[13px] text-slate-600"><span className="font-semibold text-blue-700">{usd(result.mid)}</span> {t("qv.mid")}</div>
                     <div className="mt-5 flex flex-wrap gap-2.5">
                       <Link to={`/console/intake${result.query}`} className="inline-flex items-center gap-5 bg-ink-900 px-5 py-3 text-[12px] font-semibold text-white transition hover:bg-ink-800">{t("qv.refine")} <span aria-hidden>→</span></Link>
-                      <Link to="/console" className="inline-flex items-center gap-5 border border-ink-900 px-5 py-3 text-[12px] font-semibold text-ink-900 transition hover:bg-ink-900 hover:text-white">{t("nav.access")} <span aria-hidden>↗</span></Link>
                     </div>
                   </div>
                   <div>
@@ -109,7 +110,7 @@ const QuickValue: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <p className="text-[13px] text-slate-600">{t("qv.empty")}</p>
+                <p className="text-[14px] text-slate-600">{t("qv.empty")}</p>
               )}
             </div>
           </div>
