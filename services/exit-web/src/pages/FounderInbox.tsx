@@ -269,7 +269,8 @@ const FounderInbox: React.FC = () => {
         {events.length ? (
           <ul>
             {events.map((e) => {
-              const d = INCOMING[e.kind] ?? { verb: e.kind, tone: "text-xo-muted" };
+              // a founder advancing to IOI/LOI records loi_issued too — not an offer they made
+              const d = e.actorRole === "founder" && e.kind === "loi_issued" ? { verb: "moved the deal to an offer stage (IOI/LOI)", tone: "text-xo-action" } : INCOMING[e.kind] ?? { verb: e.kind, tone: "text-xo-muted" };
               return (
                 <li key={e.id} className="flex items-baseline justify-between gap-3 border-b border-xo-line px-4 py-1.5 text-[12px] last:border-0">
                   <span className="min-w-0">
