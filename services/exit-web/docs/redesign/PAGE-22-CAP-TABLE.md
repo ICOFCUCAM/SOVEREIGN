@@ -46,3 +46,7 @@ The cap table (fully-diluted ownership, signatory and board flags), signatory co
 
 ### X16 — Shared `Field` hint contrast (found here) — documented before the fix
 `lib/ui.tsx` `Field` renders its hint as `text-white/40` — 3.78:1 on the dialog surface, below 4.5:1. Used by every form built on `Field`. *Fix:* `text-white/60`.
+
+### X16 — Shared `Field` hint contrast
+*Closed by:* `lib/ui.tsx` `Field`: hint `text-white/40` → `text-white/60`. No behaviour change.
+*Verification:* `tsc -b` pass · Chromium: Cap Table add-stakeholder dialog axe 0 (was 1).

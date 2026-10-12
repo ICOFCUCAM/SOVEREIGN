@@ -167,7 +167,7 @@ export const Field: React.FC<{ label: string; children: React.ReactNode; hint?: 
   <label className="block">
     <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/50">{label}</span>
     {children}
-    {hint && <span className="mt-1 block text-xs text-white/40">{hint}</span>}
+    {hint && <span className="mt-1 block text-xs text-white/60">{hint}</span>}
   </label>
 );
 
