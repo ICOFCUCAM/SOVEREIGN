@@ -34,7 +34,7 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 |---|---|---|---|
 | G1 | **"Blended $823M" and "Comparable $2.25B" presented as valuations.** | Remove the blended figure; show the comparable figure as "Median precedent deal size — other companies' deals, not a value for this company"; drop its methodology bar; bar scale from the canonical band. Calculation of the canonical value untouched. | ☑ `723221c` |
 | G2 | DCF presented without its simplification; "not assumption" claims. | "DCF sensitivity" — EBITDA used as a free-cash-flow proxy, assumptions set by you, not the valuation; remove "not assumption" / "no number without a source" claims; methodology title fixed. | ☑ `e019b34` |
-| G3 | "Strategic-buyer basis"; acquirer fit shown as probability. | "Institutional framework — the console value (D1)"; "fit probability — not a measured chance of a bid". | ☐ |
+| G3 | "Strategic-buyer basis"; acquirer fit shown as probability. | "Institutional framework — the console value (D1)"; "fit probability — not a measured chance of a bid". | ☑ G3-commit |
 | G4 | Demo only, unlabelled. | `runInstitutionalValuation(company)` and `valuationFacts` for the active company; DCF base from it; Demo data / Your intake badge. | ☐ |
 | G5 | Shared `BankerTake` / `CommandState`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 34 axe failures. | Rebuild on `xo`. | ☑ `746abb0` |
@@ -61,3 +61,8 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 ### G2 — DCF presented without its simplification; "not assumption" claims
 *Closed by:* `pages/Valuation.tsx` (labels; the DCF formula is unchanged). "DCF" → "DCF sensitivity — … · your assumptions"; "DCF assumptions" → "DCF sensitivity · your assumptions" with the foot "Projects EBITDA as a proxy for free cash flow (capex, tax and working capital are not deducted), grows it 5 years at your growth rate, discounts at your WACC and adds a terminal value at 3.0% growth. A sensitivity on your assumptions — not the valuation, which is the midpoint above."; "Methodology bands · normalized weights sum to 100%" → "Methodology bands" with the foot "The framework's weighted methods (weights sum to 100%) beside your DCF sensitivity, which carries no weight in the midpoint."; bar "DCF (5yr + terminal)" → "DCF sensitivity (not weighted)"; fact-sheet foot "No number on this page exists without one." removed ("Hover or focus any figure …"); file comment "Every figure traces to source data, not assumption" corrected.
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 "not assumption" / "without one" / "normalized weights"; the DCF foot shown · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G3 — "Strategic-buyer basis"; acquirer fit shown as probability
+*Closed by:* `pages/Valuation.tsx` (labels). Header tag "Strategic-buyer basis" → "Institutional framework — the console value" (as Page 03 G3 did for the same figure, D1); the acquirers' "87 %" column is "Fit probability" (screen-reader prefix per value) and the foot opens "Fit probability is the discovery engine's weighted fit score — not a measured chance of a bid." (the wording used on Buyer Profiles and Buyer Intelligence).
+*Verification:* `tsc -b`, eslint clean · Chromium: 0 "strategic-buyer basis"; the new tag and foot shown · free 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+*Note:* Value My Company (Page 03, approved) still heads the same column "Probability" — flagged for the final review.

@@ -43,7 +43,7 @@ const Valuation: React.FC = () => {
   return (
     <div data-page="valuation" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Valuation Desk" title="Enterprise Value"
-        badge={<span className="text-[12px] text-xo-muted">Strategic-buyer basis · Conf {INST.confidence.score}% · {INST.confidence.tier} · framework v{INST.frameworkVersion} · {INST.comparablesUsed} comps · {INST.buyerUniverse.qualified} buyers</span>} />
+        badge={<span className="text-[12px] text-xo-muted">Institutional framework — the console value · Conf {INST.confidence.score}% · {INST.confidence.tier} · framework v{INST.frameworkVersion} · {INST.comparablesUsed} comps · {INST.buyerUniverse.qualified} buyers</span>} />
 
       <section aria-label="Valuation summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <div className="bg-xo-panel"><Metric label="Midpoint" emphasis value={fmtMoney(INST.headline.mid)} sub={`${fmtMoney(INST.headline.low)}–${fmtMoney(INST.headline.high)}`} /></div>
@@ -130,15 +130,15 @@ const Valuation: React.FC = () => {
         </Section>
 
         <Section title="Most likely acquirers · fit-adjusted EV" className="lg:col-span-4"
-          foot={`Premium evidence n=${INST.premium.observedPremiums.length} · ${INST.premium.confidence.tier}. ${INST.premium.note}`}>
+          foot={`Fit probability is the discovery engine's weighted fit score — not a measured chance of a bid. Premium evidence n=${INST.premium.observedPremiums.length} · ${INST.premium.confidence.tier}. ${INST.premium.note}`}>
           <table className="w-full text-[12px]">
-            <thead className="sr-only"><tr><th scope="col">Rank</th><th scope="col">Acquirer</th><th scope="col">Probability</th><th scope="col">Days to cash</th></tr></thead>
+            <thead className="sr-only"><tr><th scope="col">Rank</th><th scope="col">Acquirer</th><th scope="col">Fit probability</th><th scope="col">Days to cash</th></tr></thead>
             <tbody>
               {INST.mostLikelyBuyers.map((b, i) => (
                 <tr key={b.name} className="border-b border-xo-line last:border-0">
                   <td className="px-4 py-2 font-mono text-xo-faint">{i + 1}</td>
                   <th scope="row" className="px-2 py-2 text-left font-semibold">{b.name}</th>
-                  <td className="px-2 py-2 text-right font-mono font-semibold tabular-nums text-xo-verified">{b.probabilityPct}%</td>
+                  <td className="px-2 py-2 text-right font-mono font-semibold tabular-nums text-xo-verified"><span className="sr-only">fit probability </span>{b.probabilityPct}%</td>
                   <td className="px-4 py-2 text-right font-mono tabular-nums text-xo-muted">{b.expectedDaysToCash}d</td>
                 </tr>
               ))}
