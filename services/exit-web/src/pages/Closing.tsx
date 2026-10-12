@@ -45,9 +45,9 @@ const OWNER_STYLE: Record<ChecklistItem["owner"], string> = {
   Banker:  "text-xo-muted",
 };
 
-// Closing Risk Meter — a computed close probability and the live risks
-// standing between the deal and the wire. Probability starts from checklist
-// completion (done = full weight, in-progress = partial), then takes a penalty
+// Closing Risk Meter — a checklist-readiness rule (not a probability) and
+// the risks standing between the deal and the wire. Readiness starts from
+// checklist completion (done = full weight, in-progress = partial), then takes a penalty
 // for each blocker and each open diligence red flag. The outstanding-risk list
 // is the set of not-done checklist items that gate the close.
 function closeProbability(done: number, inProgress: number, total: number, blocked: number, redFlags: number): number {
@@ -126,7 +126,7 @@ const Closing: React.FC = () => {
   return (
     <div data-page="closing" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Operator · Closing" title="Deal Closing Center"
-        badge={<span className="text-[12px] text-xo-muted">Sign · escrow · file · <span className={probTone}>{Math.round(prob * 100)}% close prob</span></span>}
+        badge={<span className="text-[12px] text-xo-muted">Sign · escrow · file · <span className={probTone}>checklist readiness {Math.round(prob * 100)}%</span></span>}
         actions={<>
           <button type="button" onClick={() => window.print()} className={BTN_GHOST}>Print checklist</button>
           <button type="button" onClick={() => setCallOpen(true)} className={BTN}>Closing call</button>
@@ -144,7 +144,7 @@ const Closing: React.FC = () => {
       <MarketTape items={tape} />
 
       {/* ── Closing call ──────────────────────────────────────────── */}
-      <Modal open={callOpen} onClose={() => setCallOpen(false)} title="Closing call" subtitle={`Tuesday 08:00 · ${Math.round(prob * 100)}% modeled close probability`}
+      <Modal open={callOpen} onClose={() => setCallOpen(false)} title="Closing call" subtitle={`Tuesday 08:00 · checklist readiness ${Math.round(prob * 100)}%`}
         footer={<><Button variant="ghost" onClick={downloadInvite}>Download invite (.ics)</Button><Button onClick={() => { setCallOpen(false); notify("Closing call scheduled"); }}>Schedule</Button></>}>
         <div className="space-y-4">
           <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
@@ -165,7 +165,7 @@ const Closing: React.FC = () => {
 
       <BankerTake
         next={topRisk ? <>Clear <span className="text-white">{topRisk.title}</span> ({topRisk.owner}) — the top {topRisk.severity}-risk item gating the wire.</> : "Confirm escrow funding and hold the closing call."}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(dealValue)}</span> transaction · <span className={probTone}>{Math.round(prob * 100)}%</span> modeled close probability.</>}
+        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(dealValue)}</span> transaction · <span className={probTone}>checklist readiness {Math.round(prob * 100)}%</span> (a rule, not a probability).</>}
         inaction={<>{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</>}
         buyer={<>No deal in closing — the checklist is a template.</>}
         automate={<>ExitOS tracks every signature, escrow movement and filing, and nudges the owner before each due date.</>}
@@ -173,9 +173,10 @@ const Closing: React.FC = () => {
         cta={{ label: "Generate closing docs", to: "/console/documents" }}
       />
 
-      {/* Closing Risk Meter — close probability + the risks gating the wire */}
+      {/* Closing Risk Meter — checklist readiness + the risks gating the wire */}
       <div id="escrow" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
-        <Section title="Current close probability" className="lg:col-span-4">
+        <Section title="Checklist readiness (rule)" className="lg:col-span-4"
+          foot="(Done + ½ × In progress) ÷ 12 items, minus 8 points per blocked item and 4 per diligence red flag; floor 5 %, cap 99 %. Built from the statuses you set — a progress rule, not a probability of closing.">
           <div className="flex flex-col items-center px-4 py-4">
             <div className="relative flex h-32 w-32 items-center justify-center">
               <svg aria-hidden viewBox="0 0 100 100" className="h-full w-full -rotate-90">
@@ -185,7 +186,7 @@ const Closing: React.FC = () => {
               </svg>
               <div className="absolute text-center">
                 <div className={`font-mono text-3xl font-semibold ${probTone}`}>{Math.round(prob * 100)}%</div>
-                <div className="text-[11px] text-xo-muted">to close</div>
+                <div className="text-[11px] text-xo-muted">readiness</div>
               </div>
             </div>
             <p className="mt-3 text-[12px] text-xo-muted">{done}/{CLOSING.length} items signed off</p>
