@@ -127,7 +127,10 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean }> = ({ dark
           return (
             <g key={key} {...(interactive ? { role: "button", tabIndex: 0, "aria-pressed": sel === i, "aria-label": `${t(key)}, ${fmtWk(wk)}`, onClick: pick(i), onKeyDown: pick(i), className: "xm-stage cursor-pointer outline-none" } : {})}>
               {interactive && <circle cx={x} cy={y} r="30" fill="transparent" />}
-              {interactive && sel === i && <circle cx={x} cy={y} r="24" fill="none" stroke={last ? C.end : C.ring} strokeWidth="2" />}
+              {interactive && sel === i && <>
+                <circle cx={x} cy={y} r="34" fill={last ? "rgba(69,227,138,0.14)" : "rgba(96,165,250,0.16)"} />
+                <circle cx={x} cy={y} r="24" fill="none" stroke={last ? C.end : C.ring} strokeWidth="2.5" />
+              </>}
               <circle className="xm-ring" cx={x} cy={y} r="17" fill="none" stroke={last ? C.end : C.ring} strokeWidth="1" />
               <circle cx={x} cy={y} r="7.5" fill={last ? C.end : C.node} stroke={C.nodeEdge} strokeWidth="1.5" />
               <text x={x} y={side === "above" ? y - 42 : y + 40} textAnchor="middle" fill={C.text} fontSize="12.5" letterSpacing="2.6" stroke={C.halo} strokeWidth="5" paintOrder="stroke" strokeLinejoin="round" style={{ ...MONO, textTransform: "uppercase" }}>
@@ -151,16 +154,38 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean }> = ({ dark
           );
         })}
       </ol>
-      {/* the selected stage: what happens, and the module that runs it */}
+      {/* the selected stage: a large panel — number, name, what happens, the module that runs it,
+          previous / next, and the stage's place in the run */}
       {interactive && (() => {
         const [key, wk] = STAGES[sel]!;
+        const n = STAGES.length, last = sel === n - 1;
+        const nav = `grid h-10 w-10 place-items-center border text-[16px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 disabled:opacity-30 ${dark ? "border-white/30 text-white hover:bg-white/10" : "border-ink-900 text-ink-900 hover:bg-slate-100"}`;
         return (
-          <div aria-live="polite" className={`grid gap-3 border-t ${k.rule} px-4 py-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-8 sm:px-6`}>
-            <div className={`font-mono text-[11px] uppercase tracking-[0.18em] ${k.n}`}>{String(sel + 1).padStart(2, "0")} · {t(key)} <span className={k.wk}>· {fmtWk(wk)}</span></div>
-            <p className={`text-[15px] leading-relaxed ${dark ? "text-blue-50/90" : "text-ink-800"}`}>{t(key.replace("lc.", "lcd."))}</p>
-            <Link to="/modules" className={`inline-flex items-center gap-3 whitespace-nowrap border px-4 py-2.5 text-[12px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${dark ? "border-white/50 text-white hover:bg-white hover:text-ink-900" : "border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white"}`}>
-              {STAGE_MODULE[key]} <span aria-hidden>→</span>
-            </Link>
+          <div className={`relative border-t ${k.rule} px-4 py-7 sm:px-8 sm:py-9`}
+            style={{ background: dark ? "linear-gradient(100deg, rgba(37,99,235,0.28) 0%, rgba(37,99,235,0.08) 45%, rgba(5,16,31,0) 80%)" : "linear-gradient(100deg, rgba(37,99,235,0.10), transparent 70%)" }}>
+            <div aria-live="polite" className="grid gap-6 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-12">
+              <div className="flex items-center gap-5">
+                <span className={`font-editorial text-[clamp(3.6rem,6vw,5.6rem)] font-semibold leading-none tabular-nums ${last ? "text-emerald-300" : "text-blue-300"}`}>{String(sel + 1).padStart(2, "0")}</span>
+                <span>
+                  <span className={`block font-mono text-[11px] uppercase tracking-[0.2em] ${k.wk}`}>{fmtWk(wk)}</span>
+                  <span className={`mt-1 block font-editorial text-[clamp(1.6rem,2.6vw,2.4rem)] font-semibold leading-tight ${dark ? "text-white" : "text-ink-900"}`}>{t(key)}</span>
+                </span>
+              </div>
+              <p className={`max-w-[54ch] text-[16.5px] leading-relaxed ${dark ? "text-blue-50/90" : "text-ink-800"}`}>{t(key.replace("lc.", "lcd."))}</p>
+              <div className="flex items-center gap-2">
+                <button type="button" aria-label={t("xm.prev")} disabled={sel === 0} onClick={() => setSel(sel - 1)} className={nav}>←</button>
+                <button type="button" aria-label={t("xm.next")} disabled={last} onClick={() => setSel(sel + 1)} className={nav}>→</button>
+                <Link to="/modules" className={`ml-2 inline-flex items-center gap-3 whitespace-nowrap px-5 py-3 text-[13px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${dark ? "bg-white text-ink-900 hover:bg-blue-50" : "bg-ink-900 text-white hover:bg-ink-800"}`}>
+                  {STAGE_MODULE[key]} <span aria-hidden>→</span>
+                </Link>
+              </div>
+            </div>
+            {/* the run so far */}
+            <div aria-hidden className="mt-7 grid grid-cols-8 gap-1.5">
+              {STAGES.map(([sk], i) => (
+                <span key={sk} className={`h-1.5 rounded-full transition-colors duration-300 ${i <= sel ? (i === n - 1 ? "bg-emerald-300" : "bg-blue-400") : dark ? "bg-white/15" : "bg-slate-200"}`} />
+              ))}
+            </div>
           </div>
         );
       })()}
@@ -173,6 +198,7 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean }> = ({ dark
       {/* footer row */}
       <figcaption className={`relative flex items-center gap-3 border-t ${k.rule} ${k.cap} px-4 py-4 font-mono text-[10px] uppercase tracking-[0.2em] sm:px-6`}>
         <span aria-hidden className="h-4 w-4 shrink-0 bg-blue-600" /><span>{t("lifecycle.title")} · {t("lifecycle.live")}<Note n={6} first dark={dark} /></span>
+        {interactive && <span className="ml-auto hidden items-center gap-2 text-blue-300 sm:inline-flex"><span aria-hidden className="h-2 w-2 animate-pulse rounded-full bg-blue-400 motion-reduce:animate-none" />{t("xm.pick")}</span>}
       </figcaption>
       <div aria-hidden className="h-1 bg-blue-600" />
     </figure>

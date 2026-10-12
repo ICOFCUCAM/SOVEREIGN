@@ -75,9 +75,10 @@ const Landing: React.FC = () => {
               [MARKET_FMT.buyers, t("ribbon.mandates")],
               [HISTORY_FMT.disclosedValue, t("ribbon.value")],
             ].map(([v, l], i) => (
-              <div key={l} className={`py-6 pr-3 ${i ? "border-l border-white/15 pl-3 sm:pl-5" : ""}`}>
-                <div className="font-editorial text-[clamp(1.6rem,2.8vw,2.6rem)] font-semibold leading-none tracking-[-0.02em]"><CountUp value={v} /></div>
-                <div className="mt-2 text-[12.5px] text-blue-100/75">{l}<Note n={([1, 2, 3] as SourceId[])[i]} first dark /></div>
+              <div key={l} className={`relative py-7 pr-3 ${i ? "border-l border-white/15 pl-3 sm:pl-6" : ""}`}>
+                <span aria-hidden className={`hero-rule absolute top-0 h-[2px] bg-blue-400 ${i ? "left-3 right-3 sm:left-6" : "left-0 right-3"}`} style={{ animationDelay: `${0.2 + i * 0.15}s` }} />
+                <div className="font-editorial text-[clamp(2.1rem,4.4vw,4rem)] font-semibold leading-none tracking-[-0.03em]"><CountUp value={v} /></div>
+                <div className="mt-2.5 text-[13px] text-blue-100/80">{l}<Note n={([1, 2, 3] as SourceId[])[i]} first dark /></div>
               </div>
             ))}
           </div>
@@ -119,6 +120,8 @@ const Landing: React.FC = () => {
         </Instrument>
         <style>{`
           @keyframes exTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+          @keyframes heroRule{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+          @media (prefers-reduced-motion: no-preference){.hero-rule{transform-origin:left;animation:heroRule .9s cubic-bezier(.2,.7,.2,1) both}}
           @keyframes exScan{0%{transform:translateY(-100%);opacity:0}8%{opacity:1}50%{opacity:.5}92%{opacity:1}100%{transform:translateY(2000%);opacity:0}}
           @keyframes exFlash{0%,100%{background:transparent}50%{background:rgba(96,165,250,.10)}}
           @keyframes exTravel{0%{left:0;opacity:0}6%{opacity:1}94%{opacity:1}100%{left:100%;opacity:0}}
@@ -269,15 +272,20 @@ const Landing: React.FC = () => {
             <div className="border-t-4 border-double border-ink-900 pt-8">
               <Chapter n="07">{t("faq.eyebrow")}</Chapter>
               <h2 id="faq-h" className="mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} /></h2>
+              <div className="mt-10 rounded-[4px] p-6 text-white" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
+                <p className="font-editorial text-[1.35rem] font-semibold leading-snug">{t("faq.more")}</p>
+                <button onClick={() => nav("/pricing")} className={`${BTN} mt-5 bg-white text-ink-900 hover:bg-blue-50`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
+              </div>
             </div>
-            <div className="border-t border-ink-900">
+            <div className="flex flex-col gap-3">
               {[1, 2, 3, 4, 5, 6].map((k) => (
-                <details key={k} className="group border-b border-slate-300">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 [&::-webkit-details-marker]:hidden">
-                    <span className="font-editorial text-[clamp(1.15rem,1.7vw,1.45rem)] font-semibold">{t(`faq.q${k}`)}</span>
-                    <span aria-hidden className="font-mono text-[20px] leading-none text-blue-600 transition-transform group-open:rotate-45">+</span>
+                <details key={k} className="group rounded-[4px] border border-slate-300 bg-white shadow-[0_1px_0_rgba(10,16,24,0.04)] transition-shadow open:border-blue-600 open:shadow-[0_18px_40px_-20px_rgba(6,24,46,0.45)]">
+                  <summary className="flex cursor-pointer list-none items-center gap-5 rounded-[4px] px-5 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:px-6 [&::-webkit-details-marker]:hidden">
+                    <span className="font-mono text-[12px] font-semibold tabular-nums text-blue-600">0{k}</span>
+                    <span className="flex-1 font-editorial text-[clamp(1.15rem,1.7vw,1.45rem)] font-semibold">{t(`faq.q${k}`)}</span>
+                    <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-300 text-[18px] leading-none text-blue-600 transition group-open:rotate-45 group-open:border-blue-600 group-open:bg-blue-600 group-open:text-white">+</span>
                   </summary>
-                  <p className="max-w-[60ch] pb-6 text-[15px] leading-relaxed text-slate-600">{t(`faq.a${k}`)}</p>
+                  <p className="max-w-[62ch] border-t border-slate-200 px-5 pb-6 pt-4 text-[15.5px] leading-relaxed text-slate-700 sm:ml-[52px] sm:border-t-0 sm:px-6 sm:pt-0">{t(`faq.a${k}`)}</p>
                 </details>
               ))}
             </div>
