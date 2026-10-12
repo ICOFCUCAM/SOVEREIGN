@@ -28,7 +28,7 @@ Founder and buyer (free): `h1` none · axe color-contrast ×14 (1440) · no over
 ## Gap register — Page 28
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **"Network-wide moat" overclaims; "this session".** | Say the figures are your own recorded actions (this browser, or your account when connected); "stored events"; no network claims. | ☑ G1-commit |
+| G1 | **"Network-wide moat" overclaims; "this session".** | Say the figures are your own recorded actions (this browser, or your account when connected); "stored events"; no network claims. | ☑ `ed8522d` |
 | G2 | **"Clear" erases history without confirmation.** | Inline confirmation stating exactly what is erased (this browser's record, and the account's stored events when connected). | ☐ |
 | G3 | Buyer sees founder events recorded in the same browser. | Buyer view filters to events with `actorRole: "buyer"`. | ☐ |
 | G4 | Fake live tape. | `RegistryTape`. | ☐ |
