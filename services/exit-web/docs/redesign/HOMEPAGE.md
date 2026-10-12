@@ -426,7 +426,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE2 | The hero's petrol (#0d2130) is a different hue family from every other dark section. | The ink scale derived as a deep blue ink; the hero dark moved onto it with a quiet blue glow behind the watermark. | closed `748df292` |
 | EE3 | Landing sections use ad hoc navy hex values. | Landing.tsx darks replaced by the ink variables. | closed `9d44bb6f` |
 | EE4 | Components (Instrument, ExchangeMap, LedgerTable, QuickValue, LifecycleBand) carry their own navies. | Component darks replaced by the ink variables (board content untouched). | closed `1c30d95f` |
-| EE5 | Five greens and six blues outside the board. | Reduced to live green (#7CFF9F) and done green (emerald-300 on dark / emerald-700 on paper); blues to blue-600 (paper), blue-400/300 (dark). | open |
+| EE5 | Five greens and six blues outside the board. | Reduced to live green (#7CFF9F) and done green (emerald-300 on dark / emerald-700 on paper); blues to blue-600 (paper), blue-400/300 (dark). | closed `75b652a2` |
 | EE6 | Ivory and white alternate without a rule. | Paper rhythm: ivory for story chapters, white for working chapters; written down here. | open |
 | EE7 | The capability strip is a flat dark bar. | A lit top seam, hairline glyphs and a hover lift on each capability. | open |
 | EE8 | The headline's large type is set at default spacing. | Optical tightening on the display lines and a hanging 'T'. | open |
@@ -983,6 +983,9 @@ Landing's own darks (FAQ brief card, the closing chapter's ground and veil, the 
 
 ### EE4 — closed 1c30d95f
 Instrument, ExchangeMap (dark ground), LedgerTable summary strip, QuickValue result card and LifecycleBand on the ink variables; the board's screen content untouched.
+
+### EE5 — closed 75b652a2
+Outside the board the page now uses two greens — live (#7CFF9F, the travelling lights only) and done (emerald-300 / #6ee7b7 on ink, emerald-700 on paper) — and three blues: blue-600 (signal, on paper), blue-400 and blue-300 (on ink). Changed: the edition dot (done-ink), the map's closing node (done), the value gauge and the signature line (blue-600 in place of blue-500). The ribbon over the board keeps its colours (board identical).
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
