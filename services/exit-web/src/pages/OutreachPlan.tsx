@@ -35,13 +35,13 @@ const OutreachPlan: React.FC = () => {
   return (
     <div data-page="outreach-plan" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Exchange · Execution · ${fromIntake ? "Your mandate" : company.name}`} title="Buyer Outreach Plan"
-        badge={<span className="text-[12px] text-xo-muted">Sequenced</span>}
-        description={plan.summary} />
+        badge={<span className="text-[12px] text-xo-muted">Suggested plan · nothing sent</span>}
+        description={<>{plan.summary} This is a suggested plan: ExitOS has not contacted any of these buyers, and nothing is sent or scheduled. Week labels are suggested timing from the day you start.</>} />
 
       <section aria-label="Plan summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Ranked buyers" emphasis value={String(plan.totalBuyers)} sub="top 20 by likelihood score" /></div>
-        <div className="bg-xo-panel"><Metric label="Sequenced waves" value={String(plan.waves.length)} sub="competitive tension" /></div>
-        <div className="bg-xo-panel"><Metric label="Lead bidders" value={String(plan.waves[0]?.buyers.length ?? 0)} sub="week 1" /></div>
+        <div className="bg-xo-panel"><Metric label="Suggested waves" value={String(plan.waves.length)} sub="to build competitive tension" /></div>
+        <div className="bg-xo-panel"><Metric label="Lead wave" value={String(plan.waves[0]?.buyers.length ?? 0)} sub="buyers · suggested week 1" /></div>
         <div className="bg-xo-panel"><Metric label="Lead buyer · close-weighted" emphasis value={<>{fmtUsdShort(plan.waves[0]?.buyers[0]?.expectedValueUsd ?? 0)}{plan.waves[0]?.buyers[0] && (!plan.waves[0].buyers[0].premiumKnown || !plan.waves[0].buyers[0].closeKnown) && <PriorTag />}</>} sub={`${plan.waves[0]?.buyers[0]?.name ?? "—"} · expected offer × close rate`} /></div>
       </section>
 
@@ -55,7 +55,7 @@ const OutreachPlan: React.FC = () => {
 
       {plan.waves.map((w) => (
         <Section key={w.tier} title={`Wave ${w.tier} · ${w.label}`} className="border border-xo-line"
-          right={<span className="text-[11px] text-xo-muted">{w.timing} · {w.buyers.length} buyers</span>}
+          right={<span className="text-[11px] text-xo-muted">Suggested {w.timing.toLowerCase()} · {w.buyers.length} buyers</span>}
           foot={w.rationale}>
           <ScrollRegion label={`Wave ${w.tier} buyers`}>
             <table className="w-full min-w-[640px] text-[12px]">

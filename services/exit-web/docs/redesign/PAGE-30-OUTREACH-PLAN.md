@@ -32,7 +32,7 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 | G1 | **Likelihood score shown as a probability; "qualified buyers".** | "Likelihood score N/100 — composite, not a probability"; "Ranked buyers"; wave text without "probability"; show each buyer's sector overlap with this company (additive field) and say how many have none. | ☑ `4a0a723` |
 | G2 | **Value per buyer unlabelled; priors untagged.** | "Close-weighted value" with the formula and baseline in the foot; PRIOR tag where premium or close rate is the neutral assumption (additive fields); the anchor metric labelled the same. | ☑ `d88eadb` |
 | G3 | "Contact path" is a role; "Conf" rule unstated. | "Typical contact role"; "Contact confidence" with its rule (indexed deals, mostly unverified). | ☑ `d1f13e3` |
-| G4 | "Sequenced" implies a running programme. | Say it is a suggested plan: nothing is sent or scheduled; week labels are suggested timing. | ☐ |
+| G4 | "Sequenced" implies a running programme. | Say it is a suggested plan: nothing is sent or scheduled; week labels are suggested timing. | ☑ G4-commit |
 | G5 | Demo unlabelled. | Demo data / Your intake badge and line. | ☐ |
 | G6 | Fake live tape. | `RegistryTape`. | ☐ |
 | G7 | Design: no `h1`, 26 contrast failures. | Rebuild on `xo`. | ☑ `edab625` |
@@ -58,3 +58,7 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 ### G3 — "Contact path" is a role; "Conf" rule unstated
 *Closed by:* `pages/OutreachPlan.tsx` (labels). Column "Contact path" → "Typical contact role" (the plan takes the first outreach path, which is always the buyer type's typical role, e.g. "Director / VP, Corporate Development"); "Conf" → "Contact confidence"; footer: "the role is the one typical for the buyer type, never a named person; confidence is a rule on the buyer's indexed deals — High at 40 or more, Medium at 8 or more, otherwise Low — and most indexed deals are unverified registry entries."
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 "Contact path" / "Conf" headers · Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G4 — "Sequenced" implies a running programme
+*Closed by:* `pages/OutreachPlan.tsx` and `lib/outreach-plan.ts` (labels). Status "Sequenced" → "Suggested plan · nothing sent"; description adds "This is a suggested plan: ExitOS has not contacted any of these buyers, and nothing is sent or scheduled. Week labels are suggested timing from the day you start."; "Sequenced waves — competitive tension" → "Suggested waves — to build competitive tension"; "Lead bidders — week 1" metric → "Lead wave — buyers · suggested week 1"; wave headers "Week 1 · 4 buyers" → "Suggested week 1 · 4 buyers"; summary "sequenced waves" → "suggested waves". The wave name "Lead bidders" is kept (the plan's label, asserted in `outreach-plan.test.ts`).
+*Verification:* `tsc -b`, eslint clean, `outreach-plan.test.ts` 4/4 · Chromium: 0 "sequenced"; the description shown · Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.

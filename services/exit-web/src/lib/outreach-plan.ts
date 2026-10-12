@@ -68,7 +68,7 @@ export function buildOutreachPlan(baselineUsd: number, tokens: readonly string[]
 
   const top = buyers[0];
   const summary = top
-    ? `${buyers.length} ranked buyers across ${waves.length} sequenced waves. Lead with ${top.name} (likelihood score ${top.probabilityPct}/100, close-weighted ${fmtUsdShort(top.expectedValueUsd)}); run the competitive set in parallel to hold leverage.`
+    ? `${buyers.length} ranked buyers across ${waves.length} suggested waves. Lead with ${top.name} (likelihood score ${top.probabilityPct}/100, close-weighted ${fmtUsdShort(top.expectedValueUsd)}); run the competitive set in parallel to hold leverage.`
     : "No ranked buyers for this profile yet.";
 
   return { waves, totalBuyers: buyers.length, summary };
