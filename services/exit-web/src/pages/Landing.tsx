@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Glyph, Mark, Arrow, Chapter, Editorial } from "../components/MarketingChrome";
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS, TOP_JURISDICTIONS, type BoardTx } from "../lib/market-stats";
 import { useI18n } from "../lib/i18n";
+import QuickValue from "../components/QuickValue";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
@@ -178,6 +179,9 @@ const Landing: React.FC = () => {
           @keyframes exTravel{0%{left:0;opacity:0}6%{opacity:1}94%{opacity:1}100%{left:100%;opacity:0}}
         `}</style>
       </section>
+
+      {/* ===== VALUE YOUR COMPANY — the working product moment ===== */}
+      <QuickValue />
 
       {/* ===== BAND · THE ACQUISITION LIFECYCLE ===== */}
       <section aria-label={t("lifecycle.title")} className="text-white" style={{ background: NAVY }}>

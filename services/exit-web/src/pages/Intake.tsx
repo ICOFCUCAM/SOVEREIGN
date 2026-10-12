@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { fmtMoney, Button } from "../lib/ui";
 import { runInstitutionalValuation } from "@exit/engines";
 import {
@@ -10,6 +11,7 @@ import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
 import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
 import { NUMERIC_FIELDS, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
+import { fromQuery, quickIntake } from "../lib/quick-value";
 import { Section, Metric, Provenance, ScrollRegion, ActionLink, Bar } from "../components/xo";
 
 // ── VALUE MY COMPANY ────────────────────────────────────────────────
@@ -52,8 +54,14 @@ const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
 const Intake: React.FC = () => {
   const { session } = useAuth();
   // Saved only when the founder edits a field — opening the page saves nothing.
-  const [inp, setInp] = useState<IntakeInputs>(() => loadSavedIntake() ?? SAMPLE_INTAKE);
+  // Figures handed over from the homepage's quick value pre-fill the form but
+  // are not saved until the founder edits a field or presses Save.
+  const { search } = useLocation();
+  const handoff = useMemo(() => fromQuery(search), [search]);
+  const [inp, setInp] = useState<IntakeInputs>(() => loadSavedIntake() ?? (handoff ? quickIntake(handoff) : SAMPLE_INTAKE));
   const [saved, setSaved] = useState<boolean>(() => loadSavedIntake() !== null);
+  const [prefilled, setPrefilled] = useState<boolean>(() => loadSavedIntake() === null && handoff !== null);
+  const [handoffDismissed, setHandoffDismissed] = useState(false);
 
   const report = useMemo(() => runInstitutionalValuation(buildProfile(inp)), [inp]);
   // Listing: preview exactly what buyers will see, confirm, and allow withdrawal.
@@ -68,7 +76,13 @@ const Intake: React.FC = () => {
   const withdraw = (): void => { unlistCompany(preview.id); setConfirming(false); setListingVersion((v) => v + 1); };
   const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => {
     setInp((p) => { const next = { ...p, [k]: v }; saveIntake(next); return next; });
-    setSaved(true);
+    setSaved(true); setPrefilled(false);
+  };
+  const keepPrefill = (): void => { saveIntake(inp); setSaved(true); setPrefilled(false); };
+  const applyHandoff = (): void => {
+    if (!handoff) return;
+    const next = quickIntake(handoff);
+    saveIntake(next); setInp(next); setTexts(textsFor(next)); setErrors({}); setSaved(true); setHandoffDismissed(true);
   };
   // Number fields keep exactly what was typed; only valid values reach the engines.
   const [texts, setTexts] = useState<Record<NumericKey, string>>(() => textsFor(inp));
@@ -92,7 +106,7 @@ const Intake: React.FC = () => {
           <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">Acquisition Intelligence · Intake</div>
           <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <h1 className="font-serif text-[24px] font-semibold tracking-tight">Value my company</h1>
-            <Provenance kind={saved ? "company" : "demo"} />
+            {saved ? <Provenance kind="company" /> : prefilled ? <Provenance kind="company">Homepage figures · not saved</Provenance> : <Provenance kind="demo" />}
           </div>
           <p className="mt-1 text-[13px] text-xo-muted">Enter your company and receive the institutional answer in seconds — enterprise value, the buyers most likely to acquire you, comparable transactions and the evidence behind every figure.</p>
         </div>
@@ -103,6 +117,20 @@ const Intake: React.FC = () => {
           {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
         </div>
       </header>
+
+      {prefilled && (
+        <section aria-label="Figures from the homepage" className="flex flex-wrap items-center gap-3 border border-xo-brass/50 bg-xo-panel px-4 py-3">
+          <p className="min-w-0 flex-1 text-[13px] text-xo-text">Pre-filled from the homepage: sector, revenue and growth. Every other field is a typical value. <span className="text-xo-muted">Nothing is saved yet — edit any field, or save these figures to use them across the console.</span></p>
+          <Button onClick={keepPrefill}>Save these figures</Button>
+        </section>
+      )}
+      {saved && handoff && !handoffDismissed && (
+        <section aria-label="Figures from the homepage" className="flex flex-wrap items-center gap-3 border border-xo-line bg-xo-panel px-4 py-3">
+          <p className="min-w-0 flex-1 text-[13px] text-xo-muted">You already have saved figures, so the homepage figures (sector, revenue, growth) were not applied.</p>
+          <Button variant="ghost" onClick={applyHandoff}>Use the homepage figures instead</Button>
+          <Button variant="ghost" onClick={() => setHandoffDismissed(true)}>Keep mine</Button>
+        </section>
+      )}
 
       {(confirming || listed) && (
         <section id="listing-confirm" aria-label="Exchange listing" className="border border-xo-caution/50 bg-xo-panel px-4 py-3">

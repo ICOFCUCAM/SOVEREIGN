@@ -217,7 +217,7 @@ U1 + U2 + U4 first: a live product moment, a signature look and visible proof, w
 ### Gap register — Phase 3 (owner, 2026-10-12: "yes build" for U1, U2, U4)
 | # | Upgrade | Status |
 |---|---|---|
-| U1 | Value your company in 30 seconds | ☐ |
+| U1 | Value your company in 30 seconds | ☑ U1-commit |
 | U2 | The broadsheet ledger | ☐ |
 | U4 | Numbered source notes | ☐ |
 
@@ -418,6 +418,36 @@ Kept: "Access Requests — Request NDA-gated identity and packages, tracked end 
 - Keyboard: 112 stops outside the board, all with a visible focus indicator.
 - Reduced motion: 0 animations outside the board.
 - Screens: `scratchpad/home/m10b-*`.
+
+### U1 — Value your company in 30 seconds
+*Closed by:*
+- **`lib/quick-value.ts` (new).**
+  - `quickIntake` = the intake's `DEFAULT_INTAKE` plus sector, revenue and growth. ARR is kept at the defaults' 75% of revenue.
+  - `quickValue` = `runInstitutionalValuation(buildProfile(…)).headline`: the D1 institutional value, no new formula.
+  - `QUICK_ASSUMPTIONS` is read from the defaults, not typed.
+  - `quickQuery` / `fromQuery`: the URL hand-off, validated with `parseNumber` (revenue $0.1M–$5,000M, growth −50%–300%, sector in `SECTORS`).
+- **`lib/quick-value.test.ts` (new, 4 tests).** Parity with the engine, defaults kept, URL round trip, invalid inputs rejected.
+- **`components/QuickValue.tsx` (new).** Placed directly under the hero: label "Value your company · 30 seconds" and `h2` "What is your company worth?".
+  - Inputs: sector select, revenue ($M), growth (%), with labels and errors tied by `aria-describedby`/`aria-invalid`.
+  - Result in an `aria-live` region: the low–high range in the editorial serif, the midpoint, and a "Model estimate" tag.
+  - The assumptions are listed beside the result.
+  - Buttons: **Refine in Value My Company →** (`/console/intake?sector=…&revenue=…&growth=…`) and **Access the Exchange**.
+  - The valuation module loads with `import()` on first focus.
+- **`pages/Intake.tsx`.**
+  - With no saved figures, a valid hand-off pre-fills the form. The badge reads "Homepage figures · not saved", a note explains it, and **Save these figures** keeps them. Nothing is saved until an edit or Save (Page 03 G1 rule kept).
+  - With saved figures, the hand-off is not applied. The page says so and offers "Use the homepage figures instead" or "Keep mine".
+- **`lib/i18n.tsx`.** 14 new `qv.*` keys in EN/FR/ES (M9 rule). Sector names and parse errors stay English, as in the console.
+
+*Verification:*
+- `tsc -b`, eslint clean · `vitest` 222/222 (+4).
+- Chromium:
+  - Invalid input ("abc", growth 900) shows "Use digits only, e.g. 12.5." and "Must be at most 300.".
+  - Vertical SaaS / 40 / 45 gives **$112.2M – $323.2M, midpoint $182.5M**.
+  - Refine → sign in → Value My Company shows **$182,541,176** (range $112,235,294 – $323,152,941), the same figures, with the "not saved" badge and nothing in `exitos.intake.v1`. Save these figures stores sector `vertical_saas`, revenue 40,000,000, growth 0.45, and the badge clears.
+- axe 0 on the section with an error shown and with a result shown, at 1440 and 390; homepage axe outside the board 0; Value My Company (free) axe 0; no overflow.
+- **Bundle (honest note).** The lazy chunk is only 1.4 kB because the valuation engine is already in the main bundle (the console shares it). The main bundle grew from 1,252.3 kB to 1,261.1 kB (+8.8 kB: the strings and the component).
+- Homepage height: 9,585 → 9,907 px at 1440.
+- Screens: `scratchpad/home/u1-*`.
 
 ---
 
