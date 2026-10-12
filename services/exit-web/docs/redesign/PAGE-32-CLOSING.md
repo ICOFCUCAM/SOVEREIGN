@@ -5,7 +5,7 @@
 | Route | `/console/closing` |
 | Component | `src/pages/Closing.tsx` (259 lines) + `lib/engines.ts` (`DILIGENCE` = `runDueDiligence(SAMPLE_COMPANY)`, `OFFER_EVALUATIONS`), shared `BankerTake` |
 | NAV | "Closing Center / Signatures / Escrow", founder, **Pro** (free: Upgrade page) |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All seven gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `f95aa68`)
 
@@ -71,3 +71,13 @@ A closing checklist (12 items with owner, due day and status), a close-probabili
 ### G6 — Shared `BankerTake` and fake live tape
 *Closed by:* `pages/Closing.tsx`. The shared `BankerTake` is replaced by a page-local "Recommended action" `Section` (headline: clear the top gating item; Today — "No deal in closing — the checklist is a template. n/12 items done, checklist readiness N% (a rule, not a probability)"; If you wait; Next — with a link to generate the closing documents; What ExitOS does — no tracking or reminders). Its "At stake: **$165,000,000 transaction**" (the highest sample offer, presented as the deal in closing) is removed — no deal is in closing. Pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "$165" / "Sentinel" / "live" words, 0 pinging elements · free (Upgrade page) and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus (39 at 1440: 12 status selects added).
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 · Chromium Pro 1440/390: 0 errors, `h1` 1, no overflow (was overflowing at 390), axe 0, all tab stops with visible focus · free: Upgrade page · closing-call dialog: role dialog, axe 0, Escape/Close return focus; .ics names the active company and matches the shown date · user-set statuses persist across reloads.
+
+## Known issues
+- Statuses are saved in this browser only (stated); they are not shared with counsel or the buyer and not stored in the account.
+- The checklist is a fixed 12-item template; items cannot be added or removed.
+- The .ics time is written in UTC from the browser's local 08:00 (unchanged behaviour).
