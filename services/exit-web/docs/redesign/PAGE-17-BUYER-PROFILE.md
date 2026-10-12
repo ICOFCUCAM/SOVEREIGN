@@ -31,7 +31,7 @@ One indexed buyer's dossier: likelihood for the founder's company and the buyer'
 ## Gap register — Page 17
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Composite score labelled "probability".** | "Likelihood score N/100 (composite)" with the formula reference; forecast tile likewise. | ☐ |
+| G1 | **Composite score labelled "probability".** | "Likelihood score N/100 (composite)" with the formula reference; forecast tile likewise. | ☑ G1-commit |
 | G2 | **"Express interest" implies an effect it does not have.** | Say what it does: saved to deal activity on this browser; the buyer is not notified. Drop "sharpens engagement intelligence". | ☐ |
 | G3 | Snapshot wording ("currently exhibits", "node-side"). | "in the registry snapshot (as of …)"; "not in the bundled extract". | ☐ |
 | G4 | Demo company unlabelled. | Company, tokens and institutional baseline from `loadActiveCompany()` (as the Terminal does); badge. | ☐ |
@@ -47,3 +47,7 @@ The Terminal shows `rankedBuyers().probability.pct` as "N% likely", "N% probabil
 ### G5 — Design
 *Closed by:* `pages/BuyerProfile.tsx` rebuilt on `xo` (back link with a 24 px target; `PageHeader` `h1` = buyer, Express interest and the PDF briefing book as header actions; two score metrics; forecast and headline DNA as definition lists and metrics; rationale, contact intelligence, expected outcome, acquisition profile, similar acquisitions (row headers, `ScrollRegion`) and signals as labelled `Section`s with `h3`s; appetite drivers show "v/max" in text; signals carry "(active)/(inactive)" for screen readers; external links announced as new tabs; the not-found state uses the same header). Content carried over verbatim; G1–G4 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Preparation `/console/buyer/microsoft` 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus; `/console/buyer/nope` (not found) 390: `h1` 1, axe 0.
+
+### G1 — Composite score labelled "probability"
+*Closed by:* `pages/BuyerProfile.tsx` (labels). "Probability · your company N%" → **"Likelihood score · your company N/100"** with "Composite: appetite + sector overlap + velocity + recency — not a probability (formula on the Buyer Graph). Suggested (rule): …"; forecast tile "Probability N% — for a company like yours" → "Likelihood score N/100 — composite, not a probability". "Expected value" and "Expected to close" were "probability-weighted"; they are offer × close rate (`expectedOutcomeFor`), so now "close-rate-weighted".
+*Verification:* `tsc -b`, eslint clean · Chromium: the only "probability" on the page is "not a probability"; 0 "N%" likelihood values.

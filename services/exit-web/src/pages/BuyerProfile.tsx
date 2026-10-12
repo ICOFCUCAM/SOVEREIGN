@@ -71,15 +71,15 @@ const BuyerProfile: React.FC = () => {
       </PageHeader>
 
       <section aria-label="Scores" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2">
-        <div className="bg-xo-panel"><Metric label="Probability · your company" emphasis value={<span className="text-xo-verified">{prob.pct}%</span>} sub={recommendedAction(p)} /></div>
+        <div className="bg-xo-panel"><Metric label="Likelihood score · your company" emphasis value={<span className="text-xo-verified">{prob.pct}<span className="text-[14px] text-xo-faint">/100</span></span>} sub={<>Composite: appetite + sector overlap + velocity + recency — not a probability (formula on the Buyer Graph). Suggested (rule): {recommendedAction(p)}</>} /></div>
         <div className="bg-xo-panel"><Metric label="Appetite score" emphasis value={<>{appetite.score}<span className="text-[14px] text-xo-faint">/100</span></>} sub={`${appetite.tier} · confidence ${confidence} · intrinsic acquisitiveness, independent of your company`} /></div>
       </section>
 
       <Section title="Acquisition forecast" className="border border-xo-line">
         <dl className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-4">
           {[
-            ["Probability", `${prob.pct}%`, "for a company like yours"],
-            ["Expected value", fmtUsdShort(expectedOutcomeFor(p, baseline).expectedClose), "probability-weighted"],
+            ["Likelihood score", `${prob.pct}/100`, "composite, not a probability"],
+            ["Expected value", fmtUsdShort(expectedOutcomeFor(p, baseline).expectedClose), "close-rate-weighted"],
             ["Expected premium", `+${Math.round((p.premium_pct ?? 0.2) * 100)}%${p.premium_pct == null ? "*" : ""}`, p.premium_pct != null ? "from track record" : "neutral prior"],
             ["Median close", `${medianClose} days`, "time-to-cash"],
           ].map(([k, v, sub]) => (
@@ -187,7 +187,7 @@ const BuyerProfile: React.FC = () => {
           <div className="bg-xo-panel"><Metric label="Premium expectation" value={`${Math.round(premium * 100)}%`} sub={premiumKnown ? `${p.disclosed_events} disclosed deals` : "market-neutral prior"} /></div>
           <div className="bg-xo-panel"><Metric label="Close-rate expectation" value={`${Math.round(close * 100)}%`} sub={closeKnown ? "from track record" : "market-neutral prior"} /></div>
           <div className="bg-xo-panel"><Metric label="Expected offer" value={fmtUsdShort(expectedOffer)} sub="at LOI" /></div>
-          <div className="bg-xo-panel"><Metric label="Expected to close" value={fmtUsdShort(expectedClose)} sub="probability-weighted" /></div>
+          <div className="bg-xo-panel"><Metric label="Expected to close" value={fmtUsdShort(expectedClose)} sub="close-rate-weighted" /></div>
         </div>
       </Section>
 
