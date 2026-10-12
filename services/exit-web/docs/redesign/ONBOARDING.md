@@ -12,7 +12,7 @@
 ### What exists today
 - **No onboarding.** A code search for a welcome, tour, getting-started, first-step or first-run hint finds none.
 - **Three navigation systems on every page.**
-  - The sidebar: **40 entries for founders**, in seven groups (Mandate 12, Market Intelligence 11, Exchange 14, Wealth 1, plus admin for operators). Buyers see 9, admins 2.
+  - The sidebar: **38 entries for founders**, in four groups (Mandate 12, Market Intelligence 11, Exchange 14, Wealth 1). Buyers see 7, admins 2, superadmins 40 (founder plus admin). *(Corrected: first written as 40 founders in seven groups and 9 buyers, before measuring `navForRole`.)*
   - The "Command Layers" bar (`LayerBar`): five layers, Executive → Banker → Market → Transaction → Buyer.
   - The layer sub-nav (`LayerSubNav`): the pages in the current layer.
   - The three use different groupings for the same pages. Example: Diligence is "Mandate" in the sidebar and "Transaction" in the layer bar.
@@ -32,7 +32,7 @@
 | # | Gap | Fix (additive; no content changed) | Status |
 |---|---|---|---|
 | O1 | **No starting point.** | A "Start here" guide at the top of the founder home: five steps in order — Value my company → Check readiness → See your value → Find buyers → Plan outreach. Step 1 is ticked only when figures are saved; steps 2–5 show "Opened" once the page has been opened in this browser. Locked steps show the engagement they need. A buyer version on Buyer Home: Browse opportunities → Acquisition intelligence → Request access → Deal Room. Can be hidden; "Show the guide" in the sidebar brings it back. Stored in this browser only. | ☑ `b336fca` |
-| O2 | **40-entry menu.** | Founders see an **Essentials** list first (Home, Value My Company, Readiness, Enterprise Value, Buyer Profiles, Acquisition Radar, Anonymous Listings, Inbox), with every other entry under **All tools** (collapsed, grouped exactly as today). The choice is remembered in this browser. The current page is always visible: opening a page outside Essentials expands All tools. Buyers and operators keep the full list (9 and 2 entries). No entry, label, route, lock or gate changes. | ☐ |
+| O2 | **38-entry menu.** | Founders see an **Essentials** list first (Home, Value My Company, Readiness, Enterprise Value, Buyer Profiles, Acquisition Radar, Anonymous Listings, Inbox), with every other entry under **All tools** (collapsed, grouped exactly as today). The choice is remembered in this browser. The current page is always visible: opening a page outside Essentials expands All tools. Buyers and operators keep the full list (7 and 2 entries; superadmins 40). No entry, label, route, lock or gate changes. | ☐ |
 | O3 | **Unexplained terms.** | A plain-language glossary (`lib/glossary.ts`) and a "Terms" panel reachable from the sidebar: one-sentence meanings for the terms listed above. Page text is not rewritten. | ☐ |
 | O4 | **No purpose line or next step.** | A slim bar under the layer navigation: "What this page is for" (one sentence) and "Next: <page> →". Driven by one map keyed by route, so no page file changes; can be hidden for all pages at once. | ☐ |
 | O5 | **No first-visit welcome.** | The role is already chosen at sign-in (founder or buyer), so a "selling or buying?" question would repeat it. Instead, on the first visit the Start-here guide opens expanded with one welcome sentence; after that it stays as the user left it. | ☐ |
