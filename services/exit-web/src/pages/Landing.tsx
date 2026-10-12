@@ -282,22 +282,22 @@ const Landing: React.FC = () => {
             </div>
           </div>
 
-          {/* front page — the three latest deals */}
-          <div className="grid border-b border-ink-900 sm:grid-cols-3">
+          {/* front page — the three latest deals, printed on ink: the page's dark pause between the light chapters (EE12) */}
+          <div className="ex-seam relative grid overflow-hidden text-white sm:grid-cols-3" style={{ background: "radial-gradient(ellipse 60% 90% at 50% 0%, var(--ex-glow), transparent 70%), linear-gradient(180deg, var(--ex-1), var(--ex-0))" }}>
             {LEDGER_ROWS.slice(0, 3).map((c, i) => (
-              <article key={c.target} className={`py-7 pr-6 ${i > 0 ? "sm:border-l sm:border-slate-300 sm:pl-6" : ""} border-b border-slate-200 last:border-b-0 sm:border-b-0`}>
-                <div className="flex items-baseline justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
+              <article key={c.target} className={`px-6 py-8 sm:px-7 ${i > 0 ? "sm:border-l sm:border-white/10" : ""} border-b border-white/10 last:border-b-0 sm:border-b-0`}>
+                <div className="flex items-baseline justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-200/75">
                   <span>{c.sector}</span><time dateTime={c.date}>{c.date}</time>
                 </div>
-                <h3 className="mt-4 font-editorial text-[clamp(1.4rem,2.2vw,1.9rem)] font-semibold leading-[1.1] text-ink-900">
-                  {c.buyer} <span className="italic text-blue-700">{c.status === "Closed" ? "acquired" : c.status === "Terminated" ? "ended its deal for" : "agreed to acquire"}</span> {c.target}
+                <h3 className="mt-4 font-editorial text-[clamp(1.4rem,2.2vw,1.9rem)] font-semibold leading-[1.1] text-white">
+                  {c.buyer} <span className="italic text-blue-300">{c.status === "Closed" ? "acquired" : c.status === "Terminated" ? "ended its deal for" : "agreed to acquire"}</span> {c.target}
                 </h3>
-                <div className="mt-5 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-ink-900">{c.value}</div>
-                <div className="mt-2 text-[12px] text-slate-600">Disclosed value</div>
-                <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 text-[11px]">
-                  <div><dt className="text-slate-600">vs reference</dt><dd className="font-mono text-[14px] font-bold text-blue-700">{c.premium}</dd></div>
-                  <div><dt className="text-slate-600">Status</dt><dd className="font-mono text-[14px] font-bold" style={{ color: c.statusColor }}>{c.status}</dd></div>
-                  <div><dt className="text-slate-600">Source</dt><dd className="font-mono text-[12px] font-semibold text-ink-900">{c.sources[0]?.kind ?? "—"}</dd></div>
+                <div className="mt-5 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-white">{c.value}</div>
+                <div className="mt-2 text-[12px] text-blue-100/70">Disclosed value</div>
+                <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-[11px]">
+                  <div><dt className="text-blue-100/70">vs reference</dt><dd className="font-mono text-[14px] font-bold text-blue-300">{c.premium}</dd></div>
+                  <div><dt className="text-blue-100/70">Status</dt><dd className={`font-mono text-[14px] font-bold ${c.status === "Closed" ? "text-ex-done" : c.status === "Terminated" ? "text-slate-300" : "text-amber-300"}`}>{c.status}</dd></div>
+                  <div><dt className="text-blue-100/70">Source</dt><dd className="font-mono text-[12px] font-semibold text-white">{c.sources[0]?.kind ?? "—"}</dd></div>
                 </dl>
               </article>
             ))}
