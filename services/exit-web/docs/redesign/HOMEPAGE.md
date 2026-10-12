@@ -132,8 +132,25 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 | 08 / The next move | **final CTA** (`cta.h2`, body, both buttons, foot) |
 | Footer | brand, tagline, 3 link columns, badges (as corrected), legal, locale, domain, and a mono note on what the figures are |
 
-## Later phase — other routes (to be audited after the homepage)
-`/platform`, `/modules`, `/pricing`: the same chrome (from M1), a skeleton-consistent layout, and the content audit. Known already: Pricing still carries the old tier texts ("Most selected", "NDA automation", "AI negotiation", "net-to-founder math"), to align with Upgrade (Page 41 G2); Platform says "one live exchange", "one audit trail", "Permissioned data rooms, full audit trails and access logs", "the live deal room".
+## Phase 2 — Marketing routes `/platform`, `/modules`, `/pricing` (audit, baseline `1797ccb2`)
+All three use the new chrome (M1) and are English-only (no i18n keys); that stays.
+
+| Page | Blocks (all kept) | Content not true or not aligned |
+|---|---|---|
+| Platform (89 lines) | hero (`h1`, body, Launch ExitOS → `/console`, Explore the modules → `/modules`) · "Built like a bank" 4 pillars · "End to end" 6-step flow · CTA (Launch ExitOS, See pricing) | "one **live** exchange"; "one **audit trail**" (hero and pillar); "Institutional security — **Permissioned data rooms, full audit trails and access logs**" (X12, Page 28); "Autonomous execution — Agents **run** sourcing, outreach … and closing … the desk does the work" (a simulation; nothing is sent, Pages 07, 36); "the **live** deal room" (simulated, Page 12); "**watch** the agents work" |
+| Modules (89 lines) | hero · founder modules (9 cards, 6 with `MODULE_FACTS` stats) · buyer modules (4 cards, 2 stats) · CTA | Valuation "recomputed **live**"; Outreach "**run by the banker agent**" (drafts, Page 36); Data Room "**Permissioned**" (X12); Closing Center "Signatures, escrow and filings **tracked to the wire**" (a checklist, Page 32); Acquisition Radar "**Live** sector signals" (registry snapshot); Deal Room "Gated diligence access **once trust and NDA clear**" (no gating, Pages 12, 25) |
+| Pricing (303 lines) | hero · "How ExitOS gets paid" 5 steps · founder ladder (4 tiers, success-fee note) · banker vs ExitOS table (10 rows) · buyer tiers (3) · CTA | Same tier texts Upgrade corrected (Page 41 G2): "**Most selected**", "NDA **automation**", "**AI** negotiation", "**net-to-founder math**", "mandate **alerts**"; `h1` "Priced like a bank. **Paid when you close.**" ($995/mo is paid regardless; only the 2.5% fee is on close); locked teaser "**4 buyers** are a strong acquisition match" (a fixed number, not computed); table "NDA Automation — Automated", "Negotiation Engine — **AI** scoring", "Real-Time Buyer Signals — **Live** radar"; "an execution desk that **runs around the clock**". **Buyer tiers ($299, $2,499 a month) contradict Upgrade's note "Buyer pricing is not published yet"** (Page 41 G3) — an owner decision, not changed here |
+
+Measured (Chromium, 1440/390, after M1/M7 chrome): 0 errors, `h1` 1, no overflow on all three; axe contrast — Platform 6, Modules 0, Pricing 19; "live" words — Platform 2, Modules 2, Pricing 4.
+
+## Gap register — Marketing routes
+| # | Gap | Fix (colours locked; no block removed) | Status |
+|---|---|---|---|
+| R1 | **Design: the three pages on the skeleton.** | Rebuild each page with the homepage system: editorial-serif `h1` (last line or word in the accent italic), mono chapter labels ("01 / …"), hairline grids instead of rounded cards, square buttons, the navy band where a page has a dark block. Content and links verbatim; `MODULE_FACTS`, prices, tiers, and every `/console`, `/pricing`, `/modules`, `/platform` entry point unchanged. | ☐ |
+| R2 | **Platform overclaims.** | "live exchange" → "exchange"; "one audit trail" → "one record"; Institutional security pillar → "Data rooms and records — a document checklist with completeness per package, NDA-gated identity, and your deal actions recorded."; Autonomous execution → "Agents walk through sourcing, outreach, data room, negotiation and closing; each step waits for your approval, and nothing is sent for you."; "the live deal room" → "the deal room"; "watch the agents work" → "walk through the agents". | ☐ |
+| R3 | **Modules overclaims.** | "recomputed live" → "recomputed from your figures"; Outreach "run by the banker agent" → "drafted by the banker for you to send"; Data Room "Permissioned" → "A document checklist"; Closing Center → "The closing checklist: signatures, escrow and filings, item by item."; Radar "Live sector signals" → "Sector signals from the registry"; Deal Room "once trust and NDA clear" → "for companies that accept your NDA request". | ☐ |
+| R4 | **Pricing not aligned with Upgrade; fixed teaser number.** | Tier texts as Upgrade (Page 41 G2): "Recommended for a live process", "Buyer outreach drafts & NDA requests", "Rule-based negotiation (Bid Room), bid & process management", "Closing Center checklist", "Receive buyer interest in your Inbox"; `h1` → "Priced like a bank. Success fee only when you close."; teaser → "Buyers that match your company are shown once you list." (no fixed number); table "NDA requests & register", "Rule-based scoring & counters", "Buyer signals — Registry radar (snapshot)"; "runs around the clock" removed. Buyer tiers unchanged (open decision). | ☐ |
+| R5 | **Contrast** on Platform (6) and Pricing (19). | Shade steps within the same palette (as M7). Target: axe 0 on all three at 1440 and 390. | ☐ |
 
 ---
 
@@ -258,4 +275,5 @@ These strings sit beside the page's other hard-coded English data constants (the
 - **The hero command board stays exactly as built** (owner, 2026-10-12, during M2: "use the same live screen which is built as a real screen. dont change it"). The board and its bezel — "Live Market", "System Status · Live", "Live Transactions", the session clock, the moving scores and heat bars, the scan sweep and the ticker — are left unchanged by M2–M8. The data it shows is the registry snapshot and the disclosed-deal history (real records); the "live" styling is the owner's choice and is listed here so it is not mistaken for an oversight.
 
 ## Open decisions for the owner
+- **Buyer pricing.** Pricing publishes Buyer Access $299/month and Premium $2,499/month; Upgrade says "Buyer pricing is not published yet" (Page 41 G3), and `access.ts` has no buyer plan. Which is right?
 - **Security and compliance claims** (M3): restore any of SOC 2, audit trail, access logs, encryption or buyer verification only with evidence (a report, a log, a check in the code).
