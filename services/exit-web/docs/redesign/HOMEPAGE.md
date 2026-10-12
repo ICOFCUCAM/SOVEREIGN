@@ -440,7 +440,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE16 | The footer drops from the dark closing to pale grey. | Footer in the deepest ink, continuing the closing chapter. | closed `9672efa3` |
 | EE17 | The page opens with the mark but does not close with it. | A large faint ExitOS signature across the footer, matching the hero watermark. | closed `4e78f0e6` |
 | EE18 | Footer hierarchy is flat. | Footer columns with a heading rule, link hover, the legal line set small. | closed `30491847` |
-| EE19 | No way back from the end of a long page. | A back-to-top control at the foot of the signature line. | open |
+| EE19 | No way back from the end of a long page. | A back-to-top control at the foot of the signature line. | closed `bc8519e6` |
 | EE20 | Footer status dots read as live indicators. | Steady done-green dots, labelled as statements, no pulse. | open |
 | EE21 | The header stays white over dark chapters. | The header turns ink over dark chapters (logo, links, CTA re-coloured). | open |
 | EE22 | Primary and secondary buttons vary in size, weight and arrow. | One primary and one secondary button style used across the homepage. | open |
@@ -1029,6 +1029,9 @@ A large faint ExitOS signature (serif, italic OS, blue-300 at 13% → 2%) set ac
 
 ### EE18 — closed 30491847
 Footer hierarchy: more air above (pt-16/20) and between columns; each column head ruled; links at 13.5 px with a small arrow that slides in on hover; the tagline set in the serif as the footer's one sentence; the legal line kept small at 65%.
+
+### EE19 — closed bc8519e6
+A 'Back to top ↑' control in the footer's bottom row (EN/FR/ES: ft.top), smooth scroll, instant under reduced motion, with a visible focus ring. Placed in the footer rather than on the signature line, which is hidden below lg and would leave phones without it.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
