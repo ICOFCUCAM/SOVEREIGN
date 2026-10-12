@@ -219,7 +219,7 @@ U1 + U2 + U4 first: a live product moment, a signature look and visible proof, w
 |---|---|---|
 | U1 | Value your company in 30 seconds | ☑ `7e3680d0` |
 | U2 | The broadsheet ledger | ☑ `8b02e07a` |
-| U4 | Numbered source notes | ☐ |
+| U4 | Numbered source notes | ☑ U4-commit |
 
 
 ---
@@ -468,6 +468,33 @@ Kept: "Access Requests — Request NDA-gated identity and packages, tracked end 
 - Chromium `/`: 3 front-page stories and 10 table rows, values matching the snapshot (for example DB Schenker $15.8B, Closed, press release + Wikidata). axe 0 on the section at 1440 and 390, and 0 outside the board page-wide; no overflow; all tab stops with visible focus.
 - Height: 9,907 → 10,560 px at 1440; 17,977 → 18,868 px at 390. U7 (mobile folding) would address this if chosen.
 - Screens: `scratchpad/home/u2-*`.
+
+### U4 — Numbered source notes
+*Closed by:*
+- **`components/SourceNotes.tsx` (new).**
+  - `Note`: a superscript link "Source n" to `#source-n`. The first citation of each source carries `id="cite-n"`.
+  - `SourcesSection`: "Sources & method" above the footer, six numbered entries, each with a "↩ back" link to its first citation. The text is computed from the same data the page shows:
+    1. **Market index** — 6,311 events, 1,497 buyers, Wikipedia/Wikidata/EDGAR, generated date, "a bundled snapshot — not a live feed".
+    2. **Acquirer registry** — 31 curated mandates (15 strategic, 6 PE), 21 jurisdictions, 10 sectors; "curated, not independently verified".
+    3. **Disclosed-deal history** — 61 recorded, 53 priced, $379.1B, the sources, "Record tier: 61 unverified".
+    4. **Deal medians** — +36% premium **from 14 deals** with a reference price; 80 days **from 56 deals** with both dates.
+    5. **Valuation** — the deterministic institutional framework; the homepage's typical-value defaults.
+    6. **Typical timeline** — "planning assumptions for a run process, not measurements".
+- **Notes placed** (21 superscripts, none inside the board) in `pages/Landing.tsx` and `components/QuickValue.tsx`:
+  - proof ribbon (1, 2, 3, 2) and trust strip mandates (2);
+  - quick value (5), lifecycle band (6), losses medians (4);
+  - market structure (2), buyer intelligence (2);
+  - confidence-register footer (3) and the six signal tiles (3 or 2 each);
+  - ledger masthead (3) and sources line (1, 3);
+  - coverage (2).
+- `lib/i18n.tsx`: `src.title` in EN/FR/ES. The entries are data text, in English like the page's other data constants.
+
+*Verification:*
+- `tsc -b`, eslint 0 errors · `vitest` 222/222.
+- Chromium `/`: 21 notes, 0 missing targets; 6 back-links, 0 missing. Clicking note 4 lands on `#source-4` (in view), and its back-link returns to `#cite-4`. 0 errors.
+- axe outside the board: 0 at 1440 and 390. Keyboard: 129 tab stops, all with visible focus. No overflow.
+- Height: 10,560 → 11,434 px at 1440; 18,868 → 20,163 px at 390.
+- Screens: `scratchpad/home/u4-sources.jpg`.
 
 ---
 

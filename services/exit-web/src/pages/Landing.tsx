@@ -4,6 +4,7 @@ import { MarketingChrome, Glyph, Mark, Arrow, Chapter, Editorial } from "../comp
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL_FMT, REGISTRY_CARDS, TOP_JURISDICTIONS, type BoardTx } from "../lib/market-stats";
 import { useI18n } from "../lib/i18n";
 import QuickValue from "../components/QuickValue";
+import { Note, SourcesSection, type SourceId } from "../components/SourceNotes";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
@@ -151,7 +152,7 @@ const Landing: React.FC = () => {
               <div key={l} className="flex items-baseline gap-2">
                 {i === 3 && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />}
                 <span className="font-mono text-[15px] font-bold tabular-nums text-ink-900">{v}</span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">{l}</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">{l}<Note n={([1, 2, 3, 2] as SourceId[])[i]} first={i < 3} /></span>
               </div>
             ))}
           </div>
@@ -164,7 +165,7 @@ const Landing: React.FC = () => {
               <div key={c.title} className={`flex items-center gap-3.5 py-5 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-6" : ""} ${i % 2 ? "border-l border-slate-200 pl-5 lg:pl-6" : ""}`}>
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center text-blue-600 ring-1 ring-slate-200"><Glyph name={c.icon} /></span>
                 <div className="min-w-0">
-                  <div className="font-editorial text-[22px] font-semibold leading-none text-ink-900">{c.metric}</div>
+                  <div className="font-editorial text-[22px] font-semibold leading-none text-ink-900">{c.metric}{c.icon === "globe" && <Note n={2} />}</div>
                   <div className="mt-1 text-[12.5px] font-semibold leading-tight text-ink-800">{c.title}</div>
                   <div className="text-[11px] leading-snug text-slate-600">{c.sub}</div>
                 </div>
@@ -187,7 +188,7 @@ const Landing: React.FC = () => {
       <section aria-label={t("lifecycle.title")} className="text-white" style={{ background: NAVY }}>
         <div className={`${WRAP} py-6`}>
           <div className="flex items-center justify-between gap-3">
-            <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-300">{t("lifecycle.title")}</div>
+            <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-300">{t("lifecycle.title")}<Note n={6} first dark /></div>
             <div className="hidden font-mono text-[9.5px] uppercase tracking-[0.16em] text-blue-200 sm:block">{t("lifecycle.live")}</div>
           </div>
           <div className="relative mt-5">
@@ -213,7 +214,7 @@ const Landing: React.FC = () => {
             <Chapter n="02">{t("loss.eyebrow")}</Chapter>
             <div>
               <h2 className={`${H2} max-w-[18ch] text-ink-900`}><Editorial text={t("loss.h2")} /></h2>
-              <p className="mt-6 max-w-xl text-[14px] leading-relaxed text-slate-600">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}</p>
+              <p className="mt-6 max-w-xl text-[14px] leading-relaxed text-slate-600">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
             </div>
           </div>
           {/* comparison matrix: Traditional vs ExitOS */}
@@ -273,7 +274,7 @@ const Landing: React.FC = () => {
           </div>
           {/* market structure — the counterparties on the exchange */}
           <div id="solutions" className="mt-16">
-            <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-600">{t("ms.eyebrow")}</div>
+            <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-600">{t("ms.eyebrow")}<Note n={2} /></div>
             <div className="mt-4 grid grid-cols-2 border-t border-slate-300 sm:grid-cols-3 lg:grid-cols-5">
               {ECOSYSTEM.map((e, i) => (
                 <div key={e.label} className={`py-5 pr-4 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-5" : ""}`}>
@@ -291,7 +292,7 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200 bg-white">
         <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
           <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
-            <Chapter n="04">{t("bi.eyebrow")}</Chapter>
+            <Chapter n="04">{t("bi.eyebrow")}<Note n={2} /></Chapter>
             <div className="flex flex-wrap items-end justify-between gap-6">
               <h2 className={`${H2} text-ink-900`}><Editorial text={t("bi.h2")} /></h2>
               <Link to="/console" className="border-b border-blue-600 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-900">{t("bi.link")} ↗</Link>
@@ -366,7 +367,7 @@ const Landing: React.FC = () => {
                 </div>
               ))}
               <div className="border-t border-slate-200 py-3 text-[11px] text-slate-600">
-                {HISTORY_FMT.events} disclosed events on record · sources: SEC EDGAR 8-K filings, Wikidata, press disclosures · refreshed with the registry
+                {HISTORY_FMT.events} disclosed events on record · sources: SEC EDGAR 8-K filings, Wikidata, press disclosures · refreshed with the registry<Note n={3} />
               </div>
             </div>
           </div>
@@ -376,7 +377,7 @@ const Landing: React.FC = () => {
               <div key={f.title} className={`py-5 pr-4 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-4" : ""}`}>
                 <div className="flex items-center justify-between">
                   <span className="text-blue-600"><Glyph name={f.icon} small /></span>
-                  <span className="font-mono text-[15px] font-bold text-ink-900">{f.value}</span>
+                  <span className="font-mono text-[15px] font-bold text-ink-900">{f.value}<Note n={f.src} /></span>
                 </div>
                 <div className="mt-3 text-[12px] font-bold leading-tight text-ink-900">{f.title}</div>
                 <div className="text-[10.5px] leading-snug text-slate-600">{f.body}</div>
@@ -402,7 +403,7 @@ const Landing: React.FC = () => {
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-ink-900 pb-3">
               <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Disclosed acquisitions</span>
               <span className="font-editorial text-[clamp(1.6rem,3vw,2.4rem)] font-semibold uppercase tracking-[0.06em] text-ink-900">The ExitOS Ledger</span>
-              <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Index as of {MARKET_INDEX_FMT.asOf} · {HISTORY_FMT.events} recorded deals, {LEDGER_PRICED} priced</span>
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Index as of {MARKET_INDEX_FMT.asOf} · {HISTORY_FMT.events} recorded deals, {LEDGER_PRICED} priced<Note n={3} /></span>
             </div>
           </div>
 
@@ -454,7 +455,7 @@ const Landing: React.FC = () => {
           <p className="mt-3 text-[11.5px] leading-relaxed text-slate-600">
             Every entry is curated from the source shown. Record tier: {Object.entries(LEDGER_TIERS).map(([k, n]) => `${n} ${k}`).join(", ")} — not re-checked against the primary filing in this build.
           </p>
-          <div className="mt-5 text-[11px] text-slate-600">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} recorded deals ({LEDGER_PRICED} priced) · {HISTORY_FMT.disclosedValue} disclosed value</div>
+          <div className="mt-5 text-[11px] text-slate-600">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} recorded deals ({LEDGER_PRICED} priced) · {HISTORY_FMT.disclosedValue} disclosed value<Note n={1} /><Note n={3} /></div>
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-slate-300 px-5 py-4">
             <span className="text-[13.5px] text-slate-700">{t("rec.bridge")}</span>
             <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("rec.run")} <Arrow /></button>
@@ -567,7 +568,7 @@ const Landing: React.FC = () => {
           <div className="px-5 py-16 sm:px-8 lg:px-14 lg:py-20">
             <Chapter n="10">{t("cov.eyebrow")}</Chapter>
             <h2 className={`${H2} mt-4 text-ink-900`}><Editorial text={t("cov.h2")} /></h2>
-            <p className="mt-6 max-w-md text-[14px] leading-relaxed text-slate-600">{t("cov.body", { g: MARKET_FMT.geographies })}</p>
+            <p className="mt-6 max-w-md text-[14px] leading-relaxed text-slate-600">{t("cov.body", { g: MARKET_FMT.geographies })}<Note n={2} /></p>
             <div className="mt-6 flex flex-wrap gap-1.5">
               {TOP_JURISDICTIONS.map(([code, n]) => (
                 <span key={code} className="inline-flex items-baseline gap-1.5 border border-slate-200 px-2.5 py-1 font-mono text-[11px] font-bold text-ink-800">
@@ -623,6 +624,7 @@ const Landing: React.FC = () => {
           <p className="mt-10 border-t border-slate-300 pt-5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-slate-600">{t("cta.foot")}</p>
         </div>
       </section>
+      <SourcesSection />
     </MarketingChrome>
   );
 };
@@ -954,12 +956,12 @@ const STEPS = [
 ];
 const BUYERS = REGISTRY_CARDS;
 const COMMAND_FEATURES = [
-  { icon: "chart", value: HISTORY_FMT.events, title: "Disclosed Deals Indexed", body: "EDGAR + Wikidata sourced" },
-  { icon: "users", value: MARKET_FMT.buyers, title: "Buyer Mandates", body: "intent monitoring" },
-  { icon: "spark", value: MARKET_FMT.activeMandates, title: "Actively Deploying", body: "appetite flagged in the registry" },
-  { icon: "fire", value: SECTOR_DEMAND[0]?.[1] ?? "—", title: "Market Heat", body: `top sector: ${SECTOR_DEMAND[0]?.[0] ?? "—"}` },
-  { icon: "globe", value: MARKET_FMT.appetite, title: "Acquisition Demand", body: "check capacity indexed" },
-  { icon: "doc", value: MARKET_FMT.sectors, title: "Sectors Covered", body: "across the registry" },
+  { icon: "chart", src: 3 as SourceId, value: HISTORY_FMT.events, title: "Disclosed Deals Indexed", body: "EDGAR + Wikidata sourced" },
+  { icon: "users", src: 2 as SourceId, value: MARKET_FMT.buyers, title: "Buyer Mandates", body: "intent monitoring" },
+  { icon: "spark", src: 2 as SourceId, value: MARKET_FMT.activeMandates, title: "Actively Deploying", body: "appetite flagged in the registry" },
+  { icon: "fire", src: 2 as SourceId, value: SECTOR_DEMAND[0]?.[1] ?? "—", title: "Market Heat", body: `top sector: ${SECTOR_DEMAND[0]?.[0] ?? "—"}` },
+  { icon: "globe", src: 2 as SourceId, value: MARKET_FMT.appetite, title: "Acquisition Demand", body: "check capacity indexed" },
+  { icon: "doc", src: 2 as SourceId, value: MARKET_FMT.sectors, title: "Sectors Covered", body: "across the registry" },
 ];
 const DATA_ROOMS = [
   { icon: "chart", title: "Financial Statements" },

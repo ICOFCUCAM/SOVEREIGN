@@ -5,6 +5,7 @@ import { SECTORS, type Sector } from "../lib/company-intake";
 import { sectorLabel } from "../lib/market-stats";
 import { parseNumber } from "../lib/intake-fields";
 import { Editorial } from "./MarketingChrome";
+import { Note } from "./SourceNotes";
 
 // "Value your company in 30 seconds" — the homepage's working product moment.
 // The valuation module is loaded on first use; the result is the same
@@ -50,7 +51,7 @@ const QuickValue: React.FC = () => {
           <div>
             <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-600">{t("qv.eyebrow")}</div>
             <h2 id={`${id}-h`} className="mt-4 font-editorial text-[clamp(2rem,3.4vw,3.2rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-ink-900"><Editorial text={t("qv.h2")} /></h2>
-            <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-slate-600">{t("qv.body")}</p>
+            <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-slate-600">{t("qv.body")}<Note n={5} first /></p>
           </div>
           <div>
             <form onSubmit={submit} onFocus={() => { void load(); }} noValidate className="grid items-start gap-3 sm:grid-cols-[1.3fr_1fr_1fr_auto]">
