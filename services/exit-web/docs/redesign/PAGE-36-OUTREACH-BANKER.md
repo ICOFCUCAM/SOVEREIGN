@@ -5,7 +5,7 @@
 | Route | `/console/banker` |
 | Component | `src/pages/Banker.tsx` (508 lines) + `lib/banker-directives.ts` (directive parser, `exitos.mandate.directives.v1` in this browser), `lib/deliverables.ts`, `lib/engines.ts` (`BUYERS`, `DILIGENCE`, `VALUATION_CANONICAL`, `useMemorandum` — demo company) |
 | NAV | "Outreach", founder, **Pro** (free: Upgrade page) |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed, plus shared X20. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `ad0c95e`)
 
@@ -84,3 +84,14 @@
 ### G5 — Demo only, unlabelled
 *Closed by:* `pages/Banker.tsx`. With a saved intake the page builds its buyer pool (`runBuyerDiscovery(company, { limit: 12 })`), diligence, canonical band and the teaser / executive summary / CIM (`useMemorandum` with the Documents page's inputs) for that company; with no intake it keeps the module-level demo values. Eyebrow "Demo company: Helios Freight" / "Your intake: …" and a **Demo data** / **Your intake** badge. Directives: "Stored against the mandate" → "Saved in this browser" (they live in `localStorage`).
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium Pro: demo → best buyer Flexport Strategic, canonical $102,849,415 / $173,889,733; intake (Northwind Analytics) → best buyer Vista Enterprise Software Bolt-On, $403,509,792 / $685,373,250 · 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 · Chromium Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · free: Upgrade page · "Brief the banker", "Adjust strategy" and introduction dialogs: role dialog, axe 0 (after X20), Escape returns focus · a directive applied end to end ("avoid private equity" → private equity down-weighted to 25 %) · demo and intake both checked.
+
+## Known issues
+- ExitOS sends no outreach from here; every deliverable is a draft (stated). If sending is wanted, it is a new feature for the owner to scope.
+- The directive parser did not pick up "minimum valuation $100M" in the test sentence "avoid private equity, minimum valuation $100M" (only the PE rule matched) — parser coverage, unchanged.
+- Introduction letters still carry "c/o ExitOS Advisory" (shared letter builder; same byline question as Page 24).
+- The six-step sequence and the "general guidance" items are generic rules of thumb (labelled).
