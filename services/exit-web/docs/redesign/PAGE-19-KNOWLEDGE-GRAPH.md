@@ -27,7 +27,7 @@ Query the acquisition index (3,855 events, as of 2026-10-11) by sector keyword, 
 ## Gap register — Page 19
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Numeric filters accept anything; bad input silently changes results.** | `parseNumber` for min/max ($M, ≥ 0) and year (1900–this year, whole); invalid fields are flagged and ignored; min > max flagged. | ☐ |
+| G1 | **Numeric filters accept anything; bad input silently changes results.** | `parseNumber` for min/max ($M, ≥ 0) and year (1900–this year, whole); invalid fields are flagged and ignored; min > max flagged. | ☑ G1-commit |
 | G2 | Provenance: index date not shown; "verified" in the code comment. | Show "Index as of …, N events"; state that rows are source-cited and not individually verified; comment corrected. | ☐ |
 | G3 | Fake live tape. | `RegistryTape`. | ☐ |
 | G4 | Design: no `h1`, 6 contrast failures, unreachable scroll areas, preset chips. | Rebuild on `xo` (labelled inputs, `ScrollRegion`s, table headers). | ☑ `0510a75` |
@@ -39,3 +39,7 @@ Query the acquisition index (3,855 events, as of 2026-10-11) by sector keyword, 
 ### G4 — Design
 *Closed by:* `pages/KnowledgeGraph.tsx` rebuilt on `xo` (`PageHeader` `h1`; four result metrics; query inputs with `<label for>` associations (an error slot ready for G1); presets as a labelled group of buttons; buyers list and acquisitions table inside keyboard-reachable `ScrollRegion`s with a sticky header and row headers). Content carried over verbatim; G1–G3 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Preparation 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 6), all tab stops with visible focus.
+
+### G1 — Numeric filters accepted anything
+*Closed by:* `pages/KnowledgeGraph.tsx`. Min and max value use `parseNumber` ($M, 0–10,000,000, scaled to USD); since-year accepts whole years 1900 – current year. An invalid field shows its error under the input ("Use digits only, e.g. 12.5. Ignored." / "Enter a year from 1900 to 2026, e.g. 2020. Ignored."), is marked `aria-invalid` and described by the message, and is **left out of the query** (before: `Number("abc")` = `NaN` silently changed the filter). Min above max → "Min is above max — max ignored."
+*Verification:* `tsc -b`, eslint clean · Chromium (Preparation): all 3,855 · min "abc" → 3,855 with the error · min 500 / max 10 → 223 (max ignored, message) · 500–1000 with year "20x" → 109 with the year error · 500–1000 since 2020 → 11 · 1440/390: 0 errors, axe 0, no overflow.

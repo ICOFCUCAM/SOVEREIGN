@@ -4,6 +4,7 @@ import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric, ScrollRegion, XO_INPUT, XO_LABEL } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { fmtUsd } from "../lib/market-intel";
+import { parseNumber } from "../lib/intake-fields";
 import { queryAcquisitions, type AcquisitionIndex, type GraphQuery, type Region } from "@exit/engines";
 // The full queryable event index (~83 KB gzip) loads only on this route.
 import indexFile from "../../../exit-engines/data/acquisition_index.json";
@@ -38,17 +39,31 @@ const KnowledgeGraph: React.FC = () => {
     setSinceYear(q.sinceYear != null ? String(q.sinceYear) : "");
   };
 
+  // Numeric filters are validated; an invalid field is flagged and left out
+  // of the query instead of silently changing the result.
+  const thisYear = new Date().getFullYear();
+  const minP = minUsd.trim() ? parseNumber(minUsd, { min: 0, max: 10_000_000, scale: 1e6 }) : null;
+  const maxP = maxUsd.trim() ? parseNumber(maxUsd, { min: 0, max: 10_000_000, scale: 1e6 }) : null;
+  const yearP = sinceYear.trim() ? parseNumber(sinceYear, { min: 1900, max: thisYear, integer: true }) : null;
+  const rangeError = minP?.ok && maxP?.ok && minP.value > maxP.value ? "Min is above max — max ignored." : undefined;
+  const minQ = minP?.ok ? minP.value : undefined;
+  const maxQ = maxP?.ok && !rangeError ? maxP.value : undefined;
+  const yearQ = yearP?.ok ? yearP.value : undefined;
+
   const result = useMemo(() => {
     const q: GraphQuery = {
       ...(sector.trim() ? { sector: sector.trim() } : {}),
       ...(region ? { region } : {}),
-      ...(minUsd ? { minUsd: Number(minUsd) * 1e6 } : {}),
-      ...(maxUsd ? { maxUsd: Number(maxUsd) * 1e6 } : {}),
-      ...(sinceYear ? { sinceYear: Number(sinceYear) } : {}),
+      ...(minQ != null ? { minUsd: minQ } : {}),
+      ...(maxQ != null ? { maxUsd: maxQ } : {}),
+      ...(yearQ != null ? { sinceYear: yearQ } : {}),
       limit: 150,
     };
     return queryAcquisitions(INDEX, q);
-  }, [sector, region, minUsd, maxUsd, sinceYear]);
+  }, [sector, region, minQ, maxQ, yearQ]);
+  const errMin = minP && !minP.ok ? `${minP.error} Ignored.` : undefined;
+  const errMax = maxP && !maxP.ok ? `${maxP.error} Ignored.` : rangeError;
+  const errYear = yearP && !yearP.ok ? `Enter a year from 1900 to ${thisYear}, e.g. 2020. Ignored.` : undefined;
 
   return (
     <div data-page="knowledge-graph" className="space-y-3 text-xo-text">
@@ -74,9 +89,9 @@ const KnowledgeGraph: React.FC = () => {
                 {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
             </Field>
-            <Field id="kg-min" label="Min value ($M)"><input id="kg-min" value={minUsd} onChange={(e) => setMinUsd(e.target.value)} inputMode="numeric" placeholder="10" className={XO_INPUT} /></Field>
-            <Field id="kg-max" label="Max value ($M)"><input id="kg-max" value={maxUsd} onChange={(e) => setMaxUsd(e.target.value)} inputMode="numeric" placeholder="500" className={XO_INPUT} /></Field>
-            <Field id="kg-year" label="Since year"><input id="kg-year" value={sinceYear} onChange={(e) => setSinceYear(e.target.value)} inputMode="numeric" placeholder="2020" className={XO_INPUT} /></Field>
+            <Field id="kg-min" label="Min value ($M)" error={errMin}><input id="kg-min" aria-invalid={errMin ? true : undefined} aria-describedby={errMin ? "kg-min-err" : undefined} value={minUsd} onChange={(e) => setMinUsd(e.target.value)} inputMode="numeric" placeholder="10" className={XO_INPUT} /></Field>
+            <Field id="kg-max" label="Max value ($M)" error={errMax}><input id="kg-max" aria-invalid={errMax ? true : undefined} aria-describedby={errMax ? "kg-max-err" : undefined} value={maxUsd} onChange={(e) => setMaxUsd(e.target.value)} inputMode="numeric" placeholder="500" className={XO_INPUT} /></Field>
+            <Field id="kg-year" label="Since year" error={errYear}><input id="kg-year" aria-invalid={errYear ? true : undefined} aria-describedby={errYear ? "kg-year-err" : undefined} value={sinceYear} onChange={(e) => setSinceYear(e.target.value)} inputMode="numeric" placeholder="2020" className={XO_INPUT} /></Field>
           </div>
           <div role="group" aria-label="Preset queries" className="mt-3 flex flex-wrap gap-2">
             {PRESETS.map((p) => (
