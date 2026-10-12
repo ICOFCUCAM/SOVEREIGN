@@ -37,8 +37,12 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 | G4 | Demo only, unlabelled. | Run on the active company; Demo data / Your intake badge. | ☐ |
 | G5 | Unvalidated number inputs. | Text inputs parsed with `parseNumber` (units, ranges), messages, `aria-invalid`; only valid values reach the engines. | ☐ |
 | G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
-| G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☐ |
+| G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☑ G7-commit |
 
 ---
 
 ## Closure log
+
+### G7 — Design
+*Closed by:* `pages/Simulator.tsx` rebuilt on `xo` (`PageHeader` `h1` "Scenario Engine"; three metrics; the inputs with `label`/`id` pairs and described hints; trajectory, scenario picker and diff as titled `Section`s; the six scenarios as `aria-pressed` buttons in a labelled group; stats and diffs as `dl`s; the buyer table with row headers in a `ScrollRegion` (fixes the 390 overflow); hex accents replaced). Content carried over verbatim; the shared `BankerTake` stays until G6; G1–G6 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Pro 1440/390: 0 errors, `h1` 1 (was 0), **no overflow** (was overflowing at 390), axe 0, all tab stops with visible focus · after selecting the PE-only scenario: axe 0, no overflow · free: Upgrade page.

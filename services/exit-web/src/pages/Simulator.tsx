@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card, Field, fmtMoney, ConfidenceChip, inputCls } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import { fmtMoney, ConfidenceChip } from "../lib/ui";
+import { PageHeader, Section, Metric as XMetric, ScrollRegion, XO_INPUT, XO_LABEL } from "../components/xo";
+import { MarketTape } from "../lib/workstation";
 import { buildMarketTape } from "../lib/market-tape";
 import { runStrategySimulator, runInstitutionalValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../lib/profile";
@@ -237,20 +238,22 @@ const Simulator: React.FC = () => {
     emitTelemetry("simulator_scenario", { scenario: id, question: s?.question }, "/console/simulator");
   };
 
-  return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Decision Engine"
-        title="Scenario Engine"
-        tag="Simulate futures"
-        metrics={[
-          { k: "Baseline realized", v: fmtMoney(baseline.sim.expectedRealizedValueUsd), accent: true, sub: "today's trajectory" },
-          { k: "Lead buyer close", v: baseline.sim.recommendedBuyers[0] ? `${(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}%` : "—", sub: baseline.sim.recommendedBuyers[0]?.buyer.name },
-          { k: "Buyers in set", v: String(baseline.sim.recommendedBuyers.length), sub: "clearing constraints" },
-        ]}
-      />
+  const tape = useMemo(() => buildMarketTape(), []);
+  const LBL = XO_LABEL;
+  const INP = XO_INPUT;
 
-      <MarketTape items={buildMarketTape()} />
+  return (
+    <div data-page="simulator" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Decision Engine" title="Scenario Engine"
+        badge={<span className="text-[12px] text-xo-muted">Simulate futures</span>} />
+
+      <section aria-label="Baseline summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3">
+        <div className="bg-xo-panel"><XMetric label="Baseline realized" emphasis value={fmtMoney(baseline.sim.expectedRealizedValueUsd)} sub="today's trajectory" /></div>
+        <div className="bg-xo-panel"><XMetric label="Lead buyer close" value={baseline.sim.recommendedBuyers[0] ? `${(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}%` : "—"} sub={baseline.sim.recommendedBuyers[0]?.buyer.name} /></div>
+        <div className="bg-xo-panel"><XMetric label="Buyers in set" value={String(baseline.sim.recommendedBuyers.length)} sub="clearing constraints" /></div>
+      </section>
+
+      <MarketTape items={tape} />
 
       <BankerTake
         next={<>Stress-test the plan before you commit — model waiting, scaling to $25M ARR, or a marquee entrant.</>}
@@ -263,256 +266,194 @@ const Simulator: React.FC = () => {
         impact={<>{fmtMoney(baseline.sim.expectedRealizedValueUsd)}</>}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         {/* ── Baseline inputs ─────────────────────────────────── */}
-        <Card className="p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Baseline trajectory</div>
-
-          <div className="mt-5 space-y-5">
-            <Field label="Target value (USD)" hint={`Implied mid: ${fmtMoney(VALUATION_CANONICAL.headline.mid)}`}>
-              <input
-                type="number"
-                value={targetUsd}
-                onChange={(e) => setTargetUsd(Number(e.target.value))}
-                step={1_000_000}
-                min={0}
-                className={inputCls}
-              />
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Min cash %">
-                <input
-                  type="number"
-                  value={Math.round(minCashPct * 100)}
-                  onChange={(e) => setMinCashPct(Math.min(1, Math.max(0, Number(e.target.value) / 100)))}
-                  min={0} max={100} step={5}
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Max earnout %">
-                <input
-                  type="number"
-                  value={Math.round(maxEarnoutPct * 100)}
-                  onChange={(e) => setMaxEarnoutPct(Math.min(1, Math.max(0, Number(e.target.value) / 100)))}
-                  min={0} max={100} step={5}
-                  className={inputCls}
-                />
-              </Field>
+        <Section title="Baseline trajectory" className="lg:col-span-4">
+          <div className="space-y-4 px-4 py-4">
+            <div>
+              <label htmlFor="sim-target" className={LBL}>Target value (USD)</label>
+              <input id="sim-target" type="number" value={targetUsd} onChange={(e) => setTargetUsd(Number(e.target.value))} step={1_000_000} min={0} aria-describedby="sim-target-hint" className={INP} />
+              <span id="sim-target-hint" className="mt-1 block text-[12px] text-xo-muted">Implied mid: {fmtMoney(VALUATION_CANONICAL.headline.mid)}</span>
             </div>
-
-            <Field label="Max timeline (days)" hint="Outreach + LOI + diligence + close">
-              <input
-                type="number"
-                value={maxTimelineDays}
-                onChange={(e) => setMaxTimelineDays(Math.max(1, Number(e.target.value)))}
-                min={1} step={15}
-                className={inputCls}
-              />
-            </Field>
-
-            <Field label="Preferred buyer type">
-              <select
-                value={preferredType}
-                onChange={(e) => setPreferredType(e.target.value as BuyerType | "any")}
-                className={inputCls}
-              >
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="sim-cash" className={LBL}>Min cash %</label>
+                <input id="sim-cash" type="number" value={Math.round(minCashPct * 100)} onChange={(e) => setMinCashPct(Math.min(1, Math.max(0, Number(e.target.value) / 100)))} min={0} max={100} step={5} className={INP} />
+              </div>
+              <div>
+                <label htmlFor="sim-earnout" className={LBL}>Max earnout %</label>
+                <input id="sim-earnout" type="number" value={Math.round(maxEarnoutPct * 100)} onChange={(e) => setMaxEarnoutPct(Math.min(1, Math.max(0, Number(e.target.value) / 100)))} min={0} max={100} step={5} className={INP} />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="sim-days" className={LBL}>Max timeline (days)</label>
+              <input id="sim-days" type="number" value={maxTimelineDays} onChange={(e) => setMaxTimelineDays(Math.max(1, Number(e.target.value)))} min={1} step={15} aria-describedby="sim-days-hint" className={INP} />
+              <span id="sim-days-hint" className="mt-1 block text-[12px] text-xo-muted">Outreach + LOI + diligence + close</span>
+            </div>
+            <div>
+              <label htmlFor="sim-type" className={LBL}>Preferred buyer type</label>
+              <select id="sim-type" value={preferredType} onChange={(e) => setPreferredType(e.target.value as BuyerType | "any")} className={INP}>
                 {BUYER_TYPES.map((b) => <option key={b.value} value={b.value}>{b.label}</option>)}
               </select>
-            </Field>
-
-            <Field label="Minimum confidence" hint="Drop buyers with weaker evidence">
-              <select
-                value={minConfidence}
-                onChange={(e) => setMinConfidence(e.target.value as typeof minConfidence)}
-                className={inputCls}
-              >
+            </div>
+            <div>
+              <label htmlFor="sim-conf" className={LBL}>Minimum confidence</label>
+              <select id="sim-conf" value={minConfidence} onChange={(e) => setMinConfidence(e.target.value as typeof minConfidence)} aria-describedby="sim-conf-hint" className={INP}>
                 <option value="experimental">Experimental — accept all</option>
                 <option value="low">Low — at least 1 prior</option>
                 <option value="medium">Medium — at least 3 priors</option>
                 <option value="high">High — at least 10 priors</option>
               </select>
-            </Field>
-          </div>
-
-          <div className="mt-6 rounded-md border border-white/5 bg-ink-900/50 p-3 text-[11px] text-white/55">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Dropped by constraint</div>
-            <div className="mt-2 grid grid-cols-2 gap-y-1 font-mono tabular-nums">
-              <span>too slow</span>          <span className="text-right text-white/75">{result.droppedByConstraint.tooLong}</span>
-              <span>wrong type</span>        <span className="text-right text-white/75">{result.droppedByConstraint.wrongBuyerType}</span>
-              <span>below target</span>     <span className="text-right text-white/75">{result.droppedByConstraint.belowTarget}</span>
-              <span>low confidence</span>   <span className="text-right text-white/75">{result.droppedByConstraint.belowConfidence}</span>
+              <span id="sim-conf-hint" className="mt-1 block text-[12px] text-xo-muted">Drop buyers with weaker evidence</span>
+            </div>
+            <div className="border border-xo-line bg-xo-ink p-3 text-[12px]">
+              <h3 className="text-[12px] font-semibold text-xo-muted">Dropped by constraint</h3>
+              <dl className="mt-2 grid grid-cols-2 gap-y-1 font-mono tabular-nums">
+                <dt className="text-xo-muted">too slow</dt>        <dd className="text-right">{result.droppedByConstraint.tooLong}</dd>
+                <dt className="text-xo-muted">wrong type</dt>      <dd className="text-right">{result.droppedByConstraint.wrongBuyerType}</dd>
+                <dt className="text-xo-muted">below target</dt>    <dd className="text-right">{result.droppedByConstraint.belowTarget}</dd>
+                <dt className="text-xo-muted">low confidence</dt>  <dd className="text-right">{result.droppedByConstraint.belowConfidence}</dd>
+              </dl>
             </div>
           </div>
-        </Card>
+        </Section>
 
         {/* ── Scenario engine ─────────────────────────────────── */}
-        <div className="space-y-6">
-          <Card className="p-6">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-400">Current trajectory</div>
-            <p className="mt-3 text-sm text-white/80">{result.summary}</p>
-            <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <Stat label="Close probability" value={`${(result.expectedCloseProbability * 100).toFixed(0)}%`} sub={`P(≥1 of ${result.recommendedBuyers.length})`} accent="#34d399" />
-              <Stat label="Time to cash"       value={`${FMT_MS(result.expectedTimeToCashDays)}d`} sub="median across set" />
-              <Stat label="Expected realized"  value={fmtMoney(result.expectedRealizedValueUsd)} sub="best of set" accent="#34d399" />
-              <Stat label="Strategic value"    value={fmtMoney(baseline.valuationMid)} sub="mid band, today" />
+        <div className="flex flex-col gap-px bg-xo-line lg:col-span-8">
+          <Section title="Current trajectory">
+            <div className="px-4 py-3">
+              <p className="text-[13px]">{result.summary}</p>
+              <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <Stat label="Close probability" value={`${(result.expectedCloseProbability * 100).toFixed(0)}%`} sub={`P(≥1 of ${result.recommendedBuyers.length})`} tone="text-xo-verified" />
+                <Stat label="Time to cash"       value={`${FMT_MS(result.expectedTimeToCashDays)}d`} sub="median across set" />
+                <Stat label="Expected realized"  value={fmtMoney(result.expectedRealizedValueUsd)} sub="best of set" tone="text-xo-verified" />
+                <Stat label="Strategic value"    value={fmtMoney(baseline.valuationMid)} sub="mid band, today" />
+              </dl>
             </div>
-          </Card>
+          </Section>
 
           {/* Scenario picker */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Simulate a future</div>
-              <div className="text-[10px] uppercase tracking-wide text-white/30">{SCENARIOS.length} scenarios</div>
-            </div>
-            <div className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          <Section title="Simulate a future" right={<span className="text-[11px] text-xo-muted">{SCENARIOS.length} scenarios</span>}>
+            <div role="group" aria-label="Scenario" className="grid gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
               {SCENARIOS.map((s) => {
                 const active = s.id === activeScenario;
                 return (
-                  <button
-                    key={s.id}
-                    onClick={() => handleScenario(s.id)}
-                    className={`rounded-lg border p-3 text-left transition ${active
-                      ? "border-deal-500/60 bg-deal-600/15 ring-1 ring-deal-500/40"
-                      : "border-white/10 bg-ink-900/40 hover:border-white/25 hover:bg-white/[0.03]"}`}
-                  >
-                    <div className={`text-[9px] font-semibold uppercase tracking-[0.18em] ${active ? "text-deal-300" : "text-white/35"}`}>{s.tag}</div>
-                    <div className={`mt-1 text-[13px] font-medium leading-snug ${active ? "text-white" : "text-white/75"}`}>{s.question}</div>
+                  <button key={s.id} type="button" aria-pressed={active} onClick={() => handleScenario(s.id)}
+                    className={`p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action ${active ? "bg-xo-raise" : "bg-xo-panel hover:bg-xo-raise"}`}>
+                    <div className={`text-[11px] font-semibold ${active ? "text-xo-verified" : "text-xo-muted"}`}>{active && <span aria-hidden>✓ </span>}{s.tag}</div>
+                    <div className="mt-1 text-[13px] font-medium leading-snug">{s.question}</div>
                   </button>
                 );
               })}
             </div>
-          </Card>
+          </Section>
 
           {/* Scenario diff */}
-          <Card className="p-6">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 className="font-serif text-lg font-bold text-white">{scenario.question}</h3>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">vs. baseline</span>
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {metrics.map((m) => {
-                const diff = m.scen - m.base;
-                const flat = Math.abs(diff) < (m.base === 0 ? 1e-9 : Math.abs(m.base) * 0.005);
-                const good = m.higherIsBetter ? diff > 0 : diff < 0;
-                const color = flat ? "text-white/40" : good ? "text-deal-300" : "text-red-300";
-                const arrow = flat ? "→" : diff > 0 ? "▲" : "▼";
-                return (
-                  <div key={m.label} className="rounded-lg border border-white/10 bg-ink-900/40 p-4">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{m.label}</div>
-                    <div className="mt-2 flex items-baseline gap-2">
-                      <span className="font-mono text-lg font-bold tabular-nums text-white">{m.fmt(m.scen)}</span>
-                      <span className={`text-[11px] font-semibold ${color}`}>{arrow} {flat ? "no change" : m.fmt(Math.abs(diff))}</span>
+          <Section title={scenario.question} eyebrow="Scenario vs. baseline">
+            <div className="px-4 py-3">
+              <dl className="grid gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
+                {metrics.map((m) => {
+                  const diff = m.scen - m.base;
+                  const flat = Math.abs(diff) < (m.base === 0 ? 1e-9 : Math.abs(m.base) * 0.005);
+                  const good = m.higherIsBetter ? diff > 0 : diff < 0;
+                  const color = flat ? "text-xo-muted" : good ? "text-xo-verified" : "text-xo-risk";
+                  const arrow = flat ? "→" : diff > 0 ? "▲" : "▼";
+                  return (
+                    <div key={m.label} className="flex flex-col bg-xo-panel p-3">
+                      <dt className="order-1 text-[12px] font-semibold text-xo-muted">{m.label}</dt>
+                      <dd className="order-2 mt-1.5 flex items-baseline gap-2">
+                        <span className="font-mono text-lg font-semibold tabular-nums">{m.fmt(m.scen)}</span>
+                        <span className={`text-[12px] font-semibold ${color}`}>{arrow} {flat ? "no change" : m.fmt(Math.abs(diff))}</span>
+                      </dd>
+                      <dd className="order-3 mt-1 text-[12px] text-xo-muted">baseline {m.fmt(m.base)}</dd>
                     </div>
-                    <div className="mt-1 text-[11px] text-white/40">baseline {m.fmt(m.base)}</div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_minmax(0,300px)]">
-              <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">What changes</div>
-                <ul className="mt-3 space-y-2 text-sm text-white/75">
-                  {applied.drivers.map((d, i) => (
-                    <li key={i} className="flex gap-2"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-deal-400" /><span>{d}</span></li>
-                  ))}
-                </ul>
+                  );
+                })}
+              </dl>
+              <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_minmax(0,300px)]">
+                <div>
+                  <h3 className="text-[12px] font-semibold text-xo-muted">What changes</h3>
+                  <ul className="mt-2 space-y-2 text-[13px]">
+                    {applied.drivers.map((d, i) => (
+                      <li key={i} className="flex gap-2"><span aria-hidden className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-xo-verified" /><span>{d}</span></li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="border border-xo-line bg-xo-ink p-3">
+                  <h3 className="text-[12px] font-semibold text-xo-muted">Modelling assumption</h3>
+                  <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">{applied.assumption}</p>
+                </div>
               </div>
-              <div className="rounded-lg border border-white/5 bg-ink-900/50 p-4">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Modelling assumption</div>
-                <p className="mt-2 text-[12.5px] leading-relaxed text-white/55">{applied.assumption}</p>
-              </div>
+              <p className="mt-4 border-t border-xo-line pt-3 text-[13px] text-xo-muted">{variant.sim.summary}</p>
             </div>
-
-            <p className="mt-5 border-t border-white/10 pt-4 text-[12.5px] text-white/70">{variant.sim.summary}</p>
-          </Card>
+          </Section>
         </div>
       </div>
 
       {/* ── Baseline buyer set + process structure ──────────────── */}
-      <div className="mt-6 space-y-6">
-        {result.recommendedBuyers.length > 0 && (
-          <Card>
-            <div className="border-b border-white/10 px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-              Recommended buyer set — baseline trajectory
-            </div>
-            <table className="w-full text-sm">
-              <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                <tr className="border-b border-white/10">
-                  <th className="px-5 py-3 w-8">#</th>
-                  <th className="px-5 py-3">Acquirer</th>
-                  <th className="px-5 py-3">Type</th>
-                  <th className="px-5 py-3 text-right">Headline</th>
-                  <th className="px-5 py-3 text-right">Close rate</th>
-                  <th className="px-5 py-3 text-right">Days</th>
-                  <th className="px-5 py-3 text-right">Expected realized</th>
+      {result.recommendedBuyers.length > 0 && (
+        <Section title="Recommended buyer set — baseline trajectory" className="border border-xo-line">
+          <ScrollRegion label="Recommended buyer set table">
+            <table className="w-full min-w-[760px] text-[13px]">
+              <thead className="text-left text-[11px] text-xo-muted">
+                <tr className="border-b border-xo-line">
+                  <th scope="col" className="w-8 px-4 py-2 font-medium">#</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Acquirer</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Type</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Headline</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Close rate</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Days</th>
+                  <th scope="col" className="px-4 py-2 text-right font-medium">Expected realized</th>
                 </tr>
               </thead>
               <tbody>
-                {result.recommendedBuyers.map((c, idx) => {
-                  const rankBg = idx === 0 ? "bg-deal-600/30 text-deal-200 ring-deal-500/40"
-                              : idx === 1 ? "bg-stage-engaged/15 text-stage-engaged ring-stage-engaged/40"
-                              : idx === 2 ? "bg-loi-500/15 text-loi-300 ring-loi-400/30"
-                              : "bg-white/5 text-white/55 ring-white/15";
-                  return (
-                    <tr key={c.buyer.name} className="border-b border-white/5 last:border-0">
-                      <td className="px-5 py-3.5">
-                        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-mono font-bold ring-1 ${rankBg}`}>
-                          {idx + 1}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <div className="font-medium text-white">{c.buyer.name}</div>
-                        <div className="mt-0.5 max-w-md text-[11px] leading-snug text-white/45">{c.buyer.thesis}</div>
-                      </td>
-                      <td className="px-5 py-3.5 text-[12px] uppercase tracking-wide text-white/65">{c.buyer.buyerType.replace(/_/g, " ")}</td>
-                      <td className="px-5 py-3.5 text-right font-mono tabular-nums text-white/85">{fmtMoney(c.expectedOutcome.expectedHeadlineUsd)}</td>
-                      <td className="px-5 py-3.5 text-right font-mono tabular-nums text-white/85">{FMT_PCT(c.expectedOutcome.closeRatePct)}</td>
-                      <td className="px-5 py-3.5 text-right font-mono tabular-nums text-white/85">{c.expectedOutcome.expectedDaysToCash}d</td>
-                      <td className="px-5 py-3.5 text-right">
-                        <div className="font-mono tabular-nums font-semibold text-deal-300">{fmtMoney(c.expectedOutcome.expectedClosingUsd)}</div>
-                        <div className="mt-0.5 flex justify-end">
-                          <ConfidenceChip
-                            tier={c.expectedOutcome.overallConfidence.tier}
-                            sample={c.expectedOutcome.overallConfidence.sample}
-                            compact
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {result.recommendedBuyers.map((c, idx) => (
+                  <tr key={c.buyer.name} className="border-b border-xo-line last:border-0">
+                    <td className="px-4 py-2.5 font-mono text-[12px] text-xo-muted">{idx + 1}</td>
+                    <th scope="row" className="px-2 py-2.5 text-left font-normal">
+                      <div className="font-medium">{c.buyer.name}</div>
+                      <div className="mt-0.5 max-w-md text-[12px] leading-snug text-xo-muted">{c.buyer.thesis}</div>
+                    </th>
+                    <td className="px-2 py-2.5 text-[12px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</td>
+                    <td className="px-2 py-2.5 text-right font-mono tabular-nums">{fmtMoney(c.expectedOutcome.expectedHeadlineUsd)}</td>
+                    <td className="px-2 py-2.5 text-right font-mono tabular-nums">{FMT_PCT(c.expectedOutcome.closeRatePct)}</td>
+                    <td className="px-2 py-2.5 text-right font-mono tabular-nums">{c.expectedOutcome.expectedDaysToCash}d</td>
+                    <td className="px-4 py-2.5 text-right">
+                      <div className="font-mono font-semibold tabular-nums text-xo-verified">{fmtMoney(c.expectedOutcome.expectedClosingUsd)}</div>
+                      <div className="mt-0.5 flex justify-end"><ConfidenceChip tier={c.expectedOutcome.overallConfidence.tier} sample={c.expectedOutcome.overallConfidence.sample} compact /></div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-          </Card>
-        )}
+          </ScrollRegion>
+        </Section>
+      )}
 
-        <Card className="p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Recommended process structure</div>
-          <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <Section title="Recommended process structure" className="border border-xo-line">
+        <div className="px-4 py-3">
+          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <Stat label="Buyers to engage"  value={String(result.recommendedProcessStructure.buyersToEngage)} sub="parallel process" />
-            <Stat label="Timeline"           value={`${result.recommendedProcessStructure.recommendedTimelineDays}d`} sub="outreach → close" />
-            <Stat label="Cash floor"         value={FMT_PCT(result.recommendedProcessStructure.recommendedCashFloorPct)} sub="negotiate at or above" />
+            <Stat label="Timeline"          value={`${result.recommendedProcessStructure.recommendedTimelineDays}d`} sub="outreach → close" />
+            <Stat label="Cash floor"        value={FMT_PCT(result.recommendedProcessStructure.recommendedCashFloorPct)} sub="negotiate at or above" />
             <Stat label="Earnout ceiling"   value={FMT_PCT(result.recommendedProcessStructure.recommendedEarnoutCeilingPct)} sub="negotiate at or below" />
-          </div>
-          <ul className="mt-5 space-y-2 text-sm text-white/70">
+          </dl>
+          <ul className="mt-4 space-y-2 text-[13px] text-xo-muted">
             {result.recommendedProcessStructure.rationale.map((r, i) => (
-              <li key={i} className="flex gap-2"><span className="text-white/30">·</span><span>{r}</span></li>
+              <li key={i} className="flex gap-2"><span aria-hidden className="text-xo-faint">·</span><span>{r}</span></li>
             ))}
           </ul>
-        </Card>
-      </div>
+        </div>
+      </Section>
     </div>
   );
 };
 
-const Stat: React.FC<{ label: string; value: string; sub?: string; accent?: string }> = ({ label, value, sub, accent }) => (
-  <div>
-    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{label}</div>
-    <div className="mt-1 text-2xl font-bold tabular-nums" style={accent ? { color: accent } : undefined}>{value}</div>
-    {sub && <div className="mt-0.5 text-[11px] text-white/45">{sub}</div>}
+const Stat: React.FC<{ label: string; value: string; sub?: string; tone?: string }> = ({ label, value, sub, tone }) => (
+  <div className="flex flex-col">
+    <dt className="order-1 text-[12px] font-semibold text-xo-muted">{label}</dt>
+    <dd className={`order-2 mt-1 text-2xl font-semibold tabular-nums ${tone ?? ""}`}>{value}</dd>
+    {sub && <dd className="order-3 mt-0.5 text-[12px] text-xo-muted">{sub}</dd>}
   </div>
 );
 
