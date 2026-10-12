@@ -30,7 +30,7 @@ Founder Active Mandate: `h1` none · axe empty-table-header ×1 · **overflow at
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Buyers see the founder's NDA register.** | Buyer role gets its own "Access Requests" view: no other counterparties; how access requests work; links to Browse Opportunities and Deal Room. | ☑ `ba6399b` |
-| G2 | **Fake verification gates** ("identity / history / funds verified", "Verified" tier). | Gates named for what they check (NDA executed, signature recorded, named representative, liquidated-damages clause); "N of 4 record checks"; state that ExitOS does not verify identity, funds or track record. | ☐ |
+| G2 | **Fake verification gates** ("identity / history / funds verified", "Verified" tier). | Gates named for what they check (NDA executed, signature recorded, named representative, liquidated-damages clause); "N of 4 record checks"; state that ExitOS does not verify identity, funds or track record. | ☑ G2-commit |
 | G3 | **False data-room gating; "issued" implies sent; sample breach evidence looks real.** | Plain wording: no data room gating exists; NDAs are drafted in this session and not sent; breach allegations and evidence references marked illustrative. | ☐ |
 | G4 | Demo NDAs unlabelled. | Badge and line: sample NDA portfolio of the demo company. | ☐ |
 | G5 | Design: no `h1`, overflow at 390, empty header, tape. | Rebuild on `xo`; `RegistryTape`. | ☑ `e4d0401` |
@@ -46,3 +46,14 @@ Founder Active Mandate: `h1` none · axe empty-table-header ×1 · **overflow at
 ### G1 — Buyers saw the founder's NDA register
 *Closed by:* `pages/Nda.tsx`, `lib/exit-api.ts` (additive `myNdaRequests()` — lists this account's own NDA requests through the existing `listNdaRequests({ buyerAccountId })`; empty when no account is connected). For `role === "buyer"` the page renders **Access Requests**: the buyer's own requests with status ("Awaiting the founder" / "NDA signed" / "Declined") and date, loading and error states, a foot explaining the flow (request from a listing on the Acquisition Radar → founder decides → deal room), and links to the Acquisition Radar, Browse Opportunities and the Deal Room. The founder register (renamed `FounderNdaVault`) is unchanged. Route, NAV and gates unchanged.
 *Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium: buyer (Pro) → "Access Requests", "No access requests recorded for your account.", 0 other counterparties; founder → the register · buyer 1440/390: 0 errors, `h1` 1, no overflow, axe 0. **NOT VERIFIED:** the list with an actual request — creating one in the test session would write to the connected backend, so it was not done.
+
+### G2 — Fake verification gates
+*Closed by:* `pages/Nda.tsx` (labels; the four checks themselves unchanged).
+| Before | After |
+|---|---|
+| "NDA signed", "Identity verified", "Acquisition history validated", "**Funds verified** — Capitalised · damages provision in force" | "NDA executed", "Signature recorded", "Named representative on record", "Liquidated-damages clause in force — Active NDA with a damages provision" |
+| "Buyer Trust Score", tiers "Verified / Qualified / Unverified", score 0–100 | "Record checks — From the NDA record — ExitOS does not verify identity, funds or acquisition history"; "N/4 · All met / Partly met / Mostly unmet" |
+| metric "Verified buyers — all four gates" | "All four checks met — record checks, not verification" |
+| `h1` "NDA & Buyer Trust" | "NDA Vault" (the NAV name) |
+| "Pursue Verified-tier buyers first — they've cleared all four trust gates." | "Start with counterparties whose NDA record meets all four checks — then do your own diligence on who they are and how they fund deals." |
+*Verification:* `tsc -b`, eslint clean · Chromium (founder): the only "verified" left is the banker's take data-room line handled in G3; 0 "Buyer Trust" / "trust gates".

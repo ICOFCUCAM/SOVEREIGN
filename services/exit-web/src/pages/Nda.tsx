@@ -26,9 +26,9 @@ const STATUS_LABEL: Record<NdaState, string> = {
   revoked: "Revoked", breached: "Breach", draft: "Draft",
 };
 
-// Buyer Trust Score — turns the NDA from a commodity document into buyer
-// qualification. Four verification gates, each worth points; the NDA signature
-// is one gate among four. A buyer only reaches the data room once trust clears.
+// Record checks — four checks read from the NDA record itself (execution,
+// signature, named representative, damages clause). They are not identity,
+// funds or track-record verification, and the page says so.
 interface TrustGate { readonly label: string; readonly cleared: boolean; readonly detail: string; }
 interface BuyerTrust { readonly gates: TrustGate[]; readonly score: number; readonly tier: "Verified" | "Qualified" | "Unverified"; }
 function buyerTrust(n: NdaInstance, status: NdaState): BuyerTrust {
@@ -42,15 +42,16 @@ function buyerTrust(n: NdaInstance, status: NdaState): BuyerTrust {
   // damages provisions (a proxy for a vetted, capitalised counterparty)
   const fundsVerified = ndaSigned && (n.terms.liquidatedDamagesUsd ?? 0) > 0;
   const gates: TrustGate[] = [
-    { label: "NDA signed", cleared: ndaSigned, detail: ndaSigned ? "Executed & active" : "Awaiting countersignature" },
-    { label: "Identity verified", cleared: identityVerified, detail: identityVerified ? `Signed by ${n.signatureEvents[0]?.representative ?? "authorised rep"}` : "No verified signatory" },
-    { label: "Acquisition history validated", cleared: historyValidated, detail: historyValidated ? "Institutional counterparty on record" : "No validated track record" },
-    { label: "Funds verified", cleared: fundsVerified, detail: fundsVerified ? "Capitalised · damages provision in force" : "Capital not yet verified" },
+    { label: "NDA executed", cleared: ndaSigned, detail: ndaSigned ? "Executed & active" : "Awaiting countersignature" },
+    { label: "Signature recorded", cleared: identityVerified, detail: identityVerified ? `Signed by ${n.signatureEvents[0]?.representative ?? "authorised rep"}` : "No signature on record" },
+    { label: "Named representative on record", cleared: historyValidated, detail: historyValidated ? "A representative is named on the signature" : "No named representative" },
+    { label: "Liquidated-damages clause in force", cleared: fundsVerified, detail: fundsVerified ? "Active NDA with a damages provision" : "No damages provision in force" },
   ];
   const score = Math.round((gates.filter((g) => g.cleared).length / gates.length) * 100);
   const tier = score >= 100 ? "Verified" : score >= 50 ? "Qualified" : "Unverified";
   return { gates, score, tier };
 }
+const TIER_LABEL: Record<BuyerTrust["tier"], string> = { Verified: "All met", Qualified: "Partly met", Unverified: "Mostly unmet" };
 const TIER_CLS: Record<BuyerTrust["tier"], string> = {
   Verified: "text-xo-verified", Qualified: "text-xo-caution", Unverified: "text-xo-muted",
 };
@@ -159,7 +160,7 @@ const FounderNdaVault: React.FC = () => {
 
   return (
     <div data-page="nda" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Workspace · NDA" title="NDA & Buyer Trust"
+      <PageHeader eyebrow="◉ Workspace · NDA" title="NDA Vault"
         badge={<span className="text-[12px] text-xo-muted">Qualification gate · {roster.active} active</span>}
         actions={<>
           <a href="/report/nda" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">NDA Package (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
@@ -168,7 +169,7 @@ const FounderNdaVault: React.FC = () => {
         </>} />
 
       <section aria-label="NDA summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Verified buyers" emphasis value={String(verifiedTier)} sub="all four gates" /></div>
+        <div className="bg-xo-panel"><Metric label="All four checks met" emphasis value={String(verifiedTier)} sub="record checks, not verification" /></div>
         <div className="bg-xo-panel"><Metric label="Active NDAs" value={String(roster.active)} sub="bound counterparties" /></div>
         <div className="bg-xo-panel"><Metric label="Pending" value={String(roster.pending)} sub="awaiting countersign" /></div>
         <div className="bg-xo-panel"><Metric label="Breaches" value={String(roster.breached)} sub="open enforcement" /></div>
@@ -230,7 +231,7 @@ const FounderNdaVault: React.FC = () => {
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
             <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{verifiedCount}</span> fully-verified buyer{verifiedCount === 1 ? "" : "s"} cleared for the data room; {roster.active} active.</TakeCell>
             <TakeCell k="If you wait">An unqualified buyer in the data room is an information leak and a wasted slot in your process.</TakeCell>
-            <TakeCell k="Pursue">Pursue <span className="text-xo-text">Verified-tier</span> buyers first — they've cleared all four trust gates.</TakeCell>
+            <TakeCell k="Pursue">Start with counterparties whose NDA record meets all four checks — then do your own diligence on who they are and how they fund deals.</TakeCell>
             <TakeCell k="ExitOS does it">ExitOS scores every counterparty on four verification gates and gates data-room access automatically.</TakeCell>
           </dl>
         </div>
@@ -242,7 +243,7 @@ const FounderNdaVault: React.FC = () => {
             <thead className="text-left text-[11px] text-xo-faint">
               <tr className="border-b border-xo-line">
                 <th scope="col" className="px-4 py-2 font-medium">Counterparty</th>
-                <th scope="col" className="px-4 py-2 font-medium">Buyer Trust</th>
+                <th scope="col" className="px-4 py-2 font-medium">Record checks</th>
                 <th scope="col" className="px-4 py-2 font-medium">Issued</th>
                 <th scope="col" className="px-4 py-2 font-medium">Expires</th>
                 <th scope="col" className="px-4 py-2 font-medium">Status</th>
@@ -256,7 +257,7 @@ const FounderNdaVault: React.FC = () => {
                 return (
                   <tr key={n.id} className="border-b border-xo-line last:border-0">
                     <th scope="row" className="px-4 py-2.5 text-left font-medium">{n.receiving.name}</th>
-                    <td className="px-4 py-2.5"><span className={`text-[12px] font-semibold ${TIER_CLS[trust.tier]}`}>{trust.tier} · {trust.score}</span></td>
+                    <td className="px-4 py-2.5"><span className={`text-[12px] font-semibold ${TIER_CLS[trust.tier]}`}>{trust.gates.filter((g) => g.cleared).length}/4 · {TIER_LABEL[trust.tier]}</span></td>
                     <td className="px-4 py-2.5 text-[12px] text-xo-muted">{timeAgo(n.issuedAt)}</td>
                     <td className="px-4 py-2.5 text-[12px] text-xo-muted">{n.expiresAt ? new Date(n.expiresAt).toLocaleDateString() : "—"}</td>
                     <td className="px-4 py-2.5"><span className={`text-[12px] font-semibold ${STATUS_CLS[status]}`}>{STATUS_LABEL[status]}</span></td>
@@ -275,8 +276,8 @@ const FounderNdaVault: React.FC = () => {
 
       {openNda && (() => { const trust = buyerTrust(openNda, evaluateNdaStatus(openNda)); return (
         <div className="space-y-3">
-          <Section title={`Buyer Trust Score · ${openNda.receiving.name}`} className="border border-xo-line"
-            right={<span className={`font-mono text-[18px] font-semibold ${TIER_CLS[trust.tier]}`}>{trust.score} · {trust.tier}</span>}
+          <Section title={`Record checks · ${openNda.receiving.name}`} eyebrow="From the NDA record — ExitOS does not verify identity, funds or acquisition history" className="border border-xo-line"
+            right={<span className={`font-mono text-[18px] font-semibold ${TIER_CLS[trust.tier]}`}>{trust.gates.filter((g) => g.cleared).length}/4 · {TIER_LABEL[trust.tier]}</span>}
             foot={trust.tier === "Verified"
               ? "All gates cleared — buyer qualified for full data-room access."
               : `${trust.gates.filter((g) => !g.cleared).length} gate(s) outstanding — data-room access restricted until trust clears.`}>
