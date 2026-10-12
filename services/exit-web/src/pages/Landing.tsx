@@ -35,10 +35,10 @@ const Landing: React.FC = () => {
       <section className="relative">
         <TradingHall
           head={
-            <div className={`${WRAP} relative pb-12 pt-16 text-white lg:pt-20`}>
+            <div className={`${WRAP} relative pb-12 pt-16 text-white lg:pb-28 lg:pt-24`}>
               <div className="grid items-end gap-8 lg:grid-cols-[1.4fr_1fr]">
                 <div>
-                  <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-blue-300">{t("hero.eyebrow")}</div>
+                  <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.24em] text-blue-300"><span aria-hidden className="h-px w-12 bg-blue-300/70" />{t("hero.eyebrow")}</div>
                   <h1 className="mt-5 font-editorial text-[clamp(3rem,6vw,6.4rem)] font-semibold leading-[0.9] tracking-[-0.045em]">
                     {h1.map((l, i) => <span key={i} className={i === h1.length - 1 ? "italic text-blue-300" : ""}>{l}{i < h1.length - 1 ? " " : ""}</span>)}
                   </h1>

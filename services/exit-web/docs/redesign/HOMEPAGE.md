@@ -309,16 +309,7 @@ The headline and proof figures sit in the hall for B and C. `ExchangeWall` and `
 ### W2 — Premium finish for the hall (owner, 2026-10-12: "can you make it iconic and increase its premiumization?")
 | # | Gap | Fix (the screen's content stays unchanged; locked palette) | Status |
 |---|---|---|---|
-| W2 | **The hall reads as a stage set, not a grand space.** | `components/TradingHall.tsx` and the hero headline:
-- **coffered ceiling** in perspective, replacing the light lines;
-- **full-height pilasters** with lit capitals, rising into the ceiling;
-- the screen set in a **recessed stepped portal** (two frames and an inner shadow);
-- **volumetric light** falling from the cove onto the screen, and a faint **glass sheen** over the screen (decorative, `pointer-events: none`, above the content, not changing it);
-- **stone floor** seams and a vignette;
-- a slow **entrance** (the screen rises and fades in once, motion-safe only);
-- an editorial **rule before the eyebrow**.
-
-Verify: board markup identical, axe outside the screen 0, reduced motion = no entrance animation, 1440/390 screens. | ☐ |
+| W2 | **The hall reads as a stage set, not a grand space.** | `components/TradingHall.tsx` and the hero headline: - **coffered ceiling** in perspective, replacing the light lines;; **full-height pilasters** with lit capitals, rising into the ceiling;; the screen set in a **recessed stepped portal** (two frames and an inner shadow);; **volumetric light** falling from the cove onto the screen, and a faint **glass sheen** over the screen (decorative, `pointer-events: none`, above the content, not changing it);; **stone floor** seams and a vignette;; a slow **entrance** (the screen rises and fades in once, motion-safe only);; an editorial **rule before the eyebrow**. Verify: board markup identical, axe outside the screen 0, reduced motion = no entrance animation, 1440/390 screens. | ☑ W2-commit |
 
 ---
 
@@ -696,6 +687,27 @@ Kept in capitals by design: one chapter label per moment, table headers, the led
 - **Honest note:** axe now reports 8 contrast items inside the screen at 1440 (7 at 390), up from 6. The board's own faint labels (`white/40–45`) sit on the frame's slightly darker ground. These are the board's text, left as built.
 - Height 6,664 px at 1440 and 10,710 px at 390.
 - Screens: `scratchpad/home/w1-*`.
+
+### W2 — Premium finish for the hall
+*Closed by:*
+- **`components/TradingHall.tsx`** (rewritten; same props):
+  - a **coffered ceiling** with a downlight in every coffer, receding in perspective (replacing the light lines);
+  - **full-height fluted pilasters** with stepped capitals and bases, rising above the screen;
+  - a **lit architrave** spanning the capitals;
+  - **volumetric light** falling from the cove onto the screen;
+  - the screen set in a **recessed, stepped portal**: an outer stone frame, an inner frame with an inset shadow, the plinth below;
+  - a faint **glass sheen** over the screen (decorative, `pointer-events: none`; the screen's content is unchanged);
+  - **stone floor** seams with an edge vignette, plus the existing live floor reflection;
+  - a slow **entrance**: the portal rises and fades in and the glow comes up, once. It runs only under `prefers-reduced-motion: no-preference`.
+- **`pages/Landing.tsx`.** A hairline rule before the eyebrow, and more space between the headline and the architrave.
+
+*Verification:*
+- A script compared the ribbon + board markup and `CommandBoard` with `20545a37`: both identical.
+- `tsc -b`, eslint clean · `vitest` 243/243.
+- Chromium `/` 1440/390: 0 errors, `h1` 1, no overflow; axe 0 outside the screen; 113 tab stops, all with visible focus.
+- Entrance animations: 3 with no motion preference, **0 with reduced motion**.
+- **Honest note:** axe now reports 0 contrast items inside the screen (8 in W1). This is because the glass-sheen layer sits over the text, so axe can no longer measure it ("incomplete"). The board's faint labels are unchanged, so this is not a contrast fix.
+- Height 6,772 px at 1440 and 10,751 px at 390. Screens: `scratchpad/home/w2-hero-*`.
 
 ---
 
