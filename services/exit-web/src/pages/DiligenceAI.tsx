@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, fmtMoney, downloadText, downloadJson, notify } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import { fmtMoney, downloadText, downloadJson, notify } from "../lib/ui";
+import { MarketTape } from "../lib/workstation";
+import { PageHeader, Section, Metric, Chip, Disclosure } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { DILIGENCE } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
@@ -15,11 +16,11 @@ import {
 // the same findings, before any buyer sees the company.
 
 const SEV_STYLE: Record<Severity, string> = {
-  high:   "bg-red-500/15 text-red-300 ring-red-400/40",
-  medium: "bg-loi-500/15 text-loi-300 ring-loi-400/40",
-  low:    "bg-white/5 text-white/50 ring-white/15",
+  high:   "border-xo-risk/50 text-xo-risk",
+  medium: "border-xo-caution/50 text-xo-caution",
+  low:    "border-xo-line text-xo-muted",
 };
-const SEV_DOT: Record<Severity, string> = { high: "bg-red-400", medium: "bg-loi-400", low: "bg-white/40" };
+const SEV_DOT: Record<Severity, string> = { high: "bg-xo-risk", medium: "bg-xo-caution", low: "bg-xo-muted" };
 
 const CATEGORIES: { key: RiskCategory; blurb: string }[] = [
   { key: "Financial",   blurb: "Concentration, revenue quality, cash flow, recurring mix" },
@@ -53,26 +54,24 @@ const DiligenceAI: React.FC = () => {
   // findings grouped by the source file that surfaced them
   const bySource = SOURCE_FILES.map((s) => ({ ...s, count: findings.filter((f) => f.source === s.label).length }));
 
+  const tape = useMemo(() => buildMarketTape(), []);
+  const BTN = "inline-flex items-center rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  const BTN_GHOST = "inline-flex items-center rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
+
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Due Diligence"
-        title="AI Due Diligence"
-        tag="Buyer + Seller reports"
-        status={high > 0 ? `${high} high severity` : "Clean"}
-        metrics={[
-          { k: "Risks discovered", v: String(findings.length), accent: true, sub: "across 3 categories" },
-          { k: "High severity", v: String(high), sub: "resolve before access" },
-          { k: "Est. buyer discount", v: `-${fmtMoney(buyerDiscount)}`, sub: "buyers would deduct" },
-          { k: "Critical questions", v: String(DILIGENCE.criticalQuestions.length), sub: "acquirers will ask" },
-        ]}
-      />
+    <div data-page="diligence" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Due Diligence" title="AI Due Diligence"
+        badge={<span className="text-[12px] text-xo-muted">Buyer + Seller reports · <span className={high > 0 ? "text-xo-risk" : "text-xo-verified"}>{high > 0 ? `${high} high severity` : "Clean"}</span></span>}
+        actions={<button type="button" onClick={rerun} disabled={rerunning} className={BTN_GHOST}>{rerunning ? "Re-running…" : "Re-run analysis"}</button>} />
 
-      <MarketTape items={buildMarketTape()} />
+      <section aria-label="Diligence summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><Metric label="Risks discovered" emphasis value={String(findings.length)} sub="across 3 categories" /></div>
+        <div className="bg-xo-panel"><Metric label="High severity" value={String(high)} sub="resolve before access" /></div>
+        <div className="bg-xo-panel"><Metric label="Est. buyer discount" value={`-${fmtMoney(buyerDiscount)}`} sub="buyers would deduct" /></div>
+        <div className="bg-xo-panel"><Metric label="Critical questions" value={String(DILIGENCE.criticalQuestions.length)} sub="acquirers will ask" /></div>
+      </section>
 
-      <div className="flex justify-end">
-        <Button variant="ghost" onClick={rerun} disabled={rerunning}>{rerunning ? "Re-running…" : "Re-run analysis"}</Button>
-      </div>
+      <MarketTape items={tape} />
 
       <BankerTake
         next={high > 0
@@ -87,158 +86,149 @@ const DiligenceAI: React.FC = () => {
       />
 
       {/* ── Ingestion ────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <section aria-label="Ingestion" className="grid grid-cols-2 gap-px border border-xo-line bg-xo-line sm:grid-cols-5">
         {bySource.map((s) => (
-          <Card key={s.key} className="p-4">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-deal-300">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-deal-400" /> Analyzed
+          <div key={s.key} className="bg-xo-panel px-4 py-3">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-xo-verified">
+              <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-xo-verified" /> Analyzed
             </div>
-            <div className="mt-1.5 text-[13px] font-semibold leading-tight text-white">{s.label}</div>
-            <div className="mt-0.5 text-[10px] text-white/40">{s.note}</div>
-            <div className="mt-2 font-mono text-lg font-bold text-white">{s.count}</div>
-            <div className="text-[10px] uppercase tracking-wide text-white/40">finding{s.count === 1 ? "" : "s"}</div>
-          </Card>
+            <div className="mt-1.5 text-[13px] font-semibold leading-tight">{s.label}</div>
+            <div className="mt-0.5 text-[11px] text-xo-muted">{s.note}</div>
+            <div className="mt-2 font-mono text-lg font-semibold">{s.count}</div>
+            <div className="text-[11px] text-xo-muted">finding{s.count === 1 ? "" : "s"}</div>
+          </div>
         ))}
-      </div>
+      </section>
 
       {/* Value prop — what a bank charges vs. what ExitOS just did */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-deal-500/30 bg-gradient-to-r from-deal-600/12 to-transparent px-5 py-4">
+      <section aria-label="Comparison and exports" className="flex flex-wrap items-center justify-between gap-4 border border-xo-line bg-xo-panel px-4 py-3">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px]">
           <div>
-            <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">Investment bank</div>
-            <div className="font-mono text-sm text-white/70 line-through decoration-white/30">$40,000+ · 4–6 weeks</div>
+            <div className="text-[11px] text-xo-muted">Investment bank</div>
+            <div className="font-mono text-[13px] text-xo-muted line-through">$40,000+ · 4–6 weeks</div>
           </div>
-          <span className="text-xl text-white/25">→</span>
+          <span aria-hidden className="text-xl text-xo-faint">→</span>
           <div>
-            <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-deal-300">ExitOS</div>
-            <div className="font-mono text-sm font-bold text-deal-300">{findings.length} findings · 2 reports · seconds</div>
+            <div className="text-[11px] text-xo-verified">ExitOS</div>
+            <div className="font-mono text-[13px] font-semibold text-xo-verified">{findings.length} findings · 2 reports · seconds</div>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button onClick={() => downloadJson("exitos-diligence-reports.json", reports)} className="inline-flex items-center rounded-md border border-white/15 px-3.5 py-2 text-[13px] font-semibold text-white/75 transition hover:bg-white/5">Export data (.json)</button>
-          <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-md bg-deal-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-500">Board-ready report (PDF) →</a>
+          <button type="button" onClick={() => downloadJson("exitos-diligence-reports.json", reports)} className={BTN_GHOST}>Export data (.json)</button>
+          <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className={BTN}>Board-ready report (PDF) →</a>
         </div>
-      </div>
+      </section>
 
       {/* ── Discovered risks by category ─────────────────────────── */}
-      <h2 className="mt-10 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Discovered risks</h2>
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-3">
         {CATEGORIES.map((cat) => {
           const items = findings.filter((f) => f.category === cat.key);
           return (
-            <div key={cat.key}>
-              <div className="mb-2">
-                <h3 className="font-serif text-base font-bold text-white">{cat.key} risks</h3>
-                <p className="text-[11px] text-white/45">{cat.blurb}</p>
-              </div>
-              <div className="space-y-3">
+            <Section key={cat.key} title={`${cat.key} risks`} eyebrow="Discovered risks" foot={cat.blurb}>
+              <ul className="space-y-px bg-xo-line">
                 {items.map((f) => <FindingCard key={f.id} f={f} audience={report.accent} />)}
-              </div>
-            </div>
+              </ul>
+            </Section>
           );
         })}
       </div>
 
       {/* ── Generated reports — six, from one scan ───────────────── */}
-      <div className="mt-12">
-        <h2 className="font-serif text-lg font-bold text-white">Generated reports</h2>
-        <p className="text-xs text-white/45">Six reports an investment bank and law firm would bill thousands for — produced from one scan.</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {reports.map((r) => (
-            <button key={r.key} onClick={() => setReportKey(r.key)}
-              className={`rounded-md px-3 py-1.5 text-[12px] font-semibold transition ${report.key === r.key ? "bg-deal-600/25 text-white ring-1 ring-deal-400/40" : "text-white/55 hover:bg-white/5 hover:text-white"}`}>
-              {r.title}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <Card className={`mt-4 overflow-hidden p-0 ring-1 ${report.accent === "buyer" ? "ring-red-400/30" : "ring-deal-400/30"}`}>
-        <div className={`border-b border-white/10 px-6 py-4 ${report.accent === "buyer" ? "bg-red-500/10" : "bg-deal-600/10"}`}>
-          <div className="flex items-center justify-between gap-3">
-            <span className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${report.accent === "buyer" ? "text-red-200" : "text-deal-300"}`}>{report.title}</span>
-            <span className="font-mono text-sm font-bold text-white">{report.metric}</span>
+      <Section title="Generated reports" className="border border-xo-line"
+        right={<span className="text-[11px] text-xo-muted">Six reports an investment bank and law firm would bill thousands for — produced from one scan.</span>}>
+        <div className="px-4 pt-3">
+          <div role="group" aria-label="Report" className="flex flex-wrap gap-2">
+            {reports.map((r) => <Chip key={r.key} pressed={report.key === r.key} onToggle={() => setReportKey(r.key)}>{r.title}</Chip>)}
           </div>
-          <p className="mt-3 text-sm leading-relaxed text-white/80">{report.headline}</p>
         </div>
-        <div className="grid gap-0 lg:grid-cols-[1.4fr_1fr]">
-          <div className="border-b border-white/10 p-6 lg:border-b-0 lg:border-r">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Findings</div>
-            <ul className="mt-3 space-y-3">
-              {report.points.length === 0 ? (
-                <li className="text-[13px] text-white/55">Nothing flagged in this report — clean on this dimension.</li>
-              ) : report.points.map((p) => (
-                <li key={p.title}>
-                  <div className="text-[12px] font-semibold uppercase tracking-wide text-white/55">{p.title}</div>
-                  <div className="mt-0.5 text-[13px] leading-snug text-white/80">{p.body}</div>
-                </li>
-              ))}
-            </ul>
+        <div className="m-4 border border-xo-line">
+          <div className="border-b border-xo-line bg-xo-ink px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className={`text-[13px] font-semibold ${report.accent === "buyer" ? "text-xo-risk" : "text-xo-verified"}`}>{report.title}</h3>
+              <span className="font-mono text-[13px] font-semibold">{report.metric}</span>
+            </div>
+            <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">{report.headline}</p>
           </div>
-          <div className="p-6">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">Recommendation</div>
-            <p className="mt-3 text-[13px] leading-relaxed text-white/75">{report.recommendation}</p>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Button variant="ghost" className="text-[12px]" onClick={() => downloadText(`exitos-${report.key}-report.md`, reportMarkdown(report))}>Export draft (.md)</Button>
-              <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className="inline-flex items-center rounded-md bg-deal-600/90 px-3.5 py-2 text-[12px] font-semibold text-white transition hover:bg-deal-500">Board-ready report (PDF) →</a>
+          <div className="grid gap-px bg-xo-line lg:grid-cols-[1.4fr_1fr]">
+            <div className="bg-xo-panel px-4 py-3">
+              <h4 className="text-[12px] font-semibold text-xo-muted">Findings</h4>
+              <ul className="mt-2 space-y-3">
+                {report.points.length === 0 ? (
+                  <li className="text-[13px] text-xo-muted">Nothing flagged in this report — clean on this dimension.</li>
+                ) : report.points.map((p) => (
+                  <li key={p.title}>
+                    <div className="text-[12px] font-semibold">{p.title}</div>
+                    <div className="mt-0.5 text-[13px] leading-snug text-xo-muted">{p.body}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-xo-panel px-4 py-3">
+              <h4 className="text-[12px] font-semibold text-xo-muted">Recommendation</h4>
+              <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">{report.recommendation}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button type="button" className={BTN_GHOST} onClick={() => downloadText(`exitos-${report.key}-report.md`, reportMarkdown(report))}>Export draft (.md)</button>
+                <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className={BTN}>Board-ready report (PDF) →</a>
+              </div>
             </div>
           </div>
         </div>
-      </Card>
+      </Section>
 
       {/* ── Diligence question bank ──────────────────────────────── */}
-      <h2 className="mt-12 mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Diligence question bank</h2>
-      <div className="space-y-2">
-        {DILIGENCE.documents.map((d) => (
-          <Card key={d.kind} className="overflow-hidden">
-            <button onClick={() => setOpen(open === d.kind ? null : d.kind)} className="flex w-full items-center justify-between px-5 py-3.5 text-left transition hover:bg-white/[0.03]">
-              <div>
-                <div className="text-sm font-bold text-white">{d.title}</div>
-                <div className="text-[11px] text-white/45">{d.sections.length} sections · classification: {d.classification}</div>
+      <Section title="Diligence question bank" className="border border-xo-line">
+        <ul>
+          {DILIGENCE.documents.map((d) => (
+            <li key={d.kind} className="border-b border-xo-line last:border-0">
+              <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+                <div>
+                  <h3 className="text-[13px] font-semibold">{d.title}</h3>
+                  <div className="text-[11px] text-xo-muted">{d.sections.length} sections · classification: {d.classification}</div>
+                </div>
+                <Disclosure open={open === d.kind} onToggle={() => setOpen(open === d.kind ? null : d.kind)} controls={`qb-${d.kind}`}>{open === d.kind ? "Hide questions" : "Show questions"}</Disclosure>
               </div>
-              <span className="text-white/40">{open === d.kind ? "–" : "+"}</span>
-            </button>
-            {open === d.kind && (
-              <div className="space-y-4 border-t border-white/10 px-5 py-4">
-                {d.sections.map((s) => (
-                  <div key={s.heading}>
-                    <div className="text-[12px] font-semibold text-deal-300">{s.heading}</div>
-                    <ul className="mt-1.5 space-y-1 text-[12px] text-white/65">
-                      {s.questions.map((q) => (
-                        <li key={q} className="flex items-baseline gap-2"><span className="mt-1 inline-block h-1 w-1 rounded-full bg-white/30" />{q}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-        ))}
-      </div>
+              {open === d.kind && (
+                <div id={`qb-${d.kind}`} className="space-y-4 border-t border-xo-line px-4 py-3">
+                  {d.sections.map((s) => (
+                    <div key={s.heading}>
+                      <h4 className="text-[12px] font-semibold text-xo-verified">{s.heading}</h4>
+                      <ul className="mt-1.5 space-y-1 text-[12px] text-xo-muted">
+                        {s.questions.map((q) => (
+                          <li key={q} className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-faint" />{q}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Section>
     </div>
   );
 };
 
 const FindingCard: React.FC<{ f: DiligenceFinding; audience: "buyer" | "seller" }> = ({ f, audience }) => (
-  <Card className="p-4">
+  <li className="bg-xo-panel px-4 py-3">
     <div className="flex items-start justify-between gap-2">
       <div className="flex items-center gap-2">
-        <span className={`h-1.5 w-1.5 rounded-full ${SEV_DOT[f.severity]}`} />
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-white/45">{f.subcategory}</span>
+        <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${SEV_DOT[f.severity]}`} />
+        <span className="text-[11px] font-semibold text-xo-muted">{f.subcategory}</span>
       </div>
-      <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ring-1 ${SEV_STYLE[f.severity]}`}>{f.severity}</span>
+      <span className={`shrink-0 rounded-sm border px-1.5 py-px text-[11px] font-semibold ${SEV_STYLE[f.severity]}`}>{f.severity}</span>
     </div>
-    <div className="mt-1.5 text-[13px] font-semibold leading-snug text-white">{f.title}</div>
-    <p className="mt-1 text-[11.5px] leading-snug text-white/55">{f.detail}</p>
-    <div className="mt-3 rounded-md border border-white/10 bg-ink-900/50 p-2.5">
+    <h3 className="mt-1.5 text-[13px] font-semibold leading-snug">{f.title}</h3>
+    <p className="mt-1 text-[12px] leading-snug text-xo-muted">{f.detail}</p>
+    <div className="mt-3 border border-xo-line bg-xo-ink p-2.5">
       <div className="flex items-center justify-between">
-        <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">{audience === "buyer" ? "Buyer view" : "Your move"}</span>
-        <span className="font-mono text-[11px] text-red-300/80">-{fmtMoney(f.impactUsd)}</span>
+        <span className="text-[11px] font-semibold text-xo-muted">{audience === "buyer" ? "Buyer view" : "Your move"}</span>
+        <span className="font-mono text-[12px] text-xo-risk">-{fmtMoney(f.impactUsd)}</span>
       </div>
-      <p className="mt-1 text-[11.5px] leading-snug text-white/70">{audience === "buyer" ? f.buyerView : f.sellerAction}</p>
+      <p className="mt-1 text-[12px] leading-snug">{audience === "buyer" ? f.buyerView : f.sellerAction}</p>
     </div>
-    <div className="mt-2 text-[10px] text-white/35">Source: {f.source}</div>
-  </Card>
+    <div className="mt-2 text-[11px] text-xo-muted">Source: {f.source}</div>
+  </li>
 );
 
 export default DiligenceAI;

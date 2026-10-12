@@ -37,8 +37,12 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe 0 · no overflow · 0 
 | G4 | "AI"; unsourced bank comparison. | "Diligence" (rule-based); remove the $40,000 / 4–6 weeks comparison and "would bill thousands". | ☐ |
 | G5 | Demo only, unlabelled. | `discoverFindings(company)` (additive parameter) and `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☐ |
 | G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
-| G7 | Design: no `h1`; old components. | Rebuild on `xo`. | ☐ |
+| G7 | Design: no `h1`; old components. | Rebuild on `xo`. | ☑ G7-commit |
 
 ---
 
 ## Closure log
+
+### G7 — Design
+*Closed by:* `pages/DiligenceAI.tsx` rebuilt on `xo` (`PageHeader` `h1` with the re-run action; four metrics; source cards and the comparison strip as labelled sections; the three risk categories as `Section`s with findings as list items under `h3`s; the report switcher as `Chip`s (`aria-pressed`) in a labelled group; the question bank with `Disclosure` toggles (`aria-expanded`/`aria-controls`); severity in words with colour; shared `Card`/`Button` replaced). Content carried over verbatim; the shared `BankerTake` stays until G6; G1–G6 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Preparation and Pro 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe 0 (heading order fixed during the rebuild), all tab stops with visible focus · after opening a question set and after switching to the Buyer Diligence Report: axe 0, no overflow · free: Upgrade page.
