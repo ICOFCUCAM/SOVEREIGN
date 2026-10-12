@@ -20,30 +20,28 @@ const RING = "#C8B48F", BR = "#B49A75";
 
 const Orb: React.FC<{ at: [number, number]; s?: number }> = ({ at: [x, y], s = 1 }) => (
   <g>
-    <circle cx={x} cy={y} r={26 * s} fill="url(#hx-orb)" />
-    <circle cx={x} cy={y} r={8.5 * s} stroke="#C9AE82" strokeOpacity=".8" strokeWidth={1.1 * s} />
+    <circle cx={x} cy={y} r={21 * s} fill="url(#hx-orb)" />
+    <circle cx={x} cy={y} r={8 * s} stroke="#C9AE82" strokeOpacity=".75" strokeWidth="1" />
     <circle cx={x} cy={y} r={4 * s} fill="#FFF8EC" />
   </g>
 );
 const Dot: React.FC<{ at: [number, number]; r?: number }> = ({ at: [x, y], r = 2.5 }) => (
-  <g><circle cx={x} cy={y} r={r * 3} fill="url(#hx-pt)" /><circle cx={x} cy={y} r={r} fill="#FBF8F2" /></g>
+  <g><circle cx={x} cy={y} r={r * 2.4} fill="url(#hx-pt)" /><circle cx={x} cy={y} r={r} fill="#FBF8F2" /></g>
 );
 
 const Dial: React.FC = () => {
   const [w1x, w1y] = P(28, 212), [w2x, w2y] = P(64, 212);
-  const [mx, my] = P(46, 212);
   return (
-    <svg viewBox="0 0 500 500" className="h-full w-full overflow-visible" fill="none" aria-hidden>
+    <svg viewBox="0 0 500 500" className="hx-dial h-full w-full overflow-visible" fill="none" shapeRendering="geometricPrecision" aria-hidden>
       <defs>
         <radialGradient id="hx-orb"><stop offset="0" stopColor="#F8EAD0" stopOpacity="1" /><stop offset=".3" stopColor="#C9AE82" stopOpacity=".55" /><stop offset="1" stopColor={BR} stopOpacity="0" /></radialGradient>
         <radialGradient id="hx-pt"><stop offset="0" stopColor="#F3E6CF" stopOpacity=".55" /><stop offset="1" stopColor="#F3E6CF" stopOpacity="0" /></radialGradient>
         <radialGradient id="hx-halo"><stop offset="0" stopColor="#5C7383" stopOpacity=".8" /><stop offset=".75" stopColor="#47596A" stopOpacity=".55" /><stop offset="1" stopColor="#47596A" stopOpacity="0" /></radialGradient>
         <radialGradient id="hx-glow"><stop offset="0" stopColor="#FFFFFF" stopOpacity=".7" /><stop offset="1" stopColor="#FFFFFF" stopOpacity="0" /></radialGradient>
-        <linearGradient id="hx-wedge" gradientUnits="userSpaceOnUse" x1={C} y1={C} x2={mx} y2={my}>
-          <stop offset="0" stopColor="#C7A97C" stopOpacity=".06" /><stop offset=".55" stopColor="#C7A97C" stopOpacity=".2" /><stop offset="1" stopColor="#D2B68A" stopOpacity=".32" />
-        </linearGradient>
+        <radialGradient id="hx-wedge" gradientUnits="userSpaceOnUse" cx={C} cy={C} r="212">
+          <stop offset="0" stopColor="#C7A97C" stopOpacity=".03" /><stop offset=".55" stopColor="#C7A97C" stopOpacity=".14" /><stop offset=".9" stopColor="#D2B68A" stopOpacity=".3" /><stop offset="1" stopColor="#D2B68A" stopOpacity=".16" />
+        </radialGradient>
         <filter id="hx-bloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7" /></filter>
-        <filter id="hx-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.2" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
         <linearGradient id="hx-axis" gradientUnits="userSpaceOnUse" x1="-560" y1="0" x2="1100" y2="0">
           <stop offset="0" stopColor={RING} stopOpacity="0" /><stop offset=".3" stopColor={RING} stopOpacity=".42" /><stop offset="1" stopColor={RING} stopOpacity=".42" />
         </linearGradient>
@@ -59,49 +57,48 @@ const Dial: React.FC = () => {
           signature — the upper one faint, rising to the dial; the lower one a bright horizon curve with a flare,
           running on under the wordmark — plus a faint ray from the flare to a small orb, a second faint
           horizontal under the axis and a short ray beside the wordmark */}
-      <path d="M-300 268 Q-190 232 -100 186 T 46 92" stroke="url(#hx-v-up)" strokeWidth=".9" />
-      <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="3.2" filter="url(#hx-bloom)" />
-      <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="1.4" />
-      <line x1="-5" y1="533" x2="-103" y2="360" stroke="#E8D7B8" strokeOpacity=".28" strokeWidth=".7" />
-      <line x1="-131" y1="326" x2="26" y2="326" stroke="#E8D7B8" strokeOpacity=".2" strokeWidth=".7" />
-      <line x1="9" y1="512" x2="81" y2="430" stroke="#E8D7B8" strokeOpacity=".22" strokeWidth=".7" />
+      <path d="M-300 268 Q-190 232 -100 186 T 46 92" stroke="url(#hx-v-up)" strokeWidth="1" />
+      <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="2.5" strokeOpacity=".55" filter="url(#hx-bloom)" />
+      <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="1.25" />
+      <line x1="-5" y1="533" x2="-103" y2="360" stroke="#E8D7B8" strokeOpacity=".24" strokeWidth="1" />
+      <line x1="-131" y1="326" x2="26" y2="326" stroke="#E8D7B8" strokeOpacity=".16" strokeWidth="1" />
+      <line x1="9" y1="512" x2="81" y2="430" stroke="#E8D7B8" strokeOpacity=".18" strokeWidth="1" />
       <Orb at={[-5, 533]} s={0.55} />
       <Orb at={[-103, 360]} s={0.45} />
-      {([[-150, 40, 1.2], [-60, 470, 1], [520, 120, 1.1], [470, 430, 1], [30, -10, 0.9]] as const).map(([x, y, r]) => <circle key={`${x}${y}`} cx={x} cy={y} r={r} fill="#F2EBDD" fillOpacity=".55" />)}
 
       {/* axes across the field, brighter inside the dial */}
-      <line x1="-560" y1={C} x2="1100" y2={C} stroke="url(#hx-axis)" strokeWidth=".7" />
-      <line x1={C} y1="-400" x2={C} y2="900" stroke={RING} strokeOpacity=".4" strokeWidth=".8" />
-      <line x1={C - 207} y1={C} x2={C + 207} y2={C} stroke={RING} strokeOpacity=".7" strokeWidth="1" />
-      <line x1={C} y1={C - 207} x2={C} y2={C + 207} stroke={RING} strokeOpacity=".7" strokeWidth="1" />
-      <g stroke={RING} strokeOpacity=".16" strokeWidth=".7">
+      <line x1="-560" y1={C} x2="1100" y2={C} stroke="url(#hx-axis)" strokeWidth="1" />
+      <line x1={C} y1="-400" x2={C} y2="900" stroke={RING} strokeOpacity=".3" strokeWidth="1" />
+      <line x1={C - 207} y1={C} x2={C + 207} y2={C} stroke={RING} strokeOpacity=".55" strokeWidth="1" />
+      <line x1={C} y1={C - 207} x2={C} y2={C + 207} stroke={RING} strokeOpacity=".55" strokeWidth="1" />
+      <g stroke={RING} strokeOpacity=".12" strokeWidth="1">
         {[45, 135, 225, 315].map((d) => { const [a, b] = P(d, 59), [c, e] = P(d, 207); return <line key={d} x1={a} y1={b} x2={c} y2={e} />; })}
       </g>
 
       {/* bezel and graduated ring */}
       <circle cx={C} cy={C} r="266" stroke="#E2D6BF" strokeOpacity=".28" strokeWidth="1.1" strokeDasharray="0.1 6" strokeLinecap="round" />
       <circle cx={C} cy={C} r="246" stroke="#E2D6BF" strokeOpacity=".5" strokeWidth="1.2" strokeDasharray="0.1 4.4" strokeLinecap="round" />
-      <circle cx={C} cy={C} r="233" stroke={RING} strokeOpacity=".62" strokeWidth="1.1" />
+      <circle cx={C} cy={C} r="233" stroke={RING} strokeOpacity=".5" strokeWidth="1" />
       <g stroke="#D9CCB4" strokeLinecap="round">
         {Array.from({ length: 180 }, (_, i) => i * 2).map((d) => {
           const major = d % 30 === 0 && d % 90 !== 0;
           const [x1, y1] = P(d, major ? 210 : 216), [x2, y2] = P(d, major ? 228 : 223);
-          return <line key={d} x1={x1} y1={y1} x2={x2} y2={y2} strokeOpacity={major ? 0.85 : 0.3} strokeWidth={major ? 1.3 : 0.7} />;
+          return <line key={d} x1={x1} y1={y1} x2={x2} y2={y2} strokeOpacity={major ? 0.8 : 0.26} strokeWidth={major ? 1.25 : 1} />;
         })}
       </g>
 
       {/* market rings */}
-      <circle cx={C} cy={C} r="205" stroke={RING} strokeOpacity=".5" strokeWidth="1" />
-      <circle cx={C} cy={C} r="160" stroke="#C9B08A" strokeOpacity=".95" strokeWidth="1.4" />
-      <circle cx={C} cy={C} r="118" stroke={RING} strokeOpacity=".32" strokeWidth=".9" />
+      <circle cx={C} cy={C} r="205" stroke={RING} strokeOpacity=".38" strokeWidth="1" />
+      <circle cx={C} cy={C} r="160" stroke="#C9B08A" strokeOpacity=".85" strokeWidth="1.25" />
+      <circle cx={C} cy={C} r="118" stroke={RING} strokeOpacity=".24" strokeWidth="1" />
       <circle cx={C} cy={C} r="88" stroke={RING} strokeOpacity=".6" strokeWidth="1.3" strokeDasharray="0.1 4.4" strokeLinecap="round" />
-      <circle cx={C} cy={C} r="60" stroke="#D2BA92" strokeOpacity=".95" strokeWidth="1.5" />
+      <circle cx={C} cy={C} r="60" stroke="#D2BA92" strokeOpacity=".9" strokeWidth="1.25" />
 
       {/* the aperture: a lit wedge, its leading edge bright */}
       <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" filter="url(#hx-bloom)" />
       <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" />
-      <line x1={C} y1={C} x2={w1x} y2={w1y} stroke="#EFE2C9" strokeOpacity=".2" strokeWidth=".8" />
-      <line x1={C} y1={C} x2={w2x} y2={w2y} stroke="#F4E8D2" strokeOpacity=".95" strokeWidth="1.8" filter="url(#hx-soft)" />
+      <line x1={C} y1={C} x2={w1x} y2={w1y} stroke="#EFE2C9" strokeOpacity=".18" strokeWidth="1" />
+      <line x1={C} y1={C} x2={w2x} y2={w2y} stroke="#F4E8D2" strokeOpacity=".9" strokeWidth="1.5" />
 
       {/* registration marks on the axes */}
       {[0, 180].map((d) => { const [x, y] = P(d, 178); return <g key={d} fill="#F2EBDD" fillOpacity=".7"><circle cx={x - 4} cy={y} r="1.3" /><circle cx={x + 4} cy={y} r="1.3" /></g>; })}
@@ -119,7 +116,7 @@ const Dial: React.FC = () => {
       {/* the transaction node: ice-white in a blue-grey halo */}
       <circle cx={C} cy={C} r="32" fill="url(#hx-halo)" />
       <circle cx={C} cy={C} r="13" fill="url(#hx-glow)" />
-      <circle cx={C} cy={C} r="14" stroke="#DCEAF3" strokeOpacity=".95" strokeWidth="1.4" />
+      <circle cx={C} cy={C} r="14" stroke="#DCEAF3" strokeOpacity=".95" strokeWidth="1.25" />
       <circle cx={C} cy={C} r="6.5" fill="#FFFFFF" />
     </svg>
   );
@@ -135,10 +132,10 @@ const ICONS: ReadonlyArray<React.ReactNode> = [
 ];
 
 // porcelain → graphite, measured from the benchmark: neutral warm greys, no tan, no seam
-const FALL = "linear-gradient(90deg, #F8F4EE 0%, #F4EFE8 26%, #EDE6DD 33%, #E2D8CE 39.5%, #CDC3B7 43.5%, #AEA59A 46.5%, #8D867C 49.5%, #6D6964 52.5%, #4E4C48 56%, #373734 60%, #2A2A28 65%, #222321 72%, #1E1F1C 100%)";
-const FALL_Y = "radial-gradient(circle at 50% 42%, rgba(160,136,100,0.2), transparent 45%), linear-gradient(180deg, #F8F4EE 0, #E2D8CE 30px, #AEA59A 70px, #6D6964 110px, #373734 160px, #222321 220px, #1E1F1C 100%)";
+const FALL = "linear-gradient(90deg, #F8F4EE 0%, #F4EFE8 26%, #EDE6DD 33%, #E2D8CE 39.5%, #CDC3B7 43.5%, #AEA59A 46.5%, #8D867C 49.5%, #6D6964 52.5%, #4B4945 56%, #33322F 60%, #262624 64%, #1F1F1D 70%, #1B1B19 100%)";
+const FALL_Y = "radial-gradient(circle at 50% 42%, rgba(160,136,100,0.08), transparent 40%), linear-gradient(180deg, #F8F4EE 0, #E2D8CE 30px, #AEA59A 70px, #6D6964 110px, #33322F 160px, #1F1F1D 220px, #1B1B19 100%)";
 // the warm haze around the dial and the light leak at lower left of the dark (desktop)
-const HAZE = "radial-gradient(circle at 74.5% 41%, rgba(166,142,104,0.24), transparent 27%), radial-gradient(ellipse 26% 34% at 58% 84%, rgba(214,196,168,0.18), transparent 70%), radial-gradient(ellipse 60% 70% at 8% 10%, #FCFAF6, transparent 70%)";
+const HAZE = "radial-gradient(circle at 74.5% 41%, rgba(166,142,104,0.09), transparent 24%), radial-gradient(ellipse 18% 22% at 59% 82%, rgba(214,196,168,0.09), transparent 70%), radial-gradient(ellipse 60% 70% at 8% 10%, #FCFAF6, transparent 70%)";
 const GRAIN = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
 const HeroExchange: React.FC = () => {
@@ -149,7 +146,7 @@ const HeroExchange: React.FC = () => {
       <div className="hx-grid relative grid lg:min-h-[max(560px,min(41.25vw,780px))] lg:grid-cols-[minmax(0,1.04fr)_minmax(0,1fr)]">
         {/* the field (desktop) is this grid's own background (.hx-grid): one fall-off across the hero, the
             dial's warm haze, a light leak at lower left; a fine grain over the dark */}
-        <span aria-hidden className="absolute inset-0 -z-10 hidden opacity-[0.06] mix-blend-screen lg:block" style={{ backgroundImage: GRAIN, maskImage: "linear-gradient(90deg, transparent 45%, #000 62%)", WebkitMaskImage: "linear-gradient(90deg, transparent 45%, #000 62%)" }} />
+        <span aria-hidden className="absolute inset-0 -z-10 hidden opacity-[0.03] mix-blend-screen lg:block" style={{ backgroundImage: GRAIN, maskImage: "linear-gradient(90deg, transparent 45%, #000 62%)", WebkitMaskImage: "linear-gradient(90deg, transparent 45%, #000 62%)" }} />
 
         {/* the editorial page */}
         <div className="relative z-10 flex items-center">
@@ -218,6 +215,8 @@ const HeroExchange: React.FC = () => {
           .hx-grid{background:${HAZE}, ${FALL}}
           .hx-sig{background:none}
         }
+        /* every line a true hairline at any size: widths are screen pixels, not view-box units */
+        .hx-dial :is(line,path,circle){vector-effect:non-scaling-stroke}
         @media (prefers-reduced-motion: no-preference){ .hx-mark{animation:hxMark 1.8s cubic-bezier(.2,.7,.2,1) .2s both} }
         @keyframes hxMark{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
       `}</style>
