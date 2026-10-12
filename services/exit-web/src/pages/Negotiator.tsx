@@ -76,7 +76,10 @@ function autonomousTerms(offer: Offer | undefined, t: Thresholds): { clauses: st
 }
 
 const Negotiator: React.FC = () => {
-  const [activeId, setActiveId] = useState(OFFER_EVALUATIONS[0]?.offer.offerId ?? "");
+  // The engine's leading offer (OFFER_COMPARISON.leader is an offer id) —
+  // selected by default and shown as the leading bid whatever is selected.
+  const leader = OFFER_EVALUATIONS.find((e) => e.offer.offerId === OFFER_COMPARISON.leader) ?? OFFER_EVALUATIONS[0];
+  const [activeId, setActiveId] = useState(leader?.offer.offerId ?? "");
   const active = OFFER_EVALUATIONS.find((e) => e.offer.offerId === activeId) ?? OFFER_EVALUATIONS[0];
   const reserveMid = VALUATION_CANONICAL.headline.mid;
   const [reserve, setReserve] = useState<Reserve>({
@@ -128,7 +131,7 @@ James — on behalf of Helios Freight`
       <section aria-label="Negotiation summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Active offers" value={String(NEGOTIATION_STATE.activeOffers)} sub={NEGOTIATION_STATE.stage} /></div>
         <div className="bg-xo-panel"><Metric label="Leverage" value={<span className="capitalize">{NEGOTIATION_STATE.leverage}</span>} sub="market posture" /></div>
-        <div className="bg-xo-panel"><Metric label="Leading bid" emphasis value={active ? `${active.score.toFixed(0)}/100` : "—"} sub={active?.offer.buyerName} /></div>
+        <div className="bg-xo-panel"><Metric label="Leading bid" emphasis value={leader ? `${leader.score.toFixed(0)}/100` : "—"} sub={leader?.offer.buyerName} /></div>
         <div className="bg-xo-panel"><Metric label="Strategic mid" value={fmtMoney(reserveMid)} sub="valuation reference" /></div>
       </section>
 
@@ -165,7 +168,7 @@ James — on behalf of Helios Freight`
             <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
               <TakeCell k="At stake">Counter at <span className="font-mono font-semibold text-xo-verified">{fmtMoney(counter.counterPrice)}</span> — +{counter.upliftPct.toFixed(0)}% on the {fmtMoney(active.offer.headlinePriceUsd)} bid.</TakeCell>
               <TakeCell k="If you wait">Accepting the first bid leaves the strategic premium on the table; leverage is {NEGOTIATION_STATE.leverage}.</TakeCell>
-              <TakeCell k="Pursue">Lead with <span className="text-xo-text">{active.offer.buyerName}</span> — your strongest bid at {active.score.toFixed(0)}/100.</TakeCell>
+              <TakeCell k="Pursue">{leader ? <>Lead with <span className="text-xo-text">{leader.offer.buyerName}</span> — your strongest bid at {leader.score.toFixed(0)}/100.</> : null}{leader && leader.offer.offerId !== active.offer.offerId ? <> The counter shown is for {active.offer.buyerName}.</> : null}</TakeCell>
               <TakeCell k="ExitOS does it">ExitOS scores every offer, drafts the counter and writes the ready-to-send response for you.</TakeCell>
             </dl>
             <button type="button" onClick={() => setDraftOpen(true)} className="mt-3 rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft the response →</button>

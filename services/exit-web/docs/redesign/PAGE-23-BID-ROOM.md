@@ -35,7 +35,7 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 ## Gap register — Page 23
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **"Leading bid" / "your strongest bid" show the first offer, not the engine's leader.** | Default selection and the leading-bid metric follow `OFFER_COMPARISON.leader`; the banker's take names the leader. | ☐ |
+| G1 | **"Leading bid" / "your strongest bid" show the first offer, not the engine's leader.** | Default selection and the leading-bid metric follow `OFFER_COMPARISON.leader`; the banker's take names the leader. | ☑ G1-commit |
 | G2 | **False "Counter sent".** | Copy only, and "Nothing is sent from ExitOS"; no sent state. | ☐ |
 | G3 | **Invented sender and hard-coded demo facts in the draft.** | "[Your name]"; company name and growth from the company profile; no "competitive process" claim beyond the offer count. | ☐ |
 | G4 | **"AI / autonomous" overclaims**; counter rule unexplained; "strategic mid" (D1). | "Standard negotiating positions (templates) — not legal advice"; counter rule stated; "enterprise value (institutional)". | ☐ |
@@ -49,3 +49,7 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 ### G6 — Design, dialog, tape
 *Closed by:* `pages/Negotiator.tsx` rebuilt on `xo` (`PageHeader` `h1` with Edit reservation lines and Generate counter as header actions; four metrics; banker's take as a page-local definition list (shared `BankerTake` no longer used here); offers as a `nav` of buttons with `aria-current`; the selected offer as a labelled section with `h2`/`h3`/`h4`; counteroffer, score breakdown, conflicts and moves with severities in words; cross-bid comparison as a definition list; the response draft now opens in the shared `Modal` (an accessible dialog since X13) instead of a bare overlay; pinging `MarketTape` → dated `RegistryTape`). Content carried over verbatim; G1–G5 follow.
 *Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe 0 (after moving the "→" inside a `dt` — axe flagged it as an invalid `dl` child), all tab stops with visible focus; draft and reservation dialogs: role dialog, focus inside, axe 0, Escape returns focus to the opener · free: Upgrade page.
+
+### G1 — "Leading bid" showed the first offer, not the engine's leader
+*Closed by:* `pages/Negotiator.tsx`. The leader is `OFFER_EVALUATIONS.find(offerId === OFFER_COMPARISON.leader)`; it is the **default selection**, the "Leading bid" metric always shows it whatever offer is selected, and the banker's take "Lead with … your strongest bid" names it (adding "The counter shown is for {selected}" when another offer is selected). Before: Vista 67/100 (first in the list) was shown as the leading bid; the engine's leader is Microsoft Industry Solutions 68/100.
+*Verification:* `tsc -b`, eslint clean · Chromium (Active Mandate): "Leading bid 68/100 Microsoft Industry Solutions"; banker's take "Lead with Microsoft Industry Solutions — your strongest bid at 68/100."
