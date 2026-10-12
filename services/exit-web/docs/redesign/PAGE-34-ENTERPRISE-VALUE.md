@@ -33,7 +33,7 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **"Blended $823M" and "Comparable $2.25B" presented as valuations.** | Remove the blended figure; show the comparable figure as "Median precedent deal size — other companies' deals, not a value for this company"; drop its methodology bar; bar scale from the canonical band. Calculation of the canonical value untouched. | ☑ `723221c` |
-| G2 | DCF presented without its simplification; "not assumption" claims. | "DCF sensitivity" — EBITDA used as a free-cash-flow proxy, assumptions set by you, not the valuation; remove "not assumption" / "no number without a source" claims; methodology title fixed. | ☑ G2-commit |
+| G2 | DCF presented without its simplification; "not assumption" claims. | "DCF sensitivity" — EBITDA used as a free-cash-flow proxy, assumptions set by you, not the valuation; remove "not assumption" / "no number without a source" claims; methodology title fixed. | ☑ `e019b34` |
 | G3 | "Strategic-buyer basis"; acquirer fit shown as probability. | "Institutional framework — the console value (D1)"; "fit probability — not a measured chance of a bid". | ☐ |
 | G4 | Demo only, unlabelled. | `runInstitutionalValuation(company)` and `valuationFacts` for the active company; DCF base from it; Demo data / Your intake badge. | ☐ |
 | G5 | Shared `BankerTake` / `CommandState`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
