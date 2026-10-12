@@ -3,7 +3,7 @@ import { useI18n } from "../lib/i18n";
 import { Note } from "./SourceNotes";
 
 // THE LIFECYCLE BAND — the original acquisition lifecycle rail (owner, DD6),
-// set as an interlude after the board (DD7): a lit seam, a serif heading, eight
+// set as the close of the board's ink chapter (DD7, EE11): a serif heading, eight
 // stations on one rail from signal to closing with their typical week, and the
 // travelling light. The light runs only when motion is allowed. A vertical
 // route on phones. Weeks are the typical timeline of note 6, not live data.
@@ -16,9 +16,14 @@ const LifecycleBand: React.FC = () => {
   const [eyebrow, heading = ""] = t("lifecycle.title").split(" · ");
   const last = LIFECYCLE.length - 1;
   return (
-    <section aria-labelledby="lc-h" className="relative isolate overflow-hidden text-white" style={{ background: "linear-gradient(180deg, var(--ex-0) 0%, var(--ex-1) 55%, #05101f 100%)" }}>
-      {/* the lit seam that parts the band from the board above */}
-      <div aria-hidden className="absolute inset-x-0 top-0 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(147,197,253,0.45) 30%, rgba(147,197,253,0.45) 70%, transparent)" }} />
+    <section aria-labelledby="lc-h" className="relative isolate overflow-hidden text-white" style={{ background: "linear-gradient(180deg, var(--ex-0) 0%, var(--ex-1) 55%, var(--ex-0) 100%)" }}>
+      {/* the board and the band are one ink chapter (EE11): the board's floor runs on into the band, marked
+          only by a short centred rule with a node, the instrument's own punctuation */}
+      <div aria-hidden className="absolute left-1/2 top-0 flex -translate-x-1/2 items-center gap-3">
+        <span className="h-px w-24 bg-gradient-to-r from-transparent to-blue-300/40" />
+        <span className="h-1.5 w-1.5 rotate-45 border border-blue-300/50" />
+        <span className="h-px w-24 bg-gradient-to-l from-transparent to-blue-300/40" />
+      </div>
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]"
         style={{ backgroundImage: "repeating-linear-gradient(90deg, #a0bee6 0 1px, transparent 1px 120px)", maskImage: "radial-gradient(ellipse 60% 80% at 50% 60%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse 60% 80% at 50% 60%, #000, transparent 75%)" }} />
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 55% 60% at 50% 72%, rgba(37,99,235,0.16), transparent 70%)" }} />
