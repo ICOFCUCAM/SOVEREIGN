@@ -27,10 +27,6 @@ const Orb: React.FC<{ at: [number, number]; s?: number }> = ({ at: [x, y], s = 1
 const Dot: React.FC<{ at: [number, number]; r?: number }> = ({ at: [x, y], r = 2.5 }) => (
   <g><circle cx={x} cy={y} r={r * 3.5} fill="#FFFFFF" fillOpacity=".16" /><circle cx={x} cy={y} r={r * 1.2} fill="#F6F4F2" /></g>
 );
-const arc = (r: number, a: number, b: number): string => {
-  const [x1, y1] = P(a, r), [x2, y2] = P(b, r);
-  return `M${x1} ${y1}A${r} ${r} 0 0 1 ${x2} ${y2}`;
-};
 
 const Dial: React.FC = () => {
   const [w1x, w1y] = P(28, 212), [w2x, w2y] = P(64, 212);
@@ -49,18 +45,26 @@ const Dial: React.FC = () => {
         <linearGradient id="hx-axis" gradientUnits="userSpaceOnUse" x1="-560" y1="0" x2="1100" y2="0">
           <stop offset="0" stopColor={RING} stopOpacity="0" /><stop offset=".3" stopColor={RING} stopOpacity=".42" /><stop offset="1" stopColor={RING} stopOpacity=".42" />
         </linearGradient>
-        <linearGradient id="hx-arc" gradientUnits="userSpaceOnUse" x1="-200" y1="700" x2="250" y2="250">
-          <stop offset="0" stopColor="#EADBC0" stopOpacity="0" /><stop offset=".5" stopColor="#EADBC0" stopOpacity=".85" /><stop offset="1" stopColor="#EADBC0" stopOpacity="0" />
+        <linearGradient id="hx-v-up" gradientUnits="userSpaceOnUse" x1="-300" y1="268" x2="46" y2="92">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0" /><stop offset=".25" stopColor="#F1E6D2" stopOpacity=".55" /><stop offset=".7" stopColor="#E3D3B6" stopOpacity=".4" /><stop offset="1" stopColor="#E3D3B6" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="hx-v-low" gradientUnits="userSpaceOnUse" x1="-330" y1="392" x2="150" y2="640">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0" /><stop offset=".22" stopColor="#FFF6E6" stopOpacity=".9" /><stop offset=".68" stopColor="#F1DFC0" stopOpacity=".95" /><stop offset="1" stopColor="#E3D3B6" stopOpacity="0" />
         </linearGradient>
       </defs>
 
-      {/* far field: the long orbits at lower left, two faint rays */}
-      <path d={arc(372, 202, 254)} stroke="url(#hx-arc)" strokeWidth="3" filter="url(#hx-bloom)" />
-      <path d={arc(372, 202, 254)} stroke="url(#hx-arc)" strokeWidth="1.3" />
-      <path d={arc(394, 210, 248)} stroke="url(#hx-arc)" strokeOpacity=".6" strokeWidth=".8" />
-      <Orb at={P(223, 372)} s={0.75} />
-      <line x1="-460" y1="300" x2="70" y2="70" stroke="#E3D3B6" strokeOpacity=".12" strokeWidth=".8" />
-      <line x1="-520" y1="250" x2="-30" y2="-40" stroke="#E3D3B6" strokeOpacity=".08" strokeWidth=".7" />
+      {/* far field, measured from the benchmark: two lines leave the white page and open in a V towards the
+          signature — the upper one faint, rising to the dial; the lower one a bright horizon curve with a flare,
+          running on under the wordmark — plus a faint ray from the flare to a small orb, a second faint
+          horizontal under the axis and a short ray beside the wordmark */}
+      <path d="M-300 268 Q-190 232 -100 186 T 46 92" stroke="url(#hx-v-up)" strokeWidth=".9" />
+      <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="3.2" filter="url(#hx-bloom)" />
+      <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="1.4" />
+      <line x1="-5" y1="533" x2="-103" y2="360" stroke="#E8D7B8" strokeOpacity=".28" strokeWidth=".7" />
+      <line x1="-131" y1="326" x2="26" y2="326" stroke="#E8D7B8" strokeOpacity=".2" strokeWidth=".7" />
+      <line x1="9" y1="512" x2="81" y2="430" stroke="#E8D7B8" strokeOpacity=".22" strokeWidth=".7" />
+      <Orb at={[-5, 533]} s={0.55} />
+      <Orb at={[-103, 360]} s={0.45} />
       {([[-150, 40, 1.2], [-60, 470, 1], [520, 120, 1.1], [470, 430, 1], [30, -10, 0.9]] as const).map(([x, y, r]) => <circle key={`${x}${y}`} cx={x} cy={y} r={r} fill="#F2EBDD" fillOpacity=".55" />)}
 
       {/* axes across the field, brighter inside the dial */}
