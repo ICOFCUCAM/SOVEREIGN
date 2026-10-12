@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric, Provenance } from "../components/xo";
@@ -40,10 +40,27 @@ const INCOMING: Record<string, { verb: string; tone: string }> = {
   nda_requested: { verb: "requested an NDA", tone: "text-xo-caution" },
   nda_signed: { verb: "marked the NDA executed", tone: "text-xo-verified" },
   loi_issued: { verb: "submitted an offer", tone: "text-xo-action" },
+  meeting_scheduled: { verb: "moved the deal to management meeting", tone: "text-xo-action" },
+  diligence_started: { verb: "moved the deal to due diligence", tone: "text-xo-action" },
+  closed: { verb: "marked the deal closed", tone: "text-xo-verified" },
+  walked_away: { verb: "withdrew the deal", tone: "text-xo-muted" },
 };
 const OFFER_TONE: Record<string, string> = {
   submitted: "text-xo-action", accepted: "text-xo-verified", rejected: "text-xo-risk", withdrawn: "text-xo-muted",
 };
+
+type Pending = { kind: "nda" | "accept" | "decline" | "withdraw"; id: string } | null;
+
+/** Inline confirmation for a record change that cannot be undone here. */
+const Confirm: React.FC<{ text: React.ReactNode; confirm: string; onConfirm: () => void; onCancel: () => void }> = ({ text, confirm, onConfirm, onCancel }) => (
+  <div role="group" aria-label="Confirm action" className="mt-2 w-full border border-xo-caution/50 bg-xo-ink px-3 py-2 text-[12px]">
+    <p className="text-xo-text">{text}</p>
+    <div className="mt-2 flex gap-2">
+      <button type="button" onClick={onConfirm} className="rounded-sm bg-deal-700 px-3 py-1 text-[12px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{confirm}</button>
+      <button type="button" autoFocus onClick={onCancel} className="rounded-sm border border-xo-line px-3 py-1 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Cancel</button>
+    </div>
+  </div>
+);
 
 const FounderInbox: React.FC = () => {
   const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
@@ -73,6 +90,12 @@ const FounderInbox: React.FC = () => {
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score)));
   }, [listing.id]);
+
+  const [pending, setPending] = useState<Pending>(null);
+  const trigger = useRef<HTMLElement | null>(null);
+  const ask = (p: NonNullable<Pending>) => (e: React.MouseEvent<HTMLButtonElement>): void => { trigger.current = e.currentTarget; setPending(p); };
+  const cancel = (): void => { setPending(null); requestAnimationFrame(() => trigger.current?.focus()); };
+  const isPending = (kind: NonNullable<Pending>["kind"], id: string): boolean => pending?.kind === kind && pending.id === id;
 
   const advance = (deal: Deal, stage: DealStage): void => {
     void advanceDeal(deal, stage, "founder", listing.code).then(refresh);
@@ -161,14 +184,18 @@ const FounderInbox: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-2 text-[12px]">
                       <span className="font-mono text-[11px] text-xo-faint">{idx >= 0 ? `Stage ${idx + 1} of ${DEAL_STAGES.length}` : "—"}</span>
                       <span className="font-semibold">A buyer</span>
-                      <span className={`rounded-sm border px-1.5 py-px text-[11px] font-semibold ${isClosed ? "border-xo-verified/50 text-xo-verified" : isWithdrawn ? "border-xo-line text-xo-muted" : "border-xo-action/50 text-xo-action"}`}>{DEAL_STAGES[idx]?.label ?? d.stage}</span>
+                      <span className={`rounded-sm border px-1.5 py-px text-[11px] font-semibold ${isClosed ? "border-xo-verified/50 text-xo-verified" : isWithdrawn ? "border-xo-line text-xo-muted" : "border-xo-action/50 text-xo-action"}`}>{DEAL_STAGES[idx]?.label ?? (isWithdrawn ? "Withdrawn" : d.stage)}</span>
                       <span className="font-mono text-[11px] text-xo-faint">{timeAgo(d.updatedAt)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       {next && !isWithdrawn && <button type="button" onClick={() => advance(d, next.stage)} className={BTN}>Advance → {next.label}</button>}
-                      {!isClosed && !isWithdrawn && <button type="button" onClick={() => advance(d, "withdrawn")} className={BTN_GHOST}>Withdraw</button>}
+                      {!isClosed && !isWithdrawn && <button type="button" onClick={ask({ kind: "withdraw", id: d.id })} aria-expanded={isPending("withdraw", d.id)} className={BTN_GHOST}>Withdraw…</button>}
                     </div>
                   </div>
+                  {isPending("withdraw", d.id) && (
+                    <Confirm text="Withdraw this deal? It moves to Withdrawn and a “walked away” event is recorded. This cannot be undone here."
+                      confirm="Withdraw deal" onConfirm={() => { setPending(null); advance(d, "withdrawn"); }} onCancel={cancel} />
+                  )}
                   {/* stage track */}
                   <div aria-hidden className="mt-2 flex gap-0.5">
                     {DEAL_STAGES.map((s, i) => (
@@ -194,7 +221,11 @@ const FounderInbox: React.FC = () => {
                     <span className="font-semibold">A buyer</span> <span className="text-xo-muted">requested an NDA</span>
                     <span className="ml-2 font-mono text-[11px] text-xo-faint">{timeAgo(r.requestedAt)}</span>
                   </div>
-                  <button type="button" onClick={() => execute(r)} className={BTN}>Execute NDA</button>
+                  <button type="button" onClick={ask({ kind: "nda", id: r.id })} aria-expanded={isPending("nda", r.id)} className={BTN}>Execute NDA…</button>
+                  {isPending("nda", r.id) && (
+                    <Confirm text="Mark this NDA request as executed? The buyer will see “NDA signed”. No document is sent or signed, and your company is not revealed. This cannot be undone here."
+                      confirm="Mark executed" onConfirm={() => { setPending(null); execute(r); }} onCancel={cancel} />
+                  )}
                 </li>
               ))}
             </ul>
@@ -214,9 +245,16 @@ const FounderInbox: React.FC = () => {
                   </div>
                   {o.status === "submitted" && (
                     <div className="flex gap-2">
-                      <button type="button" onClick={() => decide(o, "accepted")} className={BTN}>Accept</button>
-                      <button type="button" onClick={() => decide(o, "rejected")} className={BTN_GHOST}>Decline</button>
+                      <button type="button" onClick={ask({ kind: "accept", id: o.id })} aria-expanded={isPending("accept", o.id)} className={BTN}>Accept…</button>
+                      <button type="button" onClick={ask({ kind: "decline", id: o.id })} aria-expanded={isPending("decline", o.id)} className={BTN_GHOST}>Decline…</button>
                     </div>
+                  )}
+                  {(isPending("accept", o.id) || isPending("decline", o.id)) && (
+                    <Confirm text={isPending("accept", o.id)
+                      ? `Accept this ${usd(o.amountUsd)} indicative offer? The offer record changes to accepted. It is not a binding agreement, and it cannot be undone here.`
+                      : `Decline this ${usd(o.amountUsd)} offer? The offer record changes to rejected. This cannot be undone here.`}
+                      confirm={isPending("accept", o.id) ? "Accept offer" : "Decline offer"}
+                      onConfirm={() => { const st = isPending("accept", o.id) ? "accepted" : "rejected"; setPending(null); decide(o, st); }} onCancel={cancel} />
                   )}
                 </li>
               ))}
