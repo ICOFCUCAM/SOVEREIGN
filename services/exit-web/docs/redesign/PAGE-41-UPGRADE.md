@@ -32,7 +32,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · no overflow · 0 errors; old comp
 |---|---|---|---|
 | G1 | **Plan switch looks like a purchase.** | A prominent note: demo mode — no payment is taken, nothing changes on any account; choosing a tier switches this session's plan until you sign out; button names say "(demo)". | ☑ `7307e41` |
 | G2 | **"Paid only when you close"; feature overclaims; "Most selected".** | "its 2.5 % success fee is paid only when you close"; features worded as the console delivers them (outreach drafts & NDA requests; rule-based negotiation in the Bid Room; closing checklist; buyer interest in the Inbox); "Recommended for a live process" instead of "Most selected". | ☑ `25bbd37` |
-| G3 | Buyers see founder tiers. | A buyer note: what Active Mandate unlocks for buyers (Deal Room, Access Requests) and that no buyer pricing is published; buyer-appropriate button text. | ☐ |
+| G3 | Buyers see founder tiers. | A buyer note: what Active Mandate unlocks for buyers (Deal Room, Access Requests) and that no buyer pricing is published; buyer-appropriate button text. | ☑ G3-commit |
 | G4 | Design: old components. | Rebuild on `xo`. | ☑ `f998ff2` |
 
 ---
@@ -50,3 +50,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · no overflow · 0 errors; old comp
 ### G2 — "Paid only when you close"; feature overclaims; "Most selected"
 *Closed by:* `pages/Upgrade.tsx` (text; prices and gating unchanged). Description "An Active Mandate runs the live process — and is paid only when you close" → "… runs the live process for $995 a month — its 2.5% success fee is paid only when you close" (and on gated pages "… its 2.5% success fee is paid only on close"); Active Mandate features "Buyer outreach & NDA automation" → "Buyer outreach drafts & NDA requests", "Acquisition intelligence & AI negotiation" → "… & rule-based negotiation (Bid Room)", "Closing Center — net-to-founder math" → "Closing Center checklist" (as audited on Pages 23, 29, 32, 36); Listed Founder "Receive buyer interest & mandate alerts" → "Receive buyer interest in your Inbox"; badge "Most selected" → "Recommended for a live process". The marketing Pricing page carries the same original texts — left for the marketing redesign task.
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 "NDA automation", "AI negotiation", "net-to-founder", "mandate alerts", "Most selected"; the gated-page description (Outreach Plan, free) reads the new fee sentence · free 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G3 — Buyers see founder tiers
+*Closed by:* `pages/Upgrade.tsx`. For `role === "buyer"` a note: "For buyers: the tiers below are written for founders. The Active Mandate plan unlocks the buyer Deal Room and Access Requests; Preparation unlocks nothing for buyers. Buyer pricing is not published yet." (per `access.ts`: the two buyer entries gated on Pro, no buyer entry opened by Preparation); the Preparation panel shows "For founders — unlocks nothing for buyers" instead of "Prepare my company →". Founders see no change.
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium buyer: the note shown, 0 "Prepare my company →", "Launch a mandate →" kept (the buyer end-to-end flow on Buyer Home still passes); founder: no buyer note, both buttons · buyer free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.

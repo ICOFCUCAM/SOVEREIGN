@@ -30,6 +30,7 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
   const navigate = useNavigate();
   const role = session?.role ?? "founder";
   const current = session?.plan ?? "free";
+  const isBuyer = role === "buyer";
 
   const TIERS: readonly Tier[] = [
     { plan: "free", name: "Listed Founder", price: "$0", priceSub: "to enter", purpose: "Become visible to acquirers",
@@ -68,6 +69,12 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
         <span className="text-xo-muted">Choosing a tier switches this session's plan until you sign out; nothing is charged and no account changes.</span>
       </p>
 
+      {isBuyer && (
+        <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[13px] text-xo-muted">
+          <span className="font-semibold text-xo-text">For buyers:</span> the tiers below are written for founders. The Active Mandate plan unlocks the buyer Deal Room and Access Requests; Preparation unlocks nothing for buyers. Buyer pricing is not published yet.
+        </p>
+      )}
+
       <ul className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         {TIERS.map((t) => {
           const isCurrent = !t.contact && t.plan === current && t.name !== "Institutional";
@@ -97,12 +104,14 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
                     <p className="text-[12px] font-semibold text-xo-muted">Your current engagement</p>
                   ) : t.name === "Listed Founder" ? (
                     <p className="text-[12px] text-xo-muted">Free — the exchange entry point</p>
+                  ) : isBuyer && t.plan === "prep" ? (
+                    <p className="text-[12px] text-xo-muted">For founders — unlocks nothing for buyers</p>
                   ) : (
                     <button type="button" onClick={() => act(t)} aria-describedby={t.contact ? undefined : "upgrade-demo"} className={t.plan === "pro" && !t.contact ? BTN : BTN_GHOST}>
                       {t.contact ? "Request a briefing →" : t.plan === "prep" ? "Prepare my company →" : "Launch a mandate →"}
                     </button>
                   )}
-                  {!isCurrent && !t.contact && t.name !== "Listed Founder" && <p className="mt-1.5 text-[11px] text-xo-muted">Demo switch — no payment</p>}
+                  {!isCurrent && !t.contact && t.name !== "Listed Founder" && !(isBuyer && t.plan === "prep") && <p className="mt-1.5 text-[11px] text-xo-muted">Demo switch — no payment</p>}
                 </div>
               </div>
             </li>
