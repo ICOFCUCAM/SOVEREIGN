@@ -129,10 +129,15 @@ const Landing: React.FC = () => {
             <p data-edition className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</p>
             <Link to="/platform" className="mt-8 inline-flex items-center gap-3 border-b border-blue-600 pb-2.5 text-[13px] font-semibold text-ink-900 transition hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">{t("s2.link")} <span aria-hidden>→</span></Link>
           </div>
-          {/* the right-hand box: the sale process, stage by stage */}
-          <div className="min-w-0 shadow-[0_40px_80px_-40px_rgba(6,24,46,0.6)]">
-            <ExchangeMap dark interactive compact />
-          </div>
+          {/* the right-hand box: the lifecycle graph alone (DD3), its caption beneath */}
+          <figure className="m-0 min-w-0">
+            <div className="shadow-[0_40px_80px_-40px_rgba(6,24,46,0.6)]">
+              <ExchangeMap dark compact bare />
+            </div>
+            <figcaption className="mt-4 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
+              <span aria-hidden className="h-3 w-3 shrink-0 bg-blue-600" /><span>{t("lifecycle.title")} · {t("lifecycle.live")}<Note n={6} first /></span>
+            </figcaption>
+          </figure>
         </div>
       </section>
 

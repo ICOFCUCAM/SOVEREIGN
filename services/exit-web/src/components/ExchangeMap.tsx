@@ -10,6 +10,8 @@ import { Note } from "./SourceNotes";
 // lifecycle stages sits at its typical week, on a square-root scale so the
 // crowded first weeks stay legible, with the week axis drawn along the foot.
 // The vertical lanes only keep labels apart. No geography is implied.
+// `bare` (DD3) draws the chart alone — no tag, caption bar or rule — for a host
+// box that supplies its own frame and caption.
 
 const W = 1200, TOP = 30, H = 470;
 const X0 = 80, X1 = 1110, WK_MAX = 10;
@@ -87,7 +89,7 @@ const STYLE = `
 `;
 const MONO = { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" };
 
-const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean; compact?: boolean }> = ({ dark, interactive, compact }) => {
+const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean; compact?: boolean; bare?: boolean }> = ({ dark, interactive, compact, bare }) => {
   const { t } = useI18n();
   const [sel, setSel] = useState(0);
   const PT: ReadonlyArray<[number, number]> = compact ? P.map(([px], i) => [px, COMPACT[i]![0]] as [number, number]) : P;
@@ -197,6 +199,7 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean; compact?: b
         );
       })()}
 
+      {!bare && <>
       {/* corner tag */}
       <div aria-hidden className={`absolute right-6 top-6 hidden items-center ${compact ? "" : "sm:flex"}`}>
         <span className={`border ${k.tag} px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em]`}>{t("xm.tag")}</span>
@@ -208,6 +211,7 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean; compact?: b
         {interactive && <span className="ml-auto hidden items-center gap-2 text-blue-300 sm:inline-flex"><span aria-hidden className="h-2 w-2 animate-pulse rounded-full bg-blue-400 motion-reduce:animate-none" />{t("xm.pick")}</span>}
       </figcaption>
       <div aria-hidden className="h-1 bg-blue-600" />
+      </>}
     </figure>
   );
 };
