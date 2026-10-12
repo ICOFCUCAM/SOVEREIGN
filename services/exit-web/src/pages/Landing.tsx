@@ -42,7 +42,7 @@ const Landing: React.FC = () => {
         <div className={`${WRAP} relative pb-12 pt-10 lg:pb-14 lg:pt-14`}>
           <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
             <span>{t("hero.eyebrow")}</span>
-            <span className="text-blue-600">ExitOS · data as of {DATA_AS_OF}</span>
+            <span className="text-blue-600">Registry snapshot · as of {MARKET_INDEX_FMT.asOf}</span>
           </div>
           <div className="mt-9 grid items-end gap-10 lg:grid-cols-[1fr_1.08fr] lg:gap-12">
             <div className="min-w-0">
@@ -136,13 +136,9 @@ const Landing: React.FC = () => {
         <div className={`${WRAP} py-6`}>
           <div className="flex items-center justify-between gap-3">
             <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-300">{t("lifecycle.title")}</div>
-            <div className="hidden items-center gap-1.5 sm:flex">
-              <span className="relative inline-flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" /></span>
-              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-300">{t("lifecycle.live")}</span>
-            </div>
+            <div className="hidden font-mono text-[9.5px] uppercase tracking-[0.16em] text-blue-200 sm:block">{t("lifecycle.live")}</div>
           </div>
           <div className="relative mt-5">
-            <div className="pointer-events-none absolute top-[7px] hidden h-2 w-2 rounded-full lg:block" style={{ background: "#7CFF9F", boxShadow: "0 0 8px 2px rgba(124,255,159,.8)", animation: "exTravel 7s linear infinite" }} />
             <ol className="grid grid-cols-2 gap-y-4 border-t border-white/15 pt-4 sm:grid-cols-4 lg:grid-cols-8">
               {LIFECYCLE.map(([s, w], i) => (
                 <li key={s} className="flex items-baseline gap-2 pr-3">
@@ -584,7 +580,7 @@ const EXCHANGE_FLOW = [
 const LOSSES = [
   { dimension: "Buyer reach", problem: "A handful of known contacts", fix: `A run across ${MARKET_FMT.buyers} curated acquirer mandates in ${MARKET_FMT.geographies} jurisdictions` },
   { dimension: "Preparation", problem: "Negotiate unprepared", fix: "AI valuation, comps and reservation lines up front" },
-  { dimension: "Leverage", problem: "Leverage erodes mid-process", fix: "Live signals + parallel offers hold tension" },
+  { dimension: "Leverage", problem: "Leverage erodes mid-process", fix: "Registry signals + parallel offers hold tension" },
   { dimension: "Final price", problem: "Accept discounted offers", fix: "Offer optimisation captures the premium" },
 ];
 // proof — representative transactions
@@ -866,7 +862,7 @@ const BUYERS = REGISTRY_CARDS;
 const COMMAND_FEATURES = [
   { icon: "chart", value: HISTORY_FMT.events, title: "Disclosed Deals Indexed", body: "EDGAR + Wikidata sourced" },
   { icon: "users", value: MARKET_FMT.buyers, title: "Buyer Mandates", body: "intent monitoring" },
-  { icon: "spark", value: MARKET_FMT.activeMandates, title: "Actively Deploying", body: "live appetite" },
+  { icon: "spark", value: MARKET_FMT.activeMandates, title: "Actively Deploying", body: "appetite flagged in the registry" },
   { icon: "fire", value: "High", title: "Market Heat", body: "liquidity scores" },
   { icon: "globe", value: MARKET_FMT.appetite, title: "Acquisition Demand", body: "check capacity indexed" },
   { icon: "doc", value: MARKET_FMT.sectors, title: "Sectors Covered", body: "across the registry" },
@@ -897,7 +893,7 @@ const GLOBAL_STATS = [
   { value: MARKET_FMT.geographies, label: "Jurisdictions" },
   { value: MARKET_FMT.buyers, label: "Acquirer Mandates" },
   { value: MARKET_FMT.appetite, label: "Check Capacity" },
-  { value: "24/7", label: "Market Activity" },
+  { value: MARKET_FMT.sectors, label: "Sectors Covered" },
 ];
 
 // ===========================================================================

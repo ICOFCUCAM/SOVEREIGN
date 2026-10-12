@@ -104,7 +104,7 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 | # | Gap | Fix (colours locked; no feature removed) | Status |
 |---|---|---|---|
 | M1 | **Design: rebuild on the `index(9)` skeleton.** | Rebuild `Landing.tsx` and `MarketingChrome.tsx` on the skeleton's anatomy, using the locked ExitOS colours and materials mapped as above. All 17 blocks and the chrome are kept and repositioned into the skeleton's chapters (mapping below), with content carried over verbatim; M2–M9 then correct content. The hero concept (the command board as the hero instrument, beside the headline) is kept. The trading-hall photo stays in the hero. Routes, i18n keys, auth entry points (`/console`) and pricing links are unchanged. | ☑ `dcf7bf6d` |
-| M2 | **Fake live indicators.** | Remove the pings, pulses, rotating spotlight, session clock and the timer-driven score/heat oscillation. "Live Transactions" → "Disclosed transactions"; "Live Market"/"Live" → "Registry snapshot · as of {index date}"; `DATA_AS_OF` → the index's own date; "Live process" → "Typical timeline"; "live appetite", "24/7", "Live signals" reworded to what the data is. Figures and the drill-down stay. | ☐ |
+| M2 | **Fake live indicators.** | Remove the pings, pulses, rotating spotlight, session clock and the timer-driven score/heat oscillation. "Live Transactions" → "Disclosed transactions"; "Live Market"/"Live" → "Registry snapshot · as of {index date}"; `DATA_AS_OF` → the index's own date; "Live process" → "Typical timeline"; "live appetite", "24/7", "Live signals" reworded to what the data is. Figures and the drill-down stay. | ☑ M2-commit |
 | M3 | **Unverified security and compliance claims.** | Remove "SOC 2" and the audit-trail, access-log, "secured", encryption and verification claims. Each slot is kept and states what the product does (for example "Your own actions are recorded", "NDA-gated identity: listings show a codename and bands until an NDA is signed", "Founder approval at each agent step", "Record checks on each NDA, not identity or funds verification", "Data-room uploads: read who can see them before adding files"). Owner can restore any claim with evidence (open decision). | ☐ |
 | M4 | **Illustrative content shown as real.** | Visible "Illustrative" labels on the cross-bid table and the example listings; "Market Heat" shows the registry-derived heat label instead of a constant. | ☐ |
 | M5 | **Overclaims in copy.** | "AI valuation" → "Deterministic valuation"; "Offer optimisation captures the premium" → "Offers compared on structure and certainty"; "verified acquirer mandates" → "curated acquirer mandates"; board "Match Score" → "Activity score". | ☐ |
@@ -165,7 +165,27 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 - "live" words and animations unchanged (M2, M8).
 - Screens: `scratchpad/home/m1b-*`.
 
+### M2 — Fake live indicators (outside the command board)
+*Scope change:* the owner directed, mid-gap, that the hero command board stay exactly as built ("use the same live screen which is built as a real screen. dont change it"; see Owner decisions). Board edits made during this gap were reverted before the commit; `CommandBoard`, `SessionClock`, the bezel ribbon and `DATA_AS_OF` (the board's date) are unchanged.
+*Closed by:*
+- `pages/Landing.tsx`:
+  - Hero topline "ExitOS · data as of {today}" → "Registry snapshot · as of {index date}" (`MARKET_INDEX_FMT.asOf`).
+  - Lifecycle band: the ping and the travelling dot removed. The label is now plain text.
+  - Losses matrix "Live signals + parallel offers hold tension" → "Registry signals + …".
+  - Signal tile "Actively Deploying — live appetite" → "appetite flagged in the registry".
+  - Coverage stat "24/7 Market Activity" → "{sectors} Sectors Covered" (registry figure).
+- `lib/i18n.tsx` (M9): `lifecycle.live` EN "Live process" → "Typical timeline", FR "Processus en direct" → "Calendrier type", ES "Proceso en vivo" → "Calendario típico".
+
+*Verification:*
+- `tsc -b`, eslint clean · `vitest` 218/218.
+- Chromium `/` 1440/390: 0 errors, `h1` 1, no overflow.
+- "live" words 6 → 3 at 1440 and 4 → 2 at 390. All remaining ones are on the command board, as directed.
+- `git diff` confirms no line of `CommandBoard` or the bezel changed.
+
 ---
+
+## Owner decisions
+- **The hero command board stays exactly as built** (owner, 2026-10-12, during M2: "use the same live screen which is built as a real screen. dont change it"). The board and its bezel — "Live Market", "System Status · Live", "Live Transactions", the session clock, the moving scores and heat bars, the scan sweep and the ticker — are left unchanged by M2–M8. The data it shows is the registry snapshot and the disclosed-deal history (real records); the "live" styling is the owner's choice and is listed here so it is not mistaken for an oversight.
 
 ## Open decisions for the owner
 - **Security and compliance claims** (M3): restore any of SOC 2, audit trail, access logs, encryption or buyer verification only with evidence (a report, a log, a check in the code).
