@@ -384,7 +384,7 @@ Built and judged as previews (designs 10–17), then adopted onto this branch on
 
 | # | Gap | Close by | Status |
 |---|---|---|---|
-| BB1 | The light hero lacks the opening drama of design 6; the hall's pilasters read as glowing plastic, stand apart from the screen, and the ceiling shows stray diagonals. | Dark navy hero (same content, figures and fixes as design 9; the lifecycle chart in light lines on navy). Pilasters slimmed to matte stone hugging the portal, architrave between them only, quieter ceiling. | open |
+| BB1 | The light hero lacks the opening drama of design 6; the hall's pilasters read as glowing plastic, stand apart from the screen, and the ceiling shows stray diagonals. | Dark navy hero (same content, figures and fixes as design 9; the lifecycle chart in light lines on navy). Pilasters slimmed to matte stone hugging the portal, architrave between them only, quieter ceiling. | closed `8504d48b` |
 | BB2 | Owner: "the wall looks unreal … more natural like it is in a house". | A boardroom wall: navy-stained oak slats with grain, recessed downlights washing the slats, a thin-bezel display with real shadow and backlight, a fluted credenza, a stone floor. | open |
 | BB3 | Design 11's room still read as computer-made (uniform slats and light, glowing light blobs, an empty room, an oversized screen); the valuation chapter opens on an empty form. | Timber and light variation, real downlight trims, a styled credenza (books, stone sphere, vases), the screen sized to the wall, a power-on as the screen enters view; a labelled worked example in the valuation chapter computed by the same engine. | open |
 | BB4 | Owner asked whether a drawn room belongs on an iconic site; it does not (a mockup, uncanny, shrinks the product). | The board as the instrument: large and flat on deep navy, a fine bezel, its own glow, the power-on kept (hook shared in `lib/use-power-on.ts`). | open |
@@ -844,6 +844,9 @@ The ledger's chapter label now sits above a flush-left headline (with its note t
 
 ### AA10 — closed 94080f60
 SourcesSection gains a collapsed mode, used on the homepage only: the list folds under "Sources & method · 6" (a details/summary disclosure, keyboard-operable). Following a note opens it and scrolls to the entry (hashchange and deep links #source-n). The source markup still renders server-side, so the sources test holds. Also: note anchors get scroll-mt so "↩ back" no longer lands under the sticky header. Browser-checked: closed on load; note click → open, entry in view; back → citation; /#source-4 → open, entry at 112 px. Verified: tsc, eslint, vitest 243/243.
+
+### BB1 — closed 8504d48b
+Preview design 10. Dark hero with the lifecycle chart on navy (ExchangeMap gains a dark palette); pilasters slimmed, set beside the portal, architrave between them only, quieter ceiling. tsc, vitest 243/243; axe 0 at 1440/390 and keyboard 113/0 when built as design 10.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
