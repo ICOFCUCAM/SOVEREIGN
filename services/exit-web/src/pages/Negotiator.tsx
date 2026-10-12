@@ -91,7 +91,6 @@ const Negotiator: React.FC = () => {
   const counter = active ? generateCounter(active.offer, reserve) : null;
   const [draftOpen, setDraftOpen] = useState(false);
   const [reserveOpen, setReserveOpen] = useState(false);
-  const [counterSent, setCounterSent] = useState(false);
 
   const [walkUsd, setWalkUsd]   = useState(Math.round(RESERVATION_LINES.minHeadlinePriceUsd * 0.95));
   const [minUsd, setMinUsd]     = useState(RESERVATION_LINES.minHeadlinePriceUsd);
@@ -329,7 +328,7 @@ James — on behalf of Helios Freight`
       </Section>
 
       <Modal open={draftOpen && !!active && !!counter} onClose={() => setDraftOpen(false)} title={`Counter response · ${active?.offer.buyerName ?? ""}`} size="lg"
-        footer={<><Button variant="ghost" onClick={() => copyText(draftText)}>Copy</Button><Button onClick={() => { setCounterSent(true); setDraftOpen(false); notify(`Counter sent to ${active?.offer.buyerName}`); }}>{counterSent ? "Sent ✓ · resend" : "Send counter →"}</Button></>}>
+        footer={<><span className="mr-auto text-[12px] text-white/70">Nothing is sent from ExitOS — copy the draft into your own email.</span><Button onClick={() => copyText(draftText)}>Copy draft</Button></>}>
         <pre className="whitespace-pre-wrap border border-white/10 bg-ink-900/70 p-4 font-sans text-[13px] leading-relaxed text-white/85">{draftText}</pre>
       </Modal>
     </div>

@@ -36,7 +36,7 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **"Leading bid" / "your strongest bid" show the first offer, not the engine's leader.** | Default selection and the leading-bid metric follow `OFFER_COMPARISON.leader`; the banker's take names the leader. | ☑ `9e4d5fa` |
-| G2 | **False "Counter sent".** | Copy only, and "Nothing is sent from ExitOS"; no sent state. | ☐ |
+| G2 | **False "Counter sent".** | Copy only, and "Nothing is sent from ExitOS"; no sent state. | ☑ G2-commit |
 | G3 | **Invented sender and hard-coded demo facts in the draft.** | "[Your name]"; company name and growth from the company profile; no "competitive process" claim beyond the offer count. | ☐ |
 | G4 | **"AI / autonomous" overclaims**; counter rule unexplained; "strategic mid" (D1). | "Standard negotiating positions (templates) — not legal advice"; counter rule stated; "enterprise value (institutional)". | ☐ |
 | G5 | Unvalidated amounts; demo offers unlabelled. | `parseNumber` with walk ≤ minimum ≤ ideal checks; badge and line for sample offers. | ☐ |
@@ -53,3 +53,7 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 ### G1 — "Leading bid" showed the first offer, not the engine's leader
 *Closed by:* `pages/Negotiator.tsx`. The leader is `OFFER_EVALUATIONS.find(offerId === OFFER_COMPARISON.leader)`; it is the **default selection**, the "Leading bid" metric always shows it whatever offer is selected, and the banker's take "Lead with … your strongest bid" names it (adding "The counter shown is for {selected}" when another offer is selected). Before: Vista 67/100 (first in the list) was shown as the leading bid; the engine's leader is Microsoft Industry Solutions 68/100.
 *Verification:* `tsc -b`, eslint clean · Chromium (Active Mandate): "Leading bid 68/100 Microsoft Industry Solutions"; banker's take "Lead with Microsoft Industry Solutions — your strongest bid at 68/100."
+
+### G2 — False "Counter sent"
+*Closed by:* `pages/Negotiator.tsx`. The draft dialog's "Send counter →" (toast "Counter sent to {buyer}", then "Sent ✓ · resend") is removed with its state. The footer reads "Nothing is sent from ExitOS — copy the draft into your own email." and offers **Copy draft**.
+*Verification:* `tsc -b`, eslint clean · Chromium: the dialog shows the note and "Copy draft"; no send control.
