@@ -82,3 +82,9 @@ body {
 .ex-link { display: inline-flex; align-items: center; gap: .75rem; padding-bottom: .55rem; font-weight: 600; color: #0a1018; background: linear-gradient(#2563eb, #2563eb) left bottom / 100% 1px no-repeat; transition: color .3s, background-size .3s; }
 .ex-link:hover { color: #1d4ed8; background-size: 100% 2px; }
 .ex-link:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+
+/* figures (EE24): old-style in serif running text, lining and proportional in
+   headings, lining and tabular wherever figures are read in columns */
+main p.font-editorial, main blockquote { font-variant-numeric: oldstyle-nums proportional-nums; }
+main :is(h1, h2, h3) { font-variant-numeric: lining-nums proportional-nums; }
+main :is(table, dl, time, figcaption, [data-edition], .tabular-nums) { font-variant-numeric: lining-nums tabular-nums; }

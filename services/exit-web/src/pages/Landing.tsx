@@ -152,7 +152,7 @@ const Landing: React.FC = () => {
               ))}
             </div>
             <p data-edition className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-ex-done-ink" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</p>
-            <Link to="/platform" className="ex-link mt-8 text-[13px]">{t("s2.link")} <Arrow /></Link>
+            <Link to="/platform" className="group ex-link mt-8 text-[13px]">{t("s2.link")} <Arrow /></Link>
           </div>
           {/* the right-hand box: the lifecycle graph alone (DD3), its caption beneath */}
           <figure className="m-0 min-w-0">
@@ -212,7 +212,6 @@ const Landing: React.FC = () => {
           .rv-on [id^="ch-"]:not(.rv-in) .rv-h{opacity:0;transform:translateY(30px)}
           main h1,main h2,main h3{text-wrap:balance}
           main p{text-wrap:pretty;hanging-punctuation:first last}
-          main p.font-editorial{font-variant-numeric:oldstyle-nums proportional-nums}
           @media (prefers-reduced-motion: no-preference){.hx-mark{animation:hxMark 2.4s cubic-bezier(.2,.7,.2,1) .3s both}.hx-mark svg{animation:hxDial 3.2s cubic-bezier(.2,.7,.2,1) .3s both}}
           @keyframes hxMark{from{opacity:0;filter:blur(6px)}to{opacity:1;filter:none}}
           @keyframes hxDial{from{transform:rotate(-24deg) scale(.96)}to{transform:none}}
