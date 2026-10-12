@@ -36,7 +36,7 @@ Founder free and Pro, buyer free: `h1` none · axe **dlitem ×18** (`dt`/`dd` ou
 | G2 | **Buyers see the founder view (identity, ask, edit, matches).** | Buyer role gets its own view: the anonymised public listing only, no identity, no founder controls or matches; NDA requests go through the Acquisition Radar. | ☑ `8dbf152` |
 | G3 | Dead "Request NDA"; "Edit listing" claims an update. | Founder public preview has no NDA button (it says buyers request from the Radar); edit is a "preview adjustment — not saved or published", validated with `parseNumber`. | ☑ `4c38cff` |
 | G4 | **Ask band conflicts with D1; match score as %; false mechanics.** | Asking band and check size from `canonicalValuationFor` ($103M mid for the demo); "match score N/100"; mechanics stated truthfully (no data release on NDA; no engagement feed). | ☑ `6456ebd` |
-| G5 | Demo only, unlabelled. | Listing, matches and memoranda for the active company (intake inputs as on Documents); Demo data / Your intake badge. | ☑ G5-commit |
+| G5 | Demo only, unlabelled. | Listing, matches and memoranda for the active company (intake inputs as on Documents); Demo data / Your intake badge. | ☑ `0de6bdc` |
 | G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
 | G7 | Design: no `h1`, 18 dlitem failures. | Rebuild on `xo`. | ☑ `c5b28e6` |
 
