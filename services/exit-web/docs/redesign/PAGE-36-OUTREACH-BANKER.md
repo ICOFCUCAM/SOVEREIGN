@@ -39,8 +39,12 @@
 | G3 | Invented signer. | "[Your name]" as on Buyer Profiles and Bid Room. | ☐ |
 | G4 | **Rules of thumb as computed advice; "strategic" anchor; fit as %.** | Advice labelled "general guidance — not computed for this company" where not derived; anchor "Canonical midpoint / high"; "fit score N/100". | ☐ |
 | G5 | Demo only, unlabelled. | Buyers, memoranda and the canonical band for the active company; Demo data / Your intake badge; directives "saved in this browser". | ☐ |
-| G6 | Design: old components. | Rebuild on `xo`. | ☐ |
+| G6 | Design: old components. | Rebuild on `xo`. | ☑ G6-commit |
 
 ---
 
 ## Closure log
+
+### G6 — Design
+*Closed by:* `pages/Banker.tsx` rebuilt on `xo` (`PageHeader` `h1` "The Banker"; status and activity, directives, funnel, workstreams, advice and deliverables as titled `Section`s; funnel as an ordered list with `aria-hidden` bars; advice and posture as `dl`s; the deliverable switcher as `Chip`s (`aria-pressed`) in a labelled group; per-buyer "Draft introduction" and "Remove directive" buttons carry the buyer/directive in their accessible name; shared `Card`/`SectionHeader` and hex accents replaced). Content carried over verbatim; G1–G5 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · "Brief the banker" and "Adjust strategy" dialogs: role dialog, focus inside, axe 0, Escape returns focus · switching to Buyer introductions, Teaser and Executive summary: axe 0, no overflow · free: Upgrade page.

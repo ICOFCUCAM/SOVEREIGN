@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Modal, Field, inputCls, SectionHeader, fmtMoney, notify } from "../lib/ui";
+import { Button, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
+import { PageHeader, Section, Chip } from "../components/xo";
 import { BUYERS, DILIGENCE, useMemorandum, VALUATION_CANONICAL } from "../lib/engines";
 import {
   docToMarkdown, docFilename, buyerIntroLetter, introFilename, buyerListCsv,
@@ -23,9 +24,9 @@ type Tab = "outreach" | "intros" | "teaser" | "summary";
 type WorkStatus = "done" | "active" | "queued";
 
 const STATUS_STYLE: Record<WorkStatus, string> = {
-  done:   "bg-deal-600/20 text-deal-300 ring-deal-400/40",
-  active: "bg-loi-500/15 text-loi-200 ring-loi-400/40",
-  queued: "bg-white/5 text-white/55 ring-white/15",
+  done:   "border-xo-verified/50 text-xo-verified",
+  active: "border-xo-caution/50 text-xo-caution",
+  queued: "border-xo-line text-xo-muted",
 };
 
 const PROJECT = "Project Cipher";
@@ -165,14 +166,15 @@ const Banker: React.FC = () => {
   ]);
   const introMd = (b: BuyerCandidate): string => buyerIntroLetter({ buyer: b, projectName: PROJECT, askMid: mid, fromName: FROM_NAME });
 
+  const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
+  const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
+  const FUNNEL_TONE = ["bg-xo-muted", "bg-xo-brass", "bg-xo-action", "bg-xo-caution", "bg-xo-verified"];
+
   return (
-    <div>
-      <SectionHeader
-        kicker="Always-on · Operator"
-        title="The Banker"
+    <div data-page="banker" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="Always-on · Operator" title="The Banker"
         description="Your permanent investment banker. It finds and scores buyers, drafts the outreach, writes the teaser and CIM, fields buyer questions, sets valuation strategy and coordinates diligence — then reports back, in the first person, like a service."
-        actions={<Button onClick={() => setBriefOpen(true)}>Brief the banker</Button>}
-      />
+        actions={<button type="button" onClick={() => setBriefOpen(true)} className={BTN}>Brief the banker</button>} />
 
       {/* ── Brief the banker ──────────────────────────────────────── */}
       <Modal open={briefOpen} onClose={() => setBriefOpen(false)} title="Brief the banker" subtitle="Your directive is parsed into mandate rules that re-weight rankings, outreach and valuation" size="md"
@@ -180,7 +182,7 @@ const Banker: React.FC = () => {
         <Field label="Your instruction" hint="e.g. prioritize strategic buyers · avoid private equity · target logistics consolidators · minimum valuation $100M · hold outreach until Q4">
           <textarea className={`${inputCls} min-h-[120px] resize-y`} value={briefText} onChange={(e) => setBriefText(e.target.value)} placeholder="Tell the banker what to do…" />
         </Field>
-        <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+        <p className="mt-2 text-[12px] leading-relaxed text-white/60">
           Parsed by the deterministic directive engine — no language model is involved. The exact rules it extracts are shown
           as active directives and applied to the buyer pool, outreach posture and valuation guardrail.
         </p>
@@ -215,154 +217,127 @@ const Banker: React.FC = () => {
       </Modal>
 
       {/* ── Agent status — first-person briefing ─────────────────── */}
-      <Card className="overflow-hidden p-0">
-        <div className="grid gap-0 lg:grid-cols-[1.5fr_1fr]">
-          <div className="border-b border-white/10 p-6 lg:border-b-0 lg:border-r">
-            <div className="flex items-center gap-3">
-              <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-deal-600/30 text-[13px] font-bold text-deal-200 ring-1 ring-deal-400/40">
-                TB
-                <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-ink-800 bg-deal-400" />
-              </span>
-              <div>
-                <div className="text-sm font-bold text-white">The Banker</div>
-                <div className="text-[11px] text-deal-300">● Working the deal · live</div>
-              </div>
-            </div>
-            <p className="mt-4 text-[15px] leading-relaxed text-white/85">
-              I've identified <span className="font-semibold text-white">{nId} qualified buyers</span>, shortlisted{" "}
-              <span className="font-semibold text-white">{nShort}</span>, opened conversations with{" "}
-              <span className="font-semibold text-white">{nContact}</span>, and{" "}
-              <span className="font-semibold text-deal-300">{nInterest} are showing active interest</span>
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="The Banker" eyebrow="Status" className="lg:col-span-7"
+          right={<span className="text-[12px] text-xo-verified">● Working the deal · live</span>}>
+          <div className="px-4 py-4">
+            <p className="text-[15px] leading-relaxed">
+              I've identified <span className="font-semibold">{nId} qualified buyers</span>, shortlisted{" "}
+              <span className="font-semibold">{nShort}</span>, opened conversations with{" "}
+              <span className="font-semibold">{nContact}</span>, and{" "}
+              <span className="font-semibold text-xo-verified">{nInterest} are showing active interest</span>
               {interestedNames ? <> — {interestedNames}</> : null}. One is in diligence.
             </p>
-            <p className="mt-2 text-[13px] leading-relaxed text-white/55">
+            <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">
               {allApproved
                 ? "Every step is approved — I'm running the process end to end and will report back as buyers move."
-                : <>Next, I'll <span className="text-white/80">{NEXT_STEPS[stepIdx]}</span>.</>}
+                : <>Next, I'll <span className="text-xo-text">{NEXT_STEPS[stepIdx]}</span>.</>}
             </p>
-            <div className="mt-4 flex flex-wrap gap-2.5">
-              <Button onClick={approveNext} disabled={allApproved}>{allApproved ? "All steps approved ✓" : "Approve next step"}</Button>
-              <Button variant="ghost" onClick={() => setStrategyOpen(true)}>Adjust strategy</Button>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button type="button" onClick={approveNext} disabled={allApproved} className={BTN}>{allApproved ? "All steps approved ✓" : "Approve next step"}</button>
+              <button type="button" onClick={() => setStrategyOpen(true)} className={BTN_GHOST}>Adjust strategy</button>
             </div>
           </div>
+        </Section>
 
-          {/* working-on-now log */}
-          <div className="bg-ink-900/40 p-6">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Recent activity</div>
-            <ul className="mt-3 space-y-3">
-              {activity.map((a, i) => (
-                <li key={i} className="flex items-start gap-2.5">
-                  <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${a.tone === "good" ? "bg-deal-400" : a.tone === "warn" ? "bg-red-400" : "bg-white/40"}`} />
-                  <div>
-                    <div className="text-[12.5px] leading-snug text-white/80">{a.text}</div>
-                    <div className="text-[10px] uppercase tracking-wide text-white/35">{a.when}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </Card>
+        <Section title="Recent activity" className="lg:col-span-5">
+          <ul className="space-y-3 px-4 py-3">
+            {activity.map((a, i) => (
+              <li key={i} className="flex items-start gap-2.5">
+                <span aria-hidden className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${a.tone === "good" ? "bg-xo-verified" : a.tone === "warn" ? "bg-xo-risk" : "bg-xo-muted"}`} />
+                <div>
+                  <div className="text-[13px] leading-snug">{a.text}</div>
+                  <div className="text-[11px] text-xo-muted">{a.when}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      </div>
 
       {/* ── Active banker directives ─────────────────────────────── */}
-      <Card className="mt-6 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Active mandate directives</div>
-            <p className="mt-0.5 text-[11.5px] text-white/45">Stored against the mandate · deterministic parser · re-applied to every recommendation below</p>
-          </div>
-          <Button variant="ghost" className="text-[12px]" onClick={() => setBriefOpen(true)}>+ Brief the banker</Button>
-        </div>
-
-        {directives.length === 0 ? (
-          <div className="mt-4 rounded-lg border border-dashed border-white/12 bg-ink-900/40 p-4 text-[12.5px] text-white/55">
-            No directives yet. Brief the banker (e.g. <span className="text-white/75">"prioritize strategic buyers, avoid PE, minimum valuation $100M"</span>) and the rules will appear here and re-rank the pool.
-          </div>
-        ) : (
-          <div className="mt-4 space-y-2.5">
-            {directives.map((d) => (
-              <div key={d.id} className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="text-[13px] font-semibold text-white">“{d.raw}”</div>
-                    <div className="mt-1 flex flex-wrap gap-1.5">
-                      {d.understood ? d.effects.map((e, i) => (
-                        <span key={i} className="rounded-full bg-deal-600/15 px-2 py-0.5 text-[10px] font-medium text-deal-200 ring-1 ring-deal-400/30" title={e.field}>{e.detail}</span>
-                      )) : <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-white/45 ring-1 ring-white/10">Stored as a note — no rule matched</span>}
+      <Section title="Active mandate directives" className="border border-xo-line"
+        right={<button type="button" onClick={() => setBriefOpen(true)} className={BTN_GHOST}>+ Brief the banker</button>}
+        foot="Stored against the mandate · deterministic parser · re-applied to every recommendation below">
+        <div className="px-4 py-3">
+          {directives.length === 0 ? (
+            <p className="border border-dashed border-xo-line bg-xo-ink p-4 text-[13px] text-xo-muted">
+              No directives yet. Brief the banker (e.g. <span className="text-xo-text">"prioritize strategic buyers, avoid PE, minimum valuation $100M"</span>) and the rules will appear here and re-rank the pool.
+            </p>
+          ) : (
+            <div className="space-y-2.5">
+              <ul className="space-y-2.5">
+                {directives.map((d) => (
+                  <li key={d.id} className="border border-xo-line bg-xo-ink p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-semibold">“{d.raw}”</div>
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          {d.understood ? d.effects.map((e, i) => (
+                            <span key={i} className="rounded-sm border border-xo-verified/40 px-1.5 py-px text-[11px] text-xo-verified">{e.detail}</span>
+                          )) : <span className="rounded-sm border border-xo-line px-1.5 py-px text-[11px] text-xo-muted">Stored as a note — no rule matched</span>}
+                        </div>
+                      </div>
+                      <button type="button" onClick={() => removeDirective(d.id)} className="shrink-0 rounded-sm px-1.5 py-1 text-[12px] font-medium text-xo-muted hover:text-xo-risk focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Remove<span className="sr-only"> directive “{d.raw}”</span></button>
                     </div>
-                  </div>
-                  <button onClick={() => removeDirective(d.id)} className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-white/40 hover:text-red-300">Remove</button>
+                  </li>
+                ))}
+              </ul>
+              <dl className="grid gap-px bg-xo-line sm:grid-cols-2">
+                <div className="bg-xo-panel p-3"><dt className="text-[11px] text-xo-muted">Outreach posture</dt><dd className={`mt-0.5 text-[13px] ${posture.held ? "text-xo-caution" : ""}`}>{posture.note}</dd></div>
+                <div className="bg-xo-panel p-3"><dt className="text-[11px] text-xo-muted">Valuation guardrail</dt><dd className="mt-0.5 text-[13px]">{guardrail.note ?? "No valuation floor or ceiling set."}</dd></div>
+              </dl>
+              {directiveActions.length > 0 && (
+                <div className="border border-xo-line bg-xo-ink p-3">
+                  <h3 className="text-[12px] font-semibold text-xo-muted">Recommended actions from your directives</h3>
+                  <ul className="mt-2 space-y-1.5">
+                    {directiveActions.map((a, i) => (
+                      <li key={i} className="flex items-start gap-2 text-[13px]"><span aria-hidden className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-xo-verified" />{a}</li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-            ))}
-
-            {/* effective posture from the merged directives */}
-            <div className="grid gap-2.5 sm:grid-cols-2">
-              <div className={`rounded-lg border p-3 ${posture.held ? "border-loi-400/40 bg-loi-500/10" : "border-white/10 bg-ink-900/40"}`}>
-                <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Outreach posture</div>
-                <div className={`mt-0.5 text-[12.5px] ${posture.held ? "text-loi-200" : "text-white/70"}`}>{posture.note}</div>
-              </div>
-              <div className={`rounded-lg border p-3 ${guardrail.note ? "border-deal-400/30 bg-deal-600/[0.07]" : "border-white/10 bg-ink-900/40"}`}>
-                <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Valuation guardrail</div>
-                <div className="mt-0.5 text-[12.5px] text-white/70">{guardrail.note ?? "No valuation floor or ceiling set."}</div>
-              </div>
+              )}
+              {excluded.length > 0 && (
+                <p className="text-[12px] text-xo-muted">{excluded.length} buyer{excluded.length === 1 ? "" : "s"} removed from the active set by directive: {excluded.map((r) => r.candidate.buyer.name).join(", ")}.</p>
+              )}
             </div>
-
-            {directiveActions.length > 0 && (
-              <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5">
-                <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Recommended actions from your directives</div>
-                <ul className="mt-2 space-y-1.5">
-                  {directiveActions.map((a, i) => (
-                    <li key={i} className="flex items-start gap-2 text-[12.5px] text-white/75"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-deal-400" />{a}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {excluded.length > 0 && (
-              <div className="text-[11.5px] text-white/45">{excluded.length} buyer{excluded.length === 1 ? "" : "s"} removed from the active set by directive: {excluded.map((r) => r.candidate.buyer.name).join(", ")}.</div>
-            )}
-          </div>
-        )}
-      </Card>
+          )}
+        </div>
+      </Section>
 
       {/* ── Deal funnel ──────────────────────────────────────────── */}
-      <Card className="mt-6 p-6">
-        <div className="flex items-center justify-between">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Deal funnel</div>
-          <Button variant="ghost" className="text-[12px]" onClick={() => { downloadDeliverable("buyer-shortlist.csv", buyerListCsv(ranked.slice(0, nShort))); }}>Export shortlist CSV</Button>
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-white/10 sm:grid-cols-5">
+      <Section title="Deal funnel" className="border border-xo-line"
+        right={<button type="button" onClick={() => { downloadDeliverable("buyer-shortlist.csv", buyerListCsv(ranked.slice(0, nShort))); }} className={BTN_GHOST}>Export shortlist CSV</button>}>
+        <ol className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-5">
           {funnel.map((f, i) => (
-            <div key={f.label} className="bg-ink-800/95 p-4">
+            <li key={f.label} className="bg-xo-panel p-4">
               <div className="flex items-baseline gap-2">
-                <span className="font-mono text-3xl font-bold tabular-nums" style={{ color: f.accent }}>{f.n}</span>
-                {i > 0 && <span className="text-[10px] text-white/35">of {funnel[i - 1].n}</span>}
+                <span className="font-mono text-3xl font-semibold tabular-nums">{f.n}</span>
+                {i > 0 && <span className="text-[11px] text-xo-muted">of {funnel[i - 1].n}</span>}
               </div>
-              <div className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-white/50">{f.label}</div>
-              <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full rounded-full" style={{ width: `${(f.n / funnel[0].n) * 100}%`, background: f.accent }} />
+              <div className="mt-1 text-[12px] font-semibold text-xo-muted">{f.label}</div>
+              <div aria-hidden className="mt-2 h-1 overflow-hidden rounded-full bg-xo-line">
+                <div className={`h-full rounded-full ${FUNNEL_TONE[i] ?? "bg-xo-muted"}`} style={{ width: `${(f.n / Math.max(1, funnel[0].n)) * 100}%` }} />
               </div>
-            </div>
+            </li>
           ))}
-        </div>
-      </Card>
+        </ol>
+      </Section>
 
       {/* ── Workstreams ──────────────────────────────────────────── */}
-      <Card className="mt-6 p-6">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">What I'm handling for you</div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <Section title="What I'm handling for you" className="border border-xo-line">
+        <ul className="grid gap-px bg-xo-line sm:grid-cols-2">
           {workstreams.map((w) => (
-            <div key={w.key} className="flex items-start gap-3 rounded-lg border border-white/10 bg-ink-900/40 p-3.5">
-              <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide ring-1 ${STATUS_STYLE[w.status]}`}>{w.status}</span>
+            <li key={w.key} className="flex items-start gap-3 bg-xo-panel px-4 py-3">
+              <span className={`mt-0.5 inline-block shrink-0 rounded-sm border px-1.5 py-px text-[11px] font-semibold ${STATUS_STYLE[w.status]}`}>{w.status}</span>
               <div className="min-w-0">
-                <div className="text-[13px] font-semibold text-white">{w.title}</div>
-                <div className="mt-0.5 text-[11.5px] leading-snug text-white/55">{w.result}</div>
+                <h3 className="text-[13px] font-semibold">{w.title}</h3>
+                <div className="mt-0.5 text-[12px] leading-snug text-xo-muted">{w.result}</div>
               </div>
-            </div>
+            </li>
           ))}
-        </div>
-      </Card>
+        </ul>
+      </Section>
 
       {/* ── Strategy advisory ────────────────────────────────────── */}
       {(() => {
@@ -377,130 +352,131 @@ const Banker: React.FC = () => {
           { q: "Best closing", a: "Escrow ≤8% released in 12 months; reverse break-fee; 30–45 day sign-to-close." },
         ];
         return (
-          <Card className="mb-8 mt-6 p-6">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-deal-600/30 text-[10px] font-bold text-deal-200 ring-1 ring-deal-400/40">TB</span>
-              <h2 className="font-serif text-base font-bold text-white">Ask your banker</h2>
+          <Section title="Ask your banker" className="border border-xo-line">
+            <div className="px-4 py-3">
+              <div className="border border-xo-verified/40 bg-xo-ink p-3">
+                <div className="text-[12px] text-xo-muted">"What is the fastest path to a {fmtMoney(target)} exit?"</div>
+                <p className="mt-1.5 text-[14px] leading-relaxed">
+                  Shortlist {strategy.shortlist} strategics, run a 6-week teaser → IOI → LOI process in parallel, and anchor at{" "}
+                  <span className="font-mono font-semibold text-xo-verified">{fmtMoney(target)}</span>. Close cash-heavy (≥{strategy.cashFloor}%) with a tight escrow — the readiness fixes and competitive tension carry the rest.
+                </p>
+              </div>
+              <dl className="mt-3 grid gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
+                {advice.map((x) => (
+                  <div key={x.q} className="bg-xo-panel p-3">
+                    <dt className="text-[11px] font-semibold text-xo-verified">{x.q}</dt>
+                    <dd className="mt-1 text-[13px] leading-snug text-xo-muted">{x.a}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
-            <div className="mt-3 rounded-lg border border-deal-500/30 bg-deal-600/[0.07] p-4">
-              <div className="text-[12px] text-white/55">"What is the fastest path to a {fmtMoney(target)} exit?"</div>
-              <p className="mt-1.5 text-[14px] leading-relaxed text-white/85">
-                Shortlist {strategy.shortlist} strategics, run a 6-week teaser → IOI → LOI process in parallel, and anchor at{" "}
-                <span className="font-mono font-semibold text-deal-300">{fmtMoney(target)}</span>. Close cash-heavy (≥{strategy.cashFloor}%) with a tight escrow — the readiness fixes and competitive tension carry the rest.
-              </p>
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {advice.map((x) => (
-                <div key={x.q} className="rounded-lg border border-white/10 bg-ink-900/40 p-3.5">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-deal-300">{x.q}</div>
-                  <div className="mt-1 text-[12.5px] leading-snug text-white/75">{x.a}</div>
-                </div>
-              ))}
-            </div>
-          </Card>
+          </Section>
         );
       })()}
 
       {/* ── Deliverables ─────────────────────────────────────────── */}
-      <div className="mt-8">
-        <h2 className="font-serif text-lg font-bold text-white">Deliverables</h2>
-        <p className="text-xs text-white/45">Everything the banker has produced — review, download, and send.</p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {([["outreach", "Outreach campaign"], ["intros", "Buyer introductions"], ["teaser", "Teaser"], ["summary", "Executive summary"]] as [Tab, string][]).map(([k, l]) => (
-            <button key={k} onClick={() => setTab(k)} className={`rounded-md px-3.5 py-2 text-[13px] font-semibold transition ${tab === k ? "bg-deal-600/20 text-white ring-1 ring-deal-400/40" : "text-white/60 hover:bg-white/5 hover:text-white"}`}>{l}</button>
-          ))}
-        </div>
+      <Section title="Deliverables" className="border border-xo-line"
+        right={<span className="text-[11px] text-xo-muted">Everything the banker has produced — review, download, and send.</span>}>
+        <div className="px-4 py-3">
+          <div role="group" aria-label="Deliverable" className="flex flex-wrap gap-2">
+            {([["outreach", "Outreach campaign"], ["intros", "Buyer introductions"], ["teaser", "Teaser"], ["summary", "Executive summary"]] as [Tab, string][]).map(([k, l]) => (
+              <Chip key={k} pressed={tab === k} onToggle={() => setTab(k)}>{l}</Chip>
+            ))}
+          </div>
 
-        <div className="mt-6">
-          {tab === "outreach" && (
-            <div className="space-y-2">
-              {posture.held && (
-                <div className="rounded-lg border border-loi-400/40 bg-loi-500/10 px-3.5 py-2.5 text-[12.5px] text-loi-200">
-                  ⏸ Outreach is held {posture.label} per banker directive — the sequence below is staged but not sent.
-                </div>
-              )}
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" className="text-[12px]" onClick={() => downloadDeliverable("outreach-campaign.md", outreachMd())}>Download</Button>
-                <Button className="text-[12px]" disabled={posture.held} onClick={() => { flagSent("outreach"); notify("Outreach campaign launched to the shortlist"); }}>{posture.held ? "Held by directive" : isSent("outreach") ? "Sent ✓ · resend" : "Send campaign"}</Button>
-              </div>
-              {SEQUENCE.map((s, i) => (
-                <Card key={s.step} className="flex items-start gap-4 p-4">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-deal-600/20 font-mono text-[12px] font-bold text-deal-200 ring-1 ring-deal-400/40">{i + 1}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-bold text-white">{s.step}</div>
-                      <div className="text-[11px] text-white/40">{s.timing}</div>
-                    </div>
-                    <div className="mt-0.5 text-[12px] leading-snug text-white/60">{s.body}</div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {tab === "intros" && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {topBuyers.map((b) => {
-                const adj = adjustedById.get(b.buyer.name);
-                const moved = adj && Math.abs(adj.adjustedProbability - adj.baseProbability) >= 0.005;
-                return (
-                <Card key={b.buyer.name} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-bold text-white">{b.buyer.name}</div>
-                    <span className="text-right">
-                      <span className="font-mono text-[13px] font-bold text-deal-300">{Math.round((adj?.adjustedProbability ?? b.probability) * 100)}%</span>
-                      {moved && <span className="ml-1 font-mono text-[10px] text-white/40 line-through">{Math.round(adj!.baseProbability * 100)}%</span>}
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-white/45">{b.buyer.buyerType.replace(/_/g, " ")}</div>
-                  {adj && adj.reasons.length > 0 && (
-                    <div className="mt-1.5 flex flex-wrap gap-1">
-                      {adj.reasons.map((r, i) => <span key={i} className="rounded bg-deal-600/15 px-1.5 py-0.5 text-[9.5px] font-medium text-deal-200 ring-1 ring-deal-400/25">{r}</span>)}
-                    </div>
-                  )}
-                  <p className="mt-2 text-[12px] leading-relaxed text-white/70">
-                    Suggested intro: position {PROJECT} to {b.buyer.name} — {b.rationale}
+          <div className="mt-4">
+            {tab === "outreach" && (
+              <div className="space-y-2">
+                {posture.held && (
+                  <p className="border border-xo-caution/40 bg-xo-ink px-3 py-2.5 text-[13px] text-xo-caution">
+                    ⏸ Outreach is held {posture.label} per banker directive — the sequence below is staged but not sent.
                   </p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <Button variant="ghost" className="text-[12px]" onClick={() => setIntroBuyer(b)}>Draft introduction</Button>
-                    {isSent(`intro:${b.buyer.name}`) && <span className="text-[11px] font-semibold uppercase tracking-wide text-deal-300">Sent ✓</span>}
-                  </div>
-                </Card>
-                );
-              })}
-            </div>
-          )}
-
-          {(tab === "teaser" || tab === "summary") && (() => {
-            const doc = tab === "teaser" ? teaser : summary;
-            if (!doc) return <Card className="p-6 text-sm text-white/40">Generating…</Card>;
-            const key = tab;
-            return (
-              <Card className="p-7">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-400">Prepared by ExitOS Advisory</div>
-                    <h2 className="mt-2 font-serif text-2xl font-bold text-white">{doc.title}</h2>
-                    <div className="mt-1 text-[11px] text-white/45">{doc.sections.length} sections · {doc.wordCount} words{doc.anonymized ? " · anonymized" : ""}</div>
-                  </div>
-                  <div className="flex shrink-0 gap-2">
-                    <Button variant="ghost" className="text-[12px]" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download</Button>
-                    <Button className="text-[12px]" onClick={() => { flagSent(key); notify("Delivered to the buyer's data room"); }}>{isSent(key) ? "Sent ✓ · resend" : "Send"}</Button>
-                  </div>
+                )}
+                <div className="flex justify-end gap-2">
+                  <button type="button" onClick={() => downloadDeliverable("outreach-campaign.md", outreachMd())} className={BTN_GHOST}>Download</button>
+                  <button type="button" disabled={posture.held} onClick={() => { flagSent("outreach"); notify("Outreach campaign launched to the shortlist"); }} className={BTN}>{posture.held ? "Held by directive" : isSent("outreach") ? "Sent ✓ · resend" : "Send campaign"}</button>
                 </div>
-                <div className="mt-5 space-y-5">
-                  {doc.sections.map((s, i) => (
-                    <section key={`${i}-${s.heading}`}>
-                      <h3 className="font-serif text-base font-bold text-white">{s.heading}</h3>
-                      <p className="mt-1.5 text-[13px] leading-relaxed text-white/70">{s.body}</p>
-                    </section>
+                <ol className="space-y-px bg-xo-line">
+                  {SEQUENCE.map((s, i) => (
+                    <li key={s.step} className="flex items-start gap-4 bg-xo-panel p-3">
+                      <span aria-hidden className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-xo-verified/50 font-mono text-[12px] font-semibold text-xo-verified">{i + 1}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="text-[13px] font-semibold">{s.step}</h3>
+                          <div className="text-[12px] text-xo-muted">{s.timing}</div>
+                        </div>
+                        <div className="mt-0.5 text-[12px] leading-snug text-xo-muted">{s.body}</div>
+                      </div>
+                    </li>
                   ))}
-                </div>
-              </Card>
-            );
-          })()}
+                </ol>
+              </div>
+            )}
+
+            {tab === "intros" && (
+              <ul className="grid gap-px bg-xo-line sm:grid-cols-2">
+                {topBuyers.map((b) => {
+                  const adj = adjustedById.get(b.buyer.name);
+                  const moved = adj && Math.abs(adj.adjustedProbability - adj.baseProbability) >= 0.005;
+                  return (
+                  <li key={b.buyer.name} className="bg-xo-panel p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-[13px] font-semibold">{b.buyer.name}</h3>
+                      <span className="text-right">
+                        <span className="font-mono text-[13px] font-semibold text-xo-verified">{Math.round((adj?.adjustedProbability ?? b.probability) * 100)}%</span>
+                        {moved && <span className="ml-1 font-mono text-[11px] text-xo-muted line-through">{Math.round(adj!.baseProbability * 100)}%</span>}
+                      </span>
+                    </div>
+                    <div className="text-[12px] text-xo-muted">{b.buyer.buyerType.replace(/_/g, " ")}</div>
+                    {adj && adj.reasons.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {adj.reasons.map((r, i) => <span key={i} className="rounded-sm border border-xo-verified/40 px-1.5 py-px text-[11px] text-xo-verified">{r}</span>)}
+                      </div>
+                    )}
+                    <p className="mt-2 text-[12px] leading-relaxed text-xo-muted">
+                      Suggested intro: position {PROJECT} to {b.buyer.name} — {b.rationale}
+                    </p>
+                    <div className="mt-3 flex items-center gap-2">
+                      <button type="button" onClick={() => setIntroBuyer(b)} className={BTN_GHOST}>Draft introduction<span className="sr-only"> to {b.buyer.name}</span></button>
+                      {isSent(`intro:${b.buyer.name}`) && <span className="text-[12px] font-semibold text-xo-verified">Sent ✓</span>}
+                    </div>
+                  </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            {(tab === "teaser" || tab === "summary") && (() => {
+              const doc = tab === "teaser" ? teaser : summary;
+              if (!doc) return <p className="p-4 text-[13px] text-xo-muted">Generating…</p>;
+              const key = tab;
+              return (
+                <article className="border border-xo-line bg-xo-ink p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">Prepared by ExitOS Advisory</div>
+                      <h3 className="mt-1 font-serif text-[20px] font-semibold">{doc.title}</h3>
+                      <div className="mt-1 text-[12px] text-xo-muted">{doc.sections.length} sections · {doc.wordCount} words{doc.anonymized ? " · anonymized" : ""}</div>
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      <button type="button" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))} className={BTN_GHOST}>Download</button>
+                      <button type="button" onClick={() => { flagSent(key); notify("Delivered to the buyer's data room"); }} className={BTN}>{isSent(key) ? "Sent ✓ · resend" : "Send"}</button>
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-4">
+                    {doc.sections.map((s, i) => (
+                      <section key={`${i}-${s.heading}`}>
+                        <h4 className="text-[14px] font-semibold">{s.heading}</h4>
+                        <p className="mt-1 text-[13px] leading-relaxed text-xo-muted">{s.body}</p>
+                      </section>
+                    ))}
+                  </div>
+                </article>
+              );
+            })()}
+          </div>
         </div>
-      </div>
+      </Section>
     </div>
   );
 };
