@@ -35,7 +35,7 @@ One indexed buyer's dossier: likelihood for the founder's company and the buyer'
 | G2 | **"Express interest" implies an effect it does not have.** | Say what it does: saved to deal activity on this browser; the buyer is not notified. Drop "sharpens engagement intelligence". | ☐ |
 | G3 | Snapshot wording ("currently exhibits", "node-side"). | "in the registry snapshot (as of …)"; "not in the bundled extract". | ☐ |
 | G4 | Demo company unlabelled. | Company, tokens and institutional baseline from `loadActiveCompany()` (as the Terminal does); badge. | ☐ |
-| G5 | Design: old primitives (found and not-found states). | Rebuild on `xo`. | ☐ |
+| G5 | Design: old primitives (found and not-found states). | Rebuild on `xo`. | ☑ G5-commit |
 
 ### X14 — Terminal (Page 01, approved) calls the same composite a probability — documented here
 The Terminal shows `rankedBuyers().probability.pct` as "N% likely", "N% probability", "N% likely to acquire a company like {company}". It is the composite from Page 16 G1, not a probability. Fix after Page 17, in its own commit, logged in `PAGE-01-TERMINAL.md`: wording only, the same "likelihood score N/100" used on Pages 16 and 17.
@@ -43,3 +43,7 @@ The Terminal shows `rankedBuyers().probability.pct` as "N% likely", "N% probabil
 ---
 
 ## Closure log
+
+### G5 — Design
+*Closed by:* `pages/BuyerProfile.tsx` rebuilt on `xo` (back link with a 24 px target; `PageHeader` `h1` = buyer, Express interest and the PDF briefing book as header actions; two score metrics; forecast and headline DNA as definition lists and metrics; rationale, contact intelligence, expected outcome, acquisition profile, similar acquisitions (row headers, `ScrollRegion`) and signals as labelled `Section`s with `h3`s; appetite drivers show "v/max" in text; signals carry "(active)/(inactive)" for screen readers; external links announced as new tabs; the not-found state uses the same header). Content carried over verbatim; G1–G4 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Preparation `/console/buyer/microsoft` 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus; `/console/buyer/nope` (not found) 390: `h1` 1, axe 0.
