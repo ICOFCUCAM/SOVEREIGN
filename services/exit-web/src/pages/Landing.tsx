@@ -156,7 +156,7 @@ const Landing: React.FC = () => {
           </div>
           {/* the right-hand box: the lifecycle graph alone (DD3), its caption beneath */}
           <figure className="m-0 min-w-0">
-            <div className="shadow-[0_40px_80px_-40px_rgba(6,24,46,0.6)]">
+            <div className="shadow-[0_40px_80px_-40px_rgba(7,26,49,0.6)]">
               <ExchangeMap dark compact bare />
             </div>
             <figcaption className="mt-4 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
@@ -370,7 +370,7 @@ const Landing: React.FC = () => {
             <div className="border-t-4 border-double border-ink-900 pt-8">
               <Chapter n="08">{t("faq.eyebrow")}</Chapter>
               <h2 id="faq-h" className="rv-h mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} /></h2>
-              <div className="mt-10 rounded-[4px] p-6 text-white" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
+              <div className="mt-10 rounded-[4px] p-6 text-white" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
                 <p className="font-editorial text-[1.35rem] font-semibold leading-snug">{t("faq.more")}</p>
                 <button onClick={() => nav("/pricing")} className={`${BTN} mt-5 bg-white text-ink-900 hover:bg-blue-50`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
               </div>
@@ -392,11 +392,11 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ===== 09 · THE NEXT MOVE — the back page ===== */}
-      <section id="ch-09" className="relative overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#05101f 0%,#06182E 55%,#030a15 100%)" }}>
-        {/* a quiet film of a meeting under a navy veil (placeholder footage, pre-launch gate G1) */}
+      <section id="ch-09" className="relative overflow-hidden text-white" style={{ background: "var(--ex-field)" }}>
+        {/* a quiet film of a meeting under an ink veil (placeholder footage, pre-launch gate G1) */}
         <AmbientVideo src="/media/boardroom-loop.mp4" webm="/media/boardroom-loop.webm" poster="/media/boardroom-poster.jpg" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.38] mix-blend-luminosity" />
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg,#05101f 0%,rgba(6,24,46,0.62) 28%,rgba(6,24,46,0.72) 62%,#030a15 100%), linear-gradient(90deg,rgba(3,10,21,0.85) 0%,rgba(3,10,21,0.35) 55%,rgba(3,10,21,0.6) 100%)" }} />
-        {/* the bookend: the hero's navy and light return at the close */}
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, var(--ex-1) 0%, rgba(7,26,49,0.62) 28%, rgba(7,26,49,0.72) 62%, var(--ex-0) 100%), linear-gradient(90deg, rgba(4,12,24,0.85) 0%, rgba(4,12,24,0.35) 55%, rgba(4,12,24,0.6) 100%)" }} />
+        {/* the bookend: the hero's ink and light return at the close */}
         <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 h-[70%] w-[80%] -translate-x-1/2 rounded-[50%] opacity-40 blur-[110px]" style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.55), transparent 70%)" }} />
         <div className={`${WRAP} relative py-20 sm:py-24 lg:py-32`}>
           <div className="border-t-4 border-double border-white/50 pt-8">
