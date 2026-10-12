@@ -37,7 +37,7 @@ Founder free and Pro: `h1` none · axe color-contrast ×7 + link-in-text-block �
 | G2 | **Consequential actions without confirmation.** | Inline confirmation for Execute NDA, Accept, Decline and Withdraw, stating what is recorded and that it cannot be undone here. | ☑ `a7ecb98` |
 | G3 | Match score shown as "%"; target revenue labelled "check". | "Match score N/100" with the rule (weights, qualified threshold); "target revenue $a–$b". | ☑ `22c7aad` |
 | G4 | **Demo company unlabelled, and bound to the wrong listing.** With no intake the inbox derives `lst-helios-freight` ("Project Meridian", Draft), while the exchange carries the demo company as the seeded `lst-demo-helios` ("Project Beacon"). Buyer actions on the demo listing never reach the demo inbox (verified: a buyer NDA request and $90M offer on Project Beacon left the founder inbox at 0). | Demo data / Your intake badge and a line naming the listing; with no intake, track the seeded demo listing `lst-demo-helios` (same company, same profile). | ☑ `75afa8c` |
-| G5 | Fake live tape. | `RegistryTape`. | ☐ |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
 | G6 | Design: no `h1`, 8 axe failures. | Rebuild on `xo`. | ☑ `d8968ce` |
 
 ---
@@ -78,3 +78,7 @@ X11 moved the shared primary buttons to `bg-deal-700` (white text 5.48:1) but ke
 ### G3 — Match score shown as "%"; target revenue labelled "check"
 *Closed by:* `pages/FounderInbox.tsx` (labels; `matchCompanyToCriteria` unchanged). "60%" → "Match score 60/100"; "$5M–$500M check" → "target revenue $5M–$500M" (the mandate field is named `minCheckUsd`/`maxCheckUsd`, but the Acquisition Radar fills it from "Target revenue" and the scorer compares it with the listing's revenue); foot states the rule: "sector 40 + revenue inside the buyer's target band 25 + region 20 + growth at or above their minimum 15. Qualified = 70 or more with the sector matching. A rule-based fit, not a likelihood of a bid."
 *Verification:* `tsc -b`, eslint 0 errors · Chromium: a buyer saved the default radar mandate (AI · Software · Developer Tools, $5M–$500M, North America and Europe); the founder inbox showed "Match score 60/100" — sector miss, revenue + region + growth = 25 + 20 + 15 — and "0 qualified of 1 matching mandates" · 1440/390: axe 0, no overflow, 0 errors.
+
+### G5 — Fake live tape
+*Closed by:* `pages/FounderInbox.tsx`: pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* `tsc -b`, eslint 0 errors · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, 25 tab stops with visible focus.
