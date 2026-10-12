@@ -4,7 +4,7 @@ import { MarketingChrome, Mark, Arrow, Chapter, Editorial } from "../components/
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL_FMT, type BoardTx } from "../lib/market-stats";
 import { useI18n } from "../lib/i18n";
 import QuickValue from "../components/QuickValue";
-import TradingHall from "../components/TradingHall";
+import BoardRoom from "../components/BoardRoom";
 import ExchangeMap from "../components/ExchangeMap";
 import { Note, SourcesSection, type SourceId } from "../components/SourceNotes";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
@@ -82,7 +82,7 @@ const Landing: React.FC = () => {
 
       {/* ===== 02 · THE EXCHANGE — the screen installed in the trading hall ===== */}
       <section aria-labelledby="hall-h">
-        <TradingHall head={
+        <BoardRoom head={
           <div className={`${WRAP} relative pb-24 pt-20 text-white`}>
             <Chapter n="02" dark>{t("hall.eyebrow")}</Chapter>
             <h2 id="hall-h" className="mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic text-blue-300">{t("hall.h2em")}</em></h2>
@@ -112,7 +112,7 @@ const Landing: React.FC = () => {
           {/* live deal-activity ticker (motion layer) */}
           <CommandBoard />
           </div>
-        </TradingHall>
+        </BoardRoom>
         <style>{`
           @keyframes exTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
           @keyframes exScan{0%{transform:translateY(-100%);opacity:0}8%{opacity:1}50%{opacity:.5}92%{opacity:1}100%{transform:translateY(2000%);opacity:0}}
