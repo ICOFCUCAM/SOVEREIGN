@@ -4,7 +4,8 @@ import { STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
 import { Evidence } from "../lib/workstation";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
-import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
+import { SAMPLE_COMPANY } from "../lib/profile";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, NEGOTIATION_STATE, BUYERS } from "../lib/engines";
 
@@ -118,7 +119,8 @@ const Pipeline: React.FC = () => {
   return (
     <div data-page="active-processes" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Exchange · Sourcing · Acquisition Pipeline" title="Active Processes"
-        badge={<span className="text-[12px] text-xo-muted">Six-stage process · Leverage {NEGOTIATION_STATE.leverage}</span>} />
+        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Six-stage process · Leverage {NEGOTIATION_STATE.leverage}</span></>}
+        description={`The demo company's sample offers (${SAMPLE_COMPANY.name}) and its top discovery candidates. Saved intakes hold no offers, so this page stays on demo data.`} />
 
       <section aria-label="Pipeline summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-5">
         <div className="bg-xo-panel"><Metric label="Active deals" value={String(live.length)} sub="offers, excluding dead" /></div>

@@ -32,7 +32,7 @@ A kanban of deals across the negotiation stages, a "Deal Probability Engine" tab
 | G1 | **Three invented deals** in the pipeline and its totals. | Remove them; the sourcing column shows the top ranked buyers from discovery as "candidates — not contacted", with no amount or probability, excluded from totals. | ☑ `bc3aef0` |
 | G2 | **Invented stage-conversion benchmarks.** | Remove the figures; say no sourced benchmark exists yet. | ☑ `dbce62f` |
 | G3 | "Prediction engine" and automation overclaims. | "Close-probability rule" with its formula; expected-days rule stated; plain "What ExitOS does". | ☑ `4451c62` |
-| G4 | Demo offers unlabelled. | Badge and line: sample offers of the demo company. | ☐ |
+| G4 | Demo offers unlabelled. | Badge and line: sample offers of the demo company. | ☑ G4-commit |
 | G5 | Design: no `h1`, 11 contrast failures, tape. | Rebuild on `xo`; `h1` "Active Processes"; `RegistryTape`. | ☑ `82783c3` |
 
 ---
@@ -56,3 +56,7 @@ Totals now reflect only the sample offers: **2 active deals** (was 5), pipeline 
 ### G3 — "Prediction engine" and automation overclaims
 *Closed by:* `pages/Pipeline.tsx` (labels; rules unchanged). "Deal Probability Engine — Predicted close probability …" → **"Close-probability rule"** with the full rule in the foot (accept ≥ 85 %, counter max(45 %, 0.85 × score), other max(20 %, 0.5 × score), decline 5 %; expected days = stage base 140 / 96 / 64 / 38 / 14 × (1 − 0.45 × p); adjusted value = amount × p) and "Rule, not a prediction"; metric "Prob-weighted (rule)"; "ExitOS scores every deal, drafts the counter and sequences buyer follow-ups automatically" → "What ExitOS does — Scores each offer and applies the stated close-probability rule. Counters are drafted in the Bid Room; follow-ups are not sequenced automatically."
 *Verification:* eslint clean · Chromium: 0 "Probability Engine" / "Predicted" / "sequences buyer follow-ups automatically".
+
+### G4 — Demo offers unlabelled
+*Closed by:* `pages/Pipeline.tsx`: **Demo data** badge and "The demo company's sample offers (Helios Freight) and its top discovery candidates. Saved intakes hold no offers, so this page stays on demo data."
+*Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · 0 "live" words, 0 pinging elements.
