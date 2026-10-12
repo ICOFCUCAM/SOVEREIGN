@@ -147,11 +147,12 @@ export interface LedgerRow {
   readonly statusColor: string;
   readonly sources: ReadonlyArray<{ kind: string; ref: string }>;
   readonly tier: string;          // confidence tier as recorded
+  readonly valueUsd: number;      // for sorting
 }
-export const LEDGER_ROWS: readonly LedgerRow[] = [...HISTORY]
+/** Every priced history entry, newest first (the ledger's searchable table). */
+export const LEDGER_ALL: readonly LedgerRow[] = [...HISTORY]
   .filter((e) => typeof e.headlinePriceUsd === "number" && e.headlinePriceUsd > 0)
   .sort((a, b) => (b.announcedDate || "").localeCompare(a.announcedDate || ""))
-  .slice(0, 13)
   .map((e) => ({
     date: e.announcedDate,
     target: e.targetName,
@@ -165,7 +166,9 @@ export const LEDGER_ROWS: readonly LedgerRow[] = [...HISTORY]
     statusColor: e.status === "closed" ? "#047857" : e.status === "terminated" ? "#475569" : "#92400e",
     sources: e.sourceRefs.map((r) => ({ kind: SOURCE_KIND[r.kind] ?? r.kind, ref: r.ref })),
     tier: e.confidence,
+    valueUsd: e.headlinePriceUsd as number,
   }));
+export const LEDGER_ROWS: readonly LedgerRow[] = LEDGER_ALL.slice(0, 13);
 /** History entries that carry a disclosed headline price. */
 export const LEDGER_PRICED = HISTORY.filter((e) => typeof e.headlinePriceUsd === "number" && e.headlinePriceUsd > 0).length;
 /** Every history entry's tier, counted — shown beside the ledger. */

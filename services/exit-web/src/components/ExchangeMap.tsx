@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import { Note } from "./SourceNotes";
 
@@ -49,6 +50,11 @@ const STAGES: ReadonlyArray<[string, string, number, number, "above" | "below"]>
   ["lc.diligence", "wk 6–9", 7.5, 360, "below"],
   ["lc.closing", "wk 10+", 10, 250, "below"],
 ];
+// what ExitOS does at each stage, and the module that does it (interactive mode)
+const STAGE_MODULE: Readonly<Record<string, string>> = {
+  "lc.signal": "Acquisition Radar", "lc.discovery": "Buyer Intelligence", "lc.nda": "Access Requests", "lc.cim": "Documents",
+  "lc.meetings": "Outreach", "lc.loi": "Negotiator", "lc.diligence": "Data Room", "lc.closing": "Closing Center",
+};
 const P = STAGES.map(([, , wk, y]) => [wx(wk), y] as [number, number]);
 
 /** A smooth curve through the points (Catmull-Rom → cubic Bézier). */
@@ -72,18 +78,24 @@ const STYLE = `
     .xm-route { stroke-dasharray: 1; animation: xmDraw 3.2s cubic-bezier(.4,0,.2,1) .2s both; }
     .xm-ring { animation: xmPulse 3.6s ease-in-out infinite; }
   }
+  .xm-stage:focus-visible circle:nth-of-type(1) { stroke: #2563eb; stroke-width: 3; }
 `;
 const MONO = { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" };
 
-const ExchangeMap: React.FC<{ dark?: boolean }> = ({ dark }) => {
+const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean }> = ({ dark, interactive }) => {
   const { t } = useI18n();
+  const [sel, setSel] = useState(0);
+  const pick = (i: number) => (e: React.KeyboardEvent | React.MouseEvent): void => {
+    if ("key" in e && e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault(); setSel(i);
+  };
   const C = dark ? NAVY : PAPER, k = dark ? K.navy : K.paper;
   // "d 0" → "day 0", "wk 1–2" → "wk 1–2" in the reader's language
   const fmtWk = (w: string): string => w.startsWith("d ") ? `${t("xm.day")} ${w.slice(2)}` : `${t("xm.wk")} ${w.slice(3)}`;
   return (
     <figure className={`relative m-0 overflow-hidden ${k.fig}`} style={{ background: C.ground }}>
       <style>{STYLE}</style>
-      <svg viewBox={`0 ${TOP} ${W} ${H + 30}`} className="block w-full" role="img" aria-label={t("lifecycle.title")}>
+      <svg viewBox={`0 ${TOP} ${W} ${H + 30}`} className="block w-full" role={interactive ? "group" : "img"} aria-label={t("lifecycle.title")}>
         <defs>
           <linearGradient id="xm-route" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0" stopColor={C.routeA} /><stop offset="0.6" stopColor={C.routeB} /><stop offset="1" stopColor={C.end} />
@@ -113,7 +125,9 @@ const ExchangeMap: React.FC<{ dark?: boolean }> = ({ dark }) => {
           const [x, y] = P[i]!;
           const last = i === STAGES.length - 1;
           return (
-            <g key={key}>
+            <g key={key} {...(interactive ? { role: "button", tabIndex: 0, "aria-pressed": sel === i, "aria-label": `${t(key)}, ${fmtWk(wk)}`, onClick: pick(i), onKeyDown: pick(i), className: "xm-stage cursor-pointer outline-none" } : {})}>
+              {interactive && <circle cx={x} cy={y} r="30" fill="transparent" />}
+              {interactive && sel === i && <circle cx={x} cy={y} r="24" fill="none" stroke={last ? C.end : C.ring} strokeWidth="2" />}
               <circle className="xm-ring" cx={x} cy={y} r="17" fill="none" stroke={last ? C.end : C.ring} strokeWidth="1" />
               <circle cx={x} cy={y} r="7.5" fill={last ? C.end : C.node} stroke={C.nodeEdge} strokeWidth="1.5" />
               <text x={x} y={side === "above" ? y - 42 : y + 40} textAnchor="middle" fill={C.text} fontSize="12.5" letterSpacing="2.6" stroke={C.halo} strokeWidth="5" paintOrder="stroke" strokeLinejoin="round" style={{ ...MONO, textTransform: "uppercase" }}>
@@ -126,10 +140,30 @@ const ExchangeMap: React.FC<{ dark?: boolean }> = ({ dark }) => {
       </svg>
       {/* on a phone the map labels are too small to read: the stages as a list */}
       <ol className={`grid grid-cols-2 gap-x-4 gap-y-2 border-t ${k.rule} px-4 py-4 font-mono text-[10px] uppercase tracking-[0.14em] sm:hidden`}>
-        {STAGES.map(([key, wk], i) => (
-          <li key={key} className={k.li}><span className={i === STAGES.length - 1 ? k.end : k.n}>{String(i + 1).padStart(2, "0")}</span> {t(key)} <span className={`block normal-case tracking-normal ${k.wk}`}>{fmtWk(wk)}</span></li>
-        ))}
+        {STAGES.map(([key, wk], i) => {
+          const body = <><span className={i === STAGES.length - 1 ? k.end : k.n}>{String(i + 1).padStart(2, "0")}</span> {t(key)} <span className={`block normal-case tracking-normal ${k.wk}`}>{fmtWk(wk)}</span></>;
+          return (
+            <li key={key} className={k.li}>
+              {interactive
+                ? <button type="button" aria-pressed={sel === i} onClick={() => setSel(i)} className={`w-full text-left uppercase ${sel === i ? "underline decoration-2 underline-offset-4" : ""} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600`}>{body}</button>
+                : body}
+            </li>
+          );
+        })}
       </ol>
+      {/* the selected stage: what happens, and the module that runs it */}
+      {interactive && (() => {
+        const [key, wk] = STAGES[sel]!;
+        return (
+          <div aria-live="polite" className={`grid gap-3 border-t ${k.rule} px-4 py-5 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-8 sm:px-6`}>
+            <div className={`font-mono text-[11px] uppercase tracking-[0.18em] ${k.n}`}>{String(sel + 1).padStart(2, "0")} · {t(key)} <span className={k.wk}>· {fmtWk(wk)}</span></div>
+            <p className={`text-[15px] leading-relaxed ${dark ? "text-blue-50/90" : "text-ink-800"}`}>{t(key.replace("lc.", "lcd."))}</p>
+            <Link to="/modules" className={`inline-flex items-center gap-3 whitespace-nowrap border px-4 py-2.5 text-[12px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${dark ? "border-white/50 text-white hover:bg-white hover:text-ink-900" : "border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white"}`}>
+              {STAGE_MODULE[key]} <span aria-hidden>→</span>
+            </Link>
+          </div>
+        );
+      })()}
 
       {/* corner tag */}
       <div aria-hidden className="absolute right-6 top-6 hidden items-center sm:flex">

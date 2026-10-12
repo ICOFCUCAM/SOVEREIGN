@@ -18,6 +18,29 @@ const usd = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$$
 const FIELD = "w-full border border-ink-900 bg-white px-4 py-3.5 text-[16px] text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600";
 const LABEL = "mb-2 block text-[13px] font-medium text-slate-700";
 
+/** The range on a scale from zero: the band is low → high, the tick is the
+ *  midpoint. The band grows into place once (not under reduced motion). */
+const RangeBar: React.FC<{ low: number; mid: number; high: number; muted?: boolean }> = ({ low, mid, high, muted }) => {
+  const [on, setOn] = useState(false);
+  useEffect(() => { const id = requestAnimationFrame(() => setOn(true)); return () => cancelAnimationFrame(id); }, [low, high]);
+  const max = high * 1.2, pc = (v: number): string => `${(v / max) * 100}%`;
+  return (
+    <div aria-hidden className="mt-6 max-w-[640px]">
+      <div className="relative h-2.5 bg-slate-200">
+        <div className={`absolute inset-y-0 origin-left motion-safe:transition-transform motion-safe:duration-700 motion-safe:ease-out ${muted ? "bg-slate-400" : "bg-blue-600"}`}
+          style={{ left: pc(low), width: `calc(${pc(high)} - ${pc(low)})`, transform: on ? "scaleX(1)" : "scaleX(0)" }} />
+        <div className="absolute -top-1.5 h-[22px] w-[3px] -translate-x-1/2 bg-ink-900" style={{ left: pc(mid) }} />
+      </div>
+      <div className="relative mt-2 h-9 font-mono text-[11px] tabular-nums text-slate-600">
+        <span className="absolute left-0">$0</span>
+        <span className="absolute -translate-x-1/2" style={{ left: pc(low) }}>{usd(low)}</span>
+        <span className="absolute -translate-x-1/2 font-semibold text-ink-900" style={{ left: pc(mid), top: "1.1rem" }}>{usd(mid)}</span>
+        <span className="absolute -translate-x-1/2" style={{ left: pc(high) }}>{usd(high)}</span>
+      </div>
+    </div>
+  );
+};
+
 const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
   const { t } = useI18n();
   const id = useId();
@@ -56,7 +79,7 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
   };
 
   return (
-    <section aria-labelledby={`${id}-h`} className="border-b border-slate-200 bg-[#f6f8fb]">
+    <section id={`ch-${n}`} aria-labelledby={`${id}-h`} className="border-b border-slate-200 bg-[#f6f8fb]">
       <div className="mx-auto w-full max-w-[1480px] px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
         <div className="border-t-4 border-double border-ink-900 pt-8">
           <Chapter n={n}>{t("qv.eyebrow")}</Chapter>
@@ -105,6 +128,7 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
                       {usd(result.low)} <span className="text-slate-400">–</span> {usd(result.high)}
                     </div>
                     <div className="mt-2 text-[13px] text-slate-600"><span className="font-semibold text-blue-700">{usd(result.mid)}</span> {t("qv.mid")}</div>
+                    <RangeBar low={result.low} mid={result.mid} high={result.high} />
                     <div className="mt-5 flex flex-wrap gap-2.5">
                       <Link to={`/console/intake${result.query}`} className="inline-flex items-center gap-5 bg-ink-900 px-5 py-3 text-[12px] font-semibold text-white transition hover:bg-ink-800">{t("qv.refine")} <span aria-hidden>→</span></Link>
                     </div>
@@ -129,7 +153,8 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
                   <div className="mt-3 font-editorial text-[clamp(2.8rem,6.4vw,6rem)] font-semibold leading-none tabular-nums tracking-[-0.03em] text-slate-500">
                     {usd(example.low)} <span aria-hidden className="text-slate-300">–</span> {usd(example.high)}
                   </div>
-                  <p className="mt-3 text-[14px] text-slate-600">{t("qv.example", { s: sectorLabel(EX.sector), r: EX.revenueUsd / 1e6, g: Math.round(EX.growthPct * 100) })}</p>
+                  <RangeBar low={example.low} mid={example.mid} high={example.high} muted />
+                  <p className="mt-4 text-[14px] text-slate-600">{t("qv.example", { s: sectorLabel(EX.sector), r: EX.revenueUsd / 1e6, g: Math.round(EX.growthPct * 100) })}</p>
                 </div>
               ) : (
                 <p className="text-[14px] text-slate-600">{t("qv.empty")}</p>

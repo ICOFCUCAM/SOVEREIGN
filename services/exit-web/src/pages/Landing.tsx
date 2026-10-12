@@ -5,6 +5,9 @@ import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SEC
 import { useI18n } from "../lib/i18n";
 import QuickValue from "../components/QuickValue";
 import Instrument from "../components/Instrument";
+import LedgerTable from "../components/LedgerTable";
+import CountUp from "../components/CountUp";
+import ChapterRail from "../components/ChapterRail";
 import ExchangeMap from "../components/ExchangeMap";
 import { Note, SourcesSection, type SourceId } from "../components/SourceNotes";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
@@ -41,8 +44,9 @@ const Landing: React.FC = () => {
   const h1 = heroLines(t("hero.h1"));
   return (
     <MarketingChrome active="home">
+      <ChapterRail />
       {/* ===== 01 · HERO — the deal atlas (Z1/Z2, after the owner's index(8).html, on the homepage spec) ===== */}
-      <section className="text-white" style={{ background: "linear-gradient(180deg,#030a15 0%,#06182E 70%,#05101f 100%)" }}>
+      <section id="ch-01" className="text-white" style={{ background: "linear-gradient(180deg,#030a15 0%,#06182E 70%,#05101f 100%)" }}>
         <div className={`${WRAP} pt-8`}>
           <div className="flex justify-between gap-6 border-b border-white/20 pb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-100/75">
             <span>{t("hero.eyebrow")}</span><span className="text-right">{t("hero.asof")} {MARKET_INDEX_FMT.asOf}</span>
@@ -63,7 +67,7 @@ const Landing: React.FC = () => {
             </div>
           </div>
           {/* 01 / discover the field — the sale process as a route across the market */}
-          <ExchangeMap dark />
+          <ExchangeMap dark interactive />
           {/* the proof figures, as the homepage has always set them: serif numerals, a label, the source note */}
           <div className="grid grid-cols-3">
             {[
@@ -72,7 +76,7 @@ const Landing: React.FC = () => {
               [HISTORY_FMT.disclosedValue, t("ribbon.value")],
             ].map(([v, l], i) => (
               <div key={l} className={`py-6 pr-3 ${i ? "border-l border-white/15 pl-3 sm:pl-5" : ""}`}>
-                <div className="font-editorial text-[clamp(1.6rem,2.8vw,2.6rem)] font-semibold leading-none tracking-[-0.02em]">{v}</div>
+                <div className="font-editorial text-[clamp(1.6rem,2.8vw,2.6rem)] font-semibold leading-none tracking-[-0.02em]"><CountUp value={v} /></div>
                 <div className="mt-2 text-[12.5px] text-blue-100/75">{l}<Note n={([1, 2, 3] as SourceId[])[i]} first dark /></div>
               </div>
             ))}
@@ -81,7 +85,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ===== 02 · THE EXCHANGE — the screen installed in the trading hall ===== */}
-      <section aria-labelledby="hall-h">
+      <section id="ch-02" aria-labelledby="hall-h">
         <Instrument head={
           <div className={`${WRAP} relative pb-16 pt-20 text-white`}>
             <Chapter n="02" dark>{t("hall.eyebrow")}</Chapter>
@@ -125,7 +129,7 @@ const Landing: React.FC = () => {
       <QuickValue />
 
       {/* ===== 04 · THE THESIS — one statement, set like a front page ===== */}
-      <section className="border-b border-slate-200 bg-[#f6f8fb]">
+      <section id="ch-04" className="border-b border-slate-200 bg-[#f6f8fb]">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <Chapter n="04">{t("loss.eyebrow")}</Chapter>
           <h2 className="mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
@@ -157,7 +161,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ===== 05 · THE TRANSACTION RECORD — the ledger ===== */}
-      <section className="border-b border-slate-200 bg-white">
+      <section id="ch-05" className="border-b border-slate-200 bg-white">
         <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
           <div>
             <Chapter n="05">{t("rec.eyebrow")}</Chapter>
@@ -198,30 +202,8 @@ const Landing: React.FC = () => {
           </div>
 
           <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
-          {/* the ledger table */}
-          <div role="region" aria-label="Earlier disclosed acquisitions" tabIndex={0} className="min-w-0 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
-            <table className="w-full min-w-[820px] text-left text-[13px]">
-              <caption className="pb-3 text-left text-[12.5px] text-slate-600">Earlier entries, newest first</caption>
-              <thead>
-                <tr className="border-y border-ink-900 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">
-                  {["Announced", "Target", "Acquirer", "Sector", "Value", "Status", "Source"].map((h) => <th key={h} scope="col" className={`py-2.5 pr-4 font-semibold ${h === "Value" ? "text-right" : ""}`}>{h}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                {LEDGER_ROWS.slice(3).map((r) => (
-                  <tr key={r.date + r.target} className="border-b border-slate-200">
-                    <td className="whitespace-nowrap py-2.5 pr-4 font-mono tabular-nums text-slate-600"><time dateTime={r.date}>{r.date}</time></td>
-                    <th scope="row" className="py-2.5 pr-4 font-editorial text-[15px] font-semibold text-ink-900">{r.target}</th>
-                    <td className="py-2.5 pr-4 text-ink-800">{r.buyer}</td>
-                    <td className="py-2.5 pr-4 text-slate-600">{r.sector}</td>
-                    <td className="py-2.5 pr-4 text-right font-mono font-semibold tabular-nums text-ink-900">{r.value}</td>
-                    <td className="py-2.5 pr-4 font-mono text-[12px] font-semibold" style={{ color: r.statusColor }}>{r.status}</td>
-                    <td className="py-2.5 font-mono text-[11px] text-slate-600">{r.sources.map((x) => `${x.kind} ${x.ref}`).join(" · ")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* the ledger table: searchable, filterable, sortable */}
+          <LedgerTable />
           <aside aria-labelledby="ledger-read" className="self-start border-t-4 border-double border-ink-900 pt-3 lg:sticky lg:top-24">
             <h3 id="ledger-read" className="font-editorial text-[18px] font-semibold text-ink-900">{t("ledger.read")}</h3>
           {/* confidence-tier register */}
@@ -258,7 +240,7 @@ const Landing: React.FC = () => {
       </section>
 
       {/* ===== 06 · THE MODULES — the site's own catalogue, live engine stats (Z3) ===== */}
-      <section aria-labelledby="mods-h" className="border-b border-slate-200 bg-white text-ink-900">
+      <section id="ch-06" aria-labelledby="mods-h" className="border-b border-slate-200 bg-white text-ink-900">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="border-t-4 border-double border-ink-900 pt-8">
             <Chapter n="06">{t("mods.eyebrow")}</Chapter>
@@ -280,11 +262,34 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* ===== 07 · THE NEXT MOVE — the back page ===== */}
-      <section className="bg-white">
+      {/* ===== 07 · QUESTIONS — what founders ask first, answered from the Pricing and Platform pages ===== */}
+      <section id="ch-07" aria-labelledby="faq-h" className="border-b border-slate-200 bg-[#f6f8fb] text-ink-900">
+        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
+          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-[6vw]">
+            <div className="border-t-4 border-double border-ink-900 pt-8">
+              <Chapter n="07">{t("faq.eyebrow")}</Chapter>
+              <h2 id="faq-h" className="mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} /></h2>
+            </div>
+            <div className="border-t border-ink-900">
+              {[1, 2, 3, 4, 5, 6].map((k) => (
+                <details key={k} className="group border-b border-slate-300">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 [&::-webkit-details-marker]:hidden">
+                    <span className="font-editorial text-[clamp(1.15rem,1.7vw,1.45rem)] font-semibold">{t(`faq.q${k}`)}</span>
+                    <span aria-hidden className="font-mono text-[20px] leading-none text-blue-600 transition-transform group-open:rotate-45">+</span>
+                  </summary>
+                  <p className="max-w-[60ch] pb-6 text-[15px] leading-relaxed text-slate-600">{t(`faq.a${k}`)}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 08 · THE NEXT MOVE — the back page ===== */}
+      <section id="ch-08" className="bg-white">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="border-t-4 border-double border-ink-900 pt-8">
-            <Chapter n="07">{t("cta.eyebrow")}</Chapter>
+            <Chapter n="08">{t("cta.eyebrow")}</Chapter>
             <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1fr_auto]">
               <h2 className="font-editorial text-[clamp(3rem,7vw,7rem)] font-semibold leading-[0.94] tracking-[-0.05em] text-ink-900"><Editorial text={t("cta.h2")} /></h2>
               <div className="flex flex-wrap gap-2.5 lg:flex-col lg:items-stretch">
