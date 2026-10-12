@@ -24,6 +24,7 @@ interface Tier {
   readonly lockedTeaser?: string;
   readonly cta: string;
   readonly highlight?: boolean;
+  readonly highlightLabel?: string;
   readonly tone?: "neutral" | "prep" | "mandate";
 }
 
@@ -36,14 +37,14 @@ const FOUNDER_TIERS: readonly Tier[] = [
       "Company profile & anonymous marketplace listing",
       "Read-only valuation estimate & exit readiness score",
       "Buyer demand indicator & acquisition radar visibility",
-      "Receive buyer interest, acquisition signals & mandate alerts",
+      "Receive buyer interest & acquisition signals in your Inbox",
     ],
     restrictions: [
       "Cannot initiate outreach or contact buyers",
       "Cannot open an NDA process or see buyer identities",
       "Cannot launch a transaction — upgrade to engage",
     ],
-    lockedTeaser: "4 buyers are a strong acquisition match for your company.",
+    lockedTeaser: "Buyers that match your company are shown once you list.",
     cta: "List my company free",
   },
   {
@@ -61,16 +62,16 @@ const FOUNDER_TIERS: readonly Tier[] = [
     cta: "Prepare my company",
   },
   {
-    key: "mandate", badge: "Most selected", name: "Active Mandate", price: "$995", priceSub: "/ mo + 2.5% success fee",
-    tone: "mandate", highlight: true,
+    key: "mandate", badge: "Active Mandate", name: "Active Mandate", price: "$995", priceSub: "/ mo + 2.5% success fee",
+    tone: "mandate", highlight: true, highlightLabel: "Recommended for a live process",
     purpose: "Run a live acquisition process",
     headline: "The execution desk. ExitOS earns the success fee only when your deal closes — our incentive is your outcome.",
     features: [
-      "Buyer outreach & NDA automation",
+      "Buyer outreach drafts & NDA requests",
       "Buyer communication & acquisition intelligence",
-      "AI negotiation, bid management & process management",
+      "Rule-based negotiation (Bid Room), bid & process management",
       "Due-diligence workflow & data room",
-      "Closing Center — cap-table-aware net-to-founder math",
+      "Closing Center checklist",
     ],
     cta: "Launch a mandate",
   },
@@ -105,10 +106,10 @@ const COMPARISON: readonly CompRow[] = [
   { capability: "Buyer Discovery", banker: "Personal network", exitos: `${ENGINE_COUNTS.registryFirms}+ mandate Buyer Graph` },
   { capability: "Buyer Registry", banker: "Private rolodex", exitos: "Structured, source-referenced" },
   { capability: "CIM Production", banker: "2–4 weeks", exitos: "Generated in minutes" },
-  { capability: "NDA Automation", banker: "Manual", exitos: "Automated" },
+  { capability: "NDA Requests", banker: "Manual", exitos: "Request & register in one place" },
   { capability: "Acquisition Intelligence", banker: "No", exitos: "Intent & appetite signals" },
-  { capability: "Negotiation Engine", banker: "No", exitos: "AI scoring & counters" },
-  { capability: "Real-Time Buyer Signals", banker: "No", exitos: "Live radar" },
+  { capability: "Negotiation Engine", banker: "No", exitos: "Rule-based scoring & counters" },
+  { capability: "Buyer Signals", banker: "No", exitos: "Registry radar (snapshot)" },
   { capability: "Data Room", banker: "Third-party tool", exitos: "Built in" },
   { capability: "Success Fee", banker: "3–10% of deal", exitos: "2.5%, paid only on close" },
 ];
@@ -130,7 +131,7 @@ const BUYER_TIERS: readonly Tier[] = [
   },
   {
     key: "buyer-premium", badge: "Buyer Premium", name: "Premium Buyer Access", price: "$2,499", priceSub: "/ month",
-    tone: "mandate", highlight: true,
+    tone: "mandate", highlight: true, highlightLabel: "Active acquirer tier",
     purpose: "First look + outbound",
     headline: "Active acquirer tier. Matched introductions before public listing.",
     features: ["Everything in Buyer Access", "Outbound matched introductions before public listing", "Priority NDA processing", "Saved searches + matching alerts", "Quarterly market briefings", "Dedicated buyer-relationship lead"],
@@ -142,7 +143,7 @@ const Pricing: React.FC = () => {
   const nav = useNavigate();
   return (
     <MarketingChrome active="pricing">
-      <PageHero chapter="Select a mandate" title="Priced like a bank. Paid when you close."
+      <PageHero chapter="Select a mandate" title="Priced like a bank. Success fee only when you close."
         deck={<>ExitOS is an acquisition exchange, not software. List for free and get discovered; prepare for a one-time fee;
           engage a mandate where <span className="font-semibold text-ink-800">ExitOS earns a success fee only when your
           deal closes.</span> Our incentive is your outcome.</>}
@@ -195,7 +196,7 @@ const Pricing: React.FC = () => {
             <Chapter n="04">Traditional banker vs ExitOS</Chapter>
             <div>
               <h2 className={`${MK.h2} text-ink-900`}><Editorial text="The same engagement. A different machine." /></h2>
-              <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-slate-600">A banker brings a rolodex and a deck. ExitOS brings a Buyer Graph, a traceable valuation framework and an execution desk that runs around the clock — at a fraction of the fee.</p>
+              <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-slate-600">A banker brings a rolodex and a deck. ExitOS brings a Buyer Graph, a traceable valuation framework and an execution desk — at a fraction of the fee.</p>
             </div>
           </div>
           <div className="mt-12 overflow-x-auto border-y border-ink-900 lg:ml-[calc(27.5%+3vw)]">
@@ -269,7 +270,7 @@ const TierCard: React.FC<{ tier: Tier; onAct: () => void }> = ({ tier, onAct }) 
     <div className={`flex flex-col border-t-4 bg-white p-5 sm:p-6 ${t.top}`}>
       <div className="flex items-center justify-between gap-2">
         <span className={`font-mono text-[10px] font-semibold uppercase tracking-[0.2em] ${t.badge}`}>{tier.badge}</span>
-        {tier.highlight && <span className="bg-blue-600 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-white">Most selected</span>}
+        {tier.highlight && tier.highlightLabel && <span className="bg-blue-600 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-white">{tier.highlightLabel}</span>}
       </div>
       <h3 className="mt-4 font-editorial text-[24px] font-semibold text-ink-900">{tier.name}</h3>
       <div className="mt-2 flex items-baseline gap-1.5">

@@ -149,7 +149,7 @@ Measured (Chromium, 1440/390, after M1/M7 chrome): 0 errors, `h1` 1, no overflow
 | R1 | **Design: the three pages on the skeleton.** | Rebuild each page with the homepage system: editorial-serif `h1` (last line or word in the accent italic), mono chapter labels ("01 / …"), hairline grids instead of rounded cards, square buttons, the navy band where a page has a dark block. Content and links verbatim; `MODULE_FACTS`, prices, tiers, and every `/console`, `/pricing`, `/modules`, `/platform` entry point unchanged. | ☑ `14735c26` |
 | R2 | **Platform overclaims.** | "live exchange" → "exchange"; "one audit trail" → "one record"; Institutional security pillar → "Data rooms and records — a document checklist with completeness per package, NDA-gated identity, and your deal actions recorded."; Autonomous execution → "Agents walk through sourcing, outreach, data room, negotiation and closing; each step waits for your approval, and nothing is sent for you."; "the live deal room" → "the deal room"; "watch the agents work" → "walk through the agents". | ☑ `aae3a406` |
 | R3 | **Modules overclaims.** | "recomputed live" → "recomputed from your figures"; Outreach "run by the banker agent" → "drafted by the banker for you to send"; Data Room "Permissioned" → "A document checklist"; Closing Center → "The closing checklist: signatures, escrow and filings, item by item."; Radar "Live sector signals" → "Sector signals from the registry"; Deal Room "once trust and NDA clear" → "for companies that accept your NDA request". | ☑ `b5825acd` |
-| R4 | **Pricing not aligned with Upgrade; fixed teaser number.** | Tier texts as Upgrade (Page 41 G2): "Recommended for a live process", "Buyer outreach drafts & NDA requests", "Rule-based negotiation (Bid Room), bid & process management", "Closing Center checklist", "Receive buyer interest in your Inbox"; `h1` → "Priced like a bank. Success fee only when you close."; teaser → "Buyers that match your company are shown once you list." (no fixed number); table "NDA requests & register", "Rule-based scoring & counters", "Buyer signals — Registry radar (snapshot)"; "runs around the clock" removed. Buyer tiers unchanged (open decision). | ☐ |
+| R4 | **Pricing not aligned with Upgrade; fixed teaser number.** | Tier texts as Upgrade (Page 41 G2): "Recommended for a live process", "Buyer outreach drafts & NDA requests", "Rule-based negotiation (Bid Room), bid & process management", "Closing Center checklist", "Receive buyer interest in your Inbox"; `h1` → "Priced like a bank. Success fee only when you close."; teaser → "Buyers that match your company are shown once you list." (no fixed number); table "NDA requests & register", "Rule-based scoring & counters", "Buyer signals — Registry radar (snapshot)"; "runs around the clock" removed. Buyer tiers unchanged (open decision). | ☑ R4-commit |
 | R5 | **Contrast** on Platform (6) and Pricing (19). | Shade steps within the same palette (as M7). Target: axe 0 on all three at 1440 and 390. | ☐ |
 
 ---
@@ -305,6 +305,20 @@ No page section was removed.
 
 Kept: "Access Requests — Request NDA-gated identity and packages, tracked end to end" (the buyer's own requests and statuses, Page 25).
 *Verification:* `tsc -b`, eslint clean · Chromium `/modules`: 0 "live", "permissioned", "run by", "wire"; "gated" only in "NDA-gated identity" (Access Requests and the footer badge); 1440/390: 0 errors, `h1` 1, no overflow.
+
+### R4 — Pricing aligned with Upgrade; fixed teaser number
+*Closed by:* `pages/Pricing.tsx` (text only; prices, tiers, fee terms and every button target unchanged):
+- **`h1`.** "Priced like a bank. **Paid when you close.**" → "Priced like a bank. Success fee only when you close." The $995 a month is paid regardless; only the 2.5% fee is on close (as Upgrade, Page 41 G2).
+- **Listed Founder.** "… acquisition signals & **mandate alerts**" → "Receive buyer interest & acquisition signals in your Inbox". Teaser "**4 buyers** are a strong acquisition match for your company." (a fixed number) → "Buyers that match your company are shown once you list."
+- **Active Mandate.**
+  - Badge "Most selected" → "Active Mandate". The highlight now reads "Recommended for a live process", as on Upgrade.
+  - Features: "Buyer outreach & NDA **automation**" → "Buyer outreach drafts & NDA requests"; "**AI** negotiation, bid management & process management" → "Rule-based negotiation (Bid Room), bid & process management"; "Closing Center — cap-table-aware **net-to-founder math**" → "Closing Center checklist".
+- **Buyer Premium highlight.** The highlight label is now per tier (`highlightLabel`, additive). Buyer Premium reads "Active acquirer tier", taken from its own headline, instead of the unverified popularity claim "Most selected".
+- **Comparison table.** "NDA Automation — Automated" → "NDA Requests — Request & register in one place"; "Negotiation Engine — **AI** scoring & counters" → "Rule-based scoring & counters"; "**Real-Time** Buyer Signals — **Live** radar" → "Buyer Signals — Registry radar (snapshot)".
+- **Intro.** "an execution desk that **runs around the clock**" → "an execution desk".
+
+**Not changed (open decision).** The buyer tiers ($299 and $2,499 a month) and their offers, which contradict Upgrade's "Buyer pricing is not published yet".
+*Verification:* `tsc -b`, eslint clean · `vitest` 218/218 · Chromium `/pricing`: 0 "Most selected", "AI", "automation", "net-to-founder", "around the clock" or "4 buyers"; "live" only in "a live process" (a real sale process, the term Upgrade uses); 1440/390: 0 errors, `h1` 1, no overflow.
 
 ---
 
