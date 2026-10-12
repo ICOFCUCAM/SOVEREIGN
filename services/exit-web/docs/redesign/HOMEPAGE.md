@@ -369,7 +369,7 @@ Self-critique of the homepage after Z3 (1440 px: 8,839 px tall; 390 px: 12,560 p
 |---|---|---|---|
 | AA1 | The lifecycle is told twice: the hero map shows the eight stages with typical weeks, and section 06 repeats them as a navy grid. | The map becomes the lifecycle: its caption carries "The acquisition lifecycle · signal → closing" and the "Typical timeline" source note (6). Section 06 is removed. | open |
 | AA2 | The map implies a geography that does not exist (Signal in North America, Closing in Australia). Real regions are not available: the registry's `country` field is empty for 3,263 of 6,311 events and mixes formats, and the file (3.4 MB) is too large for the client. | Continents removed. The horizontal position becomes time: each stage sits at its typical week (square-root scale so the first weeks do not collide), in order from left to right; the vertical lanes only separate labels. | closed `01ce06c1` |
-| AA3 | Three numbering systems: "No. 01" in the topline, "01 / Discover the field · 02 / Trace the path" and "/ 001" on the map, and chapters 02–07. "02 / Trace the path" and "02 / The modules" sit on one screen. | Only chapter numbers remain: "No. 01", the map's 01/02 labels and "/ 001" are removed. | open |
+| AA3 | Three numbering systems: "No. 01" in the topline, "01 / Discover the field · 02 / Trace the path" and "/ 001" on the map, and chapters 02–07. "02 / Trace the path" and "02 / The modules" sit on one screen. | Only chapter numbers remain: "No. 01", the map's 01/02 labels and "/ 001" are removed. | closed `ce7b3cc3` |
 | AA4 | The board — the real product — starts two screens down, behind an illustrative diagram and a module list. | New order: 01 hero · 02 the exchange (hall + board) · 03 value your company · 04 thesis · 05 ledger · 06 the modules · 07 back page. | open |
 | AA5 | Section 02's headline is the Modules page's title, word for word. The modules shown repeat figures shown elsewhere (31 mandates, $72.5B, 61 deals). Its copy is English-only in FR/ES. | Own headline ("The desk behind the screen."), four founder modules whose stats appear nowhere else on the page (Exit Readiness, Valuation Engine, Documents, Data Room), descriptions and stats in EN/FR/ES with the numbers taken from the engines. | open |
 | AA6 | Figures repeat: 21 mandates deploying (hero + board ribbon), 31 mandates and 21 jurisdictions (hero, thesis table, board), 61 recorded deals (three times in the ledger), 6,311 events (hero + ledger footnote). | Each figure once outside the board: the hero keeps three figures (6,311 · 31 · $379.1B); the ledger keeps its masthead count and drops the two repeats; the thesis table states the run without repeating the registry counts. The sources list keeps its method figures (it is the reference). | open |
@@ -804,6 +804,9 @@ Continents removed from the exchange map; stages placed by typical week on a squ
 
 ### AA8 — closed 432bda73
 The exchange map is set on paper (white ground, ink grid and labels, blue-600/700 route, emerald-600 close), so the trading hall is the page's one dark moment; LANDMASS returns to module scope. Verified: tsc, eslint, vitest 243/243; rendered at 1440 and 390, no overflow or errors.
+
+### AA3 — closed ce7b3cc3
+Removed the topline's "No. 01", the map's "01 / Discover the field" and "02 / Trace the path", and "/ 001" from the map tag (keys xm.discover and xm.trace deleted, EN/FR/ES); only chapter numbers remain. Verified: tsc, eslint, vitest 243/243.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
