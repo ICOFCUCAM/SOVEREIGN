@@ -272,9 +272,8 @@ export const INSTRUMENT_CSS = `
   .hx-pulse,.hx-flare{transform-box:fill-box;transform-origin:center}
   /* the still state (reduced motion): the outcome indicator rests at its last stage */
   .hx-bead{transform:translateY(-100%)}
-  /* the map's rim dissolves, and its upper part gives way to the dial's graduations */
-  .hx-map{position:absolute;--m:radial-gradient(circle,#000 58%,transparent 71%),linear-gradient(180deg,transparent 6%,#000 40%);
-    -webkit-mask-image:var(--m);mask-image:var(--m);-webkit-mask-composite:source-in;mask-composite:intersect}
+  /* the map is a whole disc; only its outermost rim softens */
+  .hx-map{position:absolute;-webkit-mask-image:radial-gradient(circle,#000 64%,transparent 71%);mask-image:radial-gradient(circle,#000 64%,transparent 71%)}
   .hx-map-lit{-webkit-mask-image:radial-gradient(circle at 26% 30%,#000,transparent 52%);mask-image:radial-gradient(circle at 26% 30%,#000,transparent 52%)}
   /* depth on pointer: each layer moves by its own factor; the core does not move */
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference){

@@ -98,7 +98,8 @@ const HeroExchange: React.FC = () => {
             <div className="h-[min(78vw,330px)] w-[min(78vw,330px)] sm:h-[420px] sm:w-[420px] lg:h-[min(29.4vw,540px)] lg:w-[min(29.4vw,540px)]"><Dial active={cap} onPoint={setCap} labels={labels} /></div>
             {/* the signature, over the polar map */}
             <div className="relative flex flex-col items-center" style={{ fontSize: "clamp(3rem, 5.4vw, 6rem)" }}>
-              <PolarMap className="left-1/2 top-[42%] h-[3.1em] w-[3.1em] -translate-x-1/2 -translate-y-1/2" />
+              {/* the map sits whole behind the wordmark, centred on it (a sibling, clear of the wordmark's filter) */}
+              <PolarMap className="left-1/2 top-[0.55em] h-[2.6em] w-[2.6em] -translate-x-1/2 -translate-y-1/2" />
               <div className="relative mt-[0.05em] font-editorial font-medium leading-none tracking-[-0.025em] text-transparent"
                 style={{ backgroundImage: "linear-gradient(180deg, #F2E9DA 0%, #DCCDB3 50%, #B39E7E 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", filter: "drop-shadow(0 0 22px rgba(232,220,200,0.14))" }}>
                 Exit<span className="italic">OS</span>
