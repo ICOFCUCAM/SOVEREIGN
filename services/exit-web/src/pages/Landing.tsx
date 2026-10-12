@@ -36,17 +36,38 @@ const Landing: React.FC = () => {
     <MarketingChrome active="home">
       {/* ===== 01 · HERO — editorial headline + the command board ===== */}
       <section className="relative overflow-hidden border-b border-slate-200">
-        {/* the trading-hall photograph, washed to the page ground */}
-        <div className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#f6f8fb] from-30% via-[#f6f8fb]/90 via-55% to-[#f6f8fb]/70" aria-hidden />
+        {/* trading-hall photograph as the hero environment */}
+        <div className="pointer-events-none absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
+        {/* architectural framing: ceiling light grid + glass-wall mullions +
+            floor sheen, to read as an exchange hall rather than a stock office */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-40" aria-hidden
+          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0 2px, transparent 2px 96px)", maskImage: "linear-gradient(to bottom, #000, transparent)", WebkitMaskImage: "linear-gradient(to bottom, #000, transparent)" }} />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-2/3 opacity-[0.12]" aria-hidden
+          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(40,70,110,0.6) 0 1px, transparent 1px 140px), repeating-linear-gradient(0deg, rgba(40,70,110,0.4) 0 1px, transparent 1px 180px)" }} />
+        {/* sovereign data layer — a near-invisible transaction heat field rising
+            from the floor of the hall; reads as depth, not decoration */}
+        <div className="pointer-events-none absolute bottom-0 right-0 h-2/3 w-3/5 opacity-[0.07]" aria-hidden
+          style={{
+            backgroundImage: "repeating-linear-gradient(90deg, rgba(56,130,246,0.9) 0 10px, transparent 10px 34px)",
+            maskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 80%)",
+            WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 80%)",
+          }} />
+        {/* wash: strong on the left for the headline, light on the right so the
+            hall (desks, analysts, windows) stays visible around the board. */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/92 from-5% via-white/45 via-40% to-white/5" aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#eef2f7] via-[#eef2f7]/70 to-transparent" aria-hidden />
+        {/* floor sheen + ambient light the board emits onto the floor */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 opacity-50" aria-hidden style={{ background: "linear-gradient(to top, rgba(255,255,255,0.5), transparent)" }} />
+        <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-48 w-[48%] rounded-[50%] opacity-25 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.22), rgba(70,150,220,0) 70%)" }} aria-hidden />
+
         <div className={`${WRAP} relative pb-12 pt-10 lg:pb-14 lg:pt-14`}>
           <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
             <span>{t("hero.eyebrow")}</span>
             <span className="text-blue-600">Registry snapshot · as of {MARKET_INDEX_FMT.asOf}</span>
           </div>
-          <div className="mt-9 grid items-end gap-10 lg:grid-cols-[1fr_1.08fr] lg:gap-12">
+          <div className="mt-9 grid items-center gap-8 lg:grid-cols-[0.9fr_1.3fr]">
             <div className="min-w-0">
-              <h1 className="font-editorial text-[clamp(3.2rem,6.4vw,6.6rem)] font-semibold leading-[0.9] tracking-[-0.045em] text-ink-900">
+              <h1 className="font-editorial text-[clamp(3rem,5vw,5.1rem)] font-semibold leading-[0.9] tracking-[-0.045em] text-ink-900">
                 {h1.map((l, i) => (
                   <span key={i} className={`block ${i === 1 ? "pl-[8%]" : ""} ${i === h1.length - 1 ? "italic text-blue-600" : ""}`}>{l}</span>
                 ))}
@@ -55,7 +76,7 @@ const Landing: React.FC = () => {
                 <span className="pt-1 font-mono text-[11px] text-blue-600">01—</span>
                 <div>
                   <p className="font-serif text-[18px] font-semibold leading-snug text-ink-900">{t("hero.sub")}</p>
-                  <p className="mt-3 text-[14.5px] leading-relaxed text-slate-600">{t("hero.body")}</p>
+                  <p className="mt-3 text-[14.5px] leading-relaxed text-ink-800">{t("hero.body")}</p>
                 </div>
               </div>
               <div className="mt-7 flex flex-wrap gap-2.5 sm:ml-[80px]">
@@ -64,10 +85,22 @@ const Landing: React.FC = () => {
               </div>
             </div>
 
-            {/* ---- the acquisition-exchange display (the hero instrument) ---- */}
-            <div className="min-w-0" data-board="command">
-              <div className="relative p-2.5" style={{ background: "linear-gradient(145deg,#1c2c44,#0a1626)", boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.10)" }}>
-                <div className="mb-1.5 flex items-center justify-between gap-3 bg-black/25 px-3 py-1.5">
+          {/* ---- MOUNTED ACQUISITION-EXCHANGE DISPLAY ---- */}
+          {/* pushed right + up, clear of the headline, with a light floor shadow */}
+          <div className="min-w-0 lg:translate-x-16 lg:-translate-y-6" style={{ perspective: "2000px" }}>
+            <div className="relative">
+              {/* structural mount / bezel behind the screen — the 3D mount
+                  rotation applies only at lg+; phones get the flat board */}
+              <div
+                className="ex-bezel relative rounded-[20px] p-2.5"
+                style={{
+                  background: "linear-gradient(145deg,#1c2c44,#0a1626)",
+                  boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                }}
+              >
+                {/* Bloomberg-style exchange ribbon */}
+                <div className="mb-1.5 flex items-center justify-between gap-3 rounded-md bg-black/25 px-3 py-1.5">
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/90">ExitOS Acquisition Exchange</span>
                     <span className="hidden items-center gap-1 rounded-sm bg-emerald-400/15 px-1.5 py-0.5 sm:inline-flex">
@@ -85,9 +118,24 @@ const Landing: React.FC = () => {
                     <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live</span>
                   </div>
                 </div>
+                {/* live deal-activity ticker (motion layer) */}
                 <CommandBoard />
               </div>
+
+              {/* polished-floor reflection of the screen (lg+ only) */}
+              <div
+                aria-hidden
+                className="ex-reflection pointer-events-none absolute inset-x-0 top-full hidden h-28 overflow-hidden lg:block"
+                style={{
+                  opacity: 0.07,
+                  filter: "blur(4px)",
+                  WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
+                  maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
+                  background: "linear-gradient(180deg,#0a1626,#08203B)",
+                }}
+              />
             </div>
+          </div>
           </div>
 
           {/* hero index rule — the proof ribbon (real figures) */}
