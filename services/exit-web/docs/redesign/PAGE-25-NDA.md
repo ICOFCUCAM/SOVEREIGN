@@ -5,7 +5,7 @@
 | Route | `/console/nda` |
 | Component | `src/pages/Nda.tsx` (331 lines) |
 | NAV | founder: "NDA Vault", **Active Mandate**; buyer: "Access Requests", group Deals, **Pro** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `79fe79c`)
 
@@ -71,3 +71,13 @@ Founder Active Mandate: `h1` none · axe empty-table-header ×1 · **overflow at
 ### G4 — Demo NDAs unlabelled
 *Closed by:* `pages/Nda.tsx`: **Demo data** badge and "A sample NDA portfolio for the demo company (Helios Freight, Inc.), plus any NDAs you draft in this session." (the disclosing party is the demo company's; the intake has no NDAs).
 *Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium: DEMO DATA badge and line · free (Upgrade page) and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · 0 "live" words.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium founder (Active Mandate) and buyer (Pro) 1440/390: 0 errors, `h1` 1, no overflow (was overflowing), axe 0, all tab stops with visible focus · templates/issue dialogs and an opened NDA checked · buyer sees only their own requests · free: Upgrade page · 0 "live" words.
+
+## Known issues
+- NDA register is a sample portfolio; drafted NDAs live only for the session and are not sent.
+- The buyer request list with real data was not exercised (would write to the connected backend) — NOT VERIFIED.
+- No data-room gating exists (stated on the page).
