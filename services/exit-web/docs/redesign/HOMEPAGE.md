@@ -146,7 +146,7 @@ Measured (Chromium, 1440/390, after M1/M7 chrome): 0 errors, `h1` 1, no overflow
 ## Gap register — Marketing routes
 | # | Gap | Fix (colours locked; no block removed) | Status |
 |---|---|---|---|
-| R1 | **Design: the three pages on the skeleton.** | Rebuild each page with the homepage system: editorial-serif `h1` (last line or word in the accent italic), mono chapter labels ("01 / …"), hairline grids instead of rounded cards, square buttons, the navy band where a page has a dark block. Content and links verbatim; `MODULE_FACTS`, prices, tiers, and every `/console`, `/pricing`, `/modules`, `/platform` entry point unchanged. | ☐ |
+| R1 | **Design: the three pages on the skeleton.** | Rebuild each page with the homepage system: editorial-serif `h1` (last line or word in the accent italic), mono chapter labels ("01 / …"), hairline grids instead of rounded cards, square buttons, the navy band where a page has a dark block. Content and links verbatim; `MODULE_FACTS`, prices, tiers, and every `/console`, `/pricing`, `/modules`, `/platform` entry point unchanged. | ☑ R1-commit |
 | R2 | **Platform overclaims.** | "live exchange" → "exchange"; "one audit trail" → "one record"; Institutional security pillar → "Data rooms and records — a document checklist with completeness per package, NDA-gated identity, and your deal actions recorded."; Autonomous execution → "Agents walk through sourcing, outreach, data room, negotiation and closing; each step waits for your approval, and nothing is sent for you."; "the live deal room" → "the deal room"; "watch the agents work" → "walk through the agents". | ☐ |
 | R3 | **Modules overclaims.** | "recomputed live" → "recomputed from your figures"; Outreach "run by the banker agent" → "drafted by the banker for you to send"; Data Room "Permissioned" → "A document checklist"; Closing Center → "The closing checklist: signatures, escrow and filings, item by item."; Radar "Live sector signals" → "Sector signals from the registry"; Deal Room "once trust and NDA clear" → "for companies that accept your NDA request". | ☐ |
 | R4 | **Pricing not aligned with Upgrade; fixed teaser number.** | Tier texts as Upgrade (Page 41 G2): "Recommended for a live process", "Buyer outreach drafts & NDA requests", "Rule-based negotiation (Bid Room), bid & process management", "Closing Center checklist", "Receive buyer interest in your Inbox"; `h1` → "Priced like a bank. Success fee only when you close."; teaser → "Buyers that match your company are shown once you list." (no fixed number); table "NDA requests & register", "Rule-based scoring & counters", "Buyer signals — Registry radar (snapshot)"; "runs around the clock" removed. Buyer tiers unchanged (open decision). | ☐ |
@@ -268,6 +268,19 @@ These strings sit beside the page's other hard-coded English data constants (the
 - No preference: CSS animations outside the board 0, inside 6; SMIL map pulses 8.
 - **Reduced motion: outside the board 0 and 0**; inside the board 6 (as built).
 - Before this work (baseline), reduced motion still ran 10 animations at 1440.
+
+### R1 — The three pages on the skeleton
+*Closed by:*
+- `components/MarketingChrome.tsx`: shared `MK` classes (wrap, section, `h1`/`h2` scale, square button, navy) and `PageHero`, which has the "01 / …" chapter, the editorial `h1` (accent on the last line or word), the "01—" deck and the actions.
+- `pages/Platform.tsx`: hero; "02 / Infrastructure" with the 4 pillars as a hairline grid; "03 / End to end" with the 6-step flow on the navy band; "04 / The next move" CTA.
+- `pages/Modules.tsx`: hero; "02 / Founder side" with 9 modules in a hairline 3-column grid, each stat as a mono line; "03 / Buyer side" with 4 modules on navy, plus the two buttons.
+- `pages/Pricing.tsx`: hero; "02 / How ExitOS gets paid" (5 steps); "03 / The mandate ladder" with the 4 tier panels in a hairline grid (the highlighted tier keeps a blue top rule and badge) and the success-fee note; "04 / Traditional banker vs ExitOS" as a hairline table with row headers; "05 / The other side of the exchange" with 3 buyer tiers; "06 / The next move".
+
+Every text, price, `MODULE_FACTS`/`ENGINE_COUNTS` stat and link target was carried over verbatim (R2–R4 correct content). Colours are the locked palette only.
+*Verification:* `tsc -b`, eslint clean · `vitest` 218/218 · Chromium 1440/390, all three pages: 0 errors, `h1` 1, no overflow.
+- axe: Platform 6 → **0**, Modules **0**, Pricing 19 → 17 (tier labels in `slate-400`, plus the table's sideways scroll on phones — R5).
+- Height: Platform 2,154 → 2,559 px, Modules 2,118 → 2,374 px, Pricing 4,028 → 4,759 px at 1440; at 390 roughly unchanged.
+- Screens: `scratchpad/home/r1p-*`, `r1pl-*`.
 
 ---
 

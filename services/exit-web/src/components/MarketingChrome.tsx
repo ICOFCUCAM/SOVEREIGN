@@ -87,6 +87,33 @@ export const LocaleSwitch: React.FC<{ dark?: boolean }> = ({ dark }) => {
   );
 };
 
+/** Shared marketing layout classes (the index(9) skeleton system). */
+export const MK = {
+  wrap: "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12",
+  section: "py-14 sm:py-20 lg:py-24",
+  h1: "font-editorial text-[clamp(2.8rem,6vw,6rem)] font-semibold leading-[0.95] tracking-[-0.045em]",
+  h2: "font-editorial text-[clamp(2.25rem,4.6vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.035em]",
+  btn: "inline-flex items-center gap-5 px-5 py-3.5 text-[12px] font-semibold transition",
+  navy: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)",
+} as const;
+
+/** The marketing page hero: chapter label, editorial h1, numbered deck, actions. */
+export const PageHero: React.FC<{ chapter: string; title: string; deck: React.ReactNode; actions: React.ReactNode }> = ({ chapter, title, deck, actions }) => (
+  <section className="border-b border-slate-200 bg-white">
+    <div className={`${MK.wrap} pb-14 pt-12 lg:pb-20 lg:pt-16`}>
+      <Chapter n="01">{chapter}</Chapter>
+      <h1 className={`${MK.h1} mt-6 max-w-[16ch] text-ink-900`}><Editorial text={title} /></h1>
+      <div className="mt-9 grid grid-cols-[44px_minmax(0,1fr)] gap-4 sm:grid-cols-[64px_minmax(0,620px)]">
+        <span className="pt-1 font-mono text-[11px] text-blue-600">01—</span>
+        <div>
+          <div className="text-[16px] leading-relaxed text-slate-600">{deck}</div>
+          <div className="mt-7 flex flex-wrap gap-2.5">{actions}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
 /** A chapter label — "02 / The thesis" — in the accent colour, mono. */
 export const Chapter: React.FC<{ n: string; children: React.ReactNode; dark?: boolean }> = ({ n, children, dark }) => (
   <div className={`font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] ${dark ? "text-blue-300" : "text-blue-600"}`}>{n} / {children}</div>
