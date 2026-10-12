@@ -122,10 +122,8 @@ const ExchangeMap: React.FC = () => {
         <span className="h-[34px] w-[10px] bg-blue-600" />
       </div>
       {/* footer row */}
-      <figcaption className="relative flex flex-wrap items-center justify-between gap-3 border-t border-slate-300 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.2em] sm:px-6">
-        <span className="flex items-center gap-3 text-slate-600"><span aria-hidden className="h-4 w-4 bg-blue-600" /><span className="text-blue-700">01</span> / {t("xm.discover")}</span>
-        <span className="text-slate-600">{t("xm.note")}</span>
-        <span className="text-slate-600"><span className="text-blue-700">02</span> / {t("xm.trace")} <span aria-hidden>↓</span></span>
+      <figcaption className="relative flex items-center gap-3 border-t border-slate-300 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600 sm:px-6">
+        <span aria-hidden className="h-4 w-4 shrink-0 bg-blue-600" />{t("xm.note")}
       </figcaption>
       <div aria-hidden className="h-1 bg-blue-600" />
     </figure>

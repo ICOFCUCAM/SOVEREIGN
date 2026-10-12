@@ -41,7 +41,7 @@ const Landing: React.FC = () => {
       <section className="border-b border-ink-900 bg-[#f6f8fb] text-ink-900">
         <div className={`${WRAP} pt-8`}>
           <div className="flex justify-between gap-6 border-b border-ink-900 pb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
-            <span>{t("hero.eyebrow")}</span><span className="text-right">No. 01 · {t("hero.asof")} {MARKET_INDEX_FMT.asOf}</span>
+            <span>{t("hero.eyebrow")}</span><span className="text-right">{t("hero.asof")} {MARKET_INDEX_FMT.asOf}</span>
           </div>
           <div className="grid items-end gap-10 py-12 sm:py-14 lg:grid-cols-[minmax(0,1.4fr)_minmax(270px,0.6fr)] lg:gap-[6%] lg:py-16">
             <h1 className="max-w-[12ch] font-editorial text-[clamp(3.4rem,8.4vw,8.8rem)] font-semibold leading-[0.9] tracking-[-0.05em]">
