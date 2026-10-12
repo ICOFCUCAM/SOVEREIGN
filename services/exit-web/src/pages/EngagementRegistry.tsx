@@ -39,22 +39,24 @@ const EngagementRegistry: React.FC = () => {
 
       <MarketTape items={tape} />
 
+      <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">The ranking does not depend on your company: the engagement estimate uses only each buyer's own record, so this list is the same for every company. For buyers ranked against your company, see the <Link to="/console/outreach-plan" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Outreach Plan</Link>.</p>
+
       <Section title="Buyer engagement registry" className="border border-xo-line"
         right={<span className="flex items-center gap-2"><label htmlFor="er-search" className="text-[11px] text-xo-muted">Search buyer</label><input id="er-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="e.g. Microsoft" className={`${XO_INPUT} h-8 w-40 py-1 text-[12px]`} /></span>}
-        foot="NDA / LOI conversion appear once a buyer's own responses are recorded on ExitOS (— until then; your own views and interest do not count). Close rate is from the registry where disclosed. ExitOS surfaces the path, never personal contacts.">
+        foot="NDA / LOI conversion appear once a buyer's own responses are recorded on ExitOS (— until then; your own views and interest do not count). Close rate is from the registry where disclosed. Indexed deals are registry entries, most of them unverified. Contact confidence is a rule on indexed deals — High at 40 or more, Medium at 8 or more, otherwise Low. The contact role is the one typical for the buyer type, never a named person; ExitOS does not store or send to personal contacts.">
         <p role="status" className="sr-only">{filtered.length} of {rows.length} buyers shown</p>
         <ScrollRegion label="Buyer engagement registry table">
           <table className="w-full min-w-[960px] text-[12px]">
             <thead className="text-left text-[11px] text-xo-muted">
               <tr className="border-b border-xo-line">
                 <th scope="col" className="px-4 py-2 font-medium">Buyer</th>
-                <th scope="col" className="px-2 py-2 font-medium">Intent</th>
-                <th scope="col" className="px-2 py-2 text-right font-medium">History</th>
-                <th scope="col" className="px-2 py-2 font-medium">Outreach path</th>
-                <th scope="col" className="px-2 py-2 text-center font-medium">Contact</th>
+                <th scope="col" className="px-2 py-2 font-medium">Stated themes</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">Indexed deals · 12m</th>
+                <th scope="col" className="px-2 py-2 font-medium">Typical contact role</th>
+                <th scope="col" className="px-2 py-2 text-center font-medium">Contact confidence</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">NDA</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">LOI</th>
-                <th scope="col" className="px-2 py-2 text-right font-medium">Close</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">Close rate (registry)</th>
                 <th scope="col" className="px-4 py-2 text-right font-medium">Engagement estimate</th>
               </tr>
             </thead>
