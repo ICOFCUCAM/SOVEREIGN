@@ -432,7 +432,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE8 | The headline's large type is set at default spacing. | Optical tightening on the display lines and a hanging 'T'. | closed `78d94ba9` |
 | EE9 | The watermark appears flat on load. | A slow fade-up of the watermark on first load; none under reduced motion. | closed `16b04b1b` |
 | EE10 | Hero, chapter 02 box, board and band make four dark blocks in a row. | The chapter 02 chart presented as a framed ink panel on paper with its own lit edge, read as an object. | closed `17ca5886` |
-| EE11 | Board and band read as two separate dark slabs. | The instrument chapter (03 + band) set as one continuous ink chapter with a single floor gradient. | open |
+| EE11 | Board and band read as two separate dark slabs. | The instrument chapter (03 + band) set as one continuous ink chapter with a single floor gradient. | closed `821735ae` |
 | EE12 | Five thousand pixels of light in the middle with no dark pause. | The ledger's head: an ink strip of the three largest recorded deals (records only). | open |
 | EE13 | Chapter openers vary in position and form. | One chapter opener: number, rule, label at the same measure everywhere. | open |
 | EE14 | Light chapters meet with bare background changes. | A double hairline between light chapters. | open |
@@ -1005,6 +1005,9 @@ Watermark entrance: on first load the mark resolves from a soft blur and the dia
 
 ### EE10 — closed 17ca5886
 Chapter 02's lifecycle chart set as an object on the ivory: an ex-0 bezel with a lit top edge, a hairline ring, a two-level shadow and four corner registers, so it reads as a framed instrument rather than another dark band.
+
+### EE11 — closed 821735ae
+Board and band read as one ink chapter: the Instrument's floor (ex-0) runs straight into the band's top (ex-0); the full-width seam is replaced by a short centred rule with a diamond node; the band falls back to ex-0 before the white of chapter 04.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
