@@ -1,4 +1,4 @@
-import React, { useMemo, useSyncExternalStore } from "react";
+import React, { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric } from "../components/xo";
@@ -34,6 +34,9 @@ const DealActivity: React.FC = () => {
   const tape = useMemo(() => buildMarketTape(), [events.length]);
   const net = networkStats(events);
   const rate = (v: number | null): string => (v == null ? "—" : `${v}%`);
+  const [confirming, setConfirming] = useState(false);
+  const clearRef = useRef<HTMLButtonElement>(null);
+  const keep = (): void => { setConfirming(false); requestAnimationFrame(() => clearRef.current?.focus()); };
   const where = listingDestination() === "exchange" ? "your account's stored events" : "this browser";
 
   return (
@@ -73,8 +76,18 @@ const DealActivity: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Deal-flow funnel · recorded" className="lg:col-span-5"
-          right={events.length > 0 ? <button type="button" onClick={clearDealEvents} className="rounded-sm border border-xo-line px-2 py-1 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Clear</button> : undefined}
+          right={events.length > 0 && !confirming ? <button ref={clearRef} type="button" onClick={() => setConfirming(true)} className="rounded-sm border border-xo-line px-2 py-1 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Clear history…</button> : undefined}
           foot="Distinct buyers or listings that reached each stage in your recorded events.">
+          {confirming && events.length > 0 && (
+            <div role="alert" className="border-b border-xo-line bg-xo-raise px-4 py-3 text-[12px]">
+              <p className="font-semibold text-xo-risk">Erase all {events.length} stored events?</p>
+              <p className="mt-1 text-xo-muted">This permanently deletes the deal-activity record held in {where}{where === "this browser" ? "" : " in the backend"}. Funnel counts and rates on this page, and buyer activity on other pages, reset to zero. It cannot be undone.</p>
+              <div className="mt-2 flex gap-2">
+                <button type="button" onClick={() => { clearDealEvents(); setConfirming(false); }} className="rounded-sm border border-xo-risk px-2 py-1 font-semibold text-xo-risk focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Erase {events.length} events</button>
+                <button type="button" autoFocus onClick={keep} className="rounded-sm border border-xo-line px-2 py-1 font-medium text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Keep history</button>
+              </div>
+            </div>
+          )}
           <ol className="space-y-2 px-4 py-3">
             {funnel.map((s) => (
               <li key={s.kind}>
