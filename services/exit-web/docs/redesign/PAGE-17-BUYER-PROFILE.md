@@ -34,7 +34,7 @@ One indexed buyer's dossier: likelihood for the founder's company and the buyer'
 | G1 | **Composite score labelled "probability".** | "Likelihood score N/100 (composite)" with the formula reference; forecast tile likewise. | ☑ `3bf0e42` |
 | G2 | **"Express interest" implies an effect it does not have.** | Say what it does: saved to deal activity on this browser; the buyer is not notified. Drop "sharpens engagement intelligence". | ☑ `77678ee` |
 | G3 | Snapshot wording ("currently exhibits", "node-side"). | "in the registry snapshot (as of …)"; "not in the bundled extract". | ☑ `5df4217` |
-| G4 | Demo company unlabelled. | Company, tokens and institutional baseline from `loadActiveCompany()` (as the Terminal does); badge. | ☐ |
+| G4 | Demo company unlabelled. | Company, tokens and institutional baseline from `loadActiveCompany()` (as the Terminal does); badge. | ☑ G4-commit |
 | G5 | Design: old primitives (found and not-found states). | Rebuild on `xo`. | ☑ `bc01f3f` |
 
 ### X14 — Terminal (Page 01, approved) calls the same composite a probability — documented here
@@ -59,3 +59,7 @@ The Terminal shows `rankedBuyers().probability.pct` as "N% likely", "N% probabil
 ### G3 — Snapshot wording
 *Closed by:* `pages/BuyerProfile.tsx` (text only). "{buyer} currently exhibits N acquisition signals." → "In the registry snapshot (as of 2026-10-11), {buyer} shows N acquisition signals."; "indexed node-side" → "none in the bundled extract" / "the full event history is not loaded in the browser".
 *Verification:* eslint clean · Chromium: "In the registry snapshot (as of 2026-10-11), Microsoft shows 7 acquisition signals."; 0 "currently exhibits" / "node-side".
+
+### G4 — Demo company unlabelled
+*Closed by:* `pages/BuyerProfile.tsx` — the company name, sector tokens (`activeTokens`), institutional financial baseline and time-to-close (`runInstitutionalValuation`), likelihood score, overlap, rationale, contact registry and suggested action all follow `loadActiveCompany()` — the same inputs the Terminal uses when it links here. Eyebrow "Acquisition DNA · for your intake / the demo company: {name}", **Demo data / Your intake** badge. `pages/Intake.tsx` lists "Each buyer's profile" (example link to Microsoft; the gate label is computed from that route).
+*Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium `/console/buyer/microsoft`: demo → DEMO DATA, likelihood 74; intake "Northwind Analytics" → YOUR INTAKE, likelihood 94, no Helios mentions · 0 errors.

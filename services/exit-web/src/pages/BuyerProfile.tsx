@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { captureDealEvent } from "../lib/deal-events";
 import {
   buyerById, acquisitionProbability, acquisitionSignals, similarAcquisitionsBy,
@@ -8,9 +8,8 @@ import {
   acquisitionAppetiteScore, buyerConfidence, DNA_AS_OF,
 } from "../lib/buyer-dna";
 import { buyerContactRegistry, ENGAGEMENT_DISCLAIMER, ENRICHMENT_PROVIDERS } from "../lib/buyer-contact";
-import { sectorTokensFor } from "../lib/buyer-dna";
-import { VALUATION_INSTITUTIONAL } from "../lib/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
+import { runInstitutionalValuation } from "@exit/engines";
+import { loadActiveCompany, activeTokens } from "../lib/active-company";
 
 // BUYER INTELLIGENCE PROFILE — every indexed buyer's own page. "Microsoft
 // Acquisition DNA": the full derived dossier a founder can explore — volume,
@@ -22,6 +21,11 @@ const BuyerProfile: React.FC = () => {
   const { id = "" } = useParams();
   const p = buyerById(id);
   const [interested, setInterested] = useState(false);
+  // The founder's saved intake when there is one, else the demo company —
+  // the same inputs the Terminal uses for its buyer list.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const INST = useMemo(() => runInstitutionalValuation(company), [company]);
+  const tokens = useMemo(() => activeTokens(company), [company]);
 
   // Record the view in the founder's deal activity (this browser's storage).
   useEffect(() => {
@@ -37,26 +41,27 @@ const BuyerProfile: React.FC = () => {
     );
   }
 
-  const prob = acquisitionProbability(p);
+  const prob = acquisitionProbability(p, tokens);
   const { signals, activeCount } = acquisitionSignals(p);
-  const overlap = sectorOverlap(p);
+  const overlap = sectorOverlap(p, tokens);
   const similar = similarAcquisitionsBy(p.name);
 
   // Phase 2 — expected outcome for the founder's company under THIS buyer:
   // baseline × (1 + premium) × close-rate. Disclosed figures are used when
   // present; otherwise a labelled market-neutral prior, never hidden.
-  const baseline = VALUATION_INSTITUTIONAL.financialBaseline.mid;
+  const baseline = INST.financialBaseline.mid;
   const { premium, close, premiumKnown, closeKnown, expectedOffer, expectedClose } = expectedOutcomeFor(p, baseline);
-  const rationale = buyerRationale(p, baseline);
+  const rationale = buyerRationale(p, baseline, tokens, company.sector);
   const appetite = acquisitionAppetiteScore(p);
   const confidence = buyerConfidence(p);
-  const medianClose = p.median_close_days ?? VALUATION_INSTITUTIONAL.timeToClose.lowDays;
-  const reg = buyerContactRegistry(p, sectorTokensFor(SAMPLE_COMPANY.sector));
+  const medianClose = p.median_close_days ?? INST.timeToClose.lowDays;
+  const reg = buyerContactRegistry(p, tokens);
 
   return (
     <div data-page="buyer-profile" className="space-y-3 text-xo-text">
       <Link to="/console/buyer-graph" className="inline-block py-1 text-[12px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">← Buyer Graph</Link>
-      <PageHeader eyebrow="Acquisition DNA" title={p.name}
+      <PageHeader eyebrow={`Acquisition DNA · for ${fromIntake ? "your intake" : "the demo company"}: ${company.name}`} title={p.name}
+        badge={<Provenance kind={fromIntake ? "company" : "demo"} />}
         description={<span className="capitalize">{p.buyer_type.replace(/_/g, " ")}{p.country ? ` · ${p.country}` : ""}{p.industry_official ? ` · ${p.industry_official}` : ""}</span>}
         actions={<>
           <button type="button"
@@ -71,7 +76,7 @@ const BuyerProfile: React.FC = () => {
       </PageHeader>
 
       <section aria-label="Scores" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2">
-        <div className="bg-xo-panel"><Metric label="Likelihood score · your company" emphasis value={<span className="text-xo-verified">{prob.pct}<span className="text-[14px] text-xo-faint">/100</span></span>} sub={<>Composite: appetite + sector overlap + velocity + recency — not a probability (formula on the Buyer Graph). Suggested (rule): {recommendedAction(p)}</>} /></div>
+        <div className="bg-xo-panel"><Metric label="Likelihood score · your company" emphasis value={<span className="text-xo-verified">{prob.pct}<span className="text-[14px] text-xo-faint">/100</span></span>} sub={<>Composite: appetite + sector overlap + velocity + recency — not a probability (formula on the Buyer Graph). Suggested (rule): {recommendedAction(p, tokens)}</>} /></div>
         <div className="bg-xo-panel"><Metric label="Appetite score" emphasis value={<>{appetite.score}<span className="text-[14px] text-xo-faint">/100</span></>} sub={`${appetite.tier} · confidence ${confidence} · intrinsic acquisitiveness, independent of your company`} /></div>
       </section>
 
@@ -115,7 +120,7 @@ const BuyerProfile: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Close rate" value={p.close_rate != null ? `${Math.round(p.close_rate * 100)}%` : "—"} sub={p.median_close_days != null ? `${p.median_close_days}d median` : "—"} /></div>
       </section>
 
-      <Section title={`Why ${p.name} would acquire ${SAMPLE_COMPANY.name}`} className="border border-xo-line"
+      <Section title={`Why ${p.name} would acquire ${company.name}`} className="border border-xo-line"
         foot="Every point is evidence from the buyer's indexed acquisition record — points appear only when the data supports them.">
         <div className="px-4 py-3">
           <p className="text-[14px] font-medium leading-relaxed">{rationale.thesis}</p>
@@ -180,7 +185,7 @@ const BuyerProfile: React.FC = () => {
         </div>
       </Section>
 
-      <Section title={`Expected outcome · ${SAMPLE_COMPANY.name} under ${p.name}`} className="border border-xo-line"
+      <Section title={`Expected outcome · ${company.name} under ${p.name}`} className="border border-xo-line"
         right={<span className="text-[11px] text-xo-faint">baseline {fmtUsdShort(baseline)} × (1 + premium) × close rate</span>}
         foot={(!premiumKnown || !closeKnown) ? `${(!premiumKnown && !closeKnown) ? "Premium and close rate" : !premiumKnown ? "Premium" : "Close rate"} not disclosed in this buyer's indexed record — a labelled market-neutral prior is applied (never hidden). The figure sharpens as the buyer's outcomes accrue.` : undefined}>
         <div className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-4">
