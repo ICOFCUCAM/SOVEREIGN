@@ -39,6 +39,7 @@ const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
   { to: "/console/deal-room", label: "Deal Room (simulated)" },
   { to: "/console/intelligence", label: "Acquisition Intelligence" },
   { to: "/console/data-room", label: "Data Room (checklist)" },
+  { to: "/console/buyers", label: "Buyer Profiles" },
   { to: "/console/engagement-registry", label: "Engagement Registry" },
   { to: "/console/inbox", label: "Inbox" },
   { to: "/console/outreach-plan", label: "Outreach Plan" },

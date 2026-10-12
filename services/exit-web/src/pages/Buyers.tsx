@@ -4,11 +4,10 @@ import { MarketTape } from "../lib/workstation";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
-import { PageHeader, Section, Metric as XMetric } from "../components/xo";
+import { PageHeader, Section, Metric as XMetric, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { BUYERS } from "../lib/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
-import type { BuyerCandidate } from "@exit/engines";
+import { runBuyerDiscovery, type BuyerCandidate, type CompanyProfile } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
 
 // Buyer Marketplace — buyer profile cards (not a directory). Each card surfaces
 // the signals a founder actually decides on: interest level, appetite, average
@@ -24,8 +23,7 @@ function interest(c: BuyerCandidate): { label: string; pct: number; cls: string 
   if (p >= 0.35) return { label: "Warm", pct: Math.round(p * 100), cls: "text-xo-caution" };
   return { label: "Cool", pct: Math.round(p * 100), cls: "text-xo-muted" };
 }
-function warmIntro(c: BuyerCandidate): string {
-  const co = SAMPLE_COMPANY;
+function warmIntro(c: BuyerCandidate, co: CompanyProfile): string {
   const sector = co.sector.replace(/_/g, " ");
   const arrM = (co.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(0);
   return (
@@ -44,7 +42,9 @@ function warmIntro(c: BuyerCandidate): string {
 }
 
 const Buyers: React.FC = () => {
-  const all = BUYERS.candidates;
+  // The founder's saved intake when there is one, else the demo company.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const all = useMemo(() => runBuyerDiscovery(company, { limit: 12 }).candidates, [company]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filter, setFilter] = useState<{ type: string; appetite: string; interest: string }>({ type: "all", appetite: "all", interest: "all" });
   const candidates = useMemo(() => all.filter((c) => {
@@ -69,8 +69,8 @@ const Buyers: React.FC = () => {
 
   return (
     <div data-page="buyer-profiles" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Sourcing · Buyer Marketplace" title="Buyer Profiles"
-        badge={<span className="text-[12px] text-xo-muted">Profiles ranked</span>} />
+      <PageHeader eyebrow={`◉ Sourcing · Buyer Marketplace · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Buyer Profiles"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Profiles ranked</span></>} />
 
       <section aria-label="Buyer summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><XMetric label="Active-appetite buyers" value={String(activeBucket.length)} sub="registry attribute" /></div>
@@ -162,7 +162,7 @@ const Buyers: React.FC = () => {
                     <Fact label="Fit probability" value={c.probability.toFixed(2)} />
                   </dl>
                   <div className="mt-2 flex justify-end">
-                    <button type="button" onClick={() => setIntro({ name: c.buyer.name, text: warmIntro(c) })} className="rounded-sm border border-xo-line px-2.5 py-1 text-[12px] font-semibold text-xo-action hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Warm intro<span className="sr-only"> for {c.buyer.name}</span></button>
+                    <button type="button" onClick={() => setIntro({ name: c.buyer.name, text: warmIntro(c, company) })} className="rounded-sm border border-xo-line px-2.5 py-1 text-[12px] font-semibold text-xo-action hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Warm intro<span className="sr-only"> for {c.buyer.name}</span></button>
                   </div>
                 </li>
               );

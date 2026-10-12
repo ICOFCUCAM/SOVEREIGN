@@ -36,7 +36,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 | G1 | **False "queued with the banker"; invented sender "James"; unchecked activity claim.** | Intro dialog offers Copy and "Open Outreach" (with plan note), states nothing is sent from here; sign-off placeholder "[Your name]"; "recent activity" sentence only when the buyer has deals in the last 3 years. | ☑ `add04ca` |
 | G2 | **Invented founder-friendliness; fit shown as "interest" with a pulsing dot; appetite/check mislabels.** | Remove founder-friendliness; "Fit · Hot/Warm/Cool" with thresholds, no pulse; "Active-appetite buyers — registry attribute"; "Check-size midpoint"; "median across these N buyers". | ☑ `2614240` |
 | G3 | Banker's-take urgency and overclaim; hidden plan gate. | Plain wording; `requiredEngagement` note. | ☑ `80d197d` |
-| G4 | Demo company unlabelled. | Buyers and intro text on `loadActiveCompany()`; badge. | ☐ |
+| G4 | Demo company unlabelled. | Buyers and intro text on `loadActiveCompany()`; badge. | ☑ G4-commit |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 24 contrast failures, header name differs from NAV, drawer not a dialog. | Rebuild on `xo`; `h1` "Buyer Profiles"; intro in the shared `Modal`. | ☑ `3cbfa63` |
 
@@ -72,3 +72,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 | "ExitOS drafts … and routes it through the banker." | "What ExitOS does — Drafts a warm introduction … Nothing is sent from this page." |
 | "Send via The Banker →" (no plan note) | "Open Outreach →" + "Requires Active Mandate" for free and Preparation |
 *Verification:* `tsc -b`, eslint clean · Chromium: free → "Requires Active Mandate"; Active Mandate → no note; 0 "redeploy" / "routes it".
+
+### G4 — Demo company unlabelled
+*Closed by:* `pages/Buyers.tsx` — buyers from `runBuyerDiscovery(loadActiveCompany(), { limit: 12 })` (the call behind the demo constant) and the warm-intro text from that company (`warmIntro(c, company)`). Eyebrow names the source, **Demo data / Your intake** badge. `pages/Intake.tsx` lists Buyer Profiles.
+*Verification:* `tsc -b`, eslint clean · Chromium: demo → DEMO DATA, top Flexport Strategic 89 %; intake "Northwind Analytics" → YOUR INTAKE, top Vista Enterprise Software Bolt-On 92 % · 0 errors.
