@@ -481,6 +481,11 @@ Two things a still image cannot do, kept restrained:
 1. **The dial maps the five capabilities.** Five points on the instrument answer to the five items of the capability rail, in order (01 discover … 05 execute). Hovering a rail item lights its point (a ring, a hairline from the transaction node, the capability's name in mono beside it); hovering a point lights its rail item (the top edge drawn in bronze, the icon ring lit). Decorative and pointer-only (the dial is aria-hidden); the rail's text carries the meaning for everyone else. No data is implied.
 2. **The instrument draws itself in.** Once per load, about two seconds: the core, then each ring tracing outward (pathLength draw), the graduations and bezel, the wedge swinging open, the points lighting in turn, the far-field lines, then the wordmark and its tagline. Only under `prefers-reduced-motion: no-preference`; the still design is the default state, so nothing depends on the animation running. Checked: 0 hero animations and every element at full opacity under reduced motion.
 
+### HX4 — depth and a slow sign of life (owner: "go next")
+
+3. **Depth on pointer.** The dial is built in layers, each moving by its own factor as the pointer crosses the hero (far-field lines 14, bezel 7, points 5, rings 4, wedge 3, axes 2; the transaction node does not move), eased over 1.1 s. Written as CSS variables from one pointer handler with requestAnimationFrame — no React re-render. Only for fine pointers that hover (desktop), never under reduced motion.
+4. **A slow sign of life.** After the entrance the wedge sways three degrees either way over 24 s, and a soft glint runs along the horizon curve every 9 s. Both only under `prefers-reduced-motion: no-preference`; checked 0 hero animations and no layer transforms under reduced motion.
+
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
 | # | Gate | Status |

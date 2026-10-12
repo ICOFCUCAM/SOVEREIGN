@@ -57,6 +57,7 @@ const Dial: React.FC<{ active: number | null; onPoint: (i: number | null) => voi
         </linearGradient>
       </defs>
 
+      <g className="hx-z" style={{ ["--z" as string]: 14 }}>
       {/* far field, measured from the benchmark: two lines leave the white page and open in a V towards the
           signature — the upper one faint, rising to the dial; the lower one a bright horizon curve with a flare,
           running on under the wordmark — plus a faint ray from the flare to a small orb, a second faint
@@ -65,6 +66,9 @@ const Dial: React.FC<{ active: number | null; onPoint: (i: number | null) => voi
       <path d="M-300 268 Q-190 232 -100 186 T 46 92" stroke="url(#hx-v-up)" strokeWidth="1" />
       <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="2.5" strokeOpacity=".55" filter="url(#hx-bloom)" />
       <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="1.25" />
+      {/* a glint that travels the horizon now and then */}
+      <path className="hx-glint" pathLength={1} d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="#FFF1D8" strokeWidth="5" strokeLinecap="round" filter="url(#hx-bloom)" />
+      <path className="hx-glint" pathLength={1} d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="#FFF8EC" strokeWidth="1.6" strokeLinecap="round" />
       <line x1="-5" y1="533" x2="-103" y2="360" stroke="#E8D7B8" strokeOpacity=".24" strokeWidth="1" />
       <line x1="-131" y1="326" x2="26" y2="326" stroke="#E8D7B8" strokeOpacity=".16" strokeWidth="1" />
       <line x1="9" y1="512" x2="81" y2="430" stroke="#E8D7B8" strokeOpacity=".18" strokeWidth="1" />
@@ -72,6 +76,9 @@ const Dial: React.FC<{ active: number | null; onPoint: (i: number | null) => voi
       <Orb at={[-103, 360]} s={0.45} />
       </g>
 
+      </g>
+
+      <g className="hx-z" style={{ ["--z" as string]: 2 }}>
       {/* axes across the field, brighter inside the dial */}
       <g className="hx-fade" style={{ ["--d" as string]: ".3s" }}>
       <line x1="-560" y1={C} x2="1100" y2={C} stroke="url(#hx-axis)" strokeWidth="1" />
@@ -83,6 +90,9 @@ const Dial: React.FC<{ active: number | null; onPoint: (i: number | null) => voi
       </g>
       </g>
 
+      </g>
+
+      <g className="hx-z" style={{ ["--z" as string]: 7 }}>
       {/* bezel and graduated ring */}
       <circle className="hx-fade" style={{ ["--d" as string]: "1s" }} cx={C} cy={C} r="266" stroke="#E2D6BF" strokeOpacity=".28" strokeWidth="1.1" strokeDasharray="0.1 6" strokeLinecap="round" />
       <circle className="hx-fade" style={{ ["--d" as string]: ".95s" }} cx={C} cy={C} r="246" stroke="#E2D6BF" strokeOpacity=".5" strokeWidth="1.2" strokeDasharray="0.1 4.4" strokeLinecap="round" />
@@ -95,6 +105,9 @@ const Dial: React.FC<{ active: number | null; onPoint: (i: number | null) => voi
         })}
       </g>
 
+      </g>
+
+      <g className="hx-z" style={{ ["--z" as string]: 4 }}>
       {/* market rings */}
       <circle className="hx-draw" style={{ ["--d" as string]: ".6s" }} pathLength={1} cx={C} cy={C} r="205" stroke={RING} strokeOpacity=".38" strokeWidth="1" />
       <circle className="hx-draw" style={{ ["--d" as string]: ".45s" }} pathLength={1} cx={C} cy={C} r="160" stroke="#C9B08A" strokeOpacity=".85" strokeWidth="1.25" />
@@ -102,14 +115,22 @@ const Dial: React.FC<{ active: number | null; onPoint: (i: number | null) => voi
       <circle className="hx-fade" style={{ ["--d" as string]: ".25s" }} cx={C} cy={C} r="88" stroke={RING} strokeOpacity=".6" strokeWidth="1.3" strokeDasharray="0.1 4.4" strokeLinecap="round" />
       <circle className="hx-draw" style={{ ["--d" as string]: ".1s" }} pathLength={1} cx={C} cy={C} r="60" stroke="#D2BA92" strokeOpacity=".9" strokeWidth="1.25" />
 
-      {/* the aperture: a lit wedge, its leading edge bright */}
+      </g>
+
+      <g className="hx-z" style={{ ["--z" as string]: 3 }}>
+      {/* the aperture: a lit wedge, its leading edge bright; it sways a few degrees, slowly */}
       <g className="hx-open" style={{ ["--d" as string]: "1.1s" }}>
+      <g className="hx-drift">
       <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" filter="url(#hx-bloom)" />
       <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" />
       <line x1={C} y1={C} x2={w1x} y2={w1y} stroke="#EFE2C9" strokeOpacity=".18" strokeWidth="1" />
       <line x1={C} y1={C} x2={w2x} y2={w2y} stroke="#F4E8D2" strokeOpacity=".9" strokeWidth="1.5" />
       </g>
+      </g>
+      </g>
 
+
+      <g className="hx-z" style={{ ["--z" as string]: 5 }}>
       {/* registration marks on the axes */}
       <g className="hx-fade" style={{ ["--d" as string]: "1.2s" }}>
       {[0, 180].map((d) => { const [x, y] = P(d, 178); return <g key={d} fill="#F2EBDD" fillOpacity=".7"><circle cx={x - 4} cy={y} r="1.3" /><circle cx={x + 4} cy={y} r="1.3" /></g>; })}
@@ -133,7 +154,9 @@ const Dial: React.FC<{ active: number | null; onPoint: (i: number | null) => voi
         );
       })}
 
-      {/* the transaction node: ice-white in a blue-grey halo */}
+      </g>
+
+      {/* the transaction node: ice-white in a blue-grey halo; the still point the layers move around */}
       <g className="hx-fade" style={{ ["--d" as string]: "0s" }}>
       <circle cx={C} cy={C} r="32" fill="url(#hx-halo)" />
       <circle cx={C} cy={C} r="13" fill="url(#hx-glow)" />
@@ -164,9 +187,23 @@ const HeroExchange: React.FC = () => {
   const nav = useNavigate();
   const { t } = useI18n();
   const [cap, setCap] = React.useState<number | null>(null);
+  // depth on pointer (HX4): the dial's layers shift a few pixels against each other as the pointer moves over
+  // the hero — desktop pointers only, never under reduced motion; written as CSS variables, no re-render
+  const hero = React.useRef<HTMLElement>(null);
+  const raf = React.useRef(0);
+  const depth = React.useMemo(() => typeof window !== "undefined" && window.matchMedia?.("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches, []);
+  const onMove = (e: React.PointerEvent): void => {
+    const el = hero.current; if (!depth || !el) return;
+    const r = el.getBoundingClientRect();
+    const px = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width * 0.745)) / (r.width * 0.3)));
+    const py = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height * 0.4)) / (r.height * 0.5)));
+    cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() => { el.style.setProperty("--px", px.toFixed(3)); el.style.setProperty("--py", py.toFixed(3)); });
+  };
+  const onLeave = (): void => { const el = hero.current; if (!el) return; cancelAnimationFrame(raf.current); el.style.setProperty("--px", "0"); el.style.setProperty("--py", "0"); };
   const labels = [1, 2, 3, 4, 5].map((k) => t(`hx.s${k}`));
   return (
-    <section id="ch-01" aria-labelledby="hx-h" className="relative isolate flex flex-col overflow-hidden bg-[#F8F4EE]">
+    <section ref={hero} onPointerMove={onMove} onPointerLeave={onLeave} id="ch-01" aria-labelledby="hx-h" className="relative isolate flex flex-col overflow-hidden bg-[#F8F4EE]">
       <div className="hx-grid relative grid lg:min-h-[max(560px,min(41.25vw,780px))] lg:grid-cols-[minmax(0,1.04fr)_minmax(0,1fr)]">
         {/* the field (desktop) is this grid's own background (.hx-grid): one fall-off across the hero, the
             dial's warm haze, a light leak at lower left; a fine grain over the dark */}
@@ -248,6 +285,18 @@ const HeroExchange: React.FC = () => {
         /* the instrument draws itself in, once, from the centre outward: rings trace, the wedge opens, the
            points light, the wordmark resolves. Only when motion is allowed; the still design is the default. */
         .hx-cap{cursor:default}
+        .hx-glint{opacity:0;vector-effect:none}
+        /* depth (HX4): each layer moves by its own factor; the core does not move */
+        @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference){
+          .hx-z{transform:translate(calc(var(--px,0) * var(--z) * 1px), calc(var(--py,0) * var(--z) * 1px));transition:transform 1.1s cubic-bezier(.2,.7,.2,1)}
+        }
+        /* a slow sign of life (HX4): the wedge sways three degrees either way over 24 s; a glint runs the horizon every 9 s */
+        @media (prefers-reduced-motion: no-preference){
+          .hx-drift{transform-box:view-box;transform-origin:250px 250px;animation:hxDrift 24s ease-in-out 2.4s infinite}
+          .hx-glint{stroke-dasharray:.07 .93;stroke-dashoffset:1;animation:hxGlint 9s cubic-bezier(.45,0,.55,1) 3.2s infinite}
+        }
+        @keyframes hxDrift{0%,100%{transform:rotate(0)}25%{transform:rotate(3deg)}75%{transform:rotate(-3deg)}}
+        @keyframes hxGlint{0%{stroke-dashoffset:1;opacity:0}8%{opacity:.85}48%{opacity:.85}58%{stroke-dashoffset:.34;opacity:0}100%{stroke-dashoffset:.34;opacity:0}}
         @media (prefers-reduced-motion: no-preference){
           .hx-draw{stroke-dasharray:1;stroke-dashoffset:1;animation:hxDraw 1.25s cubic-bezier(.55,.05,.25,1) var(--d,0s) forwards}
           .hx-fade{opacity:0;animation:hxFade .9s ease-out var(--d,0s) forwards}
