@@ -31,7 +31,7 @@ Founder Active Mandate: `h1` none · axe empty-table-header ×1 · **overflow at
 |---|---|---|---|
 | G1 | **Buyers see the founder's NDA register.** | Buyer role gets its own "Access Requests" view: no other counterparties; how access requests work; links to Browse Opportunities and Deal Room. | ☑ `ba6399b` |
 | G2 | **Fake verification gates** ("identity / history / funds verified", "Verified" tier). | Gates named for what they check (NDA executed, signature recorded, named representative, liquidated-damages clause); "N of 4 record checks"; state that ExitOS does not verify identity, funds or track record. | ☑ `c941d4e` |
-| G3 | **False data-room gating; "issued" implies sent; sample breach evidence looks real.** | Plain wording: no data room gating exists; NDAs are drafted in this session and not sent; breach allegations and evidence references marked illustrative. | ☑ G3-commit |
+| G3 | **False data-room gating; "issued" implies sent; sample breach evidence looks real.** | Plain wording: no data room gating exists; NDAs are drafted in this session and not sent; breach allegations and evidence references marked illustrative. | ☑ `0e9fdf0` |
 | G4 | Demo NDAs unlabelled. | Badge and line: sample NDA portfolio of the demo company. | ☐ |
 | G5 | Design: no `h1`, overflow at 390, empty header, tape. | Rebuild on `xo`; `RegistryTape`. | ☑ `e4d0401` |
 
