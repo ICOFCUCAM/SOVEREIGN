@@ -1,7 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { fmtMoney } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
 import { Link } from "react-router-dom";
+import { myNdaRequests, dealsForBuyer, myMandate, DEAL_STAGES, type NdaRequest, type Deal, type Mandate } from "../lib/exit-api";
+import { allListings } from "../lib/listings";
+import { subscribe } from "../lib/deal-events";
 import { PageHeader, Section, Metric, Chip, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import {
@@ -15,6 +18,54 @@ import {
 // from lib/buyer-portal.ts (demo listing, matches and sample offers).
 
 type Tab = "dashboard" | "watchlist" | "opportunities" | "diligence" | "negotiations";
+
+const REQ_LABEL: Record<NdaRequest["status"], string> = { requested: "Awaiting the founder", signed: "NDA signed", rejected: "Declined" };
+const usdM = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(1)}B` : `$${Math.round(n / 1e6)}M`);
+
+/** The signed-in buyer's own records from the exchange backend. */
+const YourActivity: React.FC = () => {
+  const [reqs, setReqs] = useState<NdaRequest[] | null>(null);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [mandate, setMandate] = useState<Mandate | null>(null);
+  const refresh = useCallback(() => {
+    void myNdaRequests().then(setReqs).catch(() => setReqs([]));
+    void dealsForBuyer().then(setDeals).catch(() => setDeals([]));
+    void myMandate().then(setMandate).catch(() => setMandate(null));
+  }, []);
+  // re-query on mount and when the account's backend connects (it emits a
+  // deal-event change) or an action is recorded
+  useEffect(() => { refresh(); return subscribe(refresh); }, [refresh]);
+  const name = (listingId: string): string => allListings().find((l) => l.id === listingId)?.code ?? listingId;
+  const stage = (st: Deal["stage"]): string => DEAL_STAGES.find((d) => d.stage === st)?.label ?? (st === "withdrawn" ? "Withdrawn" : st);
+  const LINK = "font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  return (
+    <Section title="Your activity" eyebrow="Your account" className="border border-xo-line"
+      foot={<>Your own records on the exchange. Request NDAs and make offers on the <Link to="/console/acquisition-radar" className={LINK}>Acquisition Radar</Link>; follow the requests on <Link to="/console/nda" className={LINK}>Access Requests</Link>.</>}>
+      <div className="grid grid-cols-1 gap-px bg-xo-line lg:grid-cols-3">
+        <div className="bg-xo-panel px-4 py-3">
+          <h3 className="text-[12px] font-semibold text-xo-muted">Your NDA requests</h3>
+          {reqs == null ? <p className="mt-2 text-[13px] text-xo-muted">Loading…</p> : reqs.length === 0
+            ? <p className="mt-2 text-[13px] text-xo-muted">None yet.</p>
+            : <ul className="mt-2 space-y-1.5 text-[13px]">{reqs.map((r) => (
+                <li key={r.id} className="flex flex-wrap justify-between gap-2"><span className="font-mono">{name(r.listingId)}</span><span className={r.status === "signed" ? "text-xo-verified" : r.status === "rejected" ? "text-xo-risk" : "text-xo-caution"}>{REQ_LABEL[r.status]}</span></li>))}</ul>}
+        </div>
+        <div className="bg-xo-panel px-4 py-3">
+          <h3 className="text-[12px] font-semibold text-xo-muted">Your deals</h3>
+          {deals.length === 0
+            ? <p className="mt-2 text-[13px] text-xo-muted">None yet — a deal opens when you request an NDA or make an offer.</p>
+            : <ul className="mt-2 space-y-1.5 text-[13px]">{deals.map((d) => (
+                <li key={d.id} className="flex flex-wrap justify-between gap-2"><span className="font-mono">{name(d.listingId)}</span><span>{stage(d.stage)}</span></li>))}</ul>}
+        </div>
+        <div className="bg-xo-panel px-4 py-3">
+          <h3 className="text-[12px] font-semibold text-xo-muted">Your mandate</h3>
+          {mandate
+            ? <p className="mt-2 text-[13px]">{mandate.sectors.slice(0, 4).join(" · ") || "any sector"} · target revenue {usdM(mandate.minCheckUsd)}–{usdM(mandate.maxCheckUsd)} · {mandate.regions.slice(0, 3).join(", ") || "any region"}</p>
+            : <p className="mt-2 text-[13px] text-xo-muted">Not saved — save one on the <Link to="/console/acquisition-radar" className={LINK}>Acquisition Radar</Link> so founders' listings can be matched to it.</p>}
+        </div>
+      </div>
+    </Section>
+  );
+};
 
 const BuyerPortal: React.FC = () => {
   const [tab, setTab] = useState<Tab>("dashboard");
@@ -31,6 +82,8 @@ const BuyerPortal: React.FC = () => {
       <PageHeader eyebrow="◉ Buyer Console" title="Buyer Home"
         badge={<Provenance kind="demo">Demo seat</Provenance>}
         description={<>The workstation below shows a <span className="font-semibold text-xo-text">demo seat — {SEAT.entry?.name ?? "a registry buyer"}</span>, the registry buyer the matching engine ranks #{SEAT.rank} for the demo listing. It is not your account. Your own NDA requests are on <Link to="/console/nda" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Access Requests</Link>.</>} />
+
+      <YourActivity />
 
       <section aria-label="Demo seat summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Matched opportunities" emphasis value={String(PORTAL_STATS.opportunities)} sub="fit the demo seat's mandate" provenance="demo" /></div>
