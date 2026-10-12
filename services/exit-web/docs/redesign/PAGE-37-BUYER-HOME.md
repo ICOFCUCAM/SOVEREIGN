@@ -5,7 +5,7 @@
 | Route | `/console/buyer-portal` |
 | Component | `src/pages/BuyerPortal.tsx` (135 lines) + `lib/buyer-portal.ts` (`SEAT`, `PORTAL_OPPORTUNITIES`, `PORTAL_NEGOTIATIONS`, `PORTAL_STATS` — built from the demo listing, its matches and the sample offers/NDAs) |
 | NAV | "Buyer Home", buyer only (the buyer's landing page), no plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `6c23801`)
 
@@ -65,3 +65,14 @@ The acquirer's home: a seat (name, mandate, rank), matched opportunities with a 
 ### G5 — Fake live tape
 *Closed by:* `pages/BuyerPortal.tsx`: pinging `MarketTape` → dated `RegistryTape`; the last "live" word ("Ranked #1 of 15 mandates matched to the live listing") → "… the demo listing".
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium buyer: 0 "live" words, 0 pinging elements, snapshot date shown · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 · Chromium buyer free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 7), all tab stops with visible focus · all workstation views axe 0 · "Your activity" verified end to end on the local backend (NDA request, offer, mandate).
+
+## Known issues
+- The demo seat (Flexport Strategic) remains as a labelled example of the buyer workstation; it is not tied to the signed-in account.
+- The demo listing's anonymized title reveals ARR ("~$18M ARR") while its revenue is marked NDA-gated — listing engine title rule, unchanged.
+- The watchlist is not saved (stated).
+- Behaviour against the Supabase backend — NOT VERIFIED; "Your activity" tested only on the browser-local backend.

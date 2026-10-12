@@ -40,8 +40,8 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 34 | `/console/valuation` | Enterprise Value | `Valuation` | founder | none | ☑ done · awaiting final review |
 | 35 | `/console/diligence-ai` | Diligence | `DiligenceAI` | founder | Preparation or Pro | ☑ done · awaiting final review |
 | 36 | `/console/banker` | Outreach | `Banker` | founder | Pro | ☑ done · awaiting final review |
-| 37 | `/console/buyer-portal` | Buyer Home | `BuyerPortal` | buyer | none | ◐ in progress |
-| 38 | `/console/calibration` | Calibration | `Calibration` | admin | none | ☐ |
+| 37 | `/console/buyer-portal` | Buyer Home | `BuyerPortal` | buyer | none | ☑ done · awaiting final review |
+| 38 | `/console/calibration` | Calibration | `Calibration` | admin | none | ◐ in progress |
 | 39 | `/console/simulator` | Scenario Simulator | `Simulator` | founder | Pro | ☐ |
 | 40 | `/console/admin` | Admin Console | `Admin` | admin | none | ☐ |
 | 41 | `/console/upgrade` | — | `Upgrade` | any signed-in role | none | ☐ |
