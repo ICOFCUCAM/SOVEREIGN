@@ -29,7 +29,7 @@ A kanban of deals across the negotiation stages, a "Deal Probability Engine" tab
 ## Gap register — Page 26
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Three invented deals** in the pipeline and its totals. | Remove them; the sourcing column shows the top ranked buyers from discovery as "candidates — not contacted", with no amount or probability, excluded from totals. | ☑ G1-commit |
+| G1 | **Three invented deals** in the pipeline and its totals. | Remove them; the sourcing column shows the top ranked buyers from discovery as "candidates — not contacted", with no amount or probability, excluded from totals. | ☑ `bc3aef0` |
 | G2 | **Invented stage-conversion benchmarks.** | Remove the figures; say no sourced benchmark exists yet. | ☐ |
 | G3 | "Prediction engine" and automation overclaims. | "Close-probability rule" with its formula; expected-days rule stated; plain "What ExitOS does". | ☐ |
 | G4 | Demo offers unlabelled. | Badge and line: sample offers of the demo company. | ☐ |
