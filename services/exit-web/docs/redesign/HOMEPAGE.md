@@ -402,6 +402,15 @@ Built and judged as previews (designs 10–17), then adopted onto this branch on
 | CC3 | On phones the main action scrolls away with the hero. | A slim bottom bar with "Access the Exchange" that appears once the hero has scrolled out and hides at the closing chapter; phones only; respects the safe-area inset; not shown under 640 px height landscape. | closed `8eaf86be` |
 | CC4 | Real photography/film and client proof are the largest remaining premium gains, and neither exists yet. | No invented proof. A `lib/proof.ts` registry (empty by default) and a `ProofSection` that renders only when real entries exist (client names with permission, a quote with attribution, a press mention with link); film and photography slots documented with the media spec. Pre-launch gate G2 added. | closed `00ebbf7c` |
 
+## Phase 12 — The opening from the owner's `index(2).html` (owner, 2026-10-12)
+
+Owner: "I need the hero of the newly uploaded file … from hero to section two. The graph on our hero can be put on the right-hand box of section 2 … [our] section 2 should now come as section 3 … from there continue as in our main design." Taken in the locked palette (the file's gold → blue-600/300, cream → #f6f8fb, deep teal → navy) and our type (Source Serif 4, Inter); the file's background photo `exitos-hero-reference.png` was not uploaded, so its gradient is reproduced as seen. Our header stays (the file's Solutions / Market intelligence / Resources menus have no pages).
+
+| # | Gap | Close by | Status |
+|---|---|---|---|
+| DD1 | The lifecycle chart is drawn for the full page width; set in a half-width box its labels fall to about 8 px and its stage panel crowds. | A `compact` mode for `ExchangeMap`: larger label type and offsets for a narrower box, the stage panel stacked. | open |
+| DD2 | The homepage opening is not the owner's index(2) hero and section 2. | Hero from index(2): ivory-to-navy field, eyebrow "Intelligence · Opportunities · Execution", "The global acquisition exchange *for what's next.*", body, two actions ("Explore the platform" → /platform; the file's "Watch overview" has no film behind it → "Value my company" → chapter 04), the vertical note, and the five-part capability strip ("verified insights" → "sourced records", per M3). Section 2 "Intelligence meets *opportunity.*" with its copy and "Learn how it works" → /platform; the right-hand box carries our lifecycle graph (compact, interactive); the three proof figures and the edition line move under its copy. The board becomes chapter 03 and every later chapter moves down one (04 value · 05 thesis · 06 ledger · 07 modules · 08 questions · 09 next move); the rail, signature line, phone bar, share-card script and the inventory test follow. EN/FR/ES. | open |
+
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
 | # | Gate | Status |
