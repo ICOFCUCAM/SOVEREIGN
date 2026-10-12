@@ -89,7 +89,7 @@ const Landing: React.FC = () => {
                 </div>
               ))}
             </div>
-            <p data-edition className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-ex-done-ink" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</p>
+            <p data-edition className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rotate-45 border border-[#9A7E56]" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</p>
             <Link to="/platform" className="group ex-link mt-8 text-[13px]">{t("s2.link")} <Arrow /></Link>
           </div>
           {/* the right-hand box: the lifecycle graph alone (DD3), its caption beneath */}
