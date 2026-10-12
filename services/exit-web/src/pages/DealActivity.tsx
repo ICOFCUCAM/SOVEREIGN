@@ -6,6 +6,7 @@ import { buildMarketTape } from "../lib/market-tape";
 import { subscribe, allDealEvents, dealFlowFunnel, subjectsAtStage, clearDealEvents, type DealEvent } from "../lib/deal-events";
 import { networkStats } from "../lib/network-stats";
 import { listingDestination } from "../lib/exit-api";
+import { useAuth } from "../lib/auth";
 
 // DEAL ACTIVITY — the record of deal-flow actions taken in ExitOS by this
 // user. Events persist in this browser, or in the signed-in account's own
@@ -27,7 +28,12 @@ const KIND_LABEL: Record<string, string> = {
 };
 
 const DealActivity: React.FC = () => {
-  const events = useSyncExternalStore(subscribe, allDealEvents, allDealEvents);
+  const stored = useSyncExternalStore(subscribe, allDealEvents, allDealEvents);
+  const { session } = useAuth();
+  const isBuyer = session?.role === "buyer";
+  // a buyer sees only buyer-side actions — never founder actions recorded
+  // in the same browser when roles are switched
+  const events = useMemo(() => (isBuyer ? stored.filter((e) => e.actorRole === "buyer") : stored), [stored, isBuyer]);
   const funnel = dealFlowFunnel(events);
   const recent = [...events].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 60);
   const max = Math.max(...funnel.map((f) => f.count), 1);
@@ -43,7 +49,7 @@ const DealActivity: React.FC = () => {
     <div data-page="deal-activity" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Exchange · Telemetry" title="Deal Activity"
         badge={<span className="text-[12px] text-xo-muted">{events.length} stored events</span>}
-        description={`Deal-flow actions you have taken in ExitOS (views, interest, NDA requests …), as recorded in ${where}. Counts and rates come from these events only.`} />
+        description={`${isBuyer ? "Buyer-side deal-flow actions" : "Deal-flow actions"} you have taken in ExitOS (views, interest, NDA requests …), as recorded in ${where}. Counts and rates come from these events only.${isBuyer ? " Founder actions are not shown." : ""}`} />
 
       <section aria-label="Activity summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Stored events" emphasis value={String(events.length)} sub="all recorded" /></div>
@@ -76,9 +82,9 @@ const DealActivity: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Deal-flow funnel · recorded" className="lg:col-span-5"
-          right={events.length > 0 && !confirming ? <button ref={clearRef} type="button" onClick={() => setConfirming(true)} className="rounded-sm border border-xo-line px-2 py-1 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Clear history…</button> : undefined}
+          right={!isBuyer && events.length > 0 && !confirming ? <button ref={clearRef} type="button" onClick={() => setConfirming(true)} className="rounded-sm border border-xo-line px-2 py-1 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Clear history…</button> : undefined}
           foot="Distinct buyers or listings that reached each stage in your recorded events.">
-          {confirming && events.length > 0 && (
+          {!isBuyer && confirming && events.length > 0 && (
             <div role="alert" className="border-b border-xo-line bg-xo-raise px-4 py-3 text-[12px]">
               <p className="font-semibold text-xo-risk">Erase all {events.length} stored events?</p>
               <p className="mt-1 text-xo-muted">This permanently deletes the deal-activity record held in {where}{where === "this browser" ? "" : " in the backend"}. Funnel counts and rates on this page, and buyer activity on other pages, reset to zero. It cannot be undone.</p>
