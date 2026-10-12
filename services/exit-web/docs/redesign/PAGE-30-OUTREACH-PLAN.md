@@ -33,7 +33,7 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 | G2 | **Value per buyer unlabelled; priors untagged.** | "Close-weighted value" with the formula and baseline in the foot; PRIOR tag where premium or close rate is the neutral assumption (additive fields); the anchor metric labelled the same. | ☑ `d88eadb` |
 | G3 | "Contact path" is a role; "Conf" rule unstated. | "Typical contact role"; "Contact confidence" with its rule (indexed deals, mostly unverified). | ☑ `d1f13e3` |
 | G4 | "Sequenced" implies a running programme. | Say it is a suggested plan: nothing is sent or scheduled; week labels are suggested timing. | ☑ `61bfec0` |
-| G5 | Demo unlabelled. | Demo data / Your intake badge and line. | ☐ |
+| G5 | Demo unlabelled. | Demo data / Your intake badge and line. | ☑ G5-commit |
 | G6 | Fake live tape. | `RegistryTape`. | ☐ |
 | G7 | Design: no `h1`, 26 contrast failures. | Rebuild on `xo`. | ☑ `edab625` |
 
@@ -62,3 +62,7 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 ### G4 — "Sequenced" implies a running programme
 *Closed by:* `pages/OutreachPlan.tsx` and `lib/outreach-plan.ts` (labels). Status "Sequenced" → "Suggested plan · nothing sent"; description adds "This is a suggested plan: ExitOS has not contacted any of these buyers, and nothing is sent or scheduled. Week labels are suggested timing from the day you start."; "Sequenced waves — competitive tension" → "Suggested waves — to build competitive tension"; "Lead bidders — week 1" metric → "Lead wave — buyers · suggested week 1"; wave headers "Week 1 · 4 buyers" → "Suggested week 1 · 4 buyers"; summary "sequenced waves" → "suggested waves". The wave name "Lead bidders" is kept (the plan's label, asserted in `outreach-plan.test.ts`).
 *Verification:* `tsc -b`, eslint clean, `outreach-plan.test.ts` 4/4 · Chromium: 0 "sequenced"; the description shown · Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G5 — Demo unlabelled
+*Closed by:* `pages/OutreachPlan.tsx`. Eyebrow "Demo company: Helios Freight" / "Your intake: …" (was "Your mandate" or the bare name), **Demo data** / **Your intake** badge, and the description ends "Built for the demo company (Helios Freight); save an intake to build it for your company." or "Built for {company} from your saved intake."
+*Verification:* `tsc -b`, eslint clean · Chromium: demo → Demo data and the demo line; intake (Northwind Analytics) → Your intake and its line · Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.

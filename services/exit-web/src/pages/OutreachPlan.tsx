@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { runInstitutionalValuation } from "@exit/engines";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
@@ -34,9 +34,9 @@ const OutreachPlan: React.FC = () => {
 
   return (
     <div data-page="outreach-plan" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow={`◉ Exchange · Execution · ${fromIntake ? "Your mandate" : company.name}`} title="Buyer Outreach Plan"
-        badge={<span className="text-[12px] text-xo-muted">Suggested plan · nothing sent</span>}
-        description={<>{plan.summary} This is a suggested plan: ExitOS has not contacted any of these buyers, and nothing is sent or scheduled. Week labels are suggested timing from the day you start.</>} />
+      <PageHeader eyebrow={`◉ Exchange · Execution · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Buyer Outreach Plan"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Suggested plan · nothing sent</span></>}
+        description={<>{plan.summary} This is a suggested plan: ExitOS has not contacted any of these buyers, and nothing is sent or scheduled. Week labels are suggested timing from the day you start. {fromIntake ? `Built for ${company.name} from your saved intake.` : `Built for the demo company (${company.name}); save an intake to build it for your company.`}</>} />
 
       <section aria-label="Plan summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Ranked buyers" emphasis value={String(plan.totalBuyers)} sub="top 20 by likelihood score" /></div>
