@@ -150,7 +150,7 @@ Measured (Chromium, 1440/390, after M1/M7 chrome): 0 errors, `h1` 1, no overflow
 | R2 | **Platform overclaims.** | "live exchange" → "exchange"; "one audit trail" → "one record"; Institutional security pillar → "Data rooms and records — a document checklist with completeness per package, NDA-gated identity, and your deal actions recorded."; Autonomous execution → "Agents walk through sourcing, outreach, data room, negotiation and closing; each step waits for your approval, and nothing is sent for you."; "the live deal room" → "the deal room"; "watch the agents work" → "walk through the agents". | ☑ `aae3a406` |
 | R3 | **Modules overclaims.** | "recomputed live" → "recomputed from your figures"; Outreach "run by the banker agent" → "drafted by the banker for you to send"; Data Room "Permissioned" → "A document checklist"; Closing Center → "The closing checklist: signatures, escrow and filings, item by item."; Radar "Live sector signals" → "Sector signals from the registry"; Deal Room "once trust and NDA clear" → "for companies that accept your NDA request". | ☑ `b5825acd` |
 | R4 | **Pricing not aligned with Upgrade; fixed teaser number.** | Tier texts as Upgrade (Page 41 G2): "Recommended for a live process", "Buyer outreach drafts & NDA requests", "Rule-based negotiation (Bid Room), bid & process management", "Closing Center checklist", "Receive buyer interest in your Inbox"; `h1` → "Priced like a bank. Success fee only when you close."; teaser → "Buyers that match your company are shown once you list." (no fixed number); table "NDA requests & register", "Rule-based scoring & counters", "Buyer signals — Registry radar (snapshot)"; "runs around the clock" removed. Buyer tiers unchanged (open decision). | ☑ `ef4e6454` |
-| R5 | **Contrast** on Platform (6) and Pricing (19). | Shade steps within the same palette (as M7). Target: axe 0 on all three at 1440 and 390. | ☐ |
+| R5 | **Contrast** on Platform (6) and Pricing (19). | Shade steps within the same palette (as M7). Target: axe 0 on all three at 1440 and 390. | ☑ R5-commit |
 
 ---
 
@@ -319,6 +319,18 @@ Kept: "Access Requests — Request NDA-gated identity and packages, tracked end 
 
 **Not changed (open decision).** The buyer tiers ($299 and $2,499 a month) and their offers, which contradict Upgrade's "Buyer pricing is not published yet".
 *Verification:* `tsc -b`, eslint clean · `vitest` 218/218 · Chromium `/pricing`: 0 "Most selected", "AI", "automation", "net-to-founder", "around the clock" or "4 buyers"; "live" only in "a live process" (a real sale process, the term Upgrade uses); 1440/390: 0 errors, `h1` 1, no overflow.
+
+### R5 — Contrast on the marketing routes
+*Closed by:*
+- `pages/Pricing.tsx`:
+  - Shade steps within the palette: the neutral tier badge and accent, the tier "purpose" line, the restrictions list and secondary text go from `slate-400/500` to `slate-600`; the teaser subline from `blue-600/80` to `blue-700`; the buyer chapter label from `amber-600` to `amber-700`.
+  - The comparison table scrolls sideways on phones, so it is now a labelled, focusable region with a focus ring.
+- `pages/Platform.tsx`, `pages/Modules.tsx`: secondary text `slate-500` → `slate-600`, as on the homepage (M7).
+
+*Verification:* `tsc -b`, eslint clean · Chromium 1440/390:
+- **axe 0** on `/platform`, `/modules` and `/pricing` (Pricing was 17, plus the scrollable region at 390).
+- 0 errors, `h1` 1, no overflow.
+- Keyboard: 156–157 tab stops per page, all with a visible focus indicator.
 
 ---
 

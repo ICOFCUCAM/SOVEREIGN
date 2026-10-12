@@ -161,7 +161,7 @@ const Pricing: React.FC = () => {
               <li key={f.step} className="bg-white py-5 sm:px-5">
                 <div className="font-mono text-[11px] font-semibold tabular-nums tracking-widest text-blue-600">{f.step}</div>
                 <div className="mt-3 font-editorial text-[19px] font-semibold text-ink-900">{f.label}</div>
-                <div className="mt-1 text-[12.5px] leading-relaxed text-slate-500">{f.note}</div>
+                <div className="mt-1 text-[12.5px] leading-relaxed text-slate-600">{f.note}</div>
               </li>
             ))}
           </ol>
@@ -181,7 +181,7 @@ const Pricing: React.FC = () => {
           <div className="mt-12 grid gap-px border-y border-ink-900 bg-slate-200 sm:grid-cols-2 lg:grid-cols-4">
             {FOUNDER_TIERS.map((t) => <TierCard key={t.key} tier={t} onAct={() => nav("/console")} />)}
           </div>
-          <p className="mt-6 max-w-3xl text-[12.5px] text-slate-500">
+          <p className="mt-6 max-w-3xl text-[12.5px] text-slate-600">
             <span className="font-semibold text-ink-700">The success fee:</span> on an Active Mandate, ExitOS earns 2.5% of
             headline value at close (minimum $25,000) — against the 3–10% a traditional bank charges. You keep more of your
             own exit, and we are not paid unless you are.
@@ -199,10 +199,10 @@ const Pricing: React.FC = () => {
               <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-slate-600">A banker brings a rolodex and a deck. ExitOS brings a Buyer Graph, a traceable valuation framework and an execution desk — at a fraction of the fee.</p>
             </div>
           </div>
-          <div className="mt-12 overflow-x-auto border-y border-ink-900 lg:ml-[calc(27.5%+3vw)]">
+          <div role="region" aria-label="Traditional banker compared with ExitOS" tabIndex={0} className="mt-12 overflow-x-auto border-y border-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 lg:ml-[calc(27.5%+3vw)]">
             <table className="w-full min-w-[560px] text-left text-[13.5px]">
               <thead>
-                <tr className="border-b border-slate-200 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                <tr className="border-b border-slate-200 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-600">
                   <th scope="col" className="py-3.5 pr-4">Capability</th>
                   <th scope="col" className="px-4 py-3.5">Traditional banker</th>
                   <th scope="col" className="bg-ink-900 px-4 py-3.5 text-white">ExitOS</th>
@@ -212,7 +212,7 @@ const Pricing: React.FC = () => {
                 {COMPARISON.map((r) => (
                   <tr key={r.capability} className="border-t border-slate-200">
                     <th scope="row" className="py-3.5 pr-4 font-editorial text-[16px] font-semibold text-ink-900">{r.capability}</th>
-                    <td className="px-4 py-3.5 text-slate-500">{r.banker}</td>
+                    <td className="px-4 py-3.5 text-slate-600">{r.banker}</td>
                     <td className="bg-blue-50/40 px-4 py-3.5 font-semibold text-blue-700"><span className="mr-1.5 text-blue-600" aria-hidden>✓</span>{r.exitos}</td>
                   </tr>
                 ))}
@@ -226,7 +226,7 @@ const Pricing: React.FC = () => {
       <section className="border-b border-slate-200 bg-[#f6f8fb]">
         <div className={`${MK.wrap} ${MK.section}`}>
           <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
-            <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-amber-600">05 / The other side of the exchange</div>
+            <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-amber-700">05 / The other side of the exchange</div>
             <div>
               <h2 className={`${MK.h2} text-ink-900`}><Editorial text="Buyer access. Premium matching." /></h2>
               <p className="mt-5 max-w-2xl text-[14px] leading-relaxed text-slate-600">Buyers subscribe for browse + NDA-gated diligence; premium adds outbound matched introductions before a company lists publicly.</p>
@@ -259,7 +259,7 @@ const Pricing: React.FC = () => {
 };
 
 const TONE: Record<NonNullable<Tier["tone"]>, { top: string; accent: string; dot: string; btn: string; badge: string }> = {
-  neutral: { top: "border-t-transparent", accent: "text-slate-400", dot: "bg-slate-300", btn: "border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white", badge: "text-slate-400" },
+  neutral: { top: "border-t-transparent", accent: "text-slate-600", dot: "bg-slate-400", btn: "border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white", badge: "text-slate-600" },
   prep:    { top: "border-t-transparent", accent: "text-ink-700", dot: "bg-ink-600", btn: "bg-ink-900 text-white hover:bg-ink-800", badge: "text-ink-600" },
   mandate: { top: "border-t-blue-600", accent: "text-blue-600", dot: "bg-blue-500", btn: "bg-ink-900 text-white hover:bg-ink-800", badge: "text-blue-600" },
 };
@@ -275,10 +275,10 @@ const TierCard: React.FC<{ tier: Tier; onAct: () => void }> = ({ tier, onAct }) 
       <h3 className="mt-4 font-editorial text-[24px] font-semibold text-ink-900">{tier.name}</h3>
       <div className="mt-2 flex items-baseline gap-1.5">
         <span className="font-editorial text-[2.4rem] font-semibold leading-none tabular-nums text-ink-900">{tier.price}</span>
-        <span className="text-[11px] text-slate-500">{tier.priceSub}</span>
+        <span className="text-[11px] text-slate-600">{tier.priceSub}</span>
       </div>
-      <div className="mt-3 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">{tier.purpose}</div>
-      <p className="mt-2 text-[12.5px] leading-relaxed text-slate-500">{tier.headline}</p>
+      <div className="mt-3 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600">{tier.purpose}</div>
+      <p className="mt-2 text-[12.5px] leading-relaxed text-slate-600">{tier.headline}</p>
       <ul className="mt-4 flex-1 space-y-2 border-t border-slate-200 pt-4 text-[12.5px] text-slate-700">
         {tier.features.map((f) => (
           <li key={f} className="flex items-baseline gap-2">
@@ -287,7 +287,7 @@ const TierCard: React.FC<{ tier: Tier; onAct: () => void }> = ({ tier, onAct }) 
         ))}
       </ul>
       {tier.restrictions && (
-        <ul className="mt-3 space-y-1 border-t border-slate-100 pt-3 text-[11.5px] text-slate-400">
+        <ul className="mt-3 space-y-1 border-t border-slate-100 pt-3 text-[11.5px] text-slate-600">
           {tier.restrictions.map((r) => (
             <li key={r} className="flex items-baseline gap-2"><span className="mt-0.5 shrink-0">→</span> {r}</li>
           ))}
@@ -298,7 +298,7 @@ const TierCard: React.FC<{ tier: Tier; onAct: () => void }> = ({ tier, onAct }) 
           <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-700">
             <span aria-hidden>🔒</span> {tier.lockedTeaser}
           </div>
-          <div className="mt-0.5 text-[10.5px] text-blue-600/80">Upgrade required to unlock buyer identities and engage.</div>
+          <div className="mt-0.5 text-[10.5px] text-blue-700">Upgrade required to unlock buyer identities and engage.</div>
         </div>
       )}
       <button onClick={onAct} className={`mt-5 w-full px-4 py-3 text-[12.5px] font-semibold transition ${t.btn}`}>
