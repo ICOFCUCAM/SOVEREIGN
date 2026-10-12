@@ -392,7 +392,7 @@ Built and judged as previews (designs 10–17), then adopted onto this branch on
 | BB6 | Owner: "the visual presence of the newly added widgets are not felt". | Each widget given weight: a large stage panel with previous/next and a progress strip; the valuation result in a navy card with a gradient gauge, ticks and a midpoint pin; the ledger in a toolbar panel with status counts, a navy summary strip and value bars; a dark chapter rail with a progress line and a reading bar; question cards with a briefing prompt; larger hero figures with drawn rules. | closed `b64be532` |
 | BB7 | Further premiumisation and iconicity. | A signature line in the right margin joining the chapters and drawing as you read; a navy bookend with the ExitOS wordmark; module rows opening to their engine structure (`MODULE_PREVIEW`: readiness weights, methodologies, formats, packages — never a sample company's scores); one chapter-reveal motion system; the hero's edition line ("Edition of {date} · from the registry's daily refresh"); typography finishing (balanced headlines, pretty paragraphs, hanging punctuation, old-style figures in serif text). | closed `f4fe56e5` |
 | BB8 | Owner uploaded two videos and asked to use the good one. | `public/1.mp4` graded to the navy palette, trimmed to a seamless 4.6 s loop, compressed to 1.4 MB (MP4 + WebM, poster), played muted behind chapter 08 under a navy veil; loads only near view, pauses off-screen, never plays under reduced motion. Placeholder — pre-launch gate G1. `public/2.mp4` not used (another product's invented figures). | closed `8b3b92dc` |
-| BB9 | `BoardRoom.tsx` (BB2–BB3) is unused since BB4. | Remove it; the hall component `TradingHall.tsx` stays for the dev-only hero lab. | open |
+| BB9 | `BoardRoom.tsx` (BB2–BB3) is unused since BB4. | Remove it; the hall component `TradingHall.tsx` stays for the dev-only hero lab. | closed `ffe4035e` |
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
 | # | Gate | Status |
@@ -873,6 +873,9 @@ Preview design 16. Reveal checked: below-fold headlines hidden until reached, no
 
 ### BB8 — closed 8b3b92dc
 Preview design 17 (AmbientVideo.tsx, public/media/). Playback checked in Chromium with the WebM source: paused and not downloaded at the top, playing in view (t ≈ 2.8 s), paused again off-screen; under reduced motion never downloaded, poster only. Loop seam: first-vs-last frame difference 28.7 → 4.3. tsc, eslint 0 errors, vitest 243/243, build; axe 0 after a full scroll; keyboard 129/0. Placeholder footage — pre-launch gate G1.
+
+### BB9 — closed ffe4035e
+BoardRoom.tsx removed (no imports anywhere since BB4). TradingHall.tsx stays for the dev-only hero lab. tsc, eslint 0 errors, vitest 243/243.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
