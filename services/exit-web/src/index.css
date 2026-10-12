@@ -33,6 +33,14 @@ body {
 ::-webkit-scrollbar-thumb { background: #243353; border-radius: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
+/* the marketing site's own ground (home, platform, modules, pricing): the canvas behind an overscroll is
+   porcelain above and graphite below, as the page itself is; scrollbars and text selection in the palette */
+html:has(.ex-site) { background: linear-gradient(180deg, #F8F4EE 50%, #111310 50%); scrollbar-color: #B8AC9A transparent; }
+html:has(.ex-site) body { background: transparent; }
+html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px solid transparent; background-clip: padding-box; }
+.ex-site ::selection { background: rgba(180,154,117,0.32); color: inherit; }
+.ex-site :where([data-ink], footer) ::selection { background: rgba(201,176,138,0.4); color: #fff; }
+
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
 
