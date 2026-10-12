@@ -407,6 +407,8 @@ Built and judged as previews (designs 10–17), then adopted onto this branch on
 | # | Gate | Status |
 |---|---|---|
 | G1 | **Placeholder footage.** The closing chapter's background film is the owner's uploaded `public/1.mp4` (a meeting), graded to the navy palette, trimmed to a seamless 4.6 s loop and compressed (7.6 MB → 1.4 MB) as `services/exit-web/public/media/boardroom-loop.mp4`. Before launch: confirm it shows a genuine ExitOS event and hold written consent from every recognisable person — or replace it. (`public/2.mp4` was not used: its tablet shows another product's invented figures.) | open — owner decision 2026-10-12: use as placeholder now |
+| G2 | **Client proof.** `lib/proof.ts` is empty, so the "In confidence" section renders nothing. Before launch, add only real proof: client names (with written permission to be named), an attributed quote (named person, role, approval of the exact wording), press mentions (outlet, title, link, date). Each entry's `permission` field records who agreed and when. | open — needs the owner |
+| G3 | **Photography and film.** The site has no commissioned imagery; the only film is the G1 placeholder. Spec for replacements: stills ≥ 2560×1440, film 1920×1080 H.264 + WebM, ≤ 10 s seamless loop, no audio, ≤ 2 MB each after compression, shot dark and cool so it grades into the navy palette; subjects: the trading desk, a founder meeting, hands on documents — no screens showing figures that are not ExitOS's. Releases for every recognisable person. | open — needs the owner |
 
 ## Closure log
 

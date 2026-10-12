@@ -9,6 +9,7 @@ import LedgerTable from "../components/LedgerTable";
 import CountUp from "../components/CountUp";
 import ChapterRail from "../components/ChapterRail";
 import PhoneActionBar from "../components/PhoneActionBar";
+import ProofSection from "../components/ProofSection";
 import ModulePreview from "../components/ModulePreview";
 import SignatureLine from "../components/SignatureLine";
 import AmbientVideo from "../components/AmbientVideo";
@@ -298,6 +299,9 @@ const Landing: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* real client proof — renders nothing until lib/proof.ts holds entries (CC4, gate G2) */}
+      <ProofSection />
 
       {/* ===== 07 · QUESTIONS — what founders ask first, answered from the Pricing and Platform pages ===== */}
       <section id="ch-07" aria-labelledby="faq-h" className="border-b border-slate-200 bg-[#f6f8fb] text-ink-900">
