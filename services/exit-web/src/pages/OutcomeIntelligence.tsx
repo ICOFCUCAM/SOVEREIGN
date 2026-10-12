@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MarketTape, Evidence } from "../lib/workstation";
+import { Evidence } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
 import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { BuyerNetworkReactor } from "../components/Reactor";
@@ -42,7 +43,7 @@ const OutcomeIntelligence: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Top premium" emphasis value={premium[0] ? `${Math.round((premium[0].premium_pct ?? 0) * 100)}%` : "—"} sub={premium[0]?.name} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Buyer network reactor" className="lg:col-span-3" foot="Active acquirers · node size ∝ 12-month cadence.">

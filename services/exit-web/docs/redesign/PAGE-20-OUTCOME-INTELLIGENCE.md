@@ -33,7 +33,7 @@ Market-level outcomes: the buyers paying the highest premiums, the fastest close
 |---|---|---|---|
 | G1 | **Premium and close figures attributed to "disclosed deals" with a disclosed-deal count as the sample.** | Source named as curated outcome records matched by buyer name; disclosed registry deals shown as their own labelled column; caveat about name matching (X15). | ☑ `868fc34` |
 | G2 | Framework priors presented as "what commands the strongest valuation". | Title "Sector multiple priors (framework)"; comment corrected. | ☑ `5114fe1` |
-| G3 | Fake live tape. | `RegistryTape`. | ☐ |
+| G3 | Fake live tape. | `RegistryTape`. | ☑ G3-commit |
 | G4 | Design: no `h1`, 12 contrast failures, header-less tables. | Rebuild on `xo` with table headers. | ☑ `80fcfff` |
 
 ---
@@ -59,3 +59,7 @@ Market-level outcomes: the buyers paying the highest premiums, the fastest close
 ### G2 — Framework priors presented as market evidence
 *Closed by:* `pages/OutcomeIntelligence.tsx` (labels). "Sectors by multiple · what commands the strongest valuation" → **"Sector multiple priors (framework)"**, eyebrow "Ranked by mid multiple — priors, not observed deal multiples"; metric "Sectors benchmarked" → "Sector priors — framework multiple bands"; code comment updated. The existing foot ("Institutional multiple priors, framework-governed …") stays.
 *Verification:* eslint clean · Chromium: new title present, 0 "strongest valuation".
+
+### G3 — Fake live tape
+*Closed by:* `pages/OutcomeIntelligence.tsx`: pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
