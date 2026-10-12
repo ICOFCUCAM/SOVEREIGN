@@ -436,7 +436,7 @@ const Landing: React.FC = () => {
               <h2 className={`${H2} text-ink-900`}><Editorial text={t("mp.h2")} /></h2>
               <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
                 <p className="max-w-md text-[14px] leading-relaxed text-slate-600">{t("mp.body")}</p>
-                <a href="/marketplace" className="border-b border-blue-600 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-900">{t("mp.link")} ↗</a>
+                <Link to="/console/marketplace" className="border-b border-blue-600 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-900">{t("mp.link")} ↗</Link>
               </div>
             </div>
           </div>

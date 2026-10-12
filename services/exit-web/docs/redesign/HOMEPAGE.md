@@ -108,7 +108,7 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 | M3 | **Unverified security and compliance claims.** | Remove "SOC 2" and the audit-trail, access-log, "secured", encryption and verification claims. Each slot is kept and states what the product does (for example "Your own actions are recorded", "NDA-gated identity: listings show a codename and bands until an NDA is signed", "Founder approval at each agent step", "Record checks on each NDA, not identity or funds verification", "Data-room uploads: read who can see them before adding files"). Owner can restore any claim with evidence (open decision). | ☑ `53ade1c7` |
 | M4 | **Illustrative content shown as real.** | Visible "Illustrative" labels on the cross-bid table and the example listings; "Market Heat" shows the registry-derived heat label instead of a constant. | ☑ `d38267fd` |
 | M5 | **Overclaims in copy.** | "AI valuation" → "Deterministic valuation"; "Offer optimisation captures the premium" → "Offers compared on structure and certainty"; "verified acquirer mandates" → "curated acquirer mandates"; board "Match Score" → "Activity score". | ☑ `868699d9` |
-| M6 | **Broken link** `/marketplace`. | Point "How the listing protocol works" to the marketplace inside the exchange (`/console/marketplace`; signed-out users see sign-in). | ☐ |
+| M6 | **Broken link** `/marketplace`. | Point "How the listing protocol works" to the marketplace inside the exchange (`/console/marketplace`; signed-out users see sign-in). | ☑ M6-commit |
 | M7 | **Accessibility.** | A `main` landmark in the chrome (all marketing pages); contrast ≥ 4.5:1 for text (locked colours kept, opacities/shade steps within the same palette adjusted); the empty table header labelled; the drill-down as a real dialog (focus, Escape, `aria-modal`); the scrolling matrix keyboard-focusable; decorative map and graphics `aria-hidden`. Target: axe 0 on `/` at 1440 and 390. | ☐ |
 | M8 | **Motion ignores reduced-motion.** | All homepage animations (ticker, scan, travelling dots, SVG `animateMotion`) honour `prefers-reduced-motion: reduce` — no animation when set. | ☐ |
 | M9 | **i18n.** | Every copy change above is made in EN, FR and ES together; new strings get keys in all three. | ☐ (closed with each gap) |
@@ -223,6 +223,10 @@ These strings sit beside the page's other hard-coded English data constants (the
 
 **Not changed (owner decision):** the board's "Match Score" column stays, because the command board is kept as built. Also kept is the negotiation feature "Offer optimization — Maximise value and certainty", which describes the Bid Room's purpose rather than claiming a result.
 *Verification:* `tsc -b`, eslint clean · `vitest` 218/218 · Chromium `/`: "AI" now appears only in sector names ("AI Infrastructure") and registry theses; "verified" only in the confidence tier ("Disclosed in a public filing") and the "does not verify" line, in all three locales; 0 errors.
+
+### M6 — Broken link `/marketplace`
+*Closed by:* `pages/Landing.tsx`. The "How the listing protocol works" link went to `/marketplace`, which is not a route, so the catch-all sent users back to `/`. It now uses a router `Link` to `/console/marketplace`. Signed-out users see the sign-in form at that address and land on the marketplace after signing in.
+*Verification:* `tsc -b`, eslint clean · Chromium: click while signed out → `/console/marketplace` with the sign-in form; sign in as a founder → stays on `/console/marketplace`, `h1` "Exit Marketplace".
 
 ---
 
