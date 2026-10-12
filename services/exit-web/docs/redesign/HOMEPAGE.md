@@ -219,7 +219,7 @@ U1 + U2 + U4 first: a live product moment, a signature look and visible proof, w
 |---|---|---|
 | U1 | Value your company in 30 seconds | ☑ `7e3680d0` |
 | U2 | The broadsheet ledger | ☑ `8b02e07a` |
-| U4 | Numbered source notes | ☑ U4-commit |
+| U4 | Numbered source notes | ☑ `c5460e24` |
 
 
 ---
