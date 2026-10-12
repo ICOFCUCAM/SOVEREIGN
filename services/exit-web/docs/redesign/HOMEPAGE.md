@@ -399,7 +399,7 @@ Built and judged as previews (designs 10–17), then adopted onto this branch on
 |---|---|---|---|
 | CC1 | Buyer pricing contradicts itself: Pricing shows Buyer Access $299/mo and Premium $2,499/mo; the console's Upgrade page says "Buyer pricing is not published yet" and shows buyers the founder ladder. The product gates buyers with the shared plan keys: `free` browses (marketplace, research, radar, activity); `pro` unlocks the buyer Deal Room and Access Requests. Nothing implements Premium's introductions, saved searches, alerts, priority processing or the 10-inquiry limit. | One source, `lib/buyer-pricing.ts`, used by both pages. Observer $0 = `free`; Buyer Access $299/mo = `pro` (Deal Room + NDA access requests); Premium $2,499/mo kept at its price but marked "by request" (a human-run introductions service, no session switch). Features list only what exists. Upgrade shows buyers the buyer ladder. | closed `c0bcc3bd` |
 | CC2 | Shared links show no designed preview: no Open Graph / Twitter card image or tags. | A 1200×630 share card rendered from the dark hero (headline, the three figures, the lifecycle line) as `public/og/exitos-card.png`, with `og:*` and `twitter:*` tags in `index.html`. | closed `edbfb469` |
-| CC3 | On phones the main action scrolls away with the hero. | A slim bottom bar with "Access the Exchange" that appears once the hero has scrolled out and hides at the closing chapter; phones only; respects the safe-area inset; not shown under 640 px height landscape. | open |
+| CC3 | On phones the main action scrolls away with the hero. | A slim bottom bar with "Access the Exchange" that appears once the hero has scrolled out and hides at the closing chapter; phones only; respects the safe-area inset; not shown under 640 px height landscape. | closed `8eaf86be` |
 | CC4 | Real photography/film and client proof are the largest remaining premium gains, and neither exists yet. | No invented proof. A `lib/proof.ts` registry (empty by default) and a `ProofSection` that renders only when real entries exist (client names with permission, a quote with attribution, a press mention with link); film and photography slots documented with the media spec. Pre-launch gate G2 added. | open |
 
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
@@ -891,6 +891,9 @@ lib/buyer-pricing.ts is the one source. Pricing: buyer cards and section intro f
 
 ### CC2 — closed edbfb469
 public/og/exitos-card.png (1200×630) rendered by scripts/og-card.mjs from the running homepage's own figures and edition date (6,311 · 31 · $379.1B · Edition of Oct 11, 2026); og:type/site_name/image(+size, alt) and twitter:card/title/description/image added to index.html; the meta description's 'every action audited' (an M3 claim) replaced by 'nothing is sent without you'. Build copies the card to dist/og/; tags present in dist/index.html. The card is a snapshot: re-run the script before each release.
+
+### CC3 — closed 8eaf86be
+PhoneActionBar.tsx: one full-width action, 'Value my company · 30 seconds' → chapter 03 (the header already pins 'Access the Exchange', so the bar does not repeat it). Browser-checked: 390×844 hidden over the hero, shown mid-page, hidden at chapter 08 and at the footer, jump lands on chapter 03 (top 0); never shown at 1440×900 or 844×390 landscape. Safe-area inset respected; visibility:hidden when stowed (out of the tab order). EN/FR/ES. tsc, vitest 243/243; axe 0 at 1440/390; keyboard 129/0.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
