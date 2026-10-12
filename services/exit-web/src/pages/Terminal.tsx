@@ -12,6 +12,7 @@ import { buildMarketTape } from "../lib/market-tape";
 import { sectorSignals } from "../lib/sector-signals";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import BuyerInterestGate from "../components/BuyerInterestGate";
+import StartHere from "../components/StartHere";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
 // Page 01 of the ExitOS institutional redesign (docs/redesign/PAGE-01-
@@ -150,6 +151,8 @@ const Terminal: React.FC = () => {
           Market data is a registry snapshot as of <span className="font-mono tabular-nums text-xo-text">{asOf}</span>.
         </p>
       </header>
+
+      {role === "founder" && <StartHere />}
 
       {/* ── 2 · VALUE + DECISION METRICS ────────────────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">

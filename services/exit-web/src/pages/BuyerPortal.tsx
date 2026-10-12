@@ -6,6 +6,7 @@ import { allListings } from "../lib/listings";
 import { subscribe } from "../lib/deal-events";
 import { PageHeader, Section, Metric, Chip, Provenance } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
+import StartHere from "../components/StartHere";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import {
@@ -83,6 +84,8 @@ const BuyerPortal: React.FC = () => {
       <PageHeader eyebrow="◉ Buyer Console" title="Buyer Home"
         badge={<Provenance kind="demo">Demo seat</Provenance>}
         description={<>The workstation below shows a <span className="font-semibold text-xo-text">demo seat — {SEAT.entry?.name ?? "a registry buyer"}</span>, the registry buyer the matching engine ranks #{SEAT.rank} for the demo listing. It is not your account. Your own NDA requests are on <Link to="/console/nda" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Access Requests</Link>.</>} />
+
+      <StartHere />
 
       <YourActivity />
 

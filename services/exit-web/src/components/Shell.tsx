@@ -7,6 +7,7 @@ import { ExchangeMark } from "./ExchangeMark";
 import InstitutionalRibbon from "./InstitutionalRibbon";
 import LayerBar from "./LayerBar";
 import LayerSubNav from "./LayerSubNav";
+import { guideState, markVisited, onGuideChange, setGuideHidden } from "../lib/onboarding";
 
 // Role-aware console rail. The navigation is driven by the access policy:
 // founders, buyers, admins and superadmins see different command centers, and
@@ -38,6 +39,13 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const items = navForRole(role);
   const [noticeDismissed, setNoticeDismissed] = useState(false);
   const showStarterNotice = role === "founder" && plan === "starter" && !noticeDismissed;
+
+  // Pages opened in this browser — the "Opened" marks in the Start-here guide.
+  // A plan-gated page shows the upgrade screen instead, so it is not marked.
+  useEffect(() => { if (!needsUpgrade(loc.pathname, role, plan)) markVisited(loc.pathname); }, [loc.pathname, role, plan]);
+  const [guideHidden, setGuideHiddenState] = useState(() => guideState().hidden);
+  useEffect(() => onGuideChange(() => setGuideHiddenState(guideState().hidden)), []);
+  const showGuideLink = guideHidden && (role === "founder" || role === "buyer");
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => { setNavOpen(false); }, [loc.pathname, loc.hash]);
@@ -130,6 +138,10 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <span className="rounded bg-white/10 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-white/70">{ROLE_LABEL[role]}</span>
               <span className={`rounded px-1.5 py-0.5 font-semibold uppercase tracking-wide ${plan === "pro" ? "bg-deal-600/25 text-deal-300" : plan === "starter" ? "bg-loi-500/20 text-loi-300" : "bg-white/10 text-white/55"}`}>{plan}</span>
             </div>
+            {showGuideLink && (
+              <Link to={role === "buyer" ? "/console/buyer-portal" : "/console"} onClick={() => setGuideHidden(false)}
+                className="mb-2 block text-xs font-semibold text-white/70 hover:text-white">Show the Start-here guide</Link>
+            )}
             {plan !== "pro" && (role === "founder" || role === "buyer") && (
               <Link to="/console/upgrade" className="mb-2 block text-xs font-semibold text-deal-300 hover:text-deal-200">Upgrade to Pro →</Link>
             )}
