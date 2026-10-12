@@ -36,13 +36,13 @@ const MarketMap: React.FC = () => {
       <section aria-label="Registry totals" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Indexed acquisitions" emphasis value={m.totalEvents.toLocaleString()} sub="queryable events" /></div>
         <div className="bg-xo-panel"><Metric label="Disclosed value" value={<span className="text-xo-verified">{fmtUsd(m.totalDisclosedUsd)}</span>} sub={`${m.disclosedEvents.toLocaleString()} priced deals`} /></div>
-        <div className="bg-xo-panel"><Metric label="Active sectors" value={String(m.sectorHeat.length)} sub="by deal volume" /></div>
-        <div className="bg-xo-panel"><Metric label="Active acquirers" value={String(m.topAcquirers.length)} sub="top of registry" /></div>
+        <div className="bg-xo-panel"><Metric label="Sectors shown" value={String(m.sectorHeat.length)} sub="top by deal volume" /></div>
+        <div className="bg-xo-panel"><Metric label="Acquirers listed" value={String(m.topAcquirers.length)} sub="top by deal count" /></div>
       </section>
 
       <MarketTape items={tape} />
 
-      <Section title="Transaction heatfield · where capital is moving" className="border border-xo-line"
+      <Section title="Transaction heatfield · by sector, snapshot" className="border border-xo-line"
         foot="Column height = acquisition volume · heat = disclosed value · cap = trend. Aggregated from the registry snapshot (mostly unverified, source-cited entries)."
         right={<Disclosure open={showHeatData} onToggle={() => setShowHeatData(!showHeatData)} controls="heat-data">{showHeatData ? "Hide data" : "Show data"}</Disclosure>}>
         <div aria-hidden><TransactionHeatfield height={190} /></div>
@@ -72,14 +72,15 @@ const MarketMap: React.FC = () => {
           foot="Concentric wells of disclosed deal value per sector — arc length ∝ disclosed value.">
           <div aria-hidden><LiquidityReactor height={210} /></div>
         </Section>
-        <Section title="Sector heat · deal volume" className="lg:col-span-4" foot="Colour intensity = deal volume. Hover for disclosed value.">
+        <Section title="Sector heat · deal volume" className="lg:col-span-4" foot="Colour intensity = deal volume. Each cell shows deals and disclosed value.">
           <ul className="grid grid-cols-3 gap-px bg-xo-line sm:grid-cols-4">
             {m.sectorHeat.slice(0, 24).map((s) => {
               const f = s.deals / sectorMax;
               return (
                 <li key={s.token} className="min-w-0 p-2" style={{ background: heat(f) }} title={`${s.deals} deals · ${fmtUsd(s.disclosedUsd)} disclosed`}>
                   <div className={`truncate text-[11px] font-semibold capitalize ${f > 0.6 ? "text-xo-ink" : "text-xo-text"}`}>{s.token}</div>
-                  <div className={`font-mono text-[12px] tabular-nums ${f > 0.6 ? "text-xo-ink" : "text-xo-text"}`}>{s.deals}</div>
+                  <div className={`font-mono text-[12px] tabular-nums ${f > 0.6 ? "text-xo-ink" : "text-xo-text"}`}>{s.deals}<span className="sr-only"> deals</span></div>
+                  <div className={`truncate font-mono text-[11px] tabular-nums ${f > 0.6 ? "text-xo-ink" : "text-xo-muted"}`}>{fmtUsd(s.disclosedUsd)}<span className="sr-only"> disclosed</span></div>
                 </li>
               );
             })}
