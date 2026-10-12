@@ -3,32 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { MarketingChrome, Glyph, Arrow, Chapter, Editorial, MK, PageHero } from "../components/MarketingChrome";
 import { NegotiationDesk, BuyerIntelligence, ExampleListings } from "../components/ExchangeBlocks";
 import { SourcesSection } from "../components/SourceNotes";
-import { MODULE_FACTS } from "../lib/module-stats";
+import { FOUNDER_MODULES, BUYER_MODULES, type Mod } from "../lib/module-list";
 
 // Modules — the marketing breakdown of what's inside the console, split by the
 // side of the table the user sits on. Each card's stat line is computed from
 // the live engines (see lib/module-stats.ts), never typed in by hand.
-
-interface Mod { icon: string; name: string; body: string; stat?: string }
-
-const FOUNDER_MODULES: Mod[] = [
-  { icon: "chart", name: "Valuation Engine", body: "DCF, comparables and revenue/EBITDA multiples, recomputed from your figures.", stat: MODULE_FACTS.valuation },
-  { icon: "spark", name: "Exit Readiness Score", body: "A money-tied score across weighted dimensions with each fix priced.", stat: MODULE_FACTS.readiness },
-  { icon: "globe", name: "Buyer Intelligence", body: "Likelihood, range, timing, risk and synergy for every acquirer.", stat: MODULE_FACTS.buyerIntel },
-  { icon: "users", name: "Outreach", body: "Teasers, CIMs and a sequenced campaign — drafted by the banker for you to send.", stat: MODULE_FACTS.outreach },
-  { icon: "lock", name: "Data Room", body: "A document checklist, completeness-scored, with the dollar impact of every gap.", stat: MODULE_FACTS.dataRoom },
-  { icon: "doc", name: "Documents", body: "CIM, teaser, deck and LOIs, red-teamed against your real numbers.", stat: MODULE_FACTS.documents },
-  { icon: "chart", name: "Negotiator", body: "Offer scoring, counters, protective clauses and earnout alternatives." },
-  { icon: "check", name: "Closing Center", body: "The closing checklist: signatures, escrow and filings, item by item." },
-  { icon: "shield", name: "WealthOS", body: "Proceeds, taxes, trusts, family office and reinvestment after close." },
-];
-
-const BUYER_MODULES: Mod[] = [
-  { icon: "globe", name: "Marketplace", body: "Browse anonymized opportunities matched to your thesis.", stat: MODULE_FACTS.marketplace },
-  { icon: "chart", name: "Acquisition Radar", body: "Sector signals from the registry — deals, mandates and demand.", stat: MODULE_FACTS.radar },
-  { icon: "lock", name: "Deal Room", body: "Diligence access for companies that accept your NDA request." },
-  { icon: "doc", name: "Access Requests", body: "Request NDA-gated identity and packages, tracked end to end." },
-];
 
 const ModCard: React.FC<{ m: Mod; dark?: boolean }> = ({ m, dark }) => (
   <div className={`flex flex-col py-6 sm:px-6 ${dark ? "" : "bg-[#f6f8fb]"}`} style={dark ? { background: "#08203B" } : undefined}>

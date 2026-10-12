@@ -8,6 +8,11 @@ import TradingHall from "../components/TradingHall";
 import ExchangeMap from "../components/ExchangeMap";
 import { Note, SourcesSection, type SourceId } from "../components/SourceNotes";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
+import { FOUNDER_MODULES, BUYER_MODULES } from "../lib/module-list";
+
+// Section 02: four modules from the catalogue, one per stage of the route on the map.
+const HOME_MODULES = ["Acquisition Radar", "Valuation Engine", "Buyer Intelligence", "Data Room"]
+  .map((n) => [...FOUNDER_MODULES, ...BUYER_MODULES].find((m) => m.name === n)!);
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
 // marketing chrome (header nav → Platform / Modules / Pricing + footer).
@@ -32,66 +37,63 @@ const Landing: React.FC = () => {
   const h1 = heroLines(t("hero.h1"));
   return (
     <MarketingChrome active="home">
-      {/* ===== 01 · HERO — the deal atlas (Z1, after the owner's index(8).html) ===== */}
+      {/* ===== 01 · HERO — the deal atlas (Z1/Z2, after the owner's index(8).html, on the homepage spec) ===== */}
       <section className="border-b border-ink-900 bg-[#f6f8fb] text-ink-900">
         <div className={`${WRAP} pt-8`}>
-          <div className="flex justify-between gap-6 border-b border-slate-300 pb-4 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
-            <span>{t("hero.eyebrow")}</span><span className="text-right">01 — {t("hero.asof")} {MARKET_INDEX_FMT.asOf}</span>
+          <div className="flex justify-between gap-6 border-b border-ink-900 pb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
+            <span>{t("hero.eyebrow")}</span><span className="text-right">No. 01 · {t("hero.asof")} {MARKET_INDEX_FMT.asOf}</span>
           </div>
           <div className="grid items-end gap-10 py-12 sm:py-14 lg:grid-cols-[minmax(0,1.4fr)_minmax(270px,0.6fr)] lg:gap-[6%] lg:py-16">
-            <h1 className="max-w-[11ch] text-[clamp(3.5rem,9.2vw,9.8rem)] font-medium leading-[0.84] tracking-[-0.075em]">
+            <h1 className="max-w-[12ch] font-editorial text-[clamp(3.4rem,8.4vw,8.8rem)] font-semibold leading-[0.9] tracking-[-0.05em]">
               {h1.map((l, i) => i === h1.length - 1
-                ? <em key={i} className="block font-editorial font-normal italic tracking-[-0.05em] text-blue-700">{l}</em>
+                ? <em key={i} className="block italic text-blue-600">{l}</em>
                 : <span key={i}>{l} </span>)}
             </h1>
             <div className="max-w-[420px] border-l border-blue-600 pl-6">
-              <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-700"><span aria-hidden className="h-px w-6 bg-blue-600" />{t("hero.atlas")}</div>
-              <p className="mt-5 font-editorial text-[19px] leading-snug">{t("hero.sub")}</p>
+              <p className="font-editorial text-[20px] leading-snug">{t("hero.sub")}</p>
               <p className="mt-3 text-[14.5px] leading-relaxed text-slate-600">{t("hero.body")}</p>
               <div className="mt-7 flex flex-wrap gap-2.5">
-                <button onClick={() => nav("/console")} className={`${BTN} border border-ink-900 bg-ink-900 text-white hover:border-blue-700 hover:bg-blue-700`}>{t("nav.access")} <Arrow /></button>
-                <button onClick={() => nav("/pricing")} className={`${BTN} border border-ink-900 text-ink-900 hover:border-blue-700 hover:bg-blue-700 hover:text-white`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+                <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("nav.access")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={`${BTN} border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
               </div>
-              <div className="mt-7 flex items-center gap-4 font-mono text-[10px] text-slate-600"><span aria-hidden className="h-px w-9 bg-slate-300" />{t("hero.index")}</div>
             </div>
           </div>
           {/* 01 / discover the field — the sale process as a route across the market */}
           <ExchangeMap />
-          {/* four statements, each with the proof figure it rests on */}
+          {/* the proof figures, as the homepage has always set them: serif numerals, a label, the source note */}
           <div className="grid grid-cols-2 sm:grid-cols-4">
-            {([
-              ["tk.1l", "tk.1", MARKET_INDEX_FMT.events, t("ribbon.deals"), 1, true],
-              ["tk.2l", "tk.2", MARKET_FMT.buyers, t("ribbon.mandates"), 2, true],
-              ["tk.3l", "tk.3", MARKET_FMT.activeMandates, t("ribbon.deploying"), 2, false],
-              ["tk.4l", "tk.4", HISTORY_FMT.disclosedValue, t("ribbon.value"), 3, true],
-            ] as const).map(([lk, sk, v, l, n, first], i) => (
-              <div key={lk} className={`py-6 pr-4 ${i % 2 ? "pl-4 sm:pl-5" : ""} ${i > 1 ? "sm:pl-5" : ""} ${i < 2 ? "border-b border-slate-300 sm:border-b-0" : ""} ${i % 2 === 0 ? "border-r border-slate-300" : "sm:border-r sm:border-slate-300"} ${i === 3 ? "sm:border-r-0" : ""}`}>
-                <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600"><span className="text-blue-700">0{i + 1}</span> / {t(lk)}</div>
-                <div className="mt-2.5 font-editorial text-[clamp(1.4rem,2.2vw,1.9rem)] leading-tight tracking-[-0.02em]">{t(sk)}</div>
-                <div className="mt-2 text-[12.5px] text-slate-600"><b className="font-semibold text-ink-900">{v}</b> {l}<Note n={n as SourceId} first={first} /></div>
+            {[
+              [MARKET_INDEX_FMT.events, t("ribbon.deals")],
+              [MARKET_FMT.buyers, t("ribbon.mandates")],
+              [HISTORY_FMT.disclosedValue, t("ribbon.value")],
+              [MARKET_FMT.activeMandates, t("ribbon.deploying")],
+            ].map(([v, l], i) => (
+              <div key={l} className={`py-6 pr-4 ${i % 2 ? "pl-4" : ""} ${i > 1 ? "sm:pl-5" : ""} ${i < 2 ? "border-b border-slate-300 sm:border-b-0" : ""} ${i % 2 === 0 ? "border-r border-slate-300" : "sm:border-r sm:border-slate-300"} ${i === 3 ? "sm:border-r-0" : ""}`}>
+                <div className="font-editorial text-[clamp(1.9rem,2.8vw,2.6rem)] font-semibold leading-none tracking-[-0.02em]">{v}</div>
+                <div className="mt-2 text-[12.5px] text-slate-600">{l}<Note n={([1, 2, 3, 2] as SourceId[])[i]} first={i < 3} /></div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ===== 02 · WHAT THE EXCHANGE CONNECTS (Z1) ===== */}
-      <section aria-labelledby="cap-h" className="border-b border-slate-200 bg-white text-ink-900">
-        <div className={`${WRAP} py-[clamp(72px,8vw,128px)]`}>
-          <div className="mb-12 grid items-end gap-7 lg:grid-cols-[1fr_0.7fr] lg:gap-[7%]">
-            <div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-blue-700">02 / {t("cap.index")}</div>
-              <h2 id="cap-h" className="mt-4 text-[clamp(2.9rem,6vw,5.5rem)] font-medium leading-[0.88] tracking-[-0.07em]">{t("cap.h2")}<em className="block font-editorial font-normal italic tracking-[-0.04em] text-blue-700">{t("cap.h2em")}</em></h2>
-            </div>
-            <p className="max-w-[380px] text-[14px] leading-[1.85] text-slate-600">{t("cap.body")}</p>
+      {/* ===== 02 · THE MODULES — the site's own catalogue, live engine stats (Z3) ===== */}
+      <section aria-labelledby="mods-h" className="border-b border-slate-200 bg-white text-ink-900">
+        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
+          <div className="border-t-4 border-double border-ink-900 pt-8">
+            <Chapter n="02">The modules</Chapter>
+            <h2 id="mods-h" className="mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text="Every module a sell-side desk needs." /></h2>
           </div>
-          <div className="border-t border-ink-900">
-            {[1, 2, 3, 4].map((k) => (
-              <Link key={k} to="/modules" className="group grid grid-cols-[28px_1fr_22px] items-center gap-x-3 gap-y-1.5 border-b border-slate-300 py-6 transition-[background-color,padding] hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 motion-safe:hover:px-3 sm:grid-cols-[58px_1fr_0.85fr_35px] sm:gap-x-5 sm:py-7">
-                <span className="font-mono text-[10.5px] text-blue-700">0{k}</span>
-                <h3 className="text-[clamp(1.35rem,2.5vw,2.25rem)] font-medium tracking-[-0.05em]">{t(`cap.${k}`)}</h3>
-                <p className="col-start-2 row-start-2 max-w-[420px] text-[13px] leading-relaxed text-slate-600 sm:col-start-3 sm:row-start-1">{t(`cap.${k}d`)}</p>
-                <span aria-hidden className="col-start-3 row-span-2 row-start-1 text-right text-[22px] transition-transform group-hover:text-blue-700 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5 sm:col-start-4 sm:row-span-1">↗</span>
+          <div className="mt-12 border-t border-ink-900">
+            {HOME_MODULES.map((m, k) => (
+              <Link key={m.name} to="/modules" className="group grid grid-cols-[28px_1fr_22px] items-center gap-x-3 gap-y-1.5 border-b border-slate-300 py-6 transition-[background-color,padding] hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 motion-safe:hover:px-3 sm:grid-cols-[58px_1fr_1fr_35px] sm:gap-x-5 sm:py-7">
+                <span className="font-mono text-[11px] text-blue-600">0{k + 1}</span>
+                <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{m.name}</h3>
+                <div className="col-start-2 row-start-2 max-w-[440px] sm:col-start-3 sm:row-start-1">
+                  <p className="text-[14px] leading-relaxed text-slate-600">{m.body}</p>
+                  {m.stat && <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{m.stat}</p>}
+                </div>
+                <span aria-hidden className="col-start-3 row-span-2 row-start-1 text-right text-[22px] transition-transform group-hover:text-blue-600 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5 sm:col-start-4 sm:row-span-1">↗</span>
               </Link>
             ))}
           </div>
@@ -102,7 +104,7 @@ const Landing: React.FC = () => {
       <section aria-labelledby="hall-h">
         <TradingHall head={
           <div className={`${WRAP} relative pb-24 pt-20 text-white`}>
-            <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.24em] text-blue-300"><span aria-hidden className="h-px w-12 bg-blue-300/70" /><span>03 / {t("hall.eyebrow")}</span></div>
+            <Chapter n="03" dark>{t("hall.eyebrow")}</Chapter>
             <h2 id="hall-h" className="mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic text-blue-300">{t("hall.h2em")}</em></h2>
           </div>
         }>
