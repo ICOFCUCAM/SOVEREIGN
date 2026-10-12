@@ -157,8 +157,14 @@ const Landing: React.FC = () => {
           </div>
           {/* the right-hand box: the lifecycle graph alone (DD3), its caption beneath */}
           <figure className="m-0 min-w-0">
-            <div className="shadow-[0_40px_80px_-40px_rgba(7,26,49,0.6)]">
-              <ExchangeMap dark compact bare />
+            {/* an object on the paper, not a fourth dark band: a fine ink bezel with a lit top edge and corner registers (EE10) */}
+            <div className="relative rounded-[10px] bg-ex-0 p-[5px] shadow-[inset_0_1px_0_rgba(200,225,255,0.16),0_0_0_1px_rgba(10,33,66,0.12),0_40px_80px_-40px_rgba(7,26,49,0.6),0_18px_36px_-24px_rgba(7,26,49,0.35)]">
+              <div className="relative overflow-hidden rounded-[6px]">
+                <ExchangeMap dark compact bare />
+              </div>
+              {(["left-2 top-2 border-l border-t", "right-2 top-2 border-r border-t", "left-2 bottom-2 border-l border-b", "right-2 bottom-2 border-r border-b"] as const).map((c) => (
+                <span key={c} aria-hidden className={`pointer-events-none absolute h-3 w-3 border-blue-300/40 ${c}`} />
+              ))}
             </div>
             <figcaption className="mt-4 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
               <span aria-hidden className="h-3 w-3 shrink-0 bg-blue-600" /><span>{t("lifecycle.title")} · {t("lifecycle.live")}<Note n={6} first /></span>
