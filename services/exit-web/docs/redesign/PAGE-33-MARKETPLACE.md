@@ -38,8 +38,12 @@ Founder free and Pro, buyer free: `h1` none · axe **dlitem ×18** (`dt`/`dd` ou
 | G4 | **Ask band conflicts with D1; match score as %; false mechanics.** | Asking band and check size from `canonicalValuationFor` ($103M mid for the demo); "match score N/100"; mechanics stated truthfully (no data release on NDA; no engagement feed). | ☐ |
 | G5 | Demo only, unlabelled. | Listing, matches and memoranda for the active company (intake inputs as on Documents); Demo data / Your intake badge. | ☐ |
 | G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
-| G7 | Design: no `h1`, 18 dlitem failures. | Rebuild on `xo`. | ☐ |
+| G7 | Design: no `h1`, 18 dlitem failures. | Rebuild on `xo`. | ☑ G7-commit |
 
 ---
 
 ## Closure log
+
+### G7 — Design
+*Closed by:* `pages/Marketplace.tsx` rebuilt on `xo` (`PageHeader` `h1` "Exit Marketplace" with the two report links as actions; four metrics; the pitch and the pipeline as titled `Section`s — pipeline steps in a polite live list, progress bar `aria-hidden`, spinner only under `motion-safe`; the founder/public switch as `Chip`s (`aria-pressed`) in a labelled group; listing figures, ideal-buyer profile and the manifesto as real `dl`s (fixes the 18 dlitem failures); tags as a list; matched buyers and mechanics as sections; the edit dialog unchanged in behaviour). Content carried over verbatim; G1–G6 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium founder free/Pro and buyer 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 18), 35 tab stops with visible focus · after "Publish Opportunity" and after "Public listing": axe 0, no overflow · edit dialog: role dialog, focus inside, axe 0, Escape returns focus to "Edit listing".
