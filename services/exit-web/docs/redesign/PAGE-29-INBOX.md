@@ -15,7 +15,7 @@ The founder's side of the exchange: buyer mandates that match the founder's list
 ### Data flow
 | Element | Source | Nature |
 |---|---|---|
-| Listing | `listingFromCompany(loadActiveCompany())` — the saved intake, or the **demo company (Helios Freight)** when there is none | Demo **unlabelled**; the page title is the company name |
+| Listing | `listingFromCompany(loadActiveCompany())` — the saved intake, or the **demo company (Helios Freight)** when there is none | Demo **unlabelled**; with no intake the derived id `lst-helios-freight` is not the exchange's demo listing `lst-demo-helios`, so nothing arrives |
 | Matching mandates | `allMandates()` scored by `matchCompanyToCriteria`: sector 40 + revenue 25 + region 20 + growth 15; "qualified" = ≥ 70 and sector match | Real records ✓; the score is shown as **"N %"** (reads as a probability) and the buyer's **target-revenue** band is labelled **"check"** (the field is named `minCheckUsd` but the Acquisition Radar fills it from "Target revenue") |
 | Deals, NDA requests, offers, events | backend records for the listing (`dealsForListing`, `ndaRequestsForListing`, `offersForListing`, `eventsForSubject`) | Real records ✓ |
 | "NDA executed, **identity released**"; "Executing **releases your identity** to the requesting buyer and **opens diligence**" | `signNda` only sets the request's status to `signed`; nothing in the code reveals the company to the buyer or opens diligence; no document is signed | **Overclaim** |
@@ -36,7 +36,7 @@ Founder free and Pro: `h1` none · axe color-contrast ×7 + link-in-text-block �
 | G1 | **Identity-release, diligence, security and model-feeding overclaims.** | State what each action records: "Execute NDA" marks the request signed (no document is sent or signed; your identity is not revealed automatically); buyers stay anonymous on this page; security wording only for the exchange backend; advancing records an event; deals open on an NDA request or offer; "Open deals". | ☐ |
 | G2 | **Consequential actions without confirmation.** | Inline confirmation for Execute NDA, Accept, Decline and Withdraw, stating what is recorded and that it cannot be undone here. | ☐ |
 | G3 | Match score shown as "%"; target revenue labelled "check". | "Match score N/100" with the rule (weights, qualified threshold); "target revenue $a–$b". | ☐ |
-| G4 | Demo company unlabelled. | Demo data / Your intake badge and a line naming the listing. | ☐ |
+| G4 | **Demo company unlabelled, and bound to the wrong listing.** With no intake the inbox derives `lst-helios-freight` ("Project Meridian", Draft), while the exchange carries the demo company as the seeded `lst-demo-helios` ("Project Beacon"). Buyer actions on the demo listing never reach the demo inbox (verified: a buyer NDA request and $90M offer on Project Beacon left the founder inbox at 0). | Demo data / Your intake badge and a line naming the listing; with no intake, track the seeded demo listing `lst-demo-helios` (same company, same profile). | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
 | G6 | Design: no `h1`, 8 axe failures. | Rebuild on `xo`. | ☐ |
 
