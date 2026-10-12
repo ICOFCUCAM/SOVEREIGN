@@ -353,13 +353,13 @@ The owner supplied a reference: a dark exchange map with low-poly continents, a 
 
 | Gap | Close by | Status |
 |---|---|---|
-| Z2: Z1 copied the reference's own type system and broke the homepage spec: sans `h1`/`h2`/`h3` (spec: editorial serif, last line in the italic accent — M1, R1); about ten new small all-caps labels (V4: one chapter label per moment); hand-made section labels instead of `Chapter`; no broadsheet double rule (V2); blue-700 accent and new button hovers instead of the spec's blue-600 and button pair; figures in Inter (V4: mono for figures) | Headlines in Source Serif 4 semibold with the accent italic; `Chapter` for 02 and 03 (the hall's head too); the double rule opening section 02; the ticker keeps its numbers and statements but drops the four caps sub-labels; "The deal atlas" eyebrow removed (the topline already names the exchange); the connected-view line set in body type; figures in mono; buttons and accent as the rest of the page. Layout, content, links and the board unchanged. | open |
+| Z2: Z1 copied the reference's own type system and broke the homepage spec: sans `h1`/`h2`/`h3` (spec: editorial serif, last line in the italic accent — M1, R1); about ten new small all-caps labels (V4: one chapter label per moment); hand-made section labels instead of `Chapter`; no broadsheet double rule (V2); blue-700 accent and new button hovers instead of the spec's blue-600 and button pair; figures in Inter (V4: mono for figures) | Headlines in Source Serif 4 semibold with the accent italic; `Chapter` for 02 and 03 (the hall's head too); the double rule opening section 02; the ticker keeps its numbers and statements but drops the four caps sub-labels; "The deal atlas" eyebrow removed (the topline already names the exchange); the connected-view line set in body type; figures in mono; buttons and accent as the rest of the page. Layout, content, links and the board unchanged. || closed 4b1c1ac6 |
 
 ### Z3 — Reference copy out, our homepage data in (owner: "remove what you can remove and employ our homepage data design and from our site")
 
 | Gap | Close by | Status |
 |---|---|---|
-| Z3: the hero and section 02 still carried the reference's own copy (four ticker statements, the "connected view" line, "What the exchange connects" with its four invented rows) instead of ExitOS data | Removed all of it (keys `tk.*`, `cap.*`, `hero.index` deleted). The four-cell row shows the four proof figures in the homepage's numeral design (serif figure, label, source note). Section 02 becomes "The modules", built from the site's own catalogue (`lib/module-list.ts`, now shared with Modules): Acquisition Radar, Valuation Engine, Buyer Intelligence, Data Room, each with its Modules description and live `MODULE_FACTS` stat. Kept from the reference: the layout only. Note: the Modules copy is English-only on the Modules page as well, so section 02 is English in FR/ES. | open |
+| Z3: the hero and section 02 still carried the reference's own copy (four ticker statements, the "connected view" line, "What the exchange connects" with its four invented rows) instead of ExitOS data | Removed all of it (keys `tk.*`, `cap.*`, `hero.index` deleted). The four-cell row shows the four proof figures in the homepage's numeral design (serif figure, label, source note). Section 02 becomes "The modules", built from the site's own catalogue (`lib/module-list.ts`, now shared with Modules): Acquisition Radar, Valuation Engine, Buyer Intelligence, Data Room, each with its Modules description and live `MODULE_FACTS` stat. Kept from the reference: the layout only. Note: the Modules copy is English-only on the Modules page as well, so section 02 is English in FR/ES. || closed 4b1c1ac6 |
 
 ## Closure log
 
@@ -778,6 +778,9 @@ Hero rebuilt as statement → proof figures → exchange map → hall. Verified:
 
 ### Z1 — closed 49ee5ecd
 Verified: tsc, eslint, vitest 243/243 (inventory test included), build; axe 0 at 1440/390 inside and outside the board; keyboard 127 tab stops, 0 without visible focus; reduced motion stops all motion outside the board; no overflow, 0 console errors, one h1; board ribbon, mount and CommandBoard identical to the original. Page height 8,889 px at 1440, 12,743 px at 390 (the new section adds about 1,000 px at 1440).
+
+### Z2 + Z3 — closed 4b1c1ac6 (one commit: both changed the same two sections and were built in one pass)
+Verified: tsc, eslint, vitest 243/243 (inventory test included), build; axe 0 at 1440/390 inside and outside the board; keyboard 127 tab stops, 0 without visible focus; reduced motion stops all motion outside the board; no overflow, 0 console errors, one h1; board identical to the original. Page height 8,839 px at 1440, 12,560 px at 390.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
