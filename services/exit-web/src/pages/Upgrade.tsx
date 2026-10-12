@@ -34,13 +34,13 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
   const TIERS: readonly Tier[] = [
     { plan: "free", name: "Listed Founder", price: "$0", priceSub: "to enter", purpose: "Become visible to acquirers",
       blurb: "Listed and discoverable on the exchange. Receive buyer interest — upgrade to engage.",
-      features: ["Company profile & anonymous listing", "Read-only valuation & readiness", "Buyer demand indicator & radar visibility", "Receive buyer interest & mandate alerts"] },
+      features: ["Company profile & anonymous listing", "Read-only valuation & readiness", "Buyer demand indicator & radar visibility", "Receive buyer interest in your Inbox"] },
     { plan: "prep", name: "Preparation", price: "$995", priceSub: "one-time", purpose: "Prepare for market",
       blurb: "A transaction-ready acquisition package, produced once and yours to keep.",
       features: ["Valuation framework with provenance", "CIM, teaser & buyer universe", "Data room & cap-table review", "Market positioning & exit-strategy planning"] },
     { plan: "pro", name: "Active Mandate", price: "$995", priceSub: "/ mo + 2.5% fee", purpose: "Run a live process",
       blurb: "The execution desk. The success fee is earned only when your deal closes.",
-      features: ["Buyer outreach & NDA automation", "Acquisition intelligence & AI negotiation", "Bid & process management", "Closing Center — net-to-founder math"], highlight: current !== "pro" },
+      features: ["Buyer outreach drafts & NDA requests", "Acquisition intelligence & rule-based negotiation (Bid Room)", "Bid & process management", "Closing Center checklist"], highlight: current !== "pro" },
     { plan: "free", name: "Institutional", price: "Custom", priceSub: "engagement + fee", purpose: "Material transactions — $25M+",
       blurb: "White-glove execution: cross-border, private equity, family office and sovereign processes.",
       features: ["Dedicated managing director & deal team", "Custom buyer sourcing", "Legal & escrow coordination", "Single-tenant deployment & priority support"], contact: true },
@@ -60,8 +60,8 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
     <div data-page="upgrade" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="Select a mandate" title="Choose your engagement"
         description={feature
-          ? `${feature} requires an active engagement. Preparation makes you market-ready; an Active Mandate runs the process and is paid on close.`
-          : "Listed Founder gets you discovered for free. Preparation makes you market-ready. An Active Mandate runs the live process — and is paid only when you close."} />
+          ? `${feature} requires an active engagement. Preparation makes you market-ready; an Active Mandate runs the process — its 2.5% success fee is paid only on close.`
+          : "Listed Founder gets you discovered for free. Preparation makes you market-ready. An Active Mandate runs the live process for $995 a month — its 2.5% success fee is paid only when you close."} />
 
       <p id="upgrade-demo" role="note" className="border border-xo-caution/50 bg-xo-panel px-4 py-2.5 text-[13px]">
         <span className="font-semibold text-xo-caution">Demo mode — no payment is taken.</span>{" "}
@@ -77,7 +77,7 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
               <div className="border-b border-xo-line px-4 py-4">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className={`text-[12px] font-semibold uppercase tracking-[0.14em] ${tone}`}>{t.name}</h2>
-                  {t.highlight && <span className="rounded-sm border border-xo-verified/50 px-1.5 py-px text-[11px] font-semibold text-xo-verified">Most selected</span>}
+                  {t.highlight && <span className="rounded-sm border border-xo-verified/50 px-1.5 py-px text-[11px] font-semibold text-xo-verified">Recommended for a live process</span>}
                 </div>
                 <div className="mt-1 flex items-baseline gap-2">
                   <span className="font-mono text-3xl font-semibold tabular-nums">{t.price}</span>
