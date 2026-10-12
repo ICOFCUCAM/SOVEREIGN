@@ -5,7 +5,7 @@
 | Route | `/console/inbox` |
 | Component | `src/pages/FounderInbox.tsx` (259 lines) + `lib/exit-api.ts` (NDA requests, offers, deals, mandates), `lib/acquirer.ts` (`matchCompanyToCriteria`) |
 | NAV | "Inbox", group Exchange, founder only (buyers are redirected to the Buyer Portal), no plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed, plus shared X18 (and X17 noted). Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `8899bdc`)
 
@@ -82,3 +82,15 @@ X11 moved the shared primary buttons to `bg-deal-700` (white text 5.48:1) but ke
 ### G5 — Fake live tape
 *Closed by:* `pages/FounderInbox.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* `tsc -b`, eslint 0 errors · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, 25 tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors (one pre-existing `useCallback` dependency warning) · `vitest` 204/204 · Chromium free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 8), all tab stops with visible focus · 0 "live" words · end to end on the local backend: buyer NDA request, $90M offer and saved mandate arrive in the demo inbox; each of Execute NDA, Accept, Decline and Withdraw confirms before writing (axe 0 at 1440 and 390 with the confirmation open, after X18).
+
+## Known issues
+- **X17 (backend, owner decision):** the Supabase update policies on NDA requests and offers also allow the requesting buyer, so a buyer could mark their own request signed or their offer accepted through the API. Not changed.
+- "Advance → stage" writes immediately without confirmation (it can take a deal to Closed); not in the gap register — noted for review.
+- With no intake, the demo listing is shared: anyone using the demo can send requests and offers to it, and on the local backend anyone in the same browser can resolve them (stated on the page).
+- The Acquisition Radar's NDA confirmation says "The company's identity is revealed only if they sign" (Page 04): nothing reveals it automatically — noted for the final review.
+- Behaviour against the Supabase backend — NOT VERIFIED; tested only on the browser-local backend.
