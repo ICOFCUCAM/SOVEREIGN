@@ -42,4 +42,7 @@ The cap table (fully-diluted ownership, signatory and board flags), signatory co
 
 ### G5 — Design
 *Closed by:* `pages/Investors.tsx` rebuilt on `xo` (`PageHeader` `h1` **"Cap Table"** — the NAV name; "Investor CRM" kept in the eyebrow; five metrics; banker's take as a page-local definition list (shared `BankerTake` no longer used here); warnings as a labelled section; cap table and stakeholder waterfall as tables with row headers inside keyboard-reachable `ScrollRegion`s; the offer selector has a label; walk-away steps as an ordered list; signatory roster as lists). The add-stakeholder dialog is the shared `Modal` (accessible since X13). Content carried over verbatim; G1–G4 follow.
-*Verification:* `tsc -b`, eslint clean · Chromium (free — no plan gate) 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 12 contrast + unnamed select + 2 scroll regions), all tab stops with visible focus; add-stakeholder dialog: role dialog, focus inside, axe 0, Escape closes.
+*Verification:* `tsc -b`, eslint clean · Chromium (free — no plan gate) 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 12 contrast + unnamed select + 2 scroll regions), all tab stops with visible focus; add-stakeholder dialog: role dialog, focus inside, Escape closes focus back to "+ Stakeholder" — **correction:** axe found 1 colour-contrast failure inside the dialog (the shared `Field` hint "Optional", 3.78:1); this line first said axe 0 in error. Fixed as X16 below.
+
+### X16 — Shared `Field` hint contrast (found here) — documented before the fix
+`lib/ui.tsx` `Field` renders its hint as `text-white/40` — 3.78:1 on the dialog surface, below 4.5:1. Used by every form built on `Field`. *Fix:* `text-white/60`.
