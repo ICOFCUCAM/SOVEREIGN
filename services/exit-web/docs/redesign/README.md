@@ -43,7 +43,7 @@ Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the re
 | 37 | `/console/buyer-portal` | Buyer Home | `BuyerPortal` | buyer | none | ☑ done · awaiting final review |
 | 38 | `/console/calibration` | Calibration | `Calibration` | admin | none | ☑ done · awaiting final review |
 | 39 | `/console/simulator` | Scenario Simulator | `Simulator` | founder | Pro | ☑ done · awaiting final review |
-| 40 | `/console/admin` | Admin Console | `Admin` | admin | none | ◐ in progress |
-| 41 | `/console/upgrade` | — | `Upgrade` | any signed-in role | none | ☐ |
+| 40 | `/console/admin` | Admin Console | `Admin` | admin | none | ☑ done · awaiting final review |
+| 41 | `/console/upgrade` | — | `Upgrade` | any signed-in role | none | ◐ in progress |
 
 Notes: `/console/buyer/:id` (Buyer profile) is guarded by the Buyer Graph policy. Public routes (`/`, `/platform`, `/pricing`, `/report/*`) are outside the console and are not in this sequence.

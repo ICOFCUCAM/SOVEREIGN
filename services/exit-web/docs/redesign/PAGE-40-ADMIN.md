@@ -5,7 +5,7 @@
 | Route | `/console/admin` |
 | Component | `src/pages/Admin.tsx` (189 lines) + `lib/distribution-engine.ts` (`exit-social-dispatch` status and publish history), `lib/social-publish.ts` |
 | NAV | "Admin Console", group Admin, **admin only** (verified: a founder is redirected to `/console`) |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `f0e1238`)
 
@@ -57,3 +57,13 @@ Signed in as the dev operator (`ops@example.com` → superadmin). All Supabase f
 ### G4 — Distribution wording
 *Closed by:* `pages/Admin.tsx` (labels; the status call is unchanged and real). Unconnected channels "Activating" → **"Not connected"**; the header "N channel(s) live" → "N channel(s) connected".
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium superadmin with the status stubbed: none connected → every channel "Not connected", header "No channels connected"; LinkedIn connected → "LinkedIn — Connected", others "Not connected", header "1 channel(s) connected"; 0 "Activating" / "live" · 1440/390: axe 0, no overflow.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 · Chromium superadmin (dev operator), all function calls stubbed, 1440/390: 0 errors, `h1` 1, no overflow (was overflowing at 390), axe 0 · the add-to-roster form's validation exercised · founders redirected to `/console`.
+
+## Known issues
+- There is no account directory or server-side role service: the roster is a labelled sample and the form provisions nothing (stated). Real admin provisioning is new backend work for the owner.
+- Admin access is enforced only in the browser (the dev operator email in development); see also X22.
+- Tab-stop traversal was not run for this page (the shared checker signs in as a plan user, not the operator) — NOT VERIFIED; axe found no focus or name issues.
