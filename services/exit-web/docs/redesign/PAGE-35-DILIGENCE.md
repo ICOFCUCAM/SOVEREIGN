@@ -31,7 +31,7 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe 0 · no overflow · 0 
 ## Gap register — Page 35
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Document analysis claimed; nothing is read.** | Say the findings are rules applied to the company profile; replace the "Analyzed" source cards with "where a buyer would look" (the document each check concerns, not analysed); remove "reads every uploaded file"; per-finding "Source:" → "Buyer would check: …". | ☑ G1-commit |
+| G1 | **Document analysis claimed; nothing is read.** | Say the findings are rules applied to the company profile; replace the "Analyzed" source cards with "where a buyer would look" (the document each check concerns, not analysed); remove "reads every uploaded file"; per-finding "Source:" → "Buyer would check: …". | ☑ `cb6666f` |
 | G2 | **Invented facts and a fake re-run.** | Unverified findings worded as checks to make ("Confirm key agreements are in the data room", "Prepare a litigation schedule"); the logistics-only vendor item shown only for logistics; "108 % net retention" taken from the profile's own `netRetentionPct` (omitted when absent); "Re-run analysis" removed (findings recompute from the profile on load). | ☐ |
 | G3 | **"Buyers would deduct" — an illustrative rule.** | "Illustrative discount (rule)": weights stated, every finding counted regardless of severity, % of the canonical midpoint; not a buyer estimate. | ☐ |
 | G4 | "AI"; unsourced bank comparison. | "Diligence" (rule-based); remove the $40,000 / 4–6 weeks comparison and "would bill thousands". | ☐ |
