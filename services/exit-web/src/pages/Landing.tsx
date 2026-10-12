@@ -140,7 +140,7 @@ const Landing: React.FC = () => {
               <div key={l} className="flex items-baseline gap-2">
                 {i === 3 && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />}
                 <span className="font-mono text-[15px] font-bold tabular-nums text-ink-900">{v}</span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">{l}<Note n={([1, 2, 3, 2] as SourceId[])[i]} first={i < 3} /></span>
+                <span className="text-[12px] text-slate-600">{l}<Note n={([1, 2, 3, 2] as SourceId[])[i]} first={i < 3} /></span>
               </div>
             ))}
           </div>
@@ -220,7 +220,7 @@ const Landing: React.FC = () => {
                   {c.buyer} <span className="italic text-blue-700">{c.status === "Closed" ? "acquired" : c.status === "Terminated" ? "ended its deal for" : "agreed to acquire"}</span> {c.target}
                 </h3>
                 <div className="mt-5 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-ink-900">{c.value}</div>
-                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Disclosed Value</div>
+                <div className="mt-2 text-[12px] text-slate-600">Disclosed value</div>
                 <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 text-[11px]">
                   <div><dt className="text-slate-600">vs reference</dt><dd className="font-mono text-[14px] font-bold text-blue-700">{c.premium}</dd></div>
                   <div><dt className="text-slate-600">Status</dt><dd className="font-mono text-[14px] font-bold" style={{ color: c.statusColor }}>{c.status}</dd></div>
@@ -234,7 +234,7 @@ const Landing: React.FC = () => {
           {/* the ledger table */}
           <div role="region" aria-label="Earlier disclosed acquisitions" tabIndex={0} className="min-w-0 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
             <table className="w-full min-w-[820px] text-left text-[13px]">
-              <caption className="pb-3 text-left font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Earlier entries · newest first</caption>
+              <caption className="pb-3 text-left text-[12.5px] text-slate-600">Earlier entries, newest first</caption>
               <thead>
                 <tr className="border-y border-ink-900 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">
                   {["Announced", "Target", "Acquirer", "Sector", "Value", "Status", "Source"].map((h) => <th key={h} scope="col" className={`py-2.5 pr-4 font-semibold ${h === "Value" ? "text-right" : ""}`}>{h}</th>)}
@@ -260,8 +260,8 @@ const Landing: React.FC = () => {
           {/* confidence-tier register */}
             <div className="border-y border-ink-900">
               <div className="flex items-center justify-between border-b border-slate-200 py-3">
-                <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-900">Confidence register</span>
-                <span className="font-mono text-[10px] uppercase tracking-wide text-slate-600">applied to every estimate</span>
+                <span className="text-[13px] font-semibold text-ink-900">Confidence register</span>
+                <span className="text-[12px] text-slate-600">applied to every estimate</span>
               </div>
               {CONFIDENCE_TIERS.map((ct) => (
                 <div key={ct.tier} className="grid grid-cols-[110px_1fr] gap-4 border-b border-slate-200 py-4 last:border-0">
@@ -305,7 +305,7 @@ const Landing: React.FC = () => {
               <li key={st} className={`border-b border-white/15 py-7 pr-5 ${i % 4 !== 0 ? "sm:border-l sm:border-white/15 sm:pl-6" : ""} ${i % 2 === 1 ? "border-l border-white/15 pl-5 sm:pl-6" : ""}`}>
                 <span className="block font-editorial text-[clamp(3rem,5vw,4.6rem)] font-semibold leading-none tabular-nums text-blue-300">{String(i + 1).padStart(2, "0")}</span>
                 <span className="mt-4 block font-editorial text-[20px] font-semibold text-white">{t(st)}</span>
-                <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-blue-100/80">{w}</span>
+                <span className="mt-1 block font-mono text-[12px] text-blue-100/80">{w}</span>
               </li>
             ))}
           </ol>
@@ -326,7 +326,7 @@ const Landing: React.FC = () => {
             </div>
             <div className="mt-10 grid gap-6 border-t border-ink-900 pt-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
               <p className="max-w-2xl text-[16px] leading-relaxed text-ink-800">{t("cta.body")}</p>
-              <p className="font-mono text-[11px] uppercase leading-relaxed tracking-[0.12em] text-slate-600 lg:text-right">{t("cta.foot")}</p>
+              <p className="text-[13px] leading-relaxed text-slate-600 lg:text-right">{t("cta.foot")}</p>
             </div>
           </div>
         </div>

@@ -177,7 +177,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               <Link to="/console" onClick={() => setMenuOpen(false)} className="px-3 py-2.5 text-[14px] font-medium text-slate-600">{t("nav.login")}</Link>
             </nav>
             <div className="mt-3 flex items-center gap-3 border-t border-slate-100 px-3 pt-3">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">{t("nav.language")}</span>
+              <span className="text-[12px] font-semibold text-slate-600">{t("nav.language")}</span>
               <LocaleSwitch />
             </div>
           </div>
@@ -192,7 +192,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
             <div>
               <ExchangeLockup size={30} />
               <p className="mt-4 max-w-xs text-[12.5px] leading-relaxed text-slate-600">{t("ft.tagline")}</p>
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-slate-600">
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.soc")}</span>
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.audit")}</span>
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.ndagated")}</span>
@@ -219,7 +219,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               <div>© {new Date().getFullYear()} ExitOS — A Sovereign Infrastructure</div>
               <div className="flex items-center gap-4">
                 <LocaleSwitch />
-                <div className="font-mono uppercase tracking-[0.22em]">exit.sovereigndo.com</div>
+                <div className="font-mono">exit.sovereigndo.com</div>
               </div>
             </div>
           </div>

@@ -277,7 +277,7 @@ const TierCard: React.FC<{ tier: Tier; onAct: () => void }> = ({ tier, onAct }) 
         <span className="font-editorial text-[2.4rem] font-semibold leading-none tabular-nums text-ink-900">{tier.price}</span>
         <span className="text-[11px] text-slate-600">{tier.priceSub}</span>
       </div>
-      <div className="mt-3 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600">{tier.purpose}</div>
+      <div className="mt-3 text-[12px] font-semibold text-slate-700">{tier.purpose}</div>
       <p className="mt-2 text-[12.5px] leading-relaxed text-slate-600">{tier.headline}</p>
       <ul className="mt-4 flex-1 space-y-2 border-t border-slate-200 pt-4 text-[12.5px] text-slate-700">
         {tier.features.map((f) => (

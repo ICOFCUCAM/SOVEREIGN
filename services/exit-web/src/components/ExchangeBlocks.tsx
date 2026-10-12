@@ -152,7 +152,7 @@ export const ExchangeSystem: React.FC<{ n: string }> = ({ n }) => {
               <React.Fragment key={s.title}>
                 <div className="flex items-center gap-2">
                   <span className="text-blue-600"><Glyph name={s.icon} small /></span>
-                  <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-800">{s.title}</span>
+                  <span className="text-[13px] font-semibold text-ink-800">{s.title}</span>
                 </div>
                 {i < EXCHANGE_FLOW.length - 1 && <span className="text-blue-600" aria-hidden>→</span>}
               </React.Fragment>
@@ -339,7 +339,7 @@ export const DataRooms: React.FC<{ n: string }> = ({ n }) => {
               <div key={d.title} className={`py-5 pr-4 ${i > 0 ? "lg:border-l lg:border-white/10 lg:pl-4" : ""}`}>
                 <span className="text-blue-300"><Glyph name={d.icon} small /></span>
                 <div className="mt-3 text-[12.5px] font-semibold leading-tight text-white">{d.title}</div>
-                <div className="mt-2 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wide text-blue-100/50">
+                <div className="mt-2 flex items-center gap-1.5 text-[11.5px] text-blue-100/70">
                   <span>Required for diligence</span>
                 </div>
               </div>
@@ -369,7 +369,7 @@ export const ExampleListings: React.FC<{ n: string }> = ({ n }) => {
               </div>
             </div>
           </div>
-          <p className="mt-12 font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Example listings — illustrative, not companies on the market</p>
+          <p className="mt-12 text-[13px] font-medium text-slate-700">Example listings — illustrative, not companies on the market</p>
           <div className="mt-3 grid border-y border-ink-900 sm:grid-cols-2 lg:grid-cols-4">
             {OPPORTUNITIES.map((o, i) => (
               <div key={o.name} className={`py-6 pr-5 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-5" : ""} border-b border-slate-200 last:border-b-0 lg:border-b-0`}>
@@ -422,7 +422,7 @@ export const GlobalReach: React.FC<{ n: string }> = ({ n }) => {
               {GLOBAL_STATS.map((s) => (
                 <div key={s.label}>
                   <div className="font-editorial text-[2.2rem] font-semibold leading-none tabular-nums text-ink-900">{s.value}</div>
-                  <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">{s.label}</div>
+                  <div className="mt-2 text-[12px] text-slate-600">{s.label}</div>
                 </div>
               ))}
             </div>

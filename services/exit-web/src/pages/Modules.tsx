@@ -38,7 +38,7 @@ const ModCard: React.FC<{ m: Mod; dark?: boolean }> = ({ m, dark }) => (
     </div>
     <p className={`mt-3 flex-1 text-[13px] leading-relaxed ${dark ? "text-blue-100/70" : "text-slate-600"}`}>{m.body}</p>
     {m.stat && (
-      <div className={`mt-4 border-t pt-3 font-mono text-[10.5px] font-medium uppercase tracking-[0.1em] ${dark ? "border-white/15 text-blue-200" : "border-slate-300 text-ink-800"}`}>
+      <div className={`mt-4 border-t pt-3 font-mono text-[11.5px] font-medium ${dark ? "border-white/15 text-blue-200" : "border-slate-300 text-ink-800"}`}>
         {m.stat}
       </div>
     )}

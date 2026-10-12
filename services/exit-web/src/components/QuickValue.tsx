@@ -16,7 +16,7 @@ import { Note } from "./SourceNotes";
 type QV = typeof import("../lib/quick-value");
 const usd = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
 const FIELD = "w-full border border-slate-300 bg-white px-3 py-2.5 text-[14px] text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600";
-const LABEL = "mb-1.5 block font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-600";
+const LABEL = "mb-1.5 block text-[12.5px] font-medium text-slate-700";
 
 const QuickValue: React.FC = () => {
   const { t } = useI18n();
@@ -85,7 +85,7 @@ const QuickValue: React.FC = () => {
                 <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-slate-600">{t("qv.range")}</span>
+                      <span className="text-[12.5px] text-slate-600">{t("qv.range")}</span>
                       <span className="border border-blue-600/50 px-1.5 py-px font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-blue-700">{t("qv.model")}</span>
                     </div>
                     <div className="mt-3 font-editorial text-[clamp(2.4rem,4.6vw,4rem)] font-semibold leading-none tabular-nums tracking-[-0.03em] text-ink-900">
@@ -98,7 +98,7 @@ const QuickValue: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-slate-600">{t("qv.assume")}</div>
+                    <div className="text-[12.5px] text-slate-600">{t("qv.assume")}</div>
                     <dl className="mt-2 border-t border-slate-200 text-[12.5px]">
                       {mod.QUICK_ASSUMPTIONS.map(([k, v]) => (
                         <div key={k} className="flex justify-between gap-3 border-b border-slate-200 py-1.5">

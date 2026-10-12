@@ -270,7 +270,7 @@ Every moved figure keeps its source note. Platform and Modules get the **Sources
 | V1 | **Homepage too long; blocks belong elsewhere.** | Move the ten blocks above to Platform and Modules (content verbatim, source notes and "Sources & method" on those pages). Homepage keeps the six moments. Targets: homepage ≤ 6,500 px at 1440 and ≤ 11,000 px at 390. | ☑ `c9ebb10d` |
 | V2 | **No signature language.** | Carry the ledger's broadsheet treatment (double rule, masthead-style chapter heads, column rules, drop cap) through the thesis and the final call to action, so the homepage reads as one publication. | ☑ `bed9a324` (with V3) |
 | V3 | **Repetitive rhythm.** | Contrast of scale and ground: hero (photo + board) → compact valuation strip (white) → one giant statement on the page ground → dense ledger (white) → full-bleed navy lifecycle with large numerals → back-page call to action. No two consecutive moments share a layout. | ☑ `bed9a324` |
-| V4 | **Four typefaces, label noise.** | Marketing pages use Source Serif 4 (expressive), Inter (body) and mono (figures only). Sora (`font-serif`) is removed from marketing pages; the console is unchanged. Small all-caps labels are reduced to one chapter label per moment. | ☐ |
+| V4 | **Four typefaces, label noise.** | Marketing pages use Source Serif 4 (expressive), Inter (body) and mono (figures only). Sora (`font-serif`) is removed from marketing pages; the console is unchanged. Small all-caps labels are reduced to one chapter label per moment. | ☑ V4-commit |
 | V5 | **Hero competes with the board.** | Quieter headline column: the duplicated topline removed (the eyebrow is already in the header), the deck shortened to `hero.sub` with `hero.body` below it. **The board, its bezel, its hall and its size are untouched** (M10). | ☑ `aa64ea63` |
 | V6 | **Proof that nothing was lost.** | An inventory check (script plus a unit test over a block list) asserting that each of the 17 original blocks and U1, U2 and U4 renders on exactly one marketing page, every source note has a target, and all routes and entry points still resolve. Before/after heights, axe and keyboard on all four routes at 1440 and 390. | ☐ |
 
@@ -597,6 +597,22 @@ After these: Sources & method, then the footer. Chapter labels are renumbered 02
 - Inventory: 0 missing blocks, notes 11/9/1 with 0 missing targets.
 - **Height: 6,368 px at 1440 (target ≤ 6,500) and 10,633 px at 390 (target ≤ 11,000)**, down from 11,434 / 20,163 before Phase 4.
 - Screens: `scratchpad/home/v3-*`.
+
+### V4 — Three typefaces, less label noise
+*Finding:* by V5, Sora (`font-serif`) no longer renders anywhere on the marketing pages outside the board. The only `font-serif` left is the board's drill-down title, kept as built (M10). Measured families outside the board on all four pages: **Inter, Source Serif 4 and the monospace — three**.
+*Closed by:* small all-caps labels that were not chapter labels, table headers or newspaper kickers were set in sentence case (Inter, 12–13 px), and figures stay in the monospace:
+- **`pages/Landing.tsx`.** Proof-ribbon labels, "Disclosed value", the ledger caption, the register header, the lifecycle weeks (mono, normal case) and `cta.foot`.
+- **`components/QuickValue.tsx`.** Field labels, "Enterprise value range" and the assumptions label.
+- **`components/MarketingChrome.tsx`.** "Language", the footer badges, the domain.
+- **`components/ExchangeBlocks.tsx`.** The Founder → Exit flow titles, the data-room "Required for diligence" line, the example-listings notice, and the coverage stat labels.
+- **`pages/Modules.tsx`.** Module stat lines (mono, normal case).
+- **`pages/Pricing.tsx`.** Tier purpose line.
+
+Kept in capitals by design: one chapter label per moment, table headers, the ledger masthead and story kickers, tier badges, the board.
+*Verification:* `tsc -b`, eslint 0 errors · `vitest` 222/222.
+- Small uppercase labels (≤ 12 px, outside the board): **home 70 → 40, Platform 43 → 23, Modules 46 → 33, Pricing 39 → 28**.
+- All four routes 1440/390: 0 errors, `h1` 1, no overflow; axe 0 on Platform, Modules and Pricing, and 0 on the homepage outside the board.
+- Homepage height 6,377 / 10,676 px.
 
 ---
 
