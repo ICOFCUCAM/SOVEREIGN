@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
 import { PageHeader, Section, Metric, ScrollRegion, Chip } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor } from "../components/Reactor";
@@ -50,7 +50,7 @@ const Indexes: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Largest 12-month change" value={<span className="capitalize">{hottest?.sector ?? "—"}</span>} sub={hottest?.trendPct != null ? `${hottest.trendPct >= 0 ? "+" : ""}${Math.round(hottest.trendPct * 100)}% 12m · ${hottest.volume12m} vs ${hottest.volumePrior12m} deals${hottest.volume12m < SMALL && hottest.volumePrior12m < SMALL ? " (small sample)" : ""}` : undefined} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={as_of.slice(0, 10)} />
 
       <Section title="Transaction heatfield · volume × disclosed value" className="border border-xo-line"
         foot="Column height = acquisition volume · heat = disclosed value · cap colour = 12-month trend. The same figures are in the index table below.">

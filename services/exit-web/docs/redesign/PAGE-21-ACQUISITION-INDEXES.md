@@ -31,7 +31,7 @@ Per-sector indexes from the registry snapshot: volume, 12-month trend, buyers, m
 |---|---|---|---|
 | G1 | **Trends on tiny counts; "hottest sector" decided by a few deals.** | Show the counts beside each trend ("5 vs 3"); mark trends under 10 deals in both windows "small sample"; the hottest-sector metric shows its counts. | ☑ `c2b16f2` |
 | G2 | Mislabels: "Active buyers" (all-time distinct acquirers); "verified" comment; hover-only heatfield. | "Distinct acquirers (all years)"; comment corrected; heatfield hidden with the table as its text equivalent. | ☑ `14b90c8` |
-| G3 | Fake live tape. | `RegistryTape`. | ☐ |
+| G3 | Fake live tape. | `RegistryTape`. | ☑ G3-commit |
 | G4 | Design: no `h1`, contrast failures, unfocusable scroll region, sort semantics. | Rebuild on `xo` (`Chip` sort, `ScrollRegion`). | ☑ `6090ed3` |
 
 ---
@@ -49,3 +49,7 @@ Per-sector indexes from the registry snapshot: volume, 12-month trend, buyers, m
 ### G2 — Mislabels
 *Closed by:* `pages/Indexes.tsx` (labels). "Active buyers" → **"Distinct acquirers (all years)"** (what `activeBuyers` counts in `exit-engines/src/market/indexes.ts`); header description adds "mostly source-cited entries that are not yet verified"; heatfield foot "Hover a sector for figures" → "The same figures are in the index table below." (the heatfield is hidden from assistive tech since G4); file comment "verified registry events" corrected.
 *Verification:* eslint clean · Chromium: 0 "Active buyers" / "Hover a sector"; new header present.
+
+### G3 — Fake live tape
+*Closed by:* `pages/Indexes.tsx`: pinging `MarketTape` → dated `RegistryTape`.
+*Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
