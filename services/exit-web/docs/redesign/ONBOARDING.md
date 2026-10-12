@@ -31,7 +31,7 @@
 ## Gap register — Onboarding
 | # | Gap | Fix (additive; no content changed) | Status |
 |---|---|---|---|
-| O1 | **No starting point.** | A "Start here" guide at the top of the founder home: five steps in order — Value my company → Check readiness → See your value → Find buyers → Plan outreach. Step 1 is ticked only when figures are saved; steps 2–5 show "Opened" once the page has been opened in this browser. Locked steps show the engagement they need. A buyer version on Buyer Home: Browse opportunities → Acquisition intelligence → Request access → Deal Room. Can be hidden; "Show the guide" in the sidebar brings it back. Stored in this browser only. | ☐ |
+| O1 | **No starting point.** | A "Start here" guide at the top of the founder home: five steps in order — Value my company → Check readiness → See your value → Find buyers → Plan outreach. Step 1 is ticked only when figures are saved; steps 2–5 show "Opened" once the page has been opened in this browser. Locked steps show the engagement they need. A buyer version on Buyer Home: Browse opportunities → Acquisition intelligence → Request access → Deal Room. Can be hidden; "Show the guide" in the sidebar brings it back. Stored in this browser only. | ☑ `b336fca` |
 | O2 | **40-entry menu.** | Founders see an **Essentials** list first (Home, Value My Company, Readiness, Enterprise Value, Buyer Profiles, Acquisition Radar, Anonymous Listings, Inbox), with every other entry under **All tools** (collapsed, grouped exactly as today). The choice is remembered in this browser. The current page is always visible: opening a page outside Essentials expands All tools. Buyers and operators keep the full list (9 and 2 entries). No entry, label, route, lock or gate changes. | ☐ |
 | O3 | **Unexplained terms.** | A plain-language glossary (`lib/glossary.ts`) and a "Terms" panel reachable from the sidebar: one-sentence meanings for the terms listed above. Page text is not rewritten. | ☐ |
 | O4 | **No purpose line or next step.** | A slim bar under the layer navigation: "What this page is for" (one sentence) and "Next: <page> →". Driven by one map keyed by route, so no page file changes; can be hidden for all pages at once. | ☐ |
@@ -42,6 +42,10 @@ Out of scope (owner decision, not changed here): renaming pages; merging or remo
 ---
 
 ## Closure log
+
+### O1 — Start-here guide
+*Closed by:* `lib/onboarding.ts` (new: the steps, pages opened in this browser, hidden flag; key `exitos.guide.v1`), `components/StartHere.tsx` (new), `components/Shell.tsx` (records the opened page; a plan-gated page shows the upgrade screen instead, so it is not counted; "Show the Start-here guide" in the sidebar foot when hidden), `pages/Terminal.tsx` and `pages/BuyerPortal.tsx` (one line each: the guide under the page header). Founder steps: Value my company (Done when figures are saved) → Check readiness → See your value → Find buyers (Buyer Profiles) → Plan outreach. Buyer steps: Browse opportunities → Request an NDA or make an offer (Acquisition Radar) → Follow your requests → Work the deal. The first step not yet done or opened is marked "Next"; a step behind a plan shows "Needs <engagement>" from `requiredEngagement`. A foot line states what Done and Opened mean and that progress stays in this browser. No page text changed.
+*Verification:* `tsc -b`, eslint clean · `vitest` 211/211 (5 new in `onboarding.test.ts`) · Chromium founder free: guide shown, step 1 "Next", step 5 "Needs Preparation or Active Mandate"; open Check readiness and return → step 2 "Opened"; Hide guide → gone, sidebar link shown → guide back · buyer free: four steps, steps 3–4 "Needs Active Mandate", same hide/show · Terminal (founder free/Pro) and Buyer Home (buyer free/Pro) 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
 
 ---
 
