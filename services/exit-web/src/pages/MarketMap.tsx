@@ -9,8 +9,9 @@ import { MARKET_INTEL, ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 
 // GLOBAL ACQUISITION MARKET INTELLIGENCE (Phase 4) — the visual signature.
 // Sector heat, regional deal density, cross-border corridors and the most
-// active acquirers, every figure aggregated from the verified registry
-// (Wikipedia · Wikidata · SEC EDGAR). No estimates — pure deal data.
+// active acquirers, every figure aggregated from the acquisition registry
+// snapshot (Wikipedia · Wikidata · SEC EDGAR). Most events are source-cited
+// list entries not yet verified; the page says so.
 
 const MarketMap: React.FC = () => {
   const m = MARKET_INTEL;
@@ -29,7 +30,7 @@ const MarketMap: React.FC = () => {
     <div data-page="market-map" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Market Intelligence" title="Global Acquisition Activity"
         badge={<span className="text-[12px] text-xo-muted">The map · as of {m.as_of.slice(0, 10)} · {m.geoDensity.length} regions</span>}
-        description={`Source: ${m.source}`}
+        description={`Source: ${m.source}. Most events are source-cited entries from Wikipedia acquisition lists that are not yet verified; a minority are verified against SEC EDGAR or Wikidata. Values are as disclosed in those sources.`}
         actions={<a href="/report/market" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Market Intelligence Report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>} />
 
       <section aria-label="Registry totals" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
@@ -42,7 +43,7 @@ const MarketMap: React.FC = () => {
       <MarketTape items={tape} />
 
       <Section title="Transaction heatfield · where capital is moving" className="border border-xo-line"
-        foot="Column height = acquisition volume · heat = disclosed value · cap = trend. Aggregated from the verified registry."
+        foot="Column height = acquisition volume · heat = disclosed value · cap = trend. Aggregated from the registry snapshot (mostly unverified, source-cited entries)."
         right={<Disclosure open={showHeatData} onToggle={() => setShowHeatData(!showHeatData)} controls="heat-data">{showHeatData ? "Hide data" : "Show data"}</Disclosure>}>
         <div aria-hidden><TransactionHeatfield height={190} /></div>
         {showHeatData && (
@@ -114,7 +115,7 @@ const MarketMap: React.FC = () => {
         </Section>
 
         <Section title="Most active acquirers" className="lg:col-span-8"
-          foot={<>Source: {m.source}. Nothing modelled or estimated. Query precisely in the <Link to="/console/knowledge-graph" className="text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Knowledge Graph</Link>.</>}>
+          foot={<>Source: {m.source}. Counts of recorded events — not modelled, but mostly unverified list entries. Query precisely in the <Link to="/console/knowledge-graph" className="text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Knowledge Graph</Link>.</>}>
           <ScrollRegion label="Most active acquirers table">
             <table className="w-full min-w-[520px] text-[12px]">
               <thead className="text-left text-[11px] text-xo-faint">
