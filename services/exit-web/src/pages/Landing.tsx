@@ -258,7 +258,7 @@ const Landing: React.FC = () => {
                 {/* the premium over reference is shown only where the record measures one (no empty dashes) */}
                 <dl className={`mt-5 grid gap-2 border-t border-white/10 pt-4 text-[11px] ${c.premium && c.premium !== "—" ? "grid-cols-3" : "grid-cols-2"}`}>
                   {c.premium && c.premium !== "—" && <div><dt className="text-[#E8E0D2]/70">vs reference</dt><dd className="font-mono text-[14px] font-bold text-[#C9B08A]">{c.premium}</dd></div>}
-                  <div><dt className="text-[#E8E0D2]/70">Status</dt><dd className={`font-mono text-[14px] font-bold ${c.status === "Closed" ? "text-ex-done" : c.status === "Terminated" ? "text-slate-300" : "text-amber-300"}`}>{c.status}</dd></div>
+                  <div><dt className="text-[#E8E0D2]/70">Status</dt><dd className={`font-mono text-[14px] font-bold ${c.status === "Closed" ? "text-ex-done" : c.status === "Terminated" ? "text-slate-300" : "text-[#E2C38E]"}`}>{c.status}</dd></div>
                   <div><dt className="text-[#E8E0D2]/70">Source</dt><dd className="font-mono text-[12px] font-semibold text-white">{c.sources[0]?.kind ?? "—"}</dd></div>
                 </dl>
               </article>
@@ -670,10 +670,12 @@ const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right
 const DATA_AS_OF = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 // Data provenance — the pipeline every figure passes through, and the
 // confidence register applied to estimates (mirrors the engines' tiers).
+// Tier inks are drawn from the palette (a deep green, slate ink, bronze), each
+// above 5.5:1 on its own tint (AA for the 10 px badges).
 const CONFIDENCE_TIERS = [
-  { tier: "Verified", color: "#047857", basis: "Disclosed in a public filing", detail: "Headline value, dates and parties confirmed against the primary source." },
-  { tier: "Reported", color: "#1d4ed8", basis: "Multiple independent reports", detail: "Cross-referenced press and database coverage; primary filing not located." },
-  { tier: "Estimated", color: "#92400e", basis: "Modeled from the record", detail: "Benchmarked against the acquirer's completed-transaction history, with sample size shown." },
+  { tier: "Verified", color: "#2F6B4F", basis: "Disclosed in a public filing", detail: "Headline value, dates and parties confirmed against the primary source." },
+  { tier: "Reported", color: "#3D4A5C", basis: "Multiple independent reports", detail: "Cross-referenced press and database coverage; primary filing not located." },
+  { tier: "Estimated", color: "#7A5A2E", basis: "Modeled from the record", detail: "Benchmarked against the acquirer's completed-transaction history, with sample size shown." },
 ];
 // ===========================================================================
 // SMALL VISUAL HELPERS
