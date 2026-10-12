@@ -228,6 +228,11 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               <div className="flex items-center gap-4">
                 <LocaleSwitch dark />
                 <div className="font-mono">exit.sovereigndo.com</div>
+                {/* back to the top of a long page (EE19); instant when the reader prefers reduced motion */}
+                <button type="button" onClick={() => { scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }}
+                  className="group inline-flex items-center gap-2 border border-white/15 px-3 py-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-blue-100/80 transition hover:border-blue-300/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+                  {t("ft.top")} <span aria-hidden className="transition-transform duration-300 group-hover:-translate-y-0.5 motion-reduce:transition-none">↑</span>
+                </button>
               </div>
             </div>
           </div>

@@ -228,6 +228,7 @@ const en: Dict = {
   "ft.soc": "Deterministic engines",
   "ft.audit": "Sourced market data",
   "ft.ndagated": "NDA-gated identity",
+  "ft.top": "Back to top",
   "ft.legal": "Market data on this site is indexed from public filings and disclosures (SEC EDGAR, Wikidata, press) and from a curated registry of acquirer mandates. Figures are presented for information only and do not constitute investment, legal or tax advice. Listings trade anonymously; identity and detailed financials are disclosed only under executed NDA.",
 };
 
@@ -429,6 +430,7 @@ const fr: Dict = {
   "ft.soc": "Moteurs déterministes",
   "ft.audit": "Données de marché sourcées",
   "ft.ndagated": "Identité sous NDA",
+  "ft.top": "Haut de page",
   "ft.legal": "Les données de marché de ce site sont indexées depuis des publications officielles (SEC EDGAR, Wikidata, presse) et un registre sélectionné de mandats d'acquéreurs. Les chiffres sont fournis à titre d'information et ne constituent ni conseil en investissement, ni conseil juridique ou fiscal. Les dossiers s'échangent anonymement ; l'identité et les états financiers détaillés ne sont communiqués qu'après signature d'un NDA.",
 };
 
@@ -630,6 +632,7 @@ const es: Dict = {
   "ft.soc": "Motores deterministas",
   "ft.audit": "Datos de mercado con fuente",
   "ft.ndagated": "Identidad bajo NDA",
+  "ft.top": "Volver arriba",
   "ft.legal": "Los datos de mercado de este sitio se indexan desde registros públicos (SEC EDGAR, Wikidata, prensa) y desde un registro curado de mandatos de adquirentes. Las cifras se presentan solo a título informativo y no constituyen asesoramiento de inversión, legal ni fiscal. Las empresas cotizan de forma anónima; la identidad y las finanzas detalladas solo se revelan bajo NDA firmado.",
 };
 
