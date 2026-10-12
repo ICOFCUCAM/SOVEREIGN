@@ -33,7 +33,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · no overflow · 0 errors; old comp
 | G1 | **Plan switch looks like a purchase.** | A prominent note: demo mode — no payment is taken, nothing changes on any account; choosing a tier switches this session's plan until you sign out; button names say "(demo)". | ☐ |
 | G2 | **"Paid only when you close"; feature overclaims; "Most selected".** | "its 2.5 % success fee is paid only when you close"; features worded as the console delivers them (outreach drafts & NDA requests; rule-based negotiation in the Bid Room; closing checklist; buyer interest in the Inbox); "Recommended for a live process" instead of "Most selected". | ☐ |
 | G3 | Buyers see founder tiers. | A buyer note: what Active Mandate unlocks for buyers (Deal Room, Access Requests) and that no buyer pricing is published; buyer-appropriate button text. | ☐ |
-| G4 | Design: old components. | Rebuild on `xo`. | ☑ G4-commit |
+| G4 | Design: old components. | Rebuild on `xo`. | ☑ `f998ff2` |
 
 ---
 
