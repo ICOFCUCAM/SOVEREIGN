@@ -7,7 +7,7 @@ import { ExchangeMark } from "./ExchangeMark";
 import InstitutionalRibbon from "./InstitutionalRibbon";
 import LayerBar from "./LayerBar";
 import LayerSubNav from "./LayerSubNav";
-import { guideState, markVisited, onGuideChange, setGuideHidden } from "../lib/onboarding";
+import { guideState, markVisited, onGuideChange, setGuideHidden, ESSENTIALS, loadAllToolsOpen, saveAllToolsOpen } from "../lib/onboarding";
 
 // Role-aware console rail. The navigation is driven by the access policy:
 // founders, buyers, admins and superadmins see different command centers, and
@@ -64,10 +64,41 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return loc.pathname === to && loc.hash === "";
   };
 
-  const groups = items.reduce<Record<string, NavItem[]>>((acc, item) => {
+  // Founders get a short Essentials list first; the rest sits under "All
+  // tools". Operators and buyers keep the full list (it is already short).
+  const shortMenu = role === "founder";
+  const essentials = shortMenu ? ESSENTIALS.map((to) => items.find((n) => n.to === to)).filter((n): n is NavItem => !!n) : [];
+  const rest = shortMenu ? items.filter((n) => !ESSENTIALS.includes(n.to)) : items;
+  const [toolsOpen, setToolsOpen] = useState(loadAllToolsOpen);
+  // The current page is always visible in the menu.
+  const currentInRest = shortMenu && rest.some((n) => basePath(n.to) === loc.pathname) && !ESSENTIALS.includes(loc.pathname);
+  useEffect(() => { if (currentInRest) setToolsOpen(true); }, [currentInRest]);
+  const toggleTools = (): void => { const v = !toolsOpen; setToolsOpen(v); saveAllToolsOpen(v); };
+  const toolsId = "console-all-tools";
+
+  const groups = rest.reduce<Record<string, NavItem[]>>((acc, item) => {
     (acc[item.group] = acc[item.group] ?? []).push(item);
     return acc;
   }, {});
+
+  const renderItem = (n: NavItem): React.ReactNode => {
+    const active = isActive(n.to);
+    const locked = needsUpgrade(basePath(n.to), role, plan);
+    return (
+      <Link
+        key={`${n.to}-${n.group}`}
+        to={locked ? "/console/upgrade" : n.to}
+        aria-current={active ? "page" : undefined}
+        onClick={() => setNavOpen(false)}
+        className={`flex items-center justify-between rounded-md px-3 py-2 text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 ${active
+          ? "bg-deal-600/20 text-white ring-1 ring-deal-400/40"
+          : "text-white/70 hover:bg-white/5 hover:text-white"}`}
+      >
+        <span className={locked ? "text-white/45" : ""}>{n.label}</span>
+        {locked && <span aria-label="Pro feature" title="Upgrade to Pro" className="text-[10px] text-white/35">🔒</span>}
+      </Link>
+    );
+  };
 
   const subtitle = role === "buyer" ? "Buyer Access" : role === "admin" || role === "superadmin" ? "Operator Console" : "Founder Acquisition Suite";
 
@@ -106,31 +137,27 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <button onClick={() => setNavOpen(false)} aria-label="Close navigation menu" className="rounded p-1 text-white/50 hover:text-white lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">✕</button>
           </div>
           <nav aria-label="Console" className="flex-1 overflow-y-auto px-3 py-2">
+            {shortMenu && (
+              <div className="mb-4">
+                <div className="px-3 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/40">Essentials</div>
+                <div className="space-y-1">{essentials.map(renderItem)}</div>
+                <button type="button" onClick={toggleTools} aria-expanded={toolsOpen} aria-controls={toolsId}
+                  className="mt-3 flex w-full items-center justify-between rounded-md px-3 py-2 text-[12px] font-semibold text-white/70 ring-1 ring-white/10 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
+                  <span>All tools ({rest.length})</span>
+                  <span aria-hidden className={`inline-block transition-transform ${toolsOpen ? "rotate-180" : ""}`}>▾</span>
+                </button>
+              </div>
+            )}
+            <div id={toolsId} hidden={shortMenu && !toolsOpen}>
             {GROUP_ORDER.filter((g) => groups[g]).map((group) => (
               <div key={group} className="mb-4">
                 <div className="px-3 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/40">{group}</div>
                 <div className="space-y-1">
-                  {groups[group]!.map((n) => {
-                    const active = isActive(n.to);
-                    const locked = needsUpgrade(basePath(n.to), role, plan);
-                    return (
-                      <Link
-                        key={`${n.to}-${n.group}`}
-                        to={locked ? "/console/upgrade" : n.to}
-                        aria-current={active ? "page" : undefined}
-                        onClick={() => setNavOpen(false)}
-                        className={`flex items-center justify-between rounded-md px-3 py-2 text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 ${active
-                          ? "bg-deal-600/20 text-white ring-1 ring-deal-400/40"
-                          : "text-white/70 hover:bg-white/5 hover:text-white"}`}
-                      >
-                        <span className={locked ? "text-white/45" : ""}>{n.label}</span>
-                        {locked && <span aria-label="Pro feature" title="Upgrade to Pro" className="text-[10px] text-white/35">🔒</span>}
-                      </Link>
-                    );
-                  })}
+                  {groups[group]!.map(renderItem)}
                 </div>
               </div>
             ))}
+            </div>
           </nav>
           <div className="border-t border-white/10 px-4 py-3">
             <div className="truncate text-xs font-medium text-white/80">{session?.email}</div>

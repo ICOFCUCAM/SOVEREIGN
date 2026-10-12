@@ -70,3 +70,21 @@ export const BUYER_STEPS: readonly GuideStep[] = [
 ];
 
 export const stepsFor = (role: Role): readonly GuideStep[] => (role === "buyer" ? BUYER_STEPS : FOUNDER_STEPS);
+
+// ── Shorter founder menu ────────────────────────────────────────────
+// Founders see these first; every other entry sits under "All tools",
+// grouped as before. Labels, routes and locks are unchanged.
+export const ESSENTIALS: readonly string[] = [
+  "/console", "/console/intake", "/console/readiness", "/console/valuation",
+  "/console/buyers", "/console/acquisition-radar", "/console/marketplace", "/console/inbox",
+];
+
+const NAV_KEY = "exitos.nav.v1";
+
+export function loadAllToolsOpen(): boolean {
+  try { return localStorage.getItem(NAV_KEY) === "open"; } catch { return false; }
+}
+
+export function saveAllToolsOpen(open: boolean): void {
+  try { localStorage.setItem(NAV_KEY, open ? "open" : "closed"); } catch { /* storage unavailable: not remembered */ }
+}
