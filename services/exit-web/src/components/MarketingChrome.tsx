@@ -78,7 +78,7 @@ export const LocaleSwitch: React.FC<{ dark?: boolean }> = ({ dark }) => {
           className={`px-2 py-1 font-mono text-[10.5px] font-bold uppercase tracking-wide transition ${
             locale === code
               ? (dark ? "bg-white/15 text-white" : "bg-ink-900 text-white")
-              : (dark ? "text-white/55 hover:text-white" : "text-slate-500 hover:text-ink-900")
+              : (dark ? "text-white/55 hover:text-white" : "text-slate-600 hover:text-ink-900")
           }`}>
           {code}
         </button>
@@ -118,7 +118,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
         <div className={`${WRAP} grid min-h-[72px] grid-cols-[1fr_auto] items-center gap-5 lg:grid-cols-[1fr_auto_1fr]`}>
           <div className="flex items-center gap-5">
             <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={30} /></button>
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500 xl:inline">A Sovereign Infrastructure</span>
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600 xl:inline">A Sovereign Infrastructure</span>
           </div>
           <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
             {NAV.map(([key, fallback, to]) => (
@@ -150,7 +150,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               <Link to="/console" onClick={() => setMenuOpen(false)} className="px-3 py-2.5 text-[14px] font-medium text-slate-600">{t("nav.login")}</Link>
             </nav>
             <div className="mt-3 flex items-center gap-3 border-t border-slate-100 px-3 pt-3">
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{t("nav.language")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">{t("nav.language")}</span>
               <LocaleSwitch />
             </div>
           </div>
@@ -165,7 +165,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
             <div>
               <ExchangeLockup size={30} />
               <p className="mt-4 max-w-xs text-[12.5px] leading-relaxed text-slate-600">{t("ft.tagline")}</p>
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.soc")}</span>
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.audit")}</span>
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.ndagated")}</span>
@@ -187,8 +187,8 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
             ))}
           </div>
           <div className="mt-10 border-t border-slate-200 pt-6">
-            <p className="max-w-3xl text-[11px] leading-relaxed text-slate-500">{t("ft.legal")}</p>
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-4 text-[12px] text-slate-500">
+            <p className="max-w-3xl text-[11px] leading-relaxed text-slate-600">{t("ft.legal")}</p>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-4 text-[12px] text-slate-600">
               <div>© {new Date().getFullYear()} ExitOS — A Sovereign Infrastructure</div>
               <div className="flex items-center gap-4">
                 <LocaleSwitch />

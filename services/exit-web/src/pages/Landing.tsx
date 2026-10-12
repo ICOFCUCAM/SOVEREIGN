@@ -40,7 +40,7 @@ const Landing: React.FC = () => {
         <div className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#f6f8fb] from-30% via-[#f6f8fb]/90 via-55% to-[#f6f8fb]/70" aria-hidden />
         <div className={`${WRAP} relative pb-12 pt-10 lg:pb-14 lg:pt-14`}>
-          <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+          <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
             <span>{t("hero.eyebrow")}</span>
             <span className="text-blue-600">Registry snapshot · as of {MARKET_INDEX_FMT.asOf}</span>
           </div>
@@ -65,7 +65,7 @@ const Landing: React.FC = () => {
             </div>
 
             {/* ---- the acquisition-exchange display (the hero instrument) ---- */}
-            <div className="min-w-0">
+            <div className="min-w-0" data-board="command">
               <div className="relative p-2.5" style={{ background: "linear-gradient(145deg,#1c2c44,#0a1626)", boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.10)" }}>
                 <div className="mb-1.5 flex items-center justify-between gap-3 bg-black/25 px-3 py-1.5">
                   <div className="flex items-center gap-2">
@@ -102,7 +102,7 @@ const Landing: React.FC = () => {
               <div key={l} className="flex items-baseline gap-2">
                 {i === 3 && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />}
                 <span className="font-mono text-[15px] font-bold tabular-nums text-ink-900">{v}</span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">{l}</span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">{l}</span>
               </div>
             ))}
           </div>
@@ -117,7 +117,7 @@ const Landing: React.FC = () => {
                 <div className="min-w-0">
                   <div className="font-editorial text-[22px] font-semibold leading-none text-ink-900">{c.metric}</div>
                   <div className="mt-1 text-[12.5px] font-semibold leading-tight text-ink-800">{c.title}</div>
-                  <div className="text-[11px] leading-snug text-slate-500">{c.sub}</div>
+                  <div className="text-[11px] leading-snug text-slate-600">{c.sub}</div>
                 </div>
               </div>
             ))}
@@ -165,17 +165,17 @@ const Landing: React.FC = () => {
             </div>
           </div>
           {/* comparison matrix: Traditional vs ExitOS */}
-          <div className="mt-12 overflow-x-auto border-y border-ink-900 lg:ml-[calc(27.5%+3vw)]">
+          <div role="region" aria-label="Traditional sale compared with ExitOS" tabIndex={0} className="mt-12 overflow-x-auto border-y border-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 lg:ml-[calc(27.5%+3vw)]">
             <div className="min-w-[620px]">
               <div className="grid grid-cols-[1.1fr_1fr_1fr] border-b border-slate-200">
                 <div className="px-4 py-3" />
-                <div className="px-4 py-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-500">Traditional Sale</div>
+                <div className="px-4 py-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-slate-600">Traditional Sale</div>
                 <div className="bg-ink-900 px-4 py-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white">With ExitOS</div>
               </div>
               {LOSSES.map((l) => (
                 <div key={l.problem} className="grid grid-cols-[1.1fr_1fr_1fr] border-b border-slate-200 last:border-0">
                   <div className="flex items-center px-4 py-4 font-editorial text-[17px] font-semibold text-ink-900">{l.dimension}</div>
-                  <div className="flex items-center gap-2 px-4 py-4 text-[12.5px] text-slate-500">
+                  <div className="flex items-center gap-2 px-4 py-4 text-[12.5px] text-slate-600">
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center text-red-500"><Glyph name="x" small /></span>{l.problem}
                   </div>
                   <div className="flex items-center gap-2 bg-blue-50/40 px-4 py-4 text-[12.5px] font-medium text-ink-800">
@@ -221,13 +221,13 @@ const Landing: React.FC = () => {
           </div>
           {/* market structure — the counterparties on the exchange */}
           <div id="solutions" className="mt-16">
-            <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-500">{t("ms.eyebrow")}</div>
+            <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-600">{t("ms.eyebrow")}</div>
             <div className="mt-4 grid grid-cols-2 border-t border-slate-300 sm:grid-cols-3 lg:grid-cols-5">
               {ECOSYSTEM.map((e, i) => (
                 <div key={e.label} className={`py-5 pr-4 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-5" : ""}`}>
                   <span className="text-blue-600"><Glyph name={e.icon} /></span>
                   <div className="mt-3 text-[13px] font-semibold text-ink-900">{t(e.label)}</div>
-                  <div className="mt-0.5 font-mono text-[10.5px] text-slate-500">{t(e.meta, { n: e.n })}</div>
+                  <div className="mt-0.5 font-mono text-[10.5px] text-slate-600">{t(e.meta, { n: e.n })}</div>
                 </div>
               ))}
             </div>
@@ -252,12 +252,12 @@ const Landing: React.FC = () => {
                   <Mark name={b.name} />
                   <div>
                     <div className="text-sm font-bold leading-tight text-ink-900">{b.name}</div>
-                    <div className="text-[10.5px] text-slate-500">{b.kind}</div>
+                    <div className="text-[10.5px] text-slate-600">{b.kind}</div>
                   </div>
                 </div>
                 <div className="mt-5">
                   <div className="flex items-center justify-between text-[10.5px]">
-                    <span className="text-slate-500">Acquisition Appetite</span>
+                    <span className="text-slate-600">Acquisition Appetite</span>
                     <span className="font-semibold text-blue-600">{b.appetite >= 90 ? "Very High" : "High"}</span>
                   </div>
                   <div className="mt-1.5 h-1 overflow-hidden bg-slate-100">
@@ -267,7 +267,7 @@ const Landing: React.FC = () => {
                 <dl className="mt-4 space-y-2 text-[11px]">
                   {b.rows.map((r) => (
                     <div key={r[0]} className="flex items-baseline justify-between gap-2 border-t border-slate-100 pt-2">
-                      <dt className="text-slate-500">{r[0]}</dt>
+                      <dt className="text-slate-600">{r[0]}</dt>
                       <dd className="text-right font-semibold text-ink-800">{r[1]}</dd>
                     </div>
                   ))}
@@ -291,7 +291,7 @@ const Landing: React.FC = () => {
                   <li key={p.stage} className="flex items-baseline gap-4 border-b border-slate-200 py-3">
                     <span className="font-mono text-[10.5px] text-blue-600">{String(i + 1).padStart(2, "0")}</span>
                     <span className="text-[13px] font-semibold text-ink-900">{p.stage}</span>
-                    <span className="ml-auto text-right text-[11.5px] text-slate-500">{p.detail}</span>
+                    <span className="ml-auto text-right text-[11.5px] text-slate-600">{p.detail}</span>
                   </li>
                 ))}
               </ol>
@@ -300,7 +300,7 @@ const Landing: React.FC = () => {
             <div className="border-y border-ink-900">
               <div className="flex items-center justify-between border-b border-slate-200 py-3">
                 <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-900">Confidence register</span>
-                <span className="font-mono text-[10px] uppercase tracking-wide text-slate-500">applied to every estimate</span>
+                <span className="font-mono text-[10px] uppercase tracking-wide text-slate-600">applied to every estimate</span>
               </div>
               {CONFIDENCE_TIERS.map((ct) => (
                 <div key={ct.tier} className="grid grid-cols-[110px_1fr] gap-4 border-b border-slate-200 py-4 last:border-0">
@@ -309,11 +309,11 @@ const Landing: React.FC = () => {
                   </div>
                   <div>
                     <div className="text-[13px] font-semibold text-ink-900">{ct.basis}</div>
-                    <div className="mt-0.5 text-[12px] leading-snug text-slate-500">{ct.detail}</div>
+                    <div className="mt-0.5 text-[12px] leading-snug text-slate-600">{ct.detail}</div>
                   </div>
                 </div>
               ))}
-              <div className="border-t border-slate-200 py-3 text-[11px] text-slate-500">
+              <div className="border-t border-slate-200 py-3 text-[11px] text-slate-600">
                 {HISTORY_FMT.events} disclosed events on record · sources: SEC EDGAR 8-K filings, Wikidata, press disclosures · refreshed with the registry
               </div>
             </div>
@@ -327,7 +327,7 @@ const Landing: React.FC = () => {
                   <span className="font-mono text-[15px] font-bold text-ink-900">{f.value}</span>
                 </div>
                 <div className="mt-3 text-[12px] font-bold leading-tight text-ink-900">{f.title}</div>
-                <div className="text-[10.5px] leading-snug text-slate-500">{f.body}</div>
+                <div className="text-[10.5px] leading-snug text-slate-600">{f.body}</div>
               </div>
             ))}
           </div>
@@ -347,20 +347,20 @@ const Landing: React.FC = () => {
           <div className="mt-12 grid border-y border-ink-900 sm:grid-cols-3">
             {TRANSACTIONS.slice(0, 3).map((c, i) => (
               <div key={c.company} className={`py-8 pr-6 ${i > 0 ? "sm:border-l sm:border-slate-200 sm:pl-6" : ""} border-b border-slate-200 last:border-b-0 sm:border-b-0`}>
-                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">{c.industry}</div>
-                <div className="mt-4 text-[11px] font-medium uppercase tracking-wide text-slate-500">{c.company} &mdash; acquired by</div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">{c.industry}</div>
+                <div className="mt-4 text-[11px] font-medium uppercase tracking-wide text-slate-600">{c.company} &mdash; acquired by</div>
                 <div className="mt-1 flex items-center gap-2 text-base font-bold text-ink-900"><Mark name={c.buyer} size={20} />{c.buyer}</div>
                 <div className="mt-6 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-ink-900">{c.offer}</div>
-                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Disclosed Value</div>
+                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">Disclosed Value</div>
                 <div className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 text-[11px]">
-                  <div><div className="font-mono text-[14px] font-bold text-blue-600">{c.premium.replace(/ vs reference$/, "")}</div><div className="mt-0.5 text-slate-500">vs reference</div></div>
-                  <div><div className="font-mono text-[14px] font-bold text-ink-900">{c.status}</div><div className="mt-0.5 text-slate-500">Status</div></div>
-                  <div><div className="font-mono text-[14px] font-bold text-ink-900">{c.age}</div><div className="mt-0.5 text-slate-500">Period</div></div>
+                  <div><div className="font-mono text-[14px] font-bold text-blue-600">{c.premium.replace(/ vs reference$/, "")}</div><div className="mt-0.5 text-slate-600">vs reference</div></div>
+                  <div><div className="font-mono text-[14px] font-bold text-ink-900">{c.status}</div><div className="mt-0.5 text-slate-600">Status</div></div>
+                  <div><div className="font-mono text-[14px] font-bold text-ink-900">{c.age}</div><div className="mt-0.5 text-slate-600">Period</div></div>
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-5 text-[11px] text-slate-500">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} priced events · {HISTORY_FMT.disclosedValue} disclosed value</div>
+          <div className="mt-5 text-[11px] text-slate-600">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} priced events · {HISTORY_FMT.disclosedValue} disclosed value</div>
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-slate-300 px-5 py-4">
             <span className="text-[13.5px] text-slate-700">{t("rec.bridge")}</span>
             <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("rec.run")} <Arrow /></button>
@@ -440,22 +440,22 @@ const Landing: React.FC = () => {
               </div>
             </div>
           </div>
-          <p className="mt-12 font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-500">Example listings — illustrative, not companies on the market</p>
+          <p className="mt-12 font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Example listings — illustrative, not companies on the market</p>
           <div className="mt-3 grid border-y border-ink-900 sm:grid-cols-2 lg:grid-cols-4">
             {OPPORTUNITIES.map((o, i) => (
               <div key={o.name} className={`py-6 pr-5 ${i > 0 ? "lg:border-l lg:border-slate-200 lg:pl-5" : ""} border-b border-slate-200 last:border-b-0 lg:border-b-0`}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-mono text-[10px] font-semibold uppercase tracking-wide text-blue-600">{o.sector}</span>
-                  <span className="font-mono text-[9.5px] uppercase tracking-wide text-slate-500">{o.stage}</span>
+                  <span className="font-mono text-[9.5px] uppercase tracking-wide text-slate-600">{o.stage}</span>
                 </div>
                 <div className="mt-4 font-editorial text-[22px] font-semibold text-ink-900">{o.name}</div>
-                <div className="mt-1 text-[10.5px] text-slate-500">Example listing &middot; {o.region}</div>
+                <div className="mt-1 text-[10.5px] text-slate-600">Example listing &middot; {o.region}</div>
                 <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-200 pt-3 text-[11px]">
-                  <div><div className="text-slate-500">Revenue band</div><div className="font-mono font-semibold text-ink-800">{o.rev}</div></div>
-                  <div className="text-right"><div className="text-slate-500">EBITDA band</div><div className="font-mono font-semibold text-ink-800">{o.ebitda}</div></div>
+                  <div><div className="text-slate-600">Revenue band</div><div className="font-mono font-semibold text-ink-800">{o.rev}</div></div>
+                  <div className="text-right"><div className="text-slate-600">EBITDA band</div><div className="font-mono font-semibold text-ink-800">{o.ebitda}</div></div>
                 </div>
                 <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
-                  <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-slate-500"><Glyph name="lock" small /> Identity &amp; ask under NDA</span>
+                  <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-slate-600"><Glyph name="lock" small /> Identity &amp; ask under NDA</span>
                   <a href="/console" className="text-[12px] font-semibold text-blue-600 hover:text-blue-700">Request NDA &rarr;</a>
                 </div>
               </div>
@@ -468,7 +468,7 @@ const Landing: React.FC = () => {
       <section className="border-b border-slate-200 bg-white">
         <div className="grid items-stretch lg:grid-cols-[1.05fr_1.35fr]">
           <div className="relative flex items-center overflow-hidden px-5 py-12 sm:px-8 lg:px-12 lg:py-16" style={{ background: "linear-gradient(135deg,#0a2a52 0%,#05182f 60%,#081f3a 100%)" }}>
-            <WorldDots />
+            <div aria-hidden className="w-full"><WorldDots /></div>
           </div>
           <div className="px-5 py-16 sm:px-8 lg:px-14 lg:py-20">
             <Chapter n="10">{t("cov.eyebrow")}</Chapter>
@@ -477,7 +477,7 @@ const Landing: React.FC = () => {
             <div className="mt-6 flex flex-wrap gap-1.5">
               {TOP_JURISDICTIONS.map(([code, n]) => (
                 <span key={code} className="inline-flex items-baseline gap-1.5 border border-slate-200 px-2.5 py-1 font-mono text-[11px] font-bold text-ink-800">
-                  {code} <span className="text-[9.5px] font-medium text-slate-500">{n} mandates</span>
+                  {code} <span className="text-[9.5px] font-medium text-slate-600">{n} mandates</span>
                 </span>
               ))}
             </div>
@@ -485,7 +485,7 @@ const Landing: React.FC = () => {
               {GLOBAL_STATS.map((s) => (
                 <div key={s.label}>
                   <div className="font-editorial text-[2.2rem] font-semibold leading-none tabular-nums text-ink-900">{s.value}</div>
-                  <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">{s.label}</div>
+                  <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -526,7 +526,7 @@ const Landing: React.FC = () => {
               <button onClick={() => nav("/pricing")} className={`${BTN} justify-between border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
             </div>
           </div>
-          <p className="mt-10 border-t border-slate-300 pt-5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-slate-500">{t("cta.foot")}</p>
+          <p className="mt-10 border-t border-slate-300 pt-5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-slate-600">{t("cta.foot")}</p>
         </div>
       </section>
     </MarketingChrome>
@@ -846,9 +846,9 @@ const GOVERNANCE = [
   { icon: "doc", title: "gov.soc.t", body: "gov.soc.b" },
 ];
 const CONFIDENCE_TIERS = [
-  { tier: "Verified", color: "#059669", basis: "Disclosed in a public filing", detail: "Headline value, dates and parties confirmed against the primary source." },
-  { tier: "Reported", color: "#2563eb", basis: "Multiple independent reports", detail: "Cross-referenced press and database coverage; primary filing not located." },
-  { tier: "Estimated", color: "#d97706", basis: "Modeled from the record", detail: "Benchmarked against the acquirer's completed-transaction history, with sample size shown." },
+  { tier: "Verified", color: "#047857", basis: "Disclosed in a public filing", detail: "Headline value, dates and parties confirmed against the primary source." },
+  { tier: "Reported", color: "#1d4ed8", basis: "Multiple independent reports", detail: "Cross-referenced press and database coverage; primary filing not located." },
+  { tier: "Estimated", color: "#92400e", basis: "Modeled from the record", detail: "Benchmarked against the acquirer's completed-transaction history, with sample size shown." },
 ];
 const STEPS = [
   { icon: "chart", title: "Company Analysis", body: "Valuation across weighted methodologies, market positioning, and a priced readiness score." },
@@ -910,7 +910,7 @@ const OfferTable: React.FC = () => (
     </div>
     <table className="mt-3 w-full text-left text-[12px]">
       <thead className="text-white/45">
-        <tr>{["", "Buyer A", "Buyer B", "Buyer C"].map((h) => <th key={h} className="pb-2 font-semibold">{h}</th>)}</tr>
+        <tr>{["Measure", "Buyer A", "Buyer B", "Buyer C"].map((h, i) => <th key={h} scope="col" className={`pb-2 font-semibold ${i === 0 ? "sr-only" : ""}`}>{h}</th>)}</tr>
       </thead>
       <tbody>
         {[

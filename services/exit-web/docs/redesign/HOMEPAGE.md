@@ -109,7 +109,7 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 | M4 | **Illustrative content shown as real.** | Visible "Illustrative" labels on the cross-bid table and the example listings; "Market Heat" shows the registry-derived heat label instead of a constant. | ☑ `d38267fd` |
 | M5 | **Overclaims in copy.** | "AI valuation" → "Deterministic valuation"; "Offer optimisation captures the premium" → "Offers compared on structure and certainty"; "verified acquirer mandates" → "curated acquirer mandates"; board "Match Score" → "Activity score". | ☑ `868699d9` |
 | M6 | **Broken link** `/marketplace`. | Point "How the listing protocol works" to the marketplace inside the exchange (`/console/marketplace`; signed-out users see sign-in). | ☑ `c53e38f1` |
-| M7 | **Accessibility.** | A `main` landmark in the chrome (all marketing pages); contrast ≥ 4.5:1 for text (locked colours kept, opacities/shade steps within the same palette adjusted); the empty table header labelled; the drill-down as a real dialog (focus, Escape, `aria-modal`); the scrolling matrix keyboard-focusable; decorative map and graphics `aria-hidden`. Target: axe 0 on `/` at 1440 and 390. | ☐ |
+| M7 | **Accessibility.** | A `main` landmark in the chrome (all marketing pages); contrast ≥ 4.5:1 for text (locked colours kept, opacities/shade steps within the same palette adjusted); the empty table header labelled; the drill-down as a real dialog (focus, Escape, `aria-modal`); the scrolling matrix keyboard-focusable; decorative map and graphics `aria-hidden`. Target: axe 0 on `/` at 1440 and 390. | ☑ M7-commit |
 | M8 | **Motion ignores reduced-motion.** | All homepage animations (ticker, scan, travelling dots, SVG `animateMotion`) honour `prefers-reduced-motion: reduce` — no animation when set. | ☐ |
 | M9 | **i18n.** | Every copy change above is made in EN, FR and ES together; new strings get keys in all three. | ☐ (closed with each gap) |
 
@@ -227,6 +227,21 @@ These strings sit beside the page's other hard-coded English data constants (the
 ### M6 — Broken link `/marketplace`
 *Closed by:* `pages/Landing.tsx`. The "How the listing protocol works" link went to `/marketplace`, which is not a route, so the catch-all sent users back to `/`. It now uses a router `Link` to `/console/marketplace`. Signed-out users see the sign-in form at that address and land on the marketplace after signing in.
 *Verification:* `tsc -b`, eslint clean · Chromium: click while signed out → `/console/marketplace` with the sign-in form; sign in as a founder → stays on `/console/marketplace`, `h1` "Exit Marketplace".
+
+### M7 — Accessibility
+*Closed by:* `pages/Landing.tsx` and `components/MarketingChrome.tsx`. The `main` landmark was already added in M1. Changes:
+- **Contrast.** Secondary text on the page ground `#f6f8fb` measured 4.47:1 with `slate-500`. It now uses `slate-600`, one step in the same palette: 31 places in the page component and 5 in the chrome, plus the inactive locale buttons.
+- **Confidence-tier chips** use darker steps of their own hues: Verified `#059669` → `#047857`, Reported `#2563eb` → `#1d4ed8`, Estimated `#d97706` → `#92400e`. They were 3.22, 4.35 and 2.76:1 on their tints.
+- **Cross-bid table.** The empty first header is now a visually hidden "Measure" with `scope="col"` on all headers.
+- **Comparison matrix.** It scrolls sideways on phones, so it is now a labelled, focusable region ("Traditional sale compared with ExitOS") with a focus ring.
+- **World map** wrapped `aria-hidden` (decorative).
+- **Board marker.** The board wrapper got `data-board="command"`, a non-visual attribute used to scope the checks. The board itself is unchanged.
+
+**Not done (owner decision).** The command board's own contrast (6 labels in `white/40–45`) and its drill-down overlay are left as built. axe reports them only inside the board.
+*Verification:* `tsc -b`, eslint clean · `vitest` 218/218.
+- axe on `/` excluding the board, 1440 and 390: **0 violations** (was contrast ×33, empty-table-header, scrollable-region). Inside the board: contrast ×6, unchanged.
+- Keyboard: 112 tab stops outside the board, all with a visible focus indicator.
+- `/modules` axe 0 at both widths (shared-chrome contrast fixed). `/platform` contrast 14 → 6 and `/pricing` 27 → 19; both are their own content, for the later phase.
 
 ---
 
