@@ -42,6 +42,15 @@ html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px s
    when motion is welcome */
 .ex-site [id^="ch-"] { scroll-margin-top: 72px; }
 @media (prefers-reduced-motion: no-preference) { html:has(.ex-site) { scroll-behavior: smooth; } }
+/* disclosures (questions, modules) open and close smoothly where the browser can animate to auto height;
+   elsewhere, and under reduced motion, they open at once as before */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (interpolate-size: allow-keywords) {
+    .ex-site { interpolate-size: allow-keywords; }
+    .ex-site details::details-content { block-size: 0; overflow-y: clip; transition: block-size .45s cubic-bezier(.2,.7,.2,1), content-visibility .45s allow-discrete; }
+    .ex-site details[open]::details-content { block-size: auto; }
+  }
+}
 .ex-site ::selection { background: rgba(180,154,117,0.32); color: inherit; }
 .ex-site :where([data-ink], footer) ::selection { background: rgba(201,176,138,0.4); color: #fff; }
 
