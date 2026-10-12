@@ -40,8 +40,12 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 | G3 | **Invented sender and hard-coded demo facts in the draft.** | "[Your name]"; company name and growth from the company profile; no "competitive process" claim beyond the offer count. | ☐ |
 | G4 | **"AI / autonomous" overclaims**; counter rule unexplained; "strategic mid" (D1). | "Standard negotiating positions (templates) — not legal advice"; counter rule stated; "enterprise value (institutional)". | ☐ |
 | G5 | Unvalidated amounts; demo offers unlabelled. | `parseNumber` with walk ≤ minimum ≤ ideal checks; badge and line for sample offers. | ☐ |
-| G6 | Design: old primitives, draft overlay not a dialog, tape. | Rebuild on `xo`; draft in the shared `Modal`; `RegistryTape`. | ☐ |
+| G6 | Design: old primitives, draft overlay not a dialog, tape. | Rebuild on `xo`; draft in the shared `Modal`; `RegistryTape`. | ☑ G6-commit |
 
 ---
 
 ## Closure log
+
+### G6 — Design, dialog, tape
+*Closed by:* `pages/Negotiator.tsx` rebuilt on `xo` (`PageHeader` `h1` with Edit reservation lines and Generate counter as header actions; four metrics; banker's take as a page-local definition list (shared `BankerTake` no longer used here); offers as a `nav` of buttons with `aria-current`; the selected offer as a labelled section with `h2`/`h3`/`h4`; counteroffer, score breakdown, conflicts and moves with severities in words; cross-bid comparison as a definition list; the response draft now opens in the shared `Modal` (an accessible dialog since X13) instead of a bare overlay; pinging `MarketTape` → dated `RegistryTape`). Content carried over verbatim; G1–G5 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe 0 (after moving the "→" inside a `dt` — axe flagged it as an invalid `dl` child), all tab stops with visible focus; draft and reservation dialogs: role dialog, focus inside, axe 0, Escape returns focus to the opener · free: Upgrade page.
