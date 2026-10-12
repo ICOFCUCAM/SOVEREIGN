@@ -5,7 +5,7 @@
 | Route | `/console/calibration` |
 | Component | `src/pages/Calibration.tsx` (191 lines) + `lib/calibration.ts` (`fetchCalibration` → Supabase edge function `exit-calibration`, demo tenant) |
 | NAV | "Calibration", group Admin, **admin only** (others are redirected; verified: a founder lands on `/console`) |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All three gaps closed; X21 and X22 recorded for the owner. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `129900f`)
 
@@ -54,3 +54,13 @@ The page calls the production edge function. Tests stub that call with **synthet
 ### G2 — "Median |error|" shows the mean; sign and scope unstated
 *Closed by:* `pages/Calibration.tsx` (labels; data unchanged). "Median |error| — absolute deviation" (it showed `mae`, the mean of absolute errors) → **"Mean absolute error — average size of the miss"**; a "Median error" metric now shows the real median (`medianErrorPct`); "Mean error" sub → "signed — direction of the miss"; a note: "Demo tenant only. Error = (realized − predicted) ÷ predicted — negative means the deal closed below the prediction. The prediction recorded for each run is the strategic-report midpoint, not the canonical value the console shows (open item X21)."
 *Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium superadmin, stubbed populated state (fixture: mean −6.2 %, median −5.0 %, MAE 8.0 %): "Mean error −6.2% · Median error −5.0% · Mean absolute error 8.0%" and the note shown; 0 "Median |error|"; 1440/390 axe 0, no overflow.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 206/206 · Chromium superadmin with the edge function stubbed by synthetic fixtures (empty, populated, error) at 1440/390: 0 errors, `h1` 1, no overflow, axe 0 · non-admin redirected to `/console` (unchanged).
+
+## Known issues
+- **X21 (owner decision):** One-Click Exit records the strategic-report midpoint as the prediction; the console shows the canonical value (D1).
+- **X22 (security, backend):** `exit-calibration` returns any tenant's summary to any caller holding the public anon key and a tenant UUID; the admin gate is client-side only.
+- Real calibration data was not read: the page was tested only against stubbed responses, so the production demo tenant's actual figures are NOT VERIFIED here.
