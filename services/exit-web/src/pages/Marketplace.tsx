@@ -2,7 +2,8 @@ import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, Chip } from "../components/xo";
+import { PageHeader, Section, Metric, Chip, Provenance } from "../components/xo";
+import { useAuth } from "../lib/auth";
 import { buildMarketTape } from "../lib/market-tape";
 import { LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES, useMemorandum } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
@@ -37,7 +38,54 @@ interface PipelineStep {
   detail: React.ReactNode;   // what the step produced (shown once prepared)
 }
 
+// Buyers share this route ("Browse Opportunities") but must only ever see
+// the anonymized public listing — never the founder's identity, private
+// figures, controls or matched-buyer list.
 const Marketplace: React.FC = () => {
+  const { session } = useAuth();
+  return session?.role === "buyer" ? <BuyerMarketplace /> : <FounderMarketplace />;
+};
+
+const BuyerMarketplace: React.FC = () => {
+  const listing = LISTING_PUBLIC;
+  const tape = useMemo(() => buildMarketTape(), []);
+  const LINK = "font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  return (
+    <div data-page="marketplace" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Marketplace · Buyer" title="Browse Opportunities"
+        badge={<Provenance kind="demo">Demo listing</Provenance>}
+        description={<>The anonymized public view of the demo company's listing — the same view every buyer gets: no name, no jurisdiction. Every listing on the exchange, with NDA requests and offers, is on the <Link to="/console/acquisition-radar" className={LINK}>Acquisition Radar</Link>.</>} />
+      <MarketTape items={tape} />
+      <Section title={listing.title} eyebrow="Public listing · anonymized" className="border border-xo-line">
+        <div className="px-4 py-4">
+          <ul className="flex flex-wrap gap-2 text-[12px]">
+            <Tag>{listing.businessModel}</Tag>
+            <Tag>{listing.sector.replace(/_/g, " ")}</Tag>
+            <Tag>founded {listing.foundedYear}</Tag>
+            <Tag>jurisdiction {listing.jurisdiction}</Tag>
+          </ul>
+          <dl className="mt-5 grid grid-cols-2 gap-x-8 gap-y-3 text-[13px] sm:grid-cols-3">
+            {listing.headline.arrUsd != null && <DataRow label="ARR" value={fmtMoney(listing.headline.arrUsd)} />}
+            {listing.headline.ttmRevenueUsd != null && <DataRow label="TTM revenue" value={fmtMoney(listing.headline.ttmRevenueUsd)} />}
+            <DataRow label="Gross margin" value={`${(listing.headline.grossMarginPct * 100).toFixed(0)}%`} />
+            <DataRow label="ARR growth YoY" value={`${(listing.headline.arrGrowthYoyPct * 100).toFixed(0)}%`} />
+            <DataRow label="EBITDA margin" value={`${(listing.headline.ebitdaMarginPct * 100).toFixed(0)}%`} />
+            <DataRow label="Asking range" value={`${fmtMoney(listing.askingPriceUsd.low)} – ${fmtMoney(listing.askingPriceUsd.high)}`} />
+          </dl>
+          <h3 className="mt-6 text-[13px] font-semibold">Highlights</h3>
+          <ul className="mt-2 space-y-1.5 text-[13px] text-xo-muted">
+            {listing.highlights.map((h) => (
+              <li key={h} className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-xo-verified" /> {h}</li>
+            ))}
+          </ul>
+          <p className="mt-6 text-[12px] text-xo-muted">To request an NDA or make an indicative offer, open the listing on the <Link to="/console/acquisition-radar" className={LINK}>Acquisition Radar</Link>.</p>
+        </div>
+      </Section>
+    </div>
+  );
+};
+
+const FounderMarketplace: React.FC = () => {
   const [view, setView]   = useState<"public" | "founder">("founder");
   const [phase, setPhase] = useState<Phase>("idle");
 
