@@ -7,7 +7,17 @@ import { useI18n, LOCALES } from "../lib/i18n";
 // Platform, Modules and Pricing all read as one professional, multi-page
 // property rather than a single endless scroll.
 
-export const Arrow = () => <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+// One button family for the marketing pages (EE22): a primary and a secondary,
+// each with a paper and an ink form, the same size, weight, arrow and focus ring.
+const BTN_BASE = "group inline-flex items-center justify-between gap-5 px-5 py-3.5 text-[12.5px] font-semibold tracking-[0.01em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 motion-reduce:transition-none";
+export const BUTTON = {
+  primary: `${BTN_BASE} bg-ink-900 text-white hover:bg-blue-700 focus-visible:ring-offset-white`,
+  secondary: `${BTN_BASE} border border-ink-900/40 text-ink-900 hover:border-ink-900 hover:bg-ink-900 hover:text-white focus-visible:ring-offset-white`,
+  primaryInk: `${BTN_BASE} bg-white text-ink-900 hover:bg-blue-50 focus-visible:ring-offset-ex-1`,
+  secondaryInk: `${BTN_BASE} border border-white/50 text-white hover:border-white hover:bg-white hover:text-ink-900 focus-visible:ring-offset-ex-1`,
+} as const;
+
+export const Arrow = () => <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 motion-reduce:transition-none"><path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 
 export const Glyph: React.FC<{ name: string; small?: boolean; size?: number }> = ({ name, small, size }) => {
   const s = size ?? (small ? 15 : 20);

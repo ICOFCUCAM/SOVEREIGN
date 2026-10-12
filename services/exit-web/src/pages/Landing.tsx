@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { MarketingChrome, Mark, Arrow, Chapter, Editorial } from "../components/MarketingChrome";
+import { MarketingChrome, Mark, Arrow, BUTTON, Chapter, Editorial } from "../components/MarketingChrome";
 import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL_FMT, type BoardTx } from "../lib/market-stats";
 import { useI18n } from "../lib/i18n";
 import QuickValue from "../components/QuickValue";
@@ -37,7 +37,6 @@ const HOME_MODULES: ReadonlyArray<[string, string, Record<string, number>]> = [
 
 const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
 const H2 = "font-editorial text-[clamp(2.25rem,4.6vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.035em]";
-const BTN = "inline-flex items-center gap-5 px-5 py-3.5 text-[12px] font-semibold transition";
 
 
 /** Chapter arrivals: each chapter's headline rises into place the first time it
@@ -83,8 +82,8 @@ const Landing: React.FC = () => {
             </h1>
             <p className="mt-6 max-w-[440px] text-[15px] leading-[1.85] text-slate-700">{t("hx.body")}</p>
             <div className="mt-8 flex flex-wrap gap-2.5">
-              <button onClick={() => nav("/platform")} className={`${BTN} bg-ink-900 text-white hover:bg-blue-700`}>{t("hx.explore")} <Arrow /></button>
-              <a href="#ch-04" className={`${BTN} border border-ink-900/70 text-ink-900 hover:bg-ink-900 hover:text-white md:border-ink-900/40 md:bg-white/30 md:backdrop-blur-sm`}>{t("bar.value")} <span aria-hidden>↓</span></a>
+              <button onClick={() => nav("/platform")} className={BUTTON.primary}>{t("hx.explore")} <Arrow /></button>
+              <a href="#ch-04" className={`${BUTTON.secondary} md:bg-white/30 md:backdrop-blur-sm`}>{t("bar.value")} <span aria-hidden>↓</span></a>
             </div>
           </div>
         </div>
@@ -336,7 +335,7 @@ const Landing: React.FC = () => {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-slate-300 px-5 py-4">
             <span className="text-[13.5px] text-slate-700">{t("rec.bridge")}</span>
-            <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("rec.run")} <Arrow /></button>
+            <button onClick={() => nav("/console")} className={BUTTON.primary}>{t("rec.run")} <Arrow /></button>
           </div>
         </div>
       </section>
@@ -382,7 +381,7 @@ const Landing: React.FC = () => {
               <h2 id="faq-h" className="rv-h mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} quiet /></h2>
               <div className="mt-10 rounded-[4px] p-6 text-white" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
                 <p className="font-editorial text-[1.35rem] font-semibold leading-snug">{t("faq.more")}</p>
-                <button onClick={() => nav("/pricing")} className={`${BTN} mt-5 bg-white text-ink-900 hover:bg-blue-50`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
+                <button onClick={() => nav("/pricing")} className={`${BUTTON.primaryInk} mt-5`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
               </div>
             </div>
             <div className="flex flex-col gap-3">
@@ -414,8 +413,8 @@ const Landing: React.FC = () => {
             <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1fr_auto]">
               <h2 className="rv-h font-editorial text-[clamp(3rem,7vw,7rem)] font-semibold leading-[0.94] tracking-[-0.05em] text-white"><Editorial text={t("cta.h2")} dark /></h2>
               <div className="flex flex-wrap gap-2.5 lg:flex-col lg:items-stretch">
-                <button onClick={() => nav("/console")} className={`${BTN} justify-between bg-white text-ink-900 hover:bg-blue-50`}>{t("cta.open")} <Arrow /></button>
-                <button onClick={() => nav("/pricing")} className={`${BTN} justify-between border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
+                <button onClick={() => nav("/console")} className={BUTTON.primaryInk}>{t("cta.open")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={BUTTON.secondaryInk}>{t("cta.brief")} <span aria-hidden>↗</span></button>
               </div>
             </div>
             <div className="mt-10 grid gap-6 border-t border-white/20 pt-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">

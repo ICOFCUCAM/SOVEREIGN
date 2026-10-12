@@ -118,7 +118,7 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
                 {errs.growth && <p id={`${id}-ge`} className="mt-1 text-[12px] text-red-700">{errs.growth}</p>}
               </div>
               <div className="sm:pt-[29px]">
-                <button type="submit" disabled={busy} className="inline-flex w-full items-center justify-between gap-6 bg-ink-900 px-6 py-[17px] text-[13px] font-semibold text-white transition hover:bg-ink-800 disabled:opacity-70">
+                <button type="submit" disabled={busy} className="group inline-flex w-full items-center justify-between gap-6 bg-ink-900 px-6 py-[17px] text-[13px] font-semibold text-white transition duration-300 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-70 motion-reduce:transition-none">
                   {busy ? t("qv.working") : t("qv.go")} <span aria-hidden>→</span>
                 </button>
               </div>
