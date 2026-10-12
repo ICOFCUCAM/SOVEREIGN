@@ -153,6 +153,67 @@ Measured (Chromium, 1440/390, after M1/M7 chrome): 0 errors, `h1` 1, no overflow
 | R4 | **Pricing not aligned with Upgrade; fixed teaser number.** | Tier texts as Upgrade (Page 41 G2): "Recommended for a live process", "Buyer outreach drafts & NDA requests", "Rule-based negotiation (Bid Room), bid & process management", "Closing Center checklist", "Receive buyer interest in your Inbox"; `h1` → "Priced like a bank. Success fee only when you close."; teaser → "Buyers that match your company are shown once you list." (no fixed number); table "NDA requests & register", "Rule-based scoring & counters", "Buyer signals — Registry radar (snapshot)"; "runs around the clock" removed. Buyer tiers unchanged (open decision). | ☑ `ef4e6454` |
 | R5 | **Contrast** on Platform (6) and Pricing (19). | Shade steps within the same palette (as M7). Target: axe 0 on all three at 1440 and 390. | ☑ `079f424b` |
 
+
+## Phase 3 — Iconic upgrades (proposal, awaiting the owner's choice)
+Owner direction, 2026-10-12: "propose further iconic upgrade of the homepage", then "write". Nothing below is built yet. The same rules apply as before:
+- colours locked;
+- the command board and its trading-hall setting untouched (M10);
+- every existing block kept;
+- only real or clearly labelled data;
+- reduced motion respected;
+- EN/FR/ES for any i18n copy;
+- each item documented, then closed in its own commit.
+
+### U1 — "Value your company in 30 seconds" (recommended)
+- **What.** A strip directly under the hero. Three inputs: sector (the 12 `SECTORS`), trailing revenue ($M) and annual growth (%). Pressing **Value** shows a low–mid–high range in the editorial serif, labelled **Model estimate**. One line states the assumption: "Other inputs use typical values (gross margin 72%, EBITDA margin 10%, net retention 115% …) — refine them in Value My Company." Buttons: **Refine in Value My Company →** and **Access the Exchange**.
+- **Engine.** `buildProfile({ ...DEFAULT_INTAKE, sector, ttmRevenueUsd, arrUsd, growthPct })` → `runInstitutionalValuation(profile).headline`. This is the D1 institutional value the whole console uses; no new formula.
+- **Hand-off.** The three figures travel in the URL (`/console/intake?sector=…&revenue=…&growth=…`). Value My Company pre-fills them but **does not save** until the founder edits or confirms, keeping the Page 03 G1 rule: "Your intake" always means the founder's own data. Nothing is stored from the homepage.
+- **Input rules.** `parseNumber` validation (revenue $0.1M–$5,000M, growth −50%–300%), with errors announced. The result sits in an `aria-live="polite"` region.
+- **Weight.** The valuation engine is loaded with a dynamic `import()` on first focus, so the first paint does not grow. Bundle size before and after will be reported.
+- **Files.** `pages/Landing.tsx` (new section), `pages/Intake.tsx` (read the query, pre-fill without saving), `lib/i18n.tsx` (new keys in EN/FR/ES); tests for the URL parsing and the no-save rule.
+- **Verify.** Engine parity: the homepage mid for the demo inputs equals the console's figure. Intake not saved after the hand-off until an edit. axe 0 and keyboard; 1440/390.
+
+### U2 — The broadsheet ledger (recommended)
+- **What.** Chapter 06 (transaction record) becomes a financial-newspaper page:
+  - a masthead row ("The ExitOS Ledger · Disclosed acquisitions · as of {index date}");
+  - the three lead deals as front-page stories, with a large serif figure, acquirer, target, sector, premium versus reference, status and year;
+  - beneath them, a ruled table of the next deals in the history (date, target, acquirer, sector, disclosed value, status, source).
+- **Data.** `DISCLOSED_TRANSACTIONS` and the history snapshot already used. Each row names its source (EDGAR / Wikidata / press), as recorded.
+- **Kept.** The sources line and the bridge CTA "Run the valuation".
+- **Files.** `pages/Landing.tsx`; `lib/market-stats.ts` gains an additive export for more rows (and the source per row).
+- **Verify.** Every value matches the snapshot. Table semantics (`th scope`), a scroll region on phones, axe 0.
+
+### U3 — One giant-number statement
+- **What.** A full-width moment between the hero and the lifecycle band: **6,311** (the `MARKET_INDEX_FMT.events` figure, not typed) in very large editorial numerals. Under it: "disclosed acquisitions indexed — Wikipedia · Wikidata · SEC EDGAR, as of {date}".
+- **Kept.** The proof ribbon stays as is.
+- **Files.** `pages/Landing.tsx`; label strings in i18n.
+
+### U4 — Numbered source notes (recommended)
+- **What.** Each figure on the page outside the board gets a small superscript (¹ ² ³ …) linking to a **Sources & method** list above the footer. The list covers: the market index (counts, date); the buyer registry (curated mandates, date); the disclosed-deal history (EDGAR / Wikidata / press); medians (method, sample size); and the valuation engine (deterministic, framework version).
+- **Accessibility.** Each note is a real link with an accessible name ("Source 3"), and each source has a back-link.
+- **Files.** `pages/Landing.tsx`, a small `SourceNote` component, i18n keys.
+
+### U5 — "I'm selling / I'm buying" entrances
+- **What.** Two large panels after the thesis. **Selling**: value, prepare, list, with a button to founder sign-in. **Buying**: browse, request an NDA, deal room, with a button to buyer sign-in. These mirror the console's Start-here guide (O1).
+- **Change outside the homepage.** `pages/SignIn.tsx` reads `?role=buyer` to pre-select the Buyer tab. Only the initial selection changes; there is no change to auth or access.
+- **Files.** `pages/Landing.tsx`, `pages/SignIn.tsx`, i18n.
+
+### U6 — Lifecycle band that follows the scroll
+- **What.** In a tall wrapper, the eight-stage band stays pinned while the visitor scrolls. The stage for the current position is highlighted, with one line on what happens and the ExitOS page that handles it (a link: Value My Company, Find Buyers, Manage NDAs, Generate Documents, Compare Offers, Prepare for Diligence, Close the Deal).
+- **Reduced motion and phones.** With reduced motion on, or below 1024 px, the static band shows instead.
+- **Files.** `pages/Landing.tsx`.
+
+### U7 — Polish and speed
+- **What.**
+  - A drop cap and small capitals in the thesis; tabular figures in all tables.
+  - The hall photo `command-center.png` (1.5 MB) re-encoded as WebP/AVIF of the same image, served with `<picture>` and a PNG fallback. The picture is identical, so the board's environment is unchanged (M10).
+  - On phones, secondary chapters (provenance detail, data-room categories, governance) collapse into labelled disclosures, aiming at about 9,000 px instead of about 17,300 px.
+- **Files.** `pages/Landing.tsx`, `public/`, `index.html` (preload path).
+- **Verify.** The first-screen image weight before and after; LCP measured locally (Chromium, throttled); page height at 390.
+
+### Proposed order
+U1 + U2 + U4 first: a live product moment, a signature look and visible proof, with no new data. Then U3, U5, U7, U6.
+
 ---
 
 ## Closure log
