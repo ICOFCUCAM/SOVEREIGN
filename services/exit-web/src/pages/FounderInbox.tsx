@@ -151,7 +151,7 @@ const FounderInbox: React.FC = () => {
 
       {/* marketplace liquidity — qualified buyer mandates matching this listing */}
       <Section title="Qualified buyers · mandates matching your listing" className="border border-xo-line"
-        foot="Buyers who published an acquisition mandate that matches your sector, geography, check size and growth. Buyers are shown anonymously — this is your demand, before you run a process.">
+        foot="Mandates buyers saved on the Acquisition Radar, scored against your listing by a fixed rule: sector 40 + revenue inside the buyer's target band 25 + region 20 + growth at or above their minimum 15. Qualified = 70 or more with the sector matching. A rule-based fit, not a likelihood of a bid. Buyers are shown anonymously — this is your demand, before you run a process.">
         {matched.length ? (
           <ul>
             {matched.map(({ m, score, qualified }) => (
@@ -159,9 +159,9 @@ const FounderInbox: React.FC = () => {
                 <div className="min-w-0">
                   <span className="font-semibold">Buyer mandate</span>
                   {qualified && <span className="ml-2 rounded-sm border border-xo-verified/50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-verified">Qualified</span>}
-                  <div className="mt-0.5 text-[11px] text-xo-muted">{m.sectors.slice(0, 4).join(" · ") || "any sector"} · {usdShort(m.minCheckUsd)}–{usdShort(m.maxCheckUsd)} check · {m.regions.slice(0, 3).join(", ") || "any region"}{m.strategicThemes.length ? ` · themes: ${m.strategicThemes.slice(0, 2).join(", ")}` : ""}</div>
+                  <div className="mt-0.5 text-[11px] text-xo-muted">{m.sectors.slice(0, 4).join(" · ") || "any sector"} · target revenue {usdShort(m.minCheckUsd)}–{usdShort(m.maxCheckUsd)} · {m.regions.slice(0, 3).join(", ") || "any region"}{m.strategicThemes.length ? ` · themes: ${m.strategicThemes.slice(0, 2).join(", ")}` : ""}</div>
                 </div>
-                <span className="shrink-0 font-mono text-[15px] font-semibold tabular-nums">{score}%</span>
+                <span className="shrink-0 text-right"><span className="block text-[10px] text-xo-faint">Match score</span><span className="font-mono text-[15px] font-semibold tabular-nums">{score}<span className="text-[11px] text-xo-muted">/100</span></span></span>
               </li>
             ))}
           </ul>
