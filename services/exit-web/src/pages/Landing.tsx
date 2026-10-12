@@ -5,6 +5,7 @@ import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SEC
 import { useI18n } from "../lib/i18n";
 import QuickValue from "../components/QuickValue";
 import TradingHall from "../components/TradingHall";
+import ExchangeMap from "../components/ExchangeMap";
 import { Note, SourcesSection, type SourceId } from "../components/SourceNotes";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 
@@ -31,21 +32,25 @@ const Landing: React.FC = () => {
   const h1 = heroLines(t("hero.h1"));
   return (
     <MarketingChrome active="home">
-      {/* ===== 01 · HERO — the Horizon (X1): one statement, the hall's light below ===== */}
-      <section className="relative overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#030a15 0%,#06182E 60%,#0A1F3A 100%)" }}>
+      {/* ===== 01 · HERO — the exchange (Y1): the statement, the map of the field, then the hall ===== */}
+      <section className="relative overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#030a15 0%,#06182E 70%,#05101f 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(160,190,230,0.9) 0 1px, transparent 1px 180px)" }} />
-        <div className={`${WRAP} relative flex min-h-[calc(100vh-72px)] flex-col items-center justify-center pb-32 pt-16 text-center`}>
-          <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.26em] text-blue-300"><span aria-hidden className="h-px w-10 bg-blue-300/70" />{t("hero.eyebrow")}<span aria-hidden className="h-px w-10 bg-blue-300/70" /></div>
-          <h1 className="mt-8 max-w-[13ch] font-editorial text-[clamp(3.4rem,8vw,8.6rem)] font-semibold leading-[0.88] tracking-[-0.05em]">
-            {h1.map((l, i) => <span key={i} className={i === h1.length - 1 ? "italic text-blue-300" : ""}>{l}{i < h1.length - 1 ? " " : ""}</span>)}
-          </h1>
-          <p className="mt-8 max-w-xl font-editorial text-[21px] leading-snug text-blue-50/90">{t("hero.sub")}</p>
-          <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-blue-100/75">{t("hero.body")}</p>
-          <div className="mt-9 flex flex-wrap justify-center gap-2.5">
-            <button onClick={() => nav("/console")} className={`${BTN} bg-white text-ink-900 hover:bg-blue-50`}>{t("nav.access")} <Arrow /></button>
-            <button onClick={() => nav("/pricing")} className={`${BTN} border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+        <div className={`${WRAP} relative pb-14 pt-16 lg:pt-20`}>
+          <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.26em] text-blue-300"><span aria-hidden className="h-px w-10 bg-blue-300/70" />{t("hero.eyebrow")}</div>
+          <div className="mt-8 grid items-end gap-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-16">
+            <h1 className="max-w-[12ch] font-editorial text-[clamp(3.2rem,7vw,7.6rem)] font-semibold leading-[0.88] tracking-[-0.05em]">
+              {h1.map((l, i) => <span key={i} className={i === h1.length - 1 ? "italic text-blue-300" : ""}>{l}{i < h1.length - 1 ? " " : ""}</span>)}
+            </h1>
+            <div className="lg:pb-3">
+              <p className="max-w-xl font-editorial text-[21px] leading-snug text-blue-50/90">{t("hero.sub")}</p>
+              <p className="mt-3 max-w-xl text-[14.5px] leading-relaxed text-blue-100/75">{t("hero.body")}</p>
+              <div className="mt-8 flex flex-wrap gap-2.5">
+                <button onClick={() => nav("/console")} className={`${BTN} bg-white text-ink-900 hover:bg-blue-50`}>{t("nav.access")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={`${BTN} border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+              </div>
+            </div>
           </div>
-          <div className="mt-16 grid w-full max-w-4xl grid-cols-2 gap-y-6 sm:grid-cols-4">
+          <div className="mt-14 grid grid-cols-2 gap-y-6 border-t border-white/10 pt-7 sm:grid-cols-4">
             {[
               [MARKET_INDEX_FMT.events, t("ribbon.deals")],
               [MARKET_FMT.buyers, t("ribbon.mandates")],
@@ -59,16 +64,15 @@ const Landing: React.FC = () => {
             ))}
           </div>
         </div>
-        {/* the horizon: the hall's light cove, glimpsed below the fold */}
-        <div aria-hidden className="absolute inset-x-0 bottom-10 mx-auto h-[3px] w-[70%] rounded-full" style={{ background: "linear-gradient(90deg, transparent, rgba(225,238,255,1), transparent)", boxShadow: "0 0 40px 10px rgba(120,170,255,0.55)" }} />
-        <div aria-hidden className="absolute inset-x-0 bottom-0 mx-auto h-24 w-[80%] rounded-[50%] opacity-50 blur-3xl" style={{ background: "radial-gradient(ellipse at bottom, rgba(56,130,246,0.6), transparent 70%)" }} />
+        {/* 01 / discover the field — the sale process as a route across the market */}
+        <ExchangeMap />
       </section>
 
       {/* ===== THE EXCHANGE — the screen installed in the trading hall ===== */}
       <section aria-labelledby="hall-h">
         <TradingHall head={
-          <div className={`${WRAP} relative pb-24 pt-24 text-white`}>
-            <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.24em] text-blue-300"><span aria-hidden className="h-px w-12 bg-blue-300/70" />{t("hall.eyebrow")}</div>
+          <div className={`${WRAP} relative pb-24 pt-20 text-white`}>
+            <div className="flex items-center gap-4 font-mono text-[10.5px] uppercase tracking-[0.24em] text-blue-300"><span aria-hidden className="h-px w-12 bg-blue-300/70" /><span>02 / {t("xm.trace")} · {t("hall.eyebrow")}</span></div>
             <h2 id="hall-h" className="mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic text-blue-300">{t("hall.h2em")}</em></h2>
           </div>
         }>

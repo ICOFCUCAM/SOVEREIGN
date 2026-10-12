@@ -15,7 +15,7 @@ const xy = (lon: number, lat: number): [number, number] => [((lon + 180) / 360) 
 
 // stage, typical window, where the node sits (lon, lat), label side
 const STAGES: ReadonlyArray<[string, string, number, number, "above" | "below"]> = [
-  ["lc.signal", "day 0", -104, 46, "above"],
+  ["lc.signal", "d 0", -104, 46, "above"],
   ["lc.discovery", "wk 1", -62, -12, "below"],
   ["lc.nda", "wk 1–2", 6, 50, "above"],
   ["lc.cim", "wk 2", 20, 4, "below"],
@@ -51,6 +51,8 @@ const STYLE = `
 
 const ExchangeMap: React.FC = () => {
   const { t } = useI18n();
+  // "d 0" → "day 0", "wk 1–2" → "wk 1–2" in the reader's language
+  const fmtWk = (w: string): string => w.startsWith("d ") ? `${t("xm.day")} ${w.slice(2)}` : `${t("xm.wk")} ${w.slice(3)}`;
   return (
     <figure className="relative m-0 overflow-hidden border-y border-white/10" style={{ background: "linear-gradient(180deg,#05101f,#071a31 60%,#05101f)" }}>
       <style>{STYLE}</style>
@@ -95,7 +97,7 @@ const ExchangeMap: React.FC = () => {
               <text x={x} y={side === "above" ? y - 42 : y + 40} textAnchor="middle" fill="#e8edf5" fontSize="12.5" letterSpacing="2.6" stroke="#05101f" strokeWidth="5" paintOrder="stroke" strokeLinejoin="round" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", textTransform: "uppercase" }}>
                 {String(i + 1).padStart(2, "0")} · {t(key)}
               </text>
-              <text x={x} y={side === "above" ? y - 26 : y + 56} textAnchor="middle" fill="#93c5fd" fontSize="11" letterSpacing="1.5" stroke="#05101f" strokeWidth="4" paintOrder="stroke" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{wk}</text>
+              <text x={x} y={side === "above" ? y - 26 : y + 56} textAnchor="middle" fill="#93c5fd" fontSize="11" letterSpacing="1.5" stroke="#05101f" strokeWidth="4" paintOrder="stroke" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{fmtWk(wk)}</text>
             </g>
           );
         })}
@@ -103,20 +105,20 @@ const ExchangeMap: React.FC = () => {
       {/* on a phone the map labels are too small to read: the stages as a list */}
       <ol className="grid grid-cols-2 gap-x-4 gap-y-2 border-t border-white/10 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.14em] sm:hidden">
         {STAGES.map(([key, wk], i) => (
-          <li key={key} className="text-white/85"><span className={i === STAGES.length - 1 ? "text-emerald-300" : "text-blue-300"}>{String(i + 1).padStart(2, "0")}</span> {t(key)} <span className="block normal-case tracking-normal text-blue-200/80">{wk}</span></li>
+          <li key={key} className="text-white/85"><span className={i === STAGES.length - 1 ? "text-emerald-300" : "text-blue-300"}>{String(i + 1).padStart(2, "0")}</span> {t(key)} <span className="block normal-case tracking-normal text-blue-200/80">{fmtWk(wk)}</span></li>
         ))}
       </ol>
 
       {/* corner tag */}
       <div aria-hidden className="absolute right-6 top-6 hidden items-center sm:flex">
-        <span className="border border-white/30 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/80">Exchange map / 001</span>
+        <span className="border border-white/30 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/80">{t("xm.tag")}</span>
         <span className="h-[34px] w-[10px] bg-blue-600" />
       </div>
       {/* footer row */}
       <figcaption className="relative flex flex-wrap items-center justify-between gap-3 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.2em] sm:px-6">
-        <span className="flex items-center gap-3 text-white/70"><span aria-hidden className="h-4 w-4 bg-blue-600" /><span className="text-blue-300">01</span> / Discover the field</span>
-        <span className="text-blue-200">Illustrative process topology · typical weeks</span>
-        <span className="text-white/70"><span className="text-blue-300">02</span> / Trace the path ↓</span>
+        <span className="flex items-center gap-3 text-white/70"><span aria-hidden className="h-4 w-4 bg-blue-600" /><span className="text-blue-300">01</span> / {t("xm.discover")}</span>
+        <span className="text-blue-200">{t("xm.note")}</span>
+        <span className="text-white/70"><span className="text-blue-300">02</span> / {t("xm.trace")} <span aria-hidden>↓</span></span>
       </figcaption>
       <div aria-hidden className="h-1 bg-blue-600" />
     </figure>

@@ -337,6 +337,12 @@ The owner supplied a reference: a dark exchange map with low-poly continents, a 
 - On a phone the map labels are too small to read, so the stages are repeated as a two-column list under the map; the corner tag is hidden.
 - If approved, this map replaces the trading-hall setting of the exchange section on the homepage. The board markup stays identical either way.
 
+### Y1 — Map and hall in one hero (owner: "both should be included in the hero")
+
+| Gap | Close by | Status |
+|---|---|---|
+| Y1: the hero and the exchange are separate moments; the owner wants the exchange map and the trading hall both in the hero | One continuous hero: statement and calls to action (left/right split), the exchange map full width beneath ("01 / Discover the field"), its footer ("02 / Trace the path") leading straight into the hall with the board unchanged. Map strings move to i18n (EN/FR/ES). Board markup identical. | open |
+
 ## Closure log
 
 ### M1 — Rebuild on the `index(9)` skeleton
