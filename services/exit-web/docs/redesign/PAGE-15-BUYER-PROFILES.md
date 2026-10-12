@@ -38,7 +38,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 | G3 | Banker's-take urgency and overclaim; hidden plan gate. | Plain wording; `requiredEngagement` note. | ☐ |
 | G4 | Demo company unlabelled. | Buyers and intro text on `loadActiveCompany()`; badge. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
-| G6 | Design: no `h1`, 24 contrast failures, header name differs from NAV, drawer not a dialog. | Rebuild on `xo`; `h1` "Buyer Profiles"; intro in the shared `Modal`. | ☐ |
+| G6 | Design: no `h1`, 24 contrast failures, header name differs from NAV, drawer not a dialog. | Rebuild on `xo`; `h1` "Buyer Profiles"; intro in the shared `Modal`. | ☑ G6-commit |
 
 ### X13 — Shared `Modal` is not an accessible dialog (found here) — documented before the fix
 `lib/ui.tsx` `Modal` renders a plain `div` overlay: no `role="dialog"`, no `aria-modal`, no accessible name, focus is not moved into it on open nor returned on close (Escape and backdrop click already close it), and its close button has no visible focus ring. Used by every page that opens a modal. *Fix (additive, same props and look):* `role="dialog"`, `aria-modal="true"`, `aria-labelledby` → the title; focus moves to the dialog panel on open and back to the previously focused element on close; Tab is kept inside the dialog; visible focus ring on the close button.
@@ -50,3 +50,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 ### X13 — Shared `Modal` accessibility
 *Closed by:* `lib/ui.tsx` `Modal` (additive; props and look unchanged): `role="dialog"`, `aria-modal="true"`, `aria-labelledby` the title (`useId`); focus moves to the panel on open, Tab and Shift+Tab cycle inside, focus returns to the opener on close; close button `type="button"` with a visible focus ring.
 *Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium (Buyer Profiles): warm-intro dialog found by role, focus inside on open, axe 0 inside the dialog, Escape closes it and focus returns to "Warm intro for Flexport Strategic"; the filter dialog likewise.
+
+### G6 — Design
+*Closed by:* `pages/Buyers.tsx` rebuilt on `xo` (`PageHeader` `h1` **"Buyer Profiles"** — the NAV name; "Buyer Marketplace" kept in the eyebrow — four metrics, banker's take as a page-local definition list (shared `BankerTake` no longer used here), profiles as an ordered list with `h3`s and definition lists, Filter and Warm-intro as real buttons with accessible names; the warm intro now opens in the shared `Modal` (an accessible dialog after X13, commit `9188194`) instead of a bare overlay). Content carried over verbatim; G1–G5 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium free 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 24), all tab stops with visible focus; intro dialog axe 0, Escape closes, focus returns.
