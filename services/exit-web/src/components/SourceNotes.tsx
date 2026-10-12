@@ -77,7 +77,11 @@ export const SourcesSection: React.FC<{ only?: readonly SourceId[]; collapsed?: 
             <h2 id="sources-h" className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-[#7A6344]">{t("src.title")} <span className="text-slate-600">· {list.length}</span></h2>
             <span aria-hidden className="font-mono text-[18px] leading-none text-ink-900 transition-transform group-open:rotate-45">+</span>
           </summary>
-          <div className="mt-4 lg:pl-[calc(27.5%+3vw)]">{items}</div>
+          {/* open: how the notes work, beside the notes */}
+          <div className="mt-4 grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
+            <p className="max-w-[34ch] text-[13.5px] leading-relaxed text-slate-600">{t("src.intro")}</p>
+            {items}
+          </div>
         </details>
       </div>
     </section>
