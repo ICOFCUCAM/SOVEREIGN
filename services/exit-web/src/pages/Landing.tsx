@@ -990,7 +990,22 @@ const HUBS: { name: string; lon: number; lat: number }[] = [
 const FLOWS: [string, string][] = [
   ["na", "eu"], ["eu", "me"], ["me", "asia"], ["na", "asia"], ["eu", "asia"], ["sa", "na"], ["asia", "au"], ["na", "sa"],
 ];
+// True when the visitor asked for reduced motion (OS setting); updates live.
+const useReducedMotion = (): boolean => {
+  const q = "(prefers-reduced-motion: reduce)";
+  const [reduce, setReduce] = useState(() => typeof window !== "undefined" && !!window.matchMedia?.(q).matches);
+  useEffect(() => {
+    const m = window.matchMedia?.(q);
+    if (!m) return;
+    const on = (): void => setReduce(m.matches);
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, []);
+  return reduce;
+};
+
 const WorldDots: React.FC = () => {
+  const reduce = useReducedMotion();
   const dots = React.useMemo(() => {
     const out: [number, number][] = [];
     for (let lat = 78; lat >= -56; lat -= 2.6) {
@@ -1012,7 +1027,7 @@ const WorldDots: React.FC = () => {
         return (
           <g key={i}>
             <path d={d} fill="none" stroke="#2E8BD6" strokeWidth="1.1" opacity="0.5" />
-            <circle r="2.8" fill="#A8FFFF"><animateMotion dur={`${4 + (i % 4)}s`} repeatCount="indefinite" path={d} /></circle>
+            {!reduce && <circle r="2.8" fill="#A8FFFF"><animateMotion dur={`${4 + (i % 4)}s`} repeatCount="indefinite" path={d} /></circle>}
           </g>
         );
       })}

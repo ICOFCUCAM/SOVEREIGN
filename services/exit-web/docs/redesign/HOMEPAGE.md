@@ -110,7 +110,7 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 | M5 | **Overclaims in copy.** | "AI valuation" → "Deterministic valuation"; "Offer optimisation captures the premium" → "Offers compared on structure and certainty"; "verified acquirer mandates" → "curated acquirer mandates"; board "Match Score" → "Activity score". | ☑ `868699d9` |
 | M6 | **Broken link** `/marketplace`. | Point "How the listing protocol works" to the marketplace inside the exchange (`/console/marketplace`; signed-out users see sign-in). | ☑ `c53e38f1` |
 | M7 | **Accessibility.** | A `main` landmark in the chrome (all marketing pages); contrast ≥ 4.5:1 for text (locked colours kept, opacities/shade steps within the same palette adjusted); the empty table header labelled; the drill-down as a real dialog (focus, Escape, `aria-modal`); the scrolling matrix keyboard-focusable; decorative map and graphics `aria-hidden`. Target: axe 0 on `/` at 1440 and 390. | ☑ `1fbe0c4f` |
-| M8 | **Motion ignores reduced-motion.** | All homepage animations (ticker, scan, travelling dots, SVG `animateMotion`) honour `prefers-reduced-motion: reduce` — no animation when set. | ☐ |
+| M8 | **Motion ignores reduced-motion.** | All homepage animations (ticker, scan, travelling dots, SVG `animateMotion`) honour `prefers-reduced-motion: reduce` — no animation when set. | ☑ M8-commit |
 | M9 | **i18n.** | Every copy change above is made in EN, FR and ES together; new strings get keys in all three. | ☐ (closed with each gap) |
 
 ### M1 mapping — current blocks into the skeleton's chapters
@@ -242,6 +242,15 @@ These strings sit beside the page's other hard-coded English data constants (the
 - axe on `/` excluding the board, 1440 and 390: **0 violations** (was contrast ×33, empty-table-header, scrollable-region). Inside the board: contrast ×6, unchanged.
 - Keyboard: 112 tab stops outside the board, all with a visible focus indicator.
 - `/modules` axe 0 at both widths (shared-chrome contrast fixed). `/platform` contrast 14 → 6 and `/pricing` 27 → 19; both are their own content, for the later phase.
+
+### M8 — Motion and reduced motion
+*Closed by:* `pages/Landing.tsx`. A small `useReducedMotion` hook (`matchMedia("(prefers-reduced-motion: reduce)")`, updates if the setting changes) stops the world map's eight travelling SVG pulses (`animateMotion`) when the visitor has reduced motion on. The arcs and hubs stay. M2 already removed the other motion outside the board (the lifecycle ping and travelling dot). The `exTravel` keyframe is left in the shared style block but is now unused.
+
+**Not done (owner decision).** The command board's own motion (ticker, scan sweep, pulses, oscillating figures, clock) is kept as built, including when reduced motion is on.
+*Verification:* `tsc -b`, eslint clean · Chromium `/`:
+- No preference: CSS animations outside the board 0, inside 6; SMIL map pulses 8.
+- **Reduced motion: outside the board 0 and 0**; inside the board 6 (as built).
+- Before this work (baseline), reduced motion still ran 10 animations at 1440.
 
 ---
 
