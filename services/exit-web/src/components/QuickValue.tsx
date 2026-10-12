@@ -32,12 +32,12 @@ const RangeBar: React.FC<{ low: number; mid: number; high: number; muted?: boole
       <div className="relative h-4 rounded-full bg-white/10 ring-1 ring-inset ring-white/10">
         {ticks.map((v) => <span key={v} className="absolute inset-y-0 w-px bg-white/15" style={{ left: pc(v) }} />)}
         <div className={`absolute inset-y-0 origin-left rounded-full motion-safe:transition-transform motion-safe:duration-[900ms] motion-safe:ease-out ${muted ? "opacity-60" : ""}`}
-          style={{ left: pc(low), width: `calc(${pc(high)} - ${pc(low)})`, transform: on ? "scaleX(1)" : "scaleX(0)", background: "linear-gradient(90deg,#3b82f6,#60a5fa 55%,#93c5fd)", boxShadow: muted ? "none" : "0 0 18px rgba(96,165,250,0.55)" }} />
+          style={{ left: pc(low), width: `calc(${pc(high)} - ${pc(low)})`, transform: on ? "scaleX(1)" : "scaleX(0)", background: "linear-gradient(90deg,#9A7E56,#C9B08A 55%,#DCCDB3)", boxShadow: muted ? "none" : "0 0 18px rgba(201,176,138,0.55)" }} />
         <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ left: pc(mid) }}>
-          <span className="block h-7 w-7 rounded-full border-[3px] border-white bg-blue-600 shadow-[0_0_0_6px_rgba(37,99,235,0.25)]" />
+          <span className="block h-7 w-7 rounded-full border-[3px] border-white bg-[#9A7E56] shadow-[0_0_0_6px_rgba(180,154,117,0.25)]" />
         </div>
       </div>
-      <div className="relative mt-3 h-10 font-mono text-[11px] tabular-nums text-blue-100/70">
+      <div className="relative mt-3 h-10 font-mono text-[11px] tabular-nums text-[#E8E0D2]/70">
         {ticks.map((v) => <span key={v} className="absolute -translate-x-1/2" style={{ left: pc(v) }}>{v === 0 ? "$0" : usd(v)}</span>)}
         <span className="absolute top-5 -translate-x-1/2 whitespace-nowrap rounded-sm bg-white px-1.5 py-0.5 font-semibold text-ink-900" style={{ left: pc(mid) }}>{usd(mid)}</span>
       </div>
@@ -46,8 +46,8 @@ const RangeBar: React.FC<{ low: number; mid: number; high: number; muted?: boole
 };
 
 /** The navy card the range sits in: the page's one dark object in this chapter. */
-const CARD = "relative overflow-hidden rounded-[6px] p-6 text-white shadow-[0_30px_60px_-30px_rgba(6,24,46,0.7)] sm:p-9";
-const CARD_BG = { background: "radial-gradient(ellipse 80% 120% at 0% 0%, rgba(37,99,235,0.35), transparent 60%), linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" };
+const CARD = "relative overflow-hidden rounded-ex-md p-6 text-white shadow-ex-3 sm:p-9";
+const CARD_BG = { background: "radial-gradient(ellipse 80% 120% at 0% 0%, rgba(180,154,117,0.35), transparent 60%), linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" };
 
 const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
   const { t } = useI18n();
@@ -87,7 +87,7 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
   };
 
   return (
-    <section id={`ch-${n}`} aria-labelledby={`${id}-h`} className="border-b border-slate-200 bg-[#f6f8fb]">
+    <section id={`ch-${n}`} aria-labelledby={`${id}-h`} className="ex-light bg-white">
       <div className="mx-auto w-full max-w-[1480px] px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
         <div className="border-t-4 border-double border-ink-900 pt-8">
           <Chapter n={n}>{t("qv.eyebrow")}</Chapter>
@@ -118,7 +118,7 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
                 {errs.growth && <p id={`${id}-ge`} className="mt-1 text-[12px] text-red-700">{errs.growth}</p>}
               </div>
               <div className="sm:pt-[29px]">
-                <button type="submit" disabled={busy} className="inline-flex w-full items-center justify-between gap-6 bg-ink-900 px-6 py-[17px] text-[13px] font-semibold text-white transition hover:bg-ink-800 disabled:opacity-70">
+                <button type="submit" disabled={busy} className="group inline-flex w-full items-center justify-between gap-6 bg-ink-900 px-6 py-[17px] text-[13px] font-semibold text-white transition duration-300 hover:bg-[#2A2D30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-70 motion-reduce:transition-none">
                   {busy ? t("qv.working") : t("qv.go")} <span aria-hidden>→</span>
                 </button>
               </div>
@@ -129,16 +129,16 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
                 <div className="grid items-start gap-8 lg:grid-cols-[1.35fr_1fr]">
                   <div className={CARD} style={CARD_BG}>
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="text-[12.5px] text-blue-100/80">{t("qv.range")}</span>
-                      <span className="rounded-sm bg-blue-600 px-1.5 py-px font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white">{t("qv.model")}</span>
+                      <span className="text-[12.5px] text-[#E8E0D2]/80">{t("qv.range")}</span>
+                      <span className="rounded-sm bg-[#9A7E56] px-1.5 py-px font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white">{t("qv.model")}</span>
                     </div>
                     <div className="mt-4 font-editorial text-[clamp(2.6rem,5.6vw,5.4rem)] font-semibold leading-none tabular-nums tracking-[-0.03em]">
-                      {usd(result.low)} <span aria-hidden className="text-blue-300/60">–</span> {usd(result.high)}
+                      {usd(result.low)} <span aria-hidden className="text-[#C9B08A]/60">–</span> {usd(result.high)}
                     </div>
-                    <div className="mt-2 text-[13px] text-blue-100/80"><span className="font-semibold text-blue-300">{usd(result.mid)}</span> {t("qv.mid")}</div>
+                    <div className="mt-2 text-[13px] text-[#E8E0D2]/80"><span className="font-semibold text-[#C9B08A]">{usd(result.mid)}</span> {t("qv.mid")}</div>
                     <RangeBar low={result.low} mid={result.mid} high={result.high} />
                     <div className="mt-4 flex flex-wrap gap-2.5">
-                      <Link to={`/console/intake${result.query}`} className="inline-flex items-center gap-5 bg-white px-5 py-3 text-[12px] font-semibold text-ink-900 transition hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">{t("qv.refine")} <span aria-hidden>→</span></Link>
+                      <Link to={`/console/intake${result.query}`} className="inline-flex items-center gap-5 bg-white px-5 py-3 text-[12px] font-semibold text-ink-900 transition hover:bg-[#F5F1E9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">{t("qv.refine")} <span aria-hidden>→</span></Link>
                     </div>
                   </div>
                   <div>
@@ -155,14 +155,14 @@ const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {
               ) : example ? (
                 <div className={`${CARD} max-w-[860px]`} style={CARD_BG}>
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="text-[12.5px] text-blue-100/80">{t("qv.range")}</span>
+                    <span className="text-[12.5px] text-[#E8E0D2]/80">{t("qv.range")}</span>
                     <span className="rounded-sm border border-white/40 px-1.5 py-px font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white/85">{t("qv.exampleTag")}</span>
                   </div>
                   <div className="mt-4 font-editorial text-[clamp(2.6rem,5.6vw,5.4rem)] font-semibold leading-none tabular-nums tracking-[-0.03em] text-white/75">
-                    {usd(example.low)} <span aria-hidden className="text-blue-300/50">–</span> {usd(example.high)}
+                    {usd(example.low)} <span aria-hidden className="text-[#C9B08A]/50">–</span> {usd(example.high)}
                   </div>
                   <RangeBar low={example.low} mid={example.mid} high={example.high} muted />
-                  <p className="mt-2 text-[14px] text-blue-100/80">{t("qv.example", { s: sectorLabel(EX.sector), r: EX.revenueUsd / 1e6, g: Math.round(EX.growthPct * 100) })}</p>
+                  <p className="mt-2 text-[14px] text-[#E8E0D2]/80">{t("qv.example", { s: sectorLabel(EX.sector), r: EX.revenueUsd / 1e6, g: Math.round(EX.growthPct * 100) })}</p>
                 </div>
               ) : (
                 <p className="text-[14px] text-slate-600">{t("qv.empty")}</p>

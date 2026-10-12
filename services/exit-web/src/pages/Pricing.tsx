@@ -144,7 +144,7 @@ const Pricing: React.FC = () => {
           <ol className="mt-6 grid gap-px border-y border-ink-900 bg-slate-200 sm:grid-cols-3 lg:grid-cols-5">
             {FLOW.map((f) => (
               <li key={f.step} className="bg-white py-5 sm:px-5">
-                <div className="font-mono text-[11px] font-semibold tabular-nums tracking-widest text-blue-600">{f.step}</div>
+                <div className="font-mono text-[11px] font-semibold tabular-nums tracking-widest text-[#7A6344]">{f.step}</div>
                 <div className="mt-3 font-editorial text-[19px] font-semibold text-ink-900">{f.label}</div>
                 <div className="mt-1 text-[12.5px] leading-relaxed text-slate-600">{f.note}</div>
               </li>
@@ -154,7 +154,7 @@ const Pricing: React.FC = () => {
       </section>
 
       {/* founder ladder */}
-      <section className="border-b border-slate-200 bg-[#f6f8fb]">
+      <section className="border-b border-slate-200 bg-[#F8F4EE]">
         <div className={`${MK.wrap} ${MK.section}`}>
           <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
             <Chapter n="03">The mandate ladder</Chapter>
@@ -198,7 +198,7 @@ const Pricing: React.FC = () => {
                   <tr key={r.capability} className="border-t border-slate-200">
                     <th scope="row" className="py-3.5 pr-4 font-editorial text-[16px] font-semibold text-ink-900">{r.capability}</th>
                     <td className="px-4 py-3.5 text-slate-600">{r.banker}</td>
-                    <td className="bg-blue-50/40 px-4 py-3.5 font-semibold text-blue-700"><span className="mr-1.5 text-blue-600" aria-hidden>✓</span>{r.exitos}</td>
+                    <td className="bg-[#F5F1E9]/40 px-4 py-3.5 font-semibold text-[#6A5539]"><span className="mr-1.5 text-[#7A6344]" aria-hidden>✓</span>{r.exitos}</td>
                   </tr>
                 ))}
               </tbody>
@@ -208,7 +208,7 @@ const Pricing: React.FC = () => {
       </section>
 
       {/* buyer side */}
-      <section className="border-b border-slate-200 bg-[#f6f8fb]">
+      <section className="border-b border-slate-200 bg-[#F8F4EE]">
         <div className={`${MK.wrap} ${MK.section}`}>
           <div className="grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
             <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-amber-700">05 / The other side of the exchange</div>
@@ -246,7 +246,7 @@ const Pricing: React.FC = () => {
 const TONE: Record<NonNullable<Tier["tone"]>, { top: string; accent: string; dot: string; btn: string; badge: string }> = {
   neutral: { top: "border-t-transparent", accent: "text-slate-600", dot: "bg-slate-400", btn: "border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-white", badge: "text-slate-600" },
   prep:    { top: "border-t-transparent", accent: "text-ink-700", dot: "bg-ink-600", btn: "bg-ink-900 text-white hover:bg-ink-800", badge: "text-ink-600" },
-  mandate: { top: "border-t-blue-600", accent: "text-blue-600", dot: "bg-blue-500", btn: "bg-ink-900 text-white hover:bg-ink-800", badge: "text-blue-600" },
+  mandate: { top: "border-t-[#9A7E56]", accent: "text-[#7A6344]", dot: "bg-[#B49A75]", btn: "bg-ink-900 text-white hover:bg-ink-800", badge: "text-[#7A6344]" },
 };
 
 const TierCard: React.FC<{ tier: Tier; onAct: () => void }> = ({ tier, onAct }) => {
@@ -255,7 +255,7 @@ const TierCard: React.FC<{ tier: Tier; onAct: () => void }> = ({ tier, onAct }) 
     <div className={`flex flex-col border-t-4 bg-white p-5 sm:p-6 ${t.top}`}>
       <div className="flex items-center justify-between gap-2">
         <span className={`font-mono text-[10px] font-semibold uppercase tracking-[0.2em] ${t.badge}`}>{tier.badge}</span>
-        {tier.highlight && tier.highlightLabel && <span className="bg-blue-600 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-white">{tier.highlightLabel}</span>}
+        {tier.highlight && tier.highlightLabel && <span className="bg-[#6A5539] px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-white">{tier.highlightLabel}</span>}
       </div>
       <h3 className="mt-4 font-editorial text-[24px] font-semibold text-ink-900">{tier.name}</h3>
       <div className="mt-2 flex items-baseline gap-1.5">
@@ -279,11 +279,11 @@ const TierCard: React.FC<{ tier: Tier; onAct: () => void }> = ({ tier, onAct }) 
         </ul>
       )}
       {tier.lockedTeaser && (
-        <div className="mt-3 border-l-2 border-blue-600 bg-blue-50/60 px-3 py-2.5">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-700">
+        <div className="mt-3 border-l-2 border-[#9A7E56] bg-[#F5F1E9]/60 px-3 py-2.5">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#6A5539]">
             <span aria-hidden>🔒</span> {tier.lockedTeaser}
           </div>
-          <div className="mt-0.5 text-[10.5px] text-blue-700">Upgrade required to unlock buyer identities and engage.</div>
+          <div className="mt-0.5 text-[10.5px] text-[#6A5539]">Upgrade required to unlock buyer identities and engage.</div>
         </div>
       )}
       <button onClick={onAct} className={`mt-5 w-full px-4 py-3 text-[12.5px] font-semibold transition ${t.btn}`}>

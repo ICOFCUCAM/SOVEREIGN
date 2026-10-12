@@ -41,7 +41,7 @@ const LedgerTable: React.FC = () => {
   return (
     <div className="min-w-0">
       {/* controls */}
-      <div role="search" aria-label="Filter the ledger" className="flex flex-wrap items-end gap-3 rounded-[4px] border border-slate-300 bg-[#f6f8fb] p-4 shadow-[inset_0_1px_0_#fff]">
+      <div role="search" aria-label="Filter the ledger" className="flex flex-wrap items-end gap-3 rounded-ex-sm border border-slate-300 bg-[#F8F4EE] p-4 shadow-[inset_0_1px_0_#fff]">
         <label className="flex min-w-[200px] flex-1 flex-col gap-1 text-[12px] text-slate-600" htmlFor={`${id}-q`}>Search target or acquirer
           <input id={`${id}-q`} type="search" value={q} onChange={(e) => { setQ(e.target.value); setAll(false); }} placeholder="e.g. Salesforce" className={FIELD} />
         </label>
@@ -61,19 +61,19 @@ const LedgerTable: React.FC = () => {
           {["", ...STATUSES].map((s) => (
             <button key={s || "all"} type="button" aria-pressed={status === s} onClick={() => { setStatus(s); setAll(false); }}
               className={`border px-3 py-2 text-[12px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${status === s ? "border-ink-900 bg-ink-900 text-white" : "border-slate-300 bg-white text-ink-800 hover:border-ink-900"}`}>
-              {s || "All"} <span className={`ml-1 font-mono text-[11px] tabular-nums ${status === s ? "text-blue-200" : "text-slate-500"}`}>{count(s)}</span>
+              {s || "All"} <span className={`ml-1 font-mono text-[11px] tabular-nums ${status === s ? "text-[#DCCDB3]" : "text-slate-500"}`}>{count(s)}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* what the current view adds up to */}
-      <dl className="mt-4 grid grid-cols-3 overflow-hidden rounded-[4px] text-white" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
+      <dl className="mt-4 grid grid-cols-3 overflow-hidden rounded-ex-sm text-white" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
         {([["Matching deals", String(rows.length), ""], ["Disclosed value", rows.length ? usd(total) : "—", ""], ["Largest", largest ? largest.value : "—", largest ? `${largest.target} · ${largest.buyer}` : ""]] as const).map(([k, v, sub], i) => (
           <div key={k} className={`min-w-0 px-4 py-4 sm:px-6 ${i ? "border-l border-white/10" : ""}`}>
-            <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-blue-200/80">{k}</dt>
+            <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#DCCDB3]/80">{k}</dt>
             <dd className="mt-1.5 font-editorial text-[clamp(1.2rem,2.2vw,1.9rem)] font-semibold tabular-nums">{v}</dd>
-            {sub && <dd className="mt-0.5 truncate text-[12px] text-blue-100/75">{sub}</dd>}
+            {sub && <dd className="mt-0.5 truncate text-[12px] text-[#E8E0D2]/75">{sub}</dd>}
           </div>
         ))}
       </dl>
@@ -89,14 +89,14 @@ const LedgerTable: React.FC = () => {
           </thead>
           <tbody>
             {shown.map((r) => (
-              <tr key={r.date + r.target} className="border-b border-slate-200 transition-colors hover:bg-blue-50/60">
+              <tr key={r.date + r.target} className="border-b border-slate-200 transition-colors hover:bg-[#F5F1E9]/60">
                 <td className="whitespace-nowrap py-2.5 pr-4 font-mono tabular-nums text-slate-600"><time dateTime={r.date}>{r.date}</time></td>
                 <th scope="row" className="py-2.5 pr-4 font-editorial text-[15px] font-semibold text-ink-900">{r.target}</th>
                 <td className="py-2.5 pr-4 text-ink-800">{r.buyer}</td>
                 <td className="py-2.5 pr-4 text-slate-600">{r.sector}</td>
                 <td className="py-2.5 pr-4 text-right font-mono font-semibold tabular-nums text-ink-900">
                   <span className="flex items-center justify-end gap-2.5">
-                    <span aria-hidden className="h-1.5 rounded-full bg-blue-600/80" style={{ width: `${Math.max(3, (r.valueUsd / MAX_ALL) * 72)}px` }} />{r.value}
+                    <span aria-hidden className="h-1.5 rounded-full bg-[#9A7E56]/80" style={{ width: `${Math.max(3, (r.valueUsd / MAX_ALL) * 72)}px` }} />{r.value}
                   </span>
                 </td>
                 <td className="py-2.5 pr-4 font-mono text-[12px] font-semibold" style={{ color: r.statusColor }}>{r.status}</td>

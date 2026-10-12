@@ -402,6 +402,99 @@ Built and judged as previews (designs 10–17), then adopted onto this branch on
 | CC3 | On phones the main action scrolls away with the hero. | A slim bottom bar with "Access the Exchange" that appears once the hero has scrolled out and hides at the closing chapter; phones only; respects the safe-area inset; not shown under 640 px height landscape. | closed `8eaf86be` |
 | CC4 | Real photography/film and client proof are the largest remaining premium gains, and neither exists yet. | No invented proof. A `lib/proof.ts` registry (empty by default) and a `ProofSection` that renders only when real entries exist (client names with permission, a quote with attribution, a press mention with link); film and photography slots documented with the media spec. Pre-launch gate G2 added. | closed `00ebbf7c` |
 
+## Phase 12 — The opening from the owner's `index(2).html` (owner, 2026-10-12)
+
+Owner: "I need the hero of the newly uploaded file … from hero to section two. The graph on our hero can be put on the right-hand box of section 2 … [our] section 2 should now come as section 3 … from there continue as in our main design." Taken in the locked palette (the file's gold → blue-600/300, cream → #f6f8fb, deep teal → navy) and our type (Source Serif 4, Inter); the file's background photo `exitos-hero-reference.png` was not uploaded, so its gradient is reproduced as seen. Our header stays (the file's Solutions / Market intelligence / Resources menus have no pages).
+
+| # | Gap | Close by | Status |
+|---|---|---|---|
+| DD1 | The lifecycle chart is drawn for the full page width; set in a half-width box its labels fall to about 8 px and its stage panel crowds. | A `compact` mode for `ExchangeMap`: larger label type and offsets for a narrower box, the stage panel stacked. | closed `cb3e3c23` |
+| DD2 | The homepage opening is not the owner's index(2) hero and section 2. | Hero from index(2): ivory-to-navy field, eyebrow "Intelligence · Opportunities · Execution", "The global acquisition exchange *for what's next.*", body, two actions ("Explore the platform" → /platform; the file's "Watch overview" has no film behind it → "Value my company" → chapter 04), the vertical note, and the five-part capability strip ("verified insights" → "sourced records", per M3). Section 2 "Intelligence meets *opportunity.*" with its copy and "Learn how it works" → /platform; the right-hand box carries our lifecycle graph (compact, interactive); the three proof figures and the edition line move under its copy. The board becomes chapter 03 and every later chapter moves down one (04 value · 05 thesis · 06 ledger · 07 modules · 08 questions · 09 next move); the rail, signature line, phone bar, share-card script and the inventory test follow. EN/FR/ES. | closed `6406eafd` |
+| DD3 | Owner (with a screenshot of the chart alone): "it is this section that should be added" — the box should hold only the graph, not the stage panel, caption bar and tag. | A `bare` mode for `ExchangeMap` (the chart only: grid, week axis, route, stages); the box holds it alone. The lifecycle title and the typical-timeline source note (6) move to one line under the box; the phone keeps its stage list (the chart is too small to read there). | closed `0666f000` |
+| DD4 | Owner: "the hero right dark is supposed to have, like a watermark, the Exit signature." | A faint watermark on the navy side of the hero (desktop): the ExitOS reticle mark drawn large in hairline blue with its emerald centre, the serif "Exit*OS*" signature beneath (the closing wordmark's lettering), decorative and hidden from assistive technology. | closed `ae1cbd94` |
+| DD5 | Owner: the hero's right-hand side "takes blue — I think black is better than that blue". | The hero's dark field, glow and capability strip move from navy to near-black (#07090c → #030405, no blue glow); the watermark and vertical note turn neutral (white at low opacity) so they read on black; the ivory side and the blue accents stay. | closed `718eea80` |
+| DD6 | Owner: "import the acquisition lifecycle [band from the earlier version] … copy the finesse and premium and employ it in the new site." | The original rail from 20545a37 restored as a band after the board (chapter 03 → into 04): the title, one hairline rail, eight numbered rings with stage and typical weeks, and the travelling green light along the rail (off under reduced motion). The original's "● Live process" with a pinging dot is not restored (removed in M2 as a fake live indicator); the band reads "Typical timeline" with a steady dot and the source note (6). | closed `718eea80` |
+| DD7 | Owner: "the acquisition lifecycle is not as premium as the one I refer you to. That hero is not professionally polished." Then: "the blue seems better than black, can you select a better color?" | Lifecycle band rebuilt as its own component (LifecycleBand.tsx): a lit seam parting it from the board, faint grid and glow, the title split into a mono eyebrow and a serif heading ("Signal → closing"), eight larger stations on one rail running from the first centre to the last, a blue-to-emerald rail, a comet-tailed travelling light (motion-safe), serif stage names, the closing station in emerald, and a vertical route on phones. Hero: the dark field moves from black to a deep petrol ink (#0d2130 → #07131c) after the owner's index(2).html reference; a wide eased ivory-to-ink blend in place of the muddy grey plateau; the bottom fade no longer greys the ivory; fine grain on the dark; the watermark redrawn as a finer instrument dial with a tagline; the vertical note moved clear of the signature line. | closed `8568b5ff` |
+
+## Phase 13 — Balance and premiumisation: one colour system (owner: "take your recommendation", 2026-10-12)
+
+Owner chose the deep blue ink for every dark surface and no champagne accent. Blue and green only; the board's own colours are out of scope (board identical).
+
+| # | Gap | Close by | Status |
+|---|---|---|---|
+| EE1 | Darks and accents are hand-typed per section (14 near-black navies, 6 blues, 5 greens); no shared vocabulary. | One `ex` token set in tailwind.config and CSS variables in index.css: ink scale ex-0…ex-3, paper / white, signal blue, two greens (live, done), one hairline. | closed `24584033` |
+| EE2 | The hero's petrol (#0d2130) is a different hue family from every other dark section. | The ink scale derived as a deep blue ink; the hero dark moved onto it with a quiet blue glow behind the watermark. | closed `748df292` |
+| EE3 | Landing sections use ad hoc navy hex values. | Landing.tsx darks replaced by the ink variables. | closed `9d44bb6f` |
+| EE4 | Components (Instrument, ExchangeMap, LedgerTable, QuickValue, LifecycleBand) carry their own navies. | Component darks replaced by the ink variables (board content untouched). | closed `1c30d95f` |
+| EE5 | Five greens and six blues outside the board. | Reduced to live green (#7CFF9F) and done green (emerald-300 on dark / emerald-700 on paper); blues to blue-600 (paper), blue-400/300 (dark). | closed `75b652a2` |
+| EE6 | Ivory and white alternate without a rule. | Paper rhythm: ivory for story chapters, white for working chapters; written down here. | closed `ea85105b` |
+| EE7 | The capability strip is a flat dark bar. | A lit top seam, hairline glyphs and a hover lift on each capability. | closed `d932ac13` |
+| EE8 | The headline's large type is set at default spacing. | Optical tightening on the display lines and a hanging 'T'. | closed `78d94ba9` |
+| EE9 | The watermark appears flat on load. | A slow fade-up of the watermark on first load; none under reduced motion. | closed `16b04b1b` |
+| EE10 | Hero, chapter 02 box, board and band make four dark blocks in a row. | The chapter 02 chart presented as a framed ink panel on paper with its own lit edge, read as an object. | closed `17ca5886` |
+| EE11 | Board and band read as two separate dark slabs. | The instrument chapter (03 + band) set as one continuous ink chapter with a single floor gradient. | closed `821735ae` |
+| EE12 | Five thousand pixels of light in the middle with no dark pause. | The ledger's head: an ink strip of the three largest recorded deals (records only). | closed `16769221` |
+| EE13 | Chapter openers vary in position and form. | One chapter opener: number, rule, label at the same measure everywhere. | closed `3420f2db` |
+| EE14 | Light chapters meet with bare background changes. | A double hairline between light chapters. | closed `f6f6b030` |
+| EE15 | Every heading carries the blue italic word; the device is a formula. | The italic kept on four headings (hero, 04, 05, 09); others plain serif. | closed `fc43efa6` |
+| EE16 | The footer drops from the dark closing to pale grey. | Footer in the deepest ink, continuing the closing chapter. | closed `9672efa3` |
+| EE17 | The page opens with the mark but does not close with it. | A large faint ExitOS signature across the footer, matching the hero watermark. | closed `4e78f0e6` |
+| EE18 | Footer hierarchy is flat. | Footer columns with a heading rule, link hover, the legal line set small. | closed `30491847` |
+| EE19 | No way back from the end of a long page. | A back-to-top control at the foot of the signature line. | closed `bc8519e6` |
+| EE20 | Footer status dots read as live indicators. | Steady done-green dots, labelled as statements, no pulse. | closed `c87073e0` |
+| EE21 | The header stays white over dark chapters. | The header turns ink over dark chapters (logo, links, CTA re-coloured). | closed `1d266593` |
+| EE22 | Primary and secondary buttons vary in size, weight and arrow. | One primary and one secondary button style used across the homepage. | closed `002ad706` |
+| EE23 | Focus rings and link underlines vary. | One focus ring and one underline treatment in signal blue. | closed `9765567b` |
+| EE24 | Figures mix old-style and lining at random. | Old-style in running text, tabular lining in tables and statistics. | closed `687524cf` |
+| EE25 | Radii run from 4 to 12 px and shadows are one-off. | One radius scale and three shadow levels. | closed `d6a9e37f` |
+| EE26 | The share card and phone bar still use the old navy. | Repainted in the ink scale. | closed `572d6c85` |
+| EE27 | Pricing and other marketing pages do not use the new tokens. | Tokens carried to the marketing pages' darks. | closed `d41ad6dd` |
+| EE28 | New colour pairs are unchecked. | A contrast audit of the new pairs (≥ 4.5:1 for text) with fixes. | closed `d31d4ad4` |
+| EE29 | The whole set needs one final verification. | Full checks: vitest, build, axe on marketing routes at 1440/390, keyboard, reduced motion, board identity. | closed `b4b2af22` |
+| EE30 | The owner needs to see the result. | Design 20 preview with before/after, and this log. | closed `45d4a9b1` |
+
+### The paper rule (EE6)
+
+Story chapters sit on ivory (`ex-paper`, #f6f8fb): 02 the opening argument, 05 the thesis, the proof section, 08 questions. Working chapters, where the reader does something, sit on white: 04 value your company, 06 the ledger, 07 the modules. Dark chapters are ink: the hero's right field, 03 the board with the lifecycle band, 09 the close and the footer.
+
+### Phase 13 verification (EE29)
+
+- `tsc --noEmit` clean; `eslint src` 0 errors (1 pre-existing warning in FounderInbox.tsx, untouched).
+- vitest 38 files, 246/246; `vite build` OK.
+- axe (wcag2a/aa, 2.1aa, 2.2aa, best-practice) after a full scroll: /, /pricing, /platform, /modules at 1440 and 390 — 0 violations; colour contrast with the header in its ink state — 0.
+- Keyboard: a full pass to the footer's back-to-top — / 74 stops, /pricing 35, none without a visible focus indicator. (The earlier "129" was a 160-press cap wrapping the page; the harness now stops at the end.)
+- Reduced motion: no CSS animation outside the board (cssOutside 0); the watermark entrance, the travelling light, link arrows and the header fade are all off.
+- Board: the ribbon and CommandBoard compared with the original, whitespace-normalised — identical.
+- Phones (390): hero, ledger and footer — no horizontal overflow, no console errors.
+
+## Phase 14 — The hero, to the owner's execution brief (2026-10-12)
+
+| # | Gap | Close by | Status |
+|---|---|---|---|
+| HX1 | The hero's grey wash between porcelain and navy reads as muddy; the radar and wordmark are too faint; the headline wraps into four lines at desktop; the capability strip uses mismatched glyphs and wraps; nothing marks the hero as ExitOS's own. | `HeroExchange.tsx`: two panels with one lit seam (no wash); the owner's palette as tokens (midnight, navy, signal, porcelain, ice); a three-line headline; one visual idea on the right — the acquisition aperture (graduated dial, rings, slow sweep, five points that light as it passes, a stronger wordmark); an understated secondary CTA; a capability rail with one icon family; phones stack the panels. | closed `52ab54bc` |
+| HX2 | Owner addendum and final correction: one master insignia (hero signature, header logo and favicon, flat monochrome); graphite, porcelain and champagne bronze in place of the blue field; a seamless transition with no seam line; "detailly reexamine the benchmark and replicate exactly". | `lib/insignia.ts` master geometry (ring, four registration ticks crossing it, ice-blue core) with micro/standard tiers; `ExchangeMark` rebuilt on it (same API, all existing uses); favicon.svg, favicon-32.png, apple-touch-icon.png and /public/brand mono files generated by `scripts/brand-assets.ts`, kept in step by a test. Hero rebuilt to measurements taken from the benchmark image: the porcelain-to-graphite fall-off sampled from it, the dial opened from the master figure (bezel 245, rings 207/160/110/80/59, 28–64° lit wedge, orbs and points at measured bearings, ice-white core in a blue-grey halo, orbit arcs and rays), wordmark and tagline, charcoal rail with bronze-ringed icons; chapter rail and signature line in bronze; header lockup 34 px with a divided tagline. Side-by-side: hx2-benchmark-vs-build.jpg. | closed `a5f18631` |
+
+### HX3 — beyond the benchmark (owner: "take your recommendation")
+
+Two things a still image cannot do, kept restrained:
+
+1. **The dial maps the five capabilities.** Five points on the instrument answer to the five items of the capability rail, in order (01 discover … 05 execute). Hovering a rail item lights its point (a ring, a hairline from the transaction node, the capability's name in mono beside it); hovering a point lights its rail item (the top edge drawn in bronze, the icon ring lit). Decorative and pointer-only (the dial is aria-hidden); the rail's text carries the meaning for everyone else. No data is implied.
+2. **The instrument draws itself in.** Once per load, about two seconds: the core, then each ring tracing outward (pathLength draw), the graduations and bezel, the wedge swinging open, the points lighting in turn, the far-field lines, then the wordmark and its tagline. Only under `prefers-reduced-motion: no-preference`; the still design is the default state, so nothing depends on the animation running. Checked: 0 hero animations and every element at full opacity under reduced motion.
+
+### HX4 — depth and a slow sign of life (owner: "go next")
+
+3. **Depth on pointer.** The dial is built in layers, each moving by its own factor as the pointer crosses the hero (far-field lines 14, bezel 7, points 5, rings 4, wedge 3, axes 2; the transaction node does not move), eased over 1.1 s. Written as CSS variables from one pointer handler with requestAnimationFrame — no React re-render. Only for fine pointers that hover (desktop), never under reduced motion.
+4. **A slow sign of life.** After the entrance the wedge sways three degrees either way over 24 s, and a soft glint runs along the horizon curve every 9 s. Both only under `prefers-reduced-motion: no-preference`; checked 0 hero animations and no layer transforms under reduced motion.
+
+### HX5 — the hero's identity carried sitewide (owner: "carry identity sitewide")
+
+The graphite, porcelain and champagne-bronze identity of the hero now runs through the whole homepage, the footer and the marketing pages (Platform, Modules, Pricing), replacing the deep blue ink of phase 13:
+
+- **Tokens.** `ex-0…3` and the CSS variables became the graphite field (#111310 floor, #1B1C1A field, #242522 raised, #3A3934 edge); `ex-paper` warm porcelain #F8F4EE; the glow, seam and hairline bronze. Every dark chapter built on them (board frame, lifecycle band, ledger front page, FAQ card, closing, footer, header ink state) moved with them.
+- **Accents.** Blue text, bars, rules, underlines and button hovers re-mapped to a bronze scale by shade, chosen for contrast (text on paper #7A6344 / #6A5539; on graphite #C9B08A / #DCCDB3 / ivory); primary buttons hover to graphite. Blue is kept only for focus rings (functional).
+- **Unchanged.** The board's ribbon and screen (checked identical); the hero (already in the identity); the share card regenerated in graphite and bronze.
+- **Checks.** vitest 250/250, build, axe 0 on /, /pricing, /platform, /modules at 1440 and 390 (one finding fixed: a 9 px badge on Pricing, now on #6A5539), keyboard 74 stops, reduced motion, board identical.
+
 ## Pre-launch gates (before the site goes live for business, when Stripe is added)
 
 | # | Gate | Status |
@@ -899,6 +992,123 @@ PhoneActionBar.tsx: one full-width action, 'Value my company · 30 seconds' → 
 
 ### CC4 — closed 00ebbf7c
 lib/proof.ts (empty; every entry carries a permission field) and ProofSection.tsx ('In confidence': attributed quote, client names, press links), mounted before chapter 07; renders nothing while empty. 3 new tests: ships empty, renders null when empty, renders entries when supplied. Pre-launch gates G2 (proof) and G3 (photography/film spec) added. tsc, eslint, vitest 246/246.
+
+### DD1 — closed cb3e3c23
+ExchangeMap gains compact mode: label type ×1.5 (19/16 px in the 1200-unit chart), its own label lanes per stage (Management meetings set to the right of its node; Buyer discovery below) so nothing collides in a half-width box, larger axis ticks, the stage panel stacked, the corner tag hidden. Route, links and nodes follow the compact lanes. Browser-checked in section 2 at 1440 and 390: no label collisions, panel readable. tsc, vitest 246/246.
+
+### DD2 — closed 6406eafd
+Hero from index(2) in the locked palette: ivory-to-navy field (stacked on phones), eyebrow, 'The global acquisition exchange for what's next.', body, 'Explore the platform' → /platform and 'Value my company' → chapter 04 (the file's 'Watch overview' had no film), the vertical note, the five-part capability strip ('verified insights' → 'sourced records'). Chapter 02 'Intelligence meets opportunity.' with the file's copy, the three proof figures and the edition line, 'Learn how it works' → /platform; its right-hand box holds the compact interactive lifecycle graph. The board is chapter 03; later chapters renumbered 04–09; rail (9 entries), signature line, phone bar (→ ch-04, steps aside at ch-09), share-card script (reads chapter 02; new headline; card regenerated) and the inventory test (hero headline needle) updated. EN/FR/ES. Checks: tsc, eslint 0 errors, vitest 246/246, build; axe 0 on / and /pricing at 1440/390 after a full scroll; keyboard 129/0; reduced motion 0 outside the board; phone bar 390×844 hidden at the hero, shown mid-page, hidden at 09 and the footer, never at 1440 or landscape; no overflow, no console errors; board identical.
+
+### DD3 — closed 0666f000
+ExchangeMap bare mode (chart only; no tag, caption bar or rule). Section 2's box holds <ExchangeMap dark compact bare /> — non-interactive, role img — and the lifecycle title with source note 6 sits under the box. Phone keeps the stage list. tsc, eslint, vitest 246/246 (inventory: lifecycle still on one page), build; axe 0 on / at 1440/390; keyboard and reduced motion as before; board identical.
+
+### DD4 — closed ae1cbd94
+Hero watermark (desktop, md+): the ExitOS reticle — outer and inner hairline circles, four ticks, emerald centre — at min(30vw, 440px) in blue-300 at 6–20% opacity, with the serif 'ExitOS' signature (italic OS, gradient text) beneath; aria-hidden. vitest 246/246, build; axe 0 at 1440/390; keyboard 129/0; reduced motion 0 outside the board.
+
+### DD5 — closed 718eea80
+Hero dark field moved from navy to near-black (#07090c → #030405) with a faint white glow instead of the blue one; overlay dark stops, bottom fade and capability strip now black; watermark reticle, ExitOS signature and the vertical note neutral white at low opacity. Ivory side and blue accents unchanged. DD6 landed in the same commit. Checked: tsc, eslint, vitest 246/246, build, axe 0 on / and /pricing at 1440/390, keyboard 129/0, reduced motion cssOutside 0, board untouched.
+
+### DD6 — closed 718eea80
+The original acquisition lifecycle rail is back as a band between the board (03) and Value your company (04): the title, the hairline rail, eight numbered rings with stage and typical weeks, and the travelling green light (exTravel, only when motion is allowed; hidden under reduced motion). "Typical timeline" with a steady dot and Note 6 replaces the old pinging "Live process" (M2). Shown on phones too, as a 2-column grid.
+
+### DD7 — closed 8568b5ff
+Premium lifecycle band (LifecycleBand.tsx) and hero polish in deep petrol ink instead of black. Checked: tsc, eslint, vitest 246/246, build, axe 0 on / and /pricing at 1440/390, keyboard 129/0, reduced motion cssOutside 0 (the travelling light is CSS gated on no-preference), board untouched.
+
+### EE1 — closed 24584033
+`ex` tokens in tailwind.config.ts (ex-0 floor #040c18, ex-1 field #071a31, ex-2 raised #0a2142, ex-3 edge #163459, paper, live, done, done-ink, hair) and the same as CSS variables in index.css with --ex-field, --ex-seam and a reusable .ex-seam lit hairline.
+
+### EE2 — closed 748df292
+Hero dark field on the ink (ex-1 → ex-0) with a quiet signal-blue glow behind the watermark in place of the petrol; capability strip on ex-0; bottom fade in ink.
+
+### EE3 — closed 9d44bb6f
+Landing's own darks (FAQ brief card, the closing chapter's ground and veil, the chapter 02 shadow) on the ink variables; CommandBoard and its helpers untouched.
+
+### EE4 — closed 1c30d95f
+Instrument, ExchangeMap (dark ground), LedgerTable summary strip, QuickValue result card and LifecycleBand on the ink variables; the board's screen content untouched.
+
+### EE5 — closed 75b652a2
+Outside the board the page now uses two greens — live (#7CFF9F, the travelling lights only) and done (emerald-300 / #6ee7b7 on ink, emerald-700 on paper) — and three blues: blue-600 (signal, on paper), blue-400 and blue-300 (on ink). Changed: the edition dot (done-ink), the map's closing node (done), the value gauge and the signature line (blue-600 in place of blue-500). The ribbon over the board keeps its colours (board identical).
+
+### EE6 — closed ea85105b
+Paper rule written above the gates: ivory for story chapters (02, 05, proof, 08), white for working chapters (04, 06, 07), ink for dark chapters. Chapter 04 moved from ivory to white; the ivory chapters now name the token (bg-ex-paper).
+
+### EE7 — closed d932ac13
+Capability strip: the lit seam (.ex-seam) replaces the flat border; glyphs sit in hairline rings; on hover a capability's top edge draws in signal blue and its ring brightens (no transition under reduced motion).
+
+### EE8 — closed 78d94ba9
+Headline: the 'T' hung by its side bearing (-0.045em) so the stem aligns with the eyebrow and body; leading 0.97; kerning, ligatures and contextual alternates on; optical sizing from the Source Serif 4 opsz axis; the italic line tracked a touch looser than the roman.
+
+### EE9 — closed 16b04b1b
+Watermark entrance: on first load the mark resolves from a soft blur and the dial settles a quarter-turn into place (2.4–3.2 s, once). Under reduced motion it is simply there.
+
+### EE10 — closed 17ca5886
+Chapter 02's lifecycle chart set as an object on the ivory: an ex-0 bezel with a lit top edge, a hairline ring, a two-level shadow and four corner registers, so it reads as a framed instrument rather than another dark band.
+
+### EE11 — closed 821735ae
+Board and band read as one ink chapter: the Instrument's floor (ex-0) runs straight into the band's top (ex-0); the full-width seam is replaced by a short centred rule with a diamond node; the band falls back to ex-0 before the white of chapter 04.
+
+### EE12 — closed 16769221
+The ledger's front page (the three latest recorded deals, unchanged data) is printed on ink under the masthead with a lit seam and a soft top glow: the dark pause between the light chapters 04–08. Status colours re-mapped for ink (closed done-green, announced amber-300, terminated slate-300). The planned 'three largest' strip was not added — the front page already carries three real records, and a second strip would repeat them.
+
+### EE13 — closed 3420f2db
+Chapter opener (the shared Chapter component, used on every marketing page): the number set in the serif at 15 px, a short rule, then the mono label; the slash kept for screen readers only. Also: the capability strip's rings and gaps tightened so the titles hold one line at 1440.
+
+### EE14 — closed f6f6b030
+Light chapters (04, 05, 06, 07, proof, 08) carry .ex-light; where two meet, a double hairline set to the text measure replaces the full-bleed border, so the paper changes read as a ruled page rather than a seam.
+
+### EE15 — closed fc43efa6
+The blue italic is kept on four homepage headings: the hero, 04 (worth?), 05 (exit) and 09 (market). Chapters 02, 03, 06, 07 and 08 keep the italic in the heading's own colour (new `quiet` prop on Editorial), so the device still sets the cadence but colour is spent where it counts. Other pages are unchanged.
+
+### EE16 — closed 9672efa3
+Footer (shared by every marketing page) on ex-0 with a lit seam: the white lockup, blue-300 column heads, links in blue-100 at 75% brightening to white, the legal line at 60%, the dark locale switch. The homepage now ends in one move from the close into the footer.
+
+### EE17 — closed 4e78f0e6
+A large faint ExitOS signature (serif, italic OS, blue-300 at 13% → 2%) set across the foot of the footer, the hero watermark's counterpart: the page opens and closes with the mark.
+
+### EE18 — closed 30491847
+Footer hierarchy: more air above (pt-16/20) and between columns; each column head ruled; links at 13.5 px with a small arrow that slides in on hover; the tagline set in the serif as the footer's one sentence; the legal line kept small at 65%.
+
+### EE19 — closed bc8519e6
+A 'Back to top ↑' control in the footer's bottom row (EN/FR/ES: ft.top), smooth scroll, instant under reduced motion, with a visible focus ring. Placed in the footer rather than on the signature line, which is hidden below lg and would leave phones without it.
+
+### EE20 — closed c87073e0
+The footer's three statements (deterministic engines, sourced market data, NDA-gated identity) are a list marked by small hollow done-green diamonds instead of filled green dots, set in mono: statements of how the exchange works, not status lights.
+
+### EE21 — closed 1d266593
+The sticky header takes the ink (ex-1 at 85%, white lockup, light links, white CTA, dark locale switch) whenever an element marked data-ink spans its midline — chapter 03 with the lifecycle band, chapter 09 and the footer — and returns to white over paper; a 500 ms colour transition, none under reduced motion; stays light while the phone menu is open.
+
+### EE22 — closed 002ad706
+One button family exported from MarketingChrome (BUTTON.primary / secondary / primaryInk / secondaryInk): same padding, 12.5 px semibold, a nudging arrow on hover, one focus ring. The homepage's six buttons and the value form's submit use it; hover on paper is now signal blue everywhere (the ledger button was ink-800).
+
+### EE23 — closed 9765567b
+One focus ring (2 px signal blue, 3 px offset, lighter on ink) as the fallback for every control in the header, main and footer that lacks its own; one text-link treatment (.ex-link: a 1 px signal-blue rule that thickens on hover) used for chapter 02's link; the modules link joins the secondary button family.
+
+### EE24 — closed 687524cf
+Figures set by role in index.css for every marketing page: old-style in serif running text and quotes, lining proportional in headings, lining tabular in tables, definition lists (the counters, the ledger strip, the value card), dates, captions and the edition line. The homepage's own old-style rule moved there. Also: chapter 02's link gets the group class so its arrow nudges.
+
+### EE25 — closed d6a9e37f
+Radius scale ex-xs 3 / ex-sm 4 / ex-md 6 / ex-lg 10 px and shadows ex-1 (hairline lift), ex-2 (card), ex-3 (object), ex-bezel (framed instrument) in tailwind.config; homepage chapters, QuickValue, LedgerTable, Instrument (bezel 12→10, screen 7→6), ModulePreview and ChapterRail moved onto them. Board ribbon and CommandBoard checked identical to the original.
+
+### EE26 — closed 572d6c85
+Phone action bar on ex-1; the share card's ground on the ink field (ex-0 → ex-1 → ex-0) and its closing node in done-green; public/og/exitos-card.png regenerated from the live page (figures and edition read from chapter 02, unchanged).
+
+### EE27 — closed d41ad6dd
+Platform, Modules and Pricing (with the ExchangeBlocks they share) on the system: MK.navy and the blocks' NAVY are now the ink field, raised tiles ex-2, dark sections carry data-ink (the header takes the ink over them) and the lit seam, and MK.btn is the shared button base (size, arrow nudge, focus ring). HeroLab, an internal lab page, is left as is.
+
+### EE28 — closed d31d4ad4
+Contrast audit (axe color-contrast, every element on the page, after a full scroll so every reveal has fired): /, /pricing, /platform, /modules at 1440 and 390 — 0 violations; the homepage again with the header in its ink state over the board — 0. One finding fixed: the header's colour change ran 500 ms, so for a moment light-mode text sat on the still-dark bar when scrolling back up (axe caught it mid-fade); now 200 ms. The axe harness now waits for the header to settle after returning to the top.
+
+### EE29 — closed b4b2af22
+Full verification recorded in 'Phase 13 verification' above: tsc, eslint, vitest 246/246, build, axe 0 on four routes at two widths and in the ink-header state, a full keyboard pass, reduced motion, board identity, phone overflow.
+
+### EE30 — closed 45d4a9b1
+Design 20 preview published (https://claude.ai/artifact/1bm87SCm3aQyuvXWY3NJZC); the before/after of designs 19 and 20 at full page saved beside this file as phase13-before-after.jpg.
+
+### HX1 — closed 52ab54bc
+Hero moved into components/HeroExchange.tsx (same id ch-01, same copy keys, same links; Landing.tsx drops the old block and its two hero keyframes). Owner palette added as ex tokens and --hx variables. Porcelain editorial panel and navy instrument panel meet on a lit hairline seam with the porcelain's last glow, replacing the grey wash. Headline balanced into three lines (EN/FR/ES) at 1024–1920, signal-blue italic on its own line; body 16 px in a 6.6:1 slate; primary CTA filled, secondary an underlined link. The acquisition aperture: graduated 3° dial with 30° majors and four bearings, three rings, crosshair axes run out to the panel edges, a 16 s sweep, five opportunity points lit as the sweep passes (decorative, not data), a lit core; wordmark at higher contrast with its tagline. Capability rail: one 24-grid line-icon family, mono index, serif titles; five columns from 1024 with descriptions from 1360 (kept for screen readers below), a compact list below 1024. Motion: the sweep, node lighting and a 1.8 s entrance only when motion is allowed; none under reduced motion. Checked: tsc; eslint 0 errors (1 pre-existing warning); vitest 246/246; build; axe 0 on / and /pricing at 1440/390 (one finding — the rail's index numerals at 4.2:1 — fixed to ice/80); keyboard full pass 74 stops, 0 without focus; reduced motion 0 animations outside the board; no overflow at 1920/1440/1280/1024/768/390; both CTAs and the language switch exercised; hero meets the header and chapter 02 with no overlap; board identical. Before/after: hx1-before-after.jpg.
+
+### HX2 — closed a5f18631
+Master insignia and benchmark hero. Files: src/lib/insignia.ts (+ test), components/ExchangeMark.tsx, components/HeroExchange.tsx, scripts/brand-assets.ts, public/favicon.svg, favicon-32.png, apple-touch-icon.png, public/brand/*.svg, index.html (icons, theme-color #242522), tailwind.config.ts and index.css (ex porcelain/graphite/shadow/bronze/ivory; Source Serif 500 loaded), ChapterRail and SignatureLine (bronze), MarketingChrome (lockup 34 px, divided tagline). Checked: tsc; eslint 0 errors (1 pre-existing warning); vitest 250/250 (4 new insignia tests: files in step with geometry, ticks cross the ring, figure inside the tile, mono single-colour); build; axe 0 on / and /pricing at 1440/390 (a tagline false positive fixed by making the dark field the elements' own background); keyboard 74 stops, 0 without focus; reduced motion 0 animations; FR/ES headlines 3 lines at 1440 and 390, no overflow; CTAs exercised; board identical. The mark checked at 16, 24, 32, 64 and 256 px as tile and mono.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
