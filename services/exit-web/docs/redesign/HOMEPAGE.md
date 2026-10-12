@@ -368,7 +368,7 @@ Self-critique of the homepage after Z3 (1440 px: 8,839 px tall; 390 px: 12,560 p
 | # | Finding | Close by | Status |
 |---|---|---|---|
 | AA1 | The lifecycle is told twice: the hero map shows the eight stages with typical weeks, and section 06 repeats them as a navy grid. | The map becomes the lifecycle: its caption carries "The acquisition lifecycle · signal → closing" and the "Typical timeline" source note (6). Section 06 is removed. | open |
-| AA2 | The map implies a geography that does not exist (Signal in North America, Closing in Australia). Real regions are not available: the registry's `country` field is empty for 3,263 of 6,311 events and mixes formats, and the file (3.4 MB) is too large for the client. | Continents removed. The horizontal position becomes time: each stage sits at its typical week (square-root scale so the first weeks do not collide), in order from left to right; the vertical lanes only separate labels. | open |
+| AA2 | The map implies a geography that does not exist (Signal in North America, Closing in Australia). Real regions are not available: the registry's `country` field is empty for 3,263 of 6,311 events and mixes formats, and the file (3.4 MB) is too large for the client. | Continents removed. The horizontal position becomes time: each stage sits at its typical week (square-root scale so the first weeks do not collide), in order from left to right; the vertical lanes only separate labels. | closed `01ce06c1` |
 | AA3 | Three numbering systems: "No. 01" in the topline, "01 / Discover the field · 02 / Trace the path" and "/ 001" on the map, and chapters 02–07. "02 / Trace the path" and "02 / The modules" sit on one screen. | Only chapter numbers remain: "No. 01", the map's 01/02 labels and "/ 001" are removed. | open |
 | AA4 | The board — the real product — starts two screens down, behind an illustrative diagram and a module list. | New order: 01 hero · 02 the exchange (hall + board) · 03 value your company · 04 thesis · 05 ledger · 06 the modules · 07 back page. | open |
 | AA5 | Section 02's headline is the Modules page's title, word for word. The modules shown repeat figures shown elsewhere (31 mandates, $72.5B, 61 deals). Its copy is English-only in FR/ES. | Own headline ("The desk behind the screen."), four founder modules whose stats appear nowhere else on the page (Exit Readiness, Valuation Engine, Documents, Data Room), descriptions and stats in EN/FR/ES with the numbers taken from the engines. | open |
@@ -798,6 +798,9 @@ Verified: tsc, eslint, vitest 243/243 (inventory test included), build; axe 0 at
 
 ### Z2 + Z3 — closed 4b1c1ac6 (one commit: both changed the same two sections and were built in one pass)
 Verified: tsc, eslint, vitest 243/243 (inventory test included), build; axe 0 at 1440/390 inside and outside the board; keyboard 127 tab stops, 0 without visible focus; reduced motion stops all motion outside the board; no overflow, 0 console errors, one h1; board identical to the original. Page height 8,839 px at 1440, 12,560 px at 390.
+
+### AA2 — closed 01ce06c1
+Continents removed from the exchange map; stages placed by typical week on a square-root time axis with week ticks along the foot. Verified: tsc, eslint, vitest 243/243; rendered at 1440 with no overflow or errors.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
