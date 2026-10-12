@@ -5,7 +5,7 @@
 | Route | `/console/outreach-plan` |
 | Component | `src/pages/OutreachPlan.tsx` (85 lines) + `lib/outreach-plan.ts`, `lib/buyer-dna.ts` (`rankedBuyers`, `expectedOutcomeFor`), `lib/buyer-contact.ts` |
 | NAV | "Outreach Plan", founder, **Preparation or Pro** (free: Upgrade page) |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All seven gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `06623c9`)
 
@@ -70,3 +70,14 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 ### G6 — Fake live tape
 *Closed by:* `pages/OutreachPlan.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free (Upgrade page), Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Preparation and Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 26), all tab stops with visible focus · free: Upgrade page · 0 "live" / "sequenced" / "Prob" words · demo and intake both checked.
+
+## Known issues
+- **Ranking without sector fit (owner decision):** for the demo company (Logistics) all 20 ranked buyers have no sector overlap; with a SaaS intake, 10 of 20. The likelihood score lets appetite, cadence and recency carry a buyer with zero overlap into the plan. Stated on the page; the ranking rule is unchanged.
+- 18 of 20 values rest on the neutral premium/close-rate prior (tagged PRIOR).
+- Contact confidence counts indexed deals, most of which are unverified registry entries (stated); the name-matching defect X15 can inflate those counts.
+- The wave name "Lead bidders" is kept (asserted by `outreach-plan.test.ts`); nobody in the plan has bid.
