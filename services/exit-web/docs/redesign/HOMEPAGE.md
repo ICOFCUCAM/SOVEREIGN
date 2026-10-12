@@ -305,6 +305,21 @@ Owner, 2026-10-12: "when I talk of the dashboard I mean the big screen that is r
 
 The headline and proof figures sit in the hall for B and C. `ExchangeWall` and `TradingHall` are imported only by the dev-only lab, so production is unchanged. Screens: `scratchpad/heroes/hero-{5,6,7}-{1440,390}.jpg`; all render with 0 errors and no overflow.
 
+
+### W2 — Premium finish for the hall (owner, 2026-10-12: "can you make it iconic and increase its premiumization?")
+| # | Gap | Fix (the screen's content stays unchanged; locked palette) | Status |
+|---|---|---|---|
+| W2 | **The hall reads as a stage set, not a grand space.** | `components/TradingHall.tsx` and the hero headline:
+- **coffered ceiling** in perspective, replacing the light lines;
+- **full-height pilasters** with lit capitals, rising into the ceiling;
+- the screen set in a **recessed stepped portal** (two frames and an inner shadow);
+- **volumetric light** falling from the cove onto the screen, and a faint **glass sheen** over the screen (decorative, `pointer-events: none`, above the content, not changing it);
+- **stone floor** seams and a vignette;
+- a slow **entrance** (the screen rises and fades in once, motion-safe only);
+- an editorial **rule before the eyebrow**.
+
+Verify: board markup identical, axe outside the screen 0, reduced motion = no entrance animation, 1440/390 screens. | ☐ |
+
 ---
 
 ## Closure log
