@@ -24,7 +24,7 @@ const G: Record<string, Guide> = {
   "/console/wealth": { purpose: "What you take home after the sale, and when each part is paid." },
   "/console/buyer-copilot": { purpose: "A short file on each top-ranked buyer, and who to approach first.", next: "/console/outreach-plan" },
   "/console/deal-room": {
-    purpose: { founder: "Simulated buyer activity in a data room, showing what a live process will report.", buyer: "What a deal room will hold, and how access is granted." },
+    purpose: { founder: "Simulated buyer activity in a data room, showing what a real sale process will report.", buyer: "What a deal room will hold, and how access is granted." },
     next: { founder: "/console/negotiator", buyer: "/console/nda" } },
   "/console/intelligence": {
     purpose: "Every ranked acquirer and the evidence behind each ranking.",
