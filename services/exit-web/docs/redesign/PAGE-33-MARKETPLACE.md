@@ -38,7 +38,7 @@ Founder free and Pro, buyer free: `h1` none · axe **dlitem ×18** (`dt`/`dd` ou
 | G4 | **Ask band conflicts with D1; match score as %; false mechanics.** | Asking band and check size from `canonicalValuationFor` ($103M mid for the demo); "match score N/100"; mechanics stated truthfully (no data release on NDA; no engagement feed). | ☐ |
 | G5 | Demo only, unlabelled. | Listing, matches and memoranda for the active company (intake inputs as on Documents); Demo data / Your intake badge. | ☐ |
 | G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
-| G7 | Design: no `h1`, 18 dlitem failures. | Rebuild on `xo`. | ☑ G7-commit |
+| G7 | Design: no `h1`, 18 dlitem failures. | Rebuild on `xo`. | ☑ `c5b28e6` |
 
 ---
 
