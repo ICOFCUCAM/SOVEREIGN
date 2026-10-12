@@ -38,6 +38,10 @@ body {
 html:has(.ex-site) { background: linear-gradient(180deg, #F8F4EE 50%, #111310 50%); scrollbar-color: #B8AC9A transparent; }
 html:has(.ex-site) body { background: transparent; }
 html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px solid transparent; background-clip: padding-box; }
+/* in-page jumps (the chapter rail, "value my company", back to top) land below the sticky header, and glide
+   when motion is welcome */
+.ex-site [id^="ch-"] { scroll-margin-top: 72px; }
+@media (prefers-reduced-motion: no-preference) { html:has(.ex-site) { scroll-behavior: smooth; } }
 .ex-site ::selection { background: rgba(180,154,117,0.32); color: inherit; }
 .ex-site :where([data-ink], footer) ::selection { background: rgba(201,176,138,0.4); color: #fff; }
 
