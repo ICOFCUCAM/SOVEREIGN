@@ -367,7 +367,7 @@ Self-critique of the homepage after Z3 (1440 px: 8,839 px tall; 390 px: 12,560 p
 
 | # | Finding | Close by | Status |
 |---|---|---|---|
-| AA1 | The lifecycle is told twice: the hero map shows the eight stages with typical weeks, and section 06 repeats them as a navy grid. | The map becomes the lifecycle: its caption carries "The acquisition lifecycle · signal → closing" and the "Typical timeline" source note (6). Section 06 is removed. | open |
+| AA1 | The lifecycle is told twice: the hero map shows the eight stages with typical weeks, and section 06 repeats them as a navy grid. | The map becomes the lifecycle: its caption carries "The acquisition lifecycle · signal → closing" and the "Typical timeline" source note (6). Section 06 is removed. | closed `b96e08a9` |
 | AA2 | The map implies a geography that does not exist (Signal in North America, Closing in Australia). Real regions are not available: the registry's `country` field is empty for 3,263 of 6,311 events and mixes formats, and the file (3.4 MB) is too large for the client. | Continents removed. The horizontal position becomes time: each stage sits at its typical week (square-root scale so the first weeks do not collide), in order from left to right; the vertical lanes only separate labels. | closed `01ce06c1` |
 | AA3 | Three numbering systems: "No. 01" in the topline, "01 / Discover the field · 02 / Trace the path" and "/ 001" on the map, and chapters 02–07. "02 / Trace the path" and "02 / The modules" sit on one screen. | Only chapter numbers remain: "No. 01", the map's 01/02 labels and "/ 001" are removed. | closed `ce7b3cc3` |
 | AA4 | The board — the real product — starts two screens down, behind an illustrative diagram and a module list. | New order: 01 hero · 02 the exchange (hall + board) · 03 value your company · 04 thesis · 05 ledger · 06 the modules · 07 back page. | open |
@@ -807,6 +807,9 @@ The exchange map is set on paper (white ground, ink grid and labels, blue-600/70
 
 ### AA3 — closed ce7b3cc3
 Removed the topline's "No. 01", the map's "01 / Discover the field" and "02 / Trace the path", and "/ 001" from the map tag (keys xm.discover and xm.trace deleted, EN/FR/ES); only chapter numbers remain. Verified: tsc, eslint, vitest 243/243.
+
+### AA1 — closed b96e08a9
+The map's caption is now "The acquisition lifecycle · signal → closing · Typical timeline" with source note 6 (first citation); the navy lifecycle band (former section 06), its LIFECYCLE table, the NAVY constant and the xm.note key are removed. The inventory test's lifecycle check is met by the map caption. Verified: tsc, eslint, vitest 243/243; rendered at 1440, no overflow or errors.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
