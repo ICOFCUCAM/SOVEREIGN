@@ -422,7 +422,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 
 | # | Gap | Close by | Status |
 |---|---|---|---|
-| EE1 | Darks and accents are hand-typed per section (14 near-black navies, 6 blues, 5 greens); no shared vocabulary. | One `ex` token set in tailwind.config and CSS variables in index.css: ink scale ex-0…ex-3, paper / white, signal blue, two greens (live, done), one hairline. | open |
+| EE1 | Darks and accents are hand-typed per section (14 near-black navies, 6 blues, 5 greens); no shared vocabulary. | One `ex` token set in tailwind.config and CSS variables in index.css: ink scale ex-0…ex-3, paper / white, signal blue, two greens (live, done), one hairline. | closed `24584033` |
 | EE2 | The hero's petrol (#0d2130) is a different hue family from every other dark section. | The ink scale derived as a deep blue ink; the hero dark moved onto it with a quiet blue glow behind the watermark. | open |
 | EE3 | Landing sections use ad hoc navy hex values. | Landing.tsx darks replaced by the ink variables. | open |
 | EE4 | Components (Instrument, ExchangeMap, LedgerTable, QuickValue, LifecycleBand) carry their own navies. | Component darks replaced by the ink variables (board content untouched). | open |
@@ -971,6 +971,9 @@ The original acquisition lifecycle rail is back as a band between the board (03)
 
 ### DD7 — closed 8568b5ff
 Premium lifecycle band (LifecycleBand.tsx) and hero polish in deep petrol ink instead of black. Checked: tsc, eslint, vitest 246/246, build, axe 0 on / and /pricing at 1440/390, keyboard 129/0, reduced motion cssOutside 0 (the travelling light is CSS gated on no-preference), board untouched.
+
+### EE1 — closed 24584033
+`ex` tokens in tailwind.config.ts (ex-0 floor #040c18, ex-1 field #071a31, ex-2 raised #0a2142, ex-3 edge #163459, paper, live, done, done-ink, hair) and the same as CSS variables in index.css with --ex-field, --ex-seam and a reusable .ex-seam lit hairline.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
