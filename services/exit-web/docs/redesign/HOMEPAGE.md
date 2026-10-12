@@ -425,7 +425,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE1 | Darks and accents are hand-typed per section (14 near-black navies, 6 blues, 5 greens); no shared vocabulary. | One `ex` token set in tailwind.config and CSS variables in index.css: ink scale ex-0…ex-3, paper / white, signal blue, two greens (live, done), one hairline. | closed `24584033` |
 | EE2 | The hero's petrol (#0d2130) is a different hue family from every other dark section. | The ink scale derived as a deep blue ink; the hero dark moved onto it with a quiet blue glow behind the watermark. | closed `748df292` |
 | EE3 | Landing sections use ad hoc navy hex values. | Landing.tsx darks replaced by the ink variables. | closed `9d44bb6f` |
-| EE4 | Components (Instrument, ExchangeMap, LedgerTable, QuickValue, LifecycleBand) carry their own navies. | Component darks replaced by the ink variables (board content untouched). | open |
+| EE4 | Components (Instrument, ExchangeMap, LedgerTable, QuickValue, LifecycleBand) carry their own navies. | Component darks replaced by the ink variables (board content untouched). | closed `1c30d95f` |
 | EE5 | Five greens and six blues outside the board. | Reduced to live green (#7CFF9F) and done green (emerald-300 on dark / emerald-700 on paper); blues to blue-600 (paper), blue-400/300 (dark). | open |
 | EE6 | Ivory and white alternate without a rule. | Paper rhythm: ivory for story chapters, white for working chapters; written down here. | open |
 | EE7 | The capability strip is a flat dark bar. | A lit top seam, hairline glyphs and a hover lift on each capability. | open |
@@ -980,6 +980,9 @@ Hero dark field on the ink (ex-1 → ex-0) with a quiet signal-blue glow behind 
 
 ### EE3 — closed 9d44bb6f
 Landing's own darks (FAQ brief card, the closing chapter's ground and veil, the chapter 02 shadow) on the ink variables; CommandBoard and its helpers untouched.
+
+### EE4 — closed 1c30d95f
+Instrument, ExchangeMap (dark ground), LedgerTable summary strip, QuickValue result card and LifecycleBand on the ink variables; the board's screen content untouched.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
