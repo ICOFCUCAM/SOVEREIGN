@@ -5,7 +5,7 @@
 | Route | `/console/buyer/:id`, guarded by `/console/buyer-graph` |
 | Component | `src/pages/BuyerProfile.tsx` (340 lines) |
 | NAV | none (reached from Buyer Graph, Terminal and other buyer links); founder, **Preparation or Active Mandate** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All five gaps closed; X14 (Terminal wording) follows. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `754f926`)
 
@@ -63,3 +63,12 @@ The Terminal shows `rankedBuyers().probability.pct` as "N% likely", "N% probabil
 ### G4 — Demo company unlabelled
 *Closed by:* `pages/BuyerProfile.tsx` — the company name, sector tokens (`activeTokens`), institutional financial baseline and time-to-close (`runInstitutionalValuation`), likelihood score, overlap, rationale, contact registry and suggested action all follow `loadActiveCompany()` — the same inputs the Terminal uses when it links here. Eyebrow "Acquisition DNA · for your intake / the demo company: {name}", **Demo data / Your intake** badge. `pages/Intake.tsx` lists "Each buyer's profile" (example link to Microsoft; the gate label is computed from that route).
 *Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium `/console/buyer/microsoft`: demo → DEMO DATA, likelihood 74; intake "Northwind Analytics" → YOUR INTAKE, likelihood 94, no Helios mentions · 0 errors.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Preparation and Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · free: Upgrade page (route guard) · not-found state checked · personalisation demo vs intake · 0 "live" words.
+
+## Known issues
+- "Express interest" is stored only in this browser; there is no buyer notification or shared record.
+- The likelihood score is the same uncalibrated composite as on the Buyer Graph.
