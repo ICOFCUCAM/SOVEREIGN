@@ -33,8 +33,12 @@ Founder Active Mandate: `h1` none · axe empty-table-header ×1 · **overflow at
 | G2 | **Fake verification gates** ("identity / history / funds verified", "Verified" tier). | Gates named for what they check (NDA executed, signature recorded, named representative, liquidated-damages clause); "N of 4 record checks"; state that ExitOS does not verify identity, funds or track record. | ☐ |
 | G3 | **False data-room gating; "issued" implies sent; sample breach evidence looks real.** | Plain wording: no data room gating exists; NDAs are drafted in this session and not sent; breach allegations and evidence references marked illustrative. | ☐ |
 | G4 | Demo NDAs unlabelled. | Badge and line: sample NDA portfolio of the demo company. | ☐ |
-| G5 | Design: no `h1`, overflow at 390, empty header, tape. | Rebuild on `xo`; `RegistryTape`. | ☐ |
+| G5 | Design: no `h1`, overflow at 390, empty header, tape. | Rebuild on `xo`; `RegistryTape`. | ☑ G5-commit |
 
 ---
 
 ## Closure log
+
+### G5 — Design and tape
+*Closed by:* `pages/Nda.tsx` rebuilt on `xo` (`PageHeader` `h1` with the PDF link (announced as a new tab), Templates and Issue NDA as header actions; four metrics; banker's take as a page-local definition list (shared `BankerTake` no longer used here); the register as a table with row headers and a labelled details column in a `ScrollRegion` — Open/Close buttons carry `aria-expanded` and the counterparty name; trust gates as a list with "(met)/(not met)"; terms as a definition list; the breach notice in a scrollable region; templates and issue dialogs are the shared `Modal` (X13); pinging `MarketTape` → dated `RegistryTape`). Content carried over verbatim; G1–G4 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Active Mandate 1440/390: 0 errors, `h1` 1 (was 0), **no overflow** (was overflowing at 390), axe 0 (was 1), all tab stops with visible focus; templates and issue dialogs axe 0; with an NDA opened: axe 0, no overflow.

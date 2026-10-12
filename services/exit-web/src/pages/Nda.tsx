@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Modal, Field, inputCls, timeAgo, notify } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import { Button, Modal, Field, inputCls, timeAgo, notify } from "../lib/ui";
+import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { SAMPLE_NDAS, NDA_ROSTER, LISTING_PRIVATE } from "../lib/engines";
 import {
@@ -8,17 +10,12 @@ import {
   STANDARD_TEMPLATES, templateById, issueNda,
   type NdaInstance, type NdaState,
 } from "@exit/engines";
-import BankerTake from "../components/BankerTake";
 
 const FOUNDER_PARTY = { id: "founder-helios", name: "Helios Freight, Inc.", representativeName: "Anne Kovac", representativeEmail: "anne@helios.example" };
 
-const STATUS_STYLE: Record<NdaState, string> = {
-  active:            "bg-deal-600/20 text-deal-300",
-  pending_signature: "bg-loi-500/15 text-loi-300",
-  expired:           "bg-white/5 text-white/45",
-  revoked:           "bg-white/5 text-white/45",
-  breached:          "bg-red-500/15 text-red-300",
-  draft:             "bg-white/5 text-white/55",
+const STATUS_CLS: Record<NdaState, string> = {
+  active: "text-xo-verified", pending_signature: "text-xo-caution", expired: "text-xo-faint",
+  revoked: "text-xo-faint", breached: "text-xo-risk", draft: "text-xo-muted",
 };
 
 const STATUS_LABEL: Record<NdaState, string> = {
@@ -51,10 +48,8 @@ function buyerTrust(n: NdaInstance, status: NdaState): BuyerTrust {
   const tier = score >= 100 ? "Verified" : score >= 50 ? "Qualified" : "Unverified";
   return { gates, score, tier };
 }
-const TIER_STYLE: Record<BuyerTrust["tier"], string> = {
-  Verified: "bg-deal-600/20 text-deal-300 ring-deal-400/40",
-  Qualified: "bg-loi-500/15 text-loi-300 ring-loi-400/40",
-  Unverified: "bg-white/5 text-white/45 ring-white/15",
+const TIER_CLS: Record<BuyerTrust["tier"], string> = {
+  Verified: "text-xo-verified", Qualified: "text-xo-caution", Unverified: "text-xo-muted",
 };
 
 const Nda: React.FC = () => {
@@ -105,57 +100,52 @@ const Nda: React.FC = () => {
     });
   }, [openNda]);
 
+  const tape = useMemo(() => buildMarketTape(), []);
   const verifiedTier = ndas.filter((n) => buyerTrust(n, evaluateNdaStatus(n)).tier === "Verified").length;
 
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Workspace · NDA"
-        title="NDA & Buyer Trust"
-        tag="Qualification gate"
-        status={`${roster.active} active`}
-        metrics={[
-          { k: "Verified buyers", v: String(verifiedTier), accent: true, sub: "all four gates" },
-          { k: "Active NDAs", v: String(roster.active), accent: true, sub: "bound counterparties" },
-          { k: "Pending", v: String(roster.pending), sub: "awaiting countersign" },
-          { k: "Breaches", v: String(roster.breached), sub: "open enforcement" },
-        ]}
-      />
+    <div data-page="nda" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Workspace · NDA" title="NDA & Buyer Trust"
+        badge={<span className="text-[12px] text-xo-muted">Qualification gate · {roster.active} active</span>}
+        actions={<>
+          <a href="/report/nda" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">NDA Package (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
+          <Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button>
+          <Button onClick={() => setIssueOpen(true)}>Issue NDA</Button>
+        </>} />
 
-      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
+      <section aria-label="NDA summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><Metric label="Verified buyers" emphasis value={String(verifiedTier)} sub="all four gates" /></div>
+        <div className="bg-xo-panel"><Metric label="Active NDAs" value={String(roster.active)} sub="bound counterparties" /></div>
+        <div className="bg-xo-panel"><Metric label="Pending" value={String(roster.pending)} sub="awaiting countersign" /></div>
+        <div className="bg-xo-panel"><Metric label="Breaches" value={String(roster.breached)} sub="open enforcement" /></div>
+      </section>
 
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <a href="/report/nda" target="_blank" rel="noopener noreferrer" className="rounded-md border border-deal-400/30 px-3.5 py-1.5 text-[12px] font-semibold text-deal-300 transition hover:bg-deal-600/10">NDA Package (PDF) →</a>
-        <Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button>
-        <Button onClick={() => setIssueOpen(true)}>Issue NDA</Button>
-      </div>
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
-      {/* ── Templates library ─────────────────────────────────────── */}
       <Modal open={templatesOpen} onClose={() => setTemplatesOpen(false)} title="NDA templates" subtitle={`${STANDARD_TEMPLATES.length} institutional templates · issue any against a counterparty`}
         footer={<Button onClick={() => { setTemplatesOpen(false); setIssueOpen(true); }}>Issue an NDA →</Button>}>
-        <div className="space-y-3">
+        <ul className="space-y-3">
           {STANDARD_TEMPLATES.map((t) => (
-            <div key={t.id} className="rounded-lg border border-white/10 bg-ink-900/40 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm font-bold text-white">{t.name}</div>
-                <span className="shrink-0 rounded-full bg-white/5 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-white/50 ring-1 ring-white/10">{t.shape.replace(/_/g, " ")} · v{t.version}</span>
+            <li key={t.id} className="rounded-lg border border-white/10 bg-ink-900/40 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h3 className="text-sm font-bold text-white">{t.name}</h3>
+                <span className="shrink-0 font-mono text-[11px] text-white/70">{t.shape.replace(/_/g, " ")} · v{t.version}</span>
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 text-[12px] sm:grid-cols-3">
-                <div><span className="text-white/40">Clauses</span> <span className="text-white/80">{t.clauseCount}</span></div>
-                <div><span className="text-white/40">Survival</span> <span className="text-white/80">{t.defaultTerms.survivalMonths}mo</span></div>
-                <div><span className="text-white/40">Return/destroy</span> <span className="text-white/80">{t.defaultTerms.returnOrDestroyDays}d</span></div>
-                <div><span className="text-white/40">Scope</span> <span className="text-white/80">{t.defaultTerms.scope}</span></div>
-                <div><span className="text-white/40">Law</span> <span className="text-white/80">{t.defaultTerms.governingLaw}</span></div>
-                <div><span className="text-white/40">Injunctive</span> <span className="text-white/80">{t.defaultTerms.injunctiveRelief ? "yes" : "no"}</span></div>
-                {t.defaultTerms.liquidatedDamagesUsd ? <div className="col-span-2"><span className="text-white/40">Liquidated damages</span> <span className="text-white/80">USD {t.defaultTerms.liquidatedDamagesUsd.toLocaleString()}</span></div> : null}
-              </div>
-              <div className="mt-3 text-[11px] text-white/45">Carve-outs: {t.defaultTerms.carveOuts.join(" · ")}</div>
-            </div>
+              <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 text-[12px] sm:grid-cols-3">
+                <div><dt className="inline text-white/60">Clauses </dt><dd className="inline text-white/90">{t.clauseCount}</dd></div>
+                <div><dt className="inline text-white/60">Survival </dt><dd className="inline text-white/90">{t.defaultTerms.survivalMonths}mo</dd></div>
+                <div><dt className="inline text-white/60">Return/destroy </dt><dd className="inline text-white/90">{t.defaultTerms.returnOrDestroyDays}d</dd></div>
+                <div><dt className="inline text-white/60">Scope </dt><dd className="inline text-white/90">{t.defaultTerms.scope}</dd></div>
+                <div><dt className="inline text-white/60">Law </dt><dd className="inline text-white/90">{t.defaultTerms.governingLaw}</dd></div>
+                <div><dt className="inline text-white/60">Injunctive </dt><dd className="inline text-white/90">{t.defaultTerms.injunctiveRelief ? "yes" : "no"}</dd></div>
+                {t.defaultTerms.liquidatedDamagesUsd ? <div className="col-span-2"><dt className="inline text-white/60">Liquidated damages </dt><dd className="inline text-white/90">USD {t.defaultTerms.liquidatedDamagesUsd.toLocaleString()}</dd></div> : null}
+              </dl>
+              <p className="mt-3 text-[12px] text-white/65">Carve-outs: {t.defaultTerms.carveOuts.join(" · ")}</p>
+            </li>
           ))}
-        </div>
+        </ul>
       </Modal>
 
-      {/* ── Issue NDA ─────────────────────────────────────────────── */}
       <Modal open={issueOpen} onClose={() => setIssueOpen(false)} title="Issue an NDA" subtitle="Generates a pending-signature NDA against the live listing" size="md"
         footer={<><Button variant="ghost" onClick={() => setIssueOpen(false)}>Cancel</Button><Button onClick={submitIssue}>Issue NDA</Button></>}>
         <div className="space-y-4">
@@ -171,34 +161,38 @@ const Nda: React.FC = () => {
             <input className={inputCls} placeholder="e.g. Jane Okonkwo, VP CorpDev" value={form.rep} onChange={(e) => setForm((f) => ({ ...f, rep: e.target.value }))} />
           </Field>
           {(() => { const t = templateById(form.templateId); return t ? (
-            <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3 text-[12px] text-white/55">
-              Issues a <span className="text-white/80">{t.shape.replace(/_/g, " ")}</span> NDA — {t.defaultTerms.survivalMonths}mo survival, {t.defaultTerms.governingLaw} law, {t.clauseCount} clauses. State starts at <span className="text-loi-300">pending signature</span>.
-            </div>
+            <p className="rounded-lg border border-white/10 bg-ink-900/40 p-3 text-[12px] text-white/75">
+              Issues a <span className="text-white">{t.shape.replace(/_/g, " ")}</span> NDA — {t.defaultTerms.survivalMonths}mo survival, {t.defaultTerms.governingLaw} law, {t.clauseCount} clauses. State starts at <span className="text-loi-300">pending signature</span>.
+            </p>
           ) : null; })()}
         </div>
       </Modal>
 
-      <BankerTake
-        next={roster.pending > 0
-          ? <>Chase countersignatures on the <span className="text-white">{roster.pending} pending NDA{roster.pending === 1 ? "" : "s"}</span> to lift each buyer into the room.</>
-          : <>All NDAs executed — qualification gates are the gating step now.</>}
-        stake={<><span className="font-mono font-bold text-deal-300">{verifiedCount}</span> fully-verified buyer{verifiedCount === 1 ? "" : "s"} cleared for the data room; {roster.active} active.</>}
-        inaction={<>An unqualified buyer in the data room is an information leak and a wasted slot in your process.</>}
-        buyer={<>Pursue <span className="text-white">Verified-tier</span> buyers first — they've cleared all four trust gates.</>}
-        automate={<>ExitOS scores every counterparty on four verification gates and gates data-room access automatically.</>}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line">
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">{roster.pending > 0
+            ? <>Chase countersignatures on the <span className="font-semibold">{roster.pending} pending NDA{roster.pending === 1 ? "" : "s"}</span> to lift each buyer into the room.</>
+            : <>All NDAs executed — qualification gates are the gating step now.</>}</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{verifiedCount}</span> fully-verified buyer{verifiedCount === 1 ? "" : "s"} cleared for the data room; {roster.active} active.</TakeCell>
+            <TakeCell k="If you wait">An unqualified buyer in the data room is an information leak and a wasted slot in your process.</TakeCell>
+            <TakeCell k="Pursue">Pursue <span className="text-xo-text">Verified-tier</span> buyers first — they've cleared all four trust gates.</TakeCell>
+            <TakeCell k="ExitOS does it">ExitOS scores every counterparty on four verification gates and gates data-room access automatically.</TakeCell>
+          </dl>
+        </div>
+      </Section>
 
-      <div className="mt-2">
-        <Card>
-          <table className="w-full text-sm">
-            <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-              <tr className="border-b border-white/10">
-                <th className="px-5 py-3">Counterparty</th>
-                <th className="px-5 py-3">Buyer Trust</th>
-                <th className="px-5 py-3">Issued</th>
-                <th className="px-5 py-3">Expires</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3"></th>
+      <Section title="NDA register" className="border border-xo-line">
+        <ScrollRegion label="NDA register table">
+          <table className="w-full min-w-[720px] text-[13px]">
+            <thead className="text-left text-[11px] text-xo-faint">
+              <tr className="border-b border-xo-line">
+                <th scope="col" className="px-4 py-2 font-medium">Counterparty</th>
+                <th scope="col" className="px-4 py-2 font-medium">Buyer Trust</th>
+                <th scope="col" className="px-4 py-2 font-medium">Issued</th>
+                <th scope="col" className="px-4 py-2 font-medium">Expires</th>
+                <th scope="col" className="px-4 py-2 font-medium">Status</th>
+                <th scope="col" className="px-4 py-2 font-medium"><span className="sr-only">Details</span></th>
               </tr>
             </thead>
             <tbody>
@@ -206,29 +200,15 @@ const Nda: React.FC = () => {
                 const status = evaluateNdaStatus(n);
                 const trust = buyerTrust(n, status);
                 return (
-                  <tr key={n.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                    <td className="px-5 py-3.5 font-medium text-white">{n.receiving.name}</td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-14 overflow-hidden rounded-full bg-white/10">
-                          <div className="h-full rounded-full" style={{ width: `${trust.score}%`, background: trust.score >= 100 ? "#34d399" : trust.score >= 50 ? "#fbbf24" : "#64748b" }} />
-                        </div>
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${TIER_STYLE[trust.tier]}`}>{trust.tier} · {trust.score}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-xs text-white/55">{timeAgo(n.issuedAt)}</td>
-                    <td className="px-5 py-3.5 text-xs text-white/55">{n.expiresAt ? new Date(n.expiresAt).toLocaleDateString() : "—"}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${STATUS_STYLE[status]}`}>
-                        {STATUS_LABEL[status]}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <button
-                        className="text-[12px] font-semibold uppercase tracking-wide text-deal-400 hover:text-deal-300"
-                        onClick={() => setOpenId(openId === n.id ? null : n.id)}
-                      >
-                        {openId === n.id ? "Close" : "Open"} &rarr;
+                  <tr key={n.id} className="border-b border-xo-line last:border-0">
+                    <th scope="row" className="px-4 py-2.5 text-left font-medium">{n.receiving.name}</th>
+                    <td className="px-4 py-2.5"><span className={`text-[12px] font-semibold ${TIER_CLS[trust.tier]}`}>{trust.tier} · {trust.score}</span></td>
+                    <td className="px-4 py-2.5 text-[12px] text-xo-muted">{timeAgo(n.issuedAt)}</td>
+                    <td className="px-4 py-2.5 text-[12px] text-xo-muted">{n.expiresAt ? new Date(n.expiresAt).toLocaleDateString() : "—"}</td>
+                    <td className="px-4 py-2.5"><span className={`text-[12px] font-semibold ${STATUS_CLS[status]}`}>{STATUS_LABEL[status]}</span></td>
+                    <td className="px-4 py-2.5">
+                      <button type="button" aria-expanded={openId === n.id} className="inline-block py-1 text-[12px] font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" onClick={() => setOpenId(openId === n.id ? null : n.id)}>
+                        {openId === n.id ? "Close" : "Open"}<span className="sr-only"> {n.receiving.name}</span> →
                       </button>
                     </td>
                   </tr>
@@ -236,96 +216,69 @@ const Nda: React.FC = () => {
               })}
             </tbody>
           </table>
-        </Card>
-      </div>
+        </ScrollRegion>
+      </Section>
 
       {openNda && (() => { const trust = buyerTrust(openNda, evaluateNdaStatus(openNda)); return (
-        <div className="mt-6 space-y-4">
-          {/* Buyer Trust Score — qualification gates */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Buyer Trust Score</div>
-                <div className="mt-1 text-lg font-semibold text-white">{openNda.receiving.name}</div>
-              </div>
-              <div className="text-right">
-                <div className="font-mono text-3xl font-bold" style={{ color: trust.score >= 100 ? "#34d399" : trust.score >= 50 ? "#fbbf24" : "#94a3b8" }}>{trust.score}</div>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${TIER_STYLE[trust.tier]}`}>{trust.tier}</span>
-              </div>
-            </div>
-            <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
+        <div className="space-y-3">
+          <Section title={`Buyer Trust Score · ${openNda.receiving.name}`} className="border border-xo-line"
+            right={<span className={`font-mono text-[18px] font-semibold ${TIER_CLS[trust.tier]}`}>{trust.score} · {trust.tier}</span>}
+            foot={trust.tier === "Verified"
+              ? "All gates cleared — buyer qualified for full data-room access."
+              : `${trust.gates.filter((g) => !g.cleared).length} gate(s) outstanding — data-room access restricted until trust clears.`}>
+            <ul className="grid gap-px bg-xo-line sm:grid-cols-2">
               {trust.gates.map((g) => (
-                <div key={g.label} className={`flex items-start gap-2.5 rounded-lg border p-3 ${g.cleared ? "border-deal-500/30 bg-deal-600/5" : "border-white/10 bg-ink-900/40"}`}>
-                  <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] ${g.cleared ? "bg-deal-600/30 text-deal-200 ring-1 ring-deal-400/40" : "bg-white/5 text-white/40 ring-1 ring-white/15"}`}>{g.cleared ? "✓" : "○"}</span>
+                <li key={g.label} className="flex items-start gap-2.5 bg-xo-panel px-4 py-3">
+                  <span aria-hidden className={g.cleared ? "text-xo-verified" : "text-xo-faint"}>{g.cleared ? "✓" : "○"}</span>
                   <div>
-                    <div className={`text-[13px] font-semibold ${g.cleared ? "text-white" : "text-white/55"}`}>{g.label}</div>
-                    <div className="text-[11px] text-white/45">{g.detail}</div>
+                    <div className={`text-[13px] font-semibold ${g.cleared ? "" : "text-xo-muted"}`}>{g.label}<span className="sr-only">{g.cleared ? " (met)" : " (not met)"}</span></div>
+                    <div className="text-[12px] text-xo-faint">{g.detail}</div>
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
-            <div className="mt-4 border-t border-white/10 pt-3 text-[12px] text-white/55">
-              {trust.tier === "Verified"
-                ? "All gates cleared — buyer qualified for full data-room access."
-                : `${trust.gates.filter((g) => !g.cleared).length} gate(s) outstanding — data-room access restricted until trust clears.`}
-            </div>
-          </Card>
+            </ul>
+          </Section>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Card className="p-6">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">NDA terms</div>
-            <div className="mt-1 text-lg font-semibold text-white">{openNda.receiving.name}</div>
-            <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <dt className="text-[10px] uppercase tracking-wide text-white/40">Survival</dt>
-                <dd className="text-white/85">{openNda.terms.survivalMonths} months</dd>
-              </div>
-              <div>
-                <dt className="text-[10px] uppercase tracking-wide text-white/40">Return / destroy</dt>
-                <dd className="text-white/85">{openNda.terms.returnOrDestroyDays} days</dd>
-              </div>
-              <div>
-                <dt className="text-[10px] uppercase tracking-wide text-white/40">Governing law</dt>
-                <dd className="text-white/85">{openNda.terms.governingLaw}</dd>
-              </div>
-              <div>
-                <dt className="text-[10px] uppercase tracking-wide text-white/40">Scope</dt>
-                <dd className="text-white/85">{openNda.terms.scope}</dd>
-              </div>
-              {openNda.terms.liquidatedDamagesUsd && (
-                <div className="col-span-2">
-                  <dt className="text-[10px] uppercase tracking-wide text-white/40">Liquidated damages</dt>
-                  <dd className="text-white/85">USD {openNda.terms.liquidatedDamagesUsd.toLocaleString()}</dd>
+          <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
+            <Section title={`NDA terms · ${openNda.receiving.name}`}>
+              <div className="px-4 py-3">
+                <dl className="grid grid-cols-2 gap-3 text-[13px]">
+                  <div><dt className="text-[11px] text-xo-faint">Survival</dt><dd>{openNda.terms.survivalMonths} months</dd></div>
+                  <div><dt className="text-[11px] text-xo-faint">Return / destroy</dt><dd>{openNda.terms.returnOrDestroyDays} days</dd></div>
+                  <div><dt className="text-[11px] text-xo-faint">Governing law</dt><dd>{openNda.terms.governingLaw}</dd></div>
+                  <div><dt className="text-[11px] text-xo-faint">Scope</dt><dd>{openNda.terms.scope}</dd></div>
+                  {openNda.terms.liquidatedDamagesUsd && (
+                    <div className="col-span-2"><dt className="text-[11px] text-xo-faint">Liquidated damages</dt><dd>USD {openNda.terms.liquidatedDamagesUsd.toLocaleString()}</dd></div>
+                  )}
+                  <div className="col-span-2"><dt className="text-[11px] text-xo-faint">Carve-outs</dt><dd className="text-xo-muted">{openNda.terms.carveOuts.join(" · ")}</dd></div>
+                </dl>
+                <div className="mt-3 border-t border-xo-line pt-2 text-[12px] text-xo-muted">
+                  {openNda.signatureEvents.length === 0
+                    ? "No signatures recorded."
+                    : <ul>{openNda.signatureEvents.map((e, i) => <li key={i}>{e.party} — {e.representative} ({new Date(e.at).toLocaleString()})</li>)}</ul>}
                 </div>
-              )}
-              <div className="col-span-2">
-                <dt className="text-[10px] uppercase tracking-wide text-white/40">Carve-outs</dt>
-                <dd className="text-white/65">{openNda.terms.carveOuts.join(" · ")}</dd>
               </div>
-            </dl>
-            <div className="mt-4 border-t border-white/5 pt-3 text-xs text-white/55">
-              {openNda.signatureEvents.length === 0
-                ? "No signatures recorded."
-                : openNda.signatureEvents.map((e, i) => (
-                    <div key={i}>· {e.party} — {e.representative} ({new Date(e.at).toLocaleString()})</div>
-                  ))}
-            </div>
-          </Card>
+            </Section>
 
-          {sampleBreach && (
-            <Card className="p-6">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Sample breach notice</div>
-              <div className="mt-1 text-lg font-semibold text-white">Generated draft</div>
-              <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap rounded-md border border-white/5 bg-black/40 p-4 text-[12px] leading-relaxed text-white/75">
-{sampleBreach.body}
-              </pre>
-            </Card>
-          )}
-        </div>
+            {sampleBreach && (
+              <Section title="Sample breach notice" eyebrow="Generated draft">
+                <ScrollRegion label="Sample breach notice text" className="max-h-96 overflow-y-auto">
+                  <pre className="whitespace-pre-wrap px-4 py-3 font-sans text-[12px] leading-relaxed text-xo-muted">{sampleBreach.body}</pre>
+                </ScrollRegion>
+              </Section>
+            )}
+          </div>
         </div>
       ); })()}
     </div>
   );
 };
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
+);
 
 export default Nda;
