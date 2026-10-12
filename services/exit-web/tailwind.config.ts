@@ -89,6 +89,14 @@ export default {
           dead:      "#64748b",
         },
       },
+      // one radius scale and three shadow levels for the marketing surfaces (EE25)
+      borderRadius: { "ex-xs": "3px", "ex-sm": "4px", "ex-md": "6px", "ex-lg": "10px" },
+      boxShadow: {
+        "ex-1": "0 1px 0 rgba(10,16,24,0.04), 0 1px 2px rgba(7,26,49,0.06)",
+        "ex-2": "0 18px 40px -20px rgba(7,26,49,0.45)",
+        "ex-3": "0 40px 80px -40px rgba(7,26,49,0.6), 0 18px 36px -24px rgba(7,26,49,0.35)",
+        "ex-bezel": "inset 0 1px 0 rgba(200,225,255,0.16), 0 0 0 1px rgba(10,33,66,0.12), 0 40px 80px -40px rgba(7,26,49,0.6), 0 18px 36px -24px rgba(7,26,49,0.35)",
+      },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],

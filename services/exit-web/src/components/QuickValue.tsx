@@ -46,7 +46,7 @@ const RangeBar: React.FC<{ low: number; mid: number; high: number; muted?: boole
 };
 
 /** The navy card the range sits in: the page's one dark object in this chapter. */
-const CARD = "relative overflow-hidden rounded-[6px] p-6 text-white shadow-[0_30px_60px_-30px_rgba(6,24,46,0.7)] sm:p-9";
+const CARD = "relative overflow-hidden rounded-ex-md p-6 text-white shadow-ex-3 sm:p-9";
 const CARD_BG = { background: "radial-gradient(ellipse 80% 120% at 0% 0%, rgba(37,99,235,0.35), transparent 60%), linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" };
 
 const QuickValue: React.FC<{ n?: string }> = ({ n = "03" }) => {

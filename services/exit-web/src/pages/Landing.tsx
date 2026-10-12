@@ -157,8 +157,8 @@ const Landing: React.FC = () => {
           {/* the right-hand box: the lifecycle graph alone (DD3), its caption beneath */}
           <figure className="m-0 min-w-0">
             {/* an object on the paper, not a fourth dark band: a fine ink bezel with a lit top edge and corner registers (EE10) */}
-            <div className="relative rounded-[10px] bg-ex-0 p-[5px] shadow-[inset_0_1px_0_rgba(200,225,255,0.16),0_0_0_1px_rgba(10,33,66,0.12),0_40px_80px_-40px_rgba(7,26,49,0.6),0_18px_36px_-24px_rgba(7,26,49,0.35)]">
-              <div className="relative overflow-hidden rounded-[6px]">
+            <div className="relative rounded-ex-lg bg-ex-0 p-[5px] shadow-ex-bezel">
+              <div className="relative overflow-hidden rounded-ex-md">
                 <ExchangeMap dark compact bare />
               </div>
               {(["left-2 top-2 border-l border-t", "right-2 top-2 border-r border-t", "left-2 bottom-2 border-l border-b", "right-2 bottom-2 border-r border-b"] as const).map((c) => (
@@ -181,7 +181,7 @@ const Landing: React.FC = () => {
           </div>
         }>
           {/* the screen: exchange ribbon + board, content unchanged */}
-          <div data-hall-screen className="rounded-[6px] bg-[#0a1626] p-1.5">
+          <div data-hall-screen className="rounded-ex-md bg-[#0a1626] p-1.5">
           {/* Bloomberg-style exchange ribbon */}
           <div className="mb-1.5 flex items-center justify-between gap-3 rounded-md bg-black/25 px-3 py-1.5">
             <div className="flex items-center gap-2">
@@ -358,7 +358,7 @@ const Landing: React.FC = () => {
                   </div>
                   <span aria-hidden className="col-start-3 row-span-2 row-start-1 grid h-9 w-9 place-items-center justify-self-end rounded-full border border-slate-300 text-[18px] text-blue-600 transition group-open:rotate-45 group-open:border-blue-600 group-open:bg-blue-600 group-open:text-white sm:col-start-4 sm:row-span-1">+</span>
                 </summary>
-                <div className="mb-7 rounded-[4px] border border-slate-200 bg-[#f6f8fb] p-5 sm:ml-[78px] sm:p-7">
+                <div className="mb-7 rounded-ex-sm border border-slate-200 bg-[#f6f8fb] p-5 sm:ml-[78px] sm:p-7">
                   <ModulePreview id={key} />
                   <Link to="/modules" className={`${BUTTON.secondary} mt-6`}>{t("mods.open")} <Arrow /></Link>
                 </div>
@@ -378,15 +378,15 @@ const Landing: React.FC = () => {
             <div className="border-t-4 border-double border-ink-900 pt-8">
               <Chapter n="08">{t("faq.eyebrow")}</Chapter>
               <h2 id="faq-h" className="rv-h mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} quiet /></h2>
-              <div className="mt-10 rounded-[4px] p-6 text-white" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
+              <div className="mt-10 rounded-ex-sm p-6 text-white" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
                 <p className="font-editorial text-[1.35rem] font-semibold leading-snug">{t("faq.more")}</p>
                 <button onClick={() => nav("/pricing")} className={`${BUTTON.primaryInk} mt-5`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
               </div>
             </div>
             <div className="flex flex-col gap-3">
               {[1, 2, 3, 4, 5, 6].map((k) => (
-                <details key={k} className="group rounded-[4px] border border-slate-300 bg-white shadow-[0_1px_0_rgba(10,16,24,0.04)] transition-shadow open:border-blue-600 open:shadow-[0_18px_40px_-20px_rgba(6,24,46,0.45)]">
-                  <summary className="flex cursor-pointer list-none items-center gap-5 rounded-[4px] px-5 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:px-6 [&::-webkit-details-marker]:hidden">
+                <details key={k} className="group rounded-ex-sm border border-slate-300 bg-white shadow-ex-1 transition-shadow open:border-blue-600 open:shadow-ex-2">
+                  <summary className="flex cursor-pointer list-none items-center gap-5 rounded-ex-sm px-5 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:px-6 [&::-webkit-details-marker]:hidden">
                     <span className="font-mono text-[12px] font-semibold tabular-nums text-blue-600">0{k}</span>
                     <span className="flex-1 font-editorial text-[clamp(1.15rem,1.7vw,1.45rem)] font-semibold">{t(`faq.q${k}`)}</span>
                     <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-300 text-[18px] leading-none text-blue-600 transition group-open:rotate-45 group-open:border-blue-600 group-open:bg-blue-600 group-open:text-white">+</span>

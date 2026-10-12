@@ -41,7 +41,7 @@ const LedgerTable: React.FC = () => {
   return (
     <div className="min-w-0">
       {/* controls */}
-      <div role="search" aria-label="Filter the ledger" className="flex flex-wrap items-end gap-3 rounded-[4px] border border-slate-300 bg-[#f6f8fb] p-4 shadow-[inset_0_1px_0_#fff]">
+      <div role="search" aria-label="Filter the ledger" className="flex flex-wrap items-end gap-3 rounded-ex-sm border border-slate-300 bg-[#f6f8fb] p-4 shadow-[inset_0_1px_0_#fff]">
         <label className="flex min-w-[200px] flex-1 flex-col gap-1 text-[12px] text-slate-600" htmlFor={`${id}-q`}>Search target or acquirer
           <input id={`${id}-q`} type="search" value={q} onChange={(e) => { setQ(e.target.value); setAll(false); }} placeholder="e.g. Salesforce" className={FIELD} />
         </label>
@@ -68,7 +68,7 @@ const LedgerTable: React.FC = () => {
       </div>
 
       {/* what the current view adds up to */}
-      <dl className="mt-4 grid grid-cols-3 overflow-hidden rounded-[4px] text-white" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
+      <dl className="mt-4 grid grid-cols-3 overflow-hidden rounded-ex-sm text-white" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
         {([["Matching deals", String(rows.length), ""], ["Disclosed value", rows.length ? usd(total) : "—", ""], ["Largest", largest ? largest.value : "—", largest ? `${largest.target} · ${largest.buyer}` : ""]] as const).map(([k, v, sub], i) => (
           <div key={k} className={`min-w-0 px-4 py-4 sm:px-6 ${i ? "border-l border-white/10" : ""}`}>
             <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-blue-200/80">{k}</dt>

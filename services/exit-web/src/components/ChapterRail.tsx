@@ -36,7 +36,7 @@ const ChapterRail: React.FC = () => {
         <div className="h-full origin-left bg-blue-600" style={{ transform: `scaleX(${progress})` }} />
       </div>
       <nav aria-label="Chapters" className="fixed left-1 top-1/2 z-30 hidden -translate-y-1/2 lg:block">
-        <div className="relative rounded-[4px] border border-white/15 bg-ink-900/90 p-1 shadow-[0_10px_30px_-8px_rgba(0,0,0,0.55)] backdrop-blur">
+        <div className="relative rounded-ex-sm border border-white/15 bg-ink-900/90 p-1 shadow-[0_10px_30px_-8px_rgba(0,0,0,0.55)] backdrop-blur">
           {/* the line the chapters hang on, filled as you read */}
           <span aria-hidden className="absolute bottom-3 left-1/2 top-3 w-px -translate-x-1/2 bg-white/15" />
           <span aria-hidden className="absolute left-1/2 top-3 w-px -translate-x-1/2 bg-blue-400" style={{ height: `calc((100% - 1.5rem) * ${progress})` }} />
@@ -44,8 +44,8 @@ const ChapterRail: React.FC = () => {
             {CHAPTERS.map(([n, key]) => (
               <li key={n} className="group relative">
                 <a href={`#ch-${n}`} aria-current={active === n ? "true" : undefined} aria-label={`${n} · ${t(key)}`}
-                  className={`grid h-6 w-6 place-items-center rounded-[3px] font-mono text-[10px] font-semibold tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${active === n ? "bg-blue-600 text-white shadow-[0_0_0_3px_rgba(37,99,235,0.3)]" : "bg-ink-900 text-blue-100/70 hover:text-white"}`}>{n}</a>
-                <span aria-hidden className={`pointer-events-none absolute left-full top-1/2 ml-3 -translate-y-1/2 whitespace-nowrap rounded-[3px] bg-ink-900 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-white shadow-lg transition-opacity ${"opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}>{t(key)}</span>
+                  className={`grid h-6 w-6 place-items-center rounded-ex-xs font-mono text-[10px] font-semibold tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${active === n ? "bg-blue-600 text-white shadow-[0_0_0_3px_rgba(37,99,235,0.3)]" : "bg-ink-900 text-blue-100/70 hover:text-white"}`}>{n}</a>
+                <span aria-hidden className={`pointer-events-none absolute left-full top-1/2 ml-3 -translate-y-1/2 whitespace-nowrap rounded-ex-xs bg-ink-900 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-white shadow-lg transition-opacity ${"opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}>{t(key)}</span>
               </li>
             ))}
           </ol>
