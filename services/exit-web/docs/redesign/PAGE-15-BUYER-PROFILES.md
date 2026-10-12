@@ -33,7 +33,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 ## Gap register — Page 15
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **False "queued with the banker"; invented sender "James"; unchecked activity claim.** | Intro dialog offers Copy and "Open Outreach" (with plan note), states nothing is sent from here; sign-off placeholder "[Your name]"; "recent activity" sentence only when the buyer has deals in the last 3 years. | ☑ G1-commit |
+| G1 | **False "queued with the banker"; invented sender "James"; unchecked activity claim.** | Intro dialog offers Copy and "Open Outreach" (with plan note), states nothing is sent from here; sign-off placeholder "[Your name]"; "recent activity" sentence only when the buyer has deals in the last 3 years. | ☑ `add04ca` |
 | G2 | **Invented founder-friendliness; fit shown as "interest" with a pulsing dot; appetite/check mislabels.** | Remove founder-friendliness; "Fit · Hot/Warm/Cool" with thresholds, no pulse; "Active-appetite buyers — registry attribute"; "Check-size midpoint"; "median across these N buyers". | ☐ |
 | G3 | Banker's-take urgency and overclaim; hidden plan gate. | Plain wording; `requiredEngagement` note. | ☐ |
 | G4 | Demo company unlabelled. | Buyers and intro text on `loadActiveCompany()`; badge. | ☐ |
