@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -10,8 +10,8 @@
   --ex-0: #040c18; --ex-1: #071a31; --ex-2: #0a2142; --ex-3: #163459;
   --ex-paper: #f6f8fb; --ex-live: #7CFF9F; --ex-done: #6ee7b7;
   --ex-hair: rgba(147,197,253,0.18);
-  /* the hero (HX1): owner palette */
-  --hx-midnight: #071426; --hx-navy: #10284B; --hx-signal: #326BFA; --hx-porcelain: #F4F6FA; --hx-ice: #91BFFF;
+  /* the hero and insignia (HX2): owner palette */
+  --hx-porcelain: #F5F1E9; --hx-graphite: #242522; --hx-shadow: #111310; --hx-bronze: #B49A75; --hx-ivory: #E8E0D2;
   --ex-glow: rgba(37,99,235,0.18);
   /* the field: a dark chapter's ground, top to floor */
   --ex-field: linear-gradient(180deg, #05101f 0%, #071a31 50%, #040c18 100%);

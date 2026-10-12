@@ -180,8 +180,8 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
       <header className={`sticky top-0 z-40 border-b backdrop-blur transition-colors duration-200 motion-reduce:transition-none ${ink ? "border-white/10 bg-ex-1/85 text-white" : "border-slate-200 bg-white/90"}`}>
         <div className={`${WRAP} grid min-h-[72px] grid-cols-[1fr_auto] items-center gap-5 lg:grid-cols-[1fr_auto_1fr]`}>
           <div className="flex items-center gap-5">
-            <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={30} dark={ink} /></button>
-            <span className={`hidden font-mono text-[10px] uppercase tracking-[0.16em] xl:inline ${ink ? "text-blue-100/60" : "text-slate-600"}`}>A Sovereign Infrastructure</span>
+            <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={34} dark={ink} /></button>
+            <span className={`hidden border-l pl-5 font-mono text-[10px] uppercase tracking-[0.3em] xl:inline ${ink ? "border-white/15 text-blue-100/60" : "border-slate-300 text-slate-600"}`}>A Sovereign Infrastructure</span>
           </div>
           <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
             {NAV.map(([key, fallback, to]) => (

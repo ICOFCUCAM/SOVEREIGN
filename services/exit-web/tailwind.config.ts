@@ -77,13 +77,14 @@ export default {
           done: "#6ee7b7",       // closed / positive, on ink
           "done-ink": "#047857", // closed / positive, on paper
           hair: "rgba(147,197,253,0.18)", // hairline on ink
-          // the hero's instrument palette (owner brief, HX1)
-          midnight: "#071426",   // the hero's dark panel, its deepest
-          navy: "#10284B",       // the hero's dark panel where the light reaches it
-          signal: "#326BFA",     // the one accent: rule, italic, primary hover
-          porcelain: "#F4F6FA",  // the hero's editorial panel
-          ice: "#91BFFF",        // linework and labels on the dark panel
-          "slate-ink": "#4A5872", // secondary text on porcelain (6.6:1)
+          // the hero and insignia palette (owner's final correction, HX2)
+          porcelain: "#F5F1E9",  // warm porcelain: the hero's editorial page
+          graphite: "#242522",   // mineral graphite: the signature field
+          shadow: "#111310",     // soft black: deep shadow, the capability rail
+          bronze: "#B49A75",     // muted champagne bronze: the signature accent
+          "bronze-ink": "#7A6344", // bronze deepened for text on porcelain (5.2:1)
+          ivory: "#E8E0D2",      // warm ivory: lettering and highlights on graphite
+          "slate-ink": "#55504A", // secondary text on porcelain (7.0:1)
         },
         // Deal-stage bands for pipeline visualization
         stage: {

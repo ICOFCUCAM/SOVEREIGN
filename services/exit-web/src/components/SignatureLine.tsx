@@ -35,14 +35,14 @@ const SignatureLine: React.FC = () => {
     <div ref={box} aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-20 hidden w-12 lg:block">
       {height > 0 && (
         <svg width="48" height={height} className="absolute inset-0 overflow-visible">
-          <line x1="24" y1={nodes[0] ?? 0} x2="24" y2={nodes[nodes.length - 1] ?? height} stroke="rgba(96,165,250,0.18)" strokeWidth="1" />
-          <line x1="24" y1={nodes[0] ?? 0} x2="24" y2={Math.max(nodes[0] ?? 0, Math.min(y, nodes[nodes.length - 1] ?? height))} stroke="#2563eb" strokeWidth="1.5" />
+          <line x1="24" y1={nodes[0] ?? 0} x2="24" y2={nodes[nodes.length - 1] ?? height} stroke="rgba(180,154,117,0.3)" strokeWidth="1" />
+          <line x1="24" y1={nodes[0] ?? 0} x2="24" y2={Math.max(nodes[0] ?? 0, Math.min(y, nodes[nodes.length - 1] ?? height))} stroke="#B49A75" strokeWidth="1.5" />
           {nodes.map((ny, i) => {
             const on = y >= ny;
             return (
               <g key={i}>
                 {on && <circle cx="24" cy={ny} r="9" fill="rgba(59,130,246,0.18)" />}
-                <circle cx="24" cy={ny} r="4" fill={on ? "#2563eb" : "#f6f8fb"} stroke="#2563eb" strokeWidth="1.5" />
+                <circle cx="24" cy={ny} r="4" fill={on ? "#B49A75" : "#F8F4EE"} stroke="#B49A75" strokeWidth="1.5" />
               </g>
             );
           })}
