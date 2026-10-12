@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buyerEngagementRecord, engagementRegistry } from "./engagement-registry.js";
 import { DNA_PROFILES, sectorTokensFor } from "./buyer-dna.js";
+import { captureDealEvent, clearDealEvents } from "./deal-events.js";
 
 const tokens = sectorTokensFor("enterprise_saas");
 
@@ -46,5 +47,30 @@ describe("buyer engagement registry (consolidated, not a contact database)", () 
     for (let i = 1; i < reg.length; i++) {
       expect(reg[i].engagementLikelihood.score).toBeLessThanOrEqual(reg[i - 1].engagementLikelihood.score);
     }
+  });
+});
+
+describe("response history counts only what the buyer did", () => {
+  const p = DNA_PROFILES.find((x) => x.events_indexed >= 40)!;
+  const subject = { subjectType: "buyer" as const, subjectId: p.buyer_id, subjectName: p.name };
+
+  it("ignores the founder's own views and local interest", () => {
+    clearDealEvents();
+    const before = buyerEngagementRecord(p, tokens);
+    captureDealEvent({ actorRole: "founder", kind: "viewed_buyer", ...subject });
+    captureDealEvent({ actorRole: "founder", kind: "expressed_interest", ...subject });
+    const after = buyerEngagementRecord(p, tokens);
+    expect(after.processesRun).toBe(before.processesRun);
+    expect(after.engagementLikelihood.score).toBe(before.engagementLikelihood.score);
+    clearDealEvents();
+  });
+
+  it("uses a buyer's own response when one is recorded", () => {
+    clearDealEvents();
+    captureDealEvent({ actorRole: "buyer", kind: "nda_signed", ...subject });
+    const rec = buyerEngagementRecord(p, tokens);
+    expect(rec.processesRun).toBeGreaterThan(0);
+    expect(rec.engagementLikelihood.basis).toMatch(/observed outreach response/);
+    clearDealEvents();
   });
 });

@@ -5,7 +5,7 @@ import {
   buyerContactRegistry, type ContactChannel,
 } from "./buyer-contact";
 import { BUYER_RESPONSES } from "./process-intel";
-import { buyerActivity } from "./deal-events";
+import { buyerActivity, allDealEvents } from "./deal-events";
 
 // ── BUYER ENGAGEMENT REGISTRY ───────────────────────────────────────
 // NOT a cold-email database. One consolidated record per buyer that unifies
@@ -69,9 +69,11 @@ function engagementLikelihood(p: DnaProfile, confidence: "High" | "Medium" | "Lo
 
 export function buyerEngagementRecord(p: DnaProfile, founderTokens: readonly string[]): BuyerEngagementRecord {
   const reg = buyerContactRegistry(p, founderTokens);
-  // observed behavior — captured ExitOS events for this buyer take priority
-  // over the demo telemetry seed; this is the moat learning from real usage
-  const observed = buyerActivity(p.buyer_id);
+  // observed behavior — only actions the BUYER took count as response
+  // history. Events whose subject is a buyer today are the founder's own
+  // (viewing a profile, local "express interest"), which say nothing about
+  // how the buyer responds, so they are excluded.
+  const observed = buyerActivity(p.buyer_id, allDealEvents().filter((e) => e.actorRole === "buyer"));
   const resp = RESPONSE_BY_BUYER.get(norm(p.name));
   const responseRate = observed.hasActivity
     ? (observed.ndaSigned > 0 || observed.loiIssued > 0 ? 100 : observed.engagements > 0 ? 50 : 0)
