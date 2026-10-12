@@ -89,7 +89,7 @@ const Landing: React.FC = () => {
           </div>
         </div>
         {/* the watermark on the black side: the ExitOS mark and signature, faint (owner, DD4; refined DD7) */}
-        <div aria-hidden className="pointer-events-none absolute right-[11%] top-1/2 hidden -translate-y-[56%] select-none flex-col items-center md:flex">
+        <div aria-hidden className="hx-mark pointer-events-none absolute right-[11%] top-1/2 hidden -translate-y-[56%] select-none flex-col items-center md:flex">
           <svg viewBox="0 0 100 100" className="h-[min(28vw,420px)] w-[min(28vw,420px)]" fill="none">
             <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.05)" strokeWidth="0.35" />
             <circle cx="50" cy="50" r="33" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
@@ -208,6 +208,9 @@ const Landing: React.FC = () => {
           main h1,main h2,main h3{text-wrap:balance}
           main p{text-wrap:pretty;hanging-punctuation:first last}
           main p.font-editorial{font-variant-numeric:oldstyle-nums proportional-nums}
+          @media (prefers-reduced-motion: no-preference){.hx-mark{animation:hxMark 2.4s cubic-bezier(.2,.7,.2,1) .3s both}.hx-mark svg{animation:hxDial 3.2s cubic-bezier(.2,.7,.2,1) .3s both}}
+          @keyframes hxMark{from{opacity:0;filter:blur(6px)}to{opacity:1;filter:none}}
+          @keyframes hxDial{from{transform:rotate(-24deg) scale(.96)}to{transform:none}}
           @media (prefers-reduced-motion: no-preference){.hero-rule{transform-origin:left;animation:heroRule .9s cubic-bezier(.2,.7,.2,1) both}}
           @keyframes exScan{0%{transform:translateY(-100%);opacity:0}8%{opacity:1}50%{opacity:.5}92%{opacity:1}100%{transform:translateY(2000%);opacity:0}}
           @keyframes exFlash{0%,100%{background:transparent}50%{background:rgba(96,165,250,.10)}}
