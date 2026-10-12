@@ -1,4 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { myNdaRequests, type NdaRequest } from "../lib/exit-api";
+import { Link } from "react-router-dom";
+import { useAuth } from "../lib/auth";
 import { Button, Modal, Field, inputCls, timeAgo, notify } from "../lib/ui";
 import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
@@ -53,6 +56,57 @@ const TIER_CLS: Record<BuyerTrust["tier"], string> = {
 };
 
 const Nda: React.FC = () => {
+  const { session } = useAuth();
+  // Buyers share this route ("Access Requests") but must never see the
+  // founder's register of other counterparties.
+  return session?.role === "buyer" ? <BuyerAccessRequests /> : <FounderNdaVault />;
+};
+
+const REQ_LABEL: Record<NdaRequest["status"], string> = { requested: "Awaiting the founder", signed: "NDA signed", rejected: "Declined" };
+
+const BuyerAccessRequests: React.FC = () => {
+  // This account's own NDA requests (made from listings on the Acquisition
+  // Radar); never anyone else's.
+  const [reqs, setReqs] = useState<NdaRequest[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    myNdaRequests().then((r) => { if (alive) setReqs(r); }).catch(() => { if (alive) { setFailed(true); setReqs([]); } });
+    return () => { alive = false; };
+  }, []);
+  return (
+    <div data-page="nda" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="Deals · Your access" title="Access Requests"
+        description="Requests you make to see a listed company's materials under NDA." />
+      <Section title="Your requests" className="border border-xo-line"
+        foot="You request access from a listing on the Acquisition Radar. The founder decides; once an NDA is signed a deal room can open for you. You only ever see your own requests — never other bidders.">
+        <div className="px-4 py-3 text-[13px] text-xo-muted">
+          {reqs == null ? <p role="status">Loading your requests…</p>
+            : failed ? <p role="alert" className="text-xo-risk">Your requests could not be loaded. Try again later.</p>
+            : reqs.length === 0 ? <p>No access requests recorded for your account.</p>
+            : (
+              <ul className="divide-y divide-xo-line">
+                {reqs.map((r) => (
+                  <li key={r.id} className="flex flex-wrap items-baseline justify-between gap-2 py-2">
+                    <span><span className="text-xo-faint">Listing </span><span className="font-mono text-xo-text">{r.listingId}</span></span>
+                    <span className={r.status === "signed" ? "text-xo-verified" : r.status === "rejected" ? "text-xo-risk" : "text-xo-caution"}>{REQ_LABEL[r.status]}</span>
+                    <span className="text-[12px] text-xo-faint">requested {new Date(r.requestedAt).toLocaleDateString()}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link to="/console/acquisition-radar" className="inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar →</Link>
+            <Link to="/console/marketplace" className="inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Browse opportunities</Link>
+            <Link to="/console/deal-room" className="inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Deal room</Link>
+          </div>
+        </div>
+      </Section>
+    </div>
+  );
+};
+
+const FounderNdaVault: React.FC = () => {
   // Session-issued NDAs sit in front of the seeded portfolio so "Issue NDA"
   // produces a real, visible counterparty row via the engine's issueNda().
   const [issued, setIssued] = useState<NdaInstance[]>([]);

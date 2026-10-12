@@ -454,6 +454,11 @@ export async function requestNda(listingId: string): Promise<NdaRequest | null> 
   if (!connectedAccountId) return null;
   return active.createNdaRequest({ listingId, buyerAccountId: connectedAccountId });
 }
+/** Buyer view: the NDA requests this account has made (none when no
+ *  account is connected). */
+export async function myNdaRequests(): Promise<NdaRequest[]> {
+  return connectedAccountId ? active.listNdaRequests({ buyerAccountId: connectedAccountId }) : [];
+}
 /** Founder view: the NDA requests on a listing they own. */
 export async function ndaRequestsForListing(listingId: string): Promise<NdaRequest[]> {
   return active.listNdaRequests({ listingId });
