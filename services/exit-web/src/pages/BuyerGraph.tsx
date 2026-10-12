@@ -179,11 +179,11 @@ const BuyerGraph: React.FC = () => {
         </ul>
       </Section>
 
-      <Section title={`Similar transactions · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")}`} className="border border-xo-line"
-        right={<span className="text-[11px] text-xo-faint">{SECTOR_TRANSACTIONS.length} matching your sector</span>}
-        foot={`Every row traces to a source on record (Wikipedia acquisition lists; SEC-corroborated where an 8-K item 2.01 matches). As of ${DNA_AS_OF.slice(0, 10)}.`}>
+      <Section title={`Transactions matching the sector keywords · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")}`} className="border border-xo-line"
+        right={<span className="text-[11px] text-xo-faint">{SECTOR_TRANSACTIONS.length} keyword matches · {SECTOR_TRANSACTIONS.filter((t) => t.verification_status === "verified").length} verified</span>}
+        foot={`Rows whose industry text contains one of the sector keywords — a keyword match can include unrelated deals (e.g. "delivery" in software). Each row traces to a source (Wikipedia acquisition lists; SEC-corroborated where an 8-K item 2.01 matches); the Verification column shows its status. As of ${DNA_AS_OF.slice(0, 10)}.`}>
         <ScrollRegion label="Similar transactions table">
-          <table className="w-full min-w-[640px] text-[12px]">
+          <table className="w-full min-w-[760px] text-[12px]">
             <thead className="text-left text-[11px] text-xo-faint">
               <tr className="border-b border-xo-line">
                 <th scope="col" className="px-3 py-2 font-medium">Target</th>
@@ -191,6 +191,7 @@ const BuyerGraph: React.FC = () => {
                 <th scope="col" className="px-3 py-2 font-medium">Industry</th>
                 <th scope="col" className="px-2 py-2 text-right font-medium">Date</th>
                 <th scope="col" className="px-3 py-2 text-right font-medium">Disclosed</th>
+                <th scope="col" className="px-3 py-2 font-medium">Verification</th>
               </tr>
             </thead>
             <tbody>
@@ -201,6 +202,7 @@ const BuyerGraph: React.FC = () => {
                   <td className="px-3 py-1.5 text-xo-faint">{t.industry.slice(0, 56)}</td>
                   <td className="px-2 py-1.5 text-right font-mono tabular-nums text-xo-muted">{t.date?.slice(0, 7) ?? "—"}</td>
                   <td className="px-3 py-1.5 text-right font-mono tabular-nums text-xo-verified">{fmtUsdShort(t.value_usd)}</td>
+                  <td className={`px-3 py-1.5 capitalize ${t.verification_status === "verified" ? "text-xo-verified" : "text-xo-caution"}`}><a href={t.source_url} target="_blank" rel="noreferrer" className="hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{t.verification_status}<span className="sr-only"> — source for {t.target} (opens in a new tab)</span></a></td>
                 </tr>
               ))}
             </tbody>

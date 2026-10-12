@@ -31,7 +31,7 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Composite score labelled "probability".** | "Likelihood score (composite)" with its formula; "not a probability". | ☑ `71c53d1` |
-| G2 | **Keyword-matched transactions presented as sector comparables; verification hidden.** | Title "Transactions matching the sector keywords"; per-row verification status; note that keyword matches can include unrelated deals. | ☐ |
+| G2 | **Keyword-matched transactions presented as sector comparables; verification hidden.** | Title "Transactions matching the sector keywords"; per-row verification status; note that keyword matches can include unrelated deals. | ☑ G2-commit |
 | G3 | Duplicate "Active acquirers — with live cadence"; recommended actions unlabelled. | Remove the duplicate; label actions "suggested (rule)". | ☐ |
 | G4 | Ranking and overlap fixed to the demo company. | Tokens from `sectorTokensFor(loadActiveCompany().sector)`; badge; transactions labelled as the demo sector when the company's sector differs. | ☐ |
 | G5 | Fake live tape. | `RegistryTape`. | ☐ |
@@ -48,3 +48,7 @@ The acquisition-DNA registry: index size, a ranked "who is most likely to buy yo
 ### G1 — Composite score labelled "probability"
 *Closed by:* `pages/BuyerGraph.tsx` (labels; `acquisitionProbability()` unchanged). "Acquisition probability · who is most likely to buy you" → "Acquisition likelihood score · …"; column "Prob" → "Score"; values "N%" → "N/100"; tooltip "composite score (appetite + overlap + velocity + recency), not a probability"; foot gives the formula: appetite (high 50, medium 32, low 14) + sector overlap × 0.34 (max 34) + deals per year × 2.5 (max 14) + recency (10 / 5 / 2 within 18 / 36 / 60 months) — "A composite score, not a probability."
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 "Acquisition probability" / "Prob"; header "Score" · Preparation 1440/390: 0 errors, axe 0, no overflow.
+
+### G2 — Keyword matches presented as sector comparables; verification hidden
+*Closed by:* `pages/BuyerGraph.tsx`. "Similar transactions · {sector} — N matching your sector" → **"Transactions matching the sector keywords · {sector}" — "17 keyword matches · 0 verified"**. New **Verification** column per row (the record's `verification_status`, linked to its source; all 17 are "unverified" in the snapshot). The foot says rows match on industry text and can include unrelated deals (e.g. "delivery" in software — Cameyo, virtual app delivery, is one of them), then the source note and as-of date.
+*Verification:* `tsc -b`, eslint clean · Chromium: "17 keyword matches · 0 verified"; 0 "matching your sector" · Preparation 1440/390: 0 errors, axe 0, no overflow.
