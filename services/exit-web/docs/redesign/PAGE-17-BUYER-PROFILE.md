@@ -34,7 +34,7 @@ One indexed buyer's dossier: likelihood for the founder's company and the buyer'
 | G1 | **Composite score labelled "probability".** | "Likelihood score N/100 (composite)" with the formula reference; forecast tile likewise. | ☑ `3bf0e42` |
 | G2 | **"Express interest" implies an effect it does not have.** | Say what it does: saved to deal activity on this browser; the buyer is not notified. Drop "sharpens engagement intelligence". | ☑ `77678ee` |
 | G3 | Snapshot wording ("currently exhibits", "node-side"). | "in the registry snapshot (as of …)"; "not in the bundled extract". | ☑ `5df4217` |
-| G4 | Demo company unlabelled. | Company, tokens and institutional baseline from `loadActiveCompany()` (as the Terminal does); badge. | ☑ G4-commit |
+| G4 | Demo company unlabelled. | Company, tokens and institutional baseline from `loadActiveCompany()` (as the Terminal does); badge. | ☑ `3066822` |
 | G5 | Design: old primitives (found and not-found states). | Rebuild on `xo`. | ☑ `bc01f3f` |
 
 ### X14 — Terminal (Page 01, approved) calls the same composite a probability — documented here
