@@ -430,7 +430,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE6 | Ivory and white alternate without a rule. | Paper rhythm: ivory for story chapters, white for working chapters; written down here. | closed `ea85105b` |
 | EE7 | The capability strip is a flat dark bar. | A lit top seam, hairline glyphs and a hover lift on each capability. | closed `d932ac13` |
 | EE8 | The headline's large type is set at default spacing. | Optical tightening on the display lines and a hanging 'T'. | closed `78d94ba9` |
-| EE9 | The watermark appears flat on load. | A slow fade-up of the watermark on first load; none under reduced motion. | open |
+| EE9 | The watermark appears flat on load. | A slow fade-up of the watermark on first load; none under reduced motion. | closed `16b04b1b` |
 | EE10 | Hero, chapter 02 box, board and band make four dark blocks in a row. | The chapter 02 chart presented as a framed ink panel on paper with its own lit edge, read as an object. | open |
 | EE11 | Board and band read as two separate dark slabs. | The instrument chapter (03 + band) set as one continuous ink chapter with a single floor gradient. | open |
 | EE12 | Five thousand pixels of light in the middle with no dark pause. | The ledger's head: an ink strip of the three largest recorded deals (records only). | open |
@@ -999,6 +999,9 @@ Capability strip: the lit seam (.ex-seam) replaces the flat border; glyphs sit i
 
 ### EE8 — closed 78d94ba9
 Headline: the 'T' hung by its side bearing (-0.045em) so the stem aligns with the eyebrow and body; leading 0.97; kerning, ligatures and contextual alternates on; optical sizing from the Source Serif 4 opsz axis; the italic line tracked a touch looser than the roman.
+
+### EE9 — closed 16b04b1b
+Watermark entrance: on first load the mark resolves from a soft blur and the dial settles a quarter-turn into place (2.4–3.2 s, once). Under reduced motion it is simply there.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
