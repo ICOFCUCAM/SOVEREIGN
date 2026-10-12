@@ -36,7 +36,7 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 | G2 | DCF presented without its simplification; "not assumption" claims. | "DCF sensitivity" — EBITDA used as a free-cash-flow proxy, assumptions set by you, not the valuation; remove "not assumption" / "no number without a source" claims; methodology title fixed. | ☑ `e019b34` |
 | G3 | "Strategic-buyer basis"; acquirer fit shown as probability. | "Institutional framework — the console value (D1)"; "fit probability — not a measured chance of a bid". | ☑ `50d9f27` |
 | G4 | Demo only, unlabelled. | `runInstitutionalValuation(company)` and `valuationFacts` for the active company; DCF base from it; Demo data / Your intake badge. | ☑ `3f8e8e9` |
-| G5 | Shared `BankerTake` / `CommandState`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☑ G5-commit |
+| G5 | Shared `BankerTake` / `CommandState`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☑ `ce57723` |
 | G6 | Design: no `h1`, 34 axe failures. | Rebuild on `xo`. | ☑ `746abb0` |
 
 ---
