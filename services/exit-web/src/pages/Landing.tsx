@@ -22,7 +22,6 @@ const HOME_MODULES = ["Acquisition Radar", "Valuation Engine", "Buyer Intelligen
 // Company marks are brand-coloured monogram placeholders.
 
 const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
-const NAVY = "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)";
 const H2 = "font-editorial text-[clamp(2.25rem,4.6vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.035em]";
 const BTN = "inline-flex items-center gap-5 px-5 py-3.5 text-[12px] font-semibold transition";
 
@@ -275,27 +274,6 @@ const Landing: React.FC = () => {
             <span className="text-[13.5px] text-slate-700">{t("rec.bridge")}</span>
             <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("rec.run")} <Arrow /></button>
           </div>
-        </div>
-      </section>
-
-      {/* ===== 06 · HOW A SALE RUNS — the one dark moment ===== */}
-      <section aria-labelledby="lifecycle-h" className="text-white" style={{ background: NAVY }}>
-        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <Chapter n="06" dark>{t("lifecycle.live")}<Note n={6} first dark /></Chapter>
-              <h2 id="lifecycle-h" className="mt-5 max-w-[20ch] font-editorial text-[clamp(2.4rem,4.8vw,4.6rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-white">{t("lifecycle.title")}</h2>
-            </div>
-          </div>
-          <ol className="mt-14 grid grid-cols-2 border-t border-white/25 sm:grid-cols-4">
-            {LIFECYCLE.map(([st, w], i) => (
-              <li key={st} className={`border-b border-white/15 py-7 pr-5 ${i % 4 !== 0 ? "sm:border-l sm:border-white/15 sm:pl-6" : ""} ${i % 2 === 1 ? "border-l border-white/15 pl-5 sm:pl-6" : ""}`}>
-                <span className="block font-editorial text-[clamp(3rem,5vw,4.6rem)] font-semibold leading-none tabular-nums text-blue-300">{String(i + 1).padStart(2, "0")}</span>
-                <span className="mt-4 block font-editorial text-[20px] font-semibold text-white">{t(st)}</span>
-                <span className="mt-1 block font-mono text-[12px] text-blue-100/80">{w}</span>
-              </li>
-            ))}
-          </ol>
         </div>
       </section>
 
@@ -598,10 +576,6 @@ const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right
 // ===========================================================================
 // The lifecycle rail — stage plus the typical window in a run process.
 const DATA_AS_OF = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-const LIFECYCLE: ReadonlyArray<[string, string]> = [
-  ["lc.signal", "day 0"], ["lc.discovery", "wk 1"], ["lc.nda", "wk 1–2"], ["lc.cim", "wk 2"],
-  ["lc.meetings", "wk 2–3"], ["lc.loi", "wk 4–6"], ["lc.diligence", "wk 6–9"], ["lc.closing", "wk 10+"],
-];
 // Data provenance — the pipeline every figure passes through, and the
 // confidence register applied to estimates (mirrors the engines' tiers).
 const CONFIDENCE_TIERS = [

@@ -1,7 +1,9 @@
 import React from "react";
 import { useI18n } from "../lib/i18n";
+import { Note } from "./SourceNotes";
 
-// THE EXCHANGE MAP — the sale process as a route (HOMEPAGE.md Phase 8, AA2).
+// THE EXCHANGE MAP — the acquisition lifecycle as a route (HOMEPAGE.md Phase 8,
+// AA1, AA2): it is the homepage's one statement of the eight stages.
 // After the owner's reference: a survey grid, ringed stage nodes on one route,
 // dotted cross-links. The horizontal position is time: each of the eight
 // lifecycle stages sits at its typical week, on a square-root scale so the
@@ -123,7 +125,7 @@ const ExchangeMap: React.FC = () => {
       </div>
       {/* footer row */}
       <figcaption className="relative flex items-center gap-3 border-t border-slate-300 px-4 py-4 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600 sm:px-6">
-        <span aria-hidden className="h-4 w-4 shrink-0 bg-blue-600" />{t("xm.note")}
+        <span aria-hidden className="h-4 w-4 shrink-0 bg-blue-600" /><span>{t("lifecycle.title")} · {t("lifecycle.live")}<Note n={6} first /></span>
       </figcaption>
       <div aria-hidden className="h-1 bg-blue-600" />
     </figure>
