@@ -29,6 +29,17 @@ export const MODULE_FACTS = {
   radar: `${HISTORY_FMT.events} source-referenced deals tracked`,
 } as const;
 
+/** The raw numbers behind the facts, for copy that is translated (homepage). */
+export const MODULE_NUMS = {
+  methodologies: VALUATION_STANDARD.methodologies.length,
+  reportTypes: 3,
+  readinessDimensions: READINESS.dimensions.length,
+  fixesPriced: READINESS_ANALYSIS.weaknesses.length,
+  documentKinds: DOC_KINDS.length,
+  diligencePackages: DILIGENCE.documents.length,
+  artifactsIndexed: DD_ARTIFACTS,
+} as const;
+
 /** Structural engine counts for copy that states a number. */
 export const ENGINE_COUNTS = {
   readinessDimensions: READINESS.dimensions.length,

@@ -8,11 +8,16 @@ import TradingHall from "../components/TradingHall";
 import ExchangeMap from "../components/ExchangeMap";
 import { Note, SourcesSection, type SourceId } from "../components/SourceNotes";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
-import { FOUNDER_MODULES, BUYER_MODULES } from "../lib/module-list";
+import { MODULE_NUMS as N } from "../lib/module-stats";
 
-// Section 02: four modules from the catalogue, one per stage of the route on the map.
-const HOME_MODULES = ["Acquisition Radar", "Valuation Engine", "Buyer Intelligence", "Data Room"]
-  .map((n) => [...FOUNDER_MODULES, ...BUYER_MODULES].find((m) => m.name === n)!);
+// Chapter 06: four founder modules in the order a sale uses them. Their stats
+// come from the engines and appear nowhere else on the page (AA5, AA6).
+const HOME_MODULES: ReadonlyArray<[string, string, Record<string, number>]> = [
+  ["Exit Readiness Score", "readiness", { a: N.readinessDimensions, b: N.fixesPriced }],
+  ["Valuation Engine", "valuation", { a: N.methodologies, b: N.reportTypes }],
+  ["Documents", "documents", { a: N.documentKinds }],
+  ["Data Room", "dataRoom", { a: N.diligencePackages, b: N.artifactsIndexed }],
+];
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
 // marketing chrome (header nav → Platform / Modules / Pricing + footer).
@@ -258,17 +263,17 @@ const Landing: React.FC = () => {
       <section aria-labelledby="mods-h" className="border-b border-slate-200 bg-white text-ink-900">
         <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
           <div className="border-t-4 border-double border-ink-900 pt-8">
-            <Chapter n="06">The modules</Chapter>
-            <h2 id="mods-h" className="mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text="Every module a sell-side desk needs." /></h2>
+            <Chapter n="06">{t("mods.eyebrow")}</Chapter>
+            <h2 id="mods-h" className="mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("mods.h2")} /></h2>
           </div>
           <div className="mt-12 border-t border-ink-900">
-            {HOME_MODULES.map((m, k) => (
-              <Link key={m.name} to="/modules" className="group grid grid-cols-[28px_1fr_22px] items-center gap-x-3 gap-y-1.5 border-b border-slate-300 py-6 transition-[background-color,padding] hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 motion-safe:hover:px-3 sm:grid-cols-[58px_1fr_1fr_35px] sm:gap-x-5 sm:py-7">
+            {HOME_MODULES.map(([name, key, v], k) => (
+              <Link key={name} to="/modules" className="group grid grid-cols-[28px_1fr_22px] items-center gap-x-3 gap-y-1.5 border-b border-slate-300 py-6 transition-[background-color,padding] hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 motion-safe:hover:px-3 sm:grid-cols-[58px_1fr_1fr_35px] sm:gap-x-5 sm:py-7">
                 <span className="font-mono text-[11px] text-blue-600">0{k + 1}</span>
-                <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{m.name}</h3>
+                <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{name}</h3>
                 <div className="col-start-2 row-start-2 max-w-[440px] sm:col-start-3 sm:row-start-1">
-                  <p className="text-[14px] leading-relaxed text-slate-600">{m.body}</p>
-                  {m.stat && <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{m.stat}</p>}
+                  <p className="text-[14px] leading-relaxed text-slate-600">{t(`mod.${key}`)}</p>
+                  <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{t(`mod.${key}.st`, v)}</p>
                 </div>
                 <span aria-hidden className="col-start-3 row-span-2 row-start-1 text-right text-[22px] transition-transform group-hover:text-blue-600 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5 sm:col-start-4 sm:row-span-1">↗</span>
               </Link>
