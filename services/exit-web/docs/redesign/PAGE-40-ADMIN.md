@@ -31,7 +31,7 @@ Signed in as the dev operator (`ops@example.com` → superadmin). All Supabase f
 | G1 | **Invented roster presented as real, on real domains.** | Label it "Sample roster — illustrative, not real users; ExitOS has no account directory yet"; emails on reserved `example.com`; KPIs say "sample". | ☑ `9cb8554` |
 | G2 | **"Create admin" provisions nothing.** | "Add to sample roster" with the plain statement that it creates no account and grants no access (admin roles are not server-side yet; in development the operator email is set by `VITE_EXITOS_DEV_OPERATOR_EMAIL`); validate the email. | ☑ `efce16c` |
 | G3 | **Hard-coded "operational" status.** | Facts instead of health: engines run in the browser (nothing to monitor); marketplace storage = exchange backend or this browser (`listingDestination()`); identity = demo sessions created in the browser. | ☑ `1316e7b` |
-| G4 | Distribution wording ("Activating", "live"). | "Not connected" / "N channel(s) connected". | ☐ |
+| G4 | Distribution wording ("Activating", "live"). | "Not connected" / "N channel(s) connected". | ☑ G4-commit |
 | G5 | Design: old components; overflow at 390. | Rebuild on `xo`. | ☑ `298b49b` |
 
 ---
@@ -53,3 +53,7 @@ Signed in as the dev operator (`ops@example.com` → superadmin). All Supabase f
 ### G3 — Hard-coded "operational" status
 *Closed by:* `pages/Admin.tsx`. "Platform status — Engines operational · Marketplace operational · Identity / SSO demo mode" with green dots (nothing was checked) → **"Platform configuration"** with facts: Engines — "Run in the browser" (no engine service to monitor); Marketplace storage — "Exchange backend" or "This browser" from `listingDestination()` (here: "This browser — no backend is configured …"); Identity — "Demo sessions" (no SSO or server-side role service yet); foot "Facts about how this console runs — not health checks. No service is monitored from here."
 *Verification:* `tsc -b`, eslint clean · Chromium superadmin (stubbed): 0 "operational"; the three facts shown, storage "This browser" on the dev server (no Supabase configuration) · 1440/390: axe 0, no overflow, 0 errors.
+
+### G4 — Distribution wording
+*Closed by:* `pages/Admin.tsx` (labels; the status call is unchanged and real). Unconnected channels "Activating" → **"Not connected"**; the header "N channel(s) live" → "N channel(s) connected".
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium superadmin with the status stubbed: none connected → every channel "Not connected", header "No channels connected"; LinkedIn connected → "LinkedIn — Connected", others "Not connected", header "1 channel(s) connected"; 0 "Activating" / "live" · 1440/390: axe 0, no overflow.

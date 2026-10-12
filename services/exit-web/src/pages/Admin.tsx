@@ -150,7 +150,7 @@ const SocialDistribution: React.FC = () => {
     <Section title="ExitOS Distribution Engine" className="border border-xo-line"
       right={<span className={`flex items-center gap-1.5 text-[12px] ${anyConnected ? "text-xo-verified" : "text-xo-caution"}`}>
         <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${anyConnected ? "bg-xo-verified" : "bg-xo-caution"}`} />
-        {loading ? "Checking…" : anyConnected ? `${Object.values(connected).filter(Boolean).length} channel(s) live` : "No channels connected"}
+        {loading ? "Checking…" : anyConnected ? `${Object.values(connected).filter(Boolean).length} channel(s) connected` : "No channels connected"}
       </span>}>
       <div className="px-4 py-3">
         <p className="text-[13px] leading-relaxed text-xo-muted">
@@ -167,7 +167,7 @@ const SocialDistribution: React.FC = () => {
                   <div className="text-[13px] font-semibold">{c.label}</div>
                   <div className="break-all font-mono text-[11px] text-xo-muted">{SECRET_HINT[c.id]}</div>
                 </div>
-                <span className={`shrink-0 rounded-sm border px-1.5 py-px text-[11px] font-semibold ${on ? "border-xo-verified/50 text-xo-verified" : "border-xo-line text-xo-muted"}`}>{loading ? "…" : on ? "Connected" : "Activating"}</span>
+                <span className={`shrink-0 rounded-sm border px-1.5 py-px text-[11px] font-semibold ${on ? "border-xo-verified/50 text-xo-verified" : "border-xo-line text-xo-muted"}`}>{loading ? "…" : on ? "Connected" : "Not connected"}</span>
               </li>
             );
           })}
