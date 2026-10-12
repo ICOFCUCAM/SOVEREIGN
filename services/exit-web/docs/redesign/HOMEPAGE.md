@@ -441,7 +441,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE17 | The page opens with the mark but does not close with it. | A large faint ExitOS signature across the footer, matching the hero watermark. | closed `4e78f0e6` |
 | EE18 | Footer hierarchy is flat. | Footer columns with a heading rule, link hover, the legal line set small. | closed `30491847` |
 | EE19 | No way back from the end of a long page. | A back-to-top control at the foot of the signature line. | closed `bc8519e6` |
-| EE20 | Footer status dots read as live indicators. | Steady done-green dots, labelled as statements, no pulse. | open |
+| EE20 | Footer status dots read as live indicators. | Steady done-green dots, labelled as statements, no pulse. | closed `c87073e0` |
 | EE21 | The header stays white over dark chapters. | The header turns ink over dark chapters (logo, links, CTA re-coloured). | open |
 | EE22 | Primary and secondary buttons vary in size, weight and arrow. | One primary and one secondary button style used across the homepage. | open |
 | EE23 | Focus rings and link underlines vary. | One focus ring and one underline treatment in signal blue. | open |
@@ -1032,6 +1032,9 @@ Footer hierarchy: more air above (pt-16/20) and between columns; each column hea
 
 ### EE19 — closed bc8519e6
 A 'Back to top ↑' control in the footer's bottom row (EN/FR/ES: ft.top), smooth scroll, instant under reduced motion, with a visible focus ring. Placed in the footer rather than on the signature line, which is hidden below lg and would leave phones without it.
+
+### EE20 — closed c87073e0
+The footer's three statements (deterministic engines, sourced market data, NDA-gated identity) are a list marked by small hollow done-green diamonds instead of filled green dots, set in mono: statements of how the exchange works, not status lights.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
