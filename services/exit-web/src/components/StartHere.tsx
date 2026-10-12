@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement, type Role, type Plan } from "../lib/access";
 import { loadSavedIntake } from "../lib/active-company";
-import { guideState, onGuideChange, setGuideHidden, stepsFor } from "../lib/onboarding";
+import { guideState, onGuideChange, setGuideHidden, setWelcomed, stepsFor } from "../lib/onboarding";
 
 // The "Start here" guide: the few steps that matter, in order, with honest
 // progress (see lib/onboarding). Shown on the founder and buyer home pages;
@@ -38,6 +38,19 @@ const StartHere: React.FC = () => {
           Hide guide
         </button>
       </header>
+      {!state.welcomed && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-xo-line bg-xo-ink px-4 py-2.5 text-[13px]">
+          <p className="min-w-0 flex-1 text-xo-text">
+            <span className="font-semibold">Welcome to ExitOS.</span> If you are new, follow these steps in order.
+            {role === "buyer" ? "" : " Start with step 1: your figures then replace the demo company on every page."}
+            {" "}Unfamiliar words? Open <span className="font-semibold">Plain-language terms</span> in the menu.
+          </p>
+          <button type="button" onClick={setWelcomed}
+            className="min-h-6 shrink-0 rounded-sm border border-xo-line px-2 py-1 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">
+            Got it
+          </button>
+        </div>
+      )}
       <ol className={`grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 ${steps.length === 4 ? "lg:grid-cols-4" : "lg:grid-cols-5"}`}>
         {steps.map((s, i) => {
           const st = status(s);

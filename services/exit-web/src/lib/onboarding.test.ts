@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { guideState, markVisited, setGuideHidden, stepsFor, FOUNDER_STEPS, BUYER_STEPS } from "./onboarding.js";
+import { guideState, markVisited, setGuideHidden, setWelcomed, stepsFor, FOUNDER_STEPS, BUYER_STEPS } from "./onboarding.js";
 
 // in-memory localStorage shim (the test env is node, not jsdom); no window,
 // so the change event is skipped (write() guards it)
@@ -16,7 +16,7 @@ beforeEach(() => {
 describe("onboarding guide state", () => {
 
   it("starts empty and visible", () => {
-    expect(guideState()).toEqual({ visited: [], hidden: false, tipsHidden: false });
+    expect(guideState()).toEqual({ visited: [], hidden: false, tipsHidden: false, welcomed: false });
   });
 
   it("records each opened page once", () => {
@@ -32,9 +32,14 @@ describe("onboarding guide state", () => {
     expect(guideState().hidden).toBe(false);
   });
 
+  it("remembers the welcome was dismissed", () => {
+    setWelcomed();
+    expect(guideState().welcomed).toBe(true);
+  });
+
   it("ignores a corrupt stored value", () => {
     localStorage.setItem("exitos.guide.v1", "{not json");
-    expect(guideState()).toEqual({ visited: [], hidden: false, tipsHidden: false });
+    expect(guideState()).toEqual({ visited: [], hidden: false, tipsHidden: false, welcomed: false });
   });
 
   it("gives founders and buyers their own steps", () => {
