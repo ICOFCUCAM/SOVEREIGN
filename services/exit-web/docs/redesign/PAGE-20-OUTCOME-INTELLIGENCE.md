@@ -32,7 +32,7 @@ Market-level outcomes: the buyers paying the highest premiums, the fastest close
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Premium and close figures attributed to "disclosed deals" with a disclosed-deal count as the sample.** | Source named as curated outcome records matched by buyer name; disclosed registry deals shown as their own labelled column; caveat about name matching (X15). | ☑ `868fc34` |
-| G2 | Framework priors presented as "what commands the strongest valuation". | Title "Sector multiple priors (framework)"; comment corrected. | ☐ |
+| G2 | Framework priors presented as "what commands the strongest valuation". | Title "Sector multiple priors (framework)"; comment corrected. | ☑ G2-commit |
 | G3 | Fake live tape. | `RegistryTape`. | ☐ |
 | G4 | Design: no `h1`, 12 contrast failures, header-less tables. | Rebuild on `xo` with table headers. | ☑ `80fcfff` |
 
@@ -55,3 +55,7 @@ Market-level outcomes: the buyers paying the highest premiums, the fastest close
 | fastest-closers foot | source + "Identical figures across similarly named buyers (e.g. General Motors, General Mills) come from one record attributed to all of them — a known data defect." (X15) |
 | file comment "Every row is a DISCLOSED figure" | curated records and framework priors named |
 *Verification:* `tsc -b`, eslint clean · Chromium: 0 "disclosed deals only" / "N disc."; new feet present.
+
+### G2 — Framework priors presented as market evidence
+*Closed by:* `pages/OutcomeIntelligence.tsx` (labels). "Sectors by multiple · what commands the strongest valuation" → **"Sector multiple priors (framework)"**, eyebrow "Ranked by mid multiple — priors, not observed deal multiples"; metric "Sectors benchmarked" → "Sector priors — framework multiple bands"; code comment updated. The existing foot ("Institutional multiple priors, framework-governed …") stays.
+*Verification:* eslint clean · Chromium: new title present, 0 "strongest valuation".

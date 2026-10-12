@@ -13,7 +13,7 @@ import { premiumLeague, speedLeague, DNA_AS_OF } from "../lib/buyer-dna";
 // times come from ExitOS's curated outcome records, attached to registry
 // buyers by name (see X15); multiples are framework priors.
 
-// strongest-multiple sectors — from the framework's institutional priors
+// sector multiple bands — the framework's institutional priors (not observed deals)
 const SECTOR_MULT = Object.entries(MULTIPLES)
   .map(([sector, m]) => {
     const band = m.arr ?? m.revenue;        // the primary top-line multiple
@@ -38,7 +38,7 @@ const OutcomeIntelligence: React.FC = () => {
       <section aria-label="Coverage" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Premium on record" value={String(premium.length)} sub="buyers with a curated outcome record" /></div>
         <div className="bg-xo-panel"><Metric label="Close-time data" value={String(speed.length)} sub="median announced→closed" /></div>
-        <div className="bg-xo-panel"><Metric label="Sectors benchmarked" value={String(SECTOR_MULT.length)} sub="multiple bands" /></div>
+        <div className="bg-xo-panel"><Metric label="Sector priors" value={String(SECTOR_MULT.length)} sub="framework multiple bands" /></div>
         <div className="bg-xo-panel"><Metric label="Top premium" emphasis value={premium[0] ? `${Math.round((premium[0].premium_pct ?? 0) * 100)}%` : "—"} sub={premium[0]?.name} /></div>
       </section>
 
@@ -93,7 +93,7 @@ const OutcomeIntelligence: React.FC = () => {
         </Section>
       </div>
 
-      <Section title="Sectors by multiple · what commands the strongest valuation" className="border border-xo-line"
+      <Section title="Sector multiple priors (framework)" eyebrow="Ranked by mid multiple — priors, not observed deal multiples" className="border border-xo-line"
         foot="Institutional multiple priors, framework-governed (the same bands the valuation engine applies). Tables widen as the registry accretes disclosed outcomes.">
         <ScrollRegion label="Sector multiples table">
           <table className="w-full min-w-[560px] text-[12px]">
