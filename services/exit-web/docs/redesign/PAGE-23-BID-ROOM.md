@@ -5,7 +5,7 @@
 | Route | `/console/negotiator` |
 | Component | `src/pages/Negotiator.tsx` (421 lines) |
 | NAV | "Bid Room", founder, **Active Mandate (Pro)** |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `7f762d9`)
 
@@ -80,3 +80,13 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 - The reservation dialog's headline floor ignores non-numeric or negative input and its hint says it is recorded for reference — the counter rule does not use it (it uses cash, earnout and premium).
 - Eyebrow "Demo company: Helios Freight", **Demo data** badge, description "Sample offers of the demo company (Helios Freight)." — with a saved intake: "Your intake has no offers, so these are not yours."
 *Verification:* `tsc -b`, eslint clean, `vitest` 204/204 · Chromium (Active Mandate): walk "abc" → error, default used; walk 200M → "above your minimum"; min 300M → "above your ideal"; demo label with and without intake · 1440/390: 0 errors, axe 0, no overflow; reservation dialog axe 0.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium Active Mandate 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · draft and reservation dialogs accessible (X13) · leader shown correctly · line validation exercised · free: Upgrade page · 0 "live" words.
+
+## Known issues
+- Offers are the demo company's samples (labelled); there is no way to enter real offers yet.
+- The headline floor is not used by the counter rule (stated in its hint); whether it should be is a product decision.
+- Negotiating positions are fixed templates; review with counsel (stated).
