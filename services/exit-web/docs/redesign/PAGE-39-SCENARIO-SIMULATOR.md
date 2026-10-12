@@ -32,7 +32,7 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Model outputs shown as facts (100 % close, best-of-set value).** | "Modelled close probability" with its assumptions (each buyer offers independently at its close rate; priors where undisclosed) and "best expected value in the set (maximum, not an average)"; the same in the scenario diff and summary. | ☑ `318272f` |
-| G2 | "Strategic valuation" is the canonical value. | "Valuation (canonical midpoint)". | ☐ |
+| G2 | "Strategic valuation" is the canonical value. | "Valuation (canonical midpoint)". | ☑ G2-commit |
 | G3 | **Demo-specific and uncomputed scenario claims.** | Drivers built from the company's own figures (ARR before → after); the ARR scenario names a target above the company's ARR; uncomputed outcomes worded as expectations to check against the diff. | ☐ |
 | G4 | Demo only, unlabelled. | Run on the active company; Demo data / Your intake badge. | ☐ |
 | G5 | Unvalidated number inputs. | Text inputs parsed with `parseNumber` (units, ranges), messages, `aria-invalid`; only valid values reach the engines. | ☐ |
@@ -50,3 +50,7 @@ Free: Upgrade page. Pro: `h1` none · **overflow at 390** · axe 0 (1440) · 0 e
 ### G1 — Model outputs shown as facts
 *Closed by:* `pages/Simulator.tsx` (labels; engine unchanged). "Close probability 100% — P(≥1 of 5)" → **"Modelled close probability — P(≥1 of 5), independence assumed"** (also in the scenario diff); "Expected realized — best of set" / "Baseline realized" → **"Best expected value in set — maximum across the set"** / "baseline · the highest buyer, not an average"; the trajectory foot states the model: "Close probability = 1 − Π(1 − close rate) across the set — it assumes every buyer in the set makes an offer, independently; close rates use priors where a buyer has not disclosed one. The value is the highest buyer's expected closing value, so it sits above what a typical buyer would pay." (the formula and the maximum confirmed in `exit-engines/src/buyers/strategy.ts`). The engine's own summary sentence ("P(close)=100% over the set. Best expected realized …") is shown unchanged above that foot; the per-buyer "Expected realized" column is a per-buyer figure and stays.
 *Verification:* `tsc -b`, eslint clean · Chromium Pro: the new labels (2 modelled close probability, 3 best expected value) and the foot shown · 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G2 — "Strategic valuation" is the canonical value
+*Closed by:* `pages/Simulator.tsx` (labels). The figure is `runInstitutionalValuation(…).headline.mid` — the canonical value (D1). "Strategic valuation" (scenario diff) and "Strategic value — mid band, today" (trajectory) → **"Valuation (canonical midpoint)"** ("today — the console value").
+*Verification:* `tsc -b`, eslint clean · Chromium Pro: "Valuation (canonical midpoint) $102,849,415"; the only remaining "strategic valuation" text is in the scenario drivers, reworded in G3.

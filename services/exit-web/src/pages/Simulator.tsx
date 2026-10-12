@@ -225,7 +225,7 @@ const Simulator: React.FC = () => {
   const result = baseline.sim;
 
   const metrics: Metric[] = [
-    { label: "Strategic valuation",  base: baseline.valuationMid,                     scen: variant.valuationMid,                     fmt: fmtMoney,             higherIsBetter: true },
+    { label: "Valuation (canonical midpoint)", base: baseline.valuationMid,                     scen: variant.valuationMid,                     fmt: fmtMoney,             higherIsBetter: true },
     { label: "Modelled close probability", base: baseline.sim.expectedCloseProbability,     scen: variant.sim.expectedCloseProbability,     fmt: (n) => `${(n * 100).toFixed(0)}%`, higherIsBetter: true },
     { label: "Best expected value in set", base: baseline.sim.expectedRealizedValueUsd,     scen: variant.sim.expectedRealizedValueUsd,     fmt: fmtMoney,             higherIsBetter: true },
     { label: "Time to cash",         base: baseline.sim.expectedTimeToCashDays,       scen: variant.sim.expectedTimeToCashDays,       fmt: (n) => `${FMT_MS(n)}d`,            higherIsBetter: false },
@@ -328,7 +328,7 @@ const Simulator: React.FC = () => {
                 <Stat label="Modelled close probability" value={`${(result.expectedCloseProbability * 100).toFixed(0)}%`} sub={`P(≥1 of ${result.recommendedBuyers.length}), independence assumed`} />
                 <Stat label="Time to cash"       value={`${FMT_MS(result.expectedTimeToCashDays)}d`} sub="median across set" />
                 <Stat label="Best expected value in set"  value={fmtMoney(result.expectedRealizedValueUsd)} sub="maximum across the set" />
-                <Stat label="Strategic value"    value={fmtMoney(baseline.valuationMid)} sub="mid band, today" />
+                <Stat label="Valuation (canonical midpoint)" value={fmtMoney(baseline.valuationMid)} sub="today — the console value" />
               </dl>
             </div>
           </Section>
