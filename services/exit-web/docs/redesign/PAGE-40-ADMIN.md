@@ -32,8 +32,12 @@ Signed in as the dev operator (`ops@example.com` → superadmin). All Supabase f
 | G2 | **"Create admin" provisions nothing.** | "Add to sample roster" with the plain statement that it creates no account and grants no access (admin roles are not server-side yet; in development the operator email is set by `VITE_EXITOS_DEV_OPERATOR_EMAIL`); validate the email. | ☐ |
 | G3 | **Hard-coded "operational" status.** | Facts instead of health: engines run in the browser (nothing to monitor); marketplace storage = exchange backend or this browser (`listingDestination()`); identity = demo sessions created in the browser. | ☐ |
 | G4 | Distribution wording ("Activating", "live"). | "Not connected" / "N channel(s) connected". | ☐ |
-| G5 | Design: old components; overflow at 390. | Rebuild on `xo`. | ☐ |
+| G5 | Design: old components; overflow at 390. | Rebuild on `xo`. | ☑ G5-commit |
 
 ---
 
 ## Closure log
+
+### G5 — Design
+*Closed by:* `pages/Admin.tsx` rebuilt on `xo` (`PageHeader` `h1`; four metrics; provisioning form with `label`/`id` pairs; the roster as a table with row headers in a `ScrollRegion` (fixes the 390 overflow); platform status and the distribution engine as titled `Section`s with `dl`/lists; publish results in words ("✓ published" / "✗ failed"); the "view" link carries the channel in its accessible name; hex and shared components replaced). Content carried over verbatim; G1–G4 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium superadmin, all function calls stubbed (distribution status "none connected" and "LinkedIn connected") at 1440/390: 0 errors, `h1` 1, **no overflow** (was overflowing at 390), axe 0.
