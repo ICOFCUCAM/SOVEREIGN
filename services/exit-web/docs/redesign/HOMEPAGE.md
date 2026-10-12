@@ -449,7 +449,7 @@ Owner chose the deep blue ink for every dark surface and no champagne accent. Bl
 | EE25 | Radii run from 4 to 12 px and shadows are one-off. | One radius scale and three shadow levels. | closed `d6a9e37f` |
 | EE26 | The share card and phone bar still use the old navy. | Repainted in the ink scale. | closed `572d6c85` |
 | EE27 | Pricing and other marketing pages do not use the new tokens. | Tokens carried to the marketing pages' darks. | closed `d41ad6dd` |
-| EE28 | New colour pairs are unchecked. | A contrast audit of the new pairs (≥ 4.5:1 for text) with fixes. | open |
+| EE28 | New colour pairs are unchecked. | A contrast audit of the new pairs (≥ 4.5:1 for text) with fixes. | closed `d31d4ad4` |
 | EE29 | The whole set needs one final verification. | Full checks: vitest, build, axe on marketing routes at 1440/390, keyboard, reduced motion, board identity. | open |
 | EE30 | The owner needs to see the result. | Design 20 preview with before/after, and this log. | open |
 
@@ -1056,6 +1056,9 @@ Phone action bar on ex-1; the share card's ground on the ink field (ex-0 → ex-
 
 ### EE27 — closed d41ad6dd
 Platform, Modules and Pricing (with the ExchangeBlocks they share) on the system: MK.navy and the blocks' NAVY are now the ink field, raised tiles ex-2, dark sections carry data-ink (the header takes the ink over them) and the lit seam, and MK.btn is the shared button base (size, arrow nudge, focus ring). HeroLab, an internal lab page, is left as is.
+
+### EE28 — closed d31d4ad4
+Contrast audit (axe color-contrast, every element on the page, after a full scroll so every reveal has fired): /, /pricing, /platform, /modules at 1440 and 390 — 0 violations; the homepage again with the header in its ink state over the board — 0. One finding fixed: the header's colour change ran 500 ms, so for a moment light-mode text sat on the still-dark bar when scrolling back up (axe caught it mid-fade); now 200 ms. The axe harness now waits for the header to settle after returning to the top.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
