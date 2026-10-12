@@ -195,11 +195,11 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
 
       {/* the footer continues the close in the deepest ink (EE16) */}
       <footer className="ex-seam relative overflow-hidden bg-ex-0 text-white">
-        <div className={`${WRAP} py-12`}>
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+        <div className={`${WRAP} pb-10 pt-16 lg:pt-20`}>
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] lg:gap-14">
             <div>
               <ExchangeLockup size={30} dark />
-              <p className="mt-4 max-w-xs text-[12.5px] leading-relaxed text-blue-100/70">{t("ft.tagline")}</p>
+              <p className="mt-5 max-w-sm font-editorial text-[17px] leading-snug text-white/85">{t("ft.tagline")}</p>
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-blue-100/70">
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.soc")}</span>
                 <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.audit")}</span>
@@ -212,17 +212,17 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               ["ft.acquirers", [["ft.browse", "/console"], ["ft.buyeraccess", "/pricing"], ["ft.requestnda", "/console"]]],
             ] as Array<[string, Array<[string, string]>]>).map(([titleKey, links]) => (
               <div key={titleKey}>
-                <div className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-300">{t(titleKey)}</div>
-                <ul className="mt-4 space-y-2.5 text-[13px]">
+                <div className="border-b border-white/10 pb-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-blue-300">{t(titleKey)}</div>
+                <ul className="mt-5 space-y-3 text-[13.5px]">
                   {links.map(([k, to]) => (
-                    <li key={k + to}><Link to={to} className="text-blue-100/75 transition-colors hover:text-white">{t(k)}</Link></li>
+                    <li key={k + to}><Link to={to} className="group inline-flex items-center gap-2 text-blue-100/75 transition-colors hover:text-white focus-visible:text-white">{t(k)}<span aria-hidden className="-translate-x-1 text-blue-300 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transition-none">→</span></Link></li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
           <div className="mt-10 border-t border-white/10 pt-6">
-            <p className="max-w-3xl text-[11px] leading-relaxed text-blue-100/60">{t("ft.legal")}</p>
+            <p className="max-w-3xl text-[11px] leading-relaxed text-blue-100/65">{t("ft.legal")}</p>
             <div className="mt-5 flex flex-wrap items-center justify-between gap-4 text-[12px] text-blue-100/70">
               <div>© {new Date().getFullYear()} ExitOS — A Sovereign Infrastructure</div>
               <div className="flex items-center gap-4">
