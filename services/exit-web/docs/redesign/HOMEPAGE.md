@@ -105,7 +105,7 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 |---|---|---|---|
 | M1 | **Design: rebuild on the `index(9)` skeleton.** | Rebuild `Landing.tsx` and `MarketingChrome.tsx` on the skeleton's anatomy, using the locked ExitOS colours and materials mapped as above. All 17 blocks and the chrome are kept and repositioned into the skeleton's chapters (mapping below), with content carried over verbatim; M2–M9 then correct content. The hero concept (the command board as the hero instrument, beside the headline) is kept. The trading-hall photo stays in the hero. Routes, i18n keys, auth entry points (`/console`) and pricing links are unchanged. | ☑ `dcf7bf6d` |
 | M2 | **Fake live indicators.** | Remove the pings, pulses, rotating spotlight, session clock and the timer-driven score/heat oscillation. "Live Transactions" → "Disclosed transactions"; "Live Market"/"Live" → "Registry snapshot · as of {index date}"; `DATA_AS_OF` → the index's own date; "Live process" → "Typical timeline"; "live appetite", "24/7", "Live signals" reworded to what the data is. Figures and the drill-down stay. | ☑ `ce76fa8f` |
-| M3 | **Unverified security and compliance claims.** | Remove "SOC 2" and the audit-trail, access-log, "secured", encryption and verification claims. Each slot is kept and states what the product does (for example "Your own actions are recorded", "NDA-gated identity: listings show a codename and bands until an NDA is signed", "Founder approval at each agent step", "Record checks on each NDA, not identity or funds verification", "Data-room uploads: read who can see them before adding files"). Owner can restore any claim with evidence (open decision). | ☐ |
+| M3 | **Unverified security and compliance claims.** | Remove "SOC 2" and the audit-trail, access-log, "secured", encryption and verification claims. Each slot is kept and states what the product does (for example "Your own actions are recorded", "NDA-gated identity: listings show a codename and bands until an NDA is signed", "Founder approval at each agent step", "Record checks on each NDA, not identity or funds verification", "Data-room uploads: read who can see them before adding files"). Owner can restore any claim with evidence (open decision). | ☑ M3-commit |
 | M4 | **Illustrative content shown as real.** | Visible "Illustrative" labels on the cross-bid table and the example listings; "Market Heat" shows the registry-derived heat label instead of a constant. | ☐ |
 | M5 | **Overclaims in copy.** | "AI valuation" → "Deterministic valuation"; "Offer optimisation captures the premium" → "Offers compared on structure and certainty"; "verified acquirer mandates" → "curated acquirer mandates"; board "Match Score" → "Activity score". | ☐ |
 | M6 | **Broken link** `/marketplace`. | Point "How the listing protocol works" to the marketplace inside the exchange (`/console/marketplace`; signed-out users see sign-in). | ☐ |
@@ -181,6 +181,26 @@ Materials: hairline rules instead of cards, square buttons, mono chapter labels,
 - Chromium `/` 1440/390: 0 errors, `h1` 1, no overflow.
 - "live" words 6 → 3 at 1440 and 4 → 2 at 390. All remaining ones are on the command board, as directed.
 - `git diff` confirms no line of `CommandBoard` or the bezel changed.
+
+### M3 — Unverified security and compliance claims
+*Closed by:* `lib/i18n.tsx` (EN, FR, ES together — M9) and `pages/Landing.tsx`. Every slot is kept, and now states what the product does:
+
+| Slot | Was | Now |
+|---|---|---|
+| Trust strip, card 2 | "SOC 2 · Compliant Infrastructure · security + data residency" | "NDA · NDA-gated identity · codename and bands until an NDA is signed" |
+| Trust strip, card 4 | "Every Action · Auditable · every action, every artifact" | "Your Actions · Recorded · your deal actions, listed in Deal Activity" |
+| Data rooms body | "Secure, permissioned, and built for high-stakes transactions." | "Organised around the documents buyers ask for, with completeness tracked package by package." |
+| Data rooms row | Permission controls · Full audit trails · Access logs | Document checklist by package · Completeness per package · Who can see uploads, stated |
+| 6 data-room categories | "● Secured · Audit trail" | "Required for diligence" |
+| Workflow step "Data Room" | "Secure diligence infrastructure built for M&A." | "The diligence document checklist, with completeness by package." |
+| Governance "Buyer verification" | "Identity, track record and funds clear four gates before the data room." | "Record checks — Four checks on each NDA record. ExitOS does not verify identity, funds or track record." (Page 25) |
+| Governance "Full audit trail" | "Every view, download and signature on the record — admissible process history." | "Recorded actions — The deal actions you take are recorded and listed in Deal Activity." (Page 28) |
+| Governance "SOC 2 posture" | "Encrypted at rest and in transit; permissioned access; data residency respected." | "Nothing sent for you — Outreach and introductions are drafts for you to send. ExitOS does not contact buyers on your behalf." (Pages 30, 36) |
+| Final CTA foot | "Strictly confidential. Anonymous until NDA. Every action audited." | "Anonymous until NDA. Your actions recorded. Nothing sent without you." |
+| Footer badges | SOC 2 posture · Full audit trail · NDA-gated identity | Deterministic engines · Sourced market data · NDA-gated identity |
+
+Kept: "Founder control — Eight approval gates" (Autonomous Exit's eight agent steps each wait for approval, Page 07); provenance "Auditable" (meaning every figure traces to a source); "One confidential process" and "List confidentially" (anonymous listings until NDA). "verified acquirer mandates" is M5. The command board is not touched.
+*Verification:* `tsc -b`, eslint clean · `vitest` 218/218 (including `i18n.test.tsx`) · Chromium `/` in EN, FR and ES: 0 "SOC 2", 0 "secured / sécurisé / seguro", "audit" only in the provenance heading; "verif" only in the registry wording (M5), the confidence tier "Verified" (disclosed in a public filing) and the new "does not verify" line; 0 errors.
 
 ---
 

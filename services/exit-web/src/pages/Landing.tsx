@@ -27,7 +27,7 @@ const Landing: React.FC = () => {
   const { t } = useI18n();
   const heroTrust = [
     { icon: "globe", metric: t("trust.network.m", { n: MARKET_FMT.buyers }), title: t("trust.network.t"), sub: t("trust.network.s", { g: MARKET_FMT.geographies, s: MARKET_FMT.sectors }) },
-    { icon: "lock", metric: "SOC 2", title: t("trust.soc.t"), sub: t("trust.soc.s") },
+    { icon: "lock", metric: "NDA", title: t("trust.soc.t"), sub: t("trust.soc.s") },
     { icon: "users", metric: "100%", title: t("trust.control.t"), sub: t("trust.control.s") },
     { icon: "check", metric: t("trust.audit.m"), title: t("trust.audit.t"), sub: t("trust.audit.s") },
   ];
@@ -406,7 +406,7 @@ const Landing: React.FC = () => {
               <p className="mt-6 max-w-lg text-[14px] leading-relaxed text-blue-100/70">{t("dr.body")}</p>
               <Link to="/platform" className="mt-6 inline-block border-b border-blue-300 pb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white">{t("dr.link")} ↗</Link>
               <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-[11.5px] text-blue-100/70">
-                {[["lock", "Permission controls"], ["check", "Full audit trails"], ["shield", "Access logs"]].map(([ic, l]) => (
+                {[["doc", "Document checklist by package"], ["check", "Completeness per package"], ["shield", "Who can see uploads, stated"]].map(([ic, l]) => (
                   <span key={l} className="flex items-center gap-1.5"><span className="text-blue-300"><Glyph name={ic} small /></span>{l}</span>
                 ))}
               </div>
@@ -419,8 +419,7 @@ const Landing: React.FC = () => {
                 <span className="text-blue-300"><Glyph name={d.icon} small /></span>
                 <div className="mt-3 text-[12.5px] font-semibold leading-tight text-white">{d.title}</div>
                 <div className="mt-2 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wide text-blue-100/50">
-                  <span className="flex items-center gap-1 text-emerald-300"><span className="h-1 w-1 rounded-full bg-emerald-400" /> Secured</span>
-                  <span>·</span><span>Audit trail</span>
+                  <span>Required for diligence</span>
                 </div>
               </div>
             ))}
@@ -853,7 +852,7 @@ const CONFIDENCE_TIERS = [
 const STEPS = [
   { icon: "chart", title: "Company Analysis", body: "Valuation across weighted methodologies, market positioning, and a priced readiness score." },
   { icon: "users", title: "Buyer Discovery", body: `Engine-ranked matching across ${MARKET_FMT.buyers} curated strategic and financial mandates.` },
-  { icon: "doc", title: "Data Room", body: "Secure diligence infrastructure built for M&A." },
+  { icon: "doc", title: "Data Room", body: "The diligence document checklist, with completeness by package." },
   { icon: "spark", title: "Negotiation Engine", body: "Offer scoring, counters and scenario modeling against your reservation lines." },
   { icon: "check", title: "LOI Received", body: "Manage terms, track milestones, and reduce deal risk." },
   { icon: "lock", title: "Closing & Payout", body: "Streamline closing, documents, and funds transfer." },
