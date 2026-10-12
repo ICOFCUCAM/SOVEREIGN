@@ -8,8 +8,9 @@ import { homeFor, type Plan } from "../lib/access";
 // reach. The institutional ladder: Listed Founder (free — listed and
 // discovered, cannot engage), Preparation ($995 one-time — market-ready
 // package), Active Mandate ($995/mo + 2.5% success fee — run the process),
-// and Institutional (custom). Choosing a tier flips the session and drops
-// the founder back into the work. Plan gating keys are unchanged: prep
+// and Institutional (custom). Choosing a tier switches the in-memory session
+// plan (demo mode: no payment, nothing persisted) and drops the founder back
+// into the work. Plan gating keys are unchanged: prep
 // backs Preparation, pro backs Active Mandate.
 
 interface Tier {
@@ -62,6 +63,11 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
           ? `${feature} requires an active engagement. Preparation makes you market-ready; an Active Mandate runs the process and is paid on close.`
           : "Listed Founder gets you discovered for free. Preparation makes you market-ready. An Active Mandate runs the live process — and is paid only when you close."} />
 
+      <p id="upgrade-demo" role="note" className="border border-xo-caution/50 bg-xo-panel px-4 py-2.5 text-[13px]">
+        <span className="font-semibold text-xo-caution">Demo mode — no payment is taken.</span>{" "}
+        <span className="text-xo-muted">Choosing a tier switches this session's plan until you sign out; nothing is charged and no account changes.</span>
+      </p>
+
       <ul className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         {TIERS.map((t) => {
           const isCurrent = !t.contact && t.plan === current && t.name !== "Institutional";
@@ -92,10 +98,11 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
                   ) : t.name === "Listed Founder" ? (
                     <p className="text-[12px] text-xo-muted">Free — the exchange entry point</p>
                   ) : (
-                    <button type="button" onClick={() => act(t)} className={t.plan === "pro" && !t.contact ? BTN : BTN_GHOST}>
+                    <button type="button" onClick={() => act(t)} aria-describedby={t.contact ? undefined : "upgrade-demo"} className={t.plan === "pro" && !t.contact ? BTN : BTN_GHOST}>
                       {t.contact ? "Request a briefing →" : t.plan === "prep" ? "Prepare my company →" : "Launch a mandate →"}
                     </button>
                   )}
+                  {!isCurrent && !t.contact && t.name !== "Listed Founder" && <p className="mt-1.5 text-[11px] text-xo-muted">Demo switch — no payment</p>}
                 </div>
               </div>
             </li>
@@ -105,7 +112,7 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
 
       <div className="flex flex-wrap items-center gap-3">
         <button type="button" onClick={() => navigate("/pricing")} className={BTN_GHOST}>See full pricing</button>
-        <p className="text-[12px] text-xo-muted">Demo: choosing an engagement switches your session instantly.</p>
+
       </div>
     </div>
   );

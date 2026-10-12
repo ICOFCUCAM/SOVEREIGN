@@ -30,7 +30,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · no overflow · 0 errors; old comp
 ## Gap register — Page 41
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **Plan switch looks like a purchase.** | A prominent note: demo mode — no payment is taken, nothing changes on any account; choosing a tier switches this session's plan until you sign out; button names say "(demo)". | ☐ |
+| G1 | **Plan switch looks like a purchase.** | A prominent note: demo mode — no payment is taken, nothing changes on any account; choosing a tier switches this session's plan until you sign out; button names say "(demo)". | ☑ G1-commit |
 | G2 | **"Paid only when you close"; feature overclaims; "Most selected".** | "its 2.5 % success fee is paid only when you close"; features worded as the console delivers them (outreach drafts & NDA requests; rule-based negotiation in the Bid Room; closing checklist; buyer interest in the Inbox); "Recommended for a live process" instead of "Most selected". | ☐ |
 | G3 | Buyers see founder tiers. | A buyer note: what Active Mandate unlocks for buyers (Deal Room, Access Requests) and that no buyer pricing is published; buyer-appropriate button text. | ☐ |
 | G4 | Design: old components. | Rebuild on `xo`. | ☑ `f998ff2` |
@@ -42,3 +42,7 @@ Founder free/Pro and buyer: `h1` 1 · axe 0 · no overflow · 0 errors; old comp
 ### G4 — Design
 *Closed by:* `pages/Upgrade.tsx` rebuilt on `xo` (`PageHeader` `h1`; the four tiers as a list of panels with an `h2` per tier, features as lists with decorative marks hidden, the action pinned to the panel foot; shared `Card`/`SectionHeader`/`Button` and gradients replaced by xo tokens). Content carried over verbatim; G1–G3 follow. Button names unchanged (the plan switch and every gated-page test depend on them).
 *Verification:* `tsc -b`, eslint clean · Chromium founder free/Pro and buyer 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · as the gate on a plan-gated page (Outreach Plan, free): same; the plan switch still works (Closing Center reached on Pro).
+
+### G1 — Plan switch looks like a purchase
+*Closed by:* `pages/Upgrade.tsx`. A prominent note above the tiers: **"Demo mode — no payment is taken.** Choosing a tier switches this session's plan until you sign out; nothing is charged and no account changes." (the session lives in memory, so a reload also signs out); each switch button is described by that note (`aria-describedby`) and shows "Demo switch — no payment" beneath it; the faint footnote is removed. The visible button names stay ("Prepare my company →", "Launch a mandate →") — deliberately, instead of adding "(demo)" to them as the register first proposed: the note and the per-button line carry the same information without breaking the names every gated-page test and link depends on.
+*Verification:* `tsc -b`, eslint clean · Chromium: the note shown once, "Demo switch — no payment" under both switch buttons · founder free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0; the plan switch still works (Closing Center reached on Pro).
