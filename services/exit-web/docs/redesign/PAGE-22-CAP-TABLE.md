@@ -32,7 +32,7 @@ The cap table (fully-diluted ownership, signatory and board flags), signatory co
 |---|---|---|---|
 | G1 | **Walk-away cascade mislabelled and mixed** (as Page 10). | Same correction as Page 10 G2/G3: headline → preference stack → founders' gross (founder group) → after the flat tax assumption on gross; risk-adjusted value shown separately and labelled; header metric renamed. | ☑ `c21bcf1` |
 | G2 | **"Added to the cap-table CRM"** — nothing is saved or calculated. | Say it: a contact list for this session, not saved, not in the cap table or waterfall. | ☑ `420052c` |
-| G3 | Demo cap table and offers unlabelled. | Badge and line: sample cap table and offers of the demo company (intake has neither). | ☐ |
+| G3 | Demo cap table and offers unlabelled. | Badge and line: sample cap table and offers of the demo company (intake has neither). | ☑ G3-commit |
 | G4 | Fake live tape. | `RegistryTape`. | ☐ |
 | G5 | Design: no `h1`, contrast, unnamed select, unfocusable scroll regions, name mismatch. | Rebuild on `xo`; `h1` "Cap Table". | ☑ `d093efc` |
 
@@ -59,3 +59,7 @@ Arithmetic check (Vista, the default selection): founders' gross $77.8M × 0.762
 ### G2 — "Added to the cap-table CRM" implied a saved change
 *Closed by:* `pages/Investors.tsx` (text only; behaviour unchanged). Dialog subtitle "Adds a contact to the cap-table CRM roster" → "Adds a contact to this session's list. It is not saved and does not change the cap table, signatories or waterfall."; button "Add to CRM" → "Add to list"; toast → "Added {name} to this session's contact list (not saved)"; list title "Added to CRM" → "Contacts added this session", foot "Kept only until you leave or reload this page; not part of the cap table or any calculation."
 *Verification:* `tsc -b`, eslint clean · Chromium: adding "Dana Reyes" shows the new toast and "Contacts added this session · 1".
+
+### G3 — Demo cap table and offers unlabelled
+*Closed by:* `pages/Investors.tsx`: eyebrow "Demo company: Helios Freight", **Demo data** badge, and "The sample cap table and sample offers of the demo company (Helios Freight)." — with a saved intake: "Your intake has no cap table or offers, so these figures are not yours." (as Page 10 G6).
+*Verification:* `tsc -b`, eslint clean · Chromium demo and intake: DEMO DATA, description as above · 0 errors.

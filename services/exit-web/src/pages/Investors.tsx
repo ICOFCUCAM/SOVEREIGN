@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, Field, inputCls, notify } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
-import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
+import { SAMPLE_COMPANY } from "../lib/profile";
+import { loadActiveCompany } from "../lib/active-company";
 import { buildMarketTape } from "../lib/market-tape";
 import {
   CAPTABLE_ANALYSIS, CAPTABLE_SIGNATORY, CAPTABLE_DRAGALONG,
@@ -27,6 +29,9 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 const Investors: React.FC = () => {
+  // The cap table and offers are the demo company's samples; an intake holds
+  // neither, so this page stays on demo data and says so.
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
   const analysis = CAPTABLE_ANALYSIS;
   const signatory = CAPTABLE_SIGNATORY;
   const drag = CAPTABLE_DRAGALONG;
@@ -54,8 +59,9 @@ const Investors: React.FC = () => {
 
   return (
     <div data-page="cap-table" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Workspace · Cap-table · Investor CRM" title="Cap Table"
-        badge={<span className="text-[12px] text-xo-muted">Ownership · waterfall · {signatory.meetsThreshold ? "Coverage met" : "Coverage short"}</span>} />
+      <PageHeader eyebrow={`◉ Workspace · Cap-table · Investor CRM · Demo company: ${SAMPLE_COMPANY.name}`} title="Cap Table"
+        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Ownership · waterfall · {signatory.meetsThreshold ? "Coverage met" : "Coverage short"}</span></>}
+        description={<>The sample cap table and sample offers of the demo company ({SAMPLE_COMPANY.name}).{fromIntake ? " Your intake has no cap table or offers, so these figures are not yours." : ""}</>} />
 
       <section aria-label="Cap-table summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
         <div className="bg-xo-panel"><Metric label="Fully diluted" value={analysis.fullyDilutedShares.toLocaleString()} sub={`${analysis.ownershipByStakeholder.length} stakeholders`} /></div>
