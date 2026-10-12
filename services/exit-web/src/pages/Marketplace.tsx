@@ -7,6 +7,9 @@ import { parseNumber } from "../lib/intake-fields";
 import { useAuth } from "../lib/auth";
 import { buildMarketTape } from "../lib/market-tape";
 import { LISTING_PUBLIC as ENGINE_PUBLIC, LISTING_PRIVATE as ENGINE_PRIVATE, LISTING_MATCHES, VALUATION_CANONICAL, useMemorandum } from "../lib/engines";
+import { createListing, matchBuyersToListing, runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type MemorandumInputs } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
 import BankerTake from "../components/BankerTake";
 
 // Exit Marketplace — "Become the banker." The sell-side pack gathers the
@@ -104,8 +107,26 @@ const FounderMarketplace: React.FC = () => {
   const [view, setView]   = useState<"public" | "founder">("founder");
   const [phase, setPhase] = useState<Phase>("idle");
 
-  const baseListing = view === "founder" ? LISTING_PRIVATE : LISTING_PUBLIC;
-  const matches  = LISTING_MATCHES.matches;
+  // The founder's saved intake when there is one; the demo company otherwise.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const own = useMemo(() => {
+    if (!fromIntake) return null;
+    const institutional = runInstitutionalValuation(company);
+    const canonical = canonicalValuationFor(company, institutional);
+    const priv = withCanonicalAsk(createListing(company, { visibility: "private_full" }), canonical.headline);
+    const pub = withCanonicalAsk(createListing(company, { visibility: "public_anonymized" }), canonical.headline);
+    const memo: Partial<MemorandumInputs> = {
+      company, valuation: canonical, constitution: institutional,
+      readiness: runReadiness(company), buyers: runBuyerDiscovery(company, { limit: 12 }), diligence: runDueDiligence(company),
+    };
+    return { priv, pub, matches: matchBuyersToListing(createListing(company, { visibility: "private_full" }), company, { limit: 15 }), memo };
+  }, [company, fromIntake]);
+  const PRIV = own?.priv ?? LISTING_PRIVATE;
+  const PUB = own?.pub ?? LISTING_PUBLIC;
+  const MATCHES = own?.matches ?? LISTING_MATCHES;
+
+  const baseListing = view === "founder" ? PRIV : PUB;
+  const matches  = MATCHES.matches;
 
   // Founder edits — local overrides applied on top of the engine listing.
   const [editOpen, setEditOpen] = useState(false);
@@ -117,9 +138,9 @@ const FounderMarketplace: React.FC = () => {
   const askParse = parseNumber(editAskText, { min: 0.1, max: 1_000_000, scale: 1e6 });
   const [editNote, setEditNote] = useState("");
 
-  const teaserInputs = useMemo(() => ({ anonymize: true }), []);
+  const teaserInputs = useMemo(() => ({ anonymize: true, ...own?.memo }), [own]);
   const teaser = useMemorandum("buyer_teaser", teaserInputs);
-  const cim    = useMemorandum("cim");
+  const cim    = useMemorandum("cim", own?.memo);
 
   // The sell-side pack: four artefacts the engines produce. Preparing it
   // publishes nothing and contacts no one — listing on the exchange happens
@@ -131,7 +152,7 @@ const FounderMarketplace: React.FC = () => {
     { key: "cim",     title: "CIM drafted",
       detail: cim ? <>{cim.sections.length} sections · {cim.wordCount.toLocaleString()} words · <Link to="/console/documents" className={LINK}>open in Documents</Link></> : "Drafting…" },
     { key: "anon",    title: "Anonymized public view",
-      detail: `Buyers would see it as "${LISTING_PUBLIC.title}" — switch to "Public listing" below to check it` },
+      detail: `Buyers would see it as "${PUB.title}" — switch to "Public listing" below to check it` },
     { key: "buyers",  title: "Buyers matched",
       detail: `${matches.length} matched buyers · top fit score ${matches[0] ? fit(matches[0].matchScore) : "—"}` },
     { key: "outreach", title: "Outreach — not started",
@@ -149,8 +170,9 @@ const FounderMarketplace: React.FC = () => {
 
   return (
     <div data-page="marketplace" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Exchange · Marketplace" title="Exit Marketplace"
-        badge={<span className="text-[12px] text-xo-muted">Become the banker · {view === "founder" ? "Founder view" : "Public view"}</span>}
+      <PageHeader eyebrow={`◉ Exchange · Marketplace · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Exit Marketplace"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Become the banker · {view === "founder" ? "Founder view" : "Public view"}</span></>}
+        description={fromIntake ? "Listing, sell-side pack and matched buyers built from your saved intake." : "Built from the demo company. Save an intake to build them for your company."}
         actions={<>
           <a href="/report/cim" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Confidential Information Memorandum (PDF) →</a>
           <a href="/report/management" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Management Presentation (PDF) →</a>
@@ -159,7 +181,7 @@ const FounderMarketplace: React.FC = () => {
       <section aria-label="Listing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Asking price (mid)" emphasis value={fmtMoney(listing.askingPriceUsd.mid)} sub={`band ${fmtMoney(listing.askingPriceUsd.low)}–${fmtMoney(listing.askingPriceUsd.high)}`} /></div>
         <div className="bg-xo-panel"><Metric label="Readiness" value={`${listing.readinessScore.toFixed(0)}/100`} sub={listing.readinessBand.replace(/_/g, " ")} /></div>
-        <div className="bg-xo-panel"><Metric label="Matched buyers" emphasis value={String(matches.length)} sub={LISTING_MATCHES.summary.split(".")[0]} /></div>
+        <div className="bg-xo-panel"><Metric label="Matched buyers" emphasis value={String(matches.length)} sub={MATCHES.summary.split(".")[0]} /></div>
         <div className="bg-xo-panel"><Metric label="Visibility" value={listing.visibility.replace(/_/g, " ")} sub={view === "founder" ? "you" : "buyers see"} /></div>
       </section>
 
