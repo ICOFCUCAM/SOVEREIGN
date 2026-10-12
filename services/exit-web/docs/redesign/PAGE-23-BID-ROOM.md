@@ -38,7 +38,7 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 | G1 | **"Leading bid" / "your strongest bid" show the first offer, not the engine's leader.** | Default selection and the leading-bid metric follow `OFFER_COMPARISON.leader`; the banker's take names the leader. | ☑ `9e4d5fa` |
 | G2 | **False "Counter sent".** | Copy only, and "Nothing is sent from ExitOS"; no sent state. | ☑ `b042c31` |
 | G3 | **Invented sender and hard-coded demo facts in the draft.** | "[Your name]"; company name and growth from the company profile; no "competitive process" claim beyond the offer count. | ☑ `6dc91dc` |
-| G4 | **"AI / autonomous" overclaims**; counter rule unexplained; "strategic mid" (D1). | "Standard negotiating positions (templates) — not legal advice"; counter rule stated; "enterprise value (institutional)". | ☐ |
+| G4 | **"AI / autonomous" overclaims**; counter rule unexplained; "strategic mid" (D1). | "Standard negotiating positions (templates) — not legal advice"; counter rule stated; "enterprise value (institutional)". | ☑ G4-commit |
 | G5 | Unvalidated amounts; demo offers unlabelled. | `parseNumber` with walk ≤ minimum ≤ ideal checks; badge and line for sample offers. | ☐ |
 | G6 | Design: old primitives, draft overlay not a dialog, tape. | Rebuild on `xo`; draft in the shared `Modal`; `RegistryTape`. | ☑ `2bf306b` |
 
@@ -61,3 +61,15 @@ Active Mandate: `h1` none · axe 0 · no overflow · 0 errors. Free / Preparatio
 ### G3 — Invented sender and hard-coded facts in the draft
 *Closed by:* `pages/Negotiator.tsx`. The draft is signed "**[Your name]** — on behalf of {company}" (was "James — on behalf of Helios Freight"); the subject line and signature take the company name from `SAMPLE_COMPANY` (the offers' company) instead of the hard-coded "Helios Freight"; ARR growth comes from the profile (`SAMPLE_COMPANY.growth.arrGrowthYoyPct`, 42 %) instead of the constant `0.42`, and prints as a whole percent; "the competitive process underway" → "the other offers we have received" (the offer count is stated below it).
 *Verification:* `tsc -b`, eslint clean · Chromium: draft begins "Re: Acquisition of Helios Freight — response to your $165,000,000 proposal", ends "[Your name] — on behalf of Helios Freight"; 0 "James".
+
+### G4 — "AI / autonomous" overclaims; counter rule unexplained; D1 wording
+*Closed by:* `pages/Negotiator.tsx` (text only; the counter rule and templates unchanged).
+| Before | After |
+|---|---|
+| `h1` "AI Deal Negotiator" | "Bid Room" (the NAV name), eyebrow "Negotiation desk" |
+| "Autonomous Negotiation · AI — the AI anchors the counter, drafts the clauses, and engineers seller protections like a junior banker and lawyer"; "AI strategy: …" | "Negotiating positions · Standard templates — not legal advice — … standard negotiating positions with fixed figures (for example a 4% reverse break fee) — a starting list to take to your advisers"; "Your lines: …" |
+| "AI Counteroffer" | "Counteroffer (rule)" + the rule (anchor = max(enterprise value, offer) + 18 / 12 / 7 % by leverage or override, capped at 105 % of the high value; cash raised to the minimum, earnout capped) |
+| "ExitOS does it — … writes the ready-to-send response for you" | "What ExitOS does — Scores every offer and drafts a counter and a response from the stated rules. You review the draft and send it yourself." |
+| "Accepting the first bid leaves the strategic premium on the table" | "… may leave value on the table; leverage is high on the offers in hand" |
+| "Strategic mid — valuation reference"; justification and draft "strategic-buyer valuation midpoint" (D1) | "Enterprise value — institutional framework · counter reference"; "enterprise value (institutional framework) is …"; draft "an enterprise value of …" |
+*Verification:* `tsc -b`, eslint clean · Chromium: the only "AI" on the page is the AI sector in the registry tape; 0 "autonomous" / "strategic-buyer" / "Strategic mid" / "junior banker" · Active Mandate 1440/390: 0 errors, axe 0, no overflow.

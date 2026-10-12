@@ -39,7 +39,7 @@ function generateCounter(offer: Offer, reserve: Reserve) {
   const stockPct = Math.max(0, 1 - cashPct - earnoutPct);
   const justification = [
     `${(SAMPLE_GROWTH * 100).toFixed(0)}% ARR growth supports a forward multiple above the submitted bid`,
-    `strategic-buyer valuation midpoint is ${fmtMoney(strategicMid)} — the offer sits below intrinsic strategic value`,
+    `enterprise value (institutional framework) is ${fmtMoney(strategicMid)} — the offer sits below it`,
     `${lev} competitive leverage: ${NEGOTIATION_STATE.activeOffers} active offer${NEGOTIATION_STATE.activeOffers === 1 ? "" : "s"} in process`,
     `cash weighting raised to ${(cashPct * 100).toFixed(0)}% and earnout capped at ${(earnoutPct * 100).toFixed(0)}% to align with deal-certainty requirements`,
   ];
@@ -49,9 +49,9 @@ function generateCounter(offer: Offer, reserve: Reserve) {
 // its profile rather than hard-coded figures.
 const SAMPLE_GROWTH = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
 
-// Autonomous Negotiation — the founder sets their lines (minimum, ideal,
-// walk-away) and the AI generates the deal terms a junior banker + lawyer
-// would: protective clauses, earnout alternatives and seller protections.
+// Negotiating positions — the founder sets their lines (minimum, ideal,
+// walk-away); the lists below are standard templates with fixed figures,
+// shown as a starting point for advisers, not legal advice.
 interface Thresholds { minUsd: number; idealUsd: number; walkUsd: number; }
 function autonomousTerms(offer: Offer | undefined, t: Thresholds): { clauses: string[]; earnouts: string[]; protections: string[] } {
   const earnoutPct = offer?.earnoutPct ?? 0;
@@ -112,7 +112,7 @@ Thank you for the proposal. We value the engagement and believe a transaction is
 
 This reflects:
   - ${(SAMPLE_GROWTH * 100).toFixed(0)}% ARR growth and the forward trajectory of the business
-  - a strategic-buyer valuation midpoint of ${fmtMoney(counter.strategicMid)}
+  - an enterprise value of ${fmtMoney(counter.strategicMid)}
   - ${NEGOTIATION_STATE.activeOffers} active offer(s) currently in our process
 
 We are prepared to move quickly toward a definitive agreement on these terms. We propose a call this week to align on structure and timeline.
@@ -123,7 +123,7 @@ Best regards,
 
   return (
     <div data-page="bid-room" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow="◉ Operator · Negotiation · Bid Room" title="AI Deal Negotiator"
+      <PageHeader eyebrow="◉ Operator · Negotiation desk" title="Bid Room"
         badge={<span className="text-[12px] text-xo-muted">Stage: {NEGOTIATION_STATE.stage} · Leverage {NEGOTIATION_STATE.leverage}</span>}
         actions={<>
           <Button variant="ghost" onClick={() => setReserveOpen(true)}>Edit reservation lines</Button>
@@ -134,7 +134,7 @@ Best regards,
         <div className="bg-xo-panel"><Metric label="Active offers" value={String(NEGOTIATION_STATE.activeOffers)} sub={NEGOTIATION_STATE.stage} /></div>
         <div className="bg-xo-panel"><Metric label="Leverage" value={<span className="capitalize">{NEGOTIATION_STATE.leverage}</span>} sub="market posture" /></div>
         <div className="bg-xo-panel"><Metric label="Leading bid" emphasis value={leader ? `${leader.score.toFixed(0)}/100` : "—"} sub={leader?.offer.buyerName} /></div>
-        <div className="bg-xo-panel"><Metric label="Strategic mid" value={fmtMoney(reserveMid)} sub="valuation reference" /></div>
+        <div className="bg-xo-panel"><Metric label="Enterprise value" value={fmtMoney(reserveMid)} sub="institutional framework · counter reference" /></div>
       </section>
 
       <RegistryTape items={buildMarketTape()} asOf={DNA_AS_OF.slice(0, 10)} />
@@ -169,25 +169,25 @@ Best regards,
             <p className="text-[14px] leading-relaxed">{NEGOTIATION_STATE.nextMove}</p>
             <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
               <TakeCell k="At stake">Counter at <span className="font-mono font-semibold text-xo-verified">{fmtMoney(counter.counterPrice)}</span> — +{counter.upliftPct.toFixed(0)}% on the {fmtMoney(active.offer.headlinePriceUsd)} bid.</TakeCell>
-              <TakeCell k="If you wait">Accepting the first bid leaves the strategic premium on the table; leverage is {NEGOTIATION_STATE.leverage}.</TakeCell>
+              <TakeCell k="If you wait">Accepting the first bid may leave value on the table; leverage is {NEGOTIATION_STATE.leverage} on the offers in hand.</TakeCell>
               <TakeCell k="Pursue">{leader ? <>Lead with <span className="text-xo-text">{leader.offer.buyerName}</span> — your strongest bid at {leader.score.toFixed(0)}/100.</> : null}{leader && leader.offer.offerId !== active.offer.offerId ? <> The counter shown is for {active.offer.buyerName}.</> : null}</TakeCell>
-              <TakeCell k="ExitOS does it">ExitOS scores every offer, drafts the counter and writes the ready-to-send response for you.</TakeCell>
+              <TakeCell k="What ExitOS does">Scores every offer and drafts a counter and a response from the stated rules. You review the draft and send it yourself.</TakeCell>
             </dl>
             <button type="button" onClick={() => setDraftOpen(true)} className="mt-3 rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft the response →</button>
           </div>
         </Section>
       )}
 
-      <Section title="Autonomous Negotiation" eyebrow="AI" className="border border-xo-line">
+      <Section title="Negotiating positions" eyebrow="Standard templates — not legal advice" className="border border-xo-line">
         <div className="px-4 py-3">
-          <p className="text-[12px] text-xo-muted">Set your lines — the AI anchors the counter, drafts the clauses, and engineers seller protections like a junior banker and lawyer.</p>
+          <p className="text-[12px] text-xo-muted">Set your lines. The clauses, earnout alternatives and protections below are standard negotiating positions with fixed figures (for example a 4% reverse break fee) — a starting list to take to your advisers, not legal advice.</p>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <XField id="neg-walk" label="Walk away"><input id="neg-walk" type="number" value={walkUsd} step={1_000_000} min={0} onChange={(e) => setWalkUsd(Number(e.target.value))} className={XO_INPUT} /></XField>
             <XField id="neg-min" label="Minimum"><input id="neg-min" type="number" value={minUsd} step={1_000_000} min={0} onChange={(e) => setMinUsd(Number(e.target.value))} className={XO_INPUT} /></XField>
             <XField id="neg-ideal" label="Ideal"><input id="neg-ideal" type="number" value={idealUsd} step={1_000_000} min={0} onChange={(e) => setIdealUsd(Number(e.target.value))} className={XO_INPUT} /></XField>
           </div>
           <p className="mt-3 border border-xo-line px-3 py-2 text-[13px] text-xo-muted">
-            AI strategy: open at <span className="font-mono font-semibold text-xo-text">{fmtMoney(idealUsd)}</span>, concede no lower than <span className="font-mono font-semibold text-xo-text">{fmtMoney(minUsd)}</span>, and walk below <span className="font-mono font-semibold text-xo-risk">{fmtMoney(walkUsd)}</span>.
+            Your lines: open at <span className="font-mono font-semibold text-xo-text">{fmtMoney(idealUsd)}</span>, concede no lower than <span className="font-mono font-semibold text-xo-text">{fmtMoney(minUsd)}</span>, and walk below <span className="font-mono font-semibold text-xo-risk">{fmtMoney(walkUsd)}</span>.
           </p>
           <div className="mt-4 grid gap-5 sm:grid-cols-3">
             <TermsList title="Protective clauses" items={terms.clauses} />
@@ -252,7 +252,7 @@ Best regards,
             {counter && (
               <div className="mt-4 border border-xo-line px-4 py-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-[12px] font-semibold text-xo-muted">AI Counteroffer</h3>
+                  <h3 className="text-[12px] font-semibold text-xo-muted">Counteroffer (rule)</h3>
                   <span className="text-[12px] text-xo-faint">leverage: {NEGOTIATION_STATE.leverage}</span>
                 </div>
                 <dl className="mt-3 flex flex-wrap items-end gap-x-8 gap-y-3">
@@ -264,6 +264,7 @@ Best regards,
                 <ul className="mt-1 list-disc space-y-1 pl-5 text-[12px] text-xo-muted">
                   {counter.justification.map((j) => <li key={j}>{j}</li>)}
                 </ul>
+                <p className="mt-3 text-[12px] text-xo-faint">Rule: anchor on the higher of the enterprise value and the offer, add a premium by leverage (high 18%, medium 12%, low 7%) or your override, cap at 105% of the high valuation; raise cash to your minimum and cap the earnout.</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button onClick={() => setDraftOpen(true)}>✦ Generate response draft</Button>
                   <Button variant="ghost" onClick={() => setReserveOpen(true)}>Adjust counter</Button>
