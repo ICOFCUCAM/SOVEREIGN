@@ -1,30 +1,40 @@
 import React from "react";
 import { useI18n } from "../lib/i18n";
-import { LANDMASS } from "./ExchangeBlocks";
 
-// THE EXCHANGE MAP — a full-width topology of the sale process (design
-// exploration, HOMEPAGE.md Phase 8, after the owner's reference). Low-polygon
-// continents (the same outlines as the coverage map) on a dashed survey grid;
-// the eight lifecycle stages as ringed nodes joined by one route, with dotted
-// cross-links. Illustrative, and labelled so; the stages and their typical
-// weeks are the lifecycle the homepage already states. Locked palette: navy,
-// blue light, the emerald signal.
+// THE EXCHANGE MAP — the sale process as a route (HOMEPAGE.md Phase 8, AA2).
+// After the owner's reference: a survey grid, ringed stage nodes on one route,
+// dotted cross-links. The horizontal position is time: each of the eight
+// lifecycle stages sits at its typical week, on a square-root scale so the
+// crowded first weeks stay legible, with the week axis drawn along the foot.
+// The vertical lanes only keep labels apart. No geography is implied.
 
 const W = 1200, TOP = 30, H = 470;
-const xy = (lon: number, lat: number): [number, number] => [((lon + 180) / 360) * W, ((90 - lat) / 180) * 600];
+const X0 = 80, X1 = 1110, WK_MAX = 10;
+const wx = (wk: number): number => X0 + (Math.sqrt(wk) / Math.sqrt(WK_MAX)) * (X1 - X0);
+const AXIS_Y = 478;
+const TICKS = [0, 1, 2, 4, 6, 8, 10];
 
-// stage, typical window, where the node sits (lon, lat), label side
+// colours, so the figure can be set on navy or on paper
+const C = {
+  ground: "linear-gradient(180deg,#05101f,#071a31 60%,#05101f)",
+  grid: "rgba(160,190,230,0.10)", axis: "rgba(160,190,230,0.22)",
+  link: "#93c5fd", node: "#60a5fa", end: "#45E38A", nodeEdge: "#e8f1ff",
+  ring: "#93c5fd", text: "#e8edf5", sub: "#93c5fd", halo: "#05101f",
+  routeA: "#93c5fd", routeB: "#60a5fa",
+};
+
+// stage, typical window (as shown), the week it is placed at, lane (y), label side
 const STAGES: ReadonlyArray<[string, string, number, number, "above" | "below"]> = [
-  ["lc.signal", "d 0", -104, 46, "above"],
-  ["lc.discovery", "wk 1", -62, -12, "below"],
-  ["lc.nda", "wk 1–2", 6, 50, "above"],
-  ["lc.cim", "wk 2", 20, 4, "below"],
-  ["lc.meetings", "wk 2–3", 78, 56, "above"],
-  ["lc.loi", "wk 4–6", 108, 30, "above"],
-  ["lc.diligence", "wk 6–9", 76, 18, "below"],
-  ["lc.closing", "wk 10+", 136, -26, "below"],
+  ["lc.signal", "d 0", 0, 270, "above"],
+  ["lc.discovery", "wk 1", 1, 410, "below"],
+  ["lc.nda", "wk 1–2", 1.5, 150, "above"],
+  ["lc.cim", "wk 2", 2, 310, "below"],
+  ["lc.meetings", "wk 2–3", 2.5, 220, "above"],
+  ["lc.loi", "wk 4–6", 5, 140, "above"],
+  ["lc.diligence", "wk 6–9", 7.5, 360, "below"],
+  ["lc.closing", "wk 10+", 10, 250, "below"],
 ];
-const P = STAGES.map(([, , lon, lat]) => xy(lon, lat));
+const P = STAGES.map(([, , wk, y]) => [wx(wk), y] as [number, number]);
 
 /** A smooth curve through the points (Catmull-Rom → cubic Bézier). */
 const route = (pts: ReadonlyArray<[number, number]>): string => {
@@ -38,7 +48,7 @@ const route = (pts: ReadonlyArray<[number, number]>): string => {
 };
 const arc = (a: [number, number], b: [number, number], lift: number): string =>
   `M${a[0]},${a[1]} Q${(a[0] + b[0]) / 2},${Math.min(a[1], b[1]) - lift} ${b[0]},${b[1]}`;
-const LINKS: ReadonlyArray<[number, number, number, "dot" | "dash"]> = [[0, 2, 70, "dot"], [1, 3, 30, "dash"], [2, 4, 60, "dot"], [3, 6, -40, "dash"], [4, 7, 40, "dot"], [1, 6, -80, "dot"]];
+const LINKS: ReadonlyArray<[number, number, number, "dot" | "dash"]> = [[0, 2, 60, "dot"], [1, 3, 30, "dash"], [2, 5, 40, "dot"], [3, 6, -30, "dash"], [4, 7, 30, "dot"]];
 
 const STYLE = `
   @keyframes xmDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
@@ -48,40 +58,36 @@ const STYLE = `
     .xm-ring { animation: xmPulse 3.6s ease-in-out infinite; }
   }
 `;
+const MONO = { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" };
 
 const ExchangeMap: React.FC = () => {
   const { t } = useI18n();
   // "d 0" → "day 0", "wk 1–2" → "wk 1–2" in the reader's language
   const fmtWk = (w: string): string => w.startsWith("d ") ? `${t("xm.day")} ${w.slice(2)}` : `${t("xm.wk")} ${w.slice(3)}`;
   return (
-    <figure className="relative m-0 overflow-hidden border-y border-white/10" style={{ background: "linear-gradient(180deg,#05101f,#071a31 60%,#05101f)" }}>
+    <figure className="relative m-0 overflow-hidden border-y border-white/10" style={{ background: C.ground }}>
       <style>{STYLE}</style>
-      <svg viewBox={`0 ${TOP} ${W} ${H}`} className="block w-full" role="img" aria-label={t("lifecycle.title")}>
+      <svg viewBox={`0 ${TOP} ${W} ${H + 30}`} className="block w-full" role="img" aria-label={t("lifecycle.title")}>
         <defs>
-          <linearGradient id="xm-land" x1="0" y1="0" x2="0.4" y2="1">
-            <stop offset="0" stopColor="#1f3a62" /><stop offset="1" stopColor="#0d213d" />
-          </linearGradient>
           <linearGradient id="xm-route" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#93c5fd" /><stop offset="0.6" stopColor="#60a5fa" /><stop offset="1" stopColor="#45E38A" />
+            <stop offset="0" stopColor={C.routeA} /><stop offset="0.6" stopColor={C.routeB} /><stop offset="1" stopColor={C.end} />
           </linearGradient>
         </defs>
         {/* survey grid */}
-        <g stroke="rgba(160,190,230,0.10)" strokeWidth="1">
-          {Array.from({ length: 25 }, (_, i) => <line key={`v${i}`} x1={i * 50} y1={TOP} x2={i * 50} y2={TOP + H} />)}
-          {Array.from({ length: 11 }, (_, i) => <line key={`h${i}`} x1={0} y1={TOP + i * 50} x2={W} y2={TOP + i * 50} />)}
+        <g stroke={C.grid} strokeWidth="1">
+          {Array.from({ length: 25 }, (_, i) => <line key={`v${i}`} x1={i * 50} y1={TOP} x2={i * 50} y2={AXIS_Y} />)}
+          {Array.from({ length: 10 }, (_, i) => <line key={`h${i}`} x1={0} y1={TOP + i * 50} x2={W} y2={TOP + i * 50} />)}
         </g>
-        <g stroke="rgba(160,190,230,0.22)" strokeWidth="1" strokeDasharray="4 6">
-          {[300, 600, 900].map((x) => <line key={x} x1={x} y1={TOP} x2={x} y2={TOP + H} />)}
-          {[170, 290, 400].map((y) => <line key={y} x1={0} y1={y} x2={W} y2={y} />)}
+        {/* the week axis: dashed verticals at the ticks, labels along the foot */}
+        <g stroke={C.axis} strokeWidth="1" strokeDasharray="4 6">
+          {TICKS.map((wk) => <line key={wk} x1={wx(wk)} y1={TOP} x2={wx(wk)} y2={AXIS_Y} />)}
         </g>
-        {/* low-polygon continents */}
-        <g>
-          {LANDMASS.map((poly, i) => (
-            <polygon key={i} points={poly.map(([lon, lat]) => xy(lon, lat).join(",")).join(" ")} fill="url(#xm-land)" stroke="rgba(160,195,240,0.22)" strokeWidth="1" strokeLinejoin="round" />
-          ))}
+        <line x1={0} y1={AXIS_Y} x2={W} y2={AXIS_Y} stroke={C.axis} strokeWidth="1" />
+        <g fill={C.sub} fontSize="11" letterSpacing="1.5" style={MONO}>
+          {TICKS.map((wk) => <text key={wk} x={wx(wk)} y={AXIS_Y + 18} textAnchor="middle">{wk === 0 ? `${t("xm.wk")} 0` : wk}</text>)}
         </g>
         {/* cross-links */}
-        <g fill="none" stroke="#93c5fd" strokeWidth="1.4" opacity="0.55">
+        <g fill="none" stroke={C.link} strokeWidth="1.4" opacity="0.55">
           {LINKS.map(([a, b, lift, kind], i) => <path key={i} d={arc(P[a]!, P[b]!, lift)} strokeDasharray={kind === "dot" ? "1.5 5" : "6 6"} strokeLinecap="round" />)}
         </g>
         {/* the route, in stage order */}
@@ -92,12 +98,12 @@ const ExchangeMap: React.FC = () => {
           const last = i === STAGES.length - 1;
           return (
             <g key={key}>
-              <circle className="xm-ring" cx={x} cy={y} r="17" fill="none" stroke={last ? "#45E38A" : "#93c5fd"} strokeWidth="1" />
-              <circle cx={x} cy={y} r="7.5" fill={last ? "#45E38A" : "#60a5fa"} stroke="#e8f1ff" strokeWidth="1.5" />
-              <text x={x} y={side === "above" ? y - 42 : y + 40} textAnchor="middle" fill="#e8edf5" fontSize="12.5" letterSpacing="2.6" stroke="#05101f" strokeWidth="5" paintOrder="stroke" strokeLinejoin="round" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", textTransform: "uppercase" }}>
+              <circle className="xm-ring" cx={x} cy={y} r="17" fill="none" stroke={last ? C.end : C.ring} strokeWidth="1" />
+              <circle cx={x} cy={y} r="7.5" fill={last ? C.end : C.node} stroke={C.nodeEdge} strokeWidth="1.5" />
+              <text x={x} y={side === "above" ? y - 42 : y + 40} textAnchor="middle" fill={C.text} fontSize="12.5" letterSpacing="2.6" stroke={C.halo} strokeWidth="5" paintOrder="stroke" strokeLinejoin="round" style={{ ...MONO, textTransform: "uppercase" }}>
                 {String(i + 1).padStart(2, "0")} · {t(key)}
               </text>
-              <text x={x} y={side === "above" ? y - 26 : y + 56} textAnchor="middle" fill="#93c5fd" fontSize="11" letterSpacing="1.5" stroke="#05101f" strokeWidth="4" paintOrder="stroke" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>{fmtWk(wk)}</text>
+              <text x={x} y={side === "above" ? y - 26 : y + 56} textAnchor="middle" fill={C.sub} fontSize="11" letterSpacing="1.5" stroke={C.halo} strokeWidth="4" paintOrder="stroke" style={MONO}>{fmtWk(wk)}</text>
             </g>
           );
         })}
