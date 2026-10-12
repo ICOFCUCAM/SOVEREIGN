@@ -8,6 +8,8 @@ import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 
 const Pricing      = lazy(() => import("./pages/Pricing"));
+// Development-only design preview (not routed in production builds).
+const HeroLab      = import.meta.env.DEV ? lazy(() => import("./pages/HeroLab")) : null;
 const Platform     = lazy(() => import("./pages/Platform"));
 const Modules      = lazy(() => import("./pages/Modules"));
 const Report       = lazy(() => import("./pages/Report"));
@@ -149,6 +151,7 @@ const App: React.FC = () => (
       <Route path="/platform" element={<Platform />} />
       <Route path="/modules" element={<Modules />} />
       <Route path="/pricing" element={<Pricing />} />
+      {HeroLab && <Route path="/hero-lab" element={<HeroLab />} />}
       <Route path="/report" element={<ReportHub />} />
       <Route path="/report/valuation" element={<Report />} />
       <Route path="/report/buyers" element={<ReportBuyers />} />

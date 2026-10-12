@@ -277,6 +277,17 @@ Every moved figure keeps its source note. Platform and Modules get the **Sources
 ### Order
 V1 (move) → V5 (hero) → V3 + V2 (homepage rhythm and broadsheet) → V4 (typography across the four pages) → V6 (inventory and review package).
 
+
+## Phase 5 — Hero concepts (owner's choice pending)
+Owner, 2026-10-12: "maintain the design of the dashboard … produce 4 hero of iconic premium design that uses this dashboard … screenshot the hero designs for me to choose".
+A **development-only** page, `/hero-lab?v=1…4` (`pages/HeroLab.tsx`), renders four heroes. The route exists only when `import.meta.env.DEV` is true, so it is not in production builds. Each hero uses the homepage's own `CommandBoard` (now exported from `Landing.tsx`; nothing else in it changed) inside the same bezel and ribbon markup. Only the staging differs:
+1. **The Trading Hall** — the current concept, refined: hall photograph, headline left, the 3D-mounted board right, proof figures under a rule.
+2. **Night Exchange** — navy ground with the faint exchange grid and a blue glow; centred editorial headline; the board centre stage, flat and large, as the lit instrument; proof figures in large serif numerals.
+3. **Front Page** — the broadsheet: masthead "The ExitOS Ledger · Registry edition", a giant headline across the page, a drop-cap column with the proof figures as a ruled list and both buttons, and the board as the front-page plate with "Fig. 1" caption and snapshot date.
+4. **The Monolith** — a split page: white editorial column left, navy panel right (hall photo faint in it), the 3D board crossing the divide, proof figures as a 2 × 2 ruled grid.
+
+The live homepage is unchanged until the owner chooses. Screens: `scratchpad/heroes/hero-{1..4}-{1440,390}.jpg`; all eight render with 0 errors and no overflow.
+
 ---
 
 ## Closure log

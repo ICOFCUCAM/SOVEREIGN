@@ -384,7 +384,7 @@ const heatGradient = (bars: number) =>
 // sector) to drill the buyers and transactions into that industry; click a
 // transaction to open the deal detail. All three columns join on the same
 // sectorLabel, so the board behaves like the product, not an illustration.
-const CommandBoard: React.FC = () => {
+export const CommandBoard: React.FC = () => {
   const [sector, setSector] = useState<string | null>(null);
   const [drill, setDrill] = useState<BoardTx | null>(null);
 
