@@ -28,7 +28,7 @@ const STATUS_STYLE: Record<WorkStatus, string> = {
 };
 
 const PROJECT = "Project Cipher";
-const FROM_NAME = "Anne Kovac, CEO";
+const FROM_NAME = "[Your name]";   // the founder signs; no invented signatory
 
 const SEQUENCE = [
   { step: "Build target list", timing: "Day 0", body: "Rank acquirers by fit, appetite and recent activity; segment strategic vs financial." },
