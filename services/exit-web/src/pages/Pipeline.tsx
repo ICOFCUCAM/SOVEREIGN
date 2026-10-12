@@ -1,7 +1,9 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
-import { MarketTape, Evidence } from "../lib/workstation";
+import { Evidence } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, NEGOTIATION_STATE } from "../lib/engines";
@@ -126,7 +128,7 @@ const Pipeline: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Leverage" value={<span className="capitalize">{NEGOTIATION_STATE.leverage}</span>} sub="negotiation posture" /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
       <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
         right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(totalWeighted)}</span>}>
