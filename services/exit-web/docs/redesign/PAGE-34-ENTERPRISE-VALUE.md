@@ -42,3 +42,6 @@ Free and Pro: `h1` none · axe color-contrast ×33 (1440), scrollable-region-foc
 ---
 
 ## Closure log
+
+### X19 — Shared `Evidence` tooltip widens the page (found here) — documented before the fix
+`lib/workstation.tsx` `Evidence` keeps its tooltip in layout while hidden (`invisible` + `opacity-0`, `absolute left-0 w-60`). In the rebuilt fact sheet the tooltips of right-hand cells extend past `main`: horizontal overflow of 3 px at 1440 and 58 px at 390 (measured). The tooltip text is also small and faint when shown (`text-[9px] text-white/45`, `text-[8px]` label). *Fix:* render the tooltip `hidden` until hover or focus (`group-hover/ev:block group-focus/ev:block`), cap its width at the viewport (`max-w-[calc(100vw-2rem)]`), and raise its text to 11px / `text-white/70`. Used on Readiness, Pipeline, Valuation, Outcome Intelligence, Buyer Graph and Terminal; behaviour (hover/focus to show) unchanged.
