@@ -64,8 +64,8 @@ const OutreachPlan: React.FC = () => {
                   <th scope="col" className="px-4 py-2 font-medium">Buyer</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Likelihood score</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Close-weighted value</th>
-                  <th scope="col" className="px-2 py-2 font-medium">Contact path</th>
-                  <th scope="col" className="px-4 py-2 text-right font-medium">Conf</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Typical contact role</th>
+                  <th scope="col" className="px-4 py-2 text-right font-medium">Contact confidence</th>
                 </tr>
               </thead>
               <tbody>
@@ -88,7 +88,7 @@ const OutreachPlan: React.FC = () => {
       ))}
 
       <p className="px-1 text-[11px] text-xo-faint">
-        Contact paths and confidence come from each buyer's <Link to="/console/buyer-graph" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">contact intelligence</Link>; likelihood scores and close-weighted values from the buyer graph and valuation framework. ExitOS surfaces the path — it does not store or send to personal contacts.
+        Contact role and confidence come from each buyer's <Link to="/console/buyer-graph" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">contact intelligence</Link>: the role is the one typical for the buyer type, never a named person; confidence is a rule on the buyer's indexed deals — High at 40 or more, Medium at 8 or more, otherwise Low — and most indexed deals are unverified registry entries. Likelihood scores and close-weighted values come from the buyer graph and valuation framework. ExitOS does not store or send to personal contacts.
       </p>
     </div>
   );
