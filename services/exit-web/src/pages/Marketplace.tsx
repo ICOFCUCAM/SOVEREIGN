@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
-import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric, Chip, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { parseNumber } from "../lib/intake-fields";
 import { useAuth } from "../lib/auth";
 import { buildMarketTape } from "../lib/market-tape";
@@ -10,7 +11,6 @@ import { LISTING_PUBLIC as ENGINE_PUBLIC, LISTING_PRIVATE as ENGINE_PRIVATE, LIS
 import { createListing, matchBuyersToListing, runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type MemorandumInputs } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
-import BankerTake from "../components/BankerTake";
 
 // Exit Marketplace — "Become the banker." The sell-side pack gathers the
 // engine artefacts a banker would prepare — teaser, CIM, the anonymized
@@ -73,7 +73,7 @@ const BuyerMarketplace: React.FC = () => {
       <PageHeader eyebrow="◉ Marketplace · Buyer" title="Browse Opportunities"
         badge={<Provenance kind="demo">Demo listing</Provenance>}
         description={<>The anonymized public view of the demo company's listing — the same view every buyer gets: no name, no jurisdiction. Every listing on the exchange, with NDA requests and offers, is on the <Link to="/console/acquisition-radar" className={LINK}>Acquisition Radar</Link>.</>} />
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
       <Section title={listing.title} eyebrow="Public listing · anonymized" className="border border-xo-line">
         <div className="px-4 py-4">
           <ul className="flex flex-wrap gap-2 text-[12px]">
@@ -185,21 +185,25 @@ const FounderMarketplace: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Visibility" value={listing.visibility.replace(/_/g, " ")} sub={view === "founder" ? "you" : "buyers see"} /></div>
       </section>
 
-      <MarketTape items={tape} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
-      <BankerTake
-        next={phase === "done"
-          ? <>Your sell-side pack is ready — review the teaser and CIM, then list on the exchange when you are ready.</>
-          : <>Prepare the sell-side pack: teaser, CIM, anonymized view and matched buyers.</>}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(listing.askingPriceUsd.mid)}</span> asking · band {fmtMoney(listing.askingPriceUsd.low)}–{fmtMoney(listing.askingPriceUsd.high)}.</>}
-        inaction={<>Without a listing, buyers on the exchange cannot discover you — and bankers charge 1–2% to run a process.</>}
-        buyer={matches[0]
-          ? <><span className="text-white">{matches[0].buyerName}</span> — fit score {fit(matches[0].matchScore)}, top of {matches.length}.</>
-          : "No matches yet."}
-        automate={<>Drafts the teaser and CIM, builds the anonymized view and matches buyers. It does not publish the listing or contact buyers.</>}
-        impact={<>{fmtMoney(listing.askingPriceUsd.mid)}</>}
-        cta={phase === "done" ? { label: "List on the exchange", to: "/console/intake" } : { label: "Prepare the sell-side pack", onClick: prepare }}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(listing.askingPriceUsd.mid)}</span>}>
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">{phase === "done"
+            ? <>Your sell-side pack is ready — review the teaser and CIM, then list on the exchange when you are ready.</>
+            : <>Prepare the sell-side pack: teaser, CIM, anonymized view and matched buyers.</>}</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(listing.askingPriceUsd.mid)}</span> asking · band {fmtMoney(listing.askingPriceUsd.low)}–{fmtMoney(listing.askingPriceUsd.high)}.</TakeCell>
+            <TakeCell k="If you wait">Without a listing, buyers on the exchange cannot discover you — and bankers charge 1–2% to run a process.</TakeCell>
+            <TakeCell k="Top match">{matches[0] ? <>{matches[0].buyerName} — fit score {fit(matches[0].matchScore)}, top of {matches.length}.</> : "No matches yet."}</TakeCell>
+            <TakeCell k="What ExitOS does">Drafts the teaser and CIM, builds the anonymized view and matches buyers. It does not publish the listing or contact buyers.</TakeCell>
+          </dl>
+          <div className="mt-3">{phase === "done"
+            ? <Link to="/console/intake" className={BTN}>List on the exchange →</Link>
+            : <button type="button" onClick={prepare} className={BTN}>Prepare the sell-side pack</button>}</div>
+        </div>
+      </Section>
 
       {/* ── Become the banker · the sell-side pack ──────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
@@ -376,6 +380,13 @@ const DataRow: React.FC<{ label: string; value: string }> = ({ label, value }) =
   <div>
     <dt className="text-[11px] text-xo-muted">{label}</dt>
     <dd className="mt-1 font-mono text-[14px] font-semibold tabular-nums">{value}</dd>
+  </div>
+);
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
   </div>
 );
 

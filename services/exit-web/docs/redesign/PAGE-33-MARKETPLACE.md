@@ -37,7 +37,7 @@ Founder free and Pro, buyer free: `h1` none · axe **dlitem ×18** (`dt`/`dd` ou
 | G3 | Dead "Request NDA"; "Edit listing" claims an update. | Founder public preview has no NDA button (it says buyers request from the Radar); edit is a "preview adjustment — not saved or published", validated with `parseNumber`. | ☑ `4c38cff` |
 | G4 | **Ask band conflicts with D1; match score as %; false mechanics.** | Asking band and check size from `canonicalValuationFor` ($103M mid for the demo); "match score N/100"; mechanics stated truthfully (no data release on NDA; no engagement feed). | ☑ `6456ebd` |
 | G5 | Demo only, unlabelled. | Listing, matches and memoranda for the active company (intake inputs as on Documents); Demo data / Your intake badge. | ☑ `0de6bdc` |
-| G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
+| G6 | Shared `BankerTake`; fake live tape. | Page-local recommended action; `RegistryTape`. | ☑ G6-commit |
 | G7 | Design: no `h1`, 18 dlitem failures. | Rebuild on `xo`. | ☑ `c5b28e6` |
 
 ---
@@ -71,3 +71,7 @@ Founder free and Pro, buyer free: `h1` none · axe **dlitem ×18** (`dt`/`dd` ou
 ### G5 — Demo only, unlabelled
 *Closed by:* `pages/Marketplace.tsx`. With a saved intake the founder view builds everything for the company: `createListing` (private and public, ask re-based on that company's canonical headline per D1), `matchBuyersToListing` (15), and the teaser and CIM via `useMemorandum` with the same inputs the Documents page uses (canonical valuation, institutional constitution, readiness, discovery, diligence). With no intake the module-level demo values are used, as before. Eyebrow "Demo company: Helios Freight" / "Your intake: …", **Demo data** / **Your intake** badge, and a description ("Built from the demo company. Save an intake to build them for your company." / "Listing, sell-side pack and matched buyers built from your saved intake."). The buyer view stays on the labelled demo listing. The report links already follow the active company.
 *Verification:* `tsc -b`, eslint clean · Chromium: demo → $102,849,415, "Logistics Freight platform · ~$18M ARR", top match Flexport Strategic 89/100; intake (Northwind Analytics) → **$403,509,792** (its D1 canonical value), "Enterprise Saas platform · ~$42M ARR", identity Northwind Analytics, top matches Vista Enterprise Software Bolt-On / Salesforce Acquisition Office / Thoma Bravo 92/100; 0 "Helios" on the intake view · founder free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0.
+
+### G6 — Shared `BankerTake`; fake live tape
+*Closed by:* `pages/Marketplace.tsx`. The shared `BankerTake` is replaced by a page-local "Recommended action" `Section` (headline by pack state; At stake — the canonical ask and band; If you wait; Top match — fit score; What ExitOS does — no publishing or contact; one action: "Prepare the sell-side pack" or, once prepared, "List on the exchange →"). Pinging `MarketTape` → dated `RegistryTape` in both the founder and buyer views.
+*Verification:* `tsc -b`, eslint clean, `vitest` 206/206 · Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · founder and buyer free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus · after preparing the pack: axe 0, no overflow.
