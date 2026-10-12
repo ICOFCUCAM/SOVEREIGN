@@ -36,8 +36,58 @@
 | O3 | **Unexplained terms.** | A plain-language glossary (`lib/glossary.ts`) and a "Terms" panel reachable from the sidebar: one-sentence meanings for the terms listed above. Page text is not rewritten. | ☑ `1a5567b` |
 | O4 | **No purpose line or next step.** | A slim bar under the layer navigation: "What this page is for" (one sentence) and "Next: <page> →". Driven by one map keyed by route, so no page file changes; can be hidden for all pages at once. | ☑ `707fc80` |
 | O5 | **No first-visit welcome.** | The role is already chosen at sign-in (founder or buyer), so a "selling or buying?" question would repeat it. Instead, on the first visit the Start-here guide opens expanded with one welcome sentence; after that it stays as the user left it. | ☑ `ce468b1` |
+| O6 | **Page names describe the product, not the task** (owner decision, 2026-10-12: "task style menu? yes"). | Menu entries get task-style names (table below). The current name stays visible as a small second line under each renamed entry, because page headings and page text refer to pages by those names ("Bid Room", "Acquisition Radar" …). Page headings and page text are unchanged. The guide, page tips, the layer sub-nav and the upgrade screen use the new names through `featureLabel`. Group headings, routes, roles and locks are unchanged. Operator entries (Admin Console, Calibration) keep their names. | ☐ |
 
 Out of scope (owner decision, not changed here): renaming pages; merging or removing the Command Layers bar or sub-nav. Both would change existing content or features. Listed as open decisions below.
+
+
+### O6 — names
+| Route | Current name (kept as the second line) | Task-style name |
+|---|---|---|
+| `/console` | Intelligence Terminal | Home |
+| `/console/commander` | Chief Investment Banker | Recommended Actions |
+| `/console/intake` | Value My Company | *(unchanged)* |
+| `/console/command` | Liquidity Command | Exit Overview |
+| `/console/autopilot` | Autonomous Exit | Simulate My Exit |
+| `/console/valuation` | Enterprise Value | See My Value |
+| `/console/readiness` | Readiness | Check Readiness |
+| `/console/diligence-ai` | Diligence | Prepare for Diligence |
+| `/console/investors` | Cap Table | Manage Cap Table |
+| `/console/exit-timing` | Exit Timing | Choose When to Sell |
+| `/console/data-room` | Data Room | Build the Data Room |
+| `/console/documents` | Documents | Generate Documents |
+| `/console/buyers` | Buyer Profiles | Find Buyers |
+| `/console/buyer-graph` | Buyer Graph | Search All Acquirers |
+| `/console/buyer-copilot` | Buyer Intelligence | Compare Top Buyers |
+| `/console/intelligence` (founder) | Acquisition Intelligence | Rank Buyers by Fit |
+| `/console/acquisition-radar` (founder and buyer) | Acquisition Radar | Scan Listed Companies |
+| `/console/engagement-registry` | Engagement Registry | Check Buyer Engagement |
+| `/console/network` | Network Intelligence | About Our Data |
+| `/console/market-map` | Market Map | Explore the Market |
+| `/console/knowledge-graph` | Knowledge Graph | Search Past Deals |
+| `/console/outcomes` | Outcome Intelligence | See Deal Outcomes |
+| `/console/indexes` | Acquisition Indexes | Compare Sectors |
+| `/console/marketplace` (founder) | Anonymous Listings | List My Company |
+| `/console/banker` | Outreach | Write to Buyers |
+| `/console/outreach-plan` | Outreach Plan | Plan Outreach |
+| `/console/nda` (founder) | NDA Vault | Manage NDAs |
+| `/console/inbox` | Inbox | *(unchanged)* |
+| `/console/pipeline` | Active Processes | Track Deals |
+| `/console/activity` (founder and buyer) | Deal Activity | Review Activity |
+| `/console/process-intel` | Process Intelligence | Track the Buyer Funnel |
+| `/console/deal-room` (founder) | Deal Room | Preview the Deal Room |
+| `/console/negotiator` | Bid Room | Compare Offers |
+| `/console/simulator` | Scenario Simulator | Test Scenarios |
+| `/console/closing` | Closing Center | Close the Deal |
+| `/console/closing#signatures` | Signatures | Track Signatures |
+| `/console/closing#escrow` | Escrow | Track Escrow |
+| `/console/wealth` | Liquidity & Transition | Plan After the Sale |
+| `/console/buyer-portal` | Buyer Home | Home |
+| `/console/marketplace` (buyer) | Browse Opportunities | *(unchanged)* |
+| `/console/intelligence` (buyer) | Acquisition Intelligence | Research Acquirers |
+| `/console/deal-room` (buyer) | Deal Room | Open the Deal Room |
+| `/console/nda` (buyer) | Access Requests | Track Access Requests |
+| `/console/admin`, `/console/calibration` | Admin Console, Calibration | *(unchanged — operators)* |
 
 ---
 
@@ -67,6 +117,6 @@ Out of scope (owner decision, not changed here): renaming pages; merging or remo
 
 ---
 
-## Open decisions for the owner
-- **Three navigation systems.** Keep the sidebar, the Command Layers bar and the sub-nav, or drop one? Today they group the same pages differently.
-- **Task-style page names.** For example, "Intelligence Terminal" → "Home", "Liquidity Command" → "Exit overview". This would change content, so it was not done.
+## Owner decisions
+- **Three navigation systems: keep all three** (owner, 2026-10-12: "keep all three"). No change.
+- **Task-style page names: yes** (owner, 2026-10-12). Done as O6.
