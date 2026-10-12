@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
 import { MarketTape } from "../lib/workstation";
 import { PageHeader, Section, Metric, Chip } from "../components/xo";
@@ -6,12 +7,11 @@ import { buildMarketTape } from "../lib/market-tape";
 import { LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES, useMemorandum } from "../lib/engines";
 import BankerTake from "../components/BankerTake";
 
-// Exit Marketplace — "Become the banker." Most founders never hire a
-// banker because bankers are expensive; ExitOS does the banker's job.
-// The "Publish Opportunity" pipeline runs the full sell-side workflow in
-// one click — teaser, CIM, anonymization, buyer identification, outreach —
-// each step backed by a real engine artifact (memorandum generator +
-// listing engine). Below the pipeline, the same listing renders in the
+// Exit Marketplace — "Become the banker." The sell-side pack gathers the
+// engine artefacts a banker would prepare — teaser, CIM, the anonymized
+// view and the matched buyers. It publishes nothing and contacts no one:
+// listing on the exchange happens from the intake, outreach stays the
+// founder's. Below the pipeline, the same listing renders in the
 // founder vs. public (anonymized) views.
 
 const OUTREACH_STYLE: Record<string, string> = {
@@ -29,19 +29,17 @@ const TYPE_STYLE: Record<string, string> = {
   sponsor:        "text-xo-muted",
 };
 
-type Phase = "idle" | "running" | "done";
+type Phase = "idle" | "done";
 
 interface PipelineStep {
   key: string;
   title: string;
-  detail: string;       // what the step produced (shown once complete)
-  running: string;      // verb shown while in flight
+  detail: React.ReactNode;   // what the step produced (shown once prepared)
 }
 
 const Marketplace: React.FC = () => {
   const [view, setView]   = useState<"public" | "founder">("founder");
   const [phase, setPhase] = useState<Phase>("idle");
-  const [done, setDone]   = useState<number>(0);
 
   const baseListing = view === "founder" ? LISTING_PRIVATE : LISTING_PUBLIC;
   const matches  = LISTING_MATCHES.matches;
@@ -59,33 +57,26 @@ const Marketplace: React.FC = () => {
   const teaser = useMemorandum("buyer_teaser", teaserInputs);
   const cim    = useMemorandum("cim");
 
-  // Distinct outreach channels across the matched buyers.
-  const channels = useMemo(() => Array.from(new Set(matches.map((m) => m.suggestedOutreach))), [matches]);
-
+  // The sell-side pack: four artefacts the engines produce. Preparing it
+  // publishes nothing and contacts no one — listing on the exchange happens
+  // from the intake, and outreach stays the founder's.
+  const LINK = "font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const steps: PipelineStep[] = [
-    { key: "teaser",  title: "Teaser created",      running: "Writing anonymized teaser…",
+    { key: "teaser",  title: "Teaser drafted",
       detail: teaser ? `${teaser.title} · ${teaser.wordCount} words · anonymized` : "Drafting…" },
-    { key: "cim",     title: "CIM drafted",         running: "Drafting confidential memorandum…",
-      detail: cim ? `${cim.sections.length} sections · ${cim.wordCount.toLocaleString()} words` : "Drafting…" },
-    { key: "anon",    title: "Data anonymized",     running: "Masking identity + sensitive figures…",
-      detail: `Identity masked → published as "${LISTING_PUBLIC.title}"` },
-    { key: "buyers",  title: "Buyers identified",   running: "Scanning the buyer universe…",
+    { key: "cim",     title: "CIM drafted",
+      detail: cim ? <>{cim.sections.length} sections · {cim.wordCount.toLocaleString()} words · <Link to="/console/documents" className={LINK}>open in Documents</Link></> : "Drafting…" },
+    { key: "anon",    title: "Anonymized public view",
+      detail: `Buyers would see it as "${LISTING_PUBLIC.title}" — switch to "Public listing" below to check it` },
+    { key: "buyers",  title: "Buyers matched",
       detail: `${matches.length} matched buyers · top fit ${matches[0] ? (matches[0].matchScore * 100).toFixed(0) : "0"}%` },
-    { key: "outreach", title: "Outreach started",   running: "Sequencing outreach…",
-      detail: `${matches.length} buyers queued across ${channels.length} channel${channels.length === 1 ? "" : "s"}` },
+    { key: "outreach", title: "Outreach — not started",
+      detail: <>ExitOS does not contact buyers from here. Plan who to approach in the <Link to="/console/outreach-plan" className={LINK}>Outreach Plan</Link>.</> },
   ];
 
-  // Advance the pipeline one step at a time while running.
-  useEffect(() => {
-    if (phase !== "running") return;
-    if (done >= steps.length) { setPhase("done"); return; }
-    const t = setTimeout(() => setDone((d) => d + 1), 850);
-    return () => clearTimeout(t);
-  }, [phase, done, steps.length]);
-
-  const publish = (): void => { setDone(0); setPhase("running"); };
-  const reset   = (): void => { setPhase("idle"); setDone(0); };
-
+  const prepare = (): void => setPhase("done");
+  const reset   = (): void => setPhase("idle");
+  const done = phase === "done" ? steps.length : 0;
   const progressPct = Math.round((done / steps.length) * 100);
 
   const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
@@ -95,7 +86,7 @@ const Marketplace: React.FC = () => {
   return (
     <div data-page="marketplace" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Exchange · Marketplace" title="Exit Marketplace"
-        badge={<span className="text-[12px] text-xo-muted">Become the banker · {phase === "done" ? "Live" : view === "founder" ? "Founder view" : "Public view"}</span>}
+        badge={<span className="text-[12px] text-xo-muted">Become the banker · {view === "founder" ? "Founder view" : "Public view"}</span>}
         actions={<>
           <a href="/report/cim" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Confidential Information Memorandum (PDF) →</a>
           <a href="/report/management" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Management Presentation (PDF) →</a>
@@ -112,76 +103,66 @@ const Marketplace: React.FC = () => {
 
       <BankerTake
         next={phase === "done"
-          ? <>You're live — review the {matches.length} buyers entering outreach and approve the first conversations.</>
-          : <>Publish the opportunity and let ExitOS run the sell-side process end to end.</>}
+          ? <>Your sell-side pack is ready — review the teaser and CIM, then list on the exchange when you are ready.</>
+          : <>Prepare the sell-side pack: teaser, CIM, anonymized view and matched buyers.</>}
         stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(listing.askingPriceUsd.mid)}</span> asking · band {fmtMoney(listing.askingPriceUsd.low)}–{fmtMoney(listing.askingPriceUsd.high)}.</>}
-        inaction={<>Without a live process, qualified buyers never learn you're sellable — and bankers charge 1–2% to run it.</>}
+        inaction={<>Without a listing, buyers on the exchange cannot discover you — and bankers charge 1–2% to run a process.</>}
         buyer={matches[0]
           ? <><span className="text-white">{matches[0].buyerName}</span> — {(matches[0].matchScore * 100).toFixed(0)}% match, top of {matches.length}.</>
-          : "No matches yet — publish to surface the buyer set."}
-        automate={<>One click writes the teaser and CIM, anonymizes the data, identifies buyers and starts outreach.</>}
+          : "No matches yet."}
+        automate={<>Drafts the teaser and CIM, builds the anonymized view and matches buyers. It does not publish the listing or contact buyers.</>}
         impact={<>{fmtMoney(listing.askingPriceUsd.mid)}</>}
-        cta={{ label: phase === "done" ? "Re-run" : "Publish Opportunity", onClick: phase === "done" ? reset : publish }}
+        cta={phase === "done" ? { label: "List on the exchange", to: "/console/intake" } : { label: "Prepare the sell-side pack", onClick: prepare }}
       />
 
-      {/* ── Become the banker · Publish Opportunity ─────────────── */}
+      {/* ── Become the banker · the sell-side pack ──────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="The operating system for company sales." eyebrow="Become the banker" className="lg:col-span-5">
           <div className="px-4 py-4">
             <p className="text-[13px] leading-relaxed text-xo-muted">
               A sell-side banker builds the teaser, writes the CIM, anonymizes your numbers, finds the buyers and runs
-              the outreach — for 1–2% of the deal. ExitOS does all five, in one click, the moment you publish.
+              the outreach — for 1–2% of the deal. ExitOS drafts the first four for you; listing on the exchange and the outreach stay your decisions.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              {phase === "idle" && <button type="button" onClick={publish} className={BTN}>Publish Opportunity</button>}
-              {phase === "running" && <button type="button" disabled className={BTN}>Publishing… {progressPct}%</button>}
+              {phase === "idle" && <button type="button" onClick={prepare} className={BTN}>Prepare the sell-side pack</button>}
               {phase === "done" && (
                 <>
-                  <span className="inline-flex items-center gap-2 rounded-sm border border-xo-verified/50 px-3 py-1.5 text-[12px] font-semibold text-xo-verified">
-                    ● Live · {matches.length} buyers in outreach
-                  </span>
-                  <button type="button" onClick={reset} className={BTN_GHOST}>Re-run</button>
+                  <span className="text-[12px] font-semibold text-xo-verified">Pack prepared — nothing published or sent</span>
+                  <button type="button" onClick={reset} className={BTN_GHOST}>Clear</button>
                 </>
               )}
             </div>
-            <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-xo-line pt-4 text-center">
-              <Manifesto value="0" label="Bankers hired" />
-              <Manifesto value="1-click" label="To full process" />
-              <Manifesto value="100%" label="Founder-owned" />
-            </dl>
           </div>
         </Section>
 
-        <Section title="Automated sell-side pipeline" className="lg:col-span-7"
-          right={<span className="font-mono text-[11px] text-xo-muted">{done}/{steps.length}</span>}>
+        <Section title="Sell-side pack" className="lg:col-span-7"
+          right={<span className="text-[11px] text-xo-muted">{phase === "done" ? "4 artefacts prepared · outreach not started" : "Not prepared"}</span>}>
           <div className="px-4 py-4">
             <div aria-hidden className="h-1 w-full overflow-hidden rounded-full bg-xo-line">
               <div className="h-full rounded-full bg-xo-action motion-safe:transition-all motion-safe:duration-700" style={{ width: `${progressPct}%` }} />
             </div>
             <ol aria-live="polite" className="mt-4 space-y-3">
               {steps.map((s, i) => {
-                const isDone   = i < done || phase === "done";
-                const isActive = phase === "running" && i === done;
+                const isDone   = i < done;
                 return (
                   <li key={s.key} className="flex items-start gap-3">
                     <span aria-hidden className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold ${
-                      isDone ? "border-xo-verified/60 text-xo-verified" : isActive ? "border-xo-caution/60 text-xo-caution" : "border-xo-line text-xo-muted"}`}>
-                      {isDone ? "✓" : isActive ? <Spinner /> : i + 1}
+                      isDone ? "border-xo-verified/60 text-xo-verified" : "border-xo-line text-xo-muted"}`}>
+                      {isDone ? (s.key === "outreach" ? "–" : "✓") : i + 1}
                     </span>
                     <div className="min-w-0">
-                      <div className={`text-[13px] font-semibold ${isDone || isActive ? "text-xo-text" : "text-xo-muted"}`}>{s.title}</div>
-                      <div className="mt-0.5 text-[12px] leading-snug text-xo-muted">{isDone ? s.detail : isActive ? s.running : "Waiting"}</div>
+                      <div className={`text-[13px] font-semibold ${isDone ? "text-xo-text" : "text-xo-muted"}`}>{s.title}</div>
+                      <div className="mt-0.5 text-[12px] leading-snug text-xo-muted">{isDone ? s.detail : "Not prepared yet"}</div>
                     </div>
                   </li>
                 );
               })}
             </ol>
             {phase === "done" && (
-              <div className="mt-4 border border-xo-verified/40 bg-xo-ink p-3">
-                <h3 className="text-[12px] font-semibold text-xo-verified">Now live · the Shopify of company sales</h3>
+              <div className="mt-4 border border-xo-line bg-xo-ink p-3">
+                <h3 className="text-[12px] font-semibold">What happens next</h3>
                 <p className="mt-1 text-[12px] leading-relaxed text-xo-muted">
-                  Your opportunity is published anonymized, the data room is indexed, and {matches.length} matched buyers
-                  are entering sequenced outreach. Engagement signals flow straight into the negotiation engine.
+                  Nothing has been published or sent. To list the company on the exchange — where buyers on the Acquisition Radar see it anonymized and can request an NDA — use <Link to="/console/intake" className={LINK}>List on the exchange</Link>. Suggested first approaches for the matched buyers:
                 </p>
                 <ul className="mt-2 flex flex-wrap gap-1.5">
                   {matches.slice(0, 6).map((m) => (
@@ -240,9 +221,7 @@ const Marketplace: React.FC = () => {
             </dl>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              {phase === "done"
-                ? <button type="button" disabled className={BTN_GHOST}>● Published to marketplace</button>
-                : <button type="button" onClick={publish} className={BTN}>Publish Opportunity</button>}
+              <Link to="/console/intake" className={BTN}>List on the exchange →</Link>
               <button type="button" onClick={() => { setEditAsk(listing.askingPriceUsd.mid); setEditNote(override.note); setEditOpen(true); }} className={BTN_GHOST}>Edit listing</button>
               {view === "public" && <button type="button" className={BTN_GHOST}>Request NDA</button>}
             </div>
@@ -297,17 +276,6 @@ const Marketplace: React.FC = () => {
     </div>
   );
 };
-
-const Spinner: React.FC = () => (
-  <span className="block h-3 w-3 rounded-full border-[1.5px] border-xo-caution/40 border-t-xo-caution motion-safe:animate-spin" />
-);
-
-const Manifesto: React.FC<{ value: string; label: string }> = ({ value, label }) => (
-  <div className="flex flex-col-reverse">
-    <dt className="mt-0.5 text-[11px] text-xo-muted">{label}</dt>
-    <dd className="font-mono text-lg font-semibold">{value}</dd>
-  </div>
-);
 
 const Tag: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <li className="rounded-sm border border-xo-line px-2 py-0.5 font-mono text-[11px] text-xo-muted">{children}</li>
