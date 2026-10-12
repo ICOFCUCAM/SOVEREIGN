@@ -319,6 +319,12 @@ Owner, 2026-10-12: asked whether the hall should move into the body with a diffe
 
 Nothing changes on the live homepage until the owner confirms. Screens: `scratchpad/heroes/hero-{8,9}-{fold,hall}-{1440,390}.jpg`.
 
+**Owner's choice (2026-10-12): Option 9** ("ok 9").
+
+| # | Gap | Fix | Status |
+|---|---|---|---|
+| X1 | **Put Option 9 on the live homepage.** | The hero becomes **The Horizon**: navy, centred editorial `h1`, ruled eyebrow, `hero.sub`, `hero.body` (kept so no content is lost), both buttons, the proof figures with source notes 1–3, and the light cove glowing on the horizon. Directly below it, the **trading hall** becomes its own section, with the label "The exchange" and the `h2` "The whole market, in one room." — new i18n keys `hall.eyebrow`, `hall.h2`, `hall.h2em` in EN/FR/ES. The screen (ribbon + `CommandBoard`) is unchanged. Every other moment keeps its order after the hall. | ☐ |
+
 ---
 
 ## Closure log
