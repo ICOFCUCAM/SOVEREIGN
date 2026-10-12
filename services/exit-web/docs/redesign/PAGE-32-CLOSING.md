@@ -1,0 +1,45 @@
+# ExitOS redesign · Page 32 — Closing Center
+
+| | |
+|---|---|
+| Route | `/console/closing` |
+| Component | `src/pages/Closing.tsx` (259 lines) + `lib/engines.ts` (`DILIGENCE` = `runDueDiligence(SAMPLE_COMPANY)`, `OFFER_EVALUATIONS`), shared `BankerTake` |
+| NAV | "Closing Center / Signatures / Escrow", founder, **Pro** (free: Upgrade page) |
+| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+
+## Stage A — Audit (baseline commit `f95aa68`)
+
+### Purpose
+A closing checklist (12 items with owner, due day and status), a close-probability meter with the risks gating the wire, the diligence red flags and critical questions, and a closing-call agenda with a calendar invite.
+
+### Data flow
+| Element | Source | Nature |
+|---|---|---|
+| **"Closing in 6 days — Sentinel Holdings"**, "in signing", "Closing checklist — Sentinel Holdings" | hard-coded | **Invented deal.** In the sample data Sentinel Holdings' NDA is **revoked** (`engines.ts`); no deal has reached closing |
+| Checklist statuses and due days (2 done, 6 in progress, 4 pending; "Fri", "Tue 9am" …) | hard-coded `CLOSING` array | **Invented progress** |
+| "Shareholder consent — **95 % threshold**"; "Regulatory filings — **Form 8023 / NJ-1054**" | hard-coded | Invented specifics (no source; the threshold depends on the company's documents and the filings on counsel's advice) |
+| **"58 % close prob"** / "modeled close probability" meter | `closeProbability`: (done + ½ in progress) / total − 8 % per blocker − 4 % per diligence red flag | A rule run on the **invented statuses**, presented as a probability |
+| Deal value in the take | max headline of the sample offers | Sample data, unlabelled |
+| Diligence red flags and critical questions | `runDueDiligence(SAMPLE_COMPANY)` | Engine ✓ on the **demo company only**, unlabelled; saved intakes ignored |
+| Closing call: **"Schedule"** → toast "Closing call scheduled"; "Dial-in issued with the calendar invite"; subtitle "**Tuesday** 08:00" | — | **False actions**: nothing is scheduled, no dial-in exists; the .ics is set to the day after tomorrow, not Tuesday |
+| .ics summary "Closing call — **Helios Freight** transaction" | hard-coded | Demo name for every company |
+| "ExitOS **tracks every signature, escrow movement and filing, and nudges the owner** before each due date" | shared `BankerTake` | **Overclaim** — none of this exists |
+| Tape | registry snapshot | Fake live (pinging) |
+
+### Baseline (Pro)
+`h1` none · **overflow at 390** · axe 0 (1440) · 0 errors · 25 tab stops. Free: Upgrade page.
+
+## Gap register — Page 32
+| # | Gap | Fix | Status |
+|---|---|---|---|
+| G1 | **Invented closing deal and progress.** | No buyer, no countdown: the checklist is a template; each item's status is **set by the user** (Not started / In progress / Done / Blocked), saved in this browser; no invented due days. | ☐ |
+| G2 | **"Close probability" from invented statuses.** | "Checklist readiness (rule)" computed from the user's statuses and the diligence red flags, with the rule stated; not a probability. | ☐ |
+| G3 | **False "Schedule", dial-in and tracking claims; wrong day.** | Remove "Schedule" and the dial-in line; the invite is a download the user imports and sends; the subtitle shows the invite's real date; no tracking or nudging claims; invite names the active company. | ☐ |
+| G4 | Invented item specifics (95 % threshold, Form 8023 / NJ-1054). | Neutral items: "Shareholder consent — at the threshold your documents require"; "Regulatory and tax filings — as counsel advises". | ☐ |
+| G5 | Diligence on the demo company only, unlabelled. | `runDueDiligence(company)` for the active company; Demo data / Your intake badge. | ☐ |
+| G6 | Shared `BankerTake` and fake live tape. | Page-local recommended action; `RegistryTape`. | ☐ |
+| G7 | Design: no `h1`, overflow at 390. | Rebuild on `xo`. | ☐ |
+
+---
+
+## Closure log
