@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { MarketTape } from "../lib/workstation";
+import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { runInstitutionalValuation } from "@exit/engines";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
@@ -13,7 +14,7 @@ import { fmtUsdShort } from "../lib/buyer-dna";
 // intelligence.
 
 const CONF_STYLE: Record<string, string> = {
-  High: "text-deal-300", Medium: "text-loi-300", Low: "text-white/45",
+  High: "text-xo-verified", Medium: "text-xo-caution", Low: "text-xo-muted",
 };
 
 const OutreachPlan: React.FC = () => {
@@ -24,59 +25,56 @@ const OutreachPlan: React.FC = () => {
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Exchange · Execution"
-        title="Buyer Outreach Plan"
-        tag={fromIntake ? "Your mandate" : company.name}
-        status="Sequenced"
-        metrics={[
-          { k: "Qualified buyers", v: String(plan.totalBuyers), accent: true, sub: "targeted, not mass" },
-          { k: "Sequenced waves", v: String(plan.waves.length), sub: "competitive tension" },
-          { k: "Lead bidders", v: String(plan.waves[0]?.buyers.length ?? 0), sub: "week 1" },
-          { k: "Anchor expected value", v: fmtUsdShort(plan.waves[0]?.buyers[0]?.expectedValueUsd ?? 0), accent: true, sub: "top buyer" },
-        ]}
-        note={<span className="text-white/70">{plan.summary}</span>}
-      />
+    <div data-page="outreach-plan" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow={`◉ Exchange · Execution · ${fromIntake ? "Your mandate" : company.name}`} title="Buyer Outreach Plan"
+        badge={<span className="text-[12px] text-xo-muted">Sequenced</span>}
+        description={plan.summary} />
+
+      <section aria-label="Plan summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><Metric label="Qualified buyers" emphasis value={String(plan.totalBuyers)} sub="targeted, not mass" /></div>
+        <div className="bg-xo-panel"><Metric label="Sequenced waves" value={String(plan.waves.length)} sub="competitive tension" /></div>
+        <div className="bg-xo-panel"><Metric label="Lead bidders" value={String(plan.waves[0]?.buyers.length ?? 0)} sub="week 1" /></div>
+        <div className="bg-xo-panel"><Metric label="Anchor expected value" emphasis value={fmtUsdShort(plan.waves[0]?.buyers[0]?.expectedValueUsd ?? 0)} sub="top buyer" /></div>
+      </section>
 
       <MarketTape items={tape} />
 
-      <Frame>
-        {plan.waves.map((w) => (
-          <Panel key={w.tier} title={`Wave ${w.tier} · ${w.label}`} className="lg:col-span-12"
-            right={<span className="text-[9px] uppercase tracking-wide text-white/35">{w.timing} · {w.buyers.length} buyers</span>}
-            foot={w.rationale}>
-            <table className="w-full text-[12px]">
-              <thead className="sticky top-0 bg-ink-900 text-left text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">
-                <tr className="border-b border-white/10">
-                  <th className="px-3 py-1.5">Buyer</th>
-                  <th className="px-2 py-1.5 text-right">Prob</th>
-                  <th className="px-2 py-1.5 text-right">Expected value</th>
-                  <th className="px-2 py-1.5">Contact path</th>
-                  <th className="px-3 py-1.5 text-right">Conf</th>
+      {plan.waves.map((w) => (
+        <Section key={w.tier} title={`Wave ${w.tier} · ${w.label}`} className="border border-xo-line"
+          right={<span className="text-[11px] text-xo-muted">{w.timing} · {w.buyers.length} buyers</span>}
+          foot={w.rationale}>
+          <ScrollRegion label={`Wave ${w.tier} buyers`}>
+            <table className="w-full min-w-[640px] text-[12px]">
+              <thead className="text-left text-[11px] text-xo-muted">
+                <tr className="border-b border-xo-line">
+                  <th scope="col" className="px-4 py-2 font-medium">Buyer</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Prob</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Expected value</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Contact path</th>
+                  <th scope="col" className="px-4 py-2 text-right font-medium">Conf</th>
                 </tr>
               </thead>
               <tbody>
                 {w.buyers.map((b) => (
-                  <tr key={b.buyerId} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                    <td className="px-3 py-1.5">
-                      <Link to={`/console/buyer/${b.buyerId}`} className="font-semibold text-white hover:text-deal-300">{b.name}</Link>
-                      <div className="text-[10px] text-white/35">{b.why}</div>
-                    </td>
-                    <td className="px-2 py-1.5 text-right font-mono font-bold tabular-nums text-deal-300">{b.probabilityPct}%</td>
-                    <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/80">{fmtUsdShort(b.expectedValueUsd)}</td>
-                    <td className="px-2 py-1.5 text-white/65">{b.contactPath}</td>
-                    <td className={`px-3 py-1.5 text-right font-semibold ${CONF_STYLE[b.confidence]}`}>{b.confidence}</td>
+                  <tr key={b.buyerId} className="border-b border-xo-line last:border-0">
+                    <th scope="row" className="px-4 py-2 text-left font-normal">
+                      <Link to={`/console/buyer/${b.buyerId}`} className="font-semibold text-xo-text hover:text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{b.name}</Link>
+                      <div className="text-[11px] text-xo-faint">{b.why}</div>
+                    </th>
+                    <td className="px-2 py-2 text-right font-mono font-semibold tabular-nums">{b.probabilityPct}%</td>
+                    <td className="px-2 py-2 text-right font-mono tabular-nums">{fmtUsdShort(b.expectedValueUsd)}</td>
+                    <td className="px-2 py-2 text-xo-muted">{b.contactPath}</td>
+                    <td className={`px-4 py-2 text-right font-semibold ${CONF_STYLE[b.confidence]}`}>{b.confidence}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </Panel>
-        ))}
-      </Frame>
+          </ScrollRegion>
+        </Section>
+      ))}
 
-      <p className="px-1 text-[10px] text-white/40">
-        Contact paths and confidence come from each buyer's <Link to="/console/buyer-graph" className="text-deal-300 hover:text-deal-200">contact intelligence</Link>; probabilities and expected value from the buyer graph and valuation framework. ExitOS surfaces the path — it does not store or send to personal contacts.
+      <p className="px-1 text-[11px] text-xo-faint">
+        Contact paths and confidence come from each buyer's <Link to="/console/buyer-graph" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">contact intelligence</Link>; probabilities and expected value from the buyer graph and valuation framework. ExitOS surfaces the path — it does not store or send to personal contacts.
       </p>
     </div>
   );

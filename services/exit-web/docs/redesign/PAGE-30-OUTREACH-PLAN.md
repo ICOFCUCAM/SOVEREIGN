@@ -35,8 +35,12 @@ Free: Upgrade page (`h1` 1, axe 0). Preparation and Pro: `h1` none · axe color-
 | G4 | "Sequenced" implies a running programme. | Say it is a suggested plan: nothing is sent or scheduled; week labels are suggested timing. | ☐ |
 | G5 | Demo unlabelled. | Demo data / Your intake badge and line. | ☐ |
 | G6 | Fake live tape. | `RegistryTape`. | ☐ |
-| G7 | Design: no `h1`, 26 contrast failures. | Rebuild on `xo`. | ☐ |
+| G7 | Design: no `h1`, 26 contrast failures. | Rebuild on `xo`. | ☑ G7-commit |
 
 ---
 
 ## Closure log
+
+### G7 — Design
+*Closed by:* `pages/OutreachPlan.tsx` rebuilt on `xo` (`PageHeader` `h1` "Buyer Outreach Plan" with the summary as description; four metrics; each wave a titled `Section` with its buyer table in a keyboard-reachable `ScrollRegion`, buyer names as row headers, column headers scoped; footer link underlined). Content carried over verbatim; G1–G6 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Preparation and Pro 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 26), all tab stops with visible focus · free: Upgrade page.
