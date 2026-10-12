@@ -231,9 +231,9 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               <p className="mt-5 max-w-sm font-editorial text-[17px] leading-snug text-white/85">{t("ft.tagline")}</p>
               {/* how the exchange works, stated — not status lights (EE20) */}
               <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10.5px] uppercase tracking-[0.12em] text-[#E8E0D2]/75">
-                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-ex-done/70" />{t("ft.soc")}</li>
-                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-ex-done/70" />{t("ft.audit")}</li>
-                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-ex-done/70" />{t("ft.ndagated")}</li>
+                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-[#C9B08A]/80" />{t("ft.soc")}</li>
+                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-[#C9B08A]/80" />{t("ft.audit")}</li>
+                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-[#C9B08A]/80" />{t("ft.ndagated")}</li>
               </ul>
             </div>
             {([
