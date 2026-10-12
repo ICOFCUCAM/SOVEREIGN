@@ -32,7 +32,7 @@ Free: Upgrade page. Preparation and Pro: `h1` none · axe color-contrast ×39 (1
 ## Gap register — Page 31
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| G1 | **The founder's own clicks counted as buyer response history.** | In `engagement-registry.ts`, count only events a **buyer** performed (`actorRole: "buyer"`) as response history — today none target a buyer, so every score is the stated appetite estimate and "Response history" reads 0 until real buyer responses exist. Calculation change, documented. | ☑ G1-commit |
+| G1 | **The founder's own clicks counted as buyer response history.** | In `engagement-registry.ts`, count only events a **buyer** performed (`actorRole: "buyer"`) as response history — today none target a buyer, so every score is the stated appetite estimate and "Response history" reads 0 until real buyer responses exist. Calculation change, documented. | ☑ `d6b3754` |
 | G2 | **Score shown as a percentage and "likely to respond"; rule hidden.** | "Engagement estimate N/100"; rule stated on the page (appetite × contact-confidence factor; tiers); "High engagement — estimate ≥ 65". | ☐ |
 | G3 | Not company-specific; column sources unstated. | Say the ranking is the same for every company; "Indexed deals · last 12m" (mostly unverified); "Typical contact role"; "Contact confidence" with its rule; "Close rate (registry, where disclosed)"; "Intent (stated themes)". | ☐ |
 | G4 | Fake live tape. | `RegistryTape`. | ☐ |
