@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { notify } from "../lib/ui";
 import { PageHeader, Section, Metric, ScrollRegion, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 import { useAuth } from "../lib/auth";
+import { listingDestination } from "../lib/exit-api";
 import { ROLE_LABEL, type Role, type Plan } from "../lib/access";
 import { CHANNELS } from "../lib/social-publish";
 import { useEngineStatus, usePublishHistory, ENGINE_ENDPOINT } from "../lib/distribution-engine";
@@ -55,7 +56,7 @@ const Admin: React.FC = () => {
   return (
     <div data-page="admin" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="Internal · Operator" title="Admin Console"
-        description={`Signed in as ${ROLE_LABEL[session?.role ?? "admin"]}. A sample account roster (illustrative), platform facts and the distribution engine.`} />
+        description={`Signed in as ${ROLE_LABEL[session?.role ?? "admin"]}. A sample account roster (illustrative), platform configuration and the distribution engine.`} />
 
       <section aria-label="Roster summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Accounts" emphasis value={String(accounts.length)} sub="sample roster" provenance="demo" /></div>
@@ -105,12 +106,18 @@ const Admin: React.FC = () => {
         </ScrollRegion>
       </Section>
 
-      <Section title="Platform status" className="border border-xo-line">
+      <Section title="Platform configuration" className="border border-xo-line"
+        foot="Facts about how this console runs — not health checks. No service is monitored from here.">
         <dl className="grid gap-px bg-xo-line sm:grid-cols-3">
-          {[["Engines", "operational"], ["Marketplace", "operational"], ["Identity / SSO", "demo mode"]].map(([k, v]) => (
-            <div key={k} className="flex items-center justify-between bg-xo-panel px-4 py-2.5 text-[13px]">
-              <dt className="text-xo-muted">{k}</dt>
-              <dd className="flex items-center gap-1.5 text-xo-verified"><span aria-hidden className="h-1.5 w-1.5 rounded-full bg-xo-verified" />{v}</dd>
+          {[
+            ["Engines", "Run in the browser", "Valuation, discovery and diligence engines run client-side; there is no engine service to monitor."],
+            ["Marketplace storage", listingDestination() === "exchange" ? "Exchange backend" : "This browser", listingDestination() === "exchange" ? "Listings, requests and offers are stored in the Supabase backend." : "No backend is configured, so listings, requests and offers are stored in this browser."],
+            ["Identity", "Demo sessions", "Sessions are created in the browser; there is no SSO or server-side role service yet."],
+          ].map(([k, v, d]) => (
+            <div key={k} className="bg-xo-panel px-4 py-3">
+              <dt className="text-[12px] text-xo-muted">{k}</dt>
+              <dd className="mt-0.5 text-[13px] font-semibold">{v}</dd>
+              <dd className="mt-0.5 text-[12px] text-xo-muted">{d}</dd>
             </div>
           ))}
         </dl>

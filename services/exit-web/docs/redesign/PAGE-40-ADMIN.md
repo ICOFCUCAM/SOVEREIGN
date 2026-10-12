@@ -30,7 +30,7 @@ Signed in as the dev operator (`ops@example.com` → superadmin). All Supabase f
 |---|---|---|---|
 | G1 | **Invented roster presented as real, on real domains.** | Label it "Sample roster — illustrative, not real users; ExitOS has no account directory yet"; emails on reserved `example.com`; KPIs say "sample". | ☑ `9cb8554` |
 | G2 | **"Create admin" provisions nothing.** | "Add to sample roster" with the plain statement that it creates no account and grants no access (admin roles are not server-side yet; in development the operator email is set by `VITE_EXITOS_DEV_OPERATOR_EMAIL`); validate the email. | ☑ `efce16c` |
-| G3 | **Hard-coded "operational" status.** | Facts instead of health: engines run in the browser (nothing to monitor); marketplace storage = exchange backend or this browser (`listingDestination()`); identity = demo sessions created in the browser. | ☐ |
+| G3 | **Hard-coded "operational" status.** | Facts instead of health: engines run in the browser (nothing to monitor); marketplace storage = exchange backend or this browser (`listingDestination()`); identity = demo sessions created in the browser. | ☑ G3-commit |
 | G4 | Distribution wording ("Activating", "live"). | "Not connected" / "N channel(s) connected". | ☐ |
 | G5 | Design: old components; overflow at 390. | Rebuild on `xo`. | ☑ `298b49b` |
 
@@ -49,3 +49,7 @@ Signed in as the dev operator (`ops@example.com` → superadmin). All Supabase f
 ### G2 — "Create admin" provisions nothing
 *Closed by:* `pages/Admin.tsx`. The button "Create admin" → **"Add to sample roster"**; the section carries a "Not wired" badge and the foot "This adds a row to the sample roster on this page — it does not create an account or grant access. Admin roles are not server-side yet; in local development the operator email is set by VITE_EXITOS_DEV_OPERATOR_EMAIL."; the toast "Admin account created for …" → "Added to the sample roster — no account was created". The email is validated (format and duplicates) with a described message and `aria-invalid`; the button stays disabled until name and email are valid.
 *Verification:* `tsc -b`, eslint clean · Chromium superadmin (stubbed) 1440/390: "not-an-email" → "Enter an email address, e.g. operator@example.com.", invalid, disabled; "owner@example.com" → "That email is already in the sample roster.", disabled; "new.op@example.com" → valid; adding shows the new toast and 7 rows; axe 0; 0 errors.
+
+### G3 — Hard-coded "operational" status
+*Closed by:* `pages/Admin.tsx`. "Platform status — Engines operational · Marketplace operational · Identity / SSO demo mode" with green dots (nothing was checked) → **"Platform configuration"** with facts: Engines — "Run in the browser" (no engine service to monitor); Marketplace storage — "Exchange backend" or "This browser" from `listingDestination()` (here: "This browser — no backend is configured …"); Identity — "Demo sessions" (no SSO or server-side role service yet); foot "Facts about how this console runs — not health checks. No service is monitored from here."
+*Verification:* `tsc -b`, eslint clean · Chromium superadmin (stubbed): 0 "operational"; the three facts shown, storage "This browser" on the dev server (no Supabase configuration) · 1440/390: axe 0, no overflow, 0 errors.
