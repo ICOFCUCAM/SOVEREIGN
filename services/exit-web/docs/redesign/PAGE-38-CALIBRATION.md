@@ -36,7 +36,7 @@ The page calls the production edge function. Tests stub that call with **synthet
 | # | Gap | Fix | Status |
 |---|---|---|---|
 | G1 | **Self-learning overclaims.** | Say the dashboard measures error for review; nothing feeds back into the engines automatically; re-calibration is a deliberate change. | ☑ `542e82e` |
-| G2 | **"Median \|error\|" shows the mean; sign and scope unstated.** | "Mean absolute error" (and the median error beside it); "error = (realized − predicted) ÷ predicted; negative = closed below the prediction"; "demo tenant"; the prediction recorded is the strategic-report midpoint (X21). | ☑ G2-commit |
+| G2 | **"Median \|error\|" shows the mean; sign and scope unstated.** | "Mean absolute error" (and the median error beside it); "error = (realized − predicted) ÷ predicted; negative = closed below the prediction"; "demo tenant"; the prediction recorded is the strategic-report midpoint (X21). | ☑ `6682907` |
 | G3 | Design: old components; overflow at 390. | Rebuild on `xo`; tables in scroll regions. | ☑ `c576de8` |
 
 ---
