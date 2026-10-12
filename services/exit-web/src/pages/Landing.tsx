@@ -171,7 +171,19 @@ const Landing: React.FC = () => {
           <div className="mt-12 grid gap-10 border-t-4 border-double border-ink-900 pt-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] lg:gap-[5vw]">
             <p className="max-w-md text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-[#6A5539]">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
             {/* comparison matrix, set as a broadsheet table */}
-            <div role="region" aria-label="Traditional sale compared with ExitOS" tabIndex={0} className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+            {/* phones: each dimension as its own entry, the two ways of selling one above the other */}
+            <dl className="border-t border-ink-900 sm:hidden">
+              {LOSSES.map((l) => (
+                <div key={l.problem} className="border-b border-slate-300 py-5 last:border-0">
+                  <dt className="font-editorial text-[19px] font-semibold text-ink-900">{l.dimension}</dt>
+                  <dd className="mt-3 grid grid-cols-[88px_1fr] gap-x-3 gap-y-2 text-[13.5px] leading-snug">
+                    <span className="pt-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-slate-600">Traditional</span><span className="text-slate-600">{l.problem}</span>
+                    <span className="pt-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#6A5539]">ExitOS</span><span className="font-medium text-ink-900">{l.fix}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <div role="region" aria-label="Traditional sale compared with ExitOS" tabIndex={0} className="hidden overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:block">
               <table className="w-full min-w-[620px] text-left">
                 <thead>
                   <tr className="border-b border-ink-900 font-mono text-[10.5px] uppercase tracking-[0.14em]">
@@ -184,7 +196,7 @@ const Landing: React.FC = () => {
                   {LOSSES.map((l) => (
                     <tr key={l.problem} className="border-b border-slate-300 last:border-0">
                       <th scope="row" className="py-4 pr-4 align-top font-editorial text-[19px] font-semibold text-ink-900">{l.dimension}</th>
-                      <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] text-slate-600"><span className="mr-1.5 text-red-600" aria-hidden>✕</span>{l.problem}</td>
+                      <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] text-slate-600"><span className="mr-1.5 text-slate-400" aria-hidden>—</span>{l.problem}</td>
                       <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] font-medium text-ink-900"><span className="mr-1.5 text-[#6A5539]" aria-hidden>✓</span>{l.fix}</td>
                     </tr>
                   ))}
