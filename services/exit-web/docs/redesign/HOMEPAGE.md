@@ -375,7 +375,7 @@ Self-critique of the homepage after Z3 (1440 px: 8,839 px tall; 390 px: 12,560 p
 | AA6 | Figures repeat: 21 mandates deploying (hero + board ribbon), 31 mandates and 21 jurisdictions (hero, thesis table, board), 61 recorded deals (three times in the ledger), 6,311 events (hero + ledger footnote). | Each figure once outside the board: the hero keeps three figures (6,311 · 31 · $379.1B); the ledger keeps its masthead count and drops the two repeats; the thesis table states the run without repeating the registry counts. The sources list keeps its method figures (it is the reference). | closed `bc252d9d` |
 | AA7 | "What is your company worth?" reads as an afterthought: a thin row between the hall and the thesis, and a third "Access the Exchange" button. | A full chapter (03) right after the board: chapter label, large editorial headline, the form at full width with larger fields, the result as the section's centrepiece; the duplicate "Access the Exchange" button removed (Refine remains). | closed `d3a1247d` |
 | AA8 | Three navy blocks compete (map, hall, lifecycle band), two nearly back to back. | AA1 removes the band; the map is set on paper (light ground, ink lines, blue route) like a printed chart, so the hall is the page's one dark moment. Palette unchanged (interchanged only). | closed `432bda73` |
-| AA9 | The ledger heading reads as centred: it sits in the right-hand column of a two-column grid while every other heading is flush left. | Chapter label above a flush-left headline, as in every other chapter. | open |
+| AA9 | The ledger heading reads as centred: it sits in the right-hand column of a two-column grid while every other heading is flush left. | Chapter label above a flush-left headline, as in every other chapter. | closed `62c60936` |
 | AA10 | The "Sources & method" list is long for a homepage. | Collapsed by default under its heading; it opens automatically when a source note is followed, so every note still lands on its entry. | open |
 
 ## Closure log
@@ -822,6 +822,9 @@ Hero keeps three figures (6,311 · 31 · $379.1B; 21 mandates deploying stays on
 
 ### AA7 — closed d3a1247d
 Value your company is chapter 03, right after the board: double rule, Chapter label, a chapter-size editorial headline with the note beside it, full-width form with larger fields and button, the range at up to 6rem as the centrepiece. The duplicate "Access the Exchange" button removed (Refine remains). Same engine result as before (Vertical SaaS / $40M / 45% → $112.2M–$323.2M at 1440 and 390). Verified: tsc, eslint, vitest 243/243.
+
+### AA9 — closed 62c60936
+The ledger's chapter label now sits above a flush-left headline (with its note to the right), as in every other chapter, instead of in a narrow left column that pushed the headline toward the centre. Verified: tsc, eslint, vitest 243/243.
 
 ## Owner decisions
 - **The board, as built, includes its presentation** (owner, 2026-10-12): the mounted 3D display in the trading hall, not only the data panel. M10 restores it.
