@@ -1,23 +1,26 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, Field, inputCls, notify } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
+import { SAMPLE_COMPANY } from "../lib/profile";
+import { loadActiveCompany } from "../lib/active-company";
 import { buildMarketTape } from "../lib/market-tape";
 import {
   CAPTABLE_ANALYSIS, CAPTABLE_SIGNATORY, CAPTABLE_DRAGALONG,
   SAMPLE_CAPTABLE, OFFER_WATERFALLS, SAMPLE_OFFERS, fmt,
 } from "../lib/engines";
-import BankerTake from "../components/BankerTake";
 
 const ROLE_STYLE: Record<string, string> = {
-  founder:        "text-deal-300",
-  lead_investor:  "text-loi-300",
-  investor:       "text-stage-engaged",
-  board_director: "text-stage-engaged",
-  board_observer: "text-white/55",
-  executive:      "text-white/70",
-  advisor:        "text-white/55",
-  employee:       "text-white/55",
-  other:          "text-white/40",
+  founder:        "text-xo-verified",
+  lead_investor:  "text-xo-caution",
+  investor:       "text-xo-action",
+  board_director: "text-xo-action",
+  board_observer: "text-xo-muted",
+  executive:      "text-xo-muted",
+  advisor:        "text-xo-muted",
+  employee:       "text-xo-muted",
+  other:          "text-xo-faint",
 };
 
 const ROLE_LABEL: Record<string, string> = {
@@ -27,6 +30,9 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 const Investors: React.FC = () => {
+  // The cap table and offers are the demo company's samples; an intake holds
+  // neither, so this page stays on demo data and says so.
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
   const analysis = CAPTABLE_ANALYSIS;
   const signatory = CAPTABLE_SIGNATORY;
   const drag = CAPTABLE_DRAGALONG;
@@ -47,32 +53,29 @@ const Investors: React.FC = () => {
     setAdded((prev) => [{ name, role: draft.role, email: draft.email.trim() }, ...prev]);
     setDraft({ name: "", role: "investor", email: "" });
     setAddOpen(false);
-    notify(`Added ${name} to the cap-table CRM`);
+    notify(`Added ${name} to this session's contact list (not saved)`);
   };
 
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Workspace · Cap-table"
-        title="Investor CRM"
-        tag="Ownership · waterfall"
-        status={signatory.meetsThreshold ? "Coverage met" : "Coverage short"}
-        metrics={[
-          { k: "Fully diluted", v: analysis.fullyDilutedShares.toLocaleString(), sub: `${analysis.ownershipByStakeholder.length} stakeholders` },
-          { k: "Founder ownership", v: `${(analysis.ownershipByRole.founder * 100).toFixed(1)}%`, accent: analysis.ownershipByRole.founder >= 0.3, sub: "of fully-diluted" },
-          { k: "Signatory coverage", v: `${Math.round(signatory.coverageOfShares * 100)}%`, accent: signatory.meetsThreshold, sub: signatory.meetsThreshold ? "meets 95%" : "below 95%" },
-          { k: "Drag-along", v: drag.meets ? "Met" : "Short", sub: `${Math.round(drag.committedPct * 100)}% · ${drag.holdouts.length} holdouts` },
-          { k: "Net to founders", v: fmt(selectedWf.waterfall.netToFoundersUsd), accent: true, sub: selectedOffer.buyerName },
-        ]}
-      />
+    <div data-page="cap-table" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow={`◉ Workspace · Cap-table · Investor CRM · Demo company: ${SAMPLE_COMPANY.name}`} title="Cap Table"
+        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Ownership · waterfall · {signatory.meetsThreshold ? "Coverage met" : "Coverage short"}</span></>}
+        description={<>The sample cap table and sample offers of the demo company ({SAMPLE_COMPANY.name}).{fromIntake ? " Your intake has no cap table or offers, so these figures are not yours." : ""}</>} />
 
-      <MarketTape items={tape} />
+      <section aria-label="Cap-table summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
+        <div className="bg-xo-panel"><Metric label="Fully diluted" value={analysis.fullyDilutedShares.toLocaleString()} sub={`${analysis.ownershipByStakeholder.length} stakeholders`} /></div>
+        <div className="bg-xo-panel"><Metric label="Founder ownership" value={`${(analysis.ownershipByRole.founder * 100).toFixed(1)}%`} sub="of fully-diluted" /></div>
+        <div className="bg-xo-panel"><Metric label="Signatory coverage" value={<span className={signatory.meetsThreshold ? "text-xo-verified" : "text-xo-caution"}>{Math.round(signatory.coverageOfShares * 100)}%</span>} sub={signatory.meetsThreshold ? "meets 95%" : "below 95%"} /></div>
+        <div className="bg-xo-panel"><Metric label="Drag-along" value={drag.meets ? "Met" : "Short"} sub={`${Math.round(drag.committedPct * 100)}% · ${drag.holdouts.length} holdouts`} /></div>
+        <div className="bg-xo-panel"><Metric label="Founders' risk-adjusted value" emphasis value={<span className="text-xo-verified">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span>} sub={`${selectedOffer.buyerName} · engine NPV (stock −15%, earnout −45%)`} /></div>
+      </section>
 
-      {/* ── Add stakeholder ───────────────────────────────────────── */}
-      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add stakeholder" subtitle="Adds a contact to the cap-table CRM roster" size="md"
-        footer={<><Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button><Button onClick={submitAdd}>Add to CRM</Button></>}>
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
+
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add stakeholder" subtitle="Adds a contact to this session's list. It is not saved and does not change the cap table, signatories or waterfall." size="md"
+        footer={<><Button variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Button><Button onClick={submitAdd}>Add to list</Button></>}>
         <div className="space-y-4">
           <Field label="Name"><input className={inputCls} placeholder="e.g. Dana Reyes" value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} /></Field>
           <Field label="Role">
@@ -85,176 +88,176 @@ const Investors: React.FC = () => {
       </Modal>
 
       {added.length > 0 && (
-        <div className="rounded-lg border border-white/10 bg-ink-900 p-3">
-          <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/40">Added to CRM · {added.length}</div>
-          <div className="mt-2 space-y-1.5">
+        <Section title={`Contacts added this session · ${added.length}`} className="border border-xo-line" foot="Kept only until you leave or reload this page; not part of the cap table or any calculation.">
+          <ul className="divide-y divide-xo-line">
             {added.map((s, i) => (
-              <div key={i} className="flex items-center justify-between rounded border border-white/10 bg-ink-800/40 px-3 py-1.5 text-[12px]">
-                <span className="font-medium text-white">{s.name}</span>
-                <span className={`text-[10px] font-semibold uppercase tracking-wide ${ROLE_STYLE[s.role] ?? "text-white/50"}`}>{ROLE_LABEL[s.role] ?? s.role}{s.email ? ` · ${s.email}` : ""}</span>
-              </div>
+              <li key={i} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-[12px]">
+                <span className="font-medium">{s.name}</span>
+                <span className={`text-[12px] font-semibold ${ROLE_STYLE[s.role] ?? "text-xo-muted"}`}>{ROLE_LABEL[s.role] ?? s.role}{s.email ? ` · ${s.email}` : ""}</span>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </Section>
       )}
 
-      <BankerTake
-        next={signatory.meetsThreshold
-          ? <>Keep signatory coverage locked and pre-clear the drag-along before signing.</>
-          : <>Secure the <span className="text-white">{drag.holdouts.length} drag-along holdout{drag.holdouts.length === 1 ? "" : "s"}</span> to clear the {Math.round(signatory.coverageOfShares * 100)}% threshold.</>}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span> net to founders on the {selectedOffer.buyerName} offer (after the preference stack).</>}
-        inaction={<>Holdouts and missing signatures can block or delay the close after terms are agreed.</>}
-        buyer={drag.holdouts.length > 0
-          ? <>Chase the holdouts: <span className="text-white">{drag.holdouts.map((h) => h.name).join(", ")}</span>.</>
-          : <>Coverage met — every required signatory is aligned.</>}
-        automate={<>ExitOS runs the waterfall per offer, tracks signatory coverage and flags drag-along gaps automatically.</>}
-        impact={<>{fmt(selectedWf.waterfall.netToFoundersUsd)}</>}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span>}>
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">{signatory.meetsThreshold
+            ? <>Keep signatory coverage locked and pre-clear the drag-along before signing.</>
+            : <>Secure the <span className="font-semibold">{drag.holdouts.length} drag-along holdout{drag.holdouts.length === 1 ? "" : "s"}</span> to clear the {Math.round(signatory.coverageOfShares * 100)}% threshold.</>}</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span> risk-adjusted value to the founder group on the {selectedOffer.buyerName} offer (after the preference stack, stock and earnout discounted).</TakeCell>
+            <TakeCell k="If you wait">Holdouts and missing signatures can block or delay the close after terms are agreed.</TakeCell>
+            <TakeCell k="Who">{drag.holdouts.length > 0 ? <>Chase the holdouts: <span className="text-xo-text">{drag.holdouts.map((h) => h.name).join(", ")}</span>.</> : <>Coverage met — every required signatory is aligned.</>}</TakeCell>
+            <TakeCell k="ExitOS does it">ExitOS runs the waterfall per offer, tracks signatory coverage and flags drag-along gaps automatically.</TakeCell>
+          </dl>
+        </div>
+      </Section>
 
       {analysis.warnings.length > 0 && (
-        <div className="rounded-lg border border-loi-500/30 bg-loi-500/5 p-3 text-[12px] text-loi-200">
-          <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-loi-300">Cap-table warnings</div>
-          <ul className="mt-1.5 space-y-0.5">
-            {analysis.warnings.map((w, i) => <li key={i}>· {w}</li>)}
+        <section aria-labelledby="ct-warn" className="border border-xo-caution/50 bg-xo-panel px-4 py-3 text-[12px]">
+          <h2 id="ct-warn" className="text-[12px] font-semibold text-xo-caution">Cap-table warnings</h2>
+          <ul className="mt-1.5 list-disc space-y-0.5 pl-5 text-xo-muted">
+            {analysis.warnings.map((w, i) => <li key={i}>{w}</li>)}
           </ul>
-        </div>
+        </section>
       )}
 
-      <Frame>
-        <Panel title="Cap table · fully-diluted ownership" className="lg:col-span-12"
-          right={<button onClick={() => setAddOpen(true)} className="rounded bg-deal-600/80 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white ring-1 ring-deal-400/40 hover:bg-deal-500">+ Stakeholder</button>}>
-          <table className="w-full text-[12px]">
-            <thead className="sticky top-0 bg-ink-900 text-left text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">
-              <tr className="border-b border-white/10">
-                <th className="px-3 py-1.5">Stakeholder</th>
-                <th className="px-2 py-1.5">Role</th>
-                <th className="px-2 py-1.5 text-right">Shares (FD)</th>
-                <th className="px-2 py-1.5 text-right">Ownership</th>
-                <th className="px-2 py-1.5">Signatory</th>
-                <th className="px-3 py-1.5">Seat</th>
+      <Section title="Cap table · fully-diluted ownership" className="border border-xo-line"
+        right={<button type="button" onClick={() => setAddOpen(true)} className="rounded-sm border border-xo-line px-2.5 py-1 text-[12px] font-semibold text-xo-action hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">+ Stakeholder</button>}>
+        <ScrollRegion label="Cap table">
+          <table className="w-full min-w-[640px] text-[12px]">
+            <thead className="text-left text-[11px] text-xo-faint">
+              <tr className="border-b border-xo-line">
+                <th scope="col" className="px-3 py-2 font-medium">Stakeholder</th>
+                <th scope="col" className="px-2 py-2 font-medium">Role</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">Shares (FD)</th>
+                <th scope="col" className="px-2 py-2 text-right font-medium">Ownership</th>
+                <th scope="col" className="px-2 py-2 font-medium">Signatory</th>
+                <th scope="col" className="px-3 py-2 font-medium">Seat</th>
               </tr>
             </thead>
             <tbody>
               {analysis.ownershipByStakeholder.map((row) => {
                 const sh = SAMPLE_CAPTABLE.stakeholders.find((s) => s.id === row.stakeholderId)!;
                 return (
-                  <tr key={row.stakeholderId} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                    <td className="px-3 py-1.5 font-medium text-white">{row.name}</td>
-                    <td className={`px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide ${ROLE_STYLE[row.role] ?? "text-white/55"}`}>{ROLE_LABEL[row.role] ?? row.role}</td>
-                    <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/75">{row.fullyDilutedShares.toLocaleString()}</td>
-                    <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/85">{(row.fullyDilutedPct * 100).toFixed(2)}%</td>
-                    <td className="px-2 py-1.5 text-[11px]">{sh.signatoryRequired ? <span className="text-deal-300">Required</span> : <span className="text-white/40">Info-only</span>}</td>
-                    <td className="px-3 py-1.5 text-[11px] text-white/55">{sh.seatOnBoard ? "Board" : "—"}</td>
+                  <tr key={row.stakeholderId} className="border-b border-xo-line last:border-0">
+                    <th scope="row" className="px-3 py-1.5 text-left font-medium">{row.name}</th>
+                    <td className={`px-2 py-1.5 text-[12px] font-semibold ${ROLE_STYLE[row.role] ?? "text-xo-muted"}`}>{ROLE_LABEL[row.role] ?? row.role}</td>
+                    <td className="px-2 py-1.5 text-right font-mono tabular-nums text-xo-muted">{row.fullyDilutedShares.toLocaleString()}</td>
+                    <td className="px-2 py-1.5 text-right font-mono tabular-nums">{(row.fullyDilutedPct * 100).toFixed(2)}%</td>
+                    <td className="px-2 py-1.5 text-[12px]">{sh.signatoryRequired ? <span className="text-xo-verified">Required</span> : <span className="text-xo-faint">Info-only</span>}</td>
+                    <td className="px-3 py-1.5 text-[12px] text-xo-muted">{sh.seatOnBoard ? "Board" : "—"}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
-        </Panel>
-      </Frame>
+        </ScrollRegion>
+      </Section>
 
-      <Frame>
-        <Panel title="Liquidation waterfall · per-offer founder net" className="lg:col-span-8"
-          right={
-            <select value={selectedOfferId} onChange={(e) => setSelectedOfferId(e.target.value)}
-              className="rounded border border-white/10 bg-black/30 px-2 py-0.5 text-[10px] text-white/85 focus:border-deal-400 focus:outline-none">
-              {SAMPLE_OFFERS.map((o) => <option key={o.offerId} value={o.offerId}>{o.buyerName} · {fmt(o.headlinePriceUsd)}</option>)}
-            </select>
-          }
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Liquidation waterfall · per-offer founder net" className="lg:col-span-8"
+          right={<><label htmlFor="ct-offer" className="sr-only">Offer</label><select id="ct-offer" value={selectedOfferId} onChange={(e) => setSelectedOfferId(e.target.value)} className="rounded-sm border border-xo-line bg-xo-ink px-2 py-1 text-[12px] text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">
+            {SAMPLE_OFFERS.map((o) => <option key={o.offerId} value={o.offerId}>{o.buyerName} · {fmt(o.headlinePriceUsd)}</option>)}
+          </select></>}
           foot={selectedWf.waterfall.notes.length > 0 ? selectedWf.waterfall.notes.join(" · ") : undefined}>
-          <div className="p-3">
-          {(() => {
-            const TAX = 0.238; // blended LTCG + NIIT estimate
-            const founderGross = selectedWf.waterfall.distributions.filter((d) => d.role === "founder").reduce((s, d) => s + d.grossProceedsUsd, 0);
-            const afterPref = selectedWf.waterfall.netToFoundersUsd; // NPV after preference stack
-            const afterTax = afterPref * (1 - TAX);
-            const steps = [
-              { label: "Offer headline", value: selectedOffer.headlinePriceUsd, color: "text-white", note: selectedOffer.buyerName },
-              { label: "Your gross proceeds", value: founderGross, color: "text-white/85", note: `${(analysis.ownershipByRole.founder * 100).toFixed(1)}% founder stake` },
-              { label: "After preferences", value: afterPref, color: "text-loi-300", note: `pref stack ${fmt(selectedWf.waterfall.preferenceTotalUsd)}` },
-              { label: "After taxes", value: afterTax, color: "text-deal-300", note: `~${(TAX * 100).toFixed(1)}% est. capital gains` },
-            ];
-            return (
-              <div className="mt-5 rounded-lg border border-deal-500/20 bg-deal-600/5 p-4">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">What you walk away with</div>
-                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {steps.map((s, i) => (
-                    <div key={s.label} className="relative">
-                      {i > 0 && <span className="absolute -left-2 top-3 hidden text-white/20 sm:block">→</span>}
-                      <div className="text-[10px] uppercase tracking-wide text-white/40">{s.label}</div>
-                      <div className={`mt-1 font-mono text-xl font-bold ${s.color}`}>{fmt(s.value)}</div>
-                      <div className="mt-0.5 text-[10px] text-white/40">{s.note}</div>
-                    </div>
-                  ))}
+          <div className="px-4 py-3">
+            {(() => {
+              // Same reading as Liquidity & Transition: nominal amounts for the
+              // founder group; the engine's risk-adjusted value shown apart.
+              const TAX = 0.238; // flat assumption: US federal LTCG 20% + NIIT 3.8%
+              const founders = selectedWf.waterfall.distributions.filter((d) => d.role === "founder");
+              const founderGross = founders.reduce((s, d) => s + d.grossProceedsUsd, 0);
+              const afterTax = founderGross * (1 - TAX);
+              const steps = [
+                { label: "Offer headline", value: selectedOffer.headlinePriceUsd, note: selectedOffer.buyerName },
+                { label: "Preference stack", value: selectedWf.waterfall.preferenceTotalUsd, note: "paid to preferred holders first" },
+                { label: "Founders' gross", value: founderGross, note: `${founders.length} founder holders · ${(analysis.ownershipByRole.founder * 100).toFixed(1)}% founder stake` },
+                { label: "After taxes", value: afterTax, note: `flat ${(TAX * 100).toFixed(1)}% tax assumption` },
+              ];
+              return (
+                <div className="border border-xo-line">
+                  <h3 className="border-b border-xo-line px-3 py-2 text-[12px] font-semibold text-xo-muted">What you walk away with</h3>
+                  <ol className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+                    {steps.map((s, i) => (
+                      <li key={s.label} className="bg-xo-panel px-3 py-2">
+                        <div className="text-[11px] text-xo-faint"><span aria-hidden>{i > 0 ? "→ " : ""}</span>{s.label}</div>
+                        <div className={`mt-1 font-mono text-[18px] font-semibold tabular-nums ${i === steps.length - 1 ? "text-xo-verified" : ""}`}>{fmt(s.value)}</div>
+                        <div className="mt-0.5 text-[11px] text-xo-faint">{s.note}</div>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="border-t border-xo-line px-3 py-2 text-[12px] text-xo-muted">Risk-adjusted value (engine): <span className="font-mono font-semibold text-xo-text">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span> before tax — stock discounted 15% and earnout 45%. The steps above assume every tranche pays in full. Tax: a flat {(TAX * 100).toFixed(1)}% (US federal long-term capital gains + NIIT) on the whole amount — no cost basis, state tax or QSBS; ExitOS has no tax model.</p>
                 </div>
-              </div>
-            );
-          })()}
+              );
+            })()}
 
-          <div className="mt-5 grid grid-cols-3 gap-4 text-sm">
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Headline</div>
-              <div className="mt-1 font-mono text-white">{fmt(selectedOffer.headlinePriceUsd)}</div>
-            </div>
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Preference stack</div>
-              <div className="mt-1 font-mono text-white/85">{fmt(selectedWf.waterfall.preferenceTotalUsd)}</div>
-            </div>
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Common pool</div>
-              <div className="mt-1 font-mono text-white/85">{fmt(selectedWf.waterfall.commonPoolUsd)}</div>
-            </div>
+            <dl className="mt-4 grid grid-cols-3 gap-4 text-[13px]">
+              <div><dt className="text-[11px] text-xo-faint">Headline</dt><dd className="mt-1 font-mono">{fmt(selectedOffer.headlinePriceUsd)}</dd></div>
+              <div><dt className="text-[11px] text-xo-faint">Preference stack</dt><dd className="mt-1 font-mono">{fmt(selectedWf.waterfall.preferenceTotalUsd)}</dd></div>
+              <div><dt className="text-[11px] text-xo-faint">Common pool</dt><dd className="mt-1 font-mono">{fmt(selectedWf.waterfall.commonPoolUsd)}</dd></div>
+            </dl>
+
+            <ScrollRegion label="Waterfall by stakeholder" className="mt-4">
+              <table className="w-full min-w-[520px] text-[12px]">
+                <thead className="text-left text-[11px] text-xo-faint">
+                  <tr className="border-b border-xo-line">
+                    <th scope="col" className="px-2 py-2 font-medium">Stakeholder</th>
+                    <th scope="col" className="px-2 py-2 text-right font-medium">Preference</th>
+                    <th scope="col" className="px-2 py-2 text-right font-medium">Common</th>
+                    <th scope="col" className="px-2 py-2 text-right font-medium">Gross</th>
+                    <th scope="col" className="px-2 py-2 text-right font-medium">NPV</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedWf.waterfall.distributions.slice(0, 8).map((d) => (
+                    <tr key={d.stakeholderId} className="border-b border-xo-line last:border-0">
+                      <th scope="row" className="px-2 py-2 text-left font-normal">{d.name}</th>
+                      <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{fmt(d.preferenceUsd)}</td>
+                      <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{fmt(d.commonProceedsUsd)}</td>
+                      <td className="px-2 py-2 text-right font-mono tabular-nums">{fmt(d.grossProceedsUsd)}</td>
+                      <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-verified">{fmt(d.netPresentValueUsd)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </ScrollRegion>
           </div>
+        </Section>
 
-          <table className="mt-5 w-full text-sm">
-            <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-              <tr className="border-b border-white/10">
-                <th className="px-2 py-2">Stakeholder</th>
-                <th className="px-2 py-2 text-right">Preference</th>
-                <th className="px-2 py-2 text-right">Common</th>
-                <th className="px-2 py-2 text-right">Gross</th>
-                <th className="px-2 py-2 text-right">NPV</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedWf.waterfall.distributions.slice(0, 8).map((d) => (
-                <tr key={d.stakeholderId} className="border-b border-white/5 last:border-0">
-                  <td className="px-2 py-2 text-white/85">{d.name}</td>
-                  <td className="px-2 py-2 text-right font-mono tabular-nums text-white/75">{fmt(d.preferenceUsd)}</td>
-                  <td className="px-2 py-2 text-right font-mono tabular-nums text-white/75">{fmt(d.commonProceedsUsd)}</td>
-                  <td className="px-2 py-2 text-right font-mono tabular-nums text-white/85">{fmt(d.grossProceedsUsd)}</td>
-                  <td className="px-2 py-2 text-right font-mono tabular-nums text-deal-300">{fmt(d.netPresentValueUsd)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          </div>
-        </Panel>
-
-        <Panel title="Signatory roster" className="lg:col-span-4"
-          right={<span className="font-mono text-[9px] text-white/35">{signatory.required.length} req · {signatory.recommended.length} rec</span>}>
-          <div className="p-3 text-[12px]">
-            <div className="space-y-1">
+        <Section title="Signatory roster" className="lg:col-span-4"
+          right={<span className="font-mono text-[11px] text-xo-faint">{signatory.required.length} req · {signatory.recommended.length} rec</span>}>
+          <div className="px-4 py-3 text-[12px]">
+            <ul className="space-y-1">
               {signatory.required.map((s) => (
-                <div key={s.id} className="flex items-center justify-between"><span className="text-white/85">{s.name}</span><span className="text-[10px] uppercase tracking-wide text-deal-300">Required</span></div>
+                <li key={s.id} className="flex items-center justify-between gap-2"><span>{s.name}</span><span className="text-[11px] text-xo-verified">Required</span></li>
               ))}
-              <div className="my-2 border-t border-white/5" />
+            </ul>
+            <ul className="mt-2 space-y-1 border-t border-xo-line pt-2">
               {signatory.recommended.map((s) => (
-                <div key={s.id} className="flex items-center justify-between"><span className="text-white/55">{s.name}</span><span className="text-[10px] uppercase tracking-wide text-white/35">Info-only</span></div>
+                <li key={s.id} className="flex items-center justify-between gap-2"><span className="text-xo-muted">{s.name}</span><span className="text-[11px] text-xo-faint">Info-only</span></li>
               ))}
-            </div>
+            </ul>
             {drag.holdouts.length > 0 && (
-              <div className="mt-3 rounded border border-white/10 bg-white/[0.02] p-2.5 text-[11px]">
-                <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-white/40">Drag-along holdouts</div>
-                <div className="mt-1 text-white/65">{drag.holdouts.map((h) => h.name).join(", ")}</div>
+              <div className="mt-3 border border-xo-line px-2.5 py-2 text-[12px]">
+                <h3 className="text-[11px] font-semibold text-xo-faint">Drag-along holdouts</h3>
+                <p className="mt-1 text-xo-muted">{drag.holdouts.map((h) => h.name).join(", ")}</p>
               </div>
             )}
           </div>
-        </Panel>
-      </Frame>
+        </Section>
+      </div>
     </div>
   );
 };
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
+);
 
 export default Investors;

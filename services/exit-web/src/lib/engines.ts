@@ -14,6 +14,7 @@ import {
 } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile.js";
 import { SAMPLE_CAPTABLE } from "./captable-sample.js";
+import { canonicalValuationFor } from "./canonical-valuation";
 
 // Pre-compute the deterministic results once per module load.
 export const VALUATION_STANDARD     = runValuation(SAMPLE_COMPANY, { reportType: "standard" });
@@ -28,6 +29,9 @@ export const VALUATION_INSTITUTIONAL = runInstitutionalValuation(SAMPLE_COMPANY,
 });
 // Canonical name — the institutional report IS the Valuation Constitution.
 export const VALUATION_CONSTITUTION = VALUATION_INSTITUTIONAL;
+// D1: the console's single enterprise value (institutional headline) in the
+// report shape offer scoring and the memorandum generator expect.
+export const VALUATION_CANONICAL = canonicalValuationFor(SAMPLE_COMPANY, VALUATION_INSTITUTIONAL, VALUATION_STRATEGIC);
 // Level 3 — the fact sheet (tear block) and the full traced-document suite,
 // all rendered from the single intelligence object above.
 export const VALUATION_FACTS = valuationFacts(VALUATION_CONSTITUTION);
@@ -112,8 +116,8 @@ export const SAMPLE_OFFERS = [
   },
 ];
 
-export const OFFER_EVALUATIONS = SAMPLE_OFFERS.map((o) => evaluateOffer(o, SAMPLE_COMPANY, VALUATION_STRATEGIC, RESERVATION_LINES));
-export const OFFER_COMPARISON  = compareOffers(SAMPLE_OFFERS, SAMPLE_COMPANY, VALUATION_STRATEGIC, RESERVATION_LINES);
+export const OFFER_EVALUATIONS = SAMPLE_OFFERS.map((o) => evaluateOffer(o, SAMPLE_COMPANY, VALUATION_CANONICAL, RESERVATION_LINES));
+export const OFFER_COMPARISON  = compareOffers(SAMPLE_OFFERS, SAMPLE_COMPANY, VALUATION_CANONICAL, RESERVATION_LINES);
 export const NEGOTIATION_STATE = deriveNegotiationState({
   stage: "loi",
   activeOffers: SAMPLE_OFFERS.length,
@@ -190,7 +194,7 @@ export function useMemorandum(kind: MemorandumKind, inputs?: Partial<MemorandumI
     memoGen
       .generate(kind, {
         company:      SAMPLE_COMPANY,
-        valuation:    VALUATION_STRATEGIC,
+        valuation:    VALUATION_CANONICAL,
         constitution: VALUATION_INSTITUTIONAL,   // every memo inherits the framework
         readiness:    READINESS,
         buyers:       BUYERS,

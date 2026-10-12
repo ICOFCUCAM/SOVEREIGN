@@ -1,8 +1,9 @@
 import { SAMPLE_COMPANY } from "./profile";
-import { VALUATION_STRATEGIC } from "./engines";
+import { VALUATION_CANONICAL } from "./engines";
+import type { CompanyProfile } from "@exit/engines";
 
-// Diligence Intelligence Engine. Given the uploaded document set, discover
-// the risks a buyer's analyst would find — across Financial, Legal and
+// Diligence checks. From the company profile (no document is read), surface
+// the risks a buyer's analyst would probe — across Financial, Legal and
 // Operational categories — then frame the same findings two ways: a Buyer
 // Risk Report (what they'll diligence and discount) and a Seller Risk
 // Report (what to fix before buyers ever see the company). Every finding
@@ -31,7 +32,8 @@ export interface SourceFile {
   readonly note: string;
 }
 
-// The document set the engine ingests. Each finding cites one of these.
+// The documents a buyer would use to test each check. Each finding names
+// one; none of them is uploaded or read by this module.
 export const SOURCE_FILES: readonly SourceFile[] = [
   { key: "financial_statements", label: "Financial statements", note: "P&L, balance sheet, cash flow" },
   { key: "contracts",            label: "Contracts",            note: "Customer & vendor agreements" },
@@ -40,15 +42,15 @@ export const SOURCE_FILES: readonly SourceFile[] = [
   { key: "tax_filings",          label: "Tax filings",          note: "Federal & state returns" },
 ];
 
-const MID = VALUATION_STRATEGIC.headline.mid;
-// w is a percentage of the strategic midpoint; round to the nearest $100k.
-const impact = (w: number) => Math.round((MID * (w / 100)) / 100_000) * 100_000;
+const MID = VALUATION_CANONICAL.headline.mid;
+// Illustrative rule: each finding carries a fixed share (w %) of the
+// canonical midpoint, whatever its severity; rounded to the nearest $100k.
 
 // Discover the findings for the current company profile. Severities and
 // presence are computed from the real metrics (concentration, margins,
 // recurring mix, founder status, IP, regulatory risk, bench strength).
-export function discoverFindings(): DiligenceFinding[] {
-  const C = SAMPLE_COMPANY;
+export function discoverFindings(C: CompanyProfile = SAMPLE_COMPANY, mid: number = MID): DiligenceFinding[] {
+  const impact = (w: number): number => Math.round((mid * (w / 100)) / 100_000) * 100_000;
   const concentration = C.revenue.customerConcentrationTop10Pct ?? 0;
   const recurringPct = C.revenue.trailingTwelveMonthsRevenueUsd > 0
     ? C.revenue.annualRecurringRevenueUsd / C.revenue.trailingTwelveMonthsRevenueUsd
@@ -77,7 +79,7 @@ export function discoverFindings(): DiligenceFinding[] {
     source: "Financial statements",
     detail: `ARR is ${(C.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(0)}M of ${(C.revenue.trailingTwelveMonthsRevenueUsd / 1_000_000).toFixed(0)}M TTM revenue — the balance is transactional, lowering quality of earnings.`,
     buyerView: "Applies a lower multiple to the non-recurring base and underwrites only the contracted ARR.",
-    sellerAction: "Convert transactional accounts onto recurring contracts and lead with the ARR growth and 108% net retention.",
+    sellerAction: `Convert transactional accounts onto recurring contracts and lead with the ARR growth${C.revenue.netRetentionPct != null ? ` and ${Math.round(C.revenue.netRetentionPct * 100)}% net retention` : ""}.`,
     impactUsd: impact(5),
   });
   out.push({
@@ -86,7 +88,7 @@ export function discoverFindings(): DiligenceFinding[] {
     title: `Gross margin ${Math.round(gross * 100)}%, EBITDA ${Math.round(ebitda * 100)}%`,
     severity: gross < 0.4 ? "medium" : "low",
     source: "Financial statements",
-    detail: `Margins sit below software comparables (gross ${Math.round(gross * 100)}%, EBITDA ${Math.round(ebitda * 100)}%), reflecting the logistics cost base. Caps the headline multiple.`,
+    detail: `Gross margin ${Math.round(gross * 100)}% and EBITDA margin ${Math.round(ebitda * 100)}% — a buyer will compare them with sector peers before setting the multiple.`,
     buyerView: "Runs a quality-of-earnings review on COGS and normalises EBITDA before pricing the multiple.",
     sellerAction: "Document a credible margin-expansion path (automation, mix shift) and pre-empt the QoE with clean management accounts.",
     impactUsd: impact(4),
@@ -97,7 +99,7 @@ export function discoverFindings(): DiligenceFinding[] {
     title: `${Math.round(C.growth.arrGrowthYoyPct * 100)}% growth on a ${Math.round(ebitda * 100)}% EBITDA base`,
     severity: ebitda < 0.12 ? "medium" : "low",
     source: "Tax filings",
-    detail: `High growth funded on a thin EBITDA margin implies limited free cash flow and working-capital intensity in the freight model.`,
+    detail: `Growth of ${Math.round(C.growth.arrGrowthYoyPct * 100)}% on a ${Math.round(ebitda * 100)}% EBITDA margin can mean limited free cash flow and working-capital needs — a buyer will test cash conversion.`,
     buyerView: "Stress-tests the cash conversion cycle and may structure consideration around working-capital pegs.",
     sellerAction: "Present a 13-week cash-flow model and a working-capital normalisation to remove the surprise at LOI.",
     impactUsd: impact(3),
@@ -106,22 +108,22 @@ export function discoverFindings(): DiligenceFinding[] {
   // ── Legal ────────────────────────────────────────────────────
   out.push({
     id: "leg-contracts",
-    category: "Legal", subcategory: "Missing contracts",
-    title: "Key customer & vendor agreements not in the data room",
+    category: "Legal", subcategory: "Contract coverage",
+    title: "Confirm key customer & vendor agreements are in the data room",
     severity: "high",
     source: "Contracts",
-    detail: "Several material customer and carrier agreements are unsigned or missing from the package — including change-of-control and assignment clauses a buyer must review.",
+    detail: "ExitOS does not check the data room. A buyer will review every material customer and vendor agreement, including change-of-control and assignment clauses; unsigned or missing agreements are a common gap.",
     buyerView: "Cannot confirm revenue is contracted or transferable on a sale; treats unconfirmed revenue as at-risk.",
     sellerAction: "Collect, execute and index every material agreement, and flag any change-of-control consents needed to close.",
     impactUsd: impact(6),
   });
   out.push({
     id: "leg-ip",
-    category: "Legal", subcategory: "IP ownership gaps",
+    category: "Legal", subcategory: "IP ownership",
     title: `IP assignment unconfirmed (${C.product.intellectualProperty?.patentsGranted ?? 0} granted, ${C.product.intellectualProperty?.patentsPending ?? 0} pending)`,
     severity: "medium",
     source: "Employment agreements",
-    detail: "Founder and contractor IP-assignment agreements are not evidenced for all contributors to the dispatch platform — a gap in clean title to the core technology.",
+    detail: "ExitOS cannot see your IP-assignment agreements. A buyer will want signed assignments from every founder, employee and contractor who contributed to the core technology — clean title is a closing condition.",
     buyerView: "Requires signed IP assignments from every contributor as a closing condition; otherwise an indemnity or holdback.",
     sellerAction: "Execute or backfill IP-assignment agreements for all founders, employees and contractors now.",
     impactUsd: impact(3),
@@ -132,7 +134,7 @@ export function discoverFindings(): DiligenceFinding[] {
     title: `Regulatory risk assessed ${C.market.regulatoryRisk}`,
     severity: C.market.regulatoryRisk === "high" ? "high" : C.market.regulatoryRisk === "medium" ? "medium" : "low",
     source: "Contracts",
-    detail: "Freight brokerage carries licensing, carrier-compliance and DOT obligations; the package lacks evidence of current standing across operating states.",
+    detail: `The profile rates regulatory risk ${C.market.regulatoryRisk}. A buyer will verify licences and regulatory standing in every operating jurisdiction; ExitOS holds no evidence of current standing.`,
     buyerView: "Verifies licences and broker bonds; unresolved compliance becomes a representation-and-warranty exposure.",
     sellerAction: "Compile licences, bonds and compliance certifications by jurisdiction into a compliance binder.",
     impactUsd: impact(2.5),
@@ -140,10 +142,10 @@ export function discoverFindings(): DiligenceFinding[] {
   out.push({
     id: "leg-litigation",
     category: "Legal", subcategory: "Litigation exposure",
-    title: "No litigation schedule on file",
+    title: "Prepare a litigation schedule",
     severity: "low",
     source: "Contracts",
-    detail: "No pending or threatened litigation has been disclosed, but the absence of a signed litigation schedule is itself a diligence gap.",
+    detail: "ExitOS holds no litigation information. A buyer will ask for a signed schedule of pending or threatened disputes, even if it is nil.",
     buyerView: "Requires a sworn no-litigation representation and a schedule of any disputes, however minor.",
     sellerAction: "Produce a signed litigation schedule (even if nil) and resolve any open commercial disputes.",
     impactUsd: impact(1),
@@ -161,13 +163,13 @@ export function discoverFindings(): DiligenceFinding[] {
     sellerAction: "Push key relationships down to the team, document the playbook, and define a transition plan that de-risks your exit.",
     impactUsd: impact(8),
   });
-  out.push({
+  if (C.sector.startsWith("logistics")) out.push({
     id: "ops-vendor",
     category: "Operational", subcategory: "Vendor concentration",
-    title: "Carrier / vendor dependency in the delivery network",
+    title: "Check carrier / vendor dependency in the delivery network",
     severity: "medium",
     source: "Contracts",
-    detail: "The freight network leans on a concentrated set of carriers; loss of a major carrier relationship would disrupt fulfilment and margins.",
+    detail: "For a freight business, a buyer will test whether the network leans on a concentrated set of carriers — losing a major carrier would disrupt fulfilment and margins. ExitOS does not hold carrier data.",
     buyerView: "Maps the carrier base and tests substitutability; concentration here compounds the customer-concentration discount.",
     sellerAction: "Broaden the carrier panel and secure capacity commitments to show the network is resilient and transferable.",
     impactUsd: impact(3),
@@ -178,7 +180,7 @@ export function discoverFindings(): DiligenceFinding[] {
     title: `Leadership bench is ${C.team.leadershipBenchStrength}; median tenure ${C.team.tenureMedianYears ?? "—"}y`,
     severity: C.team.leadershipBenchStrength === "thin" ? "high" : "medium",
     source: "Employment agreements",
-    detail: `With ${C.team.engineeringHeadcount ?? 0} of ${C.team.headcount} in engineering and an adequate (not deep) bench, a small number of key people carry outsized knowledge.`,
+    detail: `With ${C.team.engineeringHeadcount ?? 0} of ${C.team.headcount} in engineering and a ${C.team.leadershipBenchStrength} leadership bench, a buyer will look for key people who carry outsized knowledge.`,
     buyerView: "Identifies key-person risk and requires retention packages and non-competes for the critical few.",
     sellerAction: "Put retention and equity-vesting in place for key staff and build succession depth before going to market.",
     impactUsd: impact(3),
@@ -207,11 +209,11 @@ function tally(findings: readonly DiligenceFinding[]): Record<Severity, number> 
 }
 
 // Buyer Risk Report — the discount and protections a buyer's analyst lands on.
-export function buildBuyerReport(findings: readonly DiligenceFinding[]): RiskReport {
+export function buildBuyerReport(findings: readonly DiligenceFinding[], mid: number = MID): RiskReport {
   const bySeverity = tally(findings);
   const total = findings.reduce((s, f) => s + f.impactUsd, 0);
   const top = [...findings].sort((a, b) => SEV_RANK[b.severity] - SEV_RANK[a.severity] || b.impactUsd - a.impactUsd).slice(0, 4);
-  const escrowPct = Math.min(20, Math.round((total / MID) * 100));
+  const escrowPct = Math.min(20, Math.round((total / mid) * 100));
   return {
     audience: "buyer",
     title: "Buyer Diligence Report",
@@ -223,7 +225,7 @@ export function buildBuyerReport(findings: readonly DiligenceFinding[]): RiskRep
   };
 }
 
-// The six named reports a bank + law firm would produce, all from one scan.
+// The six named reports a bank + law firm would produce, all from the same checks.
 export interface NamedReport {
   key: string;
   title: string;
@@ -236,8 +238,8 @@ export interface NamedReport {
 
 const m1 = (n: number): string => `$${(n / 1_000_000).toFixed(1)}M`;
 
-export function allReports(findings: readonly DiligenceFinding[]): NamedReport[] {
-  const buyer = buildBuyerReport(findings);
+export function allReports(findings: readonly DiligenceFinding[], mid: number = MID): NamedReport[] {
+  const buyer = buildBuyerReport(findings, mid);
   const seller = buildSellerReport(findings);
   const high = findings.filter((f) => f.severity === "high");
   const legal = findings.filter((f) => f.category === "Legal");
@@ -246,9 +248,9 @@ export function allReports(findings: readonly DiligenceFinding[]): NamedReport[]
   const readyPct = findings.length ? Math.round((1 - high.length / findings.length) * 100) : 100;
 
   return [
-    { key: "buyer", title: "Buyer Diligence Report", accent: "buyer", metric: `${m1(total)} sought`,
+    { key: "buyer", title: "Buyer Diligence Report", accent: "buyer", metric: `${m1(total)} illustrative`,
       headline: buyer.headline, points: buyer.points, recommendation: buyer.recommendation },
-    { key: "seller", title: "Seller Risk Report", accent: "seller", metric: `${m1(total)} protected`,
+    { key: "seller", title: "Seller Risk Report", accent: "seller", metric: `${m1(total)} illustrative`,
       headline: seller.headline, points: seller.points, recommendation: seller.recommendation },
     { key: "readiness", title: "Deal Readiness Report", accent: "seller", metric: `${readyPct}% ready`,
       headline: `${high.length} gating item${high.length === 1 ? "" : "s"} and ${findings.length - high.length} secondary. ${high.length === 0 ? "Clear to open the room." : "Resolve the gating items before buyer access."}`,
@@ -259,8 +261,8 @@ export function allReports(findings: readonly DiligenceFinding[]): NamedReport[]
       points: high.map((f) => ({ title: `${f.subcategory} — ${f.severity}`, body: f.detail })),
       recommendation: "Get ahead of every red flag with a disclosure and a mitigation in the CIM before buyers find them." },
     { key: "valuation", title: "Valuation Impact Report", accent: "buyer", metric: `-${m1(total)}`,
-      headline: `Unresolved findings carry an estimated ${m1(total)} discount to the headline.`,
-      points: byImpact.slice(0, 5).map((f) => ({ title: `${f.subcategory} · -${m1(f.impactUsd)}`, body: f.buyerView })),
+      headline: `The illustrative rule assigns ${m1(total)} across all findings — fixed shares of the headline, whatever their severity. Not an estimate of what a buyer would deduct.`,
+      points: byImpact.slice(0, 5).map((f) => ({ title: `${f.subcategory} · illustrative -${m1(f.impactUsd)}`, body: f.buyerView })),
       recommendation: "Fix the highest-impact items first — each one closes part of the discount a buyer would otherwise take." },
     { key: "legal", title: "Legal Exposure Report", accent: "seller", metric: `${legal.length} items`,
       headline: `${legal.length} legal item${legal.length === 1 ? "" : "s"} shape the reps, indemnity cap and escrow.`,
@@ -277,10 +279,10 @@ export function buildSellerReport(findings: readonly DiligenceFinding[]): RiskRe
   return {
     audience: "seller",
     title: "Seller Risk Report",
-    headline: `Fix these before buyers see the company. Resolving the ${bySeverity.high} high-severity items protects roughly ${(total / 1_000_000).toFixed(0)}M of value a buyer would otherwise discount.`,
+    headline: `Fix these before buyers see the company, starting with the ${bySeverity.high} high-severity items.`,
     totalImpactUsd: total,
     bySeverity,
     points: top.map((f) => ({ title: `${f.subcategory} — ${f.severity}`, body: f.sellerAction })),
-    recommendation: `Run a 30–60 day pre-market remediation: lock top-account renewals, backfill IP assignments and contracts, and stand up a founder-transition plan. Re-run this scan before opening the data room.`,
+    recommendation: `Run a 30–60 day pre-market remediation: lock top-account renewals, backfill IP assignments and contracts, and stand up a founder-transition plan. Update your intake and review these findings again before opening the data room.`,
   };
 }

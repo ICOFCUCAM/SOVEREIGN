@@ -35,11 +35,11 @@ const BankerTake: React.FC<BankerTakeProps> = ({ next, stake, inaction, buyer, a
   ];
 
   const ctaEl = cta && (cta.to ? (
-    <Link to={cta.to} className="inline-flex items-center rounded-md bg-deal-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-500">
+    <Link to={cta.to} className="inline-flex items-center rounded-md bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-800">
       {cta.label} →
     </Link>
   ) : (
-    <button onClick={cta.onClick} className="inline-flex items-center rounded-md bg-deal-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-500">
+    <button onClick={cta.onClick} className="inline-flex items-center rounded-md bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-deal-800">
       {cta.label} →
     </button>
   ));

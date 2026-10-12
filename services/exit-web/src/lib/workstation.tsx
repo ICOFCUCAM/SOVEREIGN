@@ -122,14 +122,14 @@ export interface EvidenceMeta {
   sample?: number;
   asOf?: string;
 }
-export const Evidence: React.FC<{ meta: EvidenceMeta; children: React.ReactNode; className?: string }> = ({ meta, children, className = "" }) => (
+export const Evidence: React.FC<{ meta: EvidenceMeta; children: React.ReactNode; className?: string; align?: "left" | "right" }> = ({ meta, children, className = "", align = "left" }) => (
   <span tabIndex={0} className={`group/ev relative inline-flex cursor-help items-center gap-0.5 outline-none ${className}`}>
     {children}
     <span className="text-[8px] leading-none text-white/25 transition group-hover/ev:text-deal-300 group-focus/ev:text-deal-300">ⓘ</span>
-    <span className="invisible absolute left-0 top-full z-[60] mt-1 w-60 rounded-md border border-white/15 bg-ink-950/95 p-2.5 text-left opacity-0 shadow-xl shadow-black/60 backdrop-blur transition duration-100 group-hover/ev:visible group-hover/ev:opacity-100 group-focus/ev:visible group-focus/ev:opacity-100">
-      <span className="block text-[8px] font-semibold uppercase tracking-[0.18em] text-deal-300">Evidence</span>
-      {meta.methodology && <span className="mt-1 block text-[10.5px] leading-snug text-white/75">{meta.methodology}</span>}
-      <span className="mt-1.5 block space-y-0.5 text-[9px] text-white/45">
+    <span className={`absolute hidden ${align === "right" ? "right-0" : "left-0"} top-full z-[60] mt-1 w-60 max-w-[calc(100vw-2rem)] rounded-md border border-white/15 bg-ink-950/95 p-2.5 text-left shadow-xl shadow-black/60 backdrop-blur group-hover/ev:block group-focus/ev:block`}>
+      <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-deal-300">Evidence</span>
+      {meta.methodology && <span className="mt-1 block text-[11px] leading-snug text-white/80">{meta.methodology}</span>}
+      <span className="mt-1.5 block space-y-0.5 text-[11px] text-white/70">
         {meta.source && <span className="block">source · {meta.source}</span>}
         {meta.confidence && <span className="block">confidence · {meta.confidence}{meta.sample != null ? ` (n=${meta.sample})` : ""}</span>}
         {meta.asOf && <span className="block">as of {meta.asOf}</span>}

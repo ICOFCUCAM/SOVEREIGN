@@ -1,4 +1,5 @@
 import { SAMPLE_COMPANY } from "./profile";
+import type { CompanyProfile } from "@exit/engines";
 
 // Exit Readiness Engine — a 100-point Exit Score across the ten categories a
 // buyer underwrites, each derived deterministically from the company profile.
@@ -18,8 +19,7 @@ export interface ReadinessCategory {
 const clamp = (n: number): number => Math.max(0, Math.min(100, Math.round(n)));
 const TARGET = 85;      // the score a category needs to stop dragging the headline
 
-function rawCategories(): Omit<ReadinessCategory, "impactUsd">[] {
-  const C = SAMPLE_COMPANY;
+function rawCategories(C: CompanyProfile = SAMPLE_COMPANY): Omit<ReadinessCategory, "impactUsd">[] {
   const recurring = C.revenue.trailingTwelveMonthsRevenueUsd > 0
     ? C.revenue.annualRecurringRevenueUsd / C.revenue.trailingTwelveMonthsRevenueUsd : 0;
   const gross = C.revenue.grossMarginPct;
@@ -104,8 +104,8 @@ function rawCategories(): Omit<ReadinessCategory, "impactUsd">[] {
 
 // Distribute the value-left-on-the-table across the weak categories by
 // (weight × gap-to-target), so per-category dollars sum to the cascade gap.
-export function exitReadinessCategories(valueLeftUsd: number): ReadinessCategory[] {
-  const cats = rawCategories();
+export function exitReadinessCategories(valueLeftUsd: number, company: CompanyProfile = SAMPLE_COMPANY): ReadinessCategory[] {
+  const cats = rawCategories(company);
   const raw = cats.map((c) => c.weight * Math.max(0, (TARGET - c.score) / 100));
   const sum = raw.reduce((s, r) => s + r, 0) || 1;
   return cats.map((c, i) => ({

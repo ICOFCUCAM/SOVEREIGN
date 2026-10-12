@@ -94,8 +94,8 @@ export function sectorOverlap(p: DnaProfile, tokens: readonly string[] = COMPANY
 }
 
 /** Recommended action from measured appetite × overlap — stated as desk guidance. */
-export function recommendedAction(p: DnaProfile): string {
-  const { pct } = sectorOverlap(p);
+export function recommendedAction(p: DnaProfile, tokens?: readonly string[]): string {
+  const { pct } = sectorOverlap(p, tokens);
   if (p.appetite === "high" && pct > 0) return "Initiate NDA outreach";
   if (p.appetite === "high") return "Monitor — active acquirer, no sector evidence yet";
   if (p.appetite === "medium" && pct > 0) return "Warm introduction via the banker";
@@ -340,9 +340,11 @@ export function acquisitionAppetiteScore(p: DnaProfile): AppetiteScore {
 }
 
 // Per-buyer confidence in the forecast — a function of how much real data
-// backs it (events indexed + disclosed values). Honest, never asserted.
+// backs it (events indexed + disclosed values) and whether any of it is
+// independently verified (SEC EDGAR or corroborated). Depth alone, from
+// unverified sources, tops out at Moderate. Honest, never asserted.
 export function buyerConfidence(p: DnaProfile): "High" | "Moderate" | "Developing" {
-  if (p.events_indexed >= 40 && p.disclosed_events >= 4) return "High";
+  if (p.events_indexed >= 40 && p.disclosed_events >= 4 && p.verified_events >= 1) return "High";
   if (p.events_indexed >= 10) return "Moderate";
   return "Developing";
 }

@@ -6,7 +6,7 @@
 // founder sees real progression rather than an instant cliff.
 
 import {
-  runValuation, strategicBuyerReport, assetReplacementReport,
+  runValuation, assetReplacementReport,
   runReadiness, runReadinessAnalysis, runBuyerDiscovery, runDueDiligence,
   createListing, compareOffers, deriveNegotiationState,
   STANDARD_TEMPLATES, issueNda,
@@ -20,9 +20,10 @@ import {
   type NdaInstance,
 } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile";
+import { canonicalValuationFor } from "./canonical-valuation";
 import { RESERVATION_LINES, SAMPLE_OFFERS } from "./engines";
 import { listDocuments } from "./data-room";
-import { emitRunStarted, emitRunStep, emitRunCompleted, emitOffer, emitBuyerResponse, flush } from "./telemetry";
+import { emitRunStarted, emitRunStep, emitRunCompleted, flush } from "./telemetry";
 
 export type ExitStepId =
   | "profile" | "valuation" | "readiness" | "cim" | "teaser"
@@ -184,7 +185,8 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
     // 2. Valuation
     const valuation = await runStep("valuation", () => ({
       standard:    runValuation(SAMPLE_COMPANY, { reportType: "standard" }),
-      strategic:   strategicBuyerReport(SAMPLE_COMPANY),
+      // D1: the run's headline value is the institutional framework's.
+      strategic:   canonicalValuationFor(SAMPLE_COMPANY),
       replacement: assetReplacementReport(SAMPLE_COMPANY),
     }), (v) => `Strategic mid $${(v.strategic.headline.mid / 1_000_000).toFixed(0)}M (band $${(v.strategic.headline.low / 1_000_000).toFixed(0)}M–$${(v.strategic.headline.high / 1_000_000).toFixed(0)}M)`);
     run.artifacts.valuation = valuation;
@@ -227,7 +229,7 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
     }, (n) => n > 0 ? `Active · ${n} document${n === 1 ? "" : "s"} indexed` : `Provisioned · 7 rooms ready (financial · market · growth · tech · security · legal · commercial)`);
     run.artifacts.dataRoomDocs = dataRoomDocs;
 
-    // 7. NDA — load templates + pre-issue against top buyers (pending signature)
+    // 7. NDA — load templates + draft against top buyers (held locally, not sent)
     const listingPrivate = createListing(SAMPLE_COMPANY, { visibility: "private_full" });
     const listingPublic  = createListing(SAMPLE_COMPANY, { visibility: "public_anonymized" });
     const founderParty = { id: `founder-${SAMPLE_COMPANY.id}`, name: SAMPLE_COMPANY.name, representativeEmail: "founder@example.com" };
@@ -241,19 +243,12 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
           disclosing: founderParty,
           receiving: { id: buyerId, name: c.buyer.name },
         }));
-        // Telemetry · the funnel begins. Each pre-issued NDA opens
-        // a per-buyer pipeline that exit_buyer_response_events tracks
-        // through signed → CIM → LOI → close/walk.
-        emitBuyerResponse({
-          buyerId, buyerName: c.buyer.name,
-          listingId: listingPrivate.listingId,
-          clientRunId: run.id,
-          stage: "nda_issued",
-          occurredAt: new Date().toISOString(),
-        });
+        // No buyer-response telemetry here: these are drafts held in this
+        // browser and are never sent, so recording "nda_issued" would put a
+        // pipeline that never happened into the calibration data.
       }
       return issued;
-    }, (issued) => `${STANDARD_TEMPLATES.length} templates loaded · ${issued.length} NDAs pre-issued to top buyers (pending signature)`);
+    }, (issued) => `${STANDARD_TEMPLATES.length} templates loaded · ${issued.length} NDA drafts prepared for top buyers (not sent)`);
     run.artifacts.ndasIssued = ndas;
 
     // 8. Buyer list (already computed in step 4 — re-run with full limit for the artifact)
@@ -266,7 +261,7 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
       (l) => `Listing ${l.private.listingId} created · public anonymized + private full-fidelity`);
     run.artifacts.listing = { public: listingPublic, private: listingPrivate };
 
-    // 10. Negotiator — score the seeded offers and derive state
+    // 10. Negotiator — score the SAMPLE offers (demo fixtures) and derive state
     const negotiation = await runStep("negotiator", () => {
       const comparison = compareOffers(SAMPLE_OFFERS, SAMPLE_COMPANY, valuation.strategic, RESERVATION_LINES);
       const state = deriveNegotiationState({
@@ -278,8 +273,8 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
       });
       return { state, comparison };
     }, (n) => n.comparison.leader
-      ? `${SAMPLE_OFFERS.length} offers scored · leader: ${n.comparison.leader} · stage ${n.state.stage}`
-      : `${SAMPLE_OFFERS.length} offers scored · stage ${n.state.stage}`);
+      ? `${SAMPLE_OFFERS.length} sample offers scored (demo data) · leader: ${n.comparison.leader} · stage ${n.state.stage}`
+      : `${SAMPLE_OFFERS.length} sample offers scored (demo data) · stage ${n.state.stage}`);
     run.artifacts.negotiation = negotiation.state;
     run.artifacts.offerLeaderName = negotiation.comparison.leader;
 
@@ -307,32 +302,12 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
           dataRoomDocs:    dataRoomDocs,
           ndasIssued:      ndas.length,
           listingId:       listingPrivate.listingId,
-          leader:          negotiation.comparison.leader ?? null,
+          // the leader comes from sample offers, so it is not reported
         },
       });
 
-    // Emit one offer event per scored offer so the offer table accrues
-    // from day one. Score lookup is by offerId on the comparison.
-    const evalById = new Map(negotiation.comparison.offers.map((e) => [e.offer.offerId, e]));
-    for (const o of SAMPLE_OFFERS) {
-      const evaluation = evalById.get(o.offerId);
-      emitOffer({
-        offerId: o.offerId,
-        buyerName: o.buyerName,
-        buyerType: o.buyerType,
-        stage: "scored",
-        occurredAt: o.receivedAt,
-        headlinePriceUsd: o.headlinePriceUsd,
-        cashPct: o.cashPct, stockPct: o.stockPct, earnoutPct: o.earnoutPct,
-        terms: o.terms,
-        ...(evaluation ? {
-          evaluationScore: evaluation.score,
-          reservationViolated: evaluation.conflicts.length > 0,
-          netNpvUsd: evaluation.impliedNetToFoundersUsd,
-        } : {}),
-        clientRunId: run.id,
-      });
-    }
+    // No offer telemetry: the scored offers are SAMPLE_OFFERS (demo
+    // fixtures). Offer events must come from offers a buyer actually made.
 
     void flush();
     return run;

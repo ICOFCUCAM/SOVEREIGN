@@ -1,49 +1,132 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Button, Card, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { Button, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
+import { PageHeader, Section, Metric, Chip, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
+import { parseNumber } from "../lib/intake-fields";
+import { useAuth } from "../lib/auth";
 import { buildMarketTape } from "../lib/market-tape";
-import { LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES, useMemorandum } from "../lib/engines";
-import BankerTake from "../components/BankerTake";
+import { LISTING_PUBLIC as ENGINE_PUBLIC, LISTING_PRIVATE as ENGINE_PRIVATE, LISTING_MATCHES, VALUATION_CANONICAL, useMemorandum } from "../lib/engines";
+import { createListing, matchBuyersToListing, runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type MemorandumInputs } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
 
-// Exit Marketplace — "Become the banker." Most founders never hire a
-// banker because bankers are expensive; ExitOS does the banker's job.
-// The "Publish Opportunity" pipeline runs the full sell-side workflow in
-// one click — teaser, CIM, anonymization, buyer identification, outreach —
-// each step backed by a real engine artifact (memorandum generator +
-// listing engine). Below the pipeline, the same listing renders in the
+// Exit Marketplace — "Become the banker." The sell-side pack gathers the
+// engine artefacts a banker would prepare — teaser, CIM, the anonymized
+// view and the matched buyers. It publishes nothing and contacts no one:
+// listing on the exchange happens from the intake, outreach stays the
+// founder's. Below the pipeline, the same listing renders in the
 // founder vs. public (anonymized) views.
 
 const OUTREACH_STYLE: Record<string, string> = {
-  direct:         "bg-deal-600/20 text-deal-300 ring-deal-400/40",
-  banker_intro:   "bg-stage-loi/15 text-stage-loi ring-stage-loi/40",
-  warm_referral:  "bg-loi-500/15 text-loi-300 ring-loi-400/40",
-  cold_intro:     "bg-white/5 text-white/60 ring-white/15",
+  direct:         "border-xo-verified/50 text-xo-verified",
+  banker_intro:   "border-xo-action/50 text-xo-action",
+  warm_referral:  "border-xo-caution/50 text-xo-caution",
+  cold_intro:     "border-xo-line text-xo-muted",
 };
 
 const TYPE_STYLE: Record<string, string> = {
-  strategic:      "text-deal-300",
-  pe:             "text-loi-300",
-  vc:             "text-stage-loi",
-  family_office:  "text-stage-engaged",
-  sponsor:        "text-white/65",
+  strategic:      "text-xo-verified",
+  pe:             "text-xo-caution",
+  vc:             "text-xo-action",
+  family_office:  "text-xo-brass",
+  sponsor:        "text-xo-muted",
 };
 
-type Phase = "idle" | "running" | "done";
+type Phase = "idle" | "done";
 
 interface PipelineStep {
   key: string;
   title: string;
-  detail: string;       // what the step produced (shown once complete)
-  running: string;      // verb shown while in flight
+  detail: React.ReactNode;   // what the step produced (shown once prepared)
 }
 
+// D1: the console shows one enterprise value — the canonical (institutional)
+// headline. The listing engine prices the ask from the strategic report, so
+// the asking band and the ideal buyer's check size are re-based on the
+// canonical band here (display only; the engine's matching is unchanged).
+type EngineListing = typeof ENGINE_PRIVATE;
+const withCanonicalAsk = (l: EngineListing, h: { low: number; mid: number; high: number }): EngineListing => ({
+  ...l,
+  askingPriceUsd: { ...l.askingPriceUsd, low: h.low, mid: h.mid, high: h.high },
+  idealBuyerProfile: { ...l.idealBuyerProfile, checkSizeUsd: { ...l.idealBuyerProfile.checkSizeUsd, low: h.low, high: h.high } },
+});
+const LISTING_PRIVATE = withCanonicalAsk(ENGINE_PRIVATE, VALUATION_CANONICAL.headline);
+const LISTING_PUBLIC = withCanonicalAsk(ENGINE_PUBLIC, VALUATION_CANONICAL.headline);
+const fit = (score: number): string => `${(score * 100).toFixed(0)}/100`;
+
+// Buyers share this route ("Browse Opportunities") but must only ever see
+// the anonymized public listing — never the founder's identity, private
+// figures, controls or matched-buyer list.
 const Marketplace: React.FC = () => {
+  const { session } = useAuth();
+  return session?.role === "buyer" ? <BuyerMarketplace /> : <FounderMarketplace />;
+};
+
+const BuyerMarketplace: React.FC = () => {
+  const listing = LISTING_PUBLIC;
+  const tape = useMemo(() => buildMarketTape(), []);
+  const LINK = "font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  return (
+    <div data-page="marketplace" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Marketplace · Buyer" title="Browse Opportunities"
+        badge={<Provenance kind="demo">Demo listing</Provenance>}
+        description={<>The anonymized public view of the demo company's listing — the same view every buyer gets: no name, no jurisdiction. Every listing on the exchange, with NDA requests and offers, is on the <Link to="/console/acquisition-radar" className={LINK}>Acquisition Radar</Link>.</>} />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
+      <Section title={listing.title} eyebrow="Public listing · anonymized" className="border border-xo-line">
+        <div className="px-4 py-4">
+          <ul className="flex flex-wrap gap-2 text-[12px]">
+            <Tag>{listing.businessModel}</Tag>
+            <Tag>{listing.sector.replace(/_/g, " ")}</Tag>
+            <Tag>founded {listing.foundedYear}</Tag>
+            <Tag>jurisdiction {listing.jurisdiction}</Tag>
+          </ul>
+          <dl className="mt-5 grid grid-cols-2 gap-x-8 gap-y-3 text-[13px] sm:grid-cols-3">
+            {listing.headline.arrUsd != null && <DataRow label="ARR" value={fmtMoney(listing.headline.arrUsd)} />}
+            {listing.headline.ttmRevenueUsd != null && <DataRow label="TTM revenue" value={fmtMoney(listing.headline.ttmRevenueUsd)} />}
+            <DataRow label="Gross margin" value={`${(listing.headline.grossMarginPct * 100).toFixed(0)}%`} />
+            <DataRow label="ARR growth YoY" value={`${(listing.headline.arrGrowthYoyPct * 100).toFixed(0)}%`} />
+            <DataRow label="EBITDA margin" value={`${(listing.headline.ebitdaMarginPct * 100).toFixed(0)}%`} />
+            <DataRow label="Asking range" value={`${fmtMoney(listing.askingPriceUsd.low)} – ${fmtMoney(listing.askingPriceUsd.high)}`} />
+          </dl>
+          <h3 className="mt-6 text-[13px] font-semibold">Highlights</h3>
+          <ul className="mt-2 space-y-1.5 text-[13px] text-xo-muted">
+            {listing.highlights.map((h) => (
+              <li key={h} className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-xo-verified" /> {h}</li>
+            ))}
+          </ul>
+          <p className="mt-6 text-[12px] text-xo-muted">To request an NDA or make an indicative offer, open the listing on the <Link to="/console/acquisition-radar" className={LINK}>Acquisition Radar</Link>.</p>
+        </div>
+      </Section>
+    </div>
+  );
+};
+
+const FounderMarketplace: React.FC = () => {
   const [view, setView]   = useState<"public" | "founder">("founder");
   const [phase, setPhase] = useState<Phase>("idle");
-  const [done, setDone]   = useState<number>(0);
 
-  const baseListing = view === "founder" ? LISTING_PRIVATE : LISTING_PUBLIC;
-  const matches  = LISTING_MATCHES.matches;
+  // The founder's saved intake when there is one; the demo company otherwise.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const own = useMemo(() => {
+    if (!fromIntake) return null;
+    const institutional = runInstitutionalValuation(company);
+    const canonical = canonicalValuationFor(company, institutional);
+    const priv = withCanonicalAsk(createListing(company, { visibility: "private_full" }), canonical.headline);
+    const pub = withCanonicalAsk(createListing(company, { visibility: "public_anonymized" }), canonical.headline);
+    const memo: Partial<MemorandumInputs> = {
+      company, valuation: canonical, constitution: institutional,
+      readiness: runReadiness(company), buyers: runBuyerDiscovery(company, { limit: 12 }), diligence: runDueDiligence(company),
+    };
+    return { priv, pub, matches: matchBuyersToListing(createListing(company, { visibility: "private_full" }), company, { limit: 15 }), memo };
+  }, [company, fromIntake]);
+  const PRIV = own?.priv ?? LISTING_PRIVATE;
+  const PUB = own?.pub ?? LISTING_PUBLIC;
+  const MATCHES = own?.matches ?? LISTING_MATCHES;
+
+  const baseListing = view === "founder" ? PRIV : PUB;
+  const matches  = MATCHES.matches;
 
   // Founder edits — local overrides applied on top of the engine listing.
   const [editOpen, setEditOpen] = useState(false);
@@ -51,319 +134,259 @@ const Marketplace: React.FC = () => {
   const listing = override.askMid != null
     ? { ...baseListing, askingPriceUsd: { ...baseListing.askingPriceUsd, mid: override.askMid } }
     : baseListing;
-  const [editAsk, setEditAsk] = useState<number>(baseListing.askingPriceUsd.mid);
+  const [editAskText, setEditAskText] = useState<string>(String(Math.round(baseListing.askingPriceUsd.mid / 1e5) / 10));
+  const askParse = parseNumber(editAskText, { min: 0.1, max: 1_000_000, scale: 1e6 });
   const [editNote, setEditNote] = useState("");
 
-  const teaserInputs = useMemo(() => ({ anonymize: true }), []);
+  const teaserInputs = useMemo(() => ({ anonymize: true, ...own?.memo }), [own]);
   const teaser = useMemorandum("buyer_teaser", teaserInputs);
-  const cim    = useMemorandum("cim");
+  const cim    = useMemorandum("cim", own?.memo);
 
-  // Distinct outreach channels across the matched buyers.
-  const channels = useMemo(() => Array.from(new Set(matches.map((m) => m.suggestedOutreach))), [matches]);
-
+  // The sell-side pack: four artefacts the engines produce. Preparing it
+  // publishes nothing and contacts no one — listing on the exchange happens
+  // from the intake, and outreach stays the founder's.
+  const LINK = "font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const steps: PipelineStep[] = [
-    { key: "teaser",  title: "Teaser created",      running: "Writing anonymized teaser…",
+    { key: "teaser",  title: "Teaser drafted",
       detail: teaser ? `${teaser.title} · ${teaser.wordCount} words · anonymized` : "Drafting…" },
-    { key: "cim",     title: "CIM drafted",         running: "Drafting confidential memorandum…",
-      detail: cim ? `${cim.sections.length} sections · ${cim.wordCount.toLocaleString()} words` : "Drafting…" },
-    { key: "anon",    title: "Data anonymized",     running: "Masking identity + sensitive figures…",
-      detail: `Identity masked → published as "${LISTING_PUBLIC.title}"` },
-    { key: "buyers",  title: "Buyers identified",   running: "Scanning the buyer universe…",
-      detail: `${matches.length} matched buyers · top fit ${matches[0] ? (matches[0].matchScore * 100).toFixed(0) : "0"}%` },
-    { key: "outreach", title: "Outreach started",   running: "Sequencing outreach…",
-      detail: `${matches.length} buyers queued across ${channels.length} channel${channels.length === 1 ? "" : "s"}` },
+    { key: "cim",     title: "CIM drafted",
+      detail: cim ? <>{cim.sections.length} sections · {cim.wordCount.toLocaleString()} words · <Link to="/console/documents" className={LINK}>open in Documents</Link></> : "Drafting…" },
+    { key: "anon",    title: "Anonymized public view",
+      detail: `Buyers would see it as "${PUB.title}" — switch to "Public listing" below to check it` },
+    { key: "buyers",  title: "Buyers matched",
+      detail: `${matches.length} matched buyers · top fit score ${matches[0] ? fit(matches[0].matchScore) : "—"}` },
+    { key: "outreach", title: "Outreach — not started",
+      detail: <>ExitOS does not contact buyers from here. Plan who to approach in the <Link to="/console/outreach-plan" className={LINK}>Outreach Plan</Link>.</> },
   ];
 
-  // Advance the pipeline one step at a time while running.
-  useEffect(() => {
-    if (phase !== "running") return;
-    if (done >= steps.length) { setPhase("done"); return; }
-    const t = setTimeout(() => setDone((d) => d + 1), 850);
-    return () => clearTimeout(t);
-  }, [phase, done, steps.length]);
-
-  const publish = (): void => { setDone(0); setPhase("running"); };
-  const reset   = (): void => { setPhase("idle"); setDone(0); };
-
+  const prepare = (): void => setPhase("done");
+  const reset   = (): void => setPhase("idle");
+  const done = phase === "done" ? steps.length : 0;
   const progressPct = Math.round((done / steps.length) * 100);
 
+  const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
+  const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
+  const tape = useMemo(() => buildMarketTape(), []);
+
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Exchange · Marketplace"
-        title="Exit Marketplace"
-        tag="Become the banker"
-        status={phase === "done" ? "Live" : view === "founder" ? "Founder view" : "Public view"}
-        metrics={[
-          { k: "Asking price (mid)", v: fmtMoney(listing.askingPriceUsd.mid), accent: true, sub: `band ${fmtMoney(listing.askingPriceUsd.low)}–${fmtMoney(listing.askingPriceUsd.high)}` },
-          { k: "Readiness", v: `${listing.readinessScore.toFixed(0)}/100`, sub: listing.readinessBand.replace(/_/g, " ") },
-          { k: "Matched buyers", v: String(matches.length), accent: true, sub: LISTING_MATCHES.summary.split(".")[0] },
-          { k: "Visibility", v: listing.visibility.replace(/_/g, " "), sub: view === "founder" ? "you" : "buyers see" },
-        ]}
-      />
+    <div data-page="marketplace" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow={`◉ Exchange · Marketplace · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Exit Marketplace"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Become the banker · {view === "founder" ? "Founder view" : "Public view"}</span></>}
+        description={fromIntake ? "Listing, sell-side pack and matched buyers built from your saved intake." : "Built from the demo company. Save an intake to build them for your company."}
+        actions={<>
+          <a href="/report/cim" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Confidential Information Memorandum (PDF) →</a>
+          <a href="/report/management" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Management Presentation (PDF) →</a>
+        </>} />
 
-      <MarketTape items={useMemo(() => buildMarketTape(), [])} />
+      <section aria-label="Listing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><Metric label="Asking price (mid)" emphasis value={fmtMoney(listing.askingPriceUsd.mid)} sub={`band ${fmtMoney(listing.askingPriceUsd.low)}–${fmtMoney(listing.askingPriceUsd.high)}`} /></div>
+        <div className="bg-xo-panel"><Metric label="Readiness" value={`${listing.readinessScore.toFixed(0)}/100`} sub={listing.readinessBand.replace(/_/g, " ")} /></div>
+        <div className="bg-xo-panel"><Metric label="Matched buyers" emphasis value={String(matches.length)} sub={MATCHES.summary.split(".")[0]} /></div>
+        <div className="bg-xo-panel"><Metric label="Visibility" value={listing.visibility.replace(/_/g, " ")} sub={view === "founder" ? "you" : "buyers see"} /></div>
+      </section>
 
-      <div className="flex flex-wrap justify-end gap-2">
-        <a href="/report/cim" target="_blank" rel="noopener noreferrer" className="rounded-md border border-deal-400/30 px-3.5 py-1.5 text-[11.5px] font-semibold text-deal-300 transition hover:bg-deal-600/10">Confidential Information Memorandum (PDF) →</a>
-        <a href="/report/management" target="_blank" rel="noopener noreferrer" className="rounded-md border border-white/15 px-3.5 py-1.5 text-[11.5px] font-semibold text-white/70 transition hover:bg-white/5">Management Presentation (PDF) →</a>
-      </div>
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
-      <BankerTake
-        next={phase === "done"
-          ? <>You're live — review the {matches.length} buyers entering outreach and approve the first conversations.</>
-          : <>Publish the opportunity and let ExitOS run the sell-side process end to end.</>}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(listing.askingPriceUsd.mid)}</span> asking · band {fmtMoney(listing.askingPriceUsd.low)}–{fmtMoney(listing.askingPriceUsd.high)}.</>}
-        inaction={<>Without a live process, qualified buyers never learn you're sellable — and bankers charge 1–2% to run it.</>}
-        buyer={matches[0]
-          ? <><span className="text-white">{matches[0].buyerName}</span> — {(matches[0].matchScore * 100).toFixed(0)}% match, top of {matches.length}.</>
-          : "No matches yet — publish to surface the buyer set."}
-        automate={<>One click writes the teaser and CIM, anonymizes the data, identifies buyers and starts outreach.</>}
-        impact={<>{fmtMoney(listing.askingPriceUsd.mid)}</>}
-        cta={{ label: phase === "done" ? "Re-run" : "Publish Opportunity", onClick: phase === "done" ? reset : publish }}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(listing.askingPriceUsd.mid)}</span>}>
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">{phase === "done"
+            ? <>Your sell-side pack is ready — review the teaser and CIM, then list on the exchange when you are ready.</>
+            : <>Prepare the sell-side pack: teaser, CIM, anonymized view and matched buyers.</>}</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(listing.askingPriceUsd.mid)}</span> asking · band {fmtMoney(listing.askingPriceUsd.low)}–{fmtMoney(listing.askingPriceUsd.high)}.</TakeCell>
+            <TakeCell k="If you wait">Without a listing, buyers on the exchange cannot discover you — and bankers charge 1–2% to run a process.</TakeCell>
+            <TakeCell k="Top match">{matches[0] ? <>{matches[0].buyerName} — fit score {fit(matches[0].matchScore)}, top of {matches.length}.</> : "No matches yet."}</TakeCell>
+            <TakeCell k="What ExitOS does">Drafts the teaser and CIM, builds the anonymized view and matches buyers. It does not publish the listing or contact buyers.</TakeCell>
+          </dl>
+          <div className="mt-3">{phase === "done"
+            ? <Link to="/console/intake" className={BTN}>List on the exchange →</Link>
+            : <button type="button" onClick={prepare} className={BTN}>Prepare the sell-side pack</button>}</div>
+        </div>
+      </Section>
 
-      {/* ── Become the banker · Publish Opportunity ─────────────── */}
-      <Card className="overflow-hidden p-0">
-        <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-          {/* Left — the pitch + CTA */}
-          <div className="border-b border-white/10 p-7 lg:border-b-0 lg:border-r">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-400">Become the banker</div>
-            <h2 className="mt-3 font-serif text-2xl font-bold leading-tight text-white">
-              The operating system for company sales.
-            </h2>
-            <p className="mt-3 text-[13.5px] leading-relaxed text-white/65">
+      {/* ── Become the banker · the sell-side pack ──────────────── */}
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="The operating system for company sales." eyebrow="Become the banker" className="lg:col-span-5">
+          <div className="px-4 py-4">
+            <p className="text-[13px] leading-relaxed text-xo-muted">
               A sell-side banker builds the teaser, writes the CIM, anonymizes your numbers, finds the buyers and runs
-              the outreach — for 1–2% of the deal. ExitOS does all five, in one click, the moment you publish.
+              the outreach — for 1–2% of the deal. ExitOS drafts the first four for you; listing on the exchange and the outreach stay your decisions.
             </p>
-
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              {phase === "idle" && <Button onClick={publish}>Publish Opportunity</Button>}
-              {phase === "running" && <Button disabled>Publishing… {progressPct}%</Button>}
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              {phase === "idle" && <button type="button" onClick={prepare} className={BTN}>Prepare the sell-side pack</button>}
               {phase === "done" && (
                 <>
-                  <span className="inline-flex items-center gap-2 rounded-md bg-deal-600/20 px-3 py-2 text-[12px] font-semibold text-deal-200 ring-1 ring-deal-500/40">
-                    ● Live · {matches.length} buyers in outreach
-                  </span>
-                  <Button variant="ghost" onClick={reset}>Re-run</Button>
+                  <span className="text-[12px] font-semibold text-xo-verified">Pack prepared — nothing published or sent</span>
+                  <button type="button" onClick={reset} className={BTN_GHOST}>Clear</button>
                 </>
               )}
             </div>
-
-            <div className="mt-6 grid grid-cols-3 gap-3 border-t border-white/10 pt-5 text-center">
-              <Manifesto value="0" label="Bankers hired" />
-              <Manifesto value="1-click" label="To full process" />
-              <Manifesto value="100%" label="Founder-owned" />
-            </div>
           </div>
+        </Section>
 
-          {/* Right — the pipeline */}
-          <div className="bg-ink-900/40 p-7">
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Automated sell-side pipeline</div>
-              <div className="font-mono text-[11px] text-white/45">{done}/{steps.length}</div>
+        <Section title="Sell-side pack" className="lg:col-span-7"
+          right={<span className="text-[11px] text-xo-muted">{phase === "done" ? "4 artefacts prepared · outreach not started" : "Not prepared"}</span>}>
+          <div className="px-4 py-4">
+            <div aria-hidden className="h-1 w-full overflow-hidden rounded-full bg-xo-line">
+              <div className="h-full rounded-full bg-xo-action motion-safe:transition-all motion-safe:duration-700" style={{ width: `${progressPct}%` }} />
             </div>
-
-            {/* progress rail */}
-            <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-deal-500 transition-all duration-700" style={{ width: `${progressPct}%` }} />
-            </div>
-
-            <ol className="mt-5 space-y-3">
+            <ol aria-live="polite" className="mt-4 space-y-3">
               {steps.map((s, i) => {
-                const isDone   = i < done || phase === "done";
-                const isActive = phase === "running" && i === done;
+                const isDone   = i < done;
                 return (
                   <li key={s.key} className="flex items-start gap-3">
-                    <span className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ring-1 ${
-                      isDone   ? "bg-deal-600/30 text-deal-200 ring-deal-500/50"
-                      : isActive ? "bg-loi-500/20 text-loi-200 ring-loi-400/50"
-                      : "bg-white/5 text-white/35 ring-white/15"}`}>
-                      {isDone ? "✓" : isActive ? <Spinner /> : i + 1}
+                    <span aria-hidden className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold ${
+                      isDone ? "border-xo-verified/60 text-xo-verified" : "border-xo-line text-xo-muted"}`}>
+                      {isDone ? (s.key === "outreach" ? "–" : "✓") : i + 1}
                     </span>
                     <div className="min-w-0">
-                      <div className={`text-[13px] font-semibold ${isDone ? "text-white" : isActive ? "text-white" : "text-white/45"}`}>
-                        {s.title}
-                      </div>
-                      <div className={`mt-0.5 text-[11.5px] leading-snug ${isDone ? "text-white/55" : "text-white/35"}`}>
-                        {isDone ? s.detail : isActive ? s.running : "Waiting"}
-                      </div>
+                      <div className={`text-[13px] font-semibold ${isDone ? "text-xo-text" : "text-xo-muted"}`}>{s.title}</div>
+                      <div className="mt-0.5 text-[12px] leading-snug text-xo-muted">{isDone ? s.detail : "Not prepared yet"}</div>
                     </div>
                   </li>
                 );
               })}
             </ol>
-
             {phase === "done" && (
-              <div className="mt-5 rounded-lg border border-deal-500/30 bg-deal-600/10 p-4">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">Now live · the Shopify of company sales</div>
-                <p className="mt-1.5 text-[12px] leading-relaxed text-white/65">
-                  Your opportunity is published anonymized, the data room is indexed, and {matches.length} matched buyers
-                  are entering sequenced outreach. Engagement signals flow straight into the negotiation engine.
+              <div className="mt-4 border border-xo-line bg-xo-ink p-3">
+                <h3 className="text-[12px] font-semibold">What happens next</h3>
+                <p className="mt-1 text-[12px] leading-relaxed text-xo-muted">
+                  Nothing has been published or sent. To list the company on the exchange — where buyers on the Acquisition Radar see it anonymized and can request an NDA — use <Link to="/console/intake" className={LINK}>List on the exchange</Link>. Suggested first approaches for the matched buyers:
                 </p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
+                <ul className="mt-2 flex flex-wrap gap-1.5">
                   {matches.slice(0, 6).map((m) => (
-                    <span key={m.buyerName} className={`rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide ring-1 ${OUTREACH_STYLE[m.suggestedOutreach]}`}>
+                    <li key={m.buyerName} className={`rounded-sm border px-1.5 py-px text-[11px] font-medium ${OUTREACH_STYLE[m.suggestedOutreach]}`}>
                       {m.buyerName} · {m.suggestedOutreach.replace(/_/g, " ")}
-                    </span>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             )}
           </div>
-        </div>
-      </Card>
-
-      {/* ── KPIs ─────────────────────────────────────────────────── */}
-      <div className="mt-8 flex items-center justify-between">
-        <h2 className="font-serif text-lg font-bold text-white">Your listing</h2>
-        <div className="inline-flex rounded-md border border-white/15 bg-ink-800/40 p-1">
-          <button
-            onClick={() => setView("founder")}
-            className={`rounded px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${view === "founder" ? "bg-deal-600/30 text-white" : "text-white/55 hover:text-white"}`}
-          >
-            Founder view
-          </button>
-          <button
-            onClick={() => setView("public")}
-            className={`rounded px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${view === "public" ? "bg-deal-600/30 text-white" : "text-white/55 hover:text-white"}`}
-          >
-            Public listing
-          </button>
-        </div>
+        </Section>
       </div>
 
-      <div className="mt-2 grid gap-6 lg:grid-cols-[1fr_360px]">
-        <Card className="p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-400">Listing</div>
-          <h2 className="mt-2 font-serif text-3xl font-bold leading-tight text-white">{listing.title}</h2>
-          {listing.fullName && view === "founder" && (
-            <div className="mt-1 text-[12px] text-white/55">Identity (founder view): <span className="text-white/85">{listing.fullName}</span> · {listing.jurisdiction}</div>
-          )}
-          <div className="mt-4 flex flex-wrap gap-3 text-[12px]">
-            <Tag>{listing.businessModel}</Tag>
-            <Tag>{listing.sector.replace(/_/g, " ")}</Tag>
-            <Tag>founded {listing.foundedYear}</Tag>
-            <Tag>{listing.jurisdiction}</Tag>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-x-8 gap-y-3 text-[13px] sm:grid-cols-3">
-            {listing.headline.arrUsd != null && <DataRow label="ARR"           value={fmtMoney(listing.headline.arrUsd)} />}
-            {listing.headline.ttmRevenueUsd != null && <DataRow label="TTM revenue" value={fmtMoney(listing.headline.ttmRevenueUsd)} />}
-            <DataRow label="Gross margin"  value={`${(listing.headline.grossMarginPct * 100).toFixed(0)}%`} />
-            <DataRow label="ARR growth YoY" value={`${(listing.headline.arrGrowthYoyPct * 100).toFixed(0)}%`} />
-            <DataRow label="EBITDA margin" value={`${(listing.headline.ebitdaMarginPct * 100).toFixed(0)}%`} />
-            <DataRow label="Asking range"  value={`${fmtMoney(listing.askingPriceUsd.low)} – ${fmtMoney(listing.askingPriceUsd.high)}`} />
-          </div>
-
-          <h3 className="mt-7 font-serif text-base font-bold text-white">Highlights</h3>
-          <ul className="mt-2 space-y-1.5 text-[13px] text-white/75">
-            {listing.highlights.map((h) => (
-              <li key={h} className="flex items-baseline gap-2">
-                <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-deal-400" /> {h}
-              </li>
-            ))}
-          </ul>
-
-          <h3 className="mt-7 font-serif text-base font-bold text-white">Ideal buyer profile</h3>
-          <div className="mt-2 grid grid-cols-3 gap-3 text-[12px]">
-            <div>
-              <dt className="text-white/40">Buyer types</dt>
-              <dd className="mt-1 font-medium text-white/85">{listing.idealBuyerProfile.preferredTypes.join(" · ")}</dd>
-            </div>
-            <div>
-              <dt className="text-white/40">Check size</dt>
-              <dd className="mt-1 font-medium text-white/85">{fmtMoney(listing.idealBuyerProfile.checkSizeUsd.low)} – {fmtMoney(listing.idealBuyerProfile.checkSizeUsd.high)}</dd>
-            </div>
-            <div>
-              <dt className="text-white/40">Geography</dt>
-              <dd className="mt-1 font-medium text-white/85">{listing.idealBuyerProfile.geography.join(" · ")}</dd>
-            </div>
-          </div>
-
-          <div className="mt-7 flex flex-wrap gap-3">
-            {phase === "done"
-              ? <Button variant="ghost" disabled>● Published to marketplace</Button>
-              : <Button onClick={publish}>Publish Opportunity</Button>}
-            <Button variant="ghost" onClick={() => { setEditAsk(listing.askingPriceUsd.mid); setEditNote(override.note); setEditOpen(true); }}>Edit listing</Button>
-            {view === "public" && <Button variant="ghost">Request NDA</Button>}
-          </div>
-          {override.note && view === "founder" && (
-            <div className="mt-3 rounded-md border border-loi-400/20 bg-loi-500/[0.06] px-3 py-2 text-[12px] text-white/70"><span className="font-semibold text-loi-300">Founder note:</span> {override.note}</div>
-          )}
-        </Card>
-
-        {/* ── Edit listing ────────────────────────────────────────── */}
-        <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit listing" subtitle="Founder-side adjustments to the published opportunity" size="md"
-          footer={<><Button variant="ghost" onClick={() => { setOverride({ askMid: null, note: "" }); setEditOpen(false); notify("Listing reset to engine values"); }}>Reset</Button><Button onClick={() => { setOverride({ askMid: editAsk, note: editNote.trim() }); setEditOpen(false); notify("Listing updated"); }}>Save</Button></>}>
-          <div className="space-y-4">
-            <div className="rounded-lg border border-white/10 bg-ink-900/40 p-3 text-[12px] text-white/55">
-              Engine band: {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {baseListing.sector.replace(/_/g, " ")}
-            </div>
-            <Field label="Asking price (mid)" hint="Overrides the engine mid; band low/high unchanged">
-              <input type="number" step={1_000_000} min={baseListing.askingPriceUsd.low} value={editAsk} onChange={(e) => setEditAsk(Number(e.target.value))} className={inputCls} />
-            </Field>
-            <Field label="Founder note" hint="Shown on your founder view only">
-              <textarea className={`${inputCls} min-h-[80px] resize-y`} placeholder="e.g. hold publication until the audit closes" value={editNote} onChange={(e) => setEditNote(e.target.value)} />
-            </Field>
-          </div>
-        </Modal>
-
-        <aside className="space-y-4">
-          <Card className="p-5">
-            <h3 className="font-serif text-base font-bold text-white">Matched buyers</h3>
-            <p className="mt-1 text-[11px] text-white/45">Surfaced by @exit/engines · matchBuyersToListing</p>
-            <div className="mt-4 space-y-3">
-              {matches.slice(0, 8).map((m) => (
-                <div key={m.buyerName} className="rounded border border-white/10 bg-ink-900/40 p-3">
-                  <div className="flex items-baseline justify-between">
-                    <div className="font-medium text-white">{m.buyerName}</div>
-                    <span className="font-mono text-[12px] text-deal-300">{(m.matchScore * 100).toFixed(0)}%</span>
-                  </div>
-                  <div className={`mt-0.5 text-[11px] font-semibold uppercase tracking-wide ${TYPE_STYLE[m.buyerType] ?? "text-white/55"}`}>{m.buyerType.replace(/_/g, " ")}</div>
-                  <p className="mt-2 text-[11px] leading-snug text-white/55">{m.rationale}</p>
-                  <span className={`mt-2 inline-block rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide ring-1 ${OUTREACH_STYLE[m.suggestedOutreach]}`}>
-                    {m.suggestedOutreach.replace(/_/g, " ")}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="p-5">
-            <h3 className="font-serif text-base font-bold text-white">Marketplace mechanics</h3>
-            <ul className="mt-3 space-y-2 text-[12px] text-white/65">
-              <li className="flex items-baseline gap-2"><span className="mt-1 inline-block h-1 w-1 rounded-full bg-deal-400" /> Listings publish anonymized by default</li>
-              <li className="flex items-baseline gap-2"><span className="mt-1 inline-block h-1 w-1 rounded-full bg-deal-400" /> Buyers request NDA → de-anonymized data shared</li>
-              <li className="flex items-baseline gap-2"><span className="mt-1 inline-block h-1 w-1 rounded-full bg-deal-400" /> Engagement signals feed the negotiation engine</li>
-              <li className="flex items-baseline gap-2"><span className="mt-1 inline-block h-1 w-1 rounded-full bg-deal-400" /> Success fee on closed deals · founder-paid</li>
+      {/* ── Your listing ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Your listing" className="lg:col-span-8"
+          right={<div role="group" aria-label="Listing view" className="inline-flex gap-1">
+            <Chip pressed={view === "founder"} onToggle={() => setView("founder")}>Founder view</Chip>
+            <Chip pressed={view === "public"} onToggle={() => setView("public")}>Public listing</Chip>
+          </div>}>
+          <div className="px-4 py-4">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">Listing</div>
+            <h3 className="mt-1 font-serif text-[22px] font-semibold leading-tight">{listing.title}</h3>
+            {listing.fullName && view === "founder" && (
+              <p className="mt-1 text-[12px] text-xo-muted">Identity (founder view): <span className="text-xo-text">{listing.fullName}</span> · {listing.jurisdiction}</p>
+            )}
+            <ul className="mt-3 flex flex-wrap gap-2 text-[12px]">
+              <Tag>{listing.businessModel}</Tag>
+              <Tag>{listing.sector.replace(/_/g, " ")}</Tag>
+              <Tag>founded {listing.foundedYear}</Tag>
+              <Tag>{listing.jurisdiction}</Tag>
             </ul>
-          </Card>
-        </aside>
+
+            <dl className="mt-5 grid grid-cols-2 gap-x-8 gap-y-3 text-[13px] sm:grid-cols-3">
+              {listing.headline.arrUsd != null && <DataRow label="ARR"           value={fmtMoney(listing.headline.arrUsd)} />}
+              {listing.headline.ttmRevenueUsd != null && <DataRow label="TTM revenue" value={fmtMoney(listing.headline.ttmRevenueUsd)} />}
+              <DataRow label="Gross margin"  value={`${(listing.headline.grossMarginPct * 100).toFixed(0)}%`} />
+              <DataRow label="ARR growth YoY" value={`${(listing.headline.arrGrowthYoyPct * 100).toFixed(0)}%`} />
+              <DataRow label="EBITDA margin" value={`${(listing.headline.ebitdaMarginPct * 100).toFixed(0)}%`} />
+              <DataRow label="Asking range"  value={`${fmtMoney(listing.askingPriceUsd.low)} – ${fmtMoney(listing.askingPriceUsd.high)}`} />
+            </dl>
+
+            <h4 className="mt-6 text-[13px] font-semibold">Highlights</h4>
+            <ul className="mt-2 space-y-1.5 text-[13px] text-xo-muted">
+              {listing.highlights.map((h) => (
+                <li key={h} className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-xo-verified" /> {h}</li>
+              ))}
+            </ul>
+
+            <h4 className="mt-6 text-[13px] font-semibold">Ideal buyer profile</h4>
+            <dl className="mt-2 grid grid-cols-1 gap-3 text-[12px] sm:grid-cols-3">
+              <div><dt className="text-xo-muted">Buyer types</dt><dd className="mt-1 font-medium">{listing.idealBuyerProfile.preferredTypes.join(" · ")}</dd></div>
+              <div><dt className="text-xo-muted">Check size</dt><dd className="mt-1 font-medium">{fmtMoney(listing.idealBuyerProfile.checkSizeUsd.low)} – {fmtMoney(listing.idealBuyerProfile.checkSizeUsd.high)}</dd></div>
+              <div><dt className="text-xo-muted">Geography</dt><dd className="mt-1 font-medium">{listing.idealBuyerProfile.geography.join(" · ")}</dd></div>
+            </dl>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              <Link to="/console/intake" className={BTN}>List on the exchange →</Link>
+              <button type="button" onClick={() => { setEditAskText(String(Math.round(listing.askingPriceUsd.mid / 1e5) / 10)); setEditNote(override.note); setEditOpen(true); }} className={BTN_GHOST}>Adjust preview</button>
+            </div>
+            {view === "public" && <p className="mt-3 text-[12px] text-xo-muted">This is the preview buyers would see. They request an NDA from the Acquisition Radar; there is nothing to request here.</p>}
+            {override.askMid != null && <p className="mt-3 text-[12px] text-xo-caution">Preview only: the asking mid shown is your adjustment ({fmtMoney(override.askMid)}). It is not saved or published.</p>}
+            {override.note && view === "founder" && (
+              <p className="mt-3 border border-xo-caution/40 bg-xo-ink px-3 py-2 text-[12px] text-xo-muted"><span className="font-semibold text-xo-caution">Founder note:</span> {override.note}</p>
+            )}
+          </div>
+        </Section>
+
+        <div className="flex flex-col gap-px bg-xo-line lg:col-span-4">
+          <Section title="Matched buyers" eyebrow="matchBuyersToListing"
+            foot="Fit score: the discovery engine's weighted fit (sector, size, geography, activity), 0–100 — not a measured chance of a bid.">
+            <ul>
+              {matches.slice(0, 8).map((m) => (
+                <li key={m.buyerName} className="border-b border-xo-line px-4 py-3 last:border-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="font-medium">{m.buyerName}</span>
+                    <span className="font-mono text-[12px] tabular-nums"><span className="sr-only">fit score </span>{fit(m.matchScore)}</span>
+                  </div>
+                  <div className={`mt-0.5 text-[11px] font-semibold ${TYPE_STYLE[m.buyerType] ?? "text-xo-muted"}`}>{m.buyerType.replace(/_/g, " ")}</div>
+                  <p className="mt-1.5 text-[12px] leading-snug text-xo-muted">{m.rationale}</p>
+                  <span className={`mt-2 inline-block rounded-sm border px-1.5 py-px text-[11px] font-medium ${OUTREACH_STYLE[m.suggestedOutreach]}`}>{m.suggestedOutreach.replace(/_/g, " ")}</span>
+                </li>
+              ))}
+            </ul>
+          </Section>
+          <Section title="Marketplace mechanics" className="flex-1">
+            <ul className="space-y-2 px-4 py-3 text-[12px] text-xo-muted">
+              <li className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-verified" /> Listings publish anonymized by default</li>
+              <li className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-verified" /> Buyers request an NDA; you mark it executed in your Inbox. Nothing is revealed automatically — you share identity and data yourself</li>
+              <li className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-verified" /> Buyer interest, NDA requests and offers arrive in your Inbox</li>
+              <li className="flex items-baseline gap-2"><span aria-hidden className="mt-1 inline-block h-1 w-1 shrink-0 rounded-full bg-xo-verified" /> Success fee on closed deals · founder-paid</li>
+            </ul>
+          </Section>
+        </div>
       </div>
+
+      {/* ── Edit listing ────────────────────────────────────────── */}
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Adjust preview" subtitle="Changes this page's preview only — not saved, not published" size="md"
+        footer={<><Button variant="ghost" onClick={() => { setOverride({ askMid: null, note: "" }); setEditOpen(false); notify("Preview reset to engine values"); }}>Reset</Button><Button disabled={!askParse.ok} onClick={() => { if (!askParse.ok) return; setOverride({ askMid: askParse.value, note: editNote.trim() }); setEditOpen(false); notify("Preview updated — not saved or published"); }}>Apply to preview</Button></>}>
+        <div className="space-y-4">
+          <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
+            Valuation band (canonical, as everywhere in the console): {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {baseListing.sector.replace(/_/g, " ")}
+          </p>
+          <div>
+            <label htmlFor="mkt-ask" className={XO_LABEL}>Asking price, mid ($M)</label>
+            <input id="mkt-ask" inputMode="decimal" value={editAskText} onChange={(e) => setEditAskText(e.target.value)}
+              aria-invalid={!askParse.ok} aria-describedby="mkt-ask-msg" className={XO_INPUT} />
+            <span id="mkt-ask-msg" className={`mt-1 block text-[12px] ${askParse.ok ? "text-xo-muted" : "text-xo-risk"}`}>{askParse.ok ? "Overrides the engine mid in this preview; band low/high unchanged." : askParse.error}</span>
+          </div>
+          <Field label="Founder note" hint="Shown on your founder view of this page only; cleared when you leave">
+            <textarea className={`${inputCls} min-h-[80px] resize-y`} placeholder="e.g. hold publication until the audit closes" value={editNote} onChange={(e) => setEditNote(e.target.value)} />
+          </Field>
+        </div>
+      </Modal>
     </div>
   );
 };
 
-const Spinner: React.FC = () => (
-  <span className="block h-3 w-3 animate-spin rounded-full border-[1.5px] border-loi-300/40 border-t-loi-200" />
-);
-
-const Manifesto: React.FC<{ value: string; label: string }> = ({ value, label }) => (
-  <div>
-    <div className="font-mono text-lg font-bold text-white">{value}</div>
-    <div className="mt-0.5 text-[10px] uppercase tracking-wide text-white/40">{label}</div>
-  </div>
-);
-
 const Tag: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <span className="rounded-full border border-white/10 bg-ink-900/60 px-3 py-1 font-mono text-[10px] uppercase tracking-wide text-white/65">{children}</span>
+  <li className="rounded-sm border border-xo-line px-2 py-0.5 font-mono text-[11px] text-xo-muted">{children}</li>
 );
 
 const DataRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
   <div>
-    <dt className="text-[10px] uppercase tracking-[0.18em] text-white/40">{label}</dt>
-    <dd className="mt-1 font-mono text-sm font-semibold text-white">{value}</dd>
+    <dt className="text-[11px] text-xo-muted">{label}</dt>
+    <dd className="mt-1 font-mono text-[14px] font-semibold tabular-nums">{value}</dd>
+  </div>
+);
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
   </div>
 );
 

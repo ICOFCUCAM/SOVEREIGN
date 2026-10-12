@@ -6,7 +6,7 @@
 import { buyers } from "@exit/engines";
 import {
   LISTING_PUBLIC, LISTING_PRIVATE, LISTING_MATCHES,
-  SAMPLE_OFFERS, VALUATION_STRATEGIC, DILIGENCE,
+  SAMPLE_OFFERS, VALUATION_CANONICAL, DILIGENCE,
   SAMPLE_NDAS,
 } from "./engines.js";
 import { sectorLabel } from "./market-stats.js";
@@ -72,7 +72,9 @@ export const PORTAL_OPPORTUNITIES: readonly PortalOpportunity[] = [
     ...(seatSees.headline.arrUsd ?? seatSees.headline.ttmRevenueUsd
       ? { revenue: seatSees.headline.arrUsd ?? seatSees.headline.ttmRevenueUsd }
       : {}),
-    ask: seatSees.askingPriceUsd.mid,
+    // D1: the console shows one value — the canonical (institutional) midpoint,
+    // not the listing engine's strategic ask
+    ask: VALUATION_CANONICAL.headline.mid,
     fit: Math.round(seatMatch.matchScore * 100),
     stage: SEAT.offer ? (SEAT.offer.stage === "countered" ? "loi" : "engaged") : "sourcing",
     readiness: Math.round(seatSees.readinessScore),
@@ -90,12 +92,12 @@ export interface PortalNegotiation {
   readonly status: string;
 }
 
-/** The seat's own offers on listings, with premium vs the strategic mid. */
+/** The seat's own offers on listings, with premium vs the canonical midpoint. */
 export const PORTAL_NEGOTIATIONS: readonly PortalNegotiation[] = SEAT.offer
   ? [{
       code: LISTING_PUBLIC.title,
       offer: SEAT.offer.headlinePriceUsd,
-      premiumPct: Math.round((SEAT.offer.headlinePriceUsd / VALUATION_STRATEGIC.headline.mid - 1) * 100),
+      premiumPct: Math.round((SEAT.offer.headlinePriceUsd / VALUATION_CANONICAL.headline.mid - 1) * 100),
       stage: SEAT.offer.stage === "countered" ? "loi" : "engaged",
       status: SEAT.offer.stage === "countered" ? "Counter received" : "Offer submitted",
     }]

@@ -130,6 +130,53 @@ export const DISCLOSED_TRANSACTIONS: readonly BoardTx[] = [...HISTORY]
     };
   });
 
+/** The homepage ledger — the priced deals in the same order as the board
+ *  (newest first), with the date, the source and the record's tier. Every
+ *  history entry is curated; its tier says whether it was re-verified. */
+const SOURCE_KIND: Record<string, string> = {
+  edgar_8k: "SEC 8-K", edgar_10k: "SEC 10-K", wikidata: "Wikidata", press_release: "Press release", manual: "Manual note",
+};
+export interface LedgerRow {
+  readonly date: string;          // ISO announced date
+  readonly target: string;
+  readonly buyer: string;
+  readonly sector: string;
+  readonly value: string;
+  readonly premium: string;
+  readonly status: string;
+  readonly statusColor: string;
+  readonly sources: ReadonlyArray<{ kind: string; ref: string }>;
+  readonly tier: string;          // confidence tier as recorded
+  readonly valueUsd: number;      // for sorting
+}
+/** Every priced history entry, newest first (the ledger's searchable table). */
+export const LEDGER_ALL: readonly LedgerRow[] = [...HISTORY]
+  .filter((e) => typeof e.headlinePriceUsd === "number" && e.headlinePriceUsd > 0)
+  .sort((a, b) => (b.announcedDate || "").localeCompare(a.announcedDate || ""))
+  .map((e) => ({
+    date: e.announcedDate,
+    target: e.targetName,
+    buyer: shortBuyer(e.buyerName),
+    sector: sectorLabel(e.sector ?? ""),
+    value: usd(e.headlinePriceUsd as number),
+    premium: e.priorReferencePriceUsd
+      ? `+${Math.round((((e.headlinePriceUsd as number) - e.priorReferencePriceUsd) / e.priorReferencePriceUsd) * 100)}%`
+      : "—",
+    status: e.status === "closed" ? "Closed" : e.status === "terminated" ? "Terminated" : "Announced",
+    statusColor: e.status === "closed" ? "#047857" : e.status === "terminated" ? "#475569" : "#92400e",
+    sources: e.sourceRefs.map((r) => ({ kind: SOURCE_KIND[r.kind] ?? r.kind, ref: r.ref })),
+    tier: e.confidence,
+    valueUsd: e.headlinePriceUsd as number,
+  }));
+export const LEDGER_ROWS: readonly LedgerRow[] = LEDGER_ALL.slice(0, 13);
+/** History entries that carry a disclosed headline price. */
+export const LEDGER_PRICED = HISTORY.filter((e) => typeof e.headlinePriceUsd === "number" && e.headlinePriceUsd > 0).length;
+/** Every history entry's tier, counted — shown beside the ledger. */
+export const LEDGER_TIERS: Readonly<Record<string, number>> = HISTORY.reduce<Record<string, number>>((acc, e) => {
+  acc[e.confidence] = (acc[e.confidence] ?? 0) + 1;
+  return acc;
+}, {});
+
 /** Top registry mandates for the Strategic Buyers column. */
 export const STRATEGIC_BOARD: ReadonlyArray<[string, string, number, string]> = [...REGISTRY]
   .sort((a, b) => b.recentActivityScore - a.recentActivityScore)

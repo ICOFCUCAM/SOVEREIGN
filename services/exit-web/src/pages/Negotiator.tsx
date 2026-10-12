@@ -1,28 +1,22 @@
-import React, { useState } from "react";
-import { Button, Card, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import React, { useMemo, useState } from "react";
+import { Button, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
+import { PageHeader, Section, Metric, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
+import { SAMPLE_COMPANY } from "../lib/profile";
+import { parseNumber } from "../lib/intake-fields";
+import { loadActiveCompany } from "../lib/active-company";
 import { buildMarketTape } from "../lib/market-tape";
-import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_STRATEGIC } from "../lib/engines";
-import BankerTake from "../components/BankerTake";
+import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_CANONICAL } from "../lib/engines";
 
 interface Reserve { minHeadlinePriceUsd: number; minCashPct: number; maxEarnoutPct: number; premiumOverride: number | null }
 
-const REC_STYLE: Record<string, string> = {
-  accept:  "bg-deal-600/20 text-deal-300 ring-deal-400/40",
-  counter: "bg-loi-500/15 text-loi-300 ring-loi-400/40",
-  engage:  "bg-stage-engaged/15 text-stage-engaged ring-stage-engaged/40",
-  decline: "bg-red-500/15 text-red-300 ring-red-400/40",
+const REC_CLS: Record<string, string> = {
+  accept: "text-xo-verified", counter: "text-xo-caution", engage: "text-xo-action", decline: "text-xo-risk",
 };
 
-const SEVERITY_STYLE: Record<"soft" | "hard", string> = {
-  soft: "bg-loi-500/15 text-loi-300",
-  hard: "bg-red-500/15 text-red-300",
-};
-
-const LEV_STYLE: Record<string, string> = {
-  high:   "text-deal-300",
-  medium: "text-loi-300",
-  low:    "text-red-300",
+const LEV_CLS: Record<string, string> = {
+  high: "text-xo-verified", medium: "text-xo-caution", low: "text-xo-risk",
 };
 
 // Counteroffer generator — produces an ACTUAL draft counter, not advice. The
@@ -32,8 +26,8 @@ const LEV_STYLE: Record<string, string> = {
 // posture. Output is a ready-to-send response.
 type Offer = typeof OFFER_EVALUATIONS[number]["offer"];
 function generateCounter(offer: Offer, reserve: Reserve) {
-  const strategicMid = VALUATION_STRATEGIC.headline.mid;
-  const strategicHigh = VALUATION_STRATEGIC.headline.high;
+  const strategicMid = VALUATION_CANONICAL.headline.mid;
+  const strategicHigh = VALUATION_CANONICAL.headline.high;
   const lev = NEGOTIATION_STATE.leverage;
   // anchor: max of strategic-mid and the offer, plus a leverage-scaled premium
   // (or the founder's manual override from the Adjust counter modal)
@@ -47,17 +41,19 @@ function generateCounter(offer: Offer, reserve: Reserve) {
   const stockPct = Math.max(0, 1 - cashPct - earnoutPct);
   const justification = [
     `${(SAMPLE_GROWTH * 100).toFixed(0)}% ARR growth supports a forward multiple above the submitted bid`,
-    `strategic-buyer valuation midpoint is ${fmtMoney(strategicMid)} — the offer sits below intrinsic strategic value`,
+    `enterprise value (institutional framework) is ${fmtMoney(strategicMid)} — the offer sits below it`,
     `${lev} competitive leverage: ${NEGOTIATION_STATE.activeOffers} active offer${NEGOTIATION_STATE.activeOffers === 1 ? "" : "s"} in process`,
     `cash weighting raised to ${(cashPct * 100).toFixed(0)}% and earnout capped at ${(earnoutPct * 100).toFixed(0)}% to align with deal-certainty requirements`,
   ];
   return { counterPrice, upliftPct, cashPct, stockPct, earnoutPct, justification, strategicMid };
 }
-const SAMPLE_GROWTH = 0.42; // ARR growth from company profile (Helios)
+// The offers belong to the demo company, so the draft and justification use
+// its profile rather than hard-coded figures.
+const SAMPLE_GROWTH = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
 
-// Autonomous Negotiation — the founder sets their lines (minimum, ideal,
-// walk-away) and the AI generates the deal terms a junior banker + lawyer
-// would: protective clauses, earnout alternatives and seller protections.
+// Negotiating positions — the founder sets their lines (minimum, ideal,
+// walk-away); the lists below are standard templates with fixed figures,
+// shown as a starting point for advisers, not legal advice.
 interface Thresholds { minUsd: number; idealUsd: number; walkUsd: number; }
 function autonomousTerms(offer: Offer | undefined, t: Thresholds): { clauses: string[]; earnouts: string[]; protections: string[] } {
   const earnoutPct = offer?.earnoutPct ?? 0;
@@ -85,9 +81,12 @@ function autonomousTerms(offer: Offer | undefined, t: Thresholds): { clauses: st
 }
 
 const Negotiator: React.FC = () => {
-  const [activeId, setActiveId] = useState(OFFER_EVALUATIONS[0]?.offer.offerId ?? "");
+  // The engine's leading offer (OFFER_COMPARISON.leader is an offer id) —
+  // selected by default and shown as the leading bid whatever is selected.
+  const leader = OFFER_EVALUATIONS.find((e) => e.offer.offerId === OFFER_COMPARISON.leader) ?? OFFER_EVALUATIONS[0];
+  const [activeId, setActiveId] = useState(leader?.offer.offerId ?? "");
   const active = OFFER_EVALUATIONS.find((e) => e.offer.offerId === activeId) ?? OFFER_EVALUATIONS[0];
-  const reserveMid = VALUATION_STRATEGIC.headline.mid;
+  const reserveMid = VALUATION_CANONICAL.headline.mid;
   const [reserve, setReserve] = useState<Reserve>({
     minHeadlinePriceUsd: RESERVATION_LINES.minHeadlinePriceUsd,
     minCashPct: RESERVATION_LINES.minCashPct,
@@ -97,62 +96,69 @@ const Negotiator: React.FC = () => {
   const counter = active ? generateCounter(active.offer, reserve) : null;
   const [draftOpen, setDraftOpen] = useState(false);
   const [reserveOpen, setReserveOpen] = useState(false);
-  const [counterSent, setCounterSent] = useState(false);
 
-  const [walkUsd, setWalkUsd]   = useState(Math.round(RESERVATION_LINES.minHeadlinePriceUsd * 0.95));
-  const [minUsd, setMinUsd]     = useState(RESERVATION_LINES.minHeadlinePriceUsd);
-  const [idealUsd, setIdealUsd] = useState(Math.round(VALUATION_STRATEGIC.headline.high));
+  // Your lines, typed in dollars. Invalid entries are flagged and the last
+  // default stands in; the order walk-away ≤ minimum ≤ ideal is checked.
+  const DEF = { walk: Math.round(RESERVATION_LINES.minHeadlinePriceUsd * 0.95), min: RESERVATION_LINES.minHeadlinePriceUsd, ideal: Math.round(VALUATION_CANONICAL.headline.high) };
+  const [walkTxt, setWalkTxt]   = useState(String(DEF.walk));
+  const [minTxt, setMinTxt]     = useState(String(DEF.min));
+  const [idealTxt, setIdealTxt] = useState(String(DEF.ideal));
+  const usd = (t: string) => parseNumber(t, { min: 0, max: 1e13 });
+  const walkP = usd(walkTxt), minP = usd(minTxt), idealP = usd(idealTxt);
+  const walkUsd = walkP.ok ? walkP.value : DEF.walk;
+  const minUsd = minP.ok ? minP.value : DEF.min;
+  const idealUsd = idealP.ok ? idealP.value : DEF.ideal;
+  const errWalk = !walkP.ok ? `${walkP.error} Using ${fmtMoney(DEF.walk)}.` : walkUsd > minUsd ? "Walk-away is above your minimum." : undefined;
+  const errMin = !minP.ok ? `${minP.error} Using ${fmtMoney(DEF.min)}.` : minUsd > idealUsd ? "Minimum is above your ideal." : undefined;
+  const errIdeal = !idealP.ok ? `${idealP.error} Using ${fmtMoney(DEF.ideal)}.` : undefined;
   const terms = autonomousTerms(active?.offer, { minUsd, idealUsd, walkUsd });
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
 
   const draftText = active && counter
-    ? `Re: Acquisition of Helios Freight — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
+    ? `Re: Acquisition of ${SAMPLE_COMPANY.name} — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
 
 Dear ${active.offer.buyerName} team,
 
-Thank you for the proposal. We value the engagement and believe a transaction is achievable. After review against our valuation and the competitive process underway, we are countering as follows:
+Thank you for the proposal. We value the engagement and believe a transaction is achievable. After review against our valuation and the other offers we have received, we are countering as follows:
 
   • Headline consideration: ${fmtMoney(counter.counterPrice)} (a ${counter.upliftPct.toFixed(0)}% increase on the submitted bid)
   • Consideration mix: ${(counter.cashPct * 100).toFixed(0)}% cash / ${(counter.stockPct * 100).toFixed(0)}% stock / ${(counter.earnoutPct * 100).toFixed(0)}% earnout
 
 This reflects:
-  - ${SAMPLE_GROWTH * 100}% ARR growth and the forward trajectory of the business
-  - a strategic-buyer valuation midpoint of ${fmtMoney(counter.strategicMid)}
+  - ${(SAMPLE_GROWTH * 100).toFixed(0)}% ARR growth and the forward trajectory of the business
+  - an enterprise value of ${fmtMoney(counter.strategicMid)}
   - ${NEGOTIATION_STATE.activeOffers} active offer(s) currently in our process
 
 We are prepared to move quickly toward a definitive agreement on these terms. We propose a call this week to align on structure and timeline.
 
 Best regards,
-James — on behalf of Helios Freight`
+[Your name] — on behalf of ${SAMPLE_COMPANY.name}`
     : "";
 
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Operator · Negotiation"
-        title="AI Deal Negotiator"
-        tag={`Stage: ${NEGOTIATION_STATE.stage}`}
-        status={`Leverage ${NEGOTIATION_STATE.leverage}`}
-        metrics={[
-          { k: "Active offers", v: String(NEGOTIATION_STATE.activeOffers), sub: NEGOTIATION_STATE.stage },
-          { k: "Leverage", v: NEGOTIATION_STATE.leverage, accent: NEGOTIATION_STATE.leverage === "high", sub: "market posture" },
-          { k: "Leading bid", v: active ? `${active.score.toFixed(0)}/100` : "—", accent: true, sub: active?.offer.buyerName },
-          { k: "Strategic mid", v: fmtMoney(reserveMid), sub: "valuation reference" },
-        ]}
-      />
+    <div data-page="bid-room" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow={`◉ Operator · Negotiation desk · Demo company: ${SAMPLE_COMPANY.name}`} title="Bid Room"
+        description={<>Sample offers of the demo company ({SAMPLE_COMPANY.name}).{fromIntake ? " Your intake has no offers, so these are not yours." : ""}</>}
+        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Stage: {NEGOTIATION_STATE.stage} · Leverage {NEGOTIATION_STATE.leverage}</span></>}
+        actions={<>
+          <Button variant="ghost" onClick={() => setReserveOpen(true)}>Edit reservation lines</Button>
+          <Button onClick={() => setDraftOpen(true)}>Generate counter</Button>
+        </>} />
 
-      <MarketTape items={buildMarketTape()} />
+      <section aria-label="Negotiation summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><Metric label="Active offers" value={String(NEGOTIATION_STATE.activeOffers)} sub={NEGOTIATION_STATE.stage} /></div>
+        <div className="bg-xo-panel"><Metric label="Leverage" value={<span className="capitalize">{NEGOTIATION_STATE.leverage}</span>} sub="market posture" /></div>
+        <div className="bg-xo-panel"><Metric label="Leading bid" emphasis value={leader ? `${leader.score.toFixed(0)}/100` : "—"} sub={leader?.offer.buyerName} /></div>
+        <div className="bg-xo-panel"><Metric label="Enterprise value" value={fmtMoney(reserveMid)} sub="institutional framework · counter reference" /></div>
+      </section>
 
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button variant="ghost" onClick={() => setReserveOpen(true)}>Edit reservation lines</Button>
-        <Button onClick={() => setDraftOpen(true)}>Generate counter</Button>
-      </div>
+      <RegistryTape items={buildMarketTape()} asOf={DNA_AS_OF.slice(0, 10)} />
 
-      {/* ── Edit reservation lines / adjust counter ───────────────── */}
       <Modal open={reserveOpen} onClose={() => setReserveOpen(false)} title="Reservation lines & counter" subtitle="These shape the counter price and structure" size="md"
         footer={<><Button variant="ghost" onClick={() => setReserve({ minHeadlinePriceUsd: RESERVATION_LINES.minHeadlinePriceUsd, minCashPct: RESERVATION_LINES.minCashPct, maxEarnoutPct: RESERVATION_LINES.maxEarnoutPct, premiumOverride: null })}>Reset</Button><Button onClick={() => { setReserveOpen(false); notify("Reservation lines updated"); }}>Apply</Button></>}>
         <div className="space-y-4">
-          <Field label="Headline floor (walk-away below this)">
-            <input type="number" step={1_000_000} min={0} value={reserve.minHeadlinePriceUsd} onChange={(e) => setReserve((r) => ({ ...r, minHeadlinePriceUsd: Number(e.target.value) }))} className={inputCls} />
+          <Field label="Headline floor (walk-away below this)" hint="Recorded for reference; the counter rule uses the cash, earnout and premium settings below.">
+            <input type="number" step={1_000_000} min={0} value={reserve.minHeadlinePriceUsd} onChange={(e) => { const n = Number(e.target.value); if (Number.isFinite(n) && n >= 0) setReserve((r) => ({ ...r, minHeadlinePriceUsd: n })); }} className={inputCls} />
           </Field>
           <Field label={`Minimum cash — ${(reserve.minCashPct * 100).toFixed(0)}%`}>
             <input type="range" min={50} max={100} step={5} value={reserve.minCashPct * 100} onChange={(e) => setReserve((r) => ({ ...r, minCashPct: Number(e.target.value) / 100 }))} className="w-full accent-deal-500" />
@@ -164,257 +170,218 @@ James — on behalf of Helios Freight`
             <input type="range" min={0} max={30} step={1} value={reserve.premiumOverride == null ? 12 : Math.round(reserve.premiumOverride * 100)} onChange={(e) => setReserve((r) => ({ ...r, premiumOverride: Number(e.target.value) / 100 }))} className="w-full accent-deal-500" />
           </Field>
           {counter && active && (
-            <div className="rounded-md border border-deal-500/30 bg-deal-600/[0.07] p-3 text-[12.5px] text-white/75">
-              Counter previews at <span className="font-mono font-semibold text-deal-300">{fmtMoney(counter.counterPrice)}</span> (+{counter.upliftPct.toFixed(0)}%) · {(counter.cashPct * 100).toFixed(0)}% cash / {(counter.earnoutPct * 100).toFixed(0)}% earnout.
-            </div>
+            <p className="border border-xo-line px-3 py-2 text-[13px] text-white/80">
+              Counter previews at <span className="font-mono font-semibold">{fmtMoney(counter.counterPrice)}</span> (+{counter.upliftPct.toFixed(0)}%) · {(counter.cashPct * 100).toFixed(0)}% cash / {(counter.earnoutPct * 100).toFixed(0)}% earnout.
+            </p>
           )}
         </div>
       </Modal>
 
       {active && counter && (
-        <BankerTake
-          next={NEGOTIATION_STATE.nextMove}
-          stake={<>Counter at <span className="font-mono font-bold text-deal-300">{fmtMoney(counter.counterPrice)}</span> — <span className="text-deal-300">+{counter.upliftPct.toFixed(0)}%</span> on the {fmtMoney(active.offer.headlinePriceUsd)} bid.</>}
-          inaction={<>Accepting the first bid leaves the strategic premium on the table; leverage is {NEGOTIATION_STATE.leverage}.</>}
-          buyer={<>Lead with <span className="text-white">{active.offer.buyerName}</span> — your strongest bid at {active.score.toFixed(0)}/100.</>}
-          automate={<>ExitOS scores every offer, drafts the counter and writes the ready-to-send response for you.</>}
-          impact={<>+{counter.upliftPct.toFixed(0)}%</>}
-          cta={{ label: "Draft the response", onClick: () => setDraftOpen(true) }}
-        />
+        <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+          right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">+{counter.upliftPct.toFixed(0)}%</span>}>
+          <div className="px-4 py-3">
+            <p className="text-[14px] leading-relaxed">{NEGOTIATION_STATE.nextMove}</p>
+            <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+              <TakeCell k="At stake">Counter at <span className="font-mono font-semibold text-xo-verified">{fmtMoney(counter.counterPrice)}</span> — +{counter.upliftPct.toFixed(0)}% on the {fmtMoney(active.offer.headlinePriceUsd)} bid.</TakeCell>
+              <TakeCell k="If you wait">Accepting the first bid may leave value on the table; leverage is {NEGOTIATION_STATE.leverage} on the offers in hand.</TakeCell>
+              <TakeCell k="Pursue">{leader ? <>Lead with <span className="text-xo-text">{leader.offer.buyerName}</span> — your strongest bid at {leader.score.toFixed(0)}/100.</> : null}{leader && leader.offer.offerId !== active.offer.offerId ? <> The counter shown is for {active.offer.buyerName}.</> : null}</TakeCell>
+              <TakeCell k="What ExitOS does">Scores every offer and drafts a counter and a response from the stated rules. You review the draft and send it yourself.</TakeCell>
+            </dl>
+            <button type="button" onClick={() => setDraftOpen(true)} className="mt-3 rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft the response →</button>
+          </div>
+        </Section>
       )}
 
-      {/* ── Autonomous Negotiation — set your lines, AI generates the terms ── */}
-      <Card className="mb-8 p-6">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-deal-600/30 text-[10px] font-bold text-deal-200 ring-1 ring-deal-400/40">AI</span>
-          <h2 className="font-serif text-base font-bold text-white">Autonomous Negotiation</h2>
+      <Section title="Negotiating positions" eyebrow="Standard templates — not legal advice" className="border border-xo-line">
+        <div className="px-4 py-3">
+          <p className="text-[12px] text-xo-muted">Set your lines. The clauses, earnout alternatives and protections below are standard negotiating positions with fixed figures (for example a 4% reverse break fee) — a starting list to take to your advisers, not legal advice.</p>
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <XField id="neg-walk" label="Walk away ($)" error={errWalk}><input id="neg-walk" inputMode="numeric" value={walkTxt} aria-invalid={errWalk ? true : undefined} aria-describedby={errWalk ? "neg-walk-err" : undefined} onChange={(e) => setWalkTxt(e.target.value)} className={XO_INPUT} /></XField>
+            <XField id="neg-min" label="Minimum ($)" error={errMin}><input id="neg-min" inputMode="numeric" value={minTxt} aria-invalid={errMin ? true : undefined} aria-describedby={errMin ? "neg-min-err" : undefined} onChange={(e) => setMinTxt(e.target.value)} className={XO_INPUT} /></XField>
+            <XField id="neg-ideal" label="Ideal ($)" error={errIdeal}><input id="neg-ideal" inputMode="numeric" value={idealTxt} aria-invalid={errIdeal ? true : undefined} aria-describedby={errIdeal ? "neg-ideal-err" : undefined} onChange={(e) => setIdealTxt(e.target.value)} className={XO_INPUT} /></XField>
+          </div>
+          <p className="mt-3 border border-xo-line px-3 py-2 text-[13px] text-xo-muted">
+            Your lines: open at <span className="font-mono font-semibold text-xo-text">{fmtMoney(idealUsd)}</span>, concede no lower than <span className="font-mono font-semibold text-xo-text">{fmtMoney(minUsd)}</span>, and walk below <span className="font-mono font-semibold text-xo-risk">{fmtMoney(walkUsd)}</span>.
+          </p>
+          <div className="mt-4 grid gap-5 sm:grid-cols-3">
+            <TermsList title="Protective clauses" items={terms.clauses} />
+            <TermsList title="Earnout alternatives" items={terms.earnouts} />
+            <TermsList title="Seller protections" items={terms.protections} />
+          </div>
         </div>
-        <p className="mt-1 text-[12px] text-white/45">Set your lines — the AI anchors the counter, drafts the clauses, and engineers seller protections like a junior banker and lawyer.</p>
+      </Section>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Field label="Walk away">
-            <input type="number" value={walkUsd} step={1_000_000} min={0} onChange={(e) => setWalkUsd(Number(e.target.value))} className={inputCls} />
-          </Field>
-          <Field label="Minimum">
-            <input type="number" value={minUsd} step={1_000_000} min={0} onChange={(e) => setMinUsd(Number(e.target.value))} className={inputCls} />
-          </Field>
-          <Field label="Ideal">
-            <input type="number" value={idealUsd} step={1_000_000} min={0} onChange={(e) => setIdealUsd(Number(e.target.value))} className={inputCls} />
-          </Field>
+      <Section title="Negotiation posture" className="border border-xo-line">
+        <div className="px-4 py-3">
+          <p className="text-[14px]"><span className="font-semibold">Next move:</span> {NEGOTIATION_STATE.nextMove}</p>
+          {NEGOTIATION_STATE.recommendations.length > 0 && (
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-xo-muted">
+              {NEGOTIATION_STATE.recommendations.map((r) => <li key={r}>{r}</li>)}
+            </ul>
+          )}
         </div>
-        <div className="mt-3 rounded-md border border-deal-500/20 bg-deal-600/[0.06] px-4 py-2.5 text-[12.5px] text-white/75">
-          AI strategy: open at <span className="font-mono font-semibold text-deal-300">{fmtMoney(idealUsd)}</span>, concede no lower than <span className="font-mono font-semibold text-white">{fmtMoney(minUsd)}</span>, and walk below <span className="font-mono font-semibold text-red-300">{fmtMoney(walkUsd)}</span>.
-        </div>
+      </Section>
 
-        <div className="mt-5 grid gap-5 sm:grid-cols-3">
-          <TermsList title="Protective clauses" items={terms.clauses} dot="bg-deal-400" />
-          <TermsList title="Earnout alternatives" items={terms.earnouts} dot="bg-loi-400" />
-          <TermsList title="Seller protections" items={terms.protections} dot="bg-stage-engaged" />
-        </div>
-      </Card>
-
-      <Card className="mt-2 p-5">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Negotiation posture</div>
-        <p className="mt-2 text-sm text-white/85"><span className="font-semibold">Next move:</span> {NEGOTIATION_STATE.nextMove}</p>
-        {NEGOTIATION_STATE.recommendations.length > 0 && (
-          <ul className="mt-3 space-y-1.5 text-[13px] text-white/65">
-            {NEGOTIATION_STATE.recommendations.map((r) => (
-              <li key={r} className="flex items-baseline gap-2">
-                <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-deal-400" /> {r}
-              </li>
-            ))}
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-[280px_1fr]">
+        <nav aria-label="Offers" className="bg-xo-panel p-2">
+          <ul className="space-y-1">
+            {OFFER_EVALUATIONS.map((e) => {
+              const on = activeId === e.offer.offerId;
+              return (
+                <li key={e.offer.offerId}>
+                  <button type="button" aria-current={on ? "true" : undefined} onClick={() => setActiveId(e.offer.offerId)}
+                    className={`block w-full border px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${on ? "border-xo-verified/60 bg-xo-raise" : "border-xo-line hover:bg-xo-raise"}`}>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-[11px] font-semibold uppercase text-xo-faint">{e.offer.buyerType}</span>
+                      <span className="font-mono text-[12px] text-xo-muted">{e.score.toFixed(0)}/100</span>
+                    </div>
+                    <div className="mt-1 text-[13px] font-medium">{e.offer.buyerName}</div>
+                    <div className="mt-1 text-[12px] text-xo-muted">{fmtMoney(e.offer.headlinePriceUsd)} · {(e.offer.cashPct * 100).toFixed(0)}% cash · {(e.offer.stockPct * 100).toFixed(0)}% stock · {(e.offer.earnoutPct * 100).toFixed(0)}% earnout</div>
+                    <span className={`mt-2 inline-block text-[12px] font-semibold capitalize ${REC_CLS[e.recommendation] ?? "text-xo-muted"}`}>{e.recommendation}</span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
-        )}
-      </Card>
-
-      <div className="mt-8 grid gap-4 lg:grid-cols-[280px_1fr]">
-        <div className="space-y-2">
-          {OFFER_EVALUATIONS.map((e) => (
-            <button
-              key={e.offer.offerId}
-              onClick={() => setActiveId(e.offer.offerId)}
-              className={`block w-full rounded-lg border p-4 text-left transition ${
-                activeId === e.offer.offerId
-                  ? "border-deal-400/50 bg-deal-600/10"
-                  : "border-white/10 bg-ink-800/40 hover:border-white/20 hover:bg-ink-800/60"
-              }`}
-            >
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-white/45">{e.offer.buyerType}</span>
-                <span className="font-mono text-[11px] text-white/55">{e.score.toFixed(0)}/100</span>
-              </div>
-              <div className="mt-1 text-sm font-medium text-white">{e.offer.buyerName}</div>
-              <div className="mt-2 text-[11px] text-white/55">
-                {fmtMoney(e.offer.headlinePriceUsd)} · {(e.offer.cashPct * 100).toFixed(0)}c · {(e.offer.stockPct * 100).toFixed(0)}s · {(e.offer.earnoutPct * 100).toFixed(0)}e
-              </div>
-              <span className={`mt-3 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${REC_STYLE[e.recommendation]}`}>
-                {e.recommendation}
-              </span>
-            </button>
-          ))}
-        </div>
+        </nav>
 
         {active && (
-          <Card className="p-6">
-            <div className="mb-5 border-b border-white/10 pb-4">
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <h2 className="font-serif text-2xl font-bold text-white">{active.offer.buyerName}</h2>
-                  <div className="mt-1 text-[12px] text-white/55">{active.offer.buyerType} · received {new Date(active.offer.receivedAt).toLocaleDateString()}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Score</div>
-                  <div className="font-mono text-3xl text-deal-300">{active.score.toFixed(0)}</div>
-                </div>
+          <section aria-labelledby="neg-active" className="min-w-0 bg-xo-panel px-4 py-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-xo-line pb-3">
+              <div>
+                <h2 id="neg-active" className="font-serif text-[22px] font-semibold">{active.offer.buyerName}</h2>
+                <div className="mt-1 text-[12px] text-xo-muted">{active.offer.buyerType} · received {new Date(active.offer.receivedAt).toLocaleDateString()}</div>
               </div>
-              <div className="mt-3 grid grid-cols-3 gap-3 text-[12px]">
-                <Stat label="Headline" value={fmtMoney(active.offer.headlinePriceUsd)} />
-                <Stat label="Cash"     value={`${(active.offer.cashPct * 100).toFixed(0)}%`} />
-                <Stat label="Net to founders" value={fmtMoney(active.impliedNetToFoundersUsd)} accent="#34d399" />
+              <div className="text-right">
+                <div className="text-[11px] text-xo-faint">Score</div>
+                <div className="font-mono text-[28px] text-xo-verified">{active.score.toFixed(0)}</div>
               </div>
             </div>
+            <dl className="mt-3 grid grid-cols-3 gap-3 text-[12px]">
+              <Stat label="Headline" value={fmtMoney(active.offer.headlinePriceUsd)} />
+              <Stat label="Cash" value={`${(active.offer.cashPct * 100).toFixed(0)}%`} />
+              <Stat label="Net to founders" value={fmtMoney(active.impliedNetToFoundersUsd)} />
+            </dl>
 
-            {/* AI counteroffer — an actual draft, not advice */}
             {counter && (
-              <div className="mb-6 rounded-lg border border-deal-500/30 bg-deal-600/5 p-5">
-                <div className="flex items-center justify-between">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">AI Counteroffer</div>
-                  <span className="text-[11px] text-white/45">leverage: {NEGOTIATION_STATE.leverage}</span>
+              <div className="mt-4 border border-xo-line px-4 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-[12px] font-semibold text-xo-muted">Counteroffer (rule)</h3>
+                  <span className="text-[12px] text-xo-faint">leverage: {NEGOTIATION_STATE.leverage}</span>
                 </div>
-                <div className="mt-3 flex flex-wrap items-end gap-x-8 gap-y-3">
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wide text-white/40">Their offer</div>
-                    <div className="font-mono text-lg text-white/70">{fmtMoney(active.offer.headlinePriceUsd)}</div>
-                  </div>
-                  <div className="text-2xl text-white/30">→</div>
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wide text-white/40">Counter at</div>
-                    <div className="font-mono text-3xl font-bold text-deal-300">{fmtMoney(counter.counterPrice)}</div>
-                    <div className="mt-0.5 text-[11px] text-deal-300">+{counter.upliftPct.toFixed(0)}% uplift</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wide text-white/40">Structure</div>
-                    <div className="font-mono text-sm text-white/80">{(counter.cashPct * 100).toFixed(0)}% cash · {(counter.stockPct * 100).toFixed(0)}% stock · {(counter.earnoutPct * 100).toFixed(0)}% earnout</div>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Justification</div>
-                  <ul className="mt-1.5 space-y-1 text-[12px] text-white/70">
-                    {counter.justification.map((j) => (
-                      <li key={j} className="flex items-baseline gap-2"><span className="mt-1 inline-block h-1 w-1 rounded-full bg-deal-400" />{j}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-4 flex gap-2">
+                <dl className="mt-3 flex flex-wrap items-end gap-x-8 gap-y-3">
+                  <div><dt className="text-[11px] text-xo-faint">Their offer</dt><dd className="font-mono text-[17px] text-xo-muted">{fmtMoney(active.offer.headlinePriceUsd)}</dd></div>
+                  <div><dt className="text-[11px] text-xo-faint"><span aria-hidden>→ </span>Counter at</dt><dd className="font-mono text-[26px] font-semibold text-xo-verified">{fmtMoney(counter.counterPrice)}</dd><dd className="text-[12px] text-xo-verified">+{counter.upliftPct.toFixed(0)}% uplift</dd></div>
+                  <div><dt className="text-[11px] text-xo-faint">Structure</dt><dd className="font-mono text-[13px]">{(counter.cashPct * 100).toFixed(0)}% cash · {(counter.stockPct * 100).toFixed(0)}% stock · {(counter.earnoutPct * 100).toFixed(0)}% earnout</dd></div>
+                </dl>
+                <h4 className="mt-3 text-[11px] font-semibold text-xo-faint">Justification</h4>
+                <ul className="mt-1 list-disc space-y-1 pl-5 text-[12px] text-xo-muted">
+                  {counter.justification.map((j) => <li key={j}>{j}</li>)}
+                </ul>
+                <p className="mt-3 text-[12px] text-xo-faint">Rule: anchor on the higher of the enterprise value and the offer, add a premium by leverage (high 18%, medium 12%, low 7%) or your override, cap at 105% of the high valuation; raise cash to your minimum and cap the earnout.</p>
+                <div className="mt-3 flex flex-wrap gap-2">
                   <Button onClick={() => setDraftOpen(true)}>✦ Generate response draft</Button>
                   <Button variant="ghost" onClick={() => setReserveOpen(true)}>Adjust counter</Button>
                 </div>
               </div>
             )}
 
-            <h3 className="mb-3 font-serif text-base font-bold text-white">Score breakdown</h3>
-            <div className="space-y-2">
+            <h3 className="mb-2 mt-5 font-serif text-[15px] font-semibold">Score breakdown</h3>
+            <ul className="space-y-2">
               {Object.entries(active.dimensions).map(([k, d]) => (
-                <div key={k}>
-                  <div className="mb-1 flex items-baseline justify-between text-[12px]">
-                    <span className="capitalize text-white/70">{k.replace(/([A-Z])/g, " $1").toLowerCase()}</span>
-                    <span className="font-mono text-white/85">{d.score.toFixed(0)}/100 <span className="text-white/40">× {(d.weight * 100).toFixed(0)}%</span></span>
+                <li key={k}>
+                  <div className="mb-1 flex items-baseline justify-between gap-2 text-[12px]">
+                    <span className="capitalize text-xo-muted">{k.replace(/([A-Z])/g, " $1").toLowerCase()}</span>
+                    <span className="font-mono">{d.score.toFixed(0)}/100 <span className="text-xo-faint">× {(d.weight * 100).toFixed(0)}%</span></span>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
-                    <div className="h-full rounded-full bg-gradient-to-r from-deal-700 to-deal-400" style={{ width: `${Math.max(2, d.score)}%` }} />
-                  </div>
-                  <div className="mt-0.5 text-[11px] text-white/45">{d.comment}</div>
-                </div>
+                  <div aria-hidden className="h-1.5 overflow-hidden rounded-full bg-xo-line"><div className="h-full rounded-full bg-xo-action" style={{ width: `${Math.max(2, d.score)}%` }} /></div>
+                  <div className="mt-0.5 text-[12px] text-xo-faint">{d.comment}</div>
+                </li>
               ))}
-            </div>
+            </ul>
 
             {active.conflicts.length > 0 && (
               <>
-                <h3 className="mb-3 mt-6 font-serif text-base font-bold text-white">Conflicts</h3>
-                <div className="space-y-2">
+                <h3 className="mb-2 mt-5 font-serif text-[15px] font-semibold">Conflicts</h3>
+                <ul className="space-y-2">
                   {active.conflicts.map((c, i) => (
-                    <div key={`${i}-${c.term}`} className="rounded border border-white/10 bg-ink-900/50 p-3">
-                      <div className="flex items-baseline justify-between">
-                        <span className="font-medium text-white">{c.term}</span>
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${SEVERITY_STYLE[c.severity]}`}>{c.severity}</span>
+                    <li key={`${i}-${c.term}`} className="border border-xo-line px-3 py-2">
+                      <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <span className="font-medium">{c.term}</span>
+                        <span className={`text-[12px] font-semibold capitalize ${c.severity === "hard" ? "text-xo-risk" : "text-xo-caution"}`}>{c.severity}</span>
                       </div>
-                      <p className="mt-1 text-[13px] text-white/65">{c.reason}</p>
-                      {c.counterProposal && <p className="mt-1 text-[12px] text-deal-300">→ {c.counterProposal}</p>}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {active.counterMoves.length > 0 && (
-              <>
-                <h3 className="mb-3 mt-6 font-serif text-base font-bold text-white">Counter moves</h3>
-                <ul className="space-y-1.5 text-[13px] text-white/75">
-                  {active.counterMoves.map((m, i) => (
-                    <li key={i} className="flex items-baseline gap-2">
-                      <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-loi-400" /> {m}
+                      <p className="mt-1 text-[13px] text-xo-muted">{c.reason}</p>
+                      {c.counterProposal && <p className="mt-1 text-[12px] text-xo-verified">→ {c.counterProposal}</p>}
                     </li>
                   ))}
                 </ul>
               </>
             )}
-          </Card>
+
+            {active.counterMoves.length > 0 && (
+              <>
+                <h3 className="mb-2 mt-5 font-serif text-[15px] font-semibold">Counter moves</h3>
+                <ul className="list-disc space-y-1 pl-5 text-[13px] text-xo-muted">
+                  {active.counterMoves.map((m, i) => <li key={i}>{m}</li>)}
+                </ul>
+              </>
+            )}
+          </section>
         )}
       </div>
 
-      <div className="mt-10">
-        <h2 className="mb-3 font-serif text-lg font-bold">Cross-bid comparison</h2>
-        <Card className="p-5">
-          <p className="mb-4 text-[13px] text-white/65">{OFFER_COMPARISON.summary}</p>
-          <ul className="space-y-2 text-[13px] text-white/75">
+      <Section title="Cross-bid comparison" className="border border-xo-line">
+        <div className="px-4 py-3">
+          <p className="mb-3 text-[13px] text-xo-muted">{OFFER_COMPARISON.summary}</p>
+          <dl className="space-y-2 text-[13px]">
             {OFFER_COMPARISON.delta.map((d) => (
-              <li key={d.term} className="flex items-baseline gap-3">
-                <span className="font-mono text-[11px] uppercase tracking-wide text-white/40">{d.term}</span>
-                <span>{d.notes}</span>
-              </li>
+              <div key={d.term} className="flex flex-wrap items-baseline gap-3">
+                <dt className="font-mono text-[11px] uppercase text-xo-faint">{d.term}</dt>
+                <dd className="text-xo-muted">{d.notes}</dd>
+              </div>
             ))}
-          </ul>
-          <div className={`mt-4 text-[11px] uppercase tracking-[0.22em] ${LEV_STYLE[NEGOTIATION_STATE.leverage]}`}>
-            Leverage: {NEGOTIATION_STATE.leverage}
-          </div>
-        </Card>
-      </div>
-
-      {/* ready-to-send counter draft */}
-      {draftOpen && active && counter && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setDraftOpen(false)}>
-          <div className="max-h-[85vh] max-w-2xl overflow-auto rounded-lg border border-white/10 bg-ink-800/95 p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Counter response · {active.offer.buyerName}</div>
-              <button onClick={() => setDraftOpen(false)} className="text-white/40 hover:text-white">✕</button>
-            </div>
-            <pre className="mt-4 whitespace-pre-wrap rounded-md border border-white/10 bg-ink-900/70 p-4 text-[13px] leading-relaxed text-white/80">{draftText}</pre>
-            <div className="mt-4 flex justify-end gap-2">
-              <Button variant="ghost" onClick={() => copyText(draftText)}>Copy</Button>
-              <Button onClick={() => { setCounterSent(true); setDraftOpen(false); notify(`Counter sent to ${active.offer.buyerName}`); }}>{counterSent ? "Sent ✓ · resend" : "Send counter →"}</Button>
-            </div>
-          </div>
+          </dl>
+          <p className={`mt-3 text-[12px] font-semibold capitalize ${LEV_CLS[NEGOTIATION_STATE.leverage] ?? "text-xo-muted"}`}>Leverage: {NEGOTIATION_STATE.leverage}</p>
         </div>
-      )}
+      </Section>
+
+      <Modal open={draftOpen && !!active && !!counter} onClose={() => setDraftOpen(false)} title={`Counter response · ${active?.offer.buyerName ?? ""}`} size="lg"
+        footer={<><span className="mr-auto text-[12px] text-white/70">Nothing is sent from ExitOS — copy the draft into your own email.</span><Button onClick={() => copyText(draftText)}>Copy draft</Button></>}>
+        <pre className="whitespace-pre-wrap border border-white/10 bg-ink-900/70 p-4 font-sans text-[13px] leading-relaxed text-white/85">{draftText}</pre>
+      </Modal>
     </div>
   );
 };
 
-const TermsList: React.FC<{ title: string; items: string[]; dot: string }> = ({ title, items, dot }) => (
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
+);
+
+const XField: React.FC<{ id: string; label: string; children: React.ReactNode; error?: string }> = ({ id, label, children, error }) => (
   <div>
-    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{title}</div>
-    <ul className="mt-2 space-y-2 text-[12.5px] text-white/75">
-      {items.map((it) => (
-        <li key={it} className="flex items-baseline gap-2"><span className={`mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />{it}</li>
-      ))}
+    <label htmlFor={id} className={XO_LABEL}>{label}</label>
+    {children}
+    {error && <p id={`${id}-err`} className="mt-1 text-[12px] text-xo-risk">{error}</p>}
+  </div>
+);
+
+const TermsList: React.FC<{ title: string; items: string[] }> = ({ title, items }) => (
+  <div>
+    <h3 className="text-[12px] font-semibold text-xo-muted">{title}</h3>
+    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-[13px] text-xo-muted">
+      {items.map((it) => <li key={it}>{it}</li>)}
     </ul>
   </div>
 );
 
-const Stat: React.FC<{ label: string; value: string; accent?: string }> = ({ label, value, accent }) => (
+const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
   <div>
-    <div className="text-[10px] uppercase tracking-[0.22em] text-white/40">{label}</div>
-    <div className="mt-1 font-mono text-base font-semibold" style={accent ? { color: accent } : undefined}>{value}</div>
+    <dt className="text-[11px] text-xo-faint">{label}</dt>
+    <dd className="mt-1 font-mono text-[15px] font-semibold">{value}</dd>
   </div>
 );
 

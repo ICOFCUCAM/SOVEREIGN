@@ -1,18 +1,19 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Modal, fmtMoney, notify } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import { Button, Modal, fmtMoney } from "../lib/ui";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { useMemorandum, VALUATION_STRATEGIC } from "../lib/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
+import { useMemorandum, VALUATION_CANONICAL } from "../lib/engines";
+import { runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type CompanyProfile, type MemorandumInputs } from "@exit/engines";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
+import { loadActiveCompany } from "../lib/active-company";
 import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
-import BankerTake from "../components/BankerTake";
 
-// AI Red Team — reads the generated document like a hostile buyer's analyst.
-// It scans every section for numeric claims (growth, margin, retention, ARR,
-// customers) and cross-checks each against the TRUE company profile. Any claim
-// that diverges materially from source-of-truth becomes a flagged challenge —
-// the gap a buyer will find in diligence.
+// Consistency check (rule-based) — scans the generated text for growth, gross
+// margin and net-retention claims and compares each with the company profile;
+// also flags a missing concentration disclosure. Four checks, nothing more.
 interface RedFlag {
   readonly metric: string;
   readonly claimed: string;
@@ -20,10 +21,9 @@ interface RedFlag {
   readonly severity: "high" | "medium" | "low";
   readonly note: string;
 }
-function redTeam(doc: MemorandumDocument | null): RedFlag[] {
+function redTeam(doc: MemorandumDocument | null, C: CompanyProfile): RedFlag[] {
   if (!doc) return [];
   const text = doc.sections.map((s) => `${s.heading} ${s.body} ${(s.bullets ?? []).join(" ")}`).join(" ");
-  const C = SAMPLE_COMPANY;
   const flags: RedFlag[] = [];
   // truth values
   const truth = {
@@ -64,10 +64,26 @@ function redTeam(doc: MemorandumDocument | null): RedFlag[] {
 
 const Documents: React.FC = () => {
   const [kind, setKind] = useState<MemorandumKind>("cim");
-  const doc = useMemorandum(kind);
-  const flags = useMemo(() => redTeam(doc), [doc]);
+  // The founder's saved intake when there is one; the demo company otherwise
+  // (its engine runs are the hook's defaults, so no inputs are passed).
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const inputs = useMemo<Partial<MemorandumInputs> | undefined>(() => {
+    if (!fromIntake) return undefined;
+    const institutional = runInstitutionalValuation(company);
+    return {
+      company,
+      valuation: canonicalValuationFor(company, institutional),
+      constitution: institutional,
+      readiness: runReadiness(company),
+      buyers: runBuyerDiscovery(company, { limit: 12 }),
+      diligence: runDueDiligence(company),
+    };
+  }, [company, fromIntake]);
+  const doc = useMemorandum(kind, inputs);
+  const flags = useMemo(() => redTeam(doc, company), [doc, company]);
+  const valueUsd = inputs?.valuation?.headline.mid ?? VALUATION_CANONICAL.headline.mid;
   return (
-    <DocumentsView kind={kind} setKind={setKind} doc={doc} flags={flags} />
+    <DocumentsView kind={kind} setKind={setKind} doc={doc} flags={flags} company={company} fromIntake={fromIntake} valueUsd={valueUsd} />
   );
 };
 
@@ -76,7 +92,10 @@ const DocumentsView: React.FC<{
   setKind: (k: MemorandumKind) => void;
   doc: MemorandumDocument | null;
   flags: RedFlag[];
-}> = ({ kind, setKind, doc, flags }) => {
+  company: CompanyProfile;
+  fromIntake: boolean;
+  valueUsd: number;
+}> = ({ kind, setKind, doc, flags, company, fromIntake, valueUsd }) => {
 
 // Document Generator surface — wired to TemplateMemorandumGenerator
 // from @exit/engines. Selecting a kind triggers useMemorandum() which
@@ -84,191 +103,172 @@ const DocumentsView: React.FC<{
 // useEffect just provides a clean refresh boundary for future Claude
 // adapter wiring).
 
-const KINDS: Array<{ key: MemorandumKind; label: string; description: string; accent: string }> = [
-  { key: "cim",                label: "Confidential Information Memorandum", description: "Long-form acquisition document — 10 sections, banker register.",   accent: "text-deal-300" },
-  { key: "executive_summary",  label: "Executive Summary",                  description: "One-pager. Lead with proposition, headline financials, valuation.", accent: "text-loi-300" },
-  { key: "investor_deck",      label: "Investor Deck",                       description: "Ten-slide outline: title → opportunity → traction → process.",     accent: "text-stage-loi" },
-  { key: "buyer_teaser",       label: "Anonymized Buyer Teaser",            description: "1–2 pages, anonymized as Project Cipher. Issued pre-NDA.",          accent: "text-stage-engaged" },
-  { key: "dd_room_index",      label: "Data Room Index",                     description: "Index of the diligence package contents organised by package.",    accent: "text-white/65" },
+const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> = [
+  { key: "cim",                label: "Confidential Information Memorandum", description: "Long-form acquisition document — 10 sections, banker register." },
+  { key: "executive_summary",  label: "Executive Summary",                  description: "One-pager. Lead with proposition, headline financials, valuation." },
+  { key: "investor_deck",      label: "Investor Deck",                       description: "Ten-slide outline: title → opportunity → traction → process." },
+  { key: "buyer_teaser",       label: "Anonymized Buyer Teaser",            description: "1–2 pages, anonymized as Project Cipher. Issued pre-NDA." },
+  { key: "dd_room_index",      label: "Data Room Index",                     description: "Index of the diligence package contents organised by package." },
 ];
 
   const [libraryOpen, setLibraryOpen] = useState(false);
-  const [sent, setSent] = useState<Set<string>>(new Set());
-  // "Send" delivers the document to the buyer's data room — it records the send
-  // and notifies, rather than dumping a raw .md to the founder's disk. The
-  // explicit "Download draft (.md)" / "Board-ready report (PDF)" actions remain
-  // for when the founder actually wants the file.
-  const markSent = (k: MemorandumKind): void => {
-    setSent((prev) => new Set(prev).add(k));
-    notify("Delivered to the buyer's data room");
-  };
-
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Workspace · Documents"
-        title="Document Generator"
-        tag="Engine-composed"
-        status={flags.length > 0 ? `${flags.length} flags` : "Defensible"}
-        metrics={[
-          { k: "Templates", v: String(KINDS.length), sub: "document kinds" },
-          { k: "Word count", v: doc ? String(doc.wordCount) : "—", sub: "current document" },
-          { k: "Anonymized", v: doc?.anonymized ? "Yes" : "No", sub: doc?.kind === "buyer_teaser" ? "teaser default" : "founder-named" },
-          { k: "Red Team flags", v: String(flags.length), accent: flags.length === 0, sub: flags.length === 0 ? "no challenges" : "challenges detected" },
-        ]}
-      />
+    <div data-page="documents" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow={`◉ Workspace · Documents · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Document Generator"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Engine-composed · {flags.length > 0 ? `${flags.length} consistency flags` : "no conflicts in the four checks"}</span></>}
+        actions={<>
+          <span className="text-[12px] text-xo-faint">Nothing is sent from ExitOS — download a draft to share it.</span>
+          <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
+          <a href="/report" target="_blank" rel="noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
+          <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
+          {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download draft (.md)</Button>}
+        </>} />
 
-      <MarketTape items={buildMarketTape()} />
+      <section aria-label="Document summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><Metric label="Templates" value={String(KINDS.length)} sub="document kinds" /></div>
+        <div className="bg-xo-panel"><Metric label="Word count" value={doc ? String(doc.wordCount) : "—"} sub="current document" /></div>
+        <div className="bg-xo-panel"><Metric label="Anonymized" value={doc?.anonymized ? "Yes" : "No"} sub={doc?.kind === "buyer_teaser" ? "teaser default" : "founder-named"} /></div>
+        <div className="bg-xo-panel"><Metric label="Consistency flags" emphasis value={<span className={flags.length === 0 ? "text-xo-verified" : "text-xo-caution"}>{flags.length}</span>} sub="four rule-based checks" /></div>
+      </section>
 
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
-        <a href="/report" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-md border border-white/15 px-3.5 py-2 text-sm font-semibold text-white/75 transition hover:bg-white/5">Publishing Center →</a>
-        <a href="/report/valuation" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-md bg-deal-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-deal-500">Board-ready report (PDF) →</a>
-        {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download draft (.md)</Button>}
-        {doc && <Button onClick={() => markSent(doc.kind)}>{sent.has(doc.kind) ? "Sent ✓ · resend" : "Send to buyer"}</Button>}
-      </div>
+      <RegistryTape items={buildMarketTape()} asOf={DNA_AS_OF.slice(0, 10)} />
 
-      {/* ── Document library ──────────────────────────────────────── */}
       <Modal open={libraryOpen} onClose={() => setLibraryOpen(false)} title="Document library" subtitle={`${KINDS.length} acquisition documents — generated from the engines`}>
-        <div className="space-y-2">
+        <ul className="space-y-2">
           {KINDS.map((k) => (
-            <button key={k.key} onClick={() => { setKind(k.key); setLibraryOpen(false); }}
-              className={`flex w-full items-center justify-between gap-3 rounded-lg border p-3.5 text-left transition ${kind === k.key ? "border-deal-400/50 bg-deal-600/10" : "border-white/10 bg-ink-900/40 hover:border-white/20"}`}>
-              <div className="min-w-0">
-                <div className="text-sm font-medium text-white">{k.label}</div>
-                <div className="mt-0.5 text-[11px] leading-snug text-white/50">{k.description}</div>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                {sent.has(k.key) && <span className="rounded-full bg-deal-600/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-deal-300 ring-1 ring-deal-400/40">Sent</span>}
-                {kind === k.key && <span className="text-[11px] font-semibold uppercase tracking-wide text-deal-300">Open ✓</span>}
-              </div>
-            </button>
+            <li key={k.key}>
+              <button type="button" onClick={() => { setKind(k.key); setLibraryOpen(false); }}
+                className={`flex w-full items-center justify-between gap-3 rounded-lg border p-3.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${kind === k.key ? "border-deal-400/50 bg-deal-600/10" : "border-white/10 bg-ink-900/40 hover:border-white/20"}`}>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-white">{k.label}</span>
+                  <span className="mt-0.5 block text-[12px] leading-snug text-white/70">{k.description}</span>
+                </span>
+                <span className="flex shrink-0 items-center gap-2">
+                  {kind === k.key && <span className="text-[11px] font-semibold text-deal-300">Open ✓</span>}
+                </span>
+              </button>
+            </li>
           ))}
-        </div>
+        </ul>
       </Modal>
 
-      <BankerTake
-        next={flags.length > 0
-          ? <>Reconcile the <span className="text-white">{flags.length} Red Team flag{flags.length === 1 ? "" : "s"}</span> before this document reaches a buyer.</>
-          : <>This draft is defensible — issue it to the process.</>}
-        stake={<>A <span className="font-mono font-bold text-deal-300">{fmtMoney(VALUATION_STRATEGIC.headline.mid)}</span> outcome hinges on a narrative buyers can't pick apart.</>}
-        inaction={<>Every unreconciled claim is a retrade lever a buyer's analyst finds in diligence.</>}
-        buyer={<>The buyer's analyst reads this adversarially — close the gaps before they do.</>}
-        automate={<>ExitOS generates each document from the engines and red-teams it against your real financials.</>}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line">
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">{flags.length > 0
+            ? <>Reconcile the <span className="font-semibold">{flags.length} consistency flag{flags.length === 1 ? "" : "s"}</span> before this document reaches a buyer.</>
+            : <>No conflicts found in the four consistency checks — review the full draft before it reaches a buyer.</>}</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="At stake">A <span className="font-mono font-semibold text-xo-verified">{fmtMoney(valueUsd)}</span> outcome hinges on a narrative buyers can't pick apart.</TakeCell>
+            <TakeCell k="If you wait">Every unreconciled claim is a retrade lever a buyer's analyst finds in diligence.</TakeCell>
+            <TakeCell k="Buyer">The buyer's analyst reads this adversarially — close the gaps before they do.</TakeCell>
+            <TakeCell k="What ExitOS does">Generates each document from templates and the engines, then checks four figures (ARR growth, gross margin, net retention, a concentration disclosure) against the company profile.</TakeCell>
+          </dl>
+        </div>
+      </Section>
 
-
-      {/* AI Red Team — claims vs source-of-truth, the way a buyer's analyst reads it */}
       {doc && (
-        <Card className="mt-8 overflow-hidden p-0">
-          <div className="flex items-center justify-between border-b border-white/10 bg-red-500/10 px-5 py-3">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-500/25 text-[12px] text-red-200 ring-1 ring-red-400/40">⚔</span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-red-200">AI Red Team · {doc.kind.replace(/_/g, " ")}</span>
-            </div>
-            <span className="text-[11px] text-white/45">{flags.length} claim{flags.length === 1 ? "" : "s"} to reconcile before buyer review</span>
-          </div>
+        <Section title={`Consistency check · ${doc.kind.replace(/_/g, " ")}`} eyebrow="Rule-based · four checks" className="border border-xo-line"
+          foot="Checks: ARR growth, gross margin and net retention claims in the text against the profile (3-point tolerance), and whether a top-10 customer concentration of 35% or more is mentioned. Other claims are not checked."
+          right={<span className="text-[12px] text-xo-muted">{flags.length} claim{flags.length === 1 ? "" : "s"} to reconcile before buyer review</span>}>
           {flags.length === 0 ? (
-            <div className="p-5 text-sm text-white/55">No contradictions between document claims and source financials. This draft is defensible in diligence.</div>
+            <p className="px-4 py-3 text-[13px] text-xo-muted">No conflicts found in these four checks. Other claims in the draft are not checked — review it before use.</p>
           ) : (
-            <div className="divide-y divide-white/5">
+            <ul className="divide-y divide-xo-line">
               {flags.map((f) => (
-                <div key={f.metric} className="flex items-start gap-3 p-4">
-                  <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ring-1 ${
-                    f.severity === "high" ? "bg-red-500/15 text-red-300 ring-red-400/40" :
-                    f.severity === "medium" ? "bg-loi-500/15 text-loi-300 ring-loi-400/40" :
-                    "bg-white/5 text-white/50 ring-white/15"}`}>{f.severity}</span>
-                  <div className="flex-1">
-                    <div className="text-[13px] font-semibold text-white">{f.metric}</div>
-                    <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px]">
-                      <span className="text-white/55">Document claims <span className="font-mono font-semibold text-red-300">{f.claimed}</span></span>
-                      <span className="text-white/55">Financials show <span className="font-mono font-semibold text-deal-300">{f.actual}</span></span>
+                <li key={f.metric} className="flex items-start gap-3 px-4 py-3">
+                  <span className={`mt-0.5 shrink-0 text-[11px] font-semibold uppercase ${f.severity === "high" ? "text-xo-risk" : f.severity === "medium" ? "text-xo-caution" : "text-xo-muted"}`}>{f.severity}</span>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-[13px] font-semibold">{f.metric}</h3>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-xo-muted">
+                      <span>Document claims <span className="font-mono font-semibold text-xo-risk">{f.claimed}</span></span>
+                      <span>Financials show <span className="font-mono font-semibold text-xo-verified">{f.actual}</span></span>
                     </div>
-                    <p className="mt-1 text-[12px] leading-snug text-white/55">{f.note}</p>
+                    <p className="mt-1 text-[12px] leading-snug text-xo-muted">{f.note}</p>
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
-        </Card>
+        </Section>
       )}
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[280px_1fr]">
-        <div className="space-y-2">
-          {KINDS.map((k) => (
-            <button
-              key={k.key}
-              onClick={() => setKind(k.key)}
-              className={`block w-full rounded-lg border p-4 text-left transition ${
-                kind === k.key
-                  ? "border-deal-400/50 bg-deal-600/10"
-                  : "border-white/10 bg-ink-800/40 hover:border-white/20 hover:bg-ink-800/60"
-              }`}
-            >
-              <div className={`text-[11px] font-semibold uppercase tracking-wide ${k.accent}`}>{k.key.replace(/_/g, " ")}</div>
-              <div className="mt-1 text-sm font-medium text-white">{k.label}</div>
-              <div className="mt-1 text-[11px] leading-relaxed text-white/55">{k.description}</div>
-            </button>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-[280px_1fr]">
+        <nav aria-label="Document kinds" className="bg-xo-panel p-2">
+          <ul className="space-y-1">
+            {KINDS.map((k) => {
+              const on = kind === k.key;
+              return (
+                <li key={k.key}>
+                  <button type="button" aria-current={on ? "true" : undefined} onClick={() => setKind(k.key)}
+                    className={`block w-full border px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${on ? "border-xo-verified/60 bg-xo-raise" : "border-xo-line hover:bg-xo-raise"}`}>
+                    <span className="block text-[11px] font-semibold uppercase text-xo-faint">{k.key.replace(/_/g, " ")}</span>
+                    <span className="mt-1 block text-[13px] font-medium">{k.label}</span>
+                    <span className="mt-1 block text-[12px] leading-relaxed text-xo-muted">{k.description}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-        <Card className="p-7">
+        <section aria-label="Generated document" className="min-w-0 bg-xo-panel px-5 py-5">
           {!doc ? (
-            <div className="flex h-full items-center justify-center py-20 text-sm text-white/40">Generating…</div>
+            <p className="py-16 text-center text-[13px] text-xo-muted">Generating…</p>
           ) : (
-            <article className="prose-invert max-w-none">
-              <header className="mb-6 border-b border-white/10 pb-4">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-400">
-                  Prepared by ExitOS Advisory
-                </div>
-                <h2 className="mt-2 font-serif text-2xl font-bold text-white">{doc.title}</h2>
-                <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-white/45">
-                  <span>{doc.sections.length} sections</span>
-                  <span>·</span>
-                  <span>{doc.wordCount} words</span>
-                  {doc.anonymized && (<><span>·</span><span className="rounded bg-loi-500/15 px-1.5 py-0.5 font-mono text-[10px] text-loi-400">ANONYMIZED</span></>)}
+            <article>
+              <header className="mb-5 border-b border-xo-line pb-3">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">Generated by ExitOS from templates — review before use</div>
+                <h2 className="mt-1 font-serif text-[22px] font-semibold">{doc.title}</h2>
+                <div className="mt-1 flex flex-wrap gap-3 text-[12px] text-xo-faint">
+                  <span>{doc.sections.length} sections</span><span aria-hidden>·</span><span>{doc.wordCount} words</span>
+                  {doc.anonymized && (<><span aria-hidden>·</span><span className="font-mono text-[11px] text-xo-caution">ANONYMIZED</span></>)}
                 </div>
               </header>
               <div className="space-y-6">
                 {doc.sections.map((s, i) => (
                   <section key={`${i}-${s.heading}`}>
-                    <h3 className="font-serif text-lg font-bold text-white">{s.heading}</h3>
-                    <p className="mt-2 text-[14px] leading-relaxed text-white/75">{s.body}</p>
+                    <h3 className="font-serif text-[17px] font-semibold">{s.heading}</h3>
+                    <p className="mt-2 text-[14px] leading-relaxed text-xo-muted">{s.body}</p>
                     {s.bullets && s.bullets.length > 0 && (
-                      <ul className="mt-3 space-y-1.5 text-[13px] text-white/65">
-                        {s.bullets.map((b) => (
-                          <li key={b} className="flex items-baseline gap-2">
-                            <span className="mt-1 inline-block h-1 w-1 rounded-full bg-deal-400" /> {b}
-                          </li>
-                        ))}
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-xo-muted">
+                        {s.bullets.map((b) => <li key={b}>{b}</li>)}
                       </ul>
                     )}
                     {s.tables && s.tables.map((t, ti) => (
-                      <div key={ti} className="mt-3 overflow-hidden rounded-lg border border-white/10">
-                        <table className="w-full text-[12px]">
-                          <thead className="bg-white/[0.03] text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                            <tr>{t.headers.map((h) => <th key={h} className="px-3 py-2">{h}</th>)}</tr>
-                          </thead>
-                          <tbody>
-                            {t.rows.map((row, ri) => (
-                              <tr key={ri} className="border-t border-white/5">
-                                {row.map((cell, ci) => <td key={ci} className="px-3 py-2 font-mono text-white/85">{cell}</td>)}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        {t.caption && <div className="border-t border-white/10 bg-white/[0.02] px-3 py-1.5 text-[10px] uppercase tracking-wide text-white/40">{t.caption}</div>}
-                      </div>
+                      <figure key={ti} className="mt-3 border border-xo-line">
+                        <ScrollRegion label={t.caption ?? `${s.heading} table`}>
+                          <table className="w-full min-w-[480px] text-[12px]">
+                            <thead className="text-left text-[11px] text-xo-faint">
+                              <tr>{t.headers.map((h, hi) => <th key={`${hi}-${h}`} scope="col" className="px-3 py-2 font-medium">{h || <span className="sr-only">Row</span>}</th>)}</tr>
+                            </thead>
+                            <tbody>
+                              {t.rows.map((row, ri) => (
+                                <tr key={ri} className="border-t border-xo-line">
+                                  {row.map((cell, ci) => <td key={ci} className="px-3 py-2 font-mono">{cell}</td>)}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </ScrollRegion>
+                        {t.caption && <figcaption className="border-t border-xo-line px-3 py-1.5 text-[11px] text-xo-faint">{t.caption}</figcaption>}
+                      </figure>
                     ))}
                   </section>
                 ))}
               </div>
             </article>
           )}
-        </Card>
+        </section>
       </div>
     </div>
   );
 };
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
+);
 
 export default Documents;

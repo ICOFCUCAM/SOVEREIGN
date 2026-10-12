@@ -22,12 +22,12 @@ const LayerSubNav: React.FC = () => {
 
   return (
     <div className="flex items-stretch gap-px overflow-x-auto border-b border-white/10 bg-ink-950/70 backdrop-blur-sm">
-      <span className="flex shrink-0 items-center border-r border-white/10 px-3 text-[8px] font-semibold uppercase tracking-[0.22em] text-deal-300/70">{layer.label}</span>
+      <span className="flex shrink-0 items-center border-r border-white/10 px-3 text-[8px] font-semibold uppercase tracking-[0.22em] text-deal-300">{layer.label}</span>
       {items.map((i) => {
         const on = pathname === i.to;
         return (
           <Link key={i.to} to={i.to}
-            className={`shrink-0 px-3 py-1 text-[10.5px] font-medium transition ${on ? "bg-white/[0.05] text-white" : "text-white/45 hover:text-white/80"}`}>
+            className={`shrink-0 px-3 py-1 text-[10.5px] font-medium transition ${on ? "bg-white/[0.05] text-white" : "text-white/70 hover:text-white"}`}>
             {i.label}
           </Link>
         );

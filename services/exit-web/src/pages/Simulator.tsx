@@ -1,19 +1,21 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card, Field, fmtMoney, ConfidenceChip, inputCls } from "../lib/ui";
-import { CommandHeader, MarketTape } from "../lib/workstation";
+import { fmtMoney, ConfidenceChip } from "../lib/ui";
+import { PageHeader, Section, Metric as XMetric, ScrollRegion, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
-import { runStrategySimulator, runValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
-import { VALUATION_STRATEGIC } from "../lib/engines";
+import { runStrategySimulator, runInstitutionalValuation, type BuyerType, type CompanyProfile, type StrategyOutput } from "@exit/engines";
+import { loadActiveCompany } from "../lib/active-company";
+import { parseNumber } from "../lib/intake-fields";
+import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { emitTelemetry } from "../lib/telemetry";
-import BankerTake from "../components/BankerTake";
 
 // ExitOS Scenario Engine — the founder simulates futures. The baseline
 // trajectory is whatever the founder inputs describe today; each scenario
 // is a deterministic transform of (company, target, constraints) that we
 // re-run through the same valuation + strategy engines, then diff against
 // the baseline. Nothing here is free-form — every number traces to
-// runValuation / runStrategySimulator over a mutated input.
+// runInstitutionalValuation (decision D1) / runStrategySimulator over a mutated input.
 
 const BUYER_TYPES: { value: BuyerType | "any"; label: string }[] = [
   { value: "any",           label: "Any" },
@@ -46,7 +48,7 @@ interface Trajectory {
 // One forward run of both engines over a candidate world-state.
 function simulate(company: CompanyProfile, target: number, c: SimConstraints): Trajectory {
   const sim = runStrategySimulator(company, { ...c, targetValueUsd: target });
-  const valuationMid = runValuation(company, { reportType: "strategic" }).headline.mid;
+  const valuationMid = runInstitutionalValuation(company).headline.mid;
   return { company, target, constraints: c, sim, valuationMid };
 }
 
@@ -68,37 +70,42 @@ function scaleCompany(c: CompanyProfile, arrFactor: number): CompanyProfile {
   };
 }
 
-// Baseline valuation anchors (constant company → compute once).
-const BASE_STRATEGIC = runValuation(SAMPLE_COMPANY, { reportType: "strategic" }).headline;
-
 interface ScenarioDef {
   id: string;
   tag: string;
-  question: string;
+  question: (company: CompanyProfile) => string;
   // Given the baseline trajectory, return the mutated world + the
-  // human-readable drivers of the change and a modelling assumption.
+  // drivers of the change (computed from the company, or worded as what
+  // to check in the diff) and a modelling assumption.
   apply: (base: Trajectory) => { company: CompanyProfile; target: number; constraints: SimConstraints; drivers: string[]; assumption: string };
 }
+
+const arrM = (c: CompanyProfile): number => c.revenue.annualRecurringRevenueUsd / 1_000_000;
+// The growth scenario's destination: $25M ARR, or 40% above today when
+// the company is already past it (rounded up to the next $5M).
+const growthTargetArr = (c: CompanyProfile): number => {
+  const cur = c.revenue.annualRecurringRevenueUsd;
+  return cur < 25_000_000 ? 25_000_000 : Math.ceil((cur * 1.4) / 5_000_000) * 5_000_000;
+};
 
 const SCENARIOS: readonly ScenarioDef[] = [
   {
     id: "wait6",
     tag: "Timing",
-    question: "What happens if I wait six months?",
+    question: () => "What happens if I wait six months?",
     apply: (base) => {
-      const g = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
+      const g = base.company.growth.arrGrowthYoyPct;
       const factor = Math.pow(1 + g, 0.5);                       // half a year of compounding
       const company = scaleCompany(base.company, factor);
-      const newMid = runValuation(company, { reportType: "strategic" }).headline.mid;
-      const target = Math.round(base.target * (newMid / BASE_STRATEGIC.mid));
-      const newArrM = (company.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(1);
+      const newMid = runInstitutionalValuation(company).headline.mid;
+      const target = Math.round(base.target * (newMid / base.valuationMid));
       return {
         company, target,
         constraints: { ...base.constraints, maxTimelineDays: base.constraints.maxTimelineDays + 180 },
         drivers: [
-          `ARR compounds ~6 months at ${FMT_PCT(g)} YoY → $${newArrM}M`,
-          "Higher revenue base lifts the strategic valuation band",
-          "Cash lands ~180 days later — carries market-timing risk",
+          `ARR compounds about 6 months at ${FMT_PCT(g)} a year: $${arrM(base.company).toFixed(1)}M → $${arrM(company).toFixed(1)}M`,
+          "The valuation is re-run on the larger revenue base — see the diff above",
+          "Cash lands about 180 days later, with market-timing risk",
         ],
         assumption: "Holds margins, retention and buyer pool constant; only the top line compounds. Does not price in multiple compression if the market turns.",
       };
@@ -107,36 +114,37 @@ const SCENARIOS: readonly ScenarioDef[] = [
   {
     id: "arr25",
     tag: "Growth",
-    question: "What happens if revenue reaches $25M ARR?",
+    question: (c) => `What happens if revenue reaches $${Math.round(growthTargetArr(c) / 1_000_000)}M ARR?`,
     apply: (base) => {
-      const factor = 25_000_000 / SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd;
+      const dest = growthTargetArr(base.company);
+      const factor = dest / base.company.revenue.annualRecurringRevenueUsd;
       const company = scaleCompany(base.company, factor);
-      const newMid = runValuation(company, { reportType: "strategic" }).headline.mid;
-      const target = Math.round(base.target * (newMid / BASE_STRATEGIC.mid));
+      const newMid = runInstitutionalValuation(company).headline.mid;
+      const target = Math.round(base.target * (newMid / base.valuationMid));
       return {
         company, target,
         constraints: base.constraints,
         drivers: [
-          "ARR steps from $18M to $25M — crosses the scale threshold buyers reward",
-          "Strategic band re-prices off the larger recurring base",
-          "Larger check size opens up upper-bracket acquirers",
+          `ARR goes from $${arrM(base.company).toFixed(1)}M to $${(dest / 1_000_000).toFixed(0)}M`,
+          "The valuation is re-run on the larger recurring base — see the diff above",
+          "The buyer set is re-filtered at the new size — compare Buyers in set",
         ],
-        assumption: "Models the destination, not the path — assumes you reach $25M at today's margins and concentration. Time and burn to get there are out of scope.",
+        assumption: `Models the destination, not the path — assumes you reach $${(dest / 1_000_000).toFixed(0)}M at today's margins and concentration. Time and burn to get there are out of scope.`,
       };
     },
   },
   {
     id: "noearnout",
     tag: "Structure",
-    question: "What if I remove the earnout?",
+    question: () => "What if I remove the earnout?",
     apply: (base) => ({
       company: base.company,
       target: base.target,
       constraints: { ...base.constraints, maxEarnoutPct: 0, minCashPct: Math.max(0.9, base.constraints.minCashPct) },
       drivers: [
-        "All-cash demand — earnout ceiling drops to 0%",
-        "Buyers who structure around earnouts (often PE) fall out of the set",
-        "Realized value equals headline — no contingent claw-back risk",
+        "All-cash demand — earnout ceiling 0%, cash floor at least 90%",
+        "Buyers whose expected structure needs an earnout may drop out — compare Buyers in set",
+        "Realized value then equals the headline — no contingent component",
       ],
       assumption: "Same buyer universe, stricter terms. An all-cash structure de-risks proceeds but can thin the field and shave the top-end offer.",
     }),
@@ -144,37 +152,38 @@ const SCENARIOS: readonly ScenarioDef[] = [
   {
     id: "microsoft",
     tag: "Marquee buyer",
-    question: "What if Microsoft enters the process?",
+    question: () => "What if a marquee strategic (e.g. Microsoft) enters?",
     apply: (base) => {
       // Model the effect of a deep-pocketed strategic entrant: the field
-      // narrows to strategics, the anchor moves to the top of the
-      // strategic band, and a cash-heavy structure becomes achievable.
-      const target = Math.round(base.target * (BASE_STRATEGIC.high / BASE_STRATEGIC.mid));
+      // narrows to strategics, the anchor moves to the top of the band,
+      // and a cash-heavy structure is demanded.
+      const head = runInstitutionalValuation(base.company).headline;
+      const target = Math.round(base.target * (head.high / head.mid));
       return {
         company: base.company,
         target,
         constraints: { ...base.constraints, preferredBuyerType: "strategic", minCashPct: Math.max(0.8, base.constraints.minCashPct) },
         drivers: [
-          "A marquee strategic tightens the field and raises competitive tension",
-          "Anchor moves to the top of the strategic band",
-          "Deep balance sheet → cash-heavy structure, faster to close",
+          "The field narrows to strategic buyers",
+          "The target moves to the top of the canonical band",
+          "Cash floor rises to at least 80%",
         ],
-        assumption: "Models the effect of a hyperscaler entrant (top-of-band anchor + auction tension), not a literal new logo in the registry.",
+        assumption: "Models the effect of a deep-pocketed strategic entrant (top-of-band target, strategics only, cash-heavy), not a literal new buyer in the registry.",
       };
     },
   },
   {
     id: "fast90",
     tag: "Speed",
-    question: "What if I force a 90-day close?",
+    question: () => "What if I force a 90-day close?",
     apply: (base) => ({
       company: base.company,
       target: base.target,
       constraints: { ...base.constraints, maxTimelineDays: 90 },
       drivers: [
-        "Hard 90-day timeline — only fast-moving buyers survive",
-        "Slower acquirers drop out, thinning the set",
-        "Speed protects momentum but sacrifices auction tension",
+        "Hard 90-day timeline",
+        "Buyers with slower historical closes drop out — compare Buyers in set",
+        "Speed generally trades price discovery for certainty",
       ],
       assumption: "Filters the pool on historical close speed. A compressed timeline trades price discovery for certainty and de-risks deal fatigue.",
     }),
@@ -182,15 +191,15 @@ const SCENARIOS: readonly ScenarioDef[] = [
   {
     id: "peonly",
     tag: "Path",
-    question: "What if I run a PE-only process?",
+    question: () => "What if I run a PE-only process?",
     apply: (base) => ({
       company: base.company,
       target: base.target,
       constraints: { ...base.constraints, preferredBuyerType: "pe", minCashPct: Math.min(base.constraints.minCashPct, 0.6) },
       drivers: [
         "Restricts the field to financial sponsors",
-        "More earnout / rollover structure, lower cash floor",
-        "Faster, more repeatable diligence — sponsors transact for a living",
+        "Cash floor capped at 60% — more rollover or earnout allowed",
+        "Sponsors generally price off cash flow rather than synergy — compare the value diff",
       ],
       assumption: "Sponsors price off cash flow, not synergy — expect tighter headlines than a strategic but a cleaner, more predictable process.",
     }),
@@ -200,19 +209,50 @@ const SCENARIOS: readonly ScenarioDef[] = [
 interface Metric { label: string; base: number; scen: number; fmt: (n: number) => string; higherIsBetter: boolean; }
 
 const Simulator: React.FC = () => {
-  const [targetUsd,     setTargetUsd]     = useState<number>(Math.round(VALUATION_STRATEGIC.headline.mid));
+  // The founder's saved intake when there is one; the demo company otherwise.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const canonicalMid = useMemo(() => canonicalValuationFor(company).headline.mid, [company]);
+  const [targetUsd,     setTargetUsd]     = useState<number>(Math.round(canonicalMid));
   const [minCashPct,    setMinCashPct]    = useState<number>(0.75);
   const [maxEarnoutPct, setMaxEarnoutPct] = useState<number>(0.15);
   const [maxTimelineDays, setMaxTimelineDays] = useState<number>(180);
   const [preferredType,   setPreferredType]   = useState<BuyerType | "any">("any");
   const [minConfidence,   setMinConfidence]   = useState<"experimental" | "low" | "medium" | "high">("experimental");
   const [activeScenario,  setActiveScenario]  = useState<string>("wait6");
+  // Inputs keep the typed text; only values that parse reach the engines.
+  const [text, setText] = useState({ target: String(Math.round(canonicalMid / 1e5) / 10), cash: "75", earnout: "15", days: "180" });
+  const SPEC = {
+    target:  { min: 0.1, max: 1_000_000, scale: 1e6 },
+    cash:    { min: 0, max: 100 },
+    earnout: { min: 0, max: 100 },
+    days:    { min: 1, max: 3650, integer: true },
+  } as const;
+  const parsed = {
+    target: parseNumber(text.target, SPEC.target),
+    cash: parseNumber(text.cash, SPEC.cash),
+    earnout: parseNumber(text.earnout, SPEC.earnout),
+    days: parseNumber(text.days, SPEC.days),
+  };
+  const onText = (k: keyof typeof text) => (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const v = e.target.value;
+    setText((t) => ({ ...t, [k]: v }));
+    const r = parseNumber(v, SPEC[k]);
+    if (!r.ok) return;
+    if (k === "target") setTargetUsd(r.value);
+    if (k === "cash") setMinCashPct(r.value / 100);
+    if (k === "earnout") setMaxEarnoutPct(r.value / 100);
+    if (k === "days") setMaxTimelineDays(r.value);
+  };
+  const Msg: React.FC<{ id: string; k: keyof typeof text; hint?: string }> = ({ id, k, hint }) => {
+    const r = parsed[k];
+    return <span id={id} className={`mt-1 block text-[12px] ${r.ok ? "text-xo-muted" : "text-xo-risk"}`}>{r.ok ? hint ?? "\u00a0" : `${r.error} The last valid value is used.`}</span>;
+  };
 
   useEffect(() => { emitTelemetry("simulator_viewed", undefined, "/console/simulator"); }, []);
 
-  const baseline = useMemo<Trajectory>(() => simulate(SAMPLE_COMPANY, targetUsd, {
+  const baseline = useMemo<Trajectory>(() => simulate(company, targetUsd, {
     minCashPct, maxEarnoutPct, maxTimelineDays, preferredBuyerType: preferredType, minConfidence, targetBuyersToEngage: 5,
-  }), [targetUsd, minCashPct, maxEarnoutPct, maxTimelineDays, preferredType, minConfidence]);
+  }), [company, targetUsd, minCashPct, maxEarnoutPct, maxTimelineDays, preferredType, minConfidence]);
 
   const scenario = SCENARIOS.find((s) => s.id === activeScenario) ?? SCENARIOS[0];
   const applied = useMemo(() => scenario.apply(baseline), [scenario, baseline]);
@@ -224,9 +264,9 @@ const Simulator: React.FC = () => {
   const result = baseline.sim;
 
   const metrics: Metric[] = [
-    { label: "Strategic valuation",  base: baseline.valuationMid,                     scen: variant.valuationMid,                     fmt: fmtMoney,             higherIsBetter: true },
-    { label: "Close probability",    base: baseline.sim.expectedCloseProbability,     scen: variant.sim.expectedCloseProbability,     fmt: (n) => `${(n * 100).toFixed(0)}%`, higherIsBetter: true },
-    { label: "Expected realized",    base: baseline.sim.expectedRealizedValueUsd,     scen: variant.sim.expectedRealizedValueUsd,     fmt: fmtMoney,             higherIsBetter: true },
+    { label: "Valuation (canonical midpoint)", base: baseline.valuationMid,                     scen: variant.valuationMid,                     fmt: fmtMoney,             higherIsBetter: true },
+    { label: "Modelled close probability", base: baseline.sim.expectedCloseProbability,     scen: variant.sim.expectedCloseProbability,     fmt: (n) => `${(n * 100).toFixed(0)}%`, higherIsBetter: true },
+    { label: "Best expected value in set", base: baseline.sim.expectedRealizedValueUsd,     scen: variant.sim.expectedRealizedValueUsd,     fmt: fmtMoney,             higherIsBetter: true },
     { label: "Time to cash",         base: baseline.sim.expectedTimeToCashDays,       scen: variant.sim.expectedTimeToCashDays,       fmt: (n) => `${FMT_MS(n)}d`,            higherIsBetter: false },
     { label: "Buyers in set",        base: baseline.sim.recommendedBuyers.length,     scen: variant.sim.recommendedBuyers.length,     fmt: (n) => String(n),                  higherIsBetter: true },
   ];
@@ -234,285 +274,239 @@ const Simulator: React.FC = () => {
   const handleScenario = (id: string): void => {
     setActiveScenario(id);
     const s = SCENARIOS.find((x) => x.id === id);
-    emitTelemetry("simulator_scenario", { scenario: id, question: s?.question }, "/console/simulator");
+    emitTelemetry("simulator_scenario", { scenario: id, question: s?.question(baseline.company) }, "/console/simulator");
   };
 
+  const tape = useMemo(() => buildMarketTape(), []);
+  const LBL = XO_LABEL;
+  const INP = XO_INPUT;
+
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Decision Engine"
-        title="Scenario Engine"
-        tag="Simulate futures"
-        metrics={[
-          { k: "Baseline realized", v: fmtMoney(baseline.sim.expectedRealizedValueUsd), accent: true, sub: "today's trajectory" },
-          { k: "Lead buyer close", v: baseline.sim.recommendedBuyers[0] ? `${(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}%` : "—", sub: baseline.sim.recommendedBuyers[0]?.buyer.name },
-          { k: "Buyers in set", v: String(baseline.sim.recommendedBuyers.length), sub: "clearing constraints" },
-        ]}
-      />
+    <div data-page="simulator" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow={`◉ Decision Engine · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Scenario Engine"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Simulate futures</span></>}
+        description={fromIntake ? "Runs on your saved intake." : "Runs on the demo company. Save an intake to simulate your own."} />
 
-      <MarketTape items={buildMarketTape()} />
+      <section aria-label="Baseline summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3">
+        <div className="bg-xo-panel"><XMetric label="Best expected value in set" emphasis value={fmtMoney(baseline.sim.expectedRealizedValueUsd)} sub="baseline · the highest buyer, not an average" /></div>
+        <div className="bg-xo-panel"><XMetric label="Lead buyer close" value={baseline.sim.recommendedBuyers[0] ? `${(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}%` : "—"} sub={baseline.sim.recommendedBuyers[0]?.buyer.name} /></div>
+        <div className="bg-xo-panel"><XMetric label="Buyers in set" value={String(baseline.sim.recommendedBuyers.length)} sub="clearing constraints" /></div>
+      </section>
 
-      <BankerTake
-        next={<>Stress-test the plan before you commit — model waiting, scaling to $25M ARR, or a marquee entrant.</>}
-        stake={<><span className="font-mono font-bold text-deal-300">{fmtMoney(baseline.sim.expectedRealizedValueUsd)}</span> expected realized on today's baseline trajectory.</>}
-        inaction={<>The default path is rarely the optimal one — unexamined timing and structure leave value unmodeled.</>}
-        buyer={baseline.sim.recommendedBuyers[0]
-          ? <><span className="text-white">{baseline.sim.recommendedBuyers[0].buyer.name}</span> leads the baseline set at {(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}% close.</>
-          : <>No buyers clear the baseline constraints — loosen them to rebuild the set.</>}
-        automate={<>ExitOS re-runs valuation and strategy for every scenario and diffs the outcome against your baseline.</>}
-        impact={<>{fmtMoney(baseline.sim.expectedRealizedValueUsd)}</>}
-      />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
-      <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line">
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">Stress-test the plan before you commit — compare waiting, growing, removing the earnout or a marquee entrant against the baseline below.</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="Baseline">Best expected value in the set <span className="font-mono text-xo-text">{fmtMoney(baseline.sim.expectedRealizedValueUsd)}</span> — the highest buyer, not an average.</TakeCell>
+            <TakeCell k="Lead buyer">{baseline.sim.recommendedBuyers[0]
+              ? <>{baseline.sim.recommendedBuyers[0].buyer.name} — close rate {(baseline.sim.recommendedBuyers[0].expectedOutcome.closeRatePct * 100).toFixed(0)}% (prior where undisclosed).</>
+              : <>No buyer clears the constraints — loosen them to rebuild the set.</>}</TakeCell>
+            <TakeCell k="If you skip this">Timing and structure choices go untested against the model.</TakeCell>
+            <TakeCell k="What ExitOS does">Re-runs the valuation and strategy engines for each scenario and shows the difference from your baseline. Scenarios are models, not forecasts.</TakeCell>
+          </dl>
+        </div>
+      </Section>
+
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         {/* ── Baseline inputs ─────────────────────────────────── */}
-        <Card className="p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Baseline trajectory</div>
-
-          <div className="mt-5 space-y-5">
-            <Field label="Target value (USD)" hint={`Implied mid: ${fmtMoney(VALUATION_STRATEGIC.headline.mid)}`}>
-              <input
-                type="number"
-                value={targetUsd}
-                onChange={(e) => setTargetUsd(Number(e.target.value))}
-                step={1_000_000}
-                min={0}
-                className={inputCls}
-              />
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Min cash %">
-                <input
-                  type="number"
-                  value={Math.round(minCashPct * 100)}
-                  onChange={(e) => setMinCashPct(Math.min(1, Math.max(0, Number(e.target.value) / 100)))}
-                  min={0} max={100} step={5}
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Max earnout %">
-                <input
-                  type="number"
-                  value={Math.round(maxEarnoutPct * 100)}
-                  onChange={(e) => setMaxEarnoutPct(Math.min(1, Math.max(0, Number(e.target.value) / 100)))}
-                  min={0} max={100} step={5}
-                  className={inputCls}
-                />
-              </Field>
+        <Section title="Baseline trajectory" className="lg:col-span-4">
+          <div className="space-y-4 px-4 py-4">
+            <div>
+              <label htmlFor="sim-target" className={LBL}>Target value ($M)</label>
+              <input id="sim-target" inputMode="decimal" value={text.target} onChange={onText("target")} aria-invalid={!parsed.target.ok} aria-describedby="sim-target-hint" className={INP} />
+              <Msg id="sim-target-hint" k="target" hint={`Canonical midpoint: ${fmtMoney(canonicalMid)} · using ${fmtMoney(targetUsd)}`} />
             </div>
-
-            <Field label="Max timeline (days)" hint="Outreach + LOI + diligence + close">
-              <input
-                type="number"
-                value={maxTimelineDays}
-                onChange={(e) => setMaxTimelineDays(Math.max(1, Number(e.target.value)))}
-                min={1} step={15}
-                className={inputCls}
-              />
-            </Field>
-
-            <Field label="Preferred buyer type">
-              <select
-                value={preferredType}
-                onChange={(e) => setPreferredType(e.target.value as BuyerType | "any")}
-                className={inputCls}
-              >
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="sim-cash" className={LBL}>Min cash %</label>
+                <input id="sim-cash" inputMode="decimal" value={text.cash} onChange={onText("cash")} aria-invalid={!parsed.cash.ok} aria-describedby="sim-cash-msg" className={INP} />
+                <Msg id="sim-cash-msg" k="cash" hint="0–100" />
+              </div>
+              <div>
+                <label htmlFor="sim-earnout" className={LBL}>Max earnout %</label>
+                <input id="sim-earnout" inputMode="decimal" value={text.earnout} onChange={onText("earnout")} aria-invalid={!parsed.earnout.ok} aria-describedby="sim-earnout-msg" className={INP} />
+                <Msg id="sim-earnout-msg" k="earnout" hint="0–100" />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="sim-days" className={LBL}>Max timeline (days)</label>
+              <input id="sim-days" inputMode="numeric" value={text.days} onChange={onText("days")} aria-invalid={!parsed.days.ok} aria-describedby="sim-days-hint" className={INP} />
+              <Msg id="sim-days-hint" k="days" hint="Outreach + LOI + diligence + close · whole days, 1–3,650" />
+            </div>
+            <div>
+              <label htmlFor="sim-type" className={LBL}>Preferred buyer type</label>
+              <select id="sim-type" value={preferredType} onChange={(e) => setPreferredType(e.target.value as BuyerType | "any")} className={INP}>
                 {BUYER_TYPES.map((b) => <option key={b.value} value={b.value}>{b.label}</option>)}
               </select>
-            </Field>
-
-            <Field label="Minimum confidence" hint="Drop buyers with weaker evidence">
-              <select
-                value={minConfidence}
-                onChange={(e) => setMinConfidence(e.target.value as typeof minConfidence)}
-                className={inputCls}
-              >
+            </div>
+            <div>
+              <label htmlFor="sim-conf" className={LBL}>Minimum confidence</label>
+              <select id="sim-conf" value={minConfidence} onChange={(e) => setMinConfidence(e.target.value as typeof minConfidence)} aria-describedby="sim-conf-hint" className={INP}>
                 <option value="experimental">Experimental — accept all</option>
                 <option value="low">Low — at least 1 prior</option>
                 <option value="medium">Medium — at least 3 priors</option>
                 <option value="high">High — at least 10 priors</option>
               </select>
-            </Field>
-          </div>
-
-          <div className="mt-6 rounded-md border border-white/5 bg-ink-900/50 p-3 text-[11px] text-white/55">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Dropped by constraint</div>
-            <div className="mt-2 grid grid-cols-2 gap-y-1 font-mono tabular-nums">
-              <span>too slow</span>          <span className="text-right text-white/75">{result.droppedByConstraint.tooLong}</span>
-              <span>wrong type</span>        <span className="text-right text-white/75">{result.droppedByConstraint.wrongBuyerType}</span>
-              <span>below target</span>     <span className="text-right text-white/75">{result.droppedByConstraint.belowTarget}</span>
-              <span>low confidence</span>   <span className="text-right text-white/75">{result.droppedByConstraint.belowConfidence}</span>
+              <span id="sim-conf-hint" className="mt-1 block text-[12px] text-xo-muted">Drop buyers with weaker evidence</span>
+            </div>
+            <div className="border border-xo-line bg-xo-ink p-3 text-[12px]">
+              <h3 className="text-[12px] font-semibold text-xo-muted">Dropped by constraint</h3>
+              <dl className="mt-2 grid grid-cols-2 gap-y-1 font-mono tabular-nums">
+                <dt className="text-xo-muted">too slow</dt>        <dd className="text-right">{result.droppedByConstraint.tooLong}</dd>
+                <dt className="text-xo-muted">wrong type</dt>      <dd className="text-right">{result.droppedByConstraint.wrongBuyerType}</dd>
+                <dt className="text-xo-muted">below target</dt>    <dd className="text-right">{result.droppedByConstraint.belowTarget}</dd>
+                <dt className="text-xo-muted">low confidence</dt>  <dd className="text-right">{result.droppedByConstraint.belowConfidence}</dd>
+              </dl>
             </div>
           </div>
-        </Card>
+        </Section>
 
         {/* ── Scenario engine ─────────────────────────────────── */}
-        <div className="space-y-6">
-          <Card className="p-6">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-400">Current trajectory</div>
-            <p className="mt-3 text-sm text-white/80">{result.summary}</p>
-            <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <Stat label="Close probability" value={`${(result.expectedCloseProbability * 100).toFixed(0)}%`} sub={`P(≥1 of ${result.recommendedBuyers.length})`} accent="#34d399" />
-              <Stat label="Time to cash"       value={`${FMT_MS(result.expectedTimeToCashDays)}d`} sub="median across set" />
-              <Stat label="Expected realized"  value={fmtMoney(result.expectedRealizedValueUsd)} sub="best of set" accent="#34d399" />
-              <Stat label="Strategic value"    value={fmtMoney(baseline.valuationMid)} sub="mid band, today" />
+        <div className="flex flex-col gap-px bg-xo-line lg:col-span-8">
+          <Section title="Current trajectory"
+            foot="Model outputs. Close probability = 1 − Π(1 − close rate) across the set — it assumes every buyer in the set makes an offer, independently; close rates use priors where a buyer has not disclosed one. The value is the highest buyer's expected closing value, so it sits above what a typical buyer would pay.">
+            <div className="px-4 py-3">
+              <p className="text-[13px]">{result.summary}</p>
+              <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <Stat label="Modelled close probability" value={`${(result.expectedCloseProbability * 100).toFixed(0)}%`} sub={`P(≥1 of ${result.recommendedBuyers.length}), independence assumed`} />
+                <Stat label="Time to cash"       value={`${FMT_MS(result.expectedTimeToCashDays)}d`} sub="median across set" />
+                <Stat label="Best expected value in set"  value={fmtMoney(result.expectedRealizedValueUsd)} sub="maximum across the set" />
+                <Stat label="Valuation (canonical midpoint)" value={fmtMoney(baseline.valuationMid)} sub="today — the console value" />
+              </dl>
             </div>
-          </Card>
+          </Section>
 
           {/* Scenario picker */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Simulate a future</div>
-              <div className="text-[10px] uppercase tracking-wide text-white/30">{SCENARIOS.length} scenarios</div>
-            </div>
-            <div className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          <Section title="Simulate a future" right={<span className="text-[11px] text-xo-muted">{SCENARIOS.length} scenarios</span>}>
+            <div role="group" aria-label="Scenario" className="grid gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
               {SCENARIOS.map((s) => {
                 const active = s.id === activeScenario;
                 return (
-                  <button
-                    key={s.id}
-                    onClick={() => handleScenario(s.id)}
-                    className={`rounded-lg border p-3 text-left transition ${active
-                      ? "border-deal-500/60 bg-deal-600/15 ring-1 ring-deal-500/40"
-                      : "border-white/10 bg-ink-900/40 hover:border-white/25 hover:bg-white/[0.03]"}`}
-                  >
-                    <div className={`text-[9px] font-semibold uppercase tracking-[0.18em] ${active ? "text-deal-300" : "text-white/35"}`}>{s.tag}</div>
-                    <div className={`mt-1 text-[13px] font-medium leading-snug ${active ? "text-white" : "text-white/75"}`}>{s.question}</div>
+                  <button key={s.id} type="button" aria-pressed={active} onClick={() => handleScenario(s.id)}
+                    className={`p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action ${active ? "bg-xo-raise" : "bg-xo-panel hover:bg-xo-raise"}`}>
+                    <div className={`text-[11px] font-semibold ${active ? "text-xo-verified" : "text-xo-muted"}`}>{active && <span aria-hidden>✓ </span>}{s.tag}</div>
+                    <div className="mt-1 text-[13px] font-medium leading-snug">{s.question(baseline.company)}</div>
                   </button>
                 );
               })}
             </div>
-          </Card>
+          </Section>
 
           {/* Scenario diff */}
-          <Card className="p-6">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 className="font-serif text-lg font-bold text-white">{scenario.question}</h3>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">vs. baseline</span>
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {metrics.map((m) => {
-                const diff = m.scen - m.base;
-                const flat = Math.abs(diff) < (m.base === 0 ? 1e-9 : Math.abs(m.base) * 0.005);
-                const good = m.higherIsBetter ? diff > 0 : diff < 0;
-                const color = flat ? "text-white/40" : good ? "text-deal-300" : "text-red-300";
-                const arrow = flat ? "→" : diff > 0 ? "▲" : "▼";
-                return (
-                  <div key={m.label} className="rounded-lg border border-white/10 bg-ink-900/40 p-4">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{m.label}</div>
-                    <div className="mt-2 flex items-baseline gap-2">
-                      <span className="font-mono text-lg font-bold tabular-nums text-white">{m.fmt(m.scen)}</span>
-                      <span className={`text-[11px] font-semibold ${color}`}>{arrow} {flat ? "no change" : m.fmt(Math.abs(diff))}</span>
+          <Section title={scenario.question(baseline.company)} eyebrow="Scenario vs. baseline">
+            <div className="px-4 py-3">
+              <dl className="grid gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
+                {metrics.map((m) => {
+                  const diff = m.scen - m.base;
+                  const flat = Math.abs(diff) < (m.base === 0 ? 1e-9 : Math.abs(m.base) * 0.005);
+                  const good = m.higherIsBetter ? diff > 0 : diff < 0;
+                  const color = flat ? "text-xo-muted" : good ? "text-xo-verified" : "text-xo-risk";
+                  const arrow = flat ? "→" : diff > 0 ? "▲" : "▼";
+                  return (
+                    <div key={m.label} className="flex flex-col bg-xo-panel p-3">
+                      <dt className="order-1 text-[12px] font-semibold text-xo-muted">{m.label}</dt>
+                      <dd className="order-2 mt-1.5 flex items-baseline gap-2">
+                        <span className="font-mono text-lg font-semibold tabular-nums">{m.fmt(m.scen)}</span>
+                        <span className={`text-[12px] font-semibold ${color}`}>{arrow} {flat ? "no change" : m.fmt(Math.abs(diff))}</span>
+                      </dd>
+                      <dd className="order-3 mt-1 text-[12px] text-xo-muted">baseline {m.fmt(m.base)}</dd>
                     </div>
-                    <div className="mt-1 text-[11px] text-white/40">baseline {m.fmt(m.base)}</div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_minmax(0,300px)]">
-              <div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">What changes</div>
-                <ul className="mt-3 space-y-2 text-sm text-white/75">
-                  {applied.drivers.map((d, i) => (
-                    <li key={i} className="flex gap-2"><span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-deal-400" /><span>{d}</span></li>
-                  ))}
-                </ul>
+                  );
+                })}
+              </dl>
+              <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_minmax(0,300px)]">
+                <div>
+                  <h3 className="text-[12px] font-semibold text-xo-muted">What changes</h3>
+                  <ul className="mt-2 space-y-2 text-[13px]">
+                    {applied.drivers.map((d, i) => (
+                      <li key={i} className="flex gap-2"><span aria-hidden className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-xo-verified" /><span>{d}</span></li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="border border-xo-line bg-xo-ink p-3">
+                  <h3 className="text-[12px] font-semibold text-xo-muted">Modelling assumption</h3>
+                  <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">{applied.assumption}</p>
+                </div>
               </div>
-              <div className="rounded-lg border border-white/5 bg-ink-900/50 p-4">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">Modelling assumption</div>
-                <p className="mt-2 text-[12.5px] leading-relaxed text-white/55">{applied.assumption}</p>
-              </div>
+              <p className="mt-4 border-t border-xo-line pt-3 text-[13px] text-xo-muted">{variant.sim.summary}</p>
             </div>
-
-            <p className="mt-5 border-t border-white/10 pt-4 text-[12.5px] text-white/70">{variant.sim.summary}</p>
-          </Card>
+          </Section>
         </div>
       </div>
 
       {/* ── Baseline buyer set + process structure ──────────────── */}
-      <div className="mt-6 space-y-6">
-        {result.recommendedBuyers.length > 0 && (
-          <Card>
-            <div className="border-b border-white/10 px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-              Recommended buyer set — baseline trajectory
-            </div>
-            <table className="w-full text-sm">
-              <thead className="text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-                <tr className="border-b border-white/10">
-                  <th className="px-5 py-3 w-8">#</th>
-                  <th className="px-5 py-3">Acquirer</th>
-                  <th className="px-5 py-3">Type</th>
-                  <th className="px-5 py-3 text-right">Headline</th>
-                  <th className="px-5 py-3 text-right">Close rate</th>
-                  <th className="px-5 py-3 text-right">Days</th>
-                  <th className="px-5 py-3 text-right">Expected realized</th>
+      {result.recommendedBuyers.length > 0 && (
+        <Section title="Recommended buyer set — baseline trajectory" className="border border-xo-line">
+          <ScrollRegion label="Recommended buyer set table">
+            <table className="w-full min-w-[760px] text-[13px]">
+              <thead className="text-left text-[11px] text-xo-muted">
+                <tr className="border-b border-xo-line">
+                  <th scope="col" className="w-8 px-4 py-2 font-medium">#</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Acquirer</th>
+                  <th scope="col" className="px-2 py-2 font-medium">Type</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Headline</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Close rate</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Days</th>
+                  <th scope="col" className="px-4 py-2 text-right font-medium">Expected realized</th>
                 </tr>
               </thead>
               <tbody>
-                {result.recommendedBuyers.map((c, idx) => {
-                  const rankBg = idx === 0 ? "bg-deal-600/30 text-deal-200 ring-deal-500/40"
-                              : idx === 1 ? "bg-stage-engaged/15 text-stage-engaged ring-stage-engaged/40"
-                              : idx === 2 ? "bg-loi-500/15 text-loi-300 ring-loi-400/30"
-                              : "bg-white/5 text-white/55 ring-white/15";
-                  return (
-                    <tr key={c.buyer.name} className="border-b border-white/5 last:border-0">
-                      <td className="px-5 py-3.5">
-                        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-mono font-bold ring-1 ${rankBg}`}>
-                          {idx + 1}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <div className="font-medium text-white">{c.buyer.name}</div>
-                        <div className="mt-0.5 max-w-md text-[11px] leading-snug text-white/45">{c.buyer.thesis}</div>
-                      </td>
-                      <td className="px-5 py-3.5 text-[12px] uppercase tracking-wide text-white/65">{c.buyer.buyerType.replace(/_/g, " ")}</td>
-                      <td className="px-5 py-3.5 text-right font-mono tabular-nums text-white/85">{fmtMoney(c.expectedOutcome.expectedHeadlineUsd)}</td>
-                      <td className="px-5 py-3.5 text-right font-mono tabular-nums text-white/85">{FMT_PCT(c.expectedOutcome.closeRatePct)}</td>
-                      <td className="px-5 py-3.5 text-right font-mono tabular-nums text-white/85">{c.expectedOutcome.expectedDaysToCash}d</td>
-                      <td className="px-5 py-3.5 text-right">
-                        <div className="font-mono tabular-nums font-semibold text-deal-300">{fmtMoney(c.expectedOutcome.expectedClosingUsd)}</div>
-                        <div className="mt-0.5 flex justify-end">
-                          <ConfidenceChip
-                            tier={c.expectedOutcome.overallConfidence.tier}
-                            sample={c.expectedOutcome.overallConfidence.sample}
-                            compact
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {result.recommendedBuyers.map((c, idx) => (
+                  <tr key={c.buyer.name} className="border-b border-xo-line last:border-0">
+                    <td className="px-4 py-2.5 font-mono text-[12px] text-xo-muted">{idx + 1}</td>
+                    <th scope="row" className="px-2 py-2.5 text-left font-normal">
+                      <div className="font-medium">{c.buyer.name}</div>
+                      <div className="mt-0.5 max-w-md text-[12px] leading-snug text-xo-muted">{c.buyer.thesis}</div>
+                    </th>
+                    <td className="px-2 py-2.5 text-[12px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</td>
+                    <td className="px-2 py-2.5 text-right font-mono tabular-nums">{fmtMoney(c.expectedOutcome.expectedHeadlineUsd)}</td>
+                    <td className="px-2 py-2.5 text-right font-mono tabular-nums">{FMT_PCT(c.expectedOutcome.closeRatePct)}</td>
+                    <td className="px-2 py-2.5 text-right font-mono tabular-nums">{c.expectedOutcome.expectedDaysToCash}d</td>
+                    <td className="px-4 py-2.5 text-right">
+                      <div className="font-mono font-semibold tabular-nums text-xo-verified">{fmtMoney(c.expectedOutcome.expectedClosingUsd)}</div>
+                      <div className="mt-0.5 flex justify-end"><ConfidenceChip tier={c.expectedOutcome.overallConfidence.tier} sample={c.expectedOutcome.overallConfidence.sample} compact /></div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-          </Card>
-        )}
+          </ScrollRegion>
+        </Section>
+      )}
 
-        <Card className="p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">Recommended process structure</div>
-          <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <Section title="Recommended process structure" className="border border-xo-line">
+        <div className="px-4 py-3">
+          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <Stat label="Buyers to engage"  value={String(result.recommendedProcessStructure.buyersToEngage)} sub="parallel process" />
-            <Stat label="Timeline"           value={`${result.recommendedProcessStructure.recommendedTimelineDays}d`} sub="outreach → close" />
-            <Stat label="Cash floor"         value={FMT_PCT(result.recommendedProcessStructure.recommendedCashFloorPct)} sub="negotiate at or above" />
+            <Stat label="Timeline"          value={`${result.recommendedProcessStructure.recommendedTimelineDays}d`} sub="outreach → close" />
+            <Stat label="Cash floor"        value={FMT_PCT(result.recommendedProcessStructure.recommendedCashFloorPct)} sub="negotiate at or above" />
             <Stat label="Earnout ceiling"   value={FMT_PCT(result.recommendedProcessStructure.recommendedEarnoutCeilingPct)} sub="negotiate at or below" />
-          </div>
-          <ul className="mt-5 space-y-2 text-sm text-white/70">
+          </dl>
+          <ul className="mt-4 space-y-2 text-[13px] text-xo-muted">
             {result.recommendedProcessStructure.rationale.map((r, i) => (
-              <li key={i} className="flex gap-2"><span className="text-white/30">·</span><span>{r}</span></li>
+              <li key={i} className="flex gap-2"><span aria-hidden className="text-xo-faint">·</span><span>{r}</span></li>
             ))}
           </ul>
-        </Card>
-      </div>
+        </div>
+      </Section>
     </div>
   );
 };
 
-const Stat: React.FC<{ label: string; value: string; sub?: string; accent?: string }> = ({ label, value, sub, accent }) => (
-  <div>
-    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{label}</div>
-    <div className="mt-1 text-2xl font-bold tabular-nums" style={accent ? { color: accent } : undefined}>{value}</div>
-    {sub && <div className="mt-0.5 text-[11px] text-white/45">{sub}</div>}
+const Stat: React.FC<{ label: string; value: string; sub?: string; tone?: string }> = ({ label, value, sub, tone }) => (
+  <div className="flex flex-col">
+    <dt className="order-1 text-[12px] font-semibold text-xo-muted">{label}</dt>
+    <dd className={`order-2 mt-1 text-2xl font-semibold tabular-nums ${tone ?? ""}`}>{value}</dd>
+    {sub && <dd className="order-3 mt-0.5 text-[12px] text-xo-muted">{sub}</dd>}
+  </div>
+);
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
   </div>
 );
 

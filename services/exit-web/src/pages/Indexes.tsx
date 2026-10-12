@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { Panel, Frame, CommandHeader, MarketTape } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { PageHeader, Section, Metric, ScrollRegion, Chip } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor } from "../components/Reactor";
 import { TransactionHeatfield } from "../components/Heatfield";
@@ -7,18 +8,22 @@ import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
 
 // EXITOS ACQUISITION INDEXES (Stage 8) — Bloomberg has indexes; so does
 // ExitOS. Per ExitOS sector, the aggregate the whole network produces:
-// acquisition volume and its trend, active buyers, deal size and disclosed
-// value — every figure from verified registry events. As the network
-// ingests more deals, the indexes sharpen for everyone.
+// acquisition volume and its trend, distinct acquirers, deal size and
+// disclosed value — every figure from the registry snapshot (mostly
+// source-cited, unverified entries; see the Market Map).
 
 const { indexes, as_of } = ACQ_INDEXES;
 const totalVol = indexes.reduce((s, i) => s + i.volume, 0);
 const totalDisclosed = indexes.reduce((s, i) => s + i.totalDisclosedUsd, 0);
 
-const Trend: React.FC<{ pct: number | null }> = ({ pct }) => {
-  if (pct == null) return <span className="text-white/30">—</span>;
+// Trends on small windows swing wildly (3 → 5 deals is +67%), so the counts
+// are always shown and windows under 10 deals are marked.
+const SMALL = 10;
+const Trend: React.FC<{ pct: number | null; now: number; prior: number }> = ({ pct, now, prior }) => {
+  const counts = <span className="ml-1 text-[11px] text-xo-faint">({now} vs {prior}{now < SMALL && prior < SMALL ? ", small sample" : ""})</span>;
+  if (pct == null) return <span className="text-xo-faint">—{counts}</span>;
   const up = pct >= 0;
-  return <span className={`font-mono tabular-nums ${up ? "text-deal-300" : "text-red-300"}`}>{up ? "▲" : "▼"} {Math.abs(Math.round(pct * 100))}%</span>;
+  return <span className={`font-mono tabular-nums ${up ? "text-xo-verified" : "text-xo-risk"}`}><span aria-hidden>{up ? "▲" : "▼"} </span><span className="sr-only">{up ? "up " : "down "}</span>{Math.abs(Math.round(pct * 100))}%{counts}</span>;
 };
 
 const Indexes: React.FC = () => {
@@ -33,73 +38,68 @@ const Indexes: React.FC = () => {
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Market Intelligence"
-        title="Acquisition Indexes"
-        tag="Sector tape"
-        status={`As of ${as_of.slice(0, 10)}`}
-        meta={[{ k: "SOURCE", v: ACQ_INDEXES.source.slice(0, 28) }]}
-        metrics={[
-          { k: "Sector indexes", v: String(indexes.length) },
-          { k: "Indexed acquisitions", v: totalVol.toLocaleString(), accent: true, sub: "across sectors" },
-          { k: "Disclosed value", v: fmtUsd(totalDisclosed), sub: "priced deals" },
-          { k: "Hottest sector", v: hottest?.sector ?? "—", accent: true, sub: hottest?.trendPct != null ? `${hottest.trendPct >= 0 ? "+" : ""}${Math.round(hottest.trendPct * 100)}% 12m` : undefined },
-        ]}
-      />
+    <div data-page="acquisition-indexes" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow="◉ Market Intelligence" title="Acquisition Indexes"
+        badge={<span className="text-[12px] text-xo-muted">Sector tape · as of {as_of.slice(0, 10)}</span>}
+        description={`Source: ${ACQ_INDEXES.source} — mostly source-cited entries that are not yet verified.`} />
 
-      <MarketTape items={tape} />
+      <section aria-label="Index totals" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+        <div className="bg-xo-panel"><Metric label="Sector indexes" value={String(indexes.length)} /></div>
+        <div className="bg-xo-panel"><Metric label="Indexed acquisitions" emphasis value={totalVol.toLocaleString()} sub="across sectors" /></div>
+        <div className="bg-xo-panel"><Metric label="Disclosed value" value={fmtUsd(totalDisclosed)} sub="priced deals" /></div>
+        <div className="bg-xo-panel"><Metric label="Largest 12-month change" value={<span className="capitalize">{hottest?.sector ?? "—"}</span>} sub={hottest?.trendPct != null ? `${hottest.trendPct >= 0 ? "+" : ""}${Math.round(hottest.trendPct * 100)}% 12m · ${hottest.volume12m} vs ${hottest.volumePrior12m} deals${hottest.volume12m < SMALL && hottest.volumePrior12m < SMALL ? " (small sample)" : ""}` : undefined} /></div>
+      </section>
 
-      <Frame>
-        <Panel title="Transaction heatfield · volume × disclosed value" className="lg:col-span-12"
-          foot="Column height = acquisition volume · heat = disclosed value · cap colour = 12-month trend. Hover a sector for figures.">
-          <TransactionHeatfield height={200} />
-        </Panel>
-      </Frame>
+      <RegistryTape items={tape} asOf={as_of.slice(0, 10)} />
 
-      <Frame>
-        <Panel title="Acquisition reactor" className="lg:col-span-4"
+      <Section title="Transaction heatfield · volume × disclosed value" className="border border-xo-line"
+        foot="Column height = acquisition volume · heat = disclosed value · cap colour = 12-month trend. The same figures are in the index table below.">
+        <div aria-hidden><TransactionHeatfield height={200} /></div>
+      </Section>
+
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Acquisition reactor" className="lg:col-span-4"
           foot="Orbital field of sector acquisition volume — node size ∝ √volume, colour = 12-month trend.">
-          <AcquisitionReactor height={240} />
-        </Panel>
-        <Panel title="ExitOS Acquisition Indexes" className="lg:col-span-8"
-          right={
-            <div className="flex flex-wrap gap-1">
-              {([["volume", "Vol"], ["trend", "Trend"], ["size", "Size"], ["buyers", "Buyers"]] as [typeof sort, string][]).map(([k, l]) => (
-                <button key={k} onClick={() => setSort(k)} className={`rounded px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide transition ${sort === k ? "bg-deal-600/20 text-white ring-1 ring-deal-400/40" : "text-white/45 hover:text-white"}`}>{l}</button>
-              ))}
-            </div>
-          }
-          foot={`${ACQ_INDEXES.source}. Volume = indexed acquisitions mapped to the ExitOS taxonomy; trend = trailing-12m vs prior-12m; median deal from disclosed values only.`}>
-          <table className="w-full text-[12px]">
-            <thead className="sticky top-0 bg-ink-900 text-left text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">
-              <tr className="border-b border-white/10">
-                <th className="px-3 py-1.5">Index</th>
-                <th className="px-2 py-1.5 text-right">Volume</th>
-                <th className="px-2 py-1.5 text-right">12m trend</th>
-                <th className="px-2 py-1.5 text-right">Active buyers</th>
-                <th className="px-2 py-1.5 text-right">Median deal</th>
-                <th className="px-3 py-1.5 text-right">Disclosed value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((i) => (
-                <tr key={i.sector} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                  <td className="px-3 py-1.5">
-                    <span className="font-semibold capitalize text-white">{i.sector}</span>
-                    <span className="ml-2 inline-block h-1 w-20 overflow-hidden rounded-full bg-white/10 align-middle"><span className="block h-full rounded-full bg-deal-500" style={{ width: `${(i.volume / maxVol) * 100}%` }} /></span>
-                  </td>
-                  <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/85">{i.volume.toLocaleString()}</td>
-                  <td className="px-2 py-1.5 text-right"><Trend pct={i.trendPct} /></td>
-                  <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/70">{i.activeBuyers}</td>
-                  <td className="px-2 py-1.5 text-right font-mono tabular-nums text-white/70">{i.medianDealUsd != null ? fmtUsd(i.medianDealUsd) : "—"}</td>
-                  <td className="px-3 py-1.5 text-right font-mono tabular-nums text-deal-300">{i.totalDisclosedUsd > 0 ? fmtUsd(i.totalDisclosedUsd) : "—"}</td>
+          <div aria-hidden><AcquisitionReactor height={240} /></div>
+        </Section>
+        <Section title="ExitOS Acquisition Indexes" className="lg:col-span-8"
+          right={<div role="group" aria-label="Sort by" className="flex flex-wrap gap-1.5">
+            {([["volume", "Volume"], ["trend", "Trend"], ["size", "Size"], ["buyers", "Buyers"]] as [typeof sort, string][]).map(([k, l]) => (
+              <Chip key={k} pressed={sort === k} onToggle={() => setSort(k)}>{l}</Chip>
+            ))}
+          </div>}
+          foot={`${ACQ_INDEXES.source}. Volume = indexed acquisitions mapped to the ExitOS taxonomy; trend = trailing-12m vs prior-12m deal count (both counts shown; under 10 deals in both windows is marked small sample); median deal from disclosed values only.`}>
+          <ScrollRegion label="Acquisition indexes table">
+            <table className="w-full min-w-[760px] text-[12px]">
+              <thead className="text-left text-[11px] text-xo-faint">
+                <tr className="border-b border-xo-line">
+                  <th scope="col" className="px-3 py-2 font-medium">Index</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Volume</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">12m trend (deals vs prior 12m)</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Distinct acquirers (all years)</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Median deal</th>
+                  <th scope="col" className="px-3 py-2 text-right font-medium">Disclosed value</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </Panel>
-      </Frame>
+              </thead>
+              <tbody>
+                {rows.map((i) => (
+                  <tr key={i.sector} className="border-b border-xo-line last:border-0">
+                    <th scope="row" className="px-3 py-1.5 text-left font-normal">
+                      <span className="font-semibold capitalize">{i.sector}</span>
+                      <span aria-hidden className="ml-2 inline-block h-1 w-20 overflow-hidden rounded-full bg-xo-line align-middle"><span className="block h-full rounded-full bg-xo-action" style={{ width: `${(i.volume / maxVol) * 100}%` }} /></span>
+                    </th>
+                    <td className="px-2 py-1.5 text-right font-mono tabular-nums">{i.volume.toLocaleString()}</td>
+                    <td className="px-2 py-1.5 text-right"><Trend pct={i.trendPct} now={i.volume12m} prior={i.volumePrior12m} /></td>
+                    <td className="px-2 py-1.5 text-right font-mono tabular-nums text-xo-muted">{i.activeBuyers}</td>
+                    <td className="px-2 py-1.5 text-right font-mono tabular-nums text-xo-muted">{i.medianDealUsd != null ? fmtUsd(i.medianDealUsd) : "—"}</td>
+                    <td className="px-3 py-1.5 text-right font-mono tabular-nums text-xo-verified">{i.totalDisclosedUsd > 0 ? fmtUsd(i.totalDisclosedUsd) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollRegion>
+        </Section>
+      </div>
     </div>
   );
 };

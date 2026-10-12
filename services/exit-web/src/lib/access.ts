@@ -16,7 +16,8 @@ export type Plan = "free" | "starter" | "prep" | "pro";
 
 export interface NavItem {
   to: string;
-  label: string;
+  label: string;      // task-style menu name
+  name?: string;      // the page's own name, shown under a renamed entry
   group: string;
   roles: Role[];     // which roles see this item
   pro?: boolean;     // requires a paid subscription (founders/buyers)
@@ -25,66 +26,66 @@ export interface NavItem {
 
 export const NAV: NavItem[] = [
   // ── Founder · Overview ─────────────────────────────────────────
-  { to: "/console/commander",          label: "Chief Investment Banker", group: "Mandate", roles: ["founder"], pro: true },
-  { to: "/console",                    label: "Intelligence Terminal", group: "Mandate", roles: ["founder"] },
+  { to: "/console/commander",          label: "Recommended Actions", name: "Chief Investment Banker", group: "Mandate", roles: ["founder"], pro: true },
+  { to: "/console",                    label: "Home", name: "Intelligence Terminal", group: "Mandate", roles: ["founder"] },
   { to: "/console/intake",             label: "Value My Company",     group: "Mandate", roles: ["founder"] },
-  { to: "/console/command",            label: "Liquidity Command",    group: "Mandate", roles: ["founder"] },
-  { to: "/console/autopilot",          label: "Autonomous Exit",      group: "Mandate", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/buyer-graph",        label: "Buyer Graph",          group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/market-map",         label: "Market Map",           group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/knowledge-graph",    label: "Knowledge Graph",      group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/outcomes",           label: "Outcome Intelligence", group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/indexes",            label: "Acquisition Indexes",  group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/acquisition-radar",  label: "Acquisition Radar",    group: "Market Intelligence", roles: ["founder", "buyer"] },
-  { to: "/console/engagement-registry", label: "Engagement Registry",  group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/network",            label: "Network Intelligence", group: "Market Intelligence", roles: ["founder"], pro: true },
+  { to: "/console/command",            label: "Exit Overview", name: "Liquidity Command",    group: "Mandate", roles: ["founder"] },
+  { to: "/console/autopilot",          label: "Simulate My Exit", name: "Autonomous Exit",      group: "Mandate", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/buyer-graph",        label: "Search All Acquirers", name: "Buyer Graph",          group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/market-map",         label: "Explore the Market", name: "Market Map",           group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/knowledge-graph",    label: "Search Past Deals", name: "Knowledge Graph",      group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/outcomes",           label: "See Deal Outcomes", name: "Outcome Intelligence", group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/indexes",            label: "Compare Sectors", name: "Acquisition Indexes",  group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/acquisition-radar",  label: "Scan Listed Companies", name: "Acquisition Radar",    group: "Market Intelligence", roles: ["founder", "buyer"] },
+  { to: "/console/engagement-registry", label: "Check Buyer Engagement", name: "Engagement Registry",  group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/network",            label: "About Our Data", name: "Network Intelligence", group: "Market Intelligence", roles: ["founder"], pro: true },
 
   // ── Buyer · Overview ───────────────────────────────────────────
-  { to: "/console/buyer-portal",       label: "Buyer Home",           group: "Overview", roles: ["buyer"] },
+  { to: "/console/buyer-portal",       label: "Home", name: "Buyer Home",           group: "Overview", roles: ["buyer"] },
 
   // ── Prepare (founder) ──────────────────────────────────────────
-  { to: "/console/valuation",          label: "Enterprise Value",     group: "Mandate", roles: ["founder"] },
-  { to: "/console/readiness",          label: "Readiness",            group: "Mandate", roles: ["founder"] },
-  { to: "/console/diligence-ai",       label: "Diligence",            group: "Mandate", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/investors",          label: "Cap Table",            group: "Mandate", roles: ["founder"] },
-  { to: "/console/exit-timing",        label: "Exit Timing",          group: "Mandate", roles: ["founder"], pro: true },
+  { to: "/console/valuation",          label: "See My Value", name: "Enterprise Value",     group: "Mandate", roles: ["founder"] },
+  { to: "/console/readiness",          label: "Check Readiness", name: "Readiness",            group: "Mandate", roles: ["founder"] },
+  { to: "/console/diligence-ai",       label: "Prepare for Diligence", name: "Diligence",            group: "Mandate", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/investors",          label: "Manage Cap Table", name: "Cap Table",            group: "Mandate", roles: ["founder"] },
+  { to: "/console/exit-timing",        label: "Choose When to Sell", name: "Exit Timing",          group: "Mandate", roles: ["founder"], pro: true },
 
   // ── Discover (founder) ─────────────────────────────────────────
-  { to: "/console/buyer-copilot",      label: "Buyer Intelligence",   group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/buyers",             label: "Buyer Profiles",       group: "Market Intelligence", roles: ["founder"] },
-  { to: "/console/marketplace",        label: "Anonymous Listings",   group: "Exchange", roles: ["founder"] },
-  { to: "/console/intelligence",       label: "Acquisition Radar",    group: "Market Intelligence", roles: ["founder"] },
+  { to: "/console/buyer-copilot",      label: "Compare Top Buyers", name: "Buyer Intelligence",   group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/buyers",             label: "Find Buyers", name: "Buyer Profiles",       group: "Market Intelligence", roles: ["founder"] },
+  { to: "/console/marketplace",        label: "List My Company", name: "Anonymous Listings",   group: "Exchange", roles: ["founder"] },
+  { to: "/console/intelligence",       label: "Rank Buyers by Fit", name: "Acquisition Intelligence", group: "Market Intelligence", roles: ["founder"] },
 
   // ── Engage (founder) ───────────────────────────────────────────
-  { to: "/console/banker",             label: "Outreach",             group: "Exchange", roles: ["founder"], pro: true },
-  { to: "/console/nda",                label: "NDA Vault",            group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/banker",             label: "Write to Buyers", name: "Outreach",             group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/nda",                label: "Manage NDAs", name: "NDA Vault",            group: "Exchange", roles: ["founder"], pro: true },
   { to: "/console/inbox",              label: "Inbox",                group: "Exchange", roles: ["founder"] },
-  { to: "/console/pipeline",           label: "Active Processes",     group: "Exchange", roles: ["founder"] },
-  { to: "/console/activity",           label: "Deal Activity",        group: "Exchange", roles: ["founder", "buyer"] },
-  { to: "/console/outreach-plan",      label: "Outreach Plan",        group: "Exchange", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/process-intel",      label: "Process Intelligence", group: "Exchange", roles: ["founder"], pro: true },
-  { to: "/console/deal-room",          label: "Live Deal Room",       group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/pipeline",           label: "Track Deals", name: "Active Processes",     group: "Exchange", roles: ["founder"] },
+  { to: "/console/activity",           label: "Review Activity", name: "Deal Activity",        group: "Exchange", roles: ["founder", "buyer"] },
+  { to: "/console/outreach-plan",      label: "Plan Outreach", name: "Outreach Plan",        group: "Exchange", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/process-intel",      label: "Track the Buyer Funnel", name: "Process Intelligence", group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/deal-room",          label: "Preview the Deal Room", name: "Deal Room",            group: "Exchange", roles: ["founder"], pro: true },
 
   // ── Negotiate (founder) ────────────────────────────────────────
-  { to: "/console/negotiator",         label: "Bid Room",             group: "Exchange", roles: ["founder"], pro: true },
-  { to: "/console/simulator",          label: "Scenario Simulator",   group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/negotiator",         label: "Compare Offers", name: "Bid Room",             group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/simulator",          label: "Test Scenarios", name: "Scenario Simulator",   group: "Exchange", roles: ["founder"], pro: true },
 
   // ── Close (founder) ────────────────────────────────────────────
-  { to: "/console/closing",            label: "Closing Center",       group: "Exchange", roles: ["founder"], pro: true },
-  { to: "/console/data-room",          label: "Data Room",            group: "Mandate", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/documents",          label: "Documents",            group: "Mandate", roles: ["founder"], pro: true, starter: true },
-  { to: "/console/closing#signatures", label: "Signatures",           group: "Exchange", roles: ["founder"], pro: true },
-  { to: "/console/closing#escrow",     label: "Escrow",               group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/closing",            label: "Close the Deal", name: "Closing Center",       group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/data-room",          label: "Build the Data Room", name: "Data Room",            group: "Mandate", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/documents",          label: "Generate Documents", name: "Documents",            group: "Mandate", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/closing#signatures", label: "Track Signatures", name: "Signatures",           group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/closing#escrow",     label: "Track Escrow", name: "Escrow",               group: "Exchange", roles: ["founder"], pro: true },
 
   // ── Wealth (founder) ───────────────────────────────────────────
-  { to: "/console/wealth",             label: "Liquidity & Transition", group: "Wealth", roles: ["founder"], pro: true },
+  { to: "/console/wealth",             label: "Plan After the Sale", name: "Liquidity & Transition", group: "Wealth", roles: ["founder"], pro: true },
 
   // ── Buyer · Marketplace ────────────────────────────────────────
   { to: "/console/marketplace",        label: "Browse Opportunities", group: "Marketplace", roles: ["buyer"] },
-  { to: "/console/intelligence",       label: "Acquisition Radar",    group: "Marketplace", roles: ["buyer"] },
+  { to: "/console/intelligence",       label: "Research Acquirers", name: "Acquisition Intelligence", group: "Marketplace", roles: ["buyer"] },
   // ── Buyer · Deals ──────────────────────────────────────────────
-  { to: "/console/deal-room",          label: "Deal Room",            group: "Deals", roles: ["buyer"], pro: true },
-  { to: "/console/nda",                label: "Access Requests",      group: "Deals", roles: ["buyer"], pro: true },
+  { to: "/console/deal-room",          label: "Open the Deal Room", name: "Deal Room",            group: "Deals", roles: ["buyer"], pro: true },
+  { to: "/console/nda",                label: "Track Access Requests", name: "Access Requests",      group: "Deals", roles: ["buyer"], pro: true },
 
   // ── Admin ──────────────────────────────────────────────────────
   { to: "/console/admin",              label: "Admin Console",        group: "Admin", roles: ["admin"] },
@@ -152,3 +153,13 @@ export function homeFor(role: Role): string {
 export const ROLE_LABEL: Record<Role, string> = {
   founder: "Founder", buyer: "Buyer", admin: "Admin", superadmin: "Superadmin",
 };
+
+/** The engagement a destination requires for this role/plan, in founder-
+ *  facing words — or null when it is already open. Display only: the route
+ *  Guard still enforces access. */
+export function requiredEngagement(path: string, role: Role, plan: Plan): string | null {
+  if (!needsUpgrade(path, role, plan)) return null;
+  const p = base(path);
+  const e = NAV.find((n) => base(n.to) === p && (role === "superadmin" || n.roles.includes(role)));
+  return e?.starter ? `${PLAN_LABEL.prep} or ${PLAN_LABEL.pro}` : PLAN_LABEL.pro;
+}

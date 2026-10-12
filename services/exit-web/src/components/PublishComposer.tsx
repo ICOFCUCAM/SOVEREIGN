@@ -20,7 +20,7 @@ export const PublishComposer: React.FC<{ listing?: Listing; post?: SocialPost; o
   if (!open || !basePost) return null;
 
   const post: SocialPost = { ...basePost, text, body: text };
-  const toggle = (c: SocialChannel): void => setSel((s) => { const n = new Set(s); n.has(c) ? n.delete(c) : n.add(c); return n; });
+  const toggle = (c: SocialChannel): void => setSel((s) => { const n = new Set(s); if (n.has(c)) n.delete(c); else n.add(c); return n; });
   const chosen = CHANNELS.filter((c) => sel.has(c.id));
 
   const publish = async (): Promise<void> => {

@@ -1,0 +1,49 @@
+# ExitOS console redesign — page inventory and sequence
+
+Order = the route registry `ROUTES` in `src/App.tsx` (the directive: "use the real route registry and page inventory to determine the actual sequence"). Label, roles and plan gate come from `NAV` in `src/lib/access.ts`. One page at a time; each waits for the owner's approval.
+
+| Page | Route | Label (NAV) | Component | Roles | Plan gate | Status |
+|---|---|---|---|---|---|---|
+| 01 | `/console` | Intelligence Terminal | `Terminal` | founder | none | ☑ approved |
+| 02 | `/console/command` (guarded by `/console`) | Liquidity Command | `Dashboard` | founder | none | ☑ approved |
+| 03 | `/console/intake` | Value My Company | `Intake` | founder | none | ☑ approved |
+| 04 | `/console/acquisition-radar` | Acquisition Radar | `AcquisitionRadar` | founder, buyer | none | ☑ done · awaiting final review |
+| 05 | `/console/commander` | Chief Investment Banker | `Commander` | founder | Pro | ☑ done · awaiting final review |
+| 06 | `/console/network` | Network Intelligence | `Network` | founder | Pro | ☑ done · awaiting final review |
+| 07 | `/console/autopilot` | Autonomous Exit | `Autopilot` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 08 | `/console/readiness` | Readiness | `Readiness` | founder | none | ☑ done · awaiting final review |
+| 09 | `/console/exit-timing` | Exit Timing | `ExitTiming` | founder | Pro | ☑ done · awaiting final review |
+| 10 | `/console/wealth` | Liquidity & Transition | `Wealth` | founder | Pro | ☑ done · awaiting final review |
+| 11 | `/console/buyer-copilot` | Buyer Intelligence | `BuyerCopilot` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 12 | `/console/deal-room` | Deal Room (NAV label was "Live Deal Room") | `DealRoom` | founder, buyer | Pro | ☑ done · awaiting final review |
+| 13 | `/console/intelligence` | Acquisition Intelligence (NAV was "Acquisition Radar") | `Intelligence` | founder, buyer | none | ☑ done · awaiting final review |
+| 14 | `/console/data-room` | Data Room | `DataRoom` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 15 | `/console/buyers` | Buyer Profiles | `Buyers` | founder | none | ☑ done · awaiting final review |
+| 16 | `/console/buyer-graph` | Buyer Graph | `BuyerGraph` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 17 | `/console/buyer/:id` (guarded by `/console/buyer-graph`) | Buyer Graph | `BuyerProfile` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 18 | `/console/market-map` | Market Map | `MarketMap` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 19 | `/console/knowledge-graph` | Knowledge Graph | `KnowledgeGraph` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 20 | `/console/outcomes` | Outcome Intelligence | `OutcomeIntelligence` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 21 | `/console/indexes` | Acquisition Indexes | `Indexes` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 22 | `/console/investors` | Cap Table | `Investors` | founder | none | ☑ done · awaiting final review |
+| 23 | `/console/negotiator` | Bid Room | `Negotiator` | founder | Pro | ☑ done · awaiting final review |
+| 24 | `/console/documents` | Documents | `Documents` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 25 | `/console/nda` | NDA Vault / Access Requests | `Nda` | founder, buyer | Pro | ☑ done · awaiting final review |
+| 26 | `/console/pipeline` | Active Processes | `Pipeline` | founder | none | ☑ done · awaiting final review |
+| 27 | `/console/process-intel` | Process Intelligence | `ProcessIntelligence` | founder | Pro | ☑ done · awaiting final review |
+| 28 | `/console/activity` | Deal Activity | `DealActivity` | founder, buyer | none | ☑ done · awaiting final review |
+| 29 | `/console/inbox` | Inbox | `FounderInbox` | founder | none | ☑ done · awaiting final review |
+| 30 | `/console/outreach-plan` | Outreach Plan | `OutreachPlan` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 31 | `/console/engagement-registry` | Engagement Registry | `EngagementRegistry` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 32 | `/console/closing` | Closing Center / Signatures / Escrow | `Closing` | founder | Pro | ☑ done · awaiting final review |
+| 33 | `/console/marketplace` | Anonymous Listings / Browse Opportunities | `Marketplace` | founder, buyer | none | ☑ done · awaiting final review |
+| 34 | `/console/valuation` | Enterprise Value | `Valuation` | founder | none | ☑ done · awaiting final review |
+| 35 | `/console/diligence-ai` | Diligence | `DiligenceAI` | founder | Preparation or Pro | ☑ done · awaiting final review |
+| 36 | `/console/banker` | Outreach | `Banker` | founder | Pro | ☑ done · awaiting final review |
+| 37 | `/console/buyer-portal` | Buyer Home | `BuyerPortal` | buyer | none | ☑ done · awaiting final review |
+| 38 | `/console/calibration` | Calibration | `Calibration` | admin | none | ☑ done · awaiting final review |
+| 39 | `/console/simulator` | Scenario Simulator | `Simulator` | founder | Pro | ☑ done · awaiting final review |
+| 40 | `/console/admin` | Admin Console | `Admin` | admin | none | ☑ done · awaiting final review |
+| 41 | `/console/upgrade` | — | `Upgrade` | any signed-in role | none | ☑ done · awaiting final review |
+
+Notes: `/console/buyer/:id` (Buyer profile) is guarded by the Buyer Graph policy. Public routes (`/`, `/platform`, `/pricing`, `/report/*`) are outside the console and are not in this sequence.

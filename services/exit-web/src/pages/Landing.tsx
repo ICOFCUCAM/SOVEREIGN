@@ -1,606 +1,368 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { MarketingChrome, Glyph, Mark, Arrow } from "../components/MarketingChrome";
-import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, DEAL_INTEL_FMT, REGISTRY_CARDS, TOP_JURISDICTIONS, type BoardTx } from "../lib/market-stats";
-import { useI18n, tLines } from "../lib/i18n";
+import { MarketingChrome, Mark, Arrow, Chapter, Editorial } from "../components/MarketingChrome";
+import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL_FMT, type BoardTx } from "../lib/market-stats";
+import { useI18n } from "../lib/i18n";
+import QuickValue from "../components/QuickValue";
+import Instrument from "../components/Instrument";
+import LedgerTable from "../components/LedgerTable";
+import CountUp from "../components/CountUp";
+import ChapterRail from "../components/ChapterRail";
+import PhoneActionBar from "../components/PhoneActionBar";
+import ProofSection from "../components/ProofSection";
+import ModulePreview from "../components/ModulePreview";
+import SignatureLine from "../components/SignatureLine";
+import AmbientVideo from "../components/AmbientVideo";
+import ExchangeMap from "../components/ExchangeMap";
+import { Note, SourcesSection, type SourceId } from "../components/SourceNotes";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
+import { MODULE_NUMS as N } from "../lib/module-stats";
+
+// Chapter 06: four founder modules in the order a sale uses them. Their stats
+// come from the engines and appear nowhere else on the page (AA5, AA6).
+const HOME_MODULES: ReadonlyArray<[string, string, Record<string, number>]> = [
+  ["Exit Readiness Score", "readiness", { a: N.readinessDimensions, b: N.fixesPriced }],
+  ["Valuation Engine", "valuation", { a: N.methodologies, b: N.reportTypes }],
+  ["Documents", "documents", { a: N.documentKinds }],
+  ["Data Room", "dataRoom", { a: N.diligencePackages, b: N.artifactsIndexed }],
+];
 
 // Public marketing home — the front door to ExitOS, wrapped in the shared
-// marketing chrome (header nav → Platform / Modules / Pricing + footer). The
-// hero carries the coded "Acquisition Command Center" board. Figures are
-// illustrative. Company marks are brand-coloured monogram placeholders.
+// marketing chrome (header nav → Platform / Modules / Pricing + footer).
+// Editorial layout from the index(9) skeleton: an editorial-serif headline
+// beside the coded "Acquisition Command Center" board, a lifecycle band, then
+// numbered chapters on hairline rules. Colours are the locked ExitOS palette.
+// Company marks are brand-coloured monogram placeholders.
+
+const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
+const H2 = "font-editorial text-[clamp(2.25rem,4.6vw,4.25rem)] font-semibold leading-[1.02] tracking-[-0.035em]";
+const BTN = "inline-flex items-center gap-5 px-5 py-3.5 text-[12px] font-semibold transition";
+
+// The hero headline in the editorial serif: an all-caps i18n string reads in
+// sentence case on offset lines, the last line in the accent italic.
+const heroLines = (s: string): string[] =>
+  s.split("\n").map((l, i) => (l === l.toUpperCase() ? (i === 0 ? l.charAt(0) + l.slice(1).toLowerCase() : l.toLowerCase()) : l));
+
+/** Chapter arrivals: each chapter's headline rises into place the first time it
+ *  enters the view. Chapters already in view on load are shown at once; nothing
+ *  is hidden when the reader prefers reduced motion or the observer is missing. */
+const useChapterReveal = (): void => {
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const secs = [...document.querySelectorAll<HTMLElement>('[id^="ch-"]')];
+    for (const el of secs) if (el.getBoundingClientRect().top < innerHeight) el.classList.add("rv-in");
+    document.documentElement.classList.add("rv-on");
+    const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { e.target.classList.add("rv-in"); io.unobserve(e.target); } }, { rootMargin: "0px 0px -15% 0px" });
+    for (const el of secs) if (!el.classList.contains("rv-in")) io.observe(el);
+    return () => { io.disconnect(); document.documentElement.classList.remove("rv-on"); };
+  }, []);
+};
 
 const Landing: React.FC = () => {
+  useChapterReveal();
   const nav = useNavigate();
   const { t } = useI18n();
-  const heroTrust = [
-    { icon: "globe", metric: t("trust.network.m", { n: MARKET_FMT.buyers }), title: t("trust.network.t"), sub: t("trust.network.s", { g: MARKET_FMT.geographies, s: MARKET_FMT.sectors }) },
-    { icon: "lock", metric: "SOC 2", title: t("trust.soc.t"), sub: t("trust.soc.s") },
-    { icon: "users", metric: "100%", title: t("trust.control.t"), sub: t("trust.control.s") },
-    { icon: "check", metric: t("trust.audit.m"), title: t("trust.audit.t"), sub: t("trust.audit.s") },
-  ];
+  const h1 = heroLines(t("hero.h1"));
   return (
     <MarketingChrome active="home">
-      {/* ===== 01 · HERO ===== */}
-      {/* The board is NOT a floating UI card — it is a massive acquisition-
-          exchange display physically mounted inside the trading hall: large,
-          in perspective, with a structural mount, a big soft shadow, a polished
-          floor reflection and ambient light spilling onto the floor. */}
-      <section className="relative overflow-hidden border-b border-slate-200">
-        {/* trading-hall photograph as the hero environment */}
-        <div className="pointer-events-none absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/command-center.png)" }} aria-hidden />
-        {/* architectural framing: ceiling light grid + glass-wall mullions +
-            floor sheen, to read as an exchange hall rather than a stock office */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-40" aria-hidden
-          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(255,255,255,0.5) 0 2px, transparent 2px 96px)", maskImage: "linear-gradient(to bottom, #000, transparent)", WebkitMaskImage: "linear-gradient(to bottom, #000, transparent)" }} />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-2/3 opacity-[0.12]" aria-hidden
-          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(40,70,110,0.6) 0 1px, transparent 1px 140px), repeating-linear-gradient(0deg, rgba(40,70,110,0.4) 0 1px, transparent 1px 180px)" }} />
-        {/* sovereign data layer — a near-invisible transaction heat field rising
-            from the floor of the hall; reads as depth, not decoration */}
-        <div className="pointer-events-none absolute bottom-0 right-0 h-2/3 w-3/5 opacity-[0.07]" aria-hidden
-          style={{
-            backgroundImage: "repeating-linear-gradient(90deg, rgba(56,130,246,0.9) 0 10px, transparent 10px 34px)",
-            maskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 80%)",
-            WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.9), transparent 80%)",
-          }} />
-        {/* wash: strong on the left for the headline, light on the right so the
-            hall (desks, analysts, windows) stays visible around the board. */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/92 from-5% via-white/45 via-40% to-white/5" aria-hidden />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#eef2f7] via-[#eef2f7]/70 to-transparent" aria-hidden />
-        {/* floor sheen + ambient light the board emits onto the floor */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 opacity-50" aria-hidden style={{ background: "linear-gradient(to top, rgba(255,255,255,0.5), transparent)" }} />
-        <div className="pointer-events-none absolute bottom-[8%] right-[6%] h-48 w-[48%] rounded-[50%] opacity-25 blur-3xl" style={{ background: "radial-gradient(ellipse at center, rgba(70,150,220,0.22), rgba(70,150,220,0) 70%)" }} aria-hidden />
-
-        {/* proof ribbon — institutional authority above the fold (real figures) */}
-        <div className="relative border-b border-slate-200/70 bg-white/70 backdrop-blur">
-          <div className="mx-auto grid max-w-[1480px] grid-cols-2 divide-x divide-slate-200/70 px-6 lg:grid-cols-4 lg:px-10">
+      <ChapterRail />
+      <PhoneActionBar />
+      <div className="relative">
+        <SignatureLine />
+      {/* ===== 01 · HERO — the deal atlas (Z1/Z2, after the owner's index(8).html, on the homepage spec) ===== */}
+      <section id="ch-01" className="text-white" style={{ background: "linear-gradient(180deg,#030a15 0%,#06182E 70%,#05101f 100%)" }}>
+        <div className={`${WRAP} pt-8`}>
+          <div className="flex justify-between gap-6 border-b border-white/20 pb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-blue-100/75">
+            <span>{t("hero.eyebrow")}</span><span className="flex items-center justify-end gap-2 text-right"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</span>
+          </div>
+          <div className="grid items-end gap-10 py-12 sm:py-14 lg:grid-cols-[minmax(0,1.4fr)_minmax(270px,0.6fr)] lg:gap-[6%] lg:py-16">
+            <h1 className="max-w-[12ch] font-editorial text-[clamp(3.4rem,8.4vw,8.8rem)] font-semibold leading-[0.9] tracking-[-0.05em]">
+              {h1.map((l, i) => i === h1.length - 1
+                ? <em key={i} className="block italic text-blue-300">{l}</em>
+                : <span key={i}>{l} </span>)}
+            </h1>
+            <div className="max-w-[420px] border-l border-blue-300/60 pl-6">
+              <p className="font-editorial text-[20px] leading-snug text-blue-50/90">{t("hero.sub")}</p>
+              <p className="mt-3 text-[14.5px] leading-relaxed text-blue-100/75">{t("hero.body")}</p>
+              <div className="mt-7 flex flex-wrap gap-2.5">
+                <button onClick={() => nav("/console")} className={`${BTN} bg-white text-ink-900 hover:bg-blue-50`}>{t("nav.access")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={`${BTN} border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("hero.deploy")} <span aria-hidden>↗</span></button>
+              </div>
+            </div>
+          </div>
+          {/* 01 / discover the field — the sale process as a route across the market */}
+          <ExchangeMap dark interactive />
+          {/* the proof figures, as the homepage has always set them: serif numerals, a label, the source note */}
+          <div className="grid grid-cols-3">
             {[
               [MARKET_INDEX_FMT.events, t("ribbon.deals")],
               [MARKET_FMT.buyers, t("ribbon.mandates")],
               [HISTORY_FMT.disclosedValue, t("ribbon.value")],
-              [MARKET_FMT.activeMandates, t("ribbon.deploying")],
             ].map(([v, l], i) => (
-              <div key={l} className="flex items-baseline gap-2.5 px-4 py-2.5">
-                {i === 3 && <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />}
-                <span className="font-mono text-[15px] font-bold tabular-nums text-ink-900">{v}</span>
-                <span className="text-[11px] leading-tight text-slate-500">{l}</span>
+              <div key={l} className={`relative py-7 pr-3 ${i ? "border-l border-white/15 pl-3 sm:pl-6" : ""}`}>
+                <span aria-hidden className={`hero-rule absolute top-0 h-[2px] bg-blue-400 ${i ? "left-3 right-3 sm:left-6" : "left-0 right-3"}`} style={{ animationDelay: `${0.2 + i * 0.15}s` }} />
+                <div className="font-editorial text-[clamp(2.1rem,4.4vw,4rem)] font-semibold leading-none tracking-[-0.03em]"><CountUp value={v} /></div>
+                <div className="mt-2.5 text-[13px] text-blue-100/80">{l}<Note n={([1, 2, 3] as SourceId[])[i]} first dark /></div>
               </div>
             ))}
           </div>
         </div>
+      </section>
 
-        <div className="relative mx-auto grid max-w-[1480px] items-center gap-8 px-6 py-16 lg:grid-cols-[0.9fr_1.3fr] lg:px-10 lg:py-20">
-          <div className="lg:pr-2">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-300/70 bg-white/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-500" /> {t("hero.eyebrow")}
-            </div>
-            <h1 className="font-serif text-3xl font-bold leading-[1.04] tracking-tight text-ink-900 sm:text-4xl lg:text-5xl">
-              {tLines(t("hero.h1"))}
-            </h1>
-            <p className="mt-6 max-w-md font-serif text-xl font-semibold leading-snug text-ink-900">
-              {t("hero.sub")}
-            </p>
-            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-slate-600">
-              {t("hero.body")}
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-ink-800">{t("nav.access")} <Arrow /></button>
-              <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white/80 px-6 py-3 text-sm font-semibold text-ink-900 backdrop-blur transition hover:border-slate-400 hover:bg-white">{t("hero.deploy")}</button>
-            </div>
+      {/* ===== 02 · THE EXCHANGE — the screen installed in the trading hall ===== */}
+      <section id="ch-02" aria-labelledby="hall-h">
+        <Instrument head={
+          <div className={`${WRAP} relative pb-16 pt-20 text-white`}>
+            <Chapter n="02" dark>{t("hall.eyebrow")}</Chapter>
+            <h2 id="hall-h" className="rv-h mt-5 max-w-[18ch] font-editorial text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.04em]">{t("hall.h2")} <em className="italic text-blue-300">{t("hall.h2em")}</em></h2>
           </div>
-
-          {/* ---- MOUNTED ACQUISITION-EXCHANGE DISPLAY ---- */}
-          {/* pushed right + up, clear of the headline, with a light floor shadow */}
-          <div className="min-w-0 lg:translate-x-16 lg:-translate-y-6" style={{ perspective: "2000px" }}>
-            <div className="relative">
-              {/* structural mount / bezel behind the screen — the 3D mount
-                  rotation applies only at lg+; phones get the flat board */}
-              <div
-                className="ex-bezel relative rounded-[20px] p-2.5"
-                style={{
-                  background: "linear-gradient(145deg,#1c2c44,#0a1626)",
-                  boxShadow: "0 28px 48px -30px rgba(8,20,40,0.32), 0 10px 22px -18px rgba(8,20,40,0.26), inset 0 1px 0 rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                }}
-              >
-                {/* Bloomberg-style exchange ribbon */}
-                <div className="mb-1.5 flex items-center justify-between gap-3 rounded-md bg-black/25 px-3 py-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/90">ExitOS Acquisition Exchange</span>
-                    <span className="hidden items-center gap-1 rounded-sm bg-emerald-400/15 px-1.5 py-0.5 sm:inline-flex">
-                      <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-400" />
-                      <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live Market</span>
-                    </span>
-                    <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-white/45 md:inline">{MARKET_FMT.activeMandates} mandates deploying · {MARKET_FMT.appetite} capacity · data as of {DATA_AS_OF}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/40">System Status</span>
-                    <span className="relative inline-flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    </span>
-                    <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live</span>
-                  </div>
-                </div>
-                {/* live deal-activity ticker (motion layer) */}
-                <CommandBoard />
-              </div>
-
-              {/* polished-floor reflection of the screen (lg+ only) */}
-              <div
-                aria-hidden
-                className="ex-reflection pointer-events-none absolute inset-x-0 top-full hidden h-28 overflow-hidden lg:block"
-                style={{
-                  opacity: 0.07,
-                  filter: "blur(4px)",
-                  WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
-                  maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 70%)",
-                  background: "linear-gradient(180deg,#0a1626,#08203B)",
-                }}
-              />
+        }>
+          {/* the screen: exchange ribbon + board, content unchanged */}
+          <div data-hall-screen className="rounded-[6px] bg-[#0a1626] p-1.5">
+          {/* Bloomberg-style exchange ribbon */}
+          <div className="mb-1.5 flex items-center justify-between gap-3 rounded-md bg-black/25 px-3 py-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/90">ExitOS Acquisition Exchange</span>
+              <span className="hidden items-center gap-1 rounded-sm bg-emerald-400/15 px-1.5 py-0.5 sm:inline-flex">
+                <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-400" />
+                <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live Market</span>
+              </span>
+              <span className="hidden font-mono text-[9px] uppercase tracking-[0.14em] text-white/45 md:inline">{MARKET_FMT.activeMandates} mandates deploying · {MARKET_FMT.appetite} capacity · data as of {DATA_AS_OF}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/40">System Status</span>
+              <span className="relative inline-flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              </span>
+              <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">Live</span>
             </div>
           </div>
-        </div>
-
-        {/* trust strip — 4 institutional metric cards, one full-width row */}
-        <div className="relative border-t border-slate-200/70 bg-white/55 backdrop-blur">
-          <div className="mx-auto grid max-w-[1480px] grid-cols-2 gap-px overflow-hidden px-6 lg:grid-cols-4 lg:px-10">
-            {heroTrust.map((c) => (
-              <div key={c.title} className="group flex items-center gap-3.5 px-5 py-5 transition hover:bg-white">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={c.icon} /></span>
-                <div className="min-w-0">
-                  <div className="font-serif text-xl font-bold leading-none text-ink-900">{c.metric}</div>
-                  <div className="mt-1 text-[12.5px] font-semibold leading-tight text-ink-800">{c.title}</div>
-                  <div className="text-[11px] leading-snug text-slate-500">{c.sub}</div>
-                </div>
-              </div>
-            ))}
+          {/* live deal-activity ticker (motion layer) */}
+          <CommandBoard />
           </div>
-        </div>
+        </Instrument>
         <style>{`
           @keyframes exTicker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+          @keyframes heroRule{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+          .rv-on .rv-h{transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1s cubic-bezier(.2,.7,.2,1)}
+          .rv-on [id^="ch-"]:not(.rv-in) .rv-h{opacity:0;transform:translateY(30px)}
+          main h1,main h2,main h3{text-wrap:balance}
+          main p{text-wrap:pretty;hanging-punctuation:first last}
+          main p.font-editorial{font-variant-numeric:oldstyle-nums proportional-nums}
+          @media (prefers-reduced-motion: no-preference){.hero-rule{transform-origin:left;animation:heroRule .9s cubic-bezier(.2,.7,.2,1) both}}
           @keyframes exScan{0%{transform:translateY(-100%);opacity:0}8%{opacity:1}50%{opacity:.5}92%{opacity:1}100%{transform:translateY(2000%);opacity:0}}
           @keyframes exFlash{0%,100%{background:transparent}50%{background:rgba(96,165,250,.10)}}
           @keyframes exTravel{0%{left:0;opacity:0}6%{opacity:1}94%{opacity:1}100%{left:100%;opacity:0}}
         `}</style>
       </section>
 
-      {/* ===== 1A · ACQUISITION LIFECYCLE RAIL ===== */}
-      <section className="border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
-        <div className="mx-auto max-w-[1480px] px-6 py-9 lg:px-10">
-          <div className="flex items-center justify-between">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-300">{t("lifecycle.title")}</div>
-            <div className="hidden items-center gap-1.5 sm:flex">
-              <span className="relative inline-flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" /></span>
-              <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-300">{t("lifecycle.live")}</span>
+      {/* ===== 03 · VALUE YOUR COMPANY — the working product moment ===== */}
+      <QuickValue />
+
+      {/* ===== 04 · THE THESIS — one statement, set like a front page ===== */}
+      <section id="ch-04" className="border-b border-slate-200 bg-[#f6f8fb]">
+        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
+          <Chapter n="04">{t("loss.eyebrow")}</Chapter>
+          <h2 className="rv-h mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
+          <div className="mt-12 grid gap-10 border-t-4 border-double border-ink-900 pt-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] lg:gap-[5vw]">
+            <p className="max-w-md text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-blue-700">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
+            {/* comparison matrix, set as a broadsheet table */}
+            <div role="region" aria-label="Traditional sale compared with ExitOS" tabIndex={0} className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+              <table className="w-full min-w-[620px] text-left">
+                <thead>
+                  <tr className="border-b border-ink-900 font-mono text-[10.5px] uppercase tracking-[0.14em]">
+                    <th scope="col" className="py-3 pr-4 font-semibold text-slate-600"><span className="sr-only">Dimension</span></th>
+                    <th scope="col" className="border-l border-slate-300 px-4 py-3 font-semibold text-slate-600">Traditional Sale</th>
+                    <th scope="col" className="border-l border-slate-300 px-4 py-3 font-semibold text-ink-900">With ExitOS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {LOSSES.map((l) => (
+                    <tr key={l.problem} className="border-b border-slate-300 last:border-0">
+                      <th scope="row" className="py-4 pr-4 align-top font-editorial text-[19px] font-semibold text-ink-900">{l.dimension}</th>
+                      <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] text-slate-600"><span className="mr-1.5 text-red-600" aria-hidden>✕</span>{l.problem}</td>
+                      <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] font-medium text-ink-900"><span className="mr-1.5 text-blue-700" aria-hidden>✓</span>{l.fix}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
-          {/* one animated rail: a traveling pulse runs the full lifecycle */}
-          <div className="relative mt-7">
-            <div className="pointer-events-none absolute left-0 right-0 top-[11px] hidden h-px lg:block" style={{ background: "linear-gradient(90deg, transparent, rgba(96,165,250,.45) 6%, rgba(96,165,250,.45) 94%, transparent)" }} />
-            <div className="pointer-events-none absolute top-[7px] hidden h-2 w-2 rounded-full lg:block" style={{ background: "#7CFF9F", boxShadow: "0 0 8px 2px rgba(124,255,159,.8)", animation: "exTravel 7s linear infinite" }} />
-            <ol className="grid grid-cols-2 gap-y-6 sm:grid-cols-4 lg:grid-cols-8">
-              {LIFECYCLE.map(([s, w], i) => (
-                <li key={s} className="relative flex flex-col items-center text-center">
-                  <span className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#0A1F3A] font-mono text-[10px] font-bold text-blue-200 ring-1 ring-blue-400/40">{i + 1}</span>
-                  <span className="mt-2.5 px-1 text-[11px] font-semibold leading-tight text-white/85">{t(s)}</span>
-                  <span className="mt-0.5 font-mono text-[9px] uppercase tracking-wide text-blue-300/60">{w}</span>
-                </li>
-              ))}
-            </ol>
           </div>
         </div>
       </section>
 
-      {/* ===== 1B · MARKET STRUCTURE — the counterparties on the exchange ===== */}
-      <section id="solutions" className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-12 lg:px-10">
-          <div className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">{t("ms.eyebrow")}</div>
-          {/* horizontal institutional network — nodes joined by connecting lines */}
-          <div className="mt-8 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center">
-            {ECOSYSTEM.map((e, i) => (
-              <React.Fragment key={e.label}>
-                <div className="group flex flex-1 flex-col items-center rounded-lg border border-slate-200 bg-white px-3 py-4 text-center transition hover:border-blue-300">
-                  <span className="flex h-10 w-10 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={e.icon} small /></span>
-                  <div className="mt-2.5 text-[12px] font-semibold text-ink-800">{t(e.label)}</div>
-                  <div className="mt-0.5 text-[10px] text-slate-400">{t(e.meta, { n: e.n })}</div>
+      {/* ===== 05 · THE TRANSACTION RECORD — the ledger ===== */}
+      <section id="ch-05" className="border-b border-slate-200 bg-white">
+        <div className={`${WRAP} py-14 sm:py-20 lg:py-24`}>
+          <div>
+            <Chapter n="05">{t("rec.eyebrow")}</Chapter>
+            <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
+              <h2 className={`rv-h ${H2} max-w-[20ch] text-ink-900`}><Editorial text={t("rec.h2")} /></h2>
+              <p className="max-w-xs text-[13px] leading-relaxed text-slate-600">{t("rec.body")}</p>
+            </div>
+          </div>
+
+          {/* masthead */}
+          <div className="mt-12 border-t-4 border-double border-ink-900 pt-3">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-ink-900 pb-3">
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Disclosed acquisitions</span>
+              <span className="font-editorial text-[clamp(1.6rem,3vw,2.4rem)] font-semibold uppercase tracking-[0.06em] text-ink-900">The ExitOS Ledger</span>
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600">Index as of {MARKET_INDEX_FMT.asOf} · {HISTORY_FMT.events} recorded deals, {LEDGER_PRICED} priced<Note n={3} /></span>
+            </div>
+          </div>
+
+          {/* front page — the three latest deals */}
+          <div className="grid border-b border-ink-900 sm:grid-cols-3">
+            {LEDGER_ROWS.slice(0, 3).map((c, i) => (
+              <article key={c.target} className={`py-7 pr-6 ${i > 0 ? "sm:border-l sm:border-slate-300 sm:pl-6" : ""} border-b border-slate-200 last:border-b-0 sm:border-b-0`}>
+                <div className="flex items-baseline justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-600">
+                  <span>{c.sector}</span><time dateTime={c.date}>{c.date}</time>
                 </div>
-                {i < ECOSYSTEM.length - 1 && (
-                  <div className="flex shrink-0 items-center justify-center text-blue-300">
-                    <span className="hidden h-px w-6 bg-blue-200 lg:block" /><span className="px-1 lg:px-0">&rarr;</span><span className="hidden h-px w-6 bg-blue-200 lg:block" />
-                  </div>
-                )}
-              </React.Fragment>
+                <h3 className="mt-4 font-editorial text-[clamp(1.4rem,2.2vw,1.9rem)] font-semibold leading-[1.1] text-ink-900">
+                  {c.buyer} <span className="italic text-blue-700">{c.status === "Closed" ? "acquired" : c.status === "Terminated" ? "ended its deal for" : "agreed to acquire"}</span> {c.target}
+                </h3>
+                <div className="mt-5 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-ink-900">{c.value}</div>
+                <div className="mt-2 text-[12px] text-slate-600">Disclosed value</div>
+                <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 text-[11px]">
+                  <div><dt className="text-slate-600">vs reference</dt><dd className="font-mono text-[14px] font-bold text-blue-700">{c.premium}</dd></div>
+                  <div><dt className="text-slate-600">Status</dt><dd className="font-mono text-[14px] font-bold" style={{ color: c.statusColor }}>{c.status}</dd></div>
+                  <div><dt className="text-slate-600">Source</dt><dd className="font-mono text-[12px] font-semibold text-ink-900">{c.sources[0]?.kind ?? "—"}</dd></div>
+                </dl>
+              </article>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* ===== ROW 5 · PIPELINE / WORKFLOW — futuristic horizontal stepper ===== */}
-      <section id="platform" className="relative overflow-hidden border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 55%,#0B2547 100%)" }}>
-        {/* ambient grid + glow */}
-        <div className="pointer-events-none absolute inset-0 opacity-[0.18]" aria-hidden
-          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(120,170,255,0.5) 0 1px, transparent 1px 120px), repeating-linear-gradient(0deg, rgba(120,170,255,0.35) 0 1px, transparent 1px 120px)", maskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 75%)" }} />
-        <div className="pointer-events-none absolute -top-20 left-1/2 h-48 w-[60%] -translate-x-1/2 rounded-[50%] opacity-30 blur-[90px]" aria-hidden style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.28), transparent 70%)" }} />
-
-        <div className="relative mx-auto max-w-[1320px] px-6 py-20 lg:px-10">
-          <div className="max-w-3xl">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">{t("wf.eyebrow")}</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-white sm:text-[2.4rem]">{t("wf.h2")}</h2>
-          </div>
-
-          {/* 6 steps — one horizontal row, connected by a glowing rail */}
-          <div className="relative mt-14">
-            <div className="pointer-events-none absolute left-0 right-0 top-7 hidden h-px lg:block" aria-hidden style={{ background: "linear-gradient(90deg, transparent, rgba(96,165,250,0.55) 12%, rgba(96,165,250,0.55) 88%, transparent)" }} />
-            <ol className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
-              {STEPS.map((st, i) => (
-                <li key={st.title} className="relative flex flex-col items-center text-center">
-                  <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-lg text-white shadow-lg"
-                    style={{ background: "linear-gradient(145deg,#1b3a66,#0c244a)", boxShadow: "0 0 0 1px rgba(120,170,255,0.25), 0 8px 24px -10px rgba(56,130,246,0.7), inset 0 1px 0 rgba(255,255,255,0.12)" }}>
-                    <Glyph name={st.icon} />
-                    <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 font-mono text-[9px] font-bold text-white ring-2 ring-[#0A1F3A]">{i + 1}</span>
-                  </span>
-                  <div className="mt-4 text-[13.5px] font-bold text-white">{st.title}</div>
-                  <div className="mt-1.5 text-[11.5px] leading-snug text-blue-100/55">{st.body}</div>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          {/* Founder → Exit — compact horizontal flow */}
-          <div className="mt-16 flex flex-wrap items-center justify-center gap-x-2 gap-y-3 rounded-lg border border-white/10 bg-white/[0.04] px-5 py-4 backdrop-blur">
-            {EXCHANGE_FLOW.map((s, i) => (
-              <React.Fragment key={s.title}>
-                <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 ring-1 ring-blue-400/30"><Glyph name={s.icon} small /></span>
-                  <span className="text-[12px] font-semibold text-white/85">{s.title}</span>
-                </div>
-                {i < EXCHANGE_FLOW.length - 1 && <span className="px-1 text-blue-300/50" aria-hidden>→</span>}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 04 · BUYER INTELLIGENCE ===== */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("bi.eyebrow")}</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("bi.h2"))}</h2>
-            <Link to="/console" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("bi.link")} &rarr;</Link>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {BUYERS.map((b) => (
-                <div key={b.name} className="rounded-md border border-slate-200 bg-white p-5 transition hover:border-blue-300">
-                  <div className="flex items-center gap-2.5">
-                    <Mark name={b.name} />
-                    <div>
-                      <div className="text-sm font-bold leading-tight text-ink-900">{b.name}</div>
-                      <div className="text-[10px] text-slate-400">{b.kind}</div>
-                    </div>
-                  </div>
-                  {/* appetite meter */}
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-slate-400">Acquisition Appetite</span>
-                      <span className="font-semibold text-blue-600">{b.appetite >= 90 ? "Very High" : "High"}</span>
-                    </div>
-                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                      <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-600" style={{ width: `${b.appetite}%` }} />
-                    </div>
-                  </div>
-                  <dl className="mt-3 space-y-2 text-[11px]">
-                    {b.rows.map((r) => (
-                      <div key={r[0]} className="flex items-baseline justify-between gap-2 border-t border-slate-100 pt-2">
-                        <dt className="text-slate-400">{r[0]}</dt>
-                        <dd className="text-right font-semibold text-ink-800">{r[1]}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 05 · DATA PROVENANCE — where every number comes from ===== */}
-      <section className="border-b border-slate-200">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
-          <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("prov.eyebrow")}</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("prov.h2"))}</h2>
-              <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
-                {t("prov.body")}
-              </p>
-              <div className="mt-6 space-y-2.5">
-                {PROVENANCE_PIPELINE.map((p, i) => (
-                  <div key={p.stage} className="flex items-center gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink-900 font-mono text-[10px] font-bold text-white">{i + 1}</span>
-                    <span className="text-[13px] font-semibold text-ink-800">{p.stage}</span>
-                    <span className="h-px flex-1 bg-slate-200" aria-hidden />
-                    <span className="text-[11.5px] text-slate-500">{p.detail}</span>
-                  </div>
-                ))}
+          <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+          {/* the ledger table: searchable, filterable, sortable */}
+          <LedgerTable />
+          <aside aria-labelledby="ledger-read" className="self-start border-t-4 border-double border-ink-900 pt-3 lg:sticky lg:top-24">
+            <h3 id="ledger-read" className="font-editorial text-[18px] font-semibold text-ink-900">{t("ledger.read")}</h3>
+          {/* confidence-tier register */}
+            <div className="border-y border-ink-900">
+              <div className="flex items-center justify-between border-b border-slate-200 py-3">
+                <span className="text-[13px] font-semibold text-ink-900">Confidence register</span>
+                <span className="text-[12px] text-slate-600">applied to every estimate</span>
               </div>
-            </div>
-            {/* confidence-tier register */}
-            <div className="overflow-hidden rounded-lg border border-slate-200">
-              <div className="flex items-center justify-between bg-ink-900 px-5 py-3">
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white">Confidence register</span>
-                <span className="text-[10px] uppercase tracking-wide text-white/50">applied to every estimate</span>
-              </div>
-              {CONFIDENCE_TIERS.map((t, i) => (
-                <div key={t.tier} className={"grid grid-cols-[110px_1fr] gap-4 px-5 py-4 " + (i % 2 ? "bg-slate-50/60" : "bg-white")}>
+              {CONFIDENCE_TIERS.map((ct) => (
+                <div key={ct.tier} className="grid grid-cols-[110px_1fr] gap-4 border-b border-slate-200 py-4 last:border-0">
                   <div>
-                    <span className="inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1" style={{ color: t.color, background: `${t.color}14`, borderColor: `${t.color}40` }}>{t.tier}</span>
+                    <span className="inline-block px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide ring-1" style={{ color: ct.color, background: `${ct.color}14`, borderColor: `${ct.color}40` }}>{ct.tier}</span>
                   </div>
                   <div>
-                    <div className="text-[13px] font-semibold text-ink-900">{t.basis}</div>
-                    <div className="mt-0.5 text-[12px] leading-snug text-slate-500">{t.detail}</div>
+                    <div className="text-[13px] font-semibold text-ink-900">{ct.basis}</div>
+                    <div className="mt-0.5 text-[12px] leading-snug text-slate-600">{ct.detail}</div>
                   </div>
                 </div>
               ))}
-              <div className="border-t border-slate-200 bg-slate-50 px-5 py-3 text-[11px] text-slate-500">
-                {HISTORY_FMT.events} disclosed events on record · sources: SEC EDGAR 8-K filings, Wikidata, press disclosures · refreshed with the registry
+              <div className="border-t border-slate-200 py-3 text-[11px] text-slate-600">
+                Sources: SEC EDGAR 8-K filings, Wikidata, press disclosures · refreshed with the registry<Note n={3} />
               </div>
             </div>
+          </aside>
           </div>
-          {/* dense signal grid — one full-width row of live readouts */}
-          <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {COMMAND_FEATURES.map((f) => (
-              <div key={f.title} className="rounded-md border border-slate-200 bg-white p-4 transition hover:border-blue-300">
-                <div className="flex items-center justify-between">
-                  <span className="flex h-7 w-7 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={f.icon} small /></span>
-                  <span className="font-mono text-[14px] font-bold text-ink-900">{f.value}</span>
-                </div>
-                <div className="mt-2.5 text-[12px] font-bold leading-tight text-ink-900">{f.title}</div>
-                <div className="text-[10.5px] leading-snug text-slate-500">{f.body}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 06 · DATA ROOM INFRASTRUCTURE ===== */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
-          {/* heading + a short, half-height vault panel on the right */}
-          <div className="grid items-center gap-10 lg:grid-cols-[1.4fr_1fr]">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("dr.eyebrow")}</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("dr.h2"))}</h2>
-              <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-600">{t("dr.body")}</p>
-              <Link to="/platform" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("dr.link")} &rarr;</Link>
-              {/* security posture row */}
-              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[11px] text-slate-500">
-                {[["lock", "Permission controls"], ["check", "Full audit trails"], ["shield", "Access logs"]].map(([ic, t]) => (
-                  <span key={t} className="flex items-center gap-1.5"><span className="text-blue-600"><Glyph name={ic} small /></span>{t}</span>
-                ))}
-              </div>
-            </div>
-            <div className="flex h-32 items-center justify-center rounded-lg bg-gradient-to-br from-[#0B2947] to-[#06182E]"><Vault /></div>
-          </div>
-
-          {/* 6 document categories — one full-width row */}
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {DATA_ROOMS.map((d) => (
-              <div key={d.title} className="rounded-md border border-slate-200 bg-white p-3.5 transition hover:border-blue-300">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-ink-700"><Glyph name={d.icon} small /></span>
-                <div className="mt-2.5 text-[12px] font-semibold leading-tight text-ink-800">{d.title}</div>
-                <div className="mt-2 flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-wide text-slate-400">
-                  <span className="flex items-center gap-1 text-emerald-600"><span className="h-1 w-1 rounded-full bg-emerald-500" /> Secured</span>
-                  <span className="text-slate-300">·</span><span>Audit trail</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 07 · NEGOTIATION ENGINE ===== */}
-      <section className="border-b border-slate-200">
-        <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <div className="grid flex-1 items-start gap-10 lg:grid-cols-[1.25fr_1fr]">
-            <OfferTable />
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("neg.eyebrow")}</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("neg.h2"))}</h2>
-              <p className="mt-3 text-base leading-relaxed text-slate-600">{t("neg.body")}</p>
-              <Link to="/modules" className="mt-3 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("neg.link")} &rarr;</Link>
-              <ul className="mt-7 space-y-5">
-                {NEGOTIATION_FEATURES.map((f) => (
-                  <li key={f.title} className="flex gap-3">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded bg-slate-100 text-ink-700 ring-1 ring-slate-200"><Glyph name={f.icon} small /></span>
-                    <div>
-                      <div className="text-sm font-bold text-ink-900">{f.title}</div>
-                      <div className="text-[12px] text-slate-500">{f.body}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 08 · EXIT MARKETPLACE ===== */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-[1320px] items-start gap-8 px-6 py-16 lg:px-10">
-          <div className="flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("mp.eyebrow")}</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("mp.h2"))}</h2>
-            <p className="mt-3 max-w-md text-[13px] leading-relaxed text-slate-500">{t("mp.body")}</p>
-            <a href="/marketplace" className="mt-4 inline-block text-[13px] font-semibold text-blue-600 hover:text-blue-700">{t("mp.link")} &rarr;</a>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {OPPORTUNITIES.map((o) => (
-                <div key={o.name} className="rounded-md border border-slate-200 bg-white p-5 transition hover:border-blue-300">
-                  <div className="flex items-center justify-between">
-                    <div className="inline-block rounded bg-blue-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">{o.sector}</div>
-                    <span className="text-[9.5px] font-semibold uppercase tracking-wide text-slate-400">{o.stage}</span>
-                  </div>
-                  <div className="mt-3 font-mono text-sm font-bold tracking-tight text-ink-900">{o.name}</div>
-                  <div className="mt-1 text-[10px] text-slate-400">Anonymized listing &middot; {o.region}</div>
-                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 text-[11px]">
-                    <div><div className="text-slate-400">Revenue band</div><div className="font-semibold text-ink-800">{o.rev}</div></div>
-                    <div className="text-right"><div className="text-slate-400">EBITDA band</div><div className="font-semibold text-ink-800">{o.ebitda}</div></div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-                    <span className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500"><Glyph name="lock" small /> Identity &amp; ask under NDA</span>
-                    <a href="/console" className="text-[12px] font-semibold text-blue-600 hover:text-blue-700">Request NDA &rarr;</a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 09 · GLOBAL REACH ===== */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto grid max-w-[1320px] items-center gap-0 lg:grid-cols-[1.05fr_1.35fr]">
-          {/* blue acquisition-network world map panel */}
-          <div className="relative overflow-hidden lg:rounded-r-2xl" style={{ background: "linear-gradient(135deg,#0a2a52 0%,#05182f 60%,#081f3a 100%)" }}>
-            <div className="px-6 py-12 lg:px-10 lg:py-16">
-              <WorldDots />
-            </div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent lg:block" aria-hidden />
-          </div>
-          {/* headline + inline stats */}
-          <div className="px-6 py-14 lg:px-12 lg:py-20">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("cov.eyebrow")}</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{tLines(t("cov.h2"))}</h2>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-slate-600">
-              {t("cov.body", { g: MARKET_FMT.geographies })}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-1.5">
-              {TOP_JURISDICTIONS.map(([code, n]) => (
-                <span key={code} className="inline-flex items-baseline gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 font-mono text-[11px] font-bold text-ink-800">
-                  {code} <span className="text-[9.5px] font-medium text-slate-400">{n} mandates</span>
-                </span>
-              ))}
-            </div>
-            <div className="mt-10 grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-4">
-              {GLOBAL_STATS.map((s) => (
-                <div key={s.label}>
-                  <div className="font-serif text-3xl font-bold tabular-nums text-ink-900">{s.value}</div>
-                  <div className="mt-1 text-[12px] text-slate-500">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 9B · WHY FOUNDERS LOSE MILLIONS ===== */}
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-[1100px] px-6 py-16 lg:px-10">
-          <div className="text-center">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("loss.eyebrow")}</div>
-            <h2 className="mt-3 font-serif text-[2rem] font-bold leading-tight tracking-tight text-ink-900">{t("loss.h2")}</h2>
-            <p className="mx-auto mt-3 max-w-xl text-[13.5px] leading-relaxed text-slate-500">
-              {t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}
-            </p>
-          </div>
-          {/* comparison matrix: Traditional vs ExitOS — horizontally scrollable
-              on phones so the three columns stay readable */}
-          <div className="mt-10 overflow-x-auto rounded-lg border border-slate-200">
-            <div className="min-w-[620px]">
-            <div className="grid grid-cols-[1.1fr_1fr_1fr]">
-              <div className="bg-slate-50 px-5 py-4" />
-              <div className="bg-slate-100 px-5 py-4 text-center text-[12px] font-bold uppercase tracking-wide text-slate-500">Traditional Sale</div>
-              <div className="bg-ink-900 px-5 py-4 text-center text-[12px] font-bold uppercase tracking-wide text-white">With ExitOS</div>
-            </div>
-            {LOSSES.map((l, i) => (
-              <div key={l.problem} className={"grid grid-cols-[1.1fr_1fr_1fr] " + (i % 2 ? "bg-white" : "bg-slate-50/40")}>
-                <div className="flex items-center px-5 py-4 text-[13px] font-semibold text-ink-800">{l.dimension}</div>
-                <div className="flex items-center gap-2 border-l border-slate-100 px-5 py-4 text-[12.5px] text-slate-500">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500"><Glyph name="x" small /></span>{l.problem}
-                </div>
-                <div className="flex items-center gap-2 border-l border-slate-100 bg-blue-50/30 px-5 py-4 text-[12.5px] font-medium text-ink-800">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600"><Glyph name="check" small /></span>{l.fix}
-                </div>
-              </div>
-            ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 9C · PROOF · DISCLOSED TRANSACTION RECORD ===== */}
-      <section className="border-b border-slate-200 bg-[#f6f8fb]">
-        <div className="mx-auto max-w-[1320px] px-6 py-16 lg:px-10">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("rec.eyebrow")}</div>
-              <h2 className="mt-3 font-serif text-[2rem] font-bold tracking-tight text-ink-900">{t("rec.h2")}</h2>
-            </div>
-            <p className="max-w-sm text-[13px] leading-relaxed text-slate-500">{t("rec.body")}</p>
-          </div>
-          <div className="mt-10 grid gap-5 sm:grid-cols-3">
-            {TRANSACTIONS.slice(0, 3).map((c) => (
-              <div key={c.company} className="rounded-lg border border-slate-200 bg-white px-6 py-8 text-center transition">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">{c.industry}</div>
-                <div className="mt-4 text-[11px] font-medium uppercase tracking-wide text-slate-500">{c.company} &mdash; acquired by</div>
-                <div className="mt-1 flex items-center justify-center gap-2 text-base font-bold text-ink-900"><Mark name={c.buyer} size={20} />{c.buyer}</div>
-                <div className="mx-auto my-5 h-px w-12 bg-slate-200" />
-                <div className="font-serif text-4xl font-bold tabular-nums text-ink-900">{c.offer}</div>
-                <div className="mt-1 text-[11px] uppercase tracking-[0.2em] text-slate-400">Disclosed Value</div>
-                <div className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 pt-5 text-[11px]">
-                  <div><div className="font-serif text-[15px] font-bold text-blue-600">{c.premium.replace(/ vs reference$/, "")}</div><div className="mt-0.5 text-slate-400">vs reference</div></div>
-                  <div><div className="font-serif text-[15px] font-bold text-ink-900">{c.status}</div><div className="mt-0.5 text-slate-400">Status</div></div>
-                  <div><div className="font-serif text-[15px] font-bold text-ink-900">{c.age}</div><div className="mt-0.5 text-slate-400">Period</div></div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 text-center text-[11px] text-slate-400">Market index: {MARKET_INDEX_FMT.events} acquisition events from {MARKET_INDEX_FMT.buyers} buyers (Wikipedia · Wikidata · SEC EDGAR, as of {MARKET_INDEX_FMT.asOf}) · benchmark set: {HISTORY_FMT.events} priced events · {HISTORY_FMT.disclosedValue} disclosed value</div>
-          <div className="mt-8 flex items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-6 py-4 sm:mx-auto sm:max-w-2xl">
-            <span className="text-[13px] text-slate-600">{t("rec.bridge")}</span>
-            <button onClick={() => nav("/console")} className="shrink-0 rounded-md bg-ink-900 px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-ink-800">{t("rec.run")} &rarr;</button>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 9D · GOVERNANCE & CONTROLS ===== */}
-      <section className="border-b border-white/10" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
-        <div className="mx-auto max-w-[1320px] px-6 py-12 lg:px-10">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-300">{t("gov.eyebrow")}</div>
-            <div className="text-[11px] text-white/40">{t("gov.note")}</div>
-          </div>
-          <div className="mt-7 grid grid-cols-2 gap-px overflow-hidden rounded-lg lg:grid-cols-5" style={{ background: "rgba(255,255,255,.08)" }}>
-            {GOVERNANCE.map((g) => (
-              <div key={g.title} className="px-5 py-5" style={{ background: "rgba(6,24,46,.92)" }}>
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/15 text-blue-300 ring-1 ring-blue-400/30"><Glyph name={g.icon} small /></span>
-                <div className="mt-3 text-[12.5px] font-bold text-white">{t(g.title)}</div>
-                <div className="mt-1 text-[11px] leading-snug text-white/50">{t(g.body)}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 10 · FINAL CTA ===== */}
-      <section className="relative overflow-hidden bg-white">
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center gap-24 opacity-[0.05]" aria-hidden>
-          {[0, 1, 2, 3].map((i) => <div key={i} className="h-40 w-16 rounded-t bg-ink-900" />)}
-        </div>
-        <div className="relative mx-auto max-w-[1320px] px-6 py-24 text-center lg:px-10">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-600">{t("cta.eyebrow")}</div>
-          <h2 className="mt-4 font-serif text-4xl font-bold tracking-tight text-ink-900 sm:text-5xl">{t("cta.h2")}</h2>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600">
-            {t("cta.body")}
+          <p className="mt-3 text-[11.5px] leading-relaxed text-slate-600">
+            Every entry is curated from the source shown. Record tier: {Object.entries(LEDGER_TIERS).map(([k, n]) => `${n} ${k}`).join(", ")} — not re-checked against the primary filing in this build.
           </p>
-          <div className="mt-9 flex flex-wrap justify-center gap-3">
-            <button onClick={() => nav("/console")} className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-ink-800">{t("cta.open")} <Arrow /></button>
-            <button onClick={() => nav("/pricing")} className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-7 py-3.5 text-sm font-semibold text-ink-900 transition hover:border-slate-400 hover:bg-slate-50">{t("cta.brief")}</button>
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-slate-300 px-5 py-4">
+            <span className="text-[13.5px] text-slate-700">{t("rec.bridge")}</span>
+            <button onClick={() => nav("/console")} className={`${BTN} bg-ink-900 text-white hover:bg-ink-800`}>{t("rec.run")} <Arrow /></button>
           </div>
-          <p className="mt-6 text-[11.5px] text-slate-400">{t("cta.foot")}</p>
         </div>
       </section>
 
+      {/* ===== 06 · THE MODULES — the site's own catalogue, live engine stats (Z3) ===== */}
+      <section id="ch-06" aria-labelledby="mods-h" className="border-b border-slate-200 bg-white text-ink-900">
+        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
+          <div className="border-t-4 border-double border-ink-900 pt-8">
+            <Chapter n="06">{t("mods.eyebrow")}</Chapter>
+            <h2 id="mods-h" className="rv-h mt-6 max-w-[22ch] font-editorial text-[clamp(2.75rem,5.8vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("mods.h2")} /></h2>
+          </div>
+          <div className="mt-12 border-t border-ink-900">
+            {HOME_MODULES.map(([name, key, v], k) => (
+              <details key={name} open={k === 0} className="group border-b border-slate-300">
+                <summary className="grid cursor-pointer list-none grid-cols-[28px_1fr_36px] items-center gap-x-3 gap-y-1.5 py-6 transition-colors hover:bg-[#f6f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:grid-cols-[58px_1fr_1fr_44px] sm:gap-x-5 sm:py-7 [&::-webkit-details-marker]:hidden">
+                  <span className="font-mono text-[11px] text-blue-600">0{k + 1}</span>
+                  <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{name}</h3>
+                  <div className="col-start-2 row-start-2 max-w-[440px] sm:col-start-3 sm:row-start-1">
+                    <p className="text-[14px] leading-relaxed text-slate-600">{t(`mod.${key}`)}</p>
+                    <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{t(`mod.${key}.st`, v)}</p>
+                  </div>
+                  <span aria-hidden className="col-start-3 row-span-2 row-start-1 grid h-9 w-9 place-items-center justify-self-end rounded-full border border-slate-300 text-[18px] text-blue-600 transition group-open:rotate-45 group-open:border-blue-600 group-open:bg-blue-600 group-open:text-white sm:col-start-4 sm:row-span-1">+</span>
+                </summary>
+                <div className="mb-7 rounded-[4px] border border-slate-200 bg-[#f6f8fb] p-5 sm:ml-[78px] sm:p-7">
+                  <ModulePreview id={key} />
+                  <Link to="/modules" className="mt-6 inline-flex items-center gap-3 border border-ink-900 px-4 py-2.5 text-[12px] font-semibold text-ink-900 transition hover:bg-ink-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">{t("mods.open")} <span aria-hidden>→</span></Link>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* real client proof — renders nothing until lib/proof.ts holds entries (CC4, gate G2) */}
+      <ProofSection />
+
+      {/* ===== 07 · QUESTIONS — what founders ask first, answered from the Pricing and Platform pages ===== */}
+      <section id="ch-07" aria-labelledby="faq-h" className="border-b border-slate-200 bg-[#f6f8fb] text-ink-900">
+        <div className={`${WRAP} py-16 sm:py-20 lg:py-24`}>
+          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-[6vw]">
+            <div className="border-t-4 border-double border-ink-900 pt-8">
+              <Chapter n="07">{t("faq.eyebrow")}</Chapter>
+              <h2 id="faq-h" className="rv-h mt-6 font-editorial text-[clamp(2.75rem,5.2vw,5rem)] font-semibold leading-[0.94] tracking-[-0.045em]"><Editorial text={t("faq.h2")} /></h2>
+              <div className="mt-10 rounded-[4px] p-6 text-white" style={{ background: "linear-gradient(135deg,#06182E 0%,#0A1F3A 60%,#0B2547 100%)" }}>
+                <p className="font-editorial text-[1.35rem] font-semibold leading-snug">{t("faq.more")}</p>
+                <button onClick={() => nav("/pricing")} className={`${BTN} mt-5 bg-white text-ink-900 hover:bg-blue-50`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              {[1, 2, 3, 4, 5, 6].map((k) => (
+                <details key={k} className="group rounded-[4px] border border-slate-300 bg-white shadow-[0_1px_0_rgba(10,16,24,0.04)] transition-shadow open:border-blue-600 open:shadow-[0_18px_40px_-20px_rgba(6,24,46,0.45)]">
+                  <summary className="flex cursor-pointer list-none items-center gap-5 rounded-[4px] px-5 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:px-6 [&::-webkit-details-marker]:hidden">
+                    <span className="font-mono text-[12px] font-semibold tabular-nums text-blue-600">0{k}</span>
+                    <span className="flex-1 font-editorial text-[clamp(1.15rem,1.7vw,1.45rem)] font-semibold">{t(`faq.q${k}`)}</span>
+                    <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-300 text-[18px] leading-none text-blue-600 transition group-open:rotate-45 group-open:border-blue-600 group-open:bg-blue-600 group-open:text-white">+</span>
+                  </summary>
+                  <p className="max-w-[62ch] border-t border-slate-200 px-5 pb-6 pt-4 text-[15.5px] leading-relaxed text-slate-700 sm:ml-[52px] sm:border-t-0 sm:px-6 sm:pt-0">{t(`faq.a${k}`)}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 08 · THE NEXT MOVE — the back page ===== */}
+      <section id="ch-08" className="relative overflow-hidden text-white" style={{ background: "linear-gradient(180deg,#05101f 0%,#06182E 55%,#030a15 100%)" }}>
+        {/* a quiet film of a meeting under a navy veil (placeholder footage, pre-launch gate G1) */}
+        <AmbientVideo src="/media/boardroom-loop.mp4" webm="/media/boardroom-loop.webm" poster="/media/boardroom-poster.jpg" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.38] mix-blend-luminosity" />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg,#05101f 0%,rgba(6,24,46,0.62) 28%,rgba(6,24,46,0.72) 62%,#030a15 100%), linear-gradient(90deg,rgba(3,10,21,0.85) 0%,rgba(3,10,21,0.35) 55%,rgba(3,10,21,0.6) 100%)" }} />
+        {/* the bookend: the hero's navy and light return at the close */}
+        <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 h-[70%] w-[80%] -translate-x-1/2 rounded-[50%] opacity-40 blur-[110px]" style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.55), transparent 70%)" }} />
+        <div className={`${WRAP} relative py-20 sm:py-24 lg:py-32`}>
+          <div className="border-t-4 border-double border-white/50 pt-8">
+            <Chapter n="08" dark>{t("cta.eyebrow")}</Chapter>
+            <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1fr_auto]">
+              <h2 className="rv-h font-editorial text-[clamp(3rem,7vw,7rem)] font-semibold leading-[0.94] tracking-[-0.05em] text-white"><Editorial text={t("cta.h2")} dark /></h2>
+              <div className="flex flex-wrap gap-2.5 lg:flex-col lg:items-stretch">
+                <button onClick={() => nav("/console")} className={`${BTN} justify-between bg-white text-ink-900 hover:bg-blue-50`}>{t("cta.open")} <Arrow /></button>
+                <button onClick={() => nav("/pricing")} className={`${BTN} justify-between border border-white/60 text-white hover:bg-white hover:text-ink-900`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
+              </div>
+            </div>
+            <div className="mt-10 grid gap-6 border-t border-white/20 pt-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+              <p className="max-w-2xl text-[16px] leading-relaxed text-blue-50/90">{t("cta.body")}</p>
+              <p className="text-[13px] leading-relaxed text-blue-100/75 lg:text-right">{t("cta.foot")}</p>
+            </div>
+          </div>
+        </div>
+        {/* the sign-off: the wordmark, set at the width of the page */}
+        <div aria-hidden className={`${WRAP} relative select-none overflow-hidden pb-6`}>
+          <div className="font-editorial font-semibold leading-[0.8] tracking-[-0.06em] text-transparent" style={{ fontSize: "clamp(6rem, 24vw, 22rem)", backgroundImage: "linear-gradient(180deg, rgba(147,197,253,0.55) 0%, rgba(147,197,253,0.10) 85%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
+            Exit<span className="italic">OS</span>
+          </div>
+        </div>
+      </section>
+      </div>
+      <SourcesSection collapsed />
     </MarketingChrome>
   );
 };
@@ -632,28 +394,12 @@ const ACTIVITY = MANDATE_ACTIVITY;
 // Market structure — the counterparties on the exchange, with the real
 // registry count where one exists (strategic / PE are measured; the rest
 // describe the role they play in a process).
-const ECOSYSTEM = [
-  { icon: "shield", label: "ms.strategic", meta: "ms.strategic.meta", n: MARKET_FMT.strategic },
-  { icon: "spark", label: "ms.pe", meta: "ms.pe.meta", n: MARKET_FMT.privateEquity },
-  { icon: "users", label: "ms.fo", meta: "ms.fo.meta", n: "" },
-  { icon: "chart", label: "ms.advisors", meta: "ms.advisors.meta", n: "" },
-  { icon: "doc", label: "ms.corpdev", meta: "ms.corpdev.meta", n: "" },
-];
-// founder → exit workflow chain
-const EXCHANGE_FLOW = [
-  { icon: "users", title: "Founder", sub: "lists the company" },
-  { icon: "chart", title: "Acquisition Intelligence", sub: "valuation & positioning" },
-  { icon: "globe", title: "Buyer Network", sub: "matched acquirers" },
-  { icon: "spark", title: "Negotiation", sub: "scored terms" },
-  { icon: "lock", title: "Closing", sub: "signature & escrow" },
-  { icon: "check", title: "Exit", sub: "funds transferred" },
-];
 // why founders lose millions (problem → fix)
 const LOSSES = [
-  { dimension: "Buyer reach", problem: "A handful of known contacts", fix: `A run across ${MARKET_FMT.buyers} curated acquirer mandates in ${MARKET_FMT.geographies} jurisdictions` },
-  { dimension: "Preparation", problem: "Negotiate unprepared", fix: "AI valuation, comps and reservation lines up front" },
-  { dimension: "Leverage", problem: "Leverage erodes mid-process", fix: "Live signals + parallel offers hold tension" },
-  { dimension: "Final price", problem: "Accept discounted offers", fix: "Offer optimisation captures the premium" },
+  { dimension: "Buyer reach", problem: "A handful of known contacts", fix: "A run across every curated acquirer mandate in the registry" },
+  { dimension: "Preparation", problem: "Negotiate unprepared", fix: "Deterministic valuation, comps and reservation lines up front" },
+  { dimension: "Leverage", problem: "Leverage erodes mid-process", fix: "Registry signals + parallel offers hold tension" },
+  { dimension: "Final price", problem: "Accept discounted offers", fix: "Offers compared on structure and certainty, not headline alone" },
 ];
 // proof — representative transactions
 const heatGradient = (bars: number) =>
@@ -669,7 +415,7 @@ const heatGradient = (bars: number) =>
 // sector) to drill the buyers and transactions into that industry; click a
 // transaction to open the deal detail. All three columns join on the same
 // sectorLabel, so the board behaves like the product, not an illustration.
-const CommandBoard: React.FC = () => {
+export const CommandBoard: React.FC = () => {
   const [sector, setSector] = useState<string | null>(null);
   const [drill, setDrill] = useState<BoardTx | null>(null);
 
@@ -896,203 +642,14 @@ const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right
 // ===========================================================================
 // The lifecycle rail — stage plus the typical window in a run process.
 const DATA_AS_OF = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-const LIFECYCLE: ReadonlyArray<[string, string]> = [
-  ["lc.signal", "day 0"], ["lc.discovery", "wk 1"], ["lc.nda", "wk 1–2"], ["lc.cim", "wk 2"],
-  ["lc.meetings", "wk 2–3"], ["lc.loi", "wk 4–6"], ["lc.diligence", "wk 6–9"], ["lc.closing", "wk 10+"],
-];
 // Data provenance — the pipeline every figure passes through, and the
 // confidence register applied to estimates (mirrors the engines' tiers).
-const PROVENANCE_PIPELINE = [
-  { stage: "Public record", detail: "SEC EDGAR 8-K · Wikidata · press disclosures" },
-  { stage: "Curated registry", detail: `${MARKET_FMT.buyers} verified acquirer mandates` },
-  { stage: "Deterministic pricing", detail: "same inputs, same answer — reproducible" },
-  { stage: "The exchange", detail: "every figure on this page traces to the record" },
-];
-// Governance band — the controls a counterparty must clear and the controls
-// that protect the founder. Stated as conditions, not features.
-const GOVERNANCE = [
-  { icon: "lock", title: "gov.nda.t", body: "gov.nda.b" },
-  { icon: "shield", title: "gov.verify.t", body: "gov.verify.b" },
-  { icon: "check", title: "gov.audit.t", body: "gov.audit.b" },
-  { icon: "users", title: "gov.control.t", body: "gov.control.b" },
-  { icon: "doc", title: "gov.soc.t", body: "gov.soc.b" },
-];
 const CONFIDENCE_TIERS = [
-  { tier: "Verified", color: "#059669", basis: "Disclosed in a public filing", detail: "Headline value, dates and parties confirmed against the primary source." },
-  { tier: "Reported", color: "#2563eb", basis: "Multiple independent reports", detail: "Cross-referenced press and database coverage; primary filing not located." },
-  { tier: "Estimated", color: "#d97706", basis: "Modeled from the record", detail: "Benchmarked against the acquirer's completed-transaction history, with sample size shown." },
+  { tier: "Verified", color: "#047857", basis: "Disclosed in a public filing", detail: "Headline value, dates and parties confirmed against the primary source." },
+  { tier: "Reported", color: "#1d4ed8", basis: "Multiple independent reports", detail: "Cross-referenced press and database coverage; primary filing not located." },
+  { tier: "Estimated", color: "#92400e", basis: "Modeled from the record", detail: "Benchmarked against the acquirer's completed-transaction history, with sample size shown." },
 ];
-const STEPS = [
-  { icon: "chart", title: "Company Analysis", body: "Valuation across weighted methodologies, market positioning, and a priced readiness score." },
-  { icon: "users", title: "Buyer Discovery", body: `Engine-ranked matching across ${MARKET_FMT.buyers} curated strategic and financial mandates.` },
-  { icon: "doc", title: "Data Room", body: "Secure diligence infrastructure built for M&A." },
-  { icon: "spark", title: "Negotiation Engine", body: "Offer scoring, counters and scenario modeling against your reservation lines." },
-  { icon: "check", title: "LOI Received", body: "Manage terms, track milestones, and reduce deal risk." },
-  { icon: "lock", title: "Closing & Payout", body: "Streamline closing, documents, and funds transfer." },
-];
-const BUYERS = REGISTRY_CARDS;
-const COMMAND_FEATURES = [
-  { icon: "chart", value: HISTORY_FMT.events, title: "Disclosed Deals Indexed", body: "EDGAR + Wikidata sourced" },
-  { icon: "users", value: MARKET_FMT.buyers, title: "Buyer Mandates", body: "intent monitoring" },
-  { icon: "spark", value: MARKET_FMT.activeMandates, title: "Actively Deploying", body: "live appetite" },
-  { icon: "fire", value: "High", title: "Market Heat", body: "liquidity scores" },
-  { icon: "globe", value: MARKET_FMT.appetite, title: "Acquisition Demand", body: "check capacity indexed" },
-  { icon: "doc", value: MARKET_FMT.sectors, title: "Sectors Covered", body: "across the registry" },
-];
-const DATA_ROOMS = [
-  { icon: "chart", title: "Financial Statements" },
-  { icon: "doc", title: "Legal Documents" },
-  { icon: "shield", title: "Contracts & IP" },
-  { icon: "users", title: "Customer Data" },
-  { icon: "spark", title: "Technical Due Diligence" },
-  { icon: "lock", title: "Compliance & Risk" },
-];
-const NEGOTIATION_FEATURES = [
-  { icon: "spark", title: "Offer optimization", body: "Maximise value and certainty." },
-  { icon: "shield", title: "Risk analysis", body: "Understand downside scenarios." },
-  { icon: "doc", title: "Term sheet generation", body: "Create investor-grade documents." },
-];
-// Anonymized listing-protocol cards. Codenames and banded figures only —
-// identity, exact financials and the asking range unlock on a signed NDA.
-// Sector/region framing mirrors the registry's real coverage.
-const OPPORTUNITIES = [
-  { sector: "Logistics / Freight", name: "Project Meridian", rev: "$50–75M", ebitda: "$15–20M", stage: "Teaser issued", region: "North America" },
-  { sector: "Vertical SaaS", name: "Project Basalt", rev: "$100–150M", ebitda: "$30–40M", stage: "In diligence", region: "Europe" },
-  { sector: "Cybersecurity", name: "Project Aurelia", rev: "$75–125M", ebitda: "$25–35M", stage: "NDA stage", region: "Global" },
-  { sector: "AI Infrastructure", name: "Project Caldera", rev: "$75–100M", ebitda: "$20–30M", stage: "Management meetings", region: "Asia-Pacific" },
-];
-const GLOBAL_STATS = [
-  { value: MARKET_FMT.geographies, label: "Jurisdictions" },
-  { value: MARKET_FMT.buyers, label: "Acquirer Mandates" },
-  { value: MARKET_FMT.appetite, label: "Check Capacity" },
-  { value: "24/7", label: "Market Activity" },
-];
-
 // ===========================================================================
 // SMALL VISUAL HELPERS
 // ===========================================================================
-// Cross-bid comparison instrument. Figures are an internally-consistent
-// illustration of the desk's scoring; on a live process the same table runs
-// against the founder's actual offers and reservation lines.
-const OfferTable: React.FC = () => (
-  <div className="overflow-hidden rounded-lg p-4 text-white" style={{ background: "linear-gradient(180deg,#08203B,#06182E)" }}>
-    <div className="flex items-center justify-between">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">Cross-Bid Comparison</div>
-      <div className="text-[9px] uppercase tracking-wide text-white/35">scored vs reservation lines</div>
-    </div>
-    <table className="mt-3 w-full text-left text-[12px]">
-      <thead className="text-white/45">
-        <tr>{["", "Buyer A", "Buyer B", "Buyer C"].map((h) => <th key={h} className="pb-2 font-semibold">{h}</th>)}</tr>
-      </thead>
-      <tbody>
-        {[
-          ["Upfront Cash", "$172M", "$190M", "$140M"],
-          ["Earnout", "$22M", "—", "$31M"],
-          ["Rollover", "$18M", "$25M", "—"],
-          ["Total", "$212M", "$215M", "$171M"],
-          ["Certainty-weighted", "$198M", "$209M", "$152M"],
-          ["Desk score", "84 / 100", "91 / 100", "66 / 100"],
-        ].map((r) => (
-          <tr key={r[0]} className={"border-t border-white/5 " + (r[0] === "Total" || r[0] === "Desk score" ? "font-bold" : "")}>
-            <td className="py-2 text-white/50">{r[0]}</td>
-            <td className="py-2" style={r[0] === "Total" ? { color: "#7CFF9F" } : undefined}>{r[1]}</td>
-            <td className="py-2" style={r[0] === "Total" || r[0] === "Desk score" ? { color: "#7CFF9F" } : undefined}>{r[2]}</td>
-            <td className="py-2" style={r[0] === "Total" ? { color: "#7CFF9F" } : undefined}>{r[3]}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    <div className="mt-3 border-t border-white/10 pt-2 text-[10px] text-white/40">
-      Headline ≠ outcome. Every bid is weighted by structure, certainty and counterparty record — B leads on certainty despite A&rsquo;s earnout package.
-    </div>
-  </div>
-);
-
-const Vault: React.FC = () => (
-  <svg viewBox="0 0 140 120" className="h-24 w-28">
-    <rect x="34" y="22" width="72" height="76" rx="8" fill="#13355f" stroke="#58C6FF" strokeOpacity="0.5" />
-    <rect x="42" y="30" width="56" height="60" rx="5" fill="#0c244a" />
-    <circle cx="70" cy="60" r="16" fill="none" stroke="#58C6FF" strokeWidth="2.5" />
-    <path d="M63 60l5 5 10-10" fill="none" stroke="#5AD1FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-    <g stroke="#58C6FF" strokeOpacity="0.6" strokeWidth="2"><line x1="70" y1="40" x2="70" y2="46" /><line x1="70" y1="74" x2="70" y2="80" /><line x1="50" y1="60" x2="56" y2="60" /><line x1="84" y1="60" x2="90" y2="60" /></g>
-  </svg>
-);
-
-// Global acquisition network — dot map with named regional hubs and animated
-// acquisition-flow arcs connecting the regions.
-// Equirectangular geomap: a dot grid masked to coarse continent polygons so all
-// continents read (like a network world-map). [lon,lat] → SVG via project().
-const MAP_W = 960, MAP_H = 480;
-const project = (lon: number, lat: number): [number, number] => [((lon + 180) / 360) * MAP_W, ((90 - lat) / 180) * MAP_H];
-const LANDMASS: [number, number][][] = [
-  // North America
-  [[-168,66],[-150,70],[-120,70],[-95,69],[-80,73],[-60,83],[-55,60],[-66,49],[-72,46],[-76,38],[-81,31],[-81,25],[-90,29],[-97,26],[-105,22],[-114,30],[-124,40],[-124,48],[-130,55],[-140,60],[-155,58],[-166,55]],
-  // Greenland
-  [[-46,60],[-22,70],[-30,82],[-50,82],[-58,76],[-54,68]],
-  // South America
-  [[-78,8],[-66,11],[-55,5],[-50,0],[-44,-3],[-40,-12],[-38,-23],[-48,-27],[-58,-35],[-66,-46],[-73,-53],[-75,-46],[-71,-33],[-76,-14],[-81,-5],[-80,2]],
-  // Africa
-  [[-16,15],[-6,24],[10,31],[20,33],[32,31],[44,11],[51,12],[43,-2],[40,-12],[33,-26],[25,-34],[18,-35],[12,-17],[9,4],[-8,5],[-16,15]],
-  // Europe
-  [[-10,43],[-5,38],[5,38],[12,38],[18,40],[26,40],[28,45],[42,46],[40,55],[30,60],[24,66],[12,64],[6,58],[2,51],[-5,49]],
-  // Asia
-  [[26,40],[30,46],[42,48],[48,52],[60,66],[80,73],[105,76],[140,73],[170,68],[180,64],[165,60],[155,52],[140,48],[130,42],[122,38],[120,30],[110,21],[105,9],[95,6],[88,21],[78,8],[72,18],[60,25],[50,30],[44,38],[36,36],[28,37]],
-  // Australia
-  [[114,-22],[124,-17],[133,-12],[142,-11],[146,-18],[150,-25],[153,-31],[148,-38],[138,-37],[129,-32],[118,-35],[114,-30]],
-  // misc
-  [[130,31],[140,38],[142,44],[138,40],[133,34]], // Japan
-  [[166,-46],[174,-41],[178,-38],[172,-45]],        // NZ
-  [[43,-25],[50,-15],[50,-22],[46,-26]],            // Madagascar
-  [[95,2],[110,0],[120,-2],[120,-8],[105,-8],[98,-3]], // Indonesia
-];
-const inPoly = (x: number, y: number, poly: [number, number][]) => {
-  let c = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
-    if (((yi > y) !== (yj > y)) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c;
-  }
-  return c;
-};
-const isLandLL = (lon: number, lat: number) => LANDMASS.some((p) => inPoly(lon, lat, p));
-// regional hubs at real coordinates
-const HUBS: { name: string; lon: number; lat: number }[] = [
-  { name: "na", lon: -98, lat: 39 }, { name: "eu", lon: 9, lat: 50 }, { name: "me", lon: 45, lat: 26 },
-  { name: "asia", lon: 110, lat: 30 }, { name: "sa", lon: -58, lat: -15 }, { name: "au", lon: 134, lat: -25 },
-];
-const FLOWS: [string, string][] = [
-  ["na", "eu"], ["eu", "me"], ["me", "asia"], ["na", "asia"], ["eu", "asia"], ["sa", "na"], ["asia", "au"], ["na", "sa"],
-];
-const WorldDots: React.FC = () => {
-  const dots = React.useMemo(() => {
-    const out: [number, number][] = [];
-    for (let lat = 78; lat >= -56; lat -= 2.6) {
-      for (let lon = -178; lon <= 180; lon += 2.6) {
-        if (isLandLL(lon, lat)) { const [x, y] = project(lon, lat); out.push([x, y]); }
-      }
-    }
-    return out;
-  }, []);
-  const hub = (n: string) => { const h = HUBS.find((x) => x.name === n)!; return project(h.lon, h.lat); };
-  return (
-    <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="w-full">
-      {dots.map(([x, y], i) => <rect key={i} x={x - 0.9} y={y - 0.9} width={1.8} height={1.8} fill="#5AD1FF" opacity={0.5} />)}
-      {/* acquisition-flow arcs with travelling pulses */}
-      {FLOWS.map(([a, b], i) => {
-        const [x1, y1] = hub(a), [x2, y2] = hub(b);
-        const mx = (x1 + x2) / 2, my = Math.min(y1, y2) - Math.abs(x2 - x1) * 0.16 - 24;
-        const d = `M${x1},${y1} Q${mx},${my} ${x2},${y2}`;
-        return (
-          <g key={i}>
-            <path d={d} fill="none" stroke="#2E8BD6" strokeWidth="1.1" opacity="0.5" />
-            <circle r="2.8" fill="#A8FFFF"><animateMotion dur={`${4 + (i % 4)}s`} repeatCount="indefinite" path={d} /></circle>
-          </g>
-        );
-      })}
-      {HUBS.map((h, i) => { const [x, y] = project(h.lon, h.lat); return (
-        <g key={i}><circle cx={x} cy={y} r="10" fill="#2E8BD6" opacity="0.22" /><circle cx={x} cy={y} r="3.4" fill="#A8FFFF" /></g>
-      ); })}
-    </svg>
-  );
-};
-
 export default Landing;

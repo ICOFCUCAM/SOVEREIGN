@@ -410,6 +410,10 @@ let active: ExitApiClient = createExitApi();
 /** The live client, for query accessors. */
 export function backendClient(): ExitApiClient { return active; }
 
+/** Where a listing goes: the live exchange (Supabase backend) or only this
+ *  browser (the local backend used when no backend is configured). */
+export const listingDestination = (): "exchange" | "browser" => (active instanceof SupabaseExitApi ? "exchange" : "browser");
+
 /** Activate the live backend for a signed-in account: point every store at
  *  it so this session is durable and account-scoped. Called on sign-in.
  *
@@ -449,6 +453,11 @@ export function currentAccountId(): string | undefined { return connectedAccount
 export async function requestNda(listingId: string): Promise<NdaRequest | null> {
   if (!connectedAccountId) return null;
   return active.createNdaRequest({ listingId, buyerAccountId: connectedAccountId });
+}
+/** Buyer view: the NDA requests this account has made (none when no
+ *  account is connected). */
+export async function myNdaRequests(): Promise<NdaRequest[]> {
+  return connectedAccountId ? active.listNdaRequests({ buyerAccountId: connectedAccountId }) : [];
 }
 /** Founder view: the NDA requests on a listing they own. */
 export async function ndaRequestsForListing(listingId: string): Promise<NdaRequest[]> {

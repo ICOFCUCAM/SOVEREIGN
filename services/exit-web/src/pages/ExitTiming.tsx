@@ -1,180 +1,189 @@
 import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { fmtMoney } from "../lib/ui";
-import { Panel, Frame, CommandHeader, MarketTape, CommandState } from "../lib/workstation";
+import { RegistryTape } from "../components/xo/RegistryTape";
+import { DNA_AS_OF } from "../lib/buyer-dna";
+import { PageHeader, Section, Metric, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import BankerTake from "../components/BankerTake";
-import { READINESS_ANALYSIS, BUYERS, VALUATION_STANDARD } from "../lib/engines";
-import { SAMPLE_COMPANY } from "../lib/profile";
-import { EXIT_SCORE, CURRENT_VALUE_USD, POTENTIAL_VALUE_USD } from "../lib/deal-context";
+import { runBuyerDiscovery, runReadiness, runReadinessAnalysis, runValuation } from "@exit/engines";
+import { dealContextFor } from "../lib/deal-context";
+import { loadActiveCompany } from "../lib/active-company";
 import { DEAL_INTEL_FMT, sectorEventCount } from "../lib/market-stats";
 
-// Exit Timing Engine — most founders don't know *when* to sell. The engine
-// monitors the market signals that move valuation (multiples, deal activity,
-// competitor exits, deal velocity, buyer demand) alongside the company's own
-// trajectory, then recommends an optimal exit window and the value of waiting.
-// Every signal is computed from the valuation engine, the discovery pool and
-// the source-referenced acquisition history.
+// Exit Timing — most founders don't know *when* to sell. The page reads the
+// signals that move valuation (multiples, deal activity, sector exits, deal
+// velocity, buyer appetite) alongside the company's own trajectory, and gives
+// a rule-based exit window and the value of fixing first. Everything is
+// computed when the page opens from the valuation, readiness and discovery
+// engines and the source-referenced acquisition history; nothing monitors in
+// the background or sends alerts.
 
-type Impact = "tailwind" | "headwind" | "neutral";
-const IMPACT_STYLE: Record<Impact, { color: string; label: string }> = {
-  tailwind: { color: "#34d399", label: "Tailwind" },
-  headwind: { color: "#f87171", label: "Headwind" },
-  neutral:  { color: "#94a3b8", label: "Neutral" },
+// "context" = a measured figure with no rule turning it into a verdict.
+type Impact = "tailwind" | "headwind" | "neutral" | "context";
+const IMPACT_STYLE: Record<Impact, { cls: string; glyph: string; label: string }> = {
+  tailwind: { cls: "text-xo-verified", glyph: "▲", label: "Tailwind" },
+  headwind: { cls: "text-xo-risk", glyph: "▼", label: "Headwind" },
+  neutral:  { cls: "text-xo-muted", glyph: "■", label: "Neutral" },
+  context:  { cls: "text-xo-faint", glyph: "·", label: "Context" },
 };
 
 const EFFORT_MONTHS: Record<string, number> = { weeks: 2, months: 6, quarters: 9 };
 
 const ExitTiming: React.FC = () => {
-  const current = CURRENT_VALUE_USD;
-  const potential = POTENTIAL_VALUE_USD;
+  // The founder's saved intake when there is one, else the demo company.
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const { ctx, analysis, buyers, standard } = useMemo(() => ({
+    ctx: dealContextFor(company),
+    analysis: runReadinessAnalysis(company, runReadiness(company)),
+    buyers: runBuyerDiscovery(company, { limit: 12 }),
+    standard: runValuation(company, { reportType: "standard" }),
+  }), [company]);
+  const current = ctx.currentValueUsd;
+  const potential = ctx.potentialValueUsd;
   const upliftPct = current > 0 ? Math.round((potential / current - 1) * 100) : 0;
-  const growthYoy = SAMPLE_COMPANY.growth.arrGrowthYoyPct;
-  const activeBuyers = BUYERS.candidates.filter((c) => c.buyer.appetite === "active").length;
-  const dealCount = Math.min(40, BUYERS.candidates.reduce((s, c) => s + c.history.totalDeals, 0));
+  const growthYoy = company.growth.arrGrowthYoyPct;
+  const activeBuyers = buyers.candidates.filter((c) => c.buyer.appetite === "active").length;
+  const dealCount = buyers.candidates.reduce((s, c) => s + c.history.totalDeals, 0);
+  const demand = activeBuyers >= 5 ? "High" : activeBuyers >= 2 ? "Medium" : "Low";
 
   // window to optimal exit — time to mature the highest-effort fixes
-  const monthsToReady = Math.max(3, ...READINESS_ANALYSIS.weaknesses.map((w) => EFFORT_MONTHS[w.effort] ?? 6));
+  const monthsToReady = Math.max(3, ...analysis.weaknesses.map((w) => EFFORT_MONTHS[w.effort] ?? 6));
   const windowLo = Math.max(2, monthsToReady - 2);
   const windowHi = monthsToReady + 4;
   const sweet = monthsToReady;
 
-  // ── Multi-year readiness timeline ────────────────────────────
-  // Score climbs as fixes mature (~+25 then +43 from base); value compounds
-  // ~30%/yr (ARR growth tempered + the readiness lift).
-  const baseYear = new Date().getFullYear();
-  const yearScores = [EXIT_SCORE, EXIT_SCORE + 22, EXIT_SCORE + 38].map((s) => Math.min(95, Math.round(s)));
-  const timeline = [0, 1, 2].map((i) => ({
-    year: baseYear + i,
-    score: yearScores[i],
-    value: Math.round(current * Math.pow(1.3, i)),
-  }));
-  const windowIdx = yearScores.findIndex((s) => s >= 85);
-  const windowRow = timeline[windowIdx === -1 ? timeline.length - 1 : windowIdx];
+  // Now vs after fixes — both points come from the engines: the readiness
+  // engine's current and projected score, and value now vs after fixes.
+  // No year-by-year forecast is produced, so none is shown.
+  const scoreNow = Math.round(analysis.currentScore);
+  const scoreAfter = Math.round(analysis.projectedScore);
 
-  const revMult = VALUATION_STANDARD.methodologies.find((m) => m.multiple != null);
-  const sectorExits = sectorEventCount(SAMPLE_COMPANY.sector);
+  const revMult = standard.methodologies.find((m) => m.multiple != null);
+  const sectorExits = sectorEventCount(company.sector);
+  // Verdicts only where a stated rule exists; everything else is context.
   const signals: { label: string; value: string; trend: string; impact: Impact; note: string }[] = [
-    { label: "Industry multiples", value: revMult ? `${revMult.multiple?.toFixed(1)}× ${revMult.basis.toLowerCase().includes("ebitda") ? "EBITDA" : "revenue"}` : "—", trend: "engine mid-band", impact: "tailwind", note: `From the valuation engine's ${revMult?.name.toLowerCase() ?? "multiples"} methodology on your numbers.` },
-    { label: "Acquisition activity", value: `${dealCount} tracked deals`, trend: "measured", impact: "tailwind", note: "Strategics and sponsors are both active in the sector." },
-    { label: "Sector exits", value: `${sectorExits} on record`, trend: DEAL_INTEL_FMT.medianPremium + " median premium", impact: sectorExits > 0 ? "tailwind" : "neutral", note: "Comparable assets in your sector from the source-referenced history." },
-    { label: "Deal velocity", value: DEAL_INTEL_FMT.medianClose, trend: "announce → close", impact: "neutral", note: "Median time from announcement to close across tracked deals." },
-    { label: "Buyer demand", value: `${activeBuyers} in acquisition mode`, trend: "high", impact: "tailwind", note: "Active acquirers match your profile right now." },
-    { label: "Your trajectory", value: `${Math.round(growthYoy * 100)}% ARR growth`, trend: "compounding", impact: "tailwind", note: "Each quarter lifts the headline into a higher band." },
+    { label: "Industry multiples", value: revMult ? `${revMult.multiple?.toFixed(1)}× ${revMult.basis.toLowerCase().includes("ebitda") ? "EBITDA" : "revenue"}` : "—", trend: "standard valuation", impact: "context", note: `The multiple in the valuation engine's ${revMult?.name.toLowerCase() ?? "multiples"} methodology for this company. No trend over time is measured.` },
+    { label: "Acquisition activity", value: `${dealCount.toLocaleString()} acquisitions`, trend: "registry", impact: "context", note: "Recorded acquisitions by the 12 buyers ranked for this company, all years." },
+    { label: "Sector exits", value: `${sectorExits} on record`, trend: `${DEAL_INTEL_FMT.medianPremium} median premium, all sectors`, impact: sectorExits > 0 ? "tailwind" : "neutral", note: "Deals in the company's sector in the source-referenced history. Rule: tailwind if any are on record." },
+    { label: "Deal velocity", value: DEAL_INTEL_FMT.medianClose, trend: "announce → close", impact: "context", note: "Median time from announcement to close across tracked deals." },
+    { label: "Buyer demand", value: `${activeBuyers} with active appetite`, trend: demand, impact: activeBuyers >= 5 ? "tailwind" : activeBuyers >= 2 ? "neutral" : "headwind", note: "Among the 12 ranked buyers. Appetite is a registry attribute, not recent activity. Rule: high at 5 or more, medium at 2–4." },
+    { label: "Your trajectory", value: `${Math.round(growthYoy * 100)}% ARR growth`, trend: "company input", impact: growthYoy >= 0.3 ? "tailwind" : "neutral", note: "Year-on-year ARR growth entered for the company. Rule: tailwind at 30% or more (as on Exit Readiness)." },
   ];
+  const ruled = signals.filter((s) => s.impact !== "context").length;
   const tailwinds = signals.filter((s) => s.impact === "tailwind").length;
   const tape = useMemo(() => buildMarketTape(), []);
 
   return (
-    <div className="space-y-2">
-      <CommandHeader
-        kicker="◉ Timing Desk"
-        title="Exit Timing"
-        tag="Monitor"
-        status={`${tailwinds}/${signals.length} tailwinds`}
-        meta={[
-          { k: "GROWTH", v: `${Math.round(growthYoy * 100)}%` },
-          { k: "BUYERS CIRCLING", v: activeBuyers },
-        ]}
-        metrics={[
-          { k: "Optimal window", v: `${windowLo}–${windowHi}mo`, accent: true, sub: "to start" },
-          { k: "Projected uplift", v: `+${upliftPct}%`, accent: true, sub: "value of waiting" },
-          { k: "Sell today", v: fmtMoney(current), sub: "strategic mid" },
-          { k: "Sell at window", v: fmtMoney(potential), sub: `Q2 ${windowRow.year}` },
-          { k: "Market signals", v: `${tailwinds}/${signals.length}`, sub: "tailwinds" },
-          { k: "Buyers circling", v: String(activeBuyers), sub: "acquisition mode" },
-        ]}
-      />
+    <div data-page="exit-timing" className="space-y-3 text-xo-text">
+      <PageHeader eyebrow={fromIntake ? `◉ Timing Desk · Your intake: ${company.name}` : `◉ Timing Desk · Demo company: ${company.name}`} title="Exit Timing"
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">{tailwinds} of {ruled} rule-based signals favourable</span></>}>
+        <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
+          {([["Growth", `${Math.round(growthYoy * 100)}%`], ["Active-appetite buyers", String(activeBuyers)]] as const).map(([k, v]) => (
+            <div key={k} className="flex items-baseline gap-1.5"><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[12px] font-semibold tabular-nums">{v}</dd></div>
+          ))}
+        </dl>
+      </PageHeader>
 
-      <MarketTape items={tape} />
+      <section aria-label="Timing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-6">
+        <div className="bg-xo-panel"><Metric label="Optimal window" emphasis value={`${windowLo}–${windowHi}mo`} sub="to start" /></div>
+        <div className="bg-xo-panel"><Metric label="Projected uplift" value={<span className="text-xo-verified">+{upliftPct}%</span>} sub="value of waiting" /></div>
+        <div className="bg-xo-panel"><Metric label="Sell today" value={fmtMoney(current)} sub="enterprise value today" /></div>
+        <div className="bg-xo-panel"><Metric label="Sell at window" value={<span className="text-xo-verified">{fmtMoney(potential)}</span>} sub="after fixes · no growth assumed" /></div>
+        <div className="bg-xo-panel"><Metric label="Signals favourable" value={`${tailwinds}/${ruled}`} sub="rule-based signals" /></div>
+        <div className="bg-xo-panel"><Metric label="Active-appetite buyers" value={String(activeBuyers)} sub="of 12 ranked · registry attribute" /></div>
+      </section>
 
-      <CommandState
-        current={<>Sell-today <span className="font-mono text-white">{fmtMoney(current)}</span> · growth {Math.round(growthYoy * 100)}% · {tailwinds >= signals.length / 2 ? "conditions favourable" : "mixed conditions"}</>}
-        changes={<><span className="font-mono text-white">{tailwinds}/{signals.length}</span> market signals are tailwinds</>}
-        action={<>Prepare now and target a sale in months <span className="font-mono text-white">{windowLo}–{windowHi}</span></>}
-        outcome={<>At the window <span className="font-mono text-white">{fmtMoney(potential)}</span> · +{upliftPct}% value of waiting · Q2 {windowRow.year}</>}
-      />
+      <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
 
-      <BankerTake
-        next={<>Prepare now and target a sale in <span className="text-white">months {windowLo}–{windowHi}</span> — as the readiness gap closes and multiples hold.</>}
-        stake={<>Waiting to the window projects <span className="font-mono font-bold text-deal-300">+{upliftPct}%</span> · {fmtMoney(current)} → {fmtMoney(potential)}.</>}
-        inaction={<>Selling today leaves the readiness gap unclaimed; waiting too long risks the multiple cycle turning.</>}
-        buyer={<><span className="text-white">{tailwinds} of {signals.length}</span> market signals are tailwinds — conditions favor a near-term process.</>}
-        automate={<>ExitOS monitors the market continuously and pings you when the window opens.</>}
-        impact={<>+{upliftPct}%</>}
-        cta={{ label: "See readiness fixes", to: "/console/readiness" }}
-      />
+      <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line"
+        right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">+{upliftPct}%</span>}>
+        <div className="px-4 py-3">
+          <p className="text-[14px] leading-relaxed">Prepare now and target a sale in <span className="font-semibold">months {windowLo}–{windowHi}</span> — as the readiness gap closes and multiples hold.</p>
+          <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <TakeCell k="Today">Sell-today <span className="font-mono">{fmtMoney(current)}</span> · growth {Math.round(growthYoy * 100)}% · {tailwinds >= ruled / 2 ? "most rule-based signals favourable" : "mixed signals"}</TakeCell>
+            <TakeCell k="At stake">Waiting to the window projects <span className="font-mono font-semibold text-xo-verified">+{upliftPct}%</span> · {fmtMoney(current)} → {fmtMoney(potential)}.</TakeCell>
+            <TakeCell k="If you wait">Selling today leaves the readiness gap unclaimed; waiting too long risks the multiple cycle turning.</TakeCell>
+            <TakeCell k="Signals">{tailwinds} of {ruled} rule-based signals are tailwinds; {signals.length - ruled} more are shown as context.</TakeCell>
+            <TakeCell k="What ExitOS does">Recomputes this page from the company's figures and the registry snapshot each time it opens. There are no alerts — check back after updating your figures.</TakeCell>
+            <TakeCell k="Outcome">At the window <span className="font-mono">{fmtMoney(potential)}</span> · +{upliftPct}% value of waiting (after fixes, no growth assumed)</TakeCell>
+          </dl>
+          <Link to="/console/readiness" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">See readiness fixes →</Link>
+        </div>
+      </Section>
 
-      <Frame>
-        <Panel title="Recommended window" className="lg:col-span-5"
+      <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
+        <Section title="Recommended window" className="lg:col-span-5"
           foot="Sell too early and you leave the readiness gap on the table; too late and you risk the multiple cycle turning. The window balances both.">
-          <div className="p-4">
-            <div className="font-mono text-3xl font-bold text-white">Months {windowLo}–{windowHi}</div>
-            <p className="mt-2 text-[12.5px] leading-relaxed text-white/60">
-              Delaying <span className="text-white">~{sweet} months</span> to close the readiness gap projects a{" "}
-              <span className="font-mono font-semibold text-deal-300">+{upliftPct}%</span> lift — {fmtMoney(current)} → {fmtMoney(potential)}.
+          <div className="px-4 py-4">
+            <p className="font-mono text-[28px] font-semibold tabular-nums">Months {windowLo}–{windowHi}</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">
+              Delaying <span className="text-xo-text">~{sweet} months</span> to close the readiness gap projects a{" "}
+              <span className="font-mono font-semibold text-xo-verified">+{upliftPct}%</span> lift — {fmtMoney(current)} → {fmtMoney(potential)}.
             </p>
-            <div className="mt-3 grid grid-cols-2 gap-px overflow-hidden rounded-md bg-white/10">
-              <div className="bg-ink-900 p-3"><div className="text-[10px] uppercase tracking-wide text-white/40">Sell today</div><div className="font-mono text-lg font-bold text-white/80">{fmtMoney(current)}</div></div>
-              <div className="bg-ink-900 p-3"><div className="text-[10px] uppercase tracking-wide text-deal-300">Sell at window</div><div className="font-mono text-lg font-bold text-deal-300">{fmtMoney(potential)}</div></div>
-            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-px bg-xo-line">
+              <div className="bg-xo-panel px-3 py-2"><dt className="text-[11px] text-xo-faint">Sell today</dt><dd className="font-mono text-[17px] font-semibold tabular-nums">{fmtMoney(current)}</dd></div>
+              <div className="bg-xo-panel px-3 py-2"><dt className="text-[11px] text-xo-faint">Sell at window</dt><dd className="font-mono text-[17px] font-semibold tabular-nums text-xo-verified">{fmtMoney(potential)}</dd></div>
+            </dl>
           </div>
-        </Panel>
+        </Section>
 
-        <Panel title="Timing curve" className="lg:col-span-7">
-          <div className="p-4 pt-8">
-            <div className="relative h-2 rounded-full bg-white/10">
-              <div className="absolute h-full rounded-full bg-deal-500/40" style={{ left: `${(windowLo / (windowHi + 6)) * 100}%`, width: `${((windowHi - windowLo) / (windowHi + 6)) * 100}%` }} />
-              <div className="absolute -top-1 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-ink-900 bg-deal-400" style={{ left: `${(sweet / (windowHi + 6)) * 100}%` }} />
-              <div className="absolute -top-1 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-ink-900 bg-white/50" style={{ left: "0%" }} />
+        <Section title="Timing curve · now vs after fixes" className="lg:col-span-7"
+          foot="Window rule: the longest open fix sets the months to ready (weeks ≈ 2, months ≈ 6, quarters ≈ 9; at least 3); the window runs from 2 months before to 4 months after it. A heuristic, not a forecast. Scores are the readiness engine's current score and its projection (8 points per open fix, capped at 100); values are today's enterprise value and the value after fixes, with no growth assumed.">
+          <div className="px-4 py-4">
+            <div aria-hidden className="relative mt-2 h-2 rounded-full bg-xo-line">
+              <div className="absolute h-full rounded-full bg-xo-verified/40" style={{ left: `${(windowLo / (windowHi + 6)) * 100}%`, width: `${((windowHi - windowLo) / (windowHi + 6)) * 100}%` }} />
+              <div className="absolute -top-1 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-xo-panel bg-xo-verified" style={{ left: `${(sweet / (windowHi + 6)) * 100}%` }} />
+              <div className="absolute -top-1 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-xo-panel bg-xo-muted" style={{ left: "0%" }} />
             </div>
-            <div className="mt-3 flex justify-between text-[11px] text-white/45">
-              <span>Now · {fmtMoney(current)}</span><span className="text-deal-300">Optimal window</span><span>+{windowHi + 6}mo</span>
+            <div className="mt-3 flex justify-between text-[12px] text-xo-muted">
+              <span>Now · {fmtMoney(current)}</span><span className="text-xo-verified">Optimal window · months {windowLo}–{windowHi}</span><span>+{windowHi + 6}mo</span>
             </div>
-            <div className="mt-5 grid grid-cols-3 gap-px overflow-hidden rounded-md bg-white/10">
-              {timeline.map((t) => {
-                const isWindow = t.year === windowRow.year;
-                const c = t.score >= 85 ? "#34d399" : t.score >= 60 ? "#fbbf24" : "#f87171";
-                return (
-                  <div key={t.year} className={`bg-ink-900 p-3 ${isWindow ? "ring-1 ring-inset ring-deal-400/50" : ""}`}>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[15px] font-bold text-white">{t.year}</span>
-                      {isWindow && <span className="rounded bg-deal-600/25 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-deal-200">Window</span>}
-                    </div>
-                    <div className="mt-1.5 font-mono text-xl font-bold" style={{ color: c }}>{t.score}<span className="text-[10px] text-white/35">/100</span></div>
-                    <div className="font-mono text-[12px] font-semibold text-white/80">{fmtMoney(t.value)}</div>
-                  </div>
-                );
-              })}
-            </div>
+            <ol className="mt-5 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
+              <li className="bg-xo-panel px-3 py-2">
+                <div className="text-[12px] font-semibold text-xo-muted">Now</div>
+                <div className="mt-1 font-mono text-[20px] font-semibold tabular-nums">{scoreNow}<span className="text-[11px] text-xo-faint">/100 readiness engine</span></div>
+                <div className="font-mono text-[12px] font-semibold tabular-nums text-xo-muted">{fmtMoney(current)}</div>
+              </li>
+              <li className="bg-xo-panel px-3 py-2 ring-1 ring-inset ring-xo-verified/60">
+                <div className="text-[12px] font-semibold text-xo-verified">After fixes · ~{sweet} months</div>
+                <div className="mt-1 font-mono text-[20px] font-semibold tabular-nums text-xo-verified">{scoreAfter}<span className="text-[11px] text-xo-faint">/100 projected</span></div>
+                <div className="font-mono text-[12px] font-semibold tabular-nums text-xo-muted">{fmtMoney(potential)}</div>
+              </li>
+            </ol>
           </div>
-        </Panel>
-      </Frame>
+        </Section>
+      </div>
 
-      <Frame>
-        <Panel title="Market signals monitored" className="lg:col-span-12"
-          foot="All signals computed from the valuation engine, the discovery pool and the source-referenced acquisition history.">
-          <div className="grid grid-cols-1 gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
-            {signals.map((s) => {
-              const st = IMPACT_STYLE[s.impact];
-              return (
-                <div key={s.label} className="bg-ink-900 p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="text-[10px] font-semibold uppercase tracking-wide text-white/45">{s.label}</div>
-                    <span className="rounded px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide" style={{ background: `${st.color}1f`, color: st.color }}>{st.label}</span>
-                  </div>
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <span className="font-mono text-[16px] font-bold text-white">{s.value}</span>
-                    <span className="text-[11px]" style={{ color: st.color }}>{s.trend}</span>
-                  </div>
-                  <p className="mt-1 text-[11px] leading-snug text-white/55">{s.note}</p>
+      <Section title="Market signals" className="border border-xo-line"
+        foot="Computed when the page opens from the valuation engine, the 12 ranked buyers and the source-referenced acquisition history (registry snapshot). Nothing is monitored in the background.">
+        <ul className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
+          {signals.map((s) => {
+            const st = IMPACT_STYLE[s.impact];
+            return (
+              <li key={s.label} className="bg-xo-panel px-4 py-3">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-[12px] font-semibold text-xo-muted">{s.label}</h3>
+                  <span className={`text-[11px] font-semibold ${st.cls}`}><span aria-hidden>{st.glyph} </span>{st.label}</span>
                 </div>
-              );
-            })}
-          </div>
-        </Panel>
-      </Frame>
+                <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+                  <span className="font-mono text-[16px] font-semibold tabular-nums">{s.value}</span>
+                  <span className={`text-[12px] ${st.cls}`}>{s.trend}</span>
+                </div>
+                <p className="mt-1 text-[12px] leading-snug text-xo-muted">{s.note}</p>
+              </li>
+            );
+          })}
+        </ul>
+      </Section>
     </div>
   );
 };
+
+const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+  <div className="bg-xo-panel px-3 py-2">
+    <dt className="text-[11px] font-medium text-xo-faint">{k}</dt>
+    <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
+  </div>
+);
 
 export default ExitTiming;

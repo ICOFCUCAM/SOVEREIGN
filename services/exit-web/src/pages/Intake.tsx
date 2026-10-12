@@ -1,149 +1,335 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Card, Kpi, SectionHeader, Field, inputCls, fmtMoney, Button } from "../lib/ui";
+import React, { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { fmtMoney, Button } from "../lib/ui";
 import { runInstitutionalValuation } from "@exit/engines";
 import {
   buildProfile, SECTORS, SAMPLE_INTAKE, type IntakeInputs, type Sector,
 } from "../lib/company-intake";
-import { listCompany } from "../lib/listings";
+import { listCompany, listingFromCompany, unlistCompany, allListings } from "../lib/listings";
+import { listingDestination } from "../lib/exit-api";
+import { useAuth } from "../lib/auth";
+import { requiredEngagement } from "../lib/access";
+import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
+import { NUMERIC_FIELDS, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
+import { fromQuery, quickIntake } from "../lib/quick-value";
+import { Section, Metric, Provenance, ScrollRegion, ActionLink, Bar } from "../components/xo";
 
-// COMPANY INTAKE → INSTANT REPORT — the success metric: a founder enters
-// their company and within seconds receives the institutional answer (who
-// buys them, at what price, why, on what evidence). Every figure is the
-// valuation constitution computed live on their inputs; the buyer universe
-// and comparables come from the registry, parameterized by their sector.
+// ── VALUE MY COMPANY ────────────────────────────────────────────────
+// Page 03 of the ExitOS institutional redesign (docs/redesign/PAGE-03-
+// VALUE-MY-COMPANY.md). The founder enters their figures (left) and reads
+// the institutional answer (right): value → key figures → likely buyers →
+// comparable transactions → evidence. Every figure is the valuation
+// constitution computed live on the inputs; the figures are saved only when
+// the founder edits them, and then drive every console page.
 
-const KEY = "exitos.intake.v1";
 const pct = (x: number): string => `${Math.round(x * 100)}%`;
 const usd = (n: number): string => (n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`);
+const INPUT = "w-full rounded-sm border bg-xo-ink px-2.5 py-2 text-[13px] text-xo-text placeholder:text-xo-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+const LABEL = "mb-1 block text-[12px] font-medium text-xo-muted";
+
+// Pages that read the saved figures today (loadActiveCompany). Others still
+// show the demo company until their own redesign turn.
+const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
+  { to: "/console", label: "Intelligence Terminal" },
+  { to: "/console/command", label: "Liquidity Command" },
+  { to: "/console/commander", label: "Chief Investment Banker" },
+  { to: "/console/network", label: "Network Intelligence" },
+  { to: "/console/autopilot", label: "Autonomous Exit (valuation and buyers)" },
+  { to: "/console/readiness", label: "Exit Readiness" },
+  { to: "/console/exit-timing", label: "Exit Timing" },
+  { to: "/console/buyer-copilot", label: "Buyer Intelligence" },
+  { to: "/console/deal-room", label: "Deal Room (simulated)" },
+  { to: "/console/intelligence", label: "Acquisition Intelligence" },
+  { to: "/console/data-room", label: "Data Room (checklist)" },
+  { to: "/console/buyers", label: "Buyer Profiles" },
+  { to: "/console/buyer-graph", label: "Buyer Graph (ranking)" },
+  { to: "/console/buyer/microsoft", label: "Each buyer's profile" },
+  { to: "/console/documents", label: "Documents" },
+  { to: "/console/engagement-registry", label: "Engagement Registry" },
+  { to: "/console/inbox", label: "Inbox" },
+  { to: "/console/outreach-plan", label: "Outreach Plan" },
+  { to: "/report", label: "Reports" },
+];
 
 const Intake: React.FC = () => {
-  const [inp, setInp] = useState<IntakeInputs>(() => {
-    try { const s = localStorage.getItem(KEY); if (s) return { ...SAMPLE_INTAKE, ...JSON.parse(s) }; } catch { /* ignore */ }
-    return SAMPLE_INTAKE;
-  });
-  useEffect(() => { try { localStorage.setItem(KEY, JSON.stringify(inp)); } catch { /* ignore */ } }, [inp]);
+  const { session } = useAuth();
+  // Saved only when the founder edits a field — opening the page saves nothing.
+  // Figures handed over from the homepage's quick value pre-fill the form but
+  // are not saved until the founder edits a field or presses Save.
+  const { search } = useLocation();
+  const handoff = useMemo(() => fromQuery(search), [search]);
+  const [inp, setInp] = useState<IntakeInputs>(() => loadSavedIntake() ?? (handoff ? quickIntake(handoff) : SAMPLE_INTAKE));
+  const [saved, setSaved] = useState<boolean>(() => loadSavedIntake() !== null);
+  const [prefilled, setPrefilled] = useState<boolean>(() => loadSavedIntake() === null && handoff !== null);
+  const [handoffDismissed, setHandoffDismissed] = useState(false);
 
   const report = useMemo(() => runInstitutionalValuation(buildProfile(inp)), [inp]);
-  const [listed, setListed] = useState(false);
-  const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => { setInp((p) => ({ ...p, [k]: v })); setListed(false); };
-  const num = (k: keyof IntakeInputs, v: string, scale = 1): void => set(k, (parseFloat(v) || 0) * scale as never);
+  // Listing: preview exactly what buyers will see, confirm, and allow withdrawal.
+  const preview = useMemo(() => listingFromCompany(buildProfile(inp)), [inp]);
+  const [, setListingVersion] = useState(0);   // re-render after list / withdraw
+  const stored = allListings().find((l) => l.id === preview.id);
+  const listed = !!stored;
+  const stale = !!stored && JSON.stringify(stored.publicView) !== JSON.stringify(preview.publicView);
+  const [confirming, setConfirming] = useState(false);
+  const destination = listingDestination();
+  const confirmListing = (): void => { listCompany(buildProfile(inp)); setConfirming(false); setListingVersion((v) => v + 1); };
+  const withdraw = (): void => { unlistCompany(preview.id); setConfirming(false); setListingVersion((v) => v + 1); };
+  const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => {
+    setInp((p) => { const next = { ...p, [k]: v }; saveIntake(next); return next; });
+    setSaved(true); setPrefilled(false);
+  };
+  const keepPrefill = (): void => { saveIntake(inp); setSaved(true); setPrefilled(false); };
+  const applyHandoff = (): void => {
+    if (!handoff) return;
+    const next = quickIntake(handoff);
+    saveIntake(next); setInp(next); setTexts(textsFor(next)); setErrors({}); setSaved(true); setHandoffDismissed(true);
+  };
+  // Number fields keep exactly what was typed; only valid values reach the engines.
+  const [texts, setTexts] = useState<Record<NumericKey, string>>(() => textsFor(inp));
+  const [errors, setErrors] = useState<Partial<Record<NumericKey, string>>>({});
+  const typeNumber = (k: NumericKey, text: string): void => {
+    setTexts((t) => ({ ...t, [k]: text }));
+    const spec = NUMERIC_FIELDS.find((f) => f.key === k)!;
+    const res = parseField(spec, text);
+    setErrors((e) => { const n = { ...e }; if (res.ok) delete n[k]; else n[k] = res.error; return n; });
+    if (res.ok) set(k, res.value as never);
+  };
+  const clearMine = (): void => { clearIntake(); setInp(SAMPLE_INTAKE); setTexts(textsFor(SAMPLE_INTAKE)); setErrors({}); setSaved(false); };
 
   const m = report.mandatoryOutputs;
 
   return (
-    <div>
-      <SectionHeader
-        kicker="Acquisition Intelligence · Intake"
-        title="Value my company"
-        description="Enter your company and receive the institutional answer in seconds — enterprise value, the buyers most likely to acquire you, comparable transactions and the evidence behind every figure."
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => { listCompany(buildProfile(inp)); setListed(true); }}>{listed ? "✓ Listed (anonymized)" : "List on the exchange"}</Button>
-            <Button variant="ghost" onClick={() => { setInp(SAMPLE_INTAKE); setListed(false); }}>Reset to example</Button>
+    <div data-page="value-my-company" className="space-y-3 text-xo-text">
+      {/* ── header ─────────────────────────────────────────────────── */}
+      <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3 border border-xo-line bg-xo-ink px-4 py-3">
+        <div className="min-w-0 max-w-[70ch]">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">Acquisition Intelligence · Intake</div>
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h1 className="font-serif text-[24px] font-semibold tracking-tight">Value my company</h1>
+            {saved ? <Provenance kind="company" /> : prefilled ? <Provenance kind="company">Homepage figures · not saved</Provenance> : <Provenance kind="demo" />}
           </div>
-        }
-      />
+          <p className="mt-1 text-[13px] text-xo-muted">Enter your company and receive the institutional answer in seconds — enterprise value, the buyers most likely to acquire you, comparable transactions and the evidence behind every figure.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {listed && <Button variant="ghost" onClick={withdraw}>Withdraw listing</Button>}
+          {(!listed || stale) && <Button onClick={() => setConfirming(true)} disabled={!saved} aria-expanded={confirming} aria-controls="listing-confirm" aria-describedby={saved ? undefined : "list-needs-data"}>{stale ? "Update listing" : "List on the exchange"}</Button>}
+          {!saved && !listed && <span id="list-needs-data" className="basis-full text-right text-[11px] text-xo-faint">Enter your figures to list — the demo company can't be listed.</span>}
+          {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
+        </div>
+      </header>
 
-      <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
-        {/* ── intake form ── */}
-        <Card className="space-y-4 p-5">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Your company</div>
-          <Field label="Company name"><input className={inputCls} value={inp.name} onChange={(e) => set("name", e.target.value)} /></Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Sector">
-              <select className={inputCls} value={inp.sector} onChange={(e) => set("sector", e.target.value as Sector)}>
-                {SECTORS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
-              </select>
-            </Field>
-            <Field label="HQ (ISO)"><input className={inputCls} value={inp.jurisdiction} onChange={(e) => set("jurisdiction", e.target.value)} /></Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="TTM revenue ($M)"><input className={inputCls} inputMode="decimal" value={inp.ttmRevenueUsd / 1e6} onChange={(e) => num("ttmRevenueUsd", e.target.value, 1e6)} /></Field>
-            <Field label="ARR ($M)"><input className={inputCls} inputMode="decimal" value={inp.arrUsd / 1e6} onChange={(e) => num("arrUsd", e.target.value, 1e6)} /></Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Growth YoY (%)"><input className={inputCls} inputMode="decimal" value={Math.round(inp.growthPct * 100)} onChange={(e) => num("growthPct", e.target.value, 0.01)} /></Field>
-            <Field label="Gross margin (%)"><input className={inputCls} inputMode="decimal" value={Math.round(inp.grossMarginPct * 100)} onChange={(e) => num("grossMarginPct", e.target.value, 0.01)} /></Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="EBITDA margin (%)"><input className={inputCls} inputMode="decimal" value={Math.round(inp.ebitdaMarginPct * 100)} onChange={(e) => num("ebitdaMarginPct", e.target.value, 0.01)} /></Field>
-            <Field label="Net retention (%)"><input className={inputCls} inputMode="decimal" value={Math.round(inp.netRetentionPct * 100)} onChange={(e) => num("netRetentionPct", e.target.value, 0.01)} /></Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Top-10 concentration (%)"><input className={inputCls} inputMode="decimal" value={Math.round(inp.customerConcentrationPct * 100)} onChange={(e) => num("customerConcentrationPct", e.target.value, 0.01)} /></Field>
-            <Field label="Customers"><input className={inputCls} inputMode="numeric" value={inp.totalCustomers} onChange={(e) => num("totalCustomers", e.target.value)} /></Field>
-          </div>
-          <div className="flex gap-4 pt-1">
-            <label className="flex items-center gap-2 text-[12px] text-white/70"><input type="checkbox" checked={inp.hasNetworkEffects} onChange={(e) => set("hasNetworkEffects", e.target.checked)} /> Network effects</label>
-            <label className="flex items-center gap-2 text-[12px] text-white/70"><input type="checkbox" checked={inp.hasDataMoat} onChange={(e) => set("hasDataMoat", e.target.checked)} /> Data moat</label>
-          </div>
-          <p className="text-[10px] text-white/35">The report recomputes live as you type. Saved to this browser only.</p>
-        </Card>
+      {prefilled && (
+        <section aria-label="Figures from the homepage" className="flex flex-wrap items-center gap-3 border border-xo-brass/50 bg-xo-panel px-4 py-3">
+          <p className="min-w-0 flex-1 text-[13px] text-xo-text">Pre-filled from the homepage: sector, revenue and growth. Every other field is a typical value. <span className="text-xo-muted">Nothing is saved yet — edit any field, or save these figures to use them across the console.</span></p>
+          <Button onClick={keepPrefill}>Save these figures</Button>
+        </section>
+      )}
+      {saved && handoff && !handoffDismissed && (
+        <section aria-label="Figures from the homepage" className="flex flex-wrap items-center gap-3 border border-xo-line bg-xo-panel px-4 py-3">
+          <p className="min-w-0 flex-1 text-[13px] text-xo-muted">You already have saved figures, so the homepage figures (sector, revenue, growth) were not applied.</p>
+          <Button variant="ghost" onClick={applyHandoff}>Use the homepage figures instead</Button>
+          <Button variant="ghost" onClick={() => setHandoffDismissed(true)}>Keep mine</Button>
+        </section>
+      )}
 
-        {/* ── instant report ── */}
-        <div className="space-y-6">
-          <Card className="overflow-hidden border-deal-400/30 p-0">
-            <div className="bg-gradient-to-r from-deal-600/15 to-transparent px-6 py-5">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">Enterprise value · strategic-buyer basis</div>
-              <div className="mt-2 flex flex-wrap items-baseline gap-x-6 gap-y-1">
-                <span className="font-mono text-3xl font-bold tabular-nums text-white">{fmtMoney(report.headline.mid)}</span>
-                <span className="font-mono text-[15px] tabular-nums text-white/55">{fmtMoney(report.headline.low)} – {fmtMoney(report.headline.high)}</span>
-                <span className="rounded-full bg-deal-500/15 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide text-deal-300 ring-1 ring-deal-400/40">Confidence {report.confidence.score}% · {report.confidence.tier}</span>
+      {(confirming || listed) && (
+        <section id="listing-confirm" aria-label="Exchange listing" className="border border-xo-caution/50 bg-xo-panel px-4 py-3">
+          {listed && !confirming ? (
+            <p role="status" className="text-[13px] text-xo-text">
+              {destination === "exchange"
+                ? <>Listed anonymously on the exchange as <span className="font-mono">{preview.code}</span>. Buyers see the figures below, not your company name.</>
+                : <>Saved as an anonymous listing <span className="font-mono">{preview.code}</span> <strong>in this browser only</strong> — this build is not connected to the live exchange, so no buyer can see it yet.</>}
+            </p>
+          ) : (
+            <>
+              <h2 className="text-[14px] font-semibold">Before you list: this is what buyers will see</h2>
+              <p className="mt-1 text-[12px] text-xo-muted">Your company name is withheld. {destination === "exchange" ? "The listing is published to the live exchange." : "This build is not connected to the live exchange: the listing is saved in this browser only."} You can withdraw it at any time.</p>
+            </>
+          )}
+          <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-5">
+            {(() => { const pv = listed && !confirming && stored ? stored.publicView : preview.publicView; return ([["Sector", pv.sector], ["Region", pv.region], ["TTM revenue", fmtMoney(pv.revenueUsd)], ["Growth", pct(pv.growthPct)], ["EBITDA margin", pct(pv.ebitdaMarginPct)]] as const); })().map(([k, v]) => (
+              <div key={k}><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[13px] tabular-nums capitalize">{String(v).replace(/_/g, " ")}</dd></div>
+            ))}
+          </dl>
+          {listed && stale && !confirming && <p className="mt-2 text-[12px] text-xo-caution">Your figures changed since you listed. The listing still shows the earlier figures until you update it.</p>}
+          {confirming && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button onClick={confirmListing}>{listed ? "Confirm update" : "Confirm listing"}</Button>
+              <Button variant="ghost" onClick={() => setConfirming(false)}>Cancel</Button>
+            </div>
+          )}
+        </section>
+      )}
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[360px_minmax(0,1fr)]">
+        {/* ── the form ───────────────────────────────────────────────── */}
+        <Section title="Your company" eyebrow="Inputs · recomputes as you type" className="self-start border border-xo-line">
+          <div className="space-y-3 px-4 py-4">
+            <div>
+              <label htmlFor="intake-name" className={LABEL}>Company name</label>
+              <input id="intake-name" className={`${INPUT} border-xo-line`} value={inp.name} onChange={(e) => set("name", e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="intake-sector" className={LABEL}>Sector</label>
+                <select id="intake-sector" className={`${INPUT} border-xo-line capitalize`} value={inp.sector} onChange={(e) => set("sector", e.target.value as Sector)}>
+                  {SECTORS.map((x) => <option key={x} value={x}>{x.replace(/_/g, " ")}</option>)}
+                </select>
               </div>
-              <p className="mt-3 max-w-3xl text-[12.5px] leading-relaxed text-white/55">
+              <div>
+                <label htmlFor="intake-hq" className={LABEL}>HQ country (ISO)</label>
+                <input id="intake-hq" className={`${INPUT} border-xo-line uppercase`} value={inp.jurisdiction} onChange={(e) => set("jurisdiction", e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-3">
+              {NUMERIC_FIELDS.map((f) => {
+                const err = errors[f.key];
+                const id = `intake-${f.key}`;
+                return (
+                  <div key={f.key}>
+                    <label htmlFor={id} className={LABEL}>{f.label} <span className="text-xo-faint">({f.unit === "customers" ? "count" : f.unit})</span></label>
+                    <input id={id} className={`${INPUT} font-mono tabular-nums ${err ? "border-xo-risk" : "border-xo-line"}`} inputMode={f.integer ? "numeric" : "decimal"}
+                      value={texts[f.key]} onChange={(e) => typeNumber(f.key, e.target.value)}
+                      aria-invalid={err ? true : undefined} aria-describedby={`${id}-msg`} />
+                    <span id={`${id}-msg`} className={`mt-1 block text-[11px] leading-snug ${err ? "text-xo-risk" : "text-xo-faint"}`}>{err ?? f.hint}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <fieldset className="flex flex-wrap gap-x-5 gap-y-2 border-t border-xo-line pt-3">
+              <legend className="sr-only">Defensibility</legend>
+              <label className="flex items-center gap-2 text-[13px] text-xo-muted"><input type="checkbox" className="accent-emerald-500" checked={inp.hasNetworkEffects} onChange={(e) => set("hasNetworkEffects", e.target.checked)} /> Network effects</label>
+              <label className="flex items-center gap-2 text-[13px] text-xo-muted"><input type="checkbox" className="accent-emerald-500" checked={inp.hasDataMoat} onChange={(e) => set("hasDataMoat", e.target.checked)} /> Data moat</label>
+            </fieldset>
+            <p role="status" className="border-t border-xo-line pt-3 text-[12px] text-xo-muted">
+              {saved
+                ? "Your figures are saved in this browser. See below for the pages that use them."
+                : `Showing the demo company (${SAMPLE_INTAKE.name}). Edit any field to value your own company; nothing is saved until you do.`}
+            </p>
+          </div>
+        </Section>
+
+        {/* ── the report ─────────────────────────────────────────────── */}
+        <div className="min-w-0 space-y-3">
+          <Section title="Enterprise value" eyebrow="Institutional valuation framework · the console value" className="border border-xo-line"
+            right={<Provenance kind="model" />}>
+            <div className="px-4 py-4">
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span className="font-mono text-[36px] font-semibold leading-none tabular-nums">{fmtMoney(report.headline.mid)}</span>
+                <span className="font-mono text-[14px] tabular-nums text-xo-muted">{fmtMoney(report.headline.low)} – {fmtMoney(report.headline.high)}</span>
+                <span className="text-[12px] text-xo-muted">Confidence <span className="font-mono text-xo-text">{report.confidence.score}%</span> · {report.confidence.tier}</span>
+              </div>
+              <p className="mt-3 max-w-[70ch] text-[13px] leading-relaxed text-xo-muted">
                 Midpoint = financial baseline {usd(report.financialBaseline.mid)} × (1 + {pct(report.premium.appliedPct)} strategic premium). {report.premium.note}
               </p>
+              <p className="mt-2 text-[12px] text-xo-faint">The same institutional framework produces the value on every console page.</p>
             </div>
-          </Card>
+          </Section>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Kpi label="Strategic premium" value={`+${pct(report.premium.appliedPct)}`} sub={`range ${pct(report.premium.rangeLowPct)}–${pct(report.premium.rangeHighPct)}`} />
-            <Kpi label="Comparables" value={String(report.comparablesUsed)} sub="source-referenced" accent="#34d399" />
-            <Kpi label="Qualified buyers" value={String(report.buyerUniverse.qualified)} sub={`of ${report.buyerUniverse.scored} scored`} />
-            <Kpi label="Time to close" value={`${report.timeToClose.lowDays}–${report.timeToClose.highDays}d`} sub="expected" accent="#fbbf24" />
-          </div>
+          <section aria-label="Key figures" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
+            <div className="bg-xo-panel"><Metric label="Strategic premium" value={`+${pct(report.premium.appliedPct)}`} sub={`range ${pct(report.premium.rangeLowPct)}–${pct(report.premium.rangeHighPct)}`} /></div>
+            <div className="bg-xo-panel"><Metric label="Comparables" value={String(report.comparablesUsed)} sub="source-referenced" /></div>
+            <div className="bg-xo-panel"><Metric label="Qualified buyers" value={String(report.buyerUniverse.qualified)} sub={`of ${report.buyerUniverse.scored} scored`} /></div>
+            <div className="bg-xo-panel"><Metric label="Time to close" value={`${report.timeToClose.lowDays}–${report.timeToClose.highDays}d`} sub="expected" /></div>
+          </section>
 
-          {/* most likely buyers */}
-          <Card className="overflow-hidden p-0">
-            <div className="border-b border-white/10 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-deal-300">Most likely acquirers · ranked by fit-adjusted expected value</div>
-            <table className="w-full text-[12.5px]">
-              <tbody>
-                {report.mostLikelyBuyers.map((b, i) => (
-                  <tr key={b.name} className="border-b border-white/5 last:border-0">
-                    <td className="px-5 py-2.5 font-mono text-white/40">{i + 1}</td>
-                    <td className="px-3 py-2.5 font-semibold text-white">{b.name}</td>
-                    <td className="px-3 py-2.5 text-right font-mono tabular-nums text-deal-300">{b.probabilityPct}%</td>
-                    <td className="px-5 py-2.5 text-right font-mono tabular-nums text-white/60">~{b.expectedDaysToCash}d to cash</td>
-                  </tr>
-                ))}
-                {report.mostLikelyBuyers.length === 0 && <tr><td className="px-5 py-3 text-white/45">No qualified buyers for this sector in the curated registry yet.</td></tr>}
-              </tbody>
-            </table>
-          </Card>
-
-          {/* comparable transactions */}
-          <Card className="overflow-hidden p-0">
-            <div className="border-b border-white/10 px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-deal-300">Comparable transactions · {inp.sector.replace(/_/g, " ")}</div>
-            {report.comparableTransactions.length ? (
-              <table className="w-full text-[12.5px]">
-                <tbody>
-                  {report.comparableTransactions.slice(0, 8).map((c, i) => (
-                    <tr key={`${c.target}-${i}`} className="border-b border-white/5 last:border-0">
-                      <td className="px-5 py-2.5"><span className="font-medium text-white">{c.target}</span> <span className="text-white/40">→</span> <span className="text-white/70">{c.buyer}</span></td>
-                      <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/55">{c.date ?? "—"}</td>
-                      <td className="px-3 py-2.5 text-right font-mono tabular-nums text-white/70">{c.premiumPct != null ? `+${Math.round(c.premiumPct * 100)}%` : "—"}</td>
-                      <td className="px-5 py-2.5 text-right font-mono tabular-nums text-deal-300">{c.priceUsd != null ? usd(c.priceUsd) : "—"}</td>
+          <Section title="Most likely acquirers" eyebrow="Ranked by fit-adjusted expected value" className="border border-xo-line"
+            foot={`From the curated buyer registry (${report.buyerUniverse.registry} acquirers: ${report.buyerUniverse.strategic} strategic, ${report.buyerUniverse.financial} financial, ${report.buyerUniverse.family_office} family office, ${report.buyerUniverse.sovereign} sovereign); probability and time to cash are the framework's buyer model.`}>
+            {report.mostLikelyBuyers.length ? (
+              <ScrollRegion label="Most likely acquirers table">
+                <table className="w-full min-w-[420px] text-[13px]">
+                  <thead className="text-left text-[11px] text-xo-faint">
+                    <tr className="border-b border-xo-line">
+                      <th scope="col" className="px-4 py-2 font-medium">#</th>
+                      <th scope="col" className="px-2 py-2 font-medium">Acquirer</th>
+                      <th scope="col" className="px-2 py-2 text-right font-medium">Probability</th>
+                      <th scope="col" className="px-4 py-2 text-right font-medium">Time to cash</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : <div className="px-5 py-4 text-[12px] text-white/45">No same-sector comparables indexed yet — the radar widens this with every ingest run.</div>}
-            <div className="border-t border-white/10 px-5 py-2 text-[10px] text-white/35">{m.data_provenance_summary}</div>
-          </Card>
+                  </thead>
+                  <tbody>
+                    {report.mostLikelyBuyers.map((b, i) => (
+                      <tr key={b.name} className="border-b border-xo-line/60 last:border-0">
+                        <td className="px-4 py-2 font-mono text-xo-faint">{i + 1}</td>
+                        <th scope="row" className="px-2 py-2 text-left font-semibold">{b.name}</th>
+                        <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-verified">{b.probabilityPct}%</td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums text-xo-muted">~{b.expectedDaysToCash}d</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </ScrollRegion>
+            ) : <p className="px-4 py-3 text-[13px] text-xo-muted">No qualified buyers for this sector in the curated registry yet.</p>}
+          </Section>
 
-          <p className="text-[11px] text-white/40">
-            Prepared under ExitOS Valuation Framework v{report.frameworkVersion}. This is the same institutional engine the whole platform runs on — explore the full breakdown in the <Link to="/console/valuation" className="text-deal-300 hover:text-deal-200">valuation desk</Link> or the <Link to="/console" className="text-deal-300 hover:text-deal-200">Intelligence Terminal</Link>.
+          <Section title="Comparable transactions" eyebrow={inp.sector.replace(/_/g, " ")} className="border border-xo-line"
+            foot={m.data_provenance_summary}>
+            {report.comparableTransactions.length ? (
+              <ScrollRegion label="Comparable transactions table">
+                <table className="w-full min-w-[640px] text-[13px]">
+                  <thead className="text-left text-[11px] text-xo-faint">
+                    <tr className="border-b border-xo-line">
+                      <th scope="col" className="px-4 py-2 font-medium">Target → buyer</th>
+                      <th scope="col" className="px-2 py-2 text-right font-medium">Date</th>
+                      <th scope="col" className="px-2 py-2 text-right font-medium">Premium</th>
+                      <th scope="col" className="px-2 py-2 text-right font-medium">Price</th>
+                      <th scope="col" className="px-4 py-2 text-right font-medium">Source</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {report.comparableTransactions.slice(0, 8).map((c, i) => (
+                      <tr key={`${c.target}-${i}`} className="border-b border-xo-line/60 last:border-0">
+                        <td className="px-4 py-2">
+                          <span className="font-medium">{c.target}</span> <span className="text-xo-faint">→</span> <span className="text-xo-muted">{c.buyer}</span>
+                          <span className="block text-[11px] text-xo-faint">{c.status}{c.closeDays != null ? ` · ${c.closeDays}d to close` : ""} · {c.rationale}</span>
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.date ?? "—"}</td>
+                        <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.premiumPct != null ? `+${Math.round(c.premiumPct * 100)}%` : "—"}</td>
+                        <td className="px-2 py-2 text-right font-mono tabular-nums">{c.priceUsd != null ? usd(c.priceUsd) : <span className="font-sans text-[11px] text-xo-faint">undisclosed</span>}</td>
+                        <td className="px-4 py-2 text-right font-mono text-[11px] text-xo-muted" title={c.sourceRef}>{c.sourceRef.split(":")[0].replace(/_/g, " ")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </ScrollRegion>
+            ) : <p className="px-4 py-3 text-[13px] text-xo-muted">No same-sector comparables indexed yet — the radar widens this with every ingest run.</p>}
+          </Section>
+
+          <Section title="Confidence" eyebrow="What the valuation rests on" className="border border-xo-line"
+            right={<span className="font-mono text-[14px] font-semibold">{report.confidence.score}% <span className="text-[11px] font-normal text-xo-faint">{report.confidence.tier}</span></span>}
+            foot={report.confidence.note}>
+            <ul className="grid gap-x-8 gap-y-2 px-4 py-3 sm:grid-cols-2">
+              {([["Data completeness", report.confidence.drivers.dataCompleteness], ["Comparable depth", report.confidence.drivers.comparableDepth], ["Sector maturity", report.confidence.drivers.sectorMaturity], ["Financial quality", report.confidence.drivers.financialQuality], ["Data freshness", report.confidence.drivers.dataFreshness]] as const).map(([k, v]) => (
+                <li key={k} className="flex items-center justify-between gap-3 text-[12px]">
+                  <span className="text-xo-muted">{k}</span>
+                  <Bar value={Math.round(v * 100)} label={`${Math.round(v * 100)}%`} tone="action" width="w-24" />
+                </li>
+              ))}
+            </ul>
+          </Section>
+
+          <Section tone="paper" title="Disclaimer" eyebrow={`Valuation Framework v${report.frameworkVersion}`}>
+            <p className="px-4 py-3 text-[12px] leading-relaxed text-xo-paper-muted">{report.disclaimer}</p>
+          </Section>
+
+          {saved && (
+            <Section title="Where your figures are used" eyebrow="Saved in this browser" className="border border-xo-verified/40"
+              foot="Other console pages still show the demo company until they are redesigned to read your figures.">
+              <ul className="flex flex-wrap gap-x-5 gap-y-2 px-4 py-3 text-[13px]">
+                {USES_YOUR_FIGURES.map((u) => {
+                  const gate = u.to.startsWith("/console") ? requiredEngagement(u.to, session?.role ?? "founder", session?.plan ?? "free") : null;
+                  return (
+                    <li key={u.to}>
+                      <ActionLink to={u.to}>{u.label} →</ActionLink>
+                      {gate && <span className="ml-1.5 text-[11px] text-xo-caution">requires {gate}</span>}
+                    </li>
+                  );
+                })}
+              </ul>
+            </Section>
+          )}
+
+          <p className="px-1 text-[12px] text-xo-faint">
+            Prepared under ExitOS Valuation Framework v{report.frameworkVersion}. This is the same institutional engine the whole platform runs on — explore the full breakdown in the <ActionLink to="/console/valuation">valuation desk</ActionLink> or the <ActionLink to="/console">Intelligence Terminal</ActionLink>.
           </p>
         </div>
       </div>

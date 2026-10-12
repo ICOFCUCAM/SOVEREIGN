@@ -24,3 +24,24 @@ export function loadActiveCompany(): { company: CompanyProfile; fromIntake: bool
 
 /** Sector vocabulary for the active company — drives buyer-overlap ranking. */
 export const activeTokens = (company: CompanyProfile): readonly string[] => sectorTokensFor(company.sector);
+
+// ── Saved intake ────────────────────────────────────────────────────
+// The founder's figures are saved only when they enter them — never just
+// because a page was opened — so "Your intake" always means the founder's
+// own data. Clearing returns every page to the demo company.
+
+/** The founder's saved figures, or null when none are saved. */
+export function loadSavedIntake(): IntakeInputs | null {
+  try {
+    const raw = localStorage.getItem(KEY);
+    return raw ? { ...SAMPLE_INTAKE, ...(JSON.parse(raw) as Partial<IntakeInputs>) } : null;
+  } catch { return null; }
+}
+
+export function saveIntake(inputs: IntakeInputs): void {
+  try { localStorage.setItem(KEY, JSON.stringify(inputs)); } catch { /* storage unavailable: nothing saved */ }
+}
+
+export function clearIntake(): void {
+  try { localStorage.removeItem(KEY); } catch { /* ignore */ }
+}

@@ -1,3 +1,4 @@
+import type { BuyerCandidate } from "@exit/engines";
 import { BUYERS } from "./engines";
 
 // Live Deal Room activity. In demo mode there is no real session telemetry,
@@ -71,8 +72,8 @@ function activityFor(buyerName: string, buyerType: string, probability: number, 
   };
 }
 
-export function dealRoomActivity(limit = 6): BuyerActivity[] {
-  return BUYERS.candidates.slice(0, limit)
+export function dealRoomActivity(limit = 6, candidates: readonly BuyerCandidate[] = BUYERS.candidates): BuyerActivity[] {
+  return candidates.slice(0, limit)
     .map((c, i) => activityFor(c.buyer.name, c.buyer.buyerType, c.probability, i))
     .sort((a, b) => b.interestScore - a.interestScore);
 }
