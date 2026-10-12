@@ -200,11 +200,12 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
             <div>
               <ExchangeLockup size={30} dark />
               <p className="mt-5 max-w-sm font-editorial text-[17px] leading-snug text-white/85">{t("ft.tagline")}</p>
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[12px] text-blue-100/70">
-                <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.soc")}</span>
-                <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.audit")}</span>
-                <span className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-emerald-500" /> {t("ft.ndagated")}</span>
-              </div>
+              {/* how the exchange works, stated — not status lights (EE20) */}
+              <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10.5px] uppercase tracking-[0.12em] text-blue-100/75">
+                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-ex-done/70" />{t("ft.soc")}</li>
+                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-ex-done/70" />{t("ft.audit")}</li>
+                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-ex-done/70" />{t("ft.ndagated")}</li>
+              </ul>
             </div>
             {([
               ["ft.exchange", [["nav.platform", "/platform"], ["nav.modules", "/modules"], ["nav.pricing", "/pricing"], ["nav.access", "/console"]]],
