@@ -267,7 +267,7 @@ Every moved figure keeps its source note. Platform and Modules get the **Sources
 ### Gap register — Phase 4
 | # | Gap | Fix | Status |
 |---|---|---|---|
-| V1 | **Homepage too long; blocks belong elsewhere.** | Move the ten blocks above to Platform and Modules (content verbatim, source notes and "Sources & method" on those pages). Homepage keeps the six moments. Targets: homepage ≤ 6,500 px at 1440 and ≤ 11,000 px at 390. | ☑ V1-commit |
+| V1 | **Homepage too long; blocks belong elsewhere.** | Move the ten blocks above to Platform and Modules (content verbatim, source notes and "Sources & method" on those pages). Homepage keeps the six moments. Targets: homepage ≤ 6,500 px at 1440 and ≤ 11,000 px at 390. | ☑ `c9ebb10d` |
 | V2 | **No signature language.** | Carry the ledger's broadsheet treatment (double rule, masthead-style chapter heads, column rules, drop cap) through the thesis and the final call to action, so the homepage reads as one publication. | ☐ |
 | V3 | **Repetitive rhythm.** | Contrast of scale and ground: hero (photo + board) → compact valuation strip (white) → one giant statement on the page ground → dense ledger (white) → full-bleed navy lifecycle with large numerals → back-page call to action. No two consecutive moments share a layout. | ☐ |
 | V4 | **Four typefaces, label noise.** | Marketing pages use Source Serif 4 (expressive), Inter (body) and mono (figures only). Sora (`font-serif`) is removed from marketing pages; the console is unchanged. Small all-caps labels are reduced to one chapter label per moment. | ☐ |
