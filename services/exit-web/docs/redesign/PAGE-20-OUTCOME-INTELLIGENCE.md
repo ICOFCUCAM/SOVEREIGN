@@ -34,8 +34,12 @@ Market-level outcomes: the buyers paying the highest premiums, the fastest close
 | G1 | **Premium and close figures attributed to "disclosed deals" with a disclosed-deal count as the sample.** | Source named as curated outcome records matched by buyer name; disclosed registry deals shown as their own labelled column; caveat about name matching (X15). | ☐ |
 | G2 | Framework priors presented as "what commands the strongest valuation". | Title "Sector multiple priors (framework)"; comment corrected. | ☐ |
 | G3 | Fake live tape. | `RegistryTape`. | ☐ |
-| G4 | Design: no `h1`, 12 contrast failures, header-less tables. | Rebuild on `xo` with table headers. | ☐ |
+| G4 | Design: no `h1`, 12 contrast failures, header-less tables. | Rebuild on `xo` with table headers. | ☑ G4-commit |
 
 ---
 
 ## Closure log
+
+### G4 — Design
+*Closed by:* `pages/OutcomeIntelligence.tsx` rebuilt on `xo` (`PageHeader` `h1` with the as-of date; four metrics; reactor hidden from assistive tech; all three tables with column headers (the close-rate column is now labelled "Close rate") and row headers, each in a keyboard-reachable `ScrollRegion`; the premium tooltip aligns right so it stays on screen). Content carried over verbatim; G1–G3 follow.
+*Verification:* `tsc -b`, eslint clean · Chromium Preparation 1440/390: 0 errors, `h1` 1 (was 0), no overflow, axe **0** (was 12), all tab stops with visible focus.
