@@ -37,7 +37,7 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 | G2 | **Invented founder-friendliness; fit shown as "interest" with a pulsing dot; appetite/check mislabels.** | Remove founder-friendliness; "Fit · Hot/Warm/Cool" with thresholds, no pulse; "Active-appetite buyers — registry attribute"; "Check-size midpoint"; "median across these N buyers". | ☑ `2614240` |
 | G3 | Banker's-take urgency and overclaim; hidden plan gate. | Plain wording; `requiredEngagement` note. | ☑ `80d197d` |
 | G4 | Demo company unlabelled. | Buyers and intro text on `loadActiveCompany()`; badge. | ☑ `239e898` |
-| G5 | Fake live tape. | `RegistryTape`. | ☑ G5-commit |
+| G5 | Fake live tape. | `RegistryTape`. | ☑ `2e5a2f5` |
 | G6 | Design: no `h1`, 24 contrast failures, header name differs from NAV, drawer not a dialog. | Rebuild on `xo`; `h1` "Buyer Profiles"; intro in the shared `Modal`. | ☑ `3cbfa63` |
 
 ### X13 — Shared `Modal` is not an accessible dialog (found here) — documented before the fix
