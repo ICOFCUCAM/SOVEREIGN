@@ -5,7 +5,7 @@
 | Route | `/console/buyers` |
 | Component | `src/pages/Buyers.tsx` (209 lines) |
 | NAV | "Buyer Profiles", group Market Intelligence, founder, no plan gate |
-| Status | Stage A audit — gaps documented below; each closed in its own commit and marked here. |
+| Status | All six gaps closed, plus shared X13. Part of the all-pages run; reviewed together at the end. |
 
 ## Stage A — Audit (baseline commit `c542928`)
 
@@ -80,3 +80,12 @@ Profile cards for the 12 ranked buyers (header "Buyer Marketplace"): interest le
 ### G5 — Fake live tape
 *Closed by:* `pages/Buyers.tsx`: pinging `MarketTape` → dated `RegistryTape`.
 *Verification:* Chromium: 0 "live" words, 0 pinging elements, snapshot date shown · free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0, all tab stops with visible focus.
+
+---
+
+## Final verification
+`tsc -b` pass · eslint 0 errors · `vitest` 204/204 · Chromium free/Pro 1440/390: 0 errors, `h1` 1, no overflow, axe 0 (was 24), all tab stops with visible focus · intro and filter dialogs: role dialog, focus in/out, Escape, axe 0 (X13) · personalisation demo vs intake · 0 "live" words.
+
+## Known issues
+- Warm introductions are templates; sending them depends on the Outreach page (Active Mandate).
+- Fit levels are thresholds on the engine's fit score, not measured buyer interest (stated on the page).
