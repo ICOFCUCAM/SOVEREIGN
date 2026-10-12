@@ -132,10 +132,10 @@ const ICONS: ReadonlyArray<React.ReactNode> = [
 ];
 
 // porcelain → graphite, measured from the benchmark: neutral warm greys, no tan, no seam
-const FALL = "linear-gradient(90deg, #F8F4EE 0%, #F4EFE8 26%, #EDE6DD 33%, #E2D8CE 39.5%, #CDC3B7 43.5%, #AEA59A 46.5%, #8D867C 49.5%, #6D6964 52.5%, #4B4945 56%, #33322F 60%, #262624 64%, #1F1F1D 70%, #1B1B19 100%)";
-const FALL_Y = "radial-gradient(circle at 50% 42%, rgba(160,136,100,0.08), transparent 40%), linear-gradient(180deg, #F8F4EE 0, #E2D8CE 30px, #AEA59A 70px, #6D6964 110px, #33322F 160px, #1F1F1D 220px, #1B1B19 100%)";
+const FALL = "linear-gradient(90deg, #F8F4EE 0%, #F4EFE8 24%, #EDE6DD 31%, #DDD4CA 37%, #C9C0B6 40.5%, #B0A89F 43.5%, #958F86 46.9%, #7C7770 50%, #63605A 53%, #4E4C47 56%, #3F3D3A 59%, #33322F 62.5%, #2A2927 65.6%, #242422 68.75%, #1F1F1D 72%, #1A1A18 80%, #161614 100%)";
+const FALL_Y = "radial-gradient(circle at 50% 42%, rgba(160,136,100,0.08), transparent 40%), linear-gradient(180deg, #F8F4EE 0, #E2D8CE 30px, #AEA59A 70px, #6D6964 110px, #2A2927 160px, #1C1C1A 220px, #161614 100%)";
 // the warm haze around the dial and the light leak at lower left of the dark (desktop)
-const HAZE = "radial-gradient(circle at 74.5% 41%, rgba(166,142,104,0.09), transparent 24%), radial-gradient(ellipse 18% 22% at 59% 82%, rgba(214,196,168,0.09), transparent 70%), radial-gradient(ellipse 60% 70% at 8% 10%, #FCFAF6, transparent 70%)";
+const HAZE = "radial-gradient(circle at 74.5% 41%, rgba(166,142,104,0.05), transparent 22%), radial-gradient(ellipse 18% 22% at 59% 82%, rgba(214,196,168,0.09), transparent 70%), radial-gradient(ellipse 60% 70% at 8% 10%, #FCFAF6, transparent 70%)";
 const GRAIN = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
 const HeroExchange: React.FC = () => {
@@ -154,7 +154,7 @@ const HeroExchange: React.FC = () => {
             <p className="flex items-center gap-4 font-mono text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[#1F1F1E] sm:text-[11.5px] xl:tracking-[0.28em]">
               <span aria-hidden className="h-px w-10 bg-ex-bronze" />{t("hx.eyebrow")}
             </p>
-            <h1 id="hx-h" className="mt-8 max-w-[9.4em] font-editorial text-[clamp(2.7rem,4.85vw,5.5rem)] font-medium leading-[1.02] tracking-[-0.032em] text-[#15171A] [font-feature-settings:'kern','liga','calt'] [font-kerning:normal] [text-wrap:balance] lg:-ml-[0.04em]">
+            <h1 id="hx-h" className="mt-8 max-w-[9.4em] font-editorial text-[clamp(2.7rem,4.6vw,5.25rem)] font-medium leading-[1.02] tracking-[-0.032em] text-[#15171A] [font-feature-settings:'kern','liga','calt'] [font-kerning:normal] [text-wrap:balance] lg:-ml-[0.04em]">
               {t("hx.h1")}{" "}
               <em className="mt-[0.04em] block font-medium italic tracking-[-0.025em] text-[#9A7E56]">{t("hx.h1em")}</em>
             </h1>
@@ -192,7 +192,7 @@ const HeroExchange: React.FC = () => {
       </div>
 
       {/* the capability rail: charcoal, bronze-ringed icons */}
-      <div className="relative border-t border-white/[0.06] text-[#EDE7DC]" style={{ backgroundImage: "linear-gradient(180deg, #1E1F1C, #181917)" }}>
+      <div className="relative border-t border-white/[0.06] text-[#EDE7DC]" style={{ backgroundImage: "linear-gradient(180deg, #1B1B19, #151614)" }}>
         <ul aria-label={t("hx.strip")} className="mx-auto grid w-full max-w-[1640px] px-5 sm:px-8 lg:grid-cols-5 lg:px-[max(1.5rem,calc((100vw-1640px)/2+1.5rem))] xl:px-[max(4.5rem,calc((100vw-1640px)/2+2rem))]">
           {[1, 2, 3, 4, 5].map((k, i) => (
             <li key={k} className={`group relative flex items-center gap-4 py-3.5 lg:items-start lg:py-7 lg:pr-4 ${i ? "border-t border-white/[0.07] lg:border-l lg:border-t-0 lg:pl-5 xl:pl-6" : "lg:pl-0"}`}>
