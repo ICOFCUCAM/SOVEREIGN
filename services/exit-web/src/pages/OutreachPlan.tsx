@@ -13,6 +13,11 @@ import { fmtUsdShort } from "../lib/buyer-dna";
 // with its contact path and expected value. The action layer on top of the
 // intelligence.
 
+// A neutral assumption, named in words (as on the Terminal).
+const PriorTag: React.FC = () => (
+  <span className="ml-1 align-middle font-sans text-[9px] font-semibold uppercase tracking-wide text-xo-caution" title="Not disclosed by this buyer — a labelled neutral assumption">prior</span>
+);
+
 const CONF_STYLE: Record<string, string> = {
   High: "text-xo-verified", Medium: "text-xo-caution", Low: "text-xo-muted",
 };
@@ -24,6 +29,7 @@ const OutreachPlan: React.FC = () => {
   const plan = useMemo(() => buildOutreachPlan(baseline, tokens, 20), [baseline, tokens]);
   const tape = useMemo(() => buildMarketTape(), []);
   const all = plan.waves.flatMap((w) => w.buyers);
+  const priors = all.filter((b) => !b.premiumKnown || !b.closeKnown).length;
   const noOverlap = all.filter((b) => b.sectorOverlapPts === 0).length;
 
   return (
@@ -36,13 +42,14 @@ const OutreachPlan: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Ranked buyers" emphasis value={String(plan.totalBuyers)} sub="top 20 by likelihood score" /></div>
         <div className="bg-xo-panel"><Metric label="Sequenced waves" value={String(plan.waves.length)} sub="competitive tension" /></div>
         <div className="bg-xo-panel"><Metric label="Lead bidders" value={String(plan.waves[0]?.buyers.length ?? 0)} sub="week 1" /></div>
-        <div className="bg-xo-panel"><Metric label="Anchor expected value" emphasis value={fmtUsdShort(plan.waves[0]?.buyers[0]?.expectedValueUsd ?? 0)} sub="top buyer" /></div>
+        <div className="bg-xo-panel"><Metric label="Lead buyer · close-weighted" emphasis value={<>{fmtUsdShort(plan.waves[0]?.buyers[0]?.expectedValueUsd ?? 0)}{plan.waves[0]?.buyers[0] && (!plan.waves[0].buyers[0].premiumKnown || !plan.waves[0].buyers[0].closeKnown) && <PriorTag />}</>} sub={`${plan.waves[0]?.buyers[0]?.name ?? "—"} · expected offer × close rate`} /></div>
       </section>
 
       <MarketTape items={tape} />
 
       <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">
         Buyers are ranked by <span className="font-semibold text-xo-text">likelihood score</span> — a composite of acquisition appetite, sector overlap with {company.name}, deal cadence and recency (0–100), not a probability.
+        {" "}Close-weighted value = financial baseline {fmtUsdShort(baseline)} × (1 + the buyer's premium) × its close rate — the Terminal's rule. <span className="font-semibold text-xo-caution">PRIOR</span> marks {priors} of {all.length} buyers that have not disclosed a premium or close rate, so a neutral assumption (premium 20%, close rate 55%) is used.
         {noOverlap > 0 && <> <span className="font-semibold text-xo-caution">{noOverlap} of {all.length}</span> have no sector overlap with this company and rank on appetite, cadence and recency alone.</>}
       </p>
 
@@ -56,7 +63,7 @@ const OutreachPlan: React.FC = () => {
                 <tr className="border-b border-xo-line">
                   <th scope="col" className="px-4 py-2 font-medium">Buyer</th>
                   <th scope="col" className="px-2 py-2 text-right font-medium">Likelihood score</th>
-                  <th scope="col" className="px-2 py-2 text-right font-medium">Expected value</th>
+                  <th scope="col" className="px-2 py-2 text-right font-medium">Close-weighted value</th>
                   <th scope="col" className="px-2 py-2 font-medium">Contact path</th>
                   <th scope="col" className="px-4 py-2 text-right font-medium">Conf</th>
                 </tr>
@@ -69,7 +76,7 @@ const OutreachPlan: React.FC = () => {
                       <div className="text-[11px] text-xo-faint">{b.why}{b.sectorOverlapPts === 0 && <span className="text-xo-caution"> · no sector overlap</span>}</div>
                     </th>
                     <td className="px-2 py-2 text-right font-mono font-semibold tabular-nums">{b.probabilityPct}<span className="text-[11px] font-normal text-xo-muted">/100</span></td>
-                    <td className="px-2 py-2 text-right font-mono tabular-nums">{fmtUsdShort(b.expectedValueUsd)}</td>
+                    <td className="px-2 py-2 text-right font-mono tabular-nums">{fmtUsdShort(b.expectedValueUsd)}{(!b.premiumKnown || !b.closeKnown) && <PriorTag />}</td>
                     <td className="px-2 py-2 text-xo-muted">{b.contactPath}</td>
                     <td className={`px-4 py-2 text-right font-semibold ${CONF_STYLE[b.confidence]}`}>{b.confidence}</td>
                   </tr>
@@ -81,7 +88,7 @@ const OutreachPlan: React.FC = () => {
       ))}
 
       <p className="px-1 text-[11px] text-xo-faint">
-        Contact paths and confidence come from each buyer's <Link to="/console/buyer-graph" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">contact intelligence</Link>; likelihood scores and expected value from the buyer graph and valuation framework. ExitOS surfaces the path — it does not store or send to personal contacts.
+        Contact paths and confidence come from each buyer's <Link to="/console/buyer-graph" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">contact intelligence</Link>; likelihood scores and close-weighted values from the buyer graph and valuation framework. ExitOS surfaces the path — it does not store or send to personal contacts.
       </p>
     </div>
   );

@@ -13,7 +13,9 @@ export interface PlanBuyer {
   readonly name: string;
   readonly probabilityPct: number;      // likelihood score 0–100 (composite, not a probability)
   readonly sectorOverlapPts: number;    // the score's sector-overlap component (0 = no overlap)
-  readonly expectedValueUsd: number;
+  readonly expectedValueUsd: number;    // close-weighted: baseline × (1 + premium) × close rate
+  readonly premiumKnown: boolean;       // false → the neutral premium prior was used
+  readonly closeKnown: boolean;         // false → the neutral close-rate prior was used
   readonly contactPath: string;
   readonly confidence: "High" | "Medium" | "Low";
   readonly why: string;
@@ -37,12 +39,15 @@ export function buildOutreachPlan(baselineUsd: number, tokens: readonly string[]
   const ranked = rankedBuyers(limit, tokens);
   const buyers: PlanBuyer[] = ranked.map((r) => {
     const reg = buyerContactRegistry(r.profile, tokens);
+    const exp = expectedOutcomeFor(r.profile, baselineUsd);
     return {
       buyerId: r.profile.buyer_id,
       name: r.profile.name,
       probabilityPct: r.probability.pct,
       sectorOverlapPts: r.probability.overlap,
-      expectedValueUsd: expectedOutcomeFor(r.profile, baselineUsd).expectedClose,
+      expectedValueUsd: exp.expectedClose,
+      premiumKnown: exp.premiumKnown,
+      closeKnown: exp.closeKnown,
       contactPath: reg.outreachPaths[0]?.channel ?? reg.bestContactRole,
       confidence: reg.confidence.tier,
       why: r.probability.rationale,
@@ -63,7 +68,7 @@ export function buildOutreachPlan(baselineUsd: number, tokens: readonly string[]
 
   const top = buyers[0];
   const summary = top
-    ? `${buyers.length} ranked buyers across ${waves.length} sequenced waves. Lead with ${top.name} (likelihood score ${top.probabilityPct}/100, exp. ${fmtUsdShort(top.expectedValueUsd)}); run the competitive set in parallel to hold leverage.`
+    ? `${buyers.length} ranked buyers across ${waves.length} sequenced waves. Lead with ${top.name} (likelihood score ${top.probabilityPct}/100, close-weighted ${fmtUsdShort(top.expectedValueUsd)}); run the competitive set in parallel to hold leverage.`
     : "No ranked buyers for this profile yet.";
 
   return { waves, totalBuyers: buyers.length, summary };
