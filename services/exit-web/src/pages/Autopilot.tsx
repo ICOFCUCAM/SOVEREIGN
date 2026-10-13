@@ -19,7 +19,7 @@ import {
 import { emitTelemetry } from "../lib/telemetry";
 import { useAuth } from "../lib/auth";
 import { needsUpgrade, PLAN_LABEL } from "../lib/access";
-import { label } from "../lib/labels";
+import { label, plural } from "../lib/labels";
 import { sectorLabel } from "../lib/market-stats";
 import type { BuyerCandidate } from "@exit/engines";
 
@@ -463,7 +463,7 @@ const Autopilot: React.FC = () => {
           <div className="p-6">
             <h3 className="font-serif text-xl font-bold text-xo-text">This is where listing ends — and the deal begins.</h3>
             <p className="mt-2 text-[13.5px] leading-relaxed text-xo-muted">
-              ExitOS priced the company and matched {shortlist.length} buyers. To open
+              ExitOS priced the company and matched {plural(shortlist.length, "buyer")}. To open
               conversations, run outreach, negotiate offers and close — and let the remaining agents finish the job —
               launch an Active Mandate.
             </p>

@@ -6,6 +6,7 @@ import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../compon
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { loadActiveCompany } from "../lib/active-company";
 import { buildMarketTape } from "../lib/market-tape";
+import { plural } from "../lib/labels";
 import {
   CAPTABLE_ANALYSIS, CAPTABLE_SIGNATORY, CAPTABLE_DRAGALONG,
   SAMPLE_CAPTABLE, OFFER_WATERFALLS, SAMPLE_OFFERS, fmt,
@@ -65,10 +66,10 @@ const Investors: React.FC = () => {
         description={<>The sample cap table and sample offers of the demo company ({SAMPLE_COMPANY.name}).{fromIntake ? " Your intake has no cap table or offers, so these figures are not yours." : ""}</>} />
 
       <section aria-label="Cap-table summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
-        <div className="bg-xo-panel"><Metric label="Fully diluted" value={analysis.fullyDilutedShares.toLocaleString()} sub={`${analysis.ownershipByStakeholder.length} stakeholders`} /></div>
+        <div className="bg-xo-panel"><Metric label="Fully diluted" value={analysis.fullyDilutedShares.toLocaleString()} sub={plural(analysis.ownershipByStakeholder.length, "stakeholder")} /></div>
         <div className="bg-xo-panel"><Metric label="Founder ownership" value={`${(analysis.ownershipByRole.founder * 100).toFixed(1)}%`} sub="of fully-diluted" /></div>
         <div className="bg-xo-panel"><Metric label="Signatory coverage" value={<span className={signatory.meetsThreshold ? "text-xo-verified" : "text-xo-caution"}>{Math.round(signatory.coverageOfShares * 100)}%</span>} sub={signatory.meetsThreshold ? "meets 95%" : "below 95%"} /></div>
-        <div className="bg-xo-panel"><Metric label="Drag-along" value={drag.meets ? "Met" : "Short"} sub={`${Math.round(drag.committedPct * 100)}% · ${drag.holdouts.length} holdouts`} /></div>
+        <div className="bg-xo-panel"><Metric label="Drag-along" value={drag.meets ? "Met" : "Short"} sub={`${Math.round(drag.committedPct * 100)}% · ${plural(drag.holdouts.length, "holdout")}`} /></div>
         <div className="bg-xo-panel"><Metric label="Founders' risk-adjusted value" emphasis value={<span className="text-xo-verified">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span>} sub={`${selectedOffer.buyerName} · engine NPV (stock −15%, earnout −45%)`} /></div>
       </section>
 

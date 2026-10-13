@@ -12,6 +12,7 @@ import { requestNda, submitOffer, startDeal, advanceDeal, saveMandate, myMandate
 import PublishComposer from "../components/PublishComposer";
 import type { Region } from "@exit/engines";
 import { parseNumber } from "../lib/intake-fields";
+import { plural } from "../lib/labels";
 import { PageHeader, Section, Metric, ScrollRegion, ActionLink, Chip, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 
 // ── ACQUISITION RADAR · BUYER COMMAND CENTER ────────────────────────
@@ -115,14 +116,14 @@ const AcquisitionRadar: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Target sectors" value={String(sectors.length)} sub="in your mandate" /></div>
         <div className="bg-xo-panel"><Metric label="Sector deal volume" value={watchVolume.toLocaleString()} sub="indexed acquisitions" /></div>
         <div className="bg-xo-panel"><Metric label="Active acquirers" value={String(maxActiveBuyers)} sub="competition · your space" /></div>
-        <div className="bg-xo-panel"><Metric label="Qualified opportunities" value={String(qualified.length)} sub={`of ${listings.length} listings · ${founderCount} from founders, ${seedCount} demo/catalog`} /></div>
+        <div className="bg-xo-panel"><Metric label="Qualified opportunities" value={String(qualified.length)} sub={`of ${plural(listings.length, "listing")} · ${founderCount} from founders, ${seedCount} demo/catalog`} /></div>
       </section>
 
       <RegistryTape items={tape} asOf={AS_OF} />
 
       <section aria-label="Decision brief" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line md:grid-cols-2 xl:grid-cols-4">
         {[
-          { k: "Current state", body: <><span className="font-mono text-xo-text">{sectors.length}</span> target sectors · {listings.length} listings · {regions.length} regions</> },
+          { k: "Current state", body: <><span className="font-mono text-xo-text">{sectors.length}</span> target sectors · {plural(listings.length, "listing")} · {plural(regions.length, "region")}</> },
           { k: "Recent changes", body: <>{watchVolume.toLocaleString()} indexed acquisitions in your space · {maxActiveBuyers} competing acquirers</> },
           { k: "Recommended action", body: qualified[0] ? <>Express interest in <span className="font-semibold text-xo-text">{qualified[0].listing.code}</span> — {qualified[0].match.score}% match</> : <>Widen the mandate — no qualified listings yet</> },
           { k: "Expected outcome", body: <><span className="font-mono text-xo-text">{qualified.length}</span> qualified opportunities · identities reveal on NDA</> },
@@ -180,8 +181,8 @@ const AcquisitionRadar: React.FC = () => {
         </div>
 
         {/* ── opportunities ────────────────────────────────────────── */}
-        <Section title="Opportunities · scored against your mandate" eyebrow={`${listings.length} listings`} className="min-w-0 self-start border border-xo-line"
-          foot={`Identities withheld until NDA — buyers see sector, region, revenue and growth. ${founderCount} of ${listings.length} listings come from founders; the rest are the bundled demo company and Sovereign product-catalog entries, labelled on each card.`}>
+        <Section title="Opportunities · scored against your mandate" eyebrow={plural(listings.length, "listing")} className="min-w-0 self-start border border-xo-line"
+          foot={`Identities withheld until NDA — buyers see sector, region, revenue and growth. ${founderCount} of ${plural(listings.length, "listing")} come from founders; the rest are the bundled demo company and Sovereign product-catalog entries, labelled on each card.`}>
           <ol className="divide-y divide-xo-line">
             {scored.map(({ listing: l, match }) => (
               <li key={l.id} className="px-4 py-4">

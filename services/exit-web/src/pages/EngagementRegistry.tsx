@@ -5,7 +5,7 @@ import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { engagementRegistry } from "../lib/engagement-registry";
 import { RegistryTape } from "../components/xo/RegistryTape";
-import { inlineLabel, label } from "../lib/labels";
+import { inlineLabel, label, plural } from "../lib/labels";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 
 // BUYER ENGAGEMENT REGISTRY — the consolidated internal registry. For every
@@ -46,7 +46,7 @@ const EngagementRegistry: React.FC = () => {
       <Section title="Buyer engagement registry" className="border border-xo-line"
         right={<span className="flex items-center gap-2"><label htmlFor="er-search" className="text-[11px] text-xo-muted">Search buyer</label><input id="er-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="e.g. Microsoft" className={`${XO_INPUT} h-8 w-40 py-1 text-[12px]`} /></span>}
         foot="NDA / LOI conversion appear once a buyer's own responses are recorded on ExitOS (— until then; your own views and interest do not count). Close rate is from the registry where disclosed. Indexed deals are registry entries, most of them unverified. Contact confidence is a rule on indexed deals — High at 40 or more, Medium at 8 or more, otherwise Low. The contact role is the one typical for the buyer type, never a named person; ExitOS does not store or send to personal contacts.">
-        <p role="status" className="sr-only">{filtered.length} of {rows.length} buyers shown</p>
+        <p role="status" className="sr-only">{filtered.length} of {plural(rows.length, "buyer")} shown</p>
         <ScrollRegion label="Buyer engagement registry table">
           <table className="w-full min-w-[960px] text-[12px]">
             <thead className="text-left text-[11px] text-xo-muted">

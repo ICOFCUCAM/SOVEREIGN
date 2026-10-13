@@ -7,6 +7,7 @@ import { buildMarketTape } from "../lib/market-tape";
 import { subscribe, allDealEvents, dealFlowFunnel, subjectsAtStage, clearDealEvents, type DealEvent } from "../lib/deal-events";
 import { networkStats } from "../lib/network-stats";
 import { listingDestination } from "../lib/exit-api";
+import { plural } from "../lib/labels";
 import { useAuth } from "../lib/auth";
 
 // DEAL ACTIVITY — the record of deal-flow actions taken in ExitOS by this
@@ -91,7 +92,7 @@ const DealActivity: React.FC = () => {
               <p className="font-semibold text-xo-risk">Erase all {events.length} stored events?</p>
               <p className="mt-1 text-xo-muted">This permanently deletes the deal-activity record held in {where}{where === "this browser" ? "" : " in the backend"}. Funnel counts and rates on this page, and buyer activity on other pages, reset to zero. It cannot be undone.</p>
               <div className="mt-2 flex gap-2">
-                <button type="button" onClick={() => { clearDealEvents(); setConfirming(false); }} className="rounded-sm border border-xo-risk px-2 py-1 font-semibold text-xo-risk focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Erase {events.length} events</button>
+                <button type="button" onClick={() => { clearDealEvents(); setConfirming(false); }} className="rounded-sm border border-xo-risk px-2 py-1 font-semibold text-xo-risk focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Erase {plural(events.length, "event")}</button>
                 <button type="button" autoFocus onClick={keep} className="rounded-sm border border-xo-line px-2 py-1 font-medium text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Keep history</button>
               </div>
             </div>

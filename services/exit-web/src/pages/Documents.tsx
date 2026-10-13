@@ -9,7 +9,7 @@ import { runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDilig
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { loadActiveCompany } from "../lib/active-company";
 import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
-import { label } from "../lib/labels";
+import { label, plural } from "../lib/labels";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
 
 // Consistency check (rule-based) — scans the generated text for growth, gross
@@ -116,7 +116,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
   return (
     <div data-page="documents" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Workspace · Documents · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Document Generator"
-        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Engine-composed · {flags.length > 0 ? `${flags.length} consistency flags` : "no conflicts in the four checks"}</span></>}
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Engine-composed · {flags.length > 0 ? plural(flags.length, "consistency flag") : "no conflicts in the four checks"}</span></>}
         actions={<>
           {/* one size for the four header actions: three outlined, the report filled */}
           <span className="text-[12px] text-xo-faint">Nothing is sent from ExitOS — download a draft to share it.</span>

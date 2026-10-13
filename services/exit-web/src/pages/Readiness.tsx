@@ -8,6 +8,7 @@ import { PageHeader, Section, Metric, Bar, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { runReadiness, runReadinessAnalysis } from "@exit/engines";
 import { dealContextFor } from "../lib/deal-context";
+import { plural } from "../lib/labels";
 import { loadActiveCompany } from "../lib/active-company";
 
 // Exit Readiness Score — the category-defining surface. Not a generic score:
@@ -147,7 +148,7 @@ const Readiness: React.FC = () => {
       </div>
 
       <Section title="Ten categories · priced fixes" eyebrow={`Rule-based scores · value left +${fmtMoney(left)} allocated`} className="border border-xo-line"
-        foot={`Each category score is a fixed rule on the company's figures (for example, IP starts at 40 and adds points per patent). Each $ figure is the value left, shared out by how far the category sits below 85, weighted — a model allocation, not a buyer quote. ${analysis.weaknesses.length} weaknesses found by the readiness engine; the biggest lever is shown above.`}>
+        foot={`Each category score is a fixed rule on the company's figures (for example, IP starts at 40 and adds points per patent). Each $ figure is the value left, shared out by how far the category sits below 85, weighted — a model allocation, not a buyer quote. ${plural(analysis.weaknesses.length, "weakness", "weaknesses")} found by the readiness engine; the biggest lever is shown above.`}>
         <ol className="divide-y divide-xo-line">
           {categories.map((cat) => (
             <li key={cat.key} className="grid items-center gap-3 px-4 py-2.5 sm:grid-cols-[200px_1fr_130px]">

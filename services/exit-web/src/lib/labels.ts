@@ -24,3 +24,7 @@ export const inlineLabel = (code: string): string => { const l = label(code); re
 
 /** A list of codes as one line: ["strategic", "pe", "vc"] → "Strategic · PE · VC". */
 export const labels = (codes: readonly string[], sep = " · "): string => codes.map(label).join(sep);
+
+/** A count with its noun in the right number: plural(1, "listing") → "1 listing", plural(3, "weakness", "weaknesses"). */
+export const plural = (n: number, one: string, many = `${one}s`): string => `${n.toLocaleString("en-US")} ${n === 1 ? one : many}`;
+
