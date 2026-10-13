@@ -54,6 +54,11 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Close the mobile drawer whenever the route changes.
   useEffect(() => { setNavOpen(false); }, [loc.pathname, loc.hash]);
 
+  // A new page opens at its top: the workspace (<main>, the scrolling region) returns to 0 when the path
+  // changes; a link to a section (#hash) is left to the effect below.
+  const workspace = React.useRef<HTMLElement>(null);
+  useEffect(() => { if (!loc.hash) workspace.current?.scrollTo({ top: 0 }); }, [loc.pathname, loc.hash]);
+
   // Scroll anchored sections into view when the hash changes.
   useEffect(() => {
     const id = loc.hash ? loc.hash.slice(1) : null;
@@ -190,7 +195,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </aside>
 
-        <main className="relative flex-1 overflow-y-auto">
+        <main ref={workspace} className="relative flex-1 overflow-y-auto">
           <div className="sticky top-0 z-30">
             <InstitutionalRibbon />
             <LayerBar />
