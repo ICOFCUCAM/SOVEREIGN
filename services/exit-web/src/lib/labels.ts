@@ -6,7 +6,10 @@ const KNOWN: Record<string, string> = {
   pe: "PE", vc: "VC", loi: "LOI", nda: "NDA", cim: "CIM", spa: "SPA", arr: "ARR", ttm: "TTM", ebitda: "EBITDA",
   family_office: "Family office", sponsor: "Sponsor", strategic: "Strategic",
   private_full: "Private · full detail", public_anonymized: "Public · anonymized", unlisted: "Unlisted",
-  not_ready: "Not ready", seed_acquisition: "Seed acquisition", growth_acquisition: "Growth acquisition", strategic_acquisition: "Strategic acquisition",
+  cold_intro: "Cold intro", banker_intro: "Banker intro", warm_referral: "Warm referral", direct: "Direct",
+  bilateral: "Bilateral", one_way_disclosure: "One-way (disclosing)", one_way_receipt: "One-way (receiving)", mutual_with_cure: "Mutual, with cure period",
+  not_ready: "Not ready",
+ seed_acquisition: "Seed acquisition", growth_acquisition: "Growth acquisition", strategic_acquisition: "Strategic acquisition",
 };
 
 export const label = (code: string): string => {

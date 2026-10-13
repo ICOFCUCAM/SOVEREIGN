@@ -10,7 +10,7 @@ import { buildMarketTape } from "../lib/market-tape";
 import { LISTING_PUBLIC as ENGINE_PUBLIC, LISTING_PRIVATE as ENGINE_PRIVATE, LISTING_MATCHES, VALUATION_CANONICAL, useMemorandum } from "../lib/engines";
 import { createListing, matchBuyersToListing, runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type MemorandumInputs } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
-import { label, labels } from "../lib/labels";
+import { inlineLabel, label, labels } from "../lib/labels";
 import { sectorLabel } from "../lib/market-stats";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 
@@ -259,7 +259,7 @@ const FounderMarketplace: React.FC = () => {
                 <ul className="mt-2 flex flex-wrap gap-1.5">
                   {matches.slice(0, 6).map((m) => (
                     <li key={m.buyerName} className={`rounded-sm border px-1.5 py-px text-[11px] font-medium ${OUTREACH_STYLE[m.suggestedOutreach]}`}>
-                      {m.buyerName} · {m.suggestedOutreach.replace(/_/g, " ")}
+                      {m.buyerName} · {inlineLabel(m.suggestedOutreach)}
                     </li>
                   ))}
                 </ul>
@@ -336,7 +336,7 @@ const FounderMarketplace: React.FC = () => {
                   </div>
                   <div className={`mt-0.5 text-[11px] font-semibold ${TYPE_STYLE[m.buyerType] ?? "text-xo-muted"}`}>{label(m.buyerType)}</div>
                   <p className="mt-1.5 text-[12px] leading-snug text-xo-muted">{m.rationale}</p>
-                  <span className={`mt-2 inline-block rounded-sm border px-1.5 py-px text-[11px] font-medium ${OUTREACH_STYLE[m.suggestedOutreach]}`}>{m.suggestedOutreach.replace(/_/g, " ")}</span>
+                  <span className={`mt-2 inline-block rounded-sm border px-1.5 py-px text-[11px] font-medium ${OUTREACH_STYLE[m.suggestedOutreach]}`}>{label(m.suggestedOutreach)}</span>
                 </li>
               ))}
             </ul>

@@ -9,6 +9,7 @@ import { runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDilig
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { loadActiveCompany } from "../lib/active-company";
 import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
+import { label } from "../lib/labels";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
 
 // Consistency check (rule-based) — scans the generated text for growth, gross
@@ -167,7 +168,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
       </Section>
 
       {doc && (
-        <Section title={`Consistency check · ${doc.kind.replace(/_/g, " ")}`} eyebrow="Rule-based · four checks" className="border border-xo-line"
+        <Section title={`Consistency check · ${label(doc.kind)}`} eyebrow="Rule-based · four checks" className="border border-xo-line"
           foot="Checks: ARR growth, gross margin and net retention claims in the text against the profile (3-point tolerance), and whether a top-10 customer concentration of 35% or more is mentioned. Other claims are not checked."
           right={<span className="text-[12px] text-xo-muted">{flags.length} claim{flags.length === 1 ? "" : "s"} to reconcile before buyer review</span>}>
           {flags.length === 0 ? (

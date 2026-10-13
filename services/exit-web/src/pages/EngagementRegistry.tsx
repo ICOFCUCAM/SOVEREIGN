@@ -5,7 +5,7 @@ import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { engagementRegistry } from "../lib/engagement-registry";
 import { RegistryTape } from "../components/xo/RegistryTape";
-import { label } from "../lib/labels";
+import { inlineLabel, label } from "../lib/labels";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 
 // BUYER ENGAGEMENT REGISTRY — the consolidated internal registry. For every
@@ -67,7 +67,7 @@ const EngagementRegistry: React.FC = () => {
                 <tr key={r.buyerId} className="border-b border-xo-line last:border-0">
                   <th scope="row" className="px-4 py-2 text-left font-normal">
                     <Link to={`/console/buyer/${r.buyerId}`} className="font-semibold text-xo-text hover:text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{r.buyerName}</Link>
-                    <div className="text-[11px] text-xo-faint">{label(r.buyerType)} · {r.acquisitionDna.appetite.replace("_", " ")} appetite</div>
+                    <div className="text-[11px] text-xo-faint">{label(r.buyerType)} · {inlineLabel(r.acquisitionDna.appetite)} appetite</div>
                   </th>
                   <td className="px-2 py-2 text-xo-muted">{r.strategicIntent.length ? r.strategicIntent.slice(0, 2).join(", ") : "—"}</td>
                   <td className="px-2 py-2 text-right font-mono tabular-nums">{r.acquisitionHistory.total}<span className="text-xo-faint"> · {r.acquisitionHistory.last12m}/12m</span></td>

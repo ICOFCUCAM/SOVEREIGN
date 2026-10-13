@@ -8,6 +8,7 @@ import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { SAMPLE_NDAS, NDA_ROSTER, LISTING_PRIVATE } from "../lib/engines";
+import { inlineLabel, label } from "../lib/labels";
 import {
   evaluateNdaStatus, generateBreachNotice, rosterFor,
   STANDARD_TEMPLATES, templateById, issueNda,
@@ -185,7 +186,7 @@ const FounderNdaVault: React.FC = () => {
             <li key={t.id} className="rounded-lg border border-white/10 bg-ink-900/40 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="text-sm font-bold text-white">{t.name}</h3>
-                <span className="shrink-0 font-mono text-[11px] text-white/70">{t.shape.replace(/_/g, " ")} · v{t.version}</span>
+                <span className="shrink-0 font-mono text-[11px] text-white/70">{label(t.shape)} · v{t.version}</span>
               </div>
               <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 text-[12px] sm:grid-cols-3">
                 <div><dt className="inline text-white/60">Clauses </dt><dd className="inline text-white/90">{t.clauseCount}</dd></div>
@@ -218,7 +219,7 @@ const FounderNdaVault: React.FC = () => {
           </Field>
           {(() => { const t = templateById(form.templateId); return t ? (
             <p className="rounded-lg border border-white/10 bg-ink-900/40 p-3 text-[12px] text-white/75">
-              Issues a <span className="text-white">{t.shape.replace(/_/g, " ")}</span> NDA — {t.defaultTerms.survivalMonths}mo survival, {t.defaultTerms.governingLaw} law, {t.clauseCount} clauses. State starts at <span className="text-loi-300">pending signature</span>.
+              Issues a <span className="text-white">{inlineLabel(t.shape)}</span> NDA — {t.defaultTerms.survivalMonths}mo survival, {t.defaultTerms.governingLaw} law, {t.clauseCount} clauses. State starts at <span className="text-loi-300">pending signature</span>.
             </p>
           ) : null; })()}
         </div>

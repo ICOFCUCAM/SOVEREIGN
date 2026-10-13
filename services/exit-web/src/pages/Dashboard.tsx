@@ -295,7 +295,7 @@ const Dashboard: React.FC = () => {
               {matchFeed.map((f) => (
                 <li key={f.buyerName} className="flex items-baseline justify-between gap-3 px-4 py-2 text-[12px]">
                   <span className="min-w-0"><span className="font-semibold text-xo-text">{f.buyerName}</span> <span className="text-xo-muted">matched at {Math.round(f.matchScore * 100)}% fit</span></span>
-                  <span className="shrink-0 text-[11px] text-xo-faint">{f.suggestedOutreach.replace(/_/g, " ")}</span>
+                  <span className="shrink-0 text-[11px] text-xo-faint">{label(f.suggestedOutreach)}</span>
                 </li>
               ))}
             </ul>

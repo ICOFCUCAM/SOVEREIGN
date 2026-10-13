@@ -8,6 +8,7 @@ import { buildMarketTape } from "../lib/market-tape";
 import { runDueDiligence } from "@exit/engines";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { loadActiveCompany } from "../lib/active-company";
+import { label } from "../lib/labels";
 import { listDocuments, uploadDocument, fmtBytes, type DataRoomDocument, type RoomKind } from "../lib/data-room";
 
 // Completeness model — buyers care about how complete each package is, not how
@@ -198,7 +199,7 @@ const DataRoom: React.FC = () => {
         {active && (
           <section aria-labelledby="dr-active" className="min-w-0 bg-xo-panel px-4 py-4">
             <div className="border-b border-xo-line pb-3">
-              <div className="text-[11px] font-semibold capitalize text-xo-faint">{active.kind.replace(/_/g, " ")}</div>
+              <div className="text-[11px] font-semibold text-xo-faint">{label(active.kind)}</div>
               <h2 id="dr-active" className="mt-1 font-serif text-[20px] font-semibold">{active.title}</h2>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-[12px]">
                 <span className={`font-semibold capitalize ${CLASS_CLS[active.classification]}`}>{active.classification}</span>
