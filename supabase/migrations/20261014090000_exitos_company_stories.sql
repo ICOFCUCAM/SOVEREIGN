@@ -100,7 +100,7 @@ alter table public.exitos_verifications enable row level security;
 -- ── helpers ─────────────────────────────────────────────────────────
 -- the claim's current value in a story (mirrors exit-engines story.ts claimValue)
 create or replace function public.exitos_story_claim(d jsonb, claim text) returns jsonb
-language sql immutable as $$
+language sql immutable set search_path = public as $$
   select case
     when claim like 'figure:%' then d->'figures'->substr(claim, 8)
     when claim like 'annual:%' then (select e - 'meta' from jsonb_array_elements(coalesce(d->'financials'->'annual', '[]')) e where e->>'period' = substr(claim, 8) limit 1)
@@ -110,7 +110,7 @@ language sql immutable as $$
   end $$;
 
 create or replace function public.exitos_claim_competence(claim text) returns text[]
-language sql immutable as $$
+language sql immutable set search_path = public as $$
   select case when claim = 'cap' then array['legal', 'financial'] when claim like 'market:%' then array['commercial'] else array['financial'] end $$;
 
 -- ── policies ────────────────────────────────────────────────────────
