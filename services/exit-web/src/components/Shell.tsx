@@ -106,6 +106,19 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // The current page is always visible in the menu.
   const currentInRest = shortMenu && rest.some((n) => basePath(n.to) === loc.pathname) && !ESSENTIALS.includes(loc.pathname);
   useEffect(() => { if (currentInRest) setToolsOpen(true); }, [currentInRest]);
+  // the menu keeps the current page in sight: its entry scrolls into the menu's view (not the page's) when the
+  // page changes, so a page opened from the palette or a link is marked where the reader can see it
+  const menu = React.useRef<HTMLElement>(null);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const nav = menu.current, cur = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+      if (!nav || !cur) return;
+      const n = nav.getBoundingClientRect(), c = cur.getBoundingClientRect();
+      if (c.top < n.top + 12 || c.bottom > n.bottom - 40) nav.scrollTop += c.top - n.top - n.height / 3; // clear of the faded edges
+    }, 80);
+    return () => clearTimeout(t);
+  }, [loc.pathname, toolsOpen]);
+
   const toggleTools = (): void => { const v = !toolsOpen; setToolsOpen(v); saveAllToolsOpen(v); };
   const toolsId = "console-all-tools";
 
@@ -185,7 +198,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </button>
           </div>
           {/* the menu fades at its scrolling edges instead of cutting an item in half; a hairline scrollbar */}
-          <nav aria-label="Console" className="ex-navscroll flex-1 overflow-y-auto px-3 py-2">
+          <nav ref={menu} aria-label="Console" className="ex-navscroll flex-1 overflow-y-auto px-3 py-2">
             {shortMenu && (
               <div className="mb-4">
                 <div className="px-3 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/55">Essentials</div>
