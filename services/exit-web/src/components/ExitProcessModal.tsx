@@ -4,6 +4,7 @@ import {
   EXIT_STEPS, runExitProcess, clearRun,
   type ExitRun, type ExitStep,
 } from "../lib/exit-process";
+import { loadActiveCompany } from "../lib/active-company";
 
 const STATUS_BADGE: Record<ExitStep["status"], string> = {
   pending: "bg-white/5 text-white/40 ring-white/10",
@@ -40,6 +41,7 @@ const ExitProcessModal: React.FC<Props> = ({ open, onClose, onComplete }) => {
     clearRun();
     let alive = true;
     runExitProcess({
+      company: loadActiveCompany().company,
       onStepChange: (r) => {
         if (!alive) return;
         // shallow clone to force re-render
