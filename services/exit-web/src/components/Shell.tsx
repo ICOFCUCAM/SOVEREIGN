@@ -149,7 +149,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="ex-console flex h-full flex-col">
       {/* the first Tab: straight past the sidebar and the three header bars to the page */}
       <a href="#workspace" onClick={(e) => { e.preventDefault(); workspace.current?.focus(); }}
         className="sr-only z-[60] rounded-md bg-deal-700 px-4 py-2.5 text-[13px] font-semibold text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-300">Skip to content</a>

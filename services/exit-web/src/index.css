@@ -71,6 +71,12 @@ html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px s
   .ex-dialog { animation: exDialogIn .26s cubic-bezier(.2,.7,.2,1); }
 }
 
+/* in the console, a reader who prefers reduced motion gets still status dots: the pulse and ping of
+   indicators stop (they repeat forever); a spinner keeps turning, since it says work is in progress */
+@media (prefers-reduced-motion: reduce) {
+  .ex-console .animate-pulse, .ex-console .animate-ping { animation: none; }
+}
+
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
 
