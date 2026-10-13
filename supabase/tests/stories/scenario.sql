@@ -77,6 +77,7 @@ select as_user(:'A');
 update exitos_company_stories set data = jsonb_set(data, '{figures,arrUsd}', '23000000');
 select '13 after ARR changed: stale ARR, FY2025 still current', claim, stale_at is not null from exitos_verifications order by claim;
 select exitos_revoke_verification((select id from exitos_verifications where claim = 'annual:FY2025' and stale_at is null), 'owner tries');
+update exitos_review_engagements set reviewer_account_id = :'Q';
 update exitos_review_engagements set revoked_at = now();
 
 select as_user(:'R');

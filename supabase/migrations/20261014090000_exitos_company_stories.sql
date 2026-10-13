@@ -261,6 +261,15 @@ language sql stable security definer set search_path = public, auth as $$
    where auth.uid() is not null and lower(u.email) = lower(trim(p_email))
      and a.revoked_at is null and (a.expires_at is null or a.expires_at > now()) $$;
 
+-- table privileges (Supabase grants everything to anon and authenticated by default; RLS is the
+-- second line, not the only one): anon gets nothing; verification and authorisation records are
+-- written only through the checked functions above
+revoke all on public.exitos_company_stories, public.exitos_reviewer_authorizations,
+              public.exitos_review_engagements, public.exitos_verifications from anon, authenticated;
+grant select, insert, update, delete on public.exitos_company_stories to authenticated;
+grant select, insert, update (revoked_at) on public.exitos_review_engagements to authenticated;
+grant select on public.exitos_reviewer_authorizations, public.exitos_verifications to authenticated;
+revoke all on function public.exitos_story_claim(jsonb, text), public.exitos_claim_competence(text) from anon;
 revoke all on function public.exitos_reviewer_by_email(text) from public, anon;
 grant execute on function public.exitos_reviewer_by_email(text) to authenticated;
 revoke all on function public.exitos_authorize_reviewer(text, text, timestamptz, text) from public, anon;

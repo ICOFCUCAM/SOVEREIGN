@@ -24,7 +24,7 @@ CONTEXT:  PL/pgSQL function exitos_record_verification(text,text,text,text,text,
 06 A engaged R|1
 psql:scenario.sql:40: ERROR:  a company cannot verify its own claims
 CONTEXT:  PL/pgSQL function exitos_record_verification(text,text,text,text,text,jsonb,text,text,timestamp with time zone,text) line 5 at RAISE
-psql:scenario.sql:42: ERROR:  new row violates row-level security policy for table "exitos_verifications"
+psql:scenario.sql:42: ERROR:  permission denied for table exitos_verifications
 
 07 R after engagement reads story|1
 psql:scenario.sql:46: ERROR:  a verification must record the evidence reviewed
@@ -58,9 +58,10 @@ CONTEXT:  PL/pgSQL function exitos_record_verification(text,text,text,text,text,
 13 after ARR changed: stale ARR, FY2025 still current|figure:arrUsd|t
 psql:scenario.sql:79: ERROR:  no such verification of yours
 CONTEXT:  PL/pgSQL function exitos_revoke_verification(uuid,text) line 5 at RAISE
+psql:scenario.sql:80: ERROR:  permission denied for table exitos_review_engagements
 
 14 R after engagement revoked reads story|0
 
 15 R revoked FY2025|1
-16 anon reads stories|0
-psql:scenario.sql:90: ERROR:  permission denied for function exitos_record_verification
+psql:scenario.sql:90: ERROR:  permission denied for table exitos_company_stories
+psql:scenario.sql:91: ERROR:  permission denied for function exitos_record_verification
