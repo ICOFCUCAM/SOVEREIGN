@@ -129,6 +129,13 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
 
 const Console: React.FC = () => {
   const { session } = useAuth();
+  // the phone browser's bar takes the console's ink, and the site's graphite back on leaving
+  React.useEffect(() => {
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const site = meta?.content;
+    meta?.setAttribute("content", "#0a1018");
+    return () => { if (meta && site) meta.setAttribute("content", site); };
+  }, []);
   if (!session) return <SignIn />;
   return (
     <Shell>
