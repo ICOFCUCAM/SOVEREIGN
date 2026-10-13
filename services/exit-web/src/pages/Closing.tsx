@@ -248,7 +248,7 @@ const Closing: React.FC = () => {
           </ScrollRegion>
         </Section>
 
-        <Section title="From diligence" eyebrow={`runDueDiligence · ${company.name}`} className="lg:col-span-4"
+        <Section title="From diligence" eyebrow={`Diligence engine · ${company.name}`} className="lg:col-span-4"
           foot={fromIntake ? "From the diligence engine on your saved intake." : "From the diligence engine on the demo company; save an intake to run it on yours."}>
           <div className="space-y-4 px-4 py-3">
             {redFlags.length > 0 && (

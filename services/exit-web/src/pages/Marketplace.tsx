@@ -323,7 +323,7 @@ const FounderMarketplace: React.FC = () => {
         </Section>
 
         <div className="flex flex-col gap-px bg-xo-line lg:col-span-4">
-          <Section title="Matched buyers" eyebrow="matchBuyersToListing"
+          <Section title="Matched buyers" eyebrow="Matching engine"
             foot="Fit score: the discovery engine's weighted fit (sector, size, geography, activity), 0–100 — not a measured chance of a bid.">
             <ul>
               {matches.slice(0, 8).map((m) => (
