@@ -149,3 +149,145 @@ Built inside the existing app and its patterns, no new infrastructure:
 
 Each increment reports changed files, migrations, behaviour changes, tests run, remaining defects and
 rollback. Migrations are additive and reversible (each ships with its `down` statements in the report).
+
+## 7. Mandate traceability (sections 1–12)
+
+Every requirement of the mandate, with where it is handled, the deliverable that owns it, its status and the
+evidence. Status: **Done** (in code, with a test) · **Partial** (started; what remains is stated) · **D3/D4/D5**
+(planned in that deliverable) · **Owner** (needs a decision or access only the owner has, §5). A requirement
+is never marked Done because a route, button or placeholder exists.
+
+### §1 Assignment
+| # | Requirement | Where | Status | Evidence |
+|---|---|---|---|---|
+| 1.1 | Read the audit; inspect generators, routes, schemas, data, exports, states, tests | §1–3 of this plan | Done | this document |
+| 1.2 | Treat findings as claims to verify against current code | §3 status column | Done | each row re-checked on this branch |
+| 1.3 | Rebuild the architecture, not more templates or a new Documents page | §4 | D3 | — |
+| 1.4 | Work in the existing app; no demo, duplicate system or prototype | all changes in `exit-web`/`exit-engines`/`supabase` | Ongoing | — |
+
+### §2 Authoritative inventory
+| # | Requirement | Where | Status | Evidence |
+|---|---|---|---|---|
+| 2.1 | Machine-readable registry over all eight stages | `src/lib/documents/registry.ts` (52 types), `registryJson()` | Done | `registry.test.ts` |
+| 2.2 | Per type: id, stage, audience, method, source, inputs, classification, kind, formats, export behaviour, review/execution, dependencies, defects, status | registry fields | Partial | versioning per type arrives with D3 versions; tests per type in §11 of this matrix |
+| 2.3 | Human-readable report | this plan + audit doc | Done | — |
+| 2.4 | Inventory both CIMs, both closing checklists, the four timelines, dead code, every sample-data output | registry `exitos.cim`, `exitos.closing_checklist`, D-3, `dead_code` entries, B-3/B-7/B-8 | Done | registry + §3 |
+| 2.5 | Say what to consolidate, reuse, repair or retire | §3 (D-1, D-2, D-5) | Done | — |
+
+### §3 Architecture
+| # | Requirement | Where | Status |
+|---|---|---|---|
+| 3.1 | Document registry, one definition per type | registry | Partial (definitions; generation binding D3) |
+| 3.2 | Transaction context (company, transaction, buyer, seller, offer, process) | company record with stable id (N-5) done; transaction record | D3 |
+| 3.3 | Input validation (fields, types, units, currency, dates, provenance) | intake parsing + supplied/unconfirmed fields; gate inputs check | Partial (D3 adds typed schemas per document) |
+| 3.4 | Deterministic generation from validated inputs and approved templates | DDM generation | D3 |
+| 3.5 | Immutable versions with source refs, time, history, content hash, input snapshot | `exitos_document_versions` | D3 |
+| 3.6 | Review workflow: draft → validation → review → counsel → approval → supersession | review states | D3 (server-enforced approval: Owner, auth) |
+| 3.7 | Genuine PDF and structured exports | Dispatch renderer | D3 (credentials: Owner) |
+| 3.8 | Consistency engine | §4.8 | D5 |
+| 3.9 | Audit trail (generated, viewed, downloaded, changed, approved, superseded) | `exitos_document_events` | D3 |
+| 3.10 | Stable type ids and explicit schema versions | registry ids, `REGISTRY_SCHEMA_VERSION` | Done (registry); per-document schema versions D3 |
+| 3.11 | Existing database and migration conventions; no second source of truth | `exitos_*` tables, `ExitApiClient` adapters | Ongoing |
+
+### §4 Confidentiality and integrity (release-blocking)
+| # | Requirement | Status | Evidence |
+|---|---|---|---|
+| 4.1 | No EV midpoint in the introduction letter pre-NDA | Done | `deliverables.test.ts`, `registry.test.ts` |
+| 4.2 | No company name / ARR in the warm-intro subject | Done | `warm-intro.test.ts`, `registry.test.ts` |
+| 4.3 | No unsupported verification / signature / access claims | Done for the gating document and Autopilot; NDA desk states its checks | `deliverables.test.ts` |
+| 4.4 | Remove `SAMPLE_COMPANY`, `Project Cipher`, hard-coded figures and demo offers from real-company outputs | Partial: exit run, Autopilot findings, teaser code name, intake contamination done; demo offers and cap table on founder pages (B-7) open | `exit-process.test.ts`, `active-company.test.ts`, `registry.test.ts` |
+| 4.5 | Tenant isolation for company, transaction, files, documents | Partial: listings (N-1), exchange rows (N-2) and data room (A-4) in code; deployment Owner; document versions D3 | `supabase/tests/isolation/run.sh`, `data-room.test.ts`, `listings.test.ts` |
+| 4.6 | Server-side authorization for generation, retrieval, export, approval, access | Partial: RLS and data-room functions enforce party/tenant; role-based approval needs real auth (N-3, Owner) | isolation test |
+| 4.7 | No leak through filenames, subjects, metadata, logs, public URLs | Partial: subjects, listing ids and listing rows done; filenames (A-7), telemetry (N-6) open | `listings.test.ts` |
+| 4.8 | Classifications and pre-generation disclosure checks | Done for pre-NDA/public types; applied on Buyers, Banker, Documents | `registry.test.ts` |
+| 4.9 | Missing input → validation error or explicit draft; never sample fallback | Partial: unconfirmed intake fields flagged and gated; typed per-document validation D3 | `active-company.test.ts` |
+| 4.10 | Regression test per known leak and sample-data defect | Partial: tests for every fixed item; open items get theirs when fixed | §11 of this matrix |
+
+### §5 One professional document system
+| # | Requirement | Status |
+|---|---|---|
+| 5.1 | One CIM generator with validated sections | D3 (D-1) |
+| 5.2 | One closing checklist; screen and export identical (items, owners, statuses, dates) | D3 (D-2) |
+| 5.3 | Measured word counts and claims | D3 (B-10) |
+| 5.4 | Design system: branding, covers, title/identity/classification, version/status/date/page numbers, typography, tables, figures, dates, headers/footers, notices, sources/assumptions/disclaimers, placeholders, metadata, safe filenames | D3 (DDM profiles on the Dispatch renderer) |
+| 5.5 | Genuine PDF; print never presented as PDF | Partial: relabel now (B-11, D2); real PDF D3 |
+| 5.6 | Correct MIME types, filenames, extensions; editable formats only when real | D2 (B-13, A-7) |
+| 5.7 | Distinct layouts per family (financial, board, CIM, legal draft, checklist, statement) | D3 |
+
+### §6 Missing M&A workflow
+| # | Requirement | Status |
+|---|---|---|
+| 6A | Process letter, bid instructions, IOI request and criteria, management-presentation and diligence instructions | D4 |
+| 6B.1 | Structured IOI (amount, currency, consideration, assumptions, financing, conditions, timing), separate from binding terms | D4 |
+| 6B.2 | LOI / term sheet with unresolved terms | D4 |
+| 6B.3 | Exclusivity draft (duration, scope, start/end, termination) | D4 |
+| 6B.4 | Counter-offer from the actual transaction and selected offer | D4 (B-8) |
+| 6B.5 | Offer comparison from real bids (consideration, conditions, financing, certainty, timing) | D4 (B-3) |
+| 6C | SPA preparation; disclosure schedules linked to reps and warranties; board/shareholder approvals and consents; escrow draft; funds flow and closing statement; bring-down certificate; closing cap table and allocation; filings checklist marked for jurisdiction verification; announcements; counsel attachments and versions | D5 |
+| 6D | Post-closing register: working-capital true-up, earn-outs, escrow release, indemnity deadlines and claims, IP assignments, regulatory/contractual actions, notices, deliverables — each with owner, due date, evidence, status, dependencies, reminders | D5 |
+
+### §7 Legal and compliance boundaries
+| # | Requirement | Status |
+|---|---|---|
+| 7.1 | Distinguish educational template · founder draft · requires counsel · counsel-reviewed · executed (verified) | D3 (legal status field), D4 (applied) |
+| 7.2 | No claim of compliance, enforceability, execution or approval without evidence | Ongoing; NDA desk and gating document done |
+| 7.3 | Jurisdiction, governing law, structure, parties as explicit inputs; no invented clauses, deadlines, tax or regulatory rules | Partial: teaser jurisdiction and wealth tax claims removed; transaction inputs D3 |
+| 7.4 | No universal negotiation positions; configurable, attributed, validated, flagged | D4 (B-9) |
+| 7.5 | Versioned clause library with jurisdiction, provenance, review status, effective dates; counsel review before production use | D4 (clause content and review: Owner) |
+
+### §8 NDA execution and data-room access
+| # | Requirement | Status |
+|---|---|---|
+| 8.1 | Explicit states and transitions; never active through a flag | Partial: signatures recorded per party (local); server lifecycle D4; "Mark executed" (C-2) D4 |
+| 8.2 | Signature evidence, signatory identity, timestamps, document version, countersignature; external-execution workflow if no provider | Partial: signatory and time recorded; evidence attachment and version D4 |
+| 8.3 | Data-room access from policy checks with server-enforced permissions; auditable; requested / approved / provisioned / revoked distinct | Partial: tenant isolation in code; access requests and audit D4 |
+| 8.4 | Fix upload count vs missing artifacts; a file satisfies only its company, transaction, artifact type and review state | D4 (C-4) |
+
+### §9 Cross-document consistency
+| # | Requirement | Status |
+|---|---|---|
+| 9.1 | Checks: name and anonymised identity; EV, equity value, consideration, currency; ARR and periods; dates and assumptions; buyer/seller identities; offer terms; NDA and disclosure permissions; LOI, exclusivity and signing milestones; closing deliverables; post-closing dates | D5 (identity and disclosure already enforced by the gate) |
+| 9.2 | One canonical timeline; milestones derived; contradictions flagged | D3 (timeline), D5 (checks) |
+| 9.3 | Findings with severity, documents, values, sources; documented intentional differences | D5 |
+
+### §10 Document experience
+| # | Requirement | Status |
+|---|---|---|
+| 10.1 | Browse by stage and audience | D3 (registry-driven workspace) |
+| 10.2 | See what ExitOS generates vs user input vs external parties | D3 (registry `kind`) |
+| 10.3 | Generate from validated data; see missing inputs and disclosure restrictions first | Partial: gate notices on Buyers, Banker, Documents |
+| 10.4 | Preview before export | Partial (on-screen views exist); unified preview D3 |
+| 10.5 | Compare versions | D3 |
+| 10.6 | Review, approval, signature and execution tracked separately | D3/D4 |
+| 10.7 | Dependencies and outstanding actions | D3 |
+| 10.8 | Correct version, drafts never confused with executed documents | D3/D4 |
+| 10.9 | Export only when authorised and valid | Partial: blocked on disclosure findings; authorisation D3 |
+| 10.10 | Capability status per document (available, needs inputs, draft only, awaiting review, externally supplied, blocked, completed); never claim an action that did not occur | Partial: registry `status`/`kind`; UI D3; false claims removed so far: B-1, B-5, data room |
+
+### §11 Tests and release gates
+| # | Requirement | Status |
+|---|---|---|
+| 11.1 | Per document type and required inputs | Partial (pre-NDA types; all types D3) |
+| 11.2 | Real-company data propagation | Partial (exit run, teaser, gate tests) |
+| 11.3 | No unintended sample data | Partial (`registry.test.ts`, `exit-process.test.ts`, `active-company.test.ts`) |
+| 11.4 | Pre-NDA disclosure prevention | Done for current pre-NDA generators |
+| 11.5 | Tenant isolation and server authorization | Partial (`supabase/tests/isolation`, `data-room.test.ts`) |
+| 11.6 | NDA transitions and evidence | Partial (`nda-drafts.test.ts`) |
+| 11.7 | Data-room completeness and permissions | D4 |
+| 11.8 | PDF rendering, pagination, file types | D3 |
+| 11.9 | UI / Markdown / PDF / structured export agreement | D3 |
+| 11.10 | Cross-document financial and timeline consistency | D5 |
+| 11.11 | Draft / review / approval / execution distinctions | D3/D4 |
+| 11.12 | Post-closing obligations | D5 |
+| 11.13 | Run lint, type-check, unit, integration, build; no weakened tests; report what cannot run | every increment (see the increment report) |
+
+### §12 Delivery
+| # | Requirement | Status |
+|---|---|---|
+| 12.1 | D1 plan mapping every finding to code, severity, fix, dependencies, tests, acceptance | Done (this document) |
+| 12.2 | D2 confidentiality, sample data, isolation | In progress |
+| 12.3 | D3 registry, generation service, templates, versions, exports | Planned |
+| 12.4 | D4 transaction documents, NDA lifecycle, data room | Planned |
+| 12.5 | D5 consistency, signing/closing, post-closing, end-to-end | Planned |
+| 12.6 | Per increment: files, migrations, behaviour, tests, remaining defects, rollback | every increment report |
+| 12.7 | Homepage and unrelated areas untouched | checked each increment (`boardcheck`) |
