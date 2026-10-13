@@ -109,7 +109,7 @@ Applied to the live project on 13 October 2026 (owner approval of 14 October dec
 | Migration state | last ExitOS migration `exitos_document_versions`; none of the four tables or nine functions existed; no name collisions |
 | Dependencies | `exitos_has_role` present, reads `exitos_role_grants`; `auth.users` present |
 | Access policies | RLS on for all 13 existing ExitOS tables; default privileges grant new public tables to `anon` and `authenticated`, so the migration now revokes and re-grants explicitly instead of relying on RLS alone |
-| Backup and recovery | `archive_mode = on` (WAL archiving behind Supabase backups and point-in-time recovery). Plan, retention and PITR window are not visible to the deployment tools; **the owner should confirm them in the dashboard**. The change is additive: no existing object is altered or dropped |
+| Backup and recovery | `archive_mode = on` (WAL archiving behind Supabase backups and point-in-time recovery). Plan, retention and PITR window are not visible to the deployment tools; **not yet confirmed (O-14)**. The change is additive: no existing object is altered or dropped |
 | Rollback | the statements in the migration header drop only the objects it created; nothing else depends on them |
 | Compatibility | local suites pass on Postgres 16; the live project runs 17.6. The features used (jsonpath `@?`, column-level grants, `gen_random_uuid`) exist in both |
 
@@ -137,7 +137,25 @@ Minor: `anon` can execute the two pure helpers `exitos_story_claim` and `exitos_
 - Locally it passes 25 of 25 (`supabase/tests/stories/selftest.sh`). A deliberately opened read policy makes six isolation checks fail, so the test does catch leaks.
 - The deployment tool would not run it on the live project: SQL containing write statements times out waiting for a confirmation that this session cannot give.
 
-**Owner action O-12:** in the Supabase SQL editor, run the self-test migration file, then `select public.exitos_selftest_company_stories();`. The expected result is an error beginning `SELFTEST PASS (0 failed of 25 …)`.
+**Owner action O-12** (owner decision, 14 October). In the Supabase Dashboard:
+1. Open the SQL Editor for project `qvjdivcdefuprnenedje` (SOVEREIGN).
+2. Open `supabase/migrations/20261014090100_exitos_company_stories_selftest.sql` from the repository at `62a57204` or later, and review the complete script. Do not run it if it differs from the reviewed repository version.
+3. Run that script. It only creates the function, and revokes execution from everyone but the database owner.
+4. Run `select public.exitos_selftest_company_stories();`
+5. Confirm the result is an error beginning `SELFTEST PASS (0 failed of 25 …)`. Record the full message as evidence.
+
+How the test rolls back:
+- The whole test runs inside one function call that ends with `raise exception`.
+- Postgres undoes every write of a statement that fails, so the test operator grant, stories, engagements, authorisations and verifications are all removed. This holds whatever the SQL editor's transaction mode.
+- The checks it runs never commit.
+- Only the function definition from step 3 persists. Remove it afterwards, if wanted, with `drop function public.exitos_selftest_company_stories();`.
+
+Checked live in advance (read-only): `exitos_role_grants` has no triggers, and live `auth.uid()` reads `request.jwt.claim.sub`, then `request.jwt.claims`; the test sets both.
+
+**O-14, backup and recovery** (owner decision). WAL archiving alone does not establish which recovery options the project has. In the Dashboard (Database → Backups), record:
+- the backup schedule;
+- the retention period;
+- whether point-in-time recovery is enabled, and its window.
 
 **Until then, the live security status of company stories is "deployed, structurally verified, behaviour not yet verified on live". Do not report it as fully verified.**
 
