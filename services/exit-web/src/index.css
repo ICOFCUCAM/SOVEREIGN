@@ -82,6 +82,11 @@ html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px s
 .ex-navscroll::-webkit-scrollbar { width: 6px; }
 .ex-navscroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
 
+/* the console's sideways strips (the market ribbon, the layer sub-navigation): content that runs past the
+   edge fades out instead of stopping mid-word, and the scrollbar stays out of the way */
+.ex-hscroll { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); scrollbar-width: none; }
+.ex-hscroll::-webkit-scrollbar { display: none; }
+
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
 
