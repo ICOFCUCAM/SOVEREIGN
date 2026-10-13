@@ -222,8 +222,14 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </div>
           </nav>
           <div className="border-t border-white/10 px-4 py-3">
-            <div className="truncate text-xs font-medium text-white/80">{session?.email}</div>
-            <div className="mb-2 flex items-center gap-1.5 text-[10px] text-white/50">
+            {/* the account: initials in a ring beside the address */}
+            <div className="flex items-center gap-2.5">
+              <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-deal-600/20 font-mono text-[10px] font-semibold uppercase text-deal-200 ring-1 ring-deal-400/40">
+                {(session?.email ?? "?").split("@")[0].split(/[._-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("") || "?"}
+              </span>
+              <div className="min-w-0 truncate text-xs font-medium text-white/80">{session?.email}</div>
+            </div>
+            <div className="mb-2 mt-2 flex items-center gap-1.5 text-[10px] text-white/50">
               <span className="rounded bg-white/10 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-white/70">{ROLE_LABEL[role]}</span>
               <span className={`rounded px-1.5 py-0.5 font-semibold uppercase tracking-wide ${plan === "pro" ? "bg-deal-600/25 text-deal-300" : plan === "starter" ? "bg-loi-500/20 text-loi-300" : "bg-white/10 text-white/55"}`}>{plan}</span>
             </div>
