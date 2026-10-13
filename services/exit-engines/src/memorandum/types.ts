@@ -24,6 +24,9 @@ export interface MemorandumInputs {
   readonly readiness?: ReadinessReport;
   readonly diligence?: DueDiligenceReport;
   readonly anonymize?: boolean;            // for buyer_teaser
+  // The company's code name on its listing (e.g. 'Project Atlas'), used in
+  // place of its name when anonymised. Callers with a real company pass it.
+  readonly codeName?: string;
 }
 
 export interface MemorandumDocument {

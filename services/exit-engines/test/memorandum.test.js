@@ -58,6 +58,17 @@ test('buyer teaser anonymizes when requested', async () => {
   assert.ok(!fullText.includes('headquartered in'));
 });
 
+test('teaser uses the code name it is given and makes no unsupported claims', async () => {
+  const loss = { ...SAMPLE_SAAS, revenue: { ...SAMPLE_SAAS.revenue, ebitdaMarginPct: -0.12 } };
+  const doc = await new TemplateMemorandumGenerator().generate('buyer_teaser', { ...inputs(), company: loss, anonymize: true, codeName: 'Project Atlas' });
+  const text = doc.sections.map((s) => `${s.body}\n${(s.bullets ?? []).join('\n')}`).join('\n');
+  assert.ok(doc.title.startsWith('Project Atlas'));
+  assert.ok(!text.includes('Project Cipher'));
+  assert.ok(!/profitable/i.test(text));           // a -12% margin is not 'profitable'
+  assert.ok(!/sector-leading/i.test(text));
+  assert.ok(!/Management team intends/i.test(text));
+});
+
 test('anonymized CIM names no jurisdiction', async () => {
   const doc = await new TemplateMemorandumGenerator().generate('cim', { ...inputs(), anonymize: true });
   const text = doc.sections.map((s) => s.body).join('\n');

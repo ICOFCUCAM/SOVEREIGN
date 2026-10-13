@@ -10,6 +10,7 @@ import { buildMarketTape } from "../lib/market-tape";
 import { runBuyerDiscovery, type BuyerCandidate } from "@exit/engines";
 import { inlineLabel, label } from "../lib/labels";
 import { warmIntro } from "../lib/warm-intro";
+import { useDocumentGate, GateNotice } from "../components/DocumentGate";
 import { loadActiveCompany } from "../lib/active-company";
 
 // Buyer Marketplace — buyer profile cards (not a directory). Each card surfaces
@@ -47,6 +48,7 @@ const Buyers: React.FC = () => {
   const medianCheckUsd = medianCheck ? (medianCheck.buyer.checkSizeLowUsd + medianCheck.buyer.checkSizeHighUsd) / 2 : 0;
 
   const [intro, setIntro] = useState<{ name: string; text: string } | null>(null);
+  const introGate = useDocumentGate("exitos.warm_intro", intro?.text);
   const { session } = useAuth();
   // Outreach is an Active Mandate surface; say so before the click.
   const outreachGate = requiredEngagement("/console/banker", session?.role ?? "founder", session?.plan ?? "free");
@@ -157,8 +159,9 @@ const Buyers: React.FC = () => {
       </Section>
 
       <Modal open={intro != null} onClose={() => setIntro(null)} title={`Warm introduction · ${intro?.name ?? ""}`} size="md"
-        footer={<>{outreachGate && <span className="mr-auto text-[12px] text-xo-caution">Outreach requires {outreachGate}</span>}<Button variant="ghost" onClick={() => intro && copyText(intro.text)}>Copy</Button><Link to="/console/banker" className="rounded-sm bg-deal-700 px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link></>}>
+        footer={<>{outreachGate && <span className="mr-auto text-[12px] text-xo-caution">Outreach requires {outreachGate}</span>}<Button variant="ghost" disabled={!!introGate?.blocked} onClick={() => intro && !introGate?.blocked && copyText(intro.text)}>Copy</Button><Link to="/console/banker" className="rounded-sm bg-deal-700 px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link></>}>
         <p className="mb-3 text-[12px] text-xo-muted">A draft generated from the buyer's thesis and the company's figures. Nothing is sent from this page — copy it, or take it to Outreach.</p>
+        <GateNotice gate={introGate} className="mb-2" />
         <pre className="whitespace-pre-wrap border border-xo-line bg-xo-ink p-4 font-sans text-[13px] leading-relaxed text-xo-text">{intro?.text}</pre>
       </Modal>
     </div>

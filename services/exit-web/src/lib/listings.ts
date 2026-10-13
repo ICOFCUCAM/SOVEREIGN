@@ -202,3 +202,8 @@ export const findOwnListing = (profile: CompanyProfile): Listing | undefined => 
 export type ListingOrigin = "founder" | "demo" | "catalog";
 export const listingOrigin = (l: Pick<Listing, "id">): ListingOrigin =>
   l.id === "lst-demo-helios" ? "demo" : l.id.startsWith("lst-sov-") ? "catalog" : "founder";
+
+/** The code name documents use for a company before an NDA: its own listing's
+ *  (the seeded demo listing's for the demo company). */
+export const codeNameFor = (profile: CompanyProfile, demo: boolean): string =>
+  demo ? listingFromCompany(profile, "lst-demo-helios").code : (findOwnListing(profile) ?? listingFromCompany(profile)).code;

@@ -8,9 +8,17 @@ import { useMemorandum, VALUATION_CANONICAL } from "../lib/engines";
 import { runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type CompanyProfile, type MemorandumInputs } from "@exit/engines";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { loadActiveCompany } from "../lib/active-company";
+import { codeNameFor } from "../lib/listings";
+import { useDocumentGate, GateNotice } from "../components/DocumentGate";
 import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
 import { label, plural } from "../lib/labels";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
+
+// the registry type each generator kind produces
+const KIND_TYPE: Record<MemorandumKind, string> = {
+  cim: "exitos.cim", executive_summary: "exitos.executive_summary", investor_deck: "exitos.investor_deck",
+  buyer_teaser: "exitos.teaser", dd_room_index: "exitos.data_room_index",
+};
 
 // Consistency check (rule-based) — scans the generated text for growth, gross
 // margin and net-retention claims and compares each with the company profile;
@@ -69,9 +77,12 @@ const Documents: React.FC = () => {
   // (its engine runs are the hook's defaults, so no inputs are passed).
   const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
   const inputs = useMemo<Partial<MemorandumInputs> | undefined>(() => {
-    if (!fromIntake) return undefined;
+    // anonymised documents use the company's own listing code name
+    const codeName = codeNameFor(company, !fromIntake);
+    if (!fromIntake) return { codeName };
     const institutional = runInstitutionalValuation(company);
     return {
+      codeName,
       company,
       valuation: canonicalValuationFor(company, institutional),
       constitution: institutional,
@@ -97,6 +108,7 @@ const DocumentsView: React.FC<{
   fromIntake: boolean;
   valueUsd: number;
 }> = ({ kind, setKind, doc, flags, company, fromIntake, valueUsd }) => {
+  const gate = useDocumentGate(KIND_TYPE[kind], doc ? docToMarkdown(doc) : null, valueUsd);
 
 // Document Generator surface — wired to TemplateMemorandumGenerator
 // from @exit/engines. Selecting a kind triggers useMemorandum() which
@@ -108,7 +120,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
   { key: "cim",                label: "Confidential Information Memorandum", description: "Long-form acquisition document — 10 sections, banker register." },
   { key: "executive_summary",  label: "Executive Summary",                  description: "One-pager. Lead with proposition, headline financials, valuation." },
   { key: "investor_deck",      label: "Investor Deck",                       description: "Ten-slide outline: title → opportunity → traction → process." },
-  { key: "buyer_teaser",       label: "Anonymized Buyer Teaser",            description: "1–2 pages, anonymized as Project Cipher. Issued pre-NDA." },
+  { key: "buyer_teaser",       label: "Anonymized Buyer Teaser",            description: "1–2 pages, anonymized under your listing's code name. Issued pre-NDA." },
   { key: "dd_room_index",      label: "Data Room Index",                     description: "Index of the diligence package contents organised by package." },
 ];
 
@@ -123,8 +135,9 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
           <button type="button" onClick={() => setLibraryOpen(true)} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Library</button>
           <a href="/report" target="_blank" rel="noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
           <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
-          {doc && <button type="button" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Download draft (.md)</button>}
+          {doc && <button type="button" disabled={!!gate?.blocked} onClick={() => !gate?.blocked && downloadDeliverable(docFilename(doc), docToMarkdown(doc))} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Download draft (.md)</button>}
         </>} />
+      <GateNotice gate={gate} className="border border-xo-line bg-xo-panel px-4 py-2.5" />
 
       <section aria-label="Document summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Templates" value={String(KINDS.length)} sub="document kinds" /></div>

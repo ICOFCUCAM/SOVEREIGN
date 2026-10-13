@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, LockIcon, Modal, fmtMoney, notify } from "../lib/ui";
 import { PageHeader } from "../components/xo";
+import { codeNameFor } from "../lib/listings";
 
 const Card: React.FC<{ className?: string; children: React.ReactNode }> = ({ className = "", children }) => (
   <div className={`border border-xo-line bg-xo-panel ${className}`}>{children}</div>
@@ -120,6 +121,7 @@ const Autopilot: React.FC = () => {
     };
   }, [company]);
   const mid = VALUATION_CANONICAL.headline.mid;
+  const PROJECT = useMemo(() => codeNameFor(company, !fromIntake), [company, fromIntake]);
   const allBuyers = BUYERS.candidates;
   const findings = useMemo(() => discoverFindings(company, mid), [company, mid]);
   const high = findings.filter((f) => f.severity === "high").length;
@@ -165,14 +167,14 @@ const Autopilot: React.FC = () => {
         </div>
       ),
       decision: `Approve the ${shortlist.length}-buyer target list?`, approveLabel: "Approve the list",
-      deliverable: { filename: "buyer-target-list.md", build: () => buyerShortlistMemo(shortlist, "Project Cipher") },
+      deliverable: { filename: "buyer-target-list.md", build: () => buyerShortlistMemo(shortlist, PROJECT) },
       reportPath: "/report/buyers",
     },
     {
       id: "outreach", name: "Outreach Agent", role: "Drafts and runs the approach.",
       work: <>Planned a six-step outreach sequence and per-buyer introductions; generate the anonymized teaser on the Documents page.</>,
       decision: `Send the anonymized teaser to the ${shortlist.length} shortlisted buyers?`, approveLabel: "Send outreach",
-      deliverable: { filename: "outreach-plan.md", build: () => outreachPlanDoc({ projectName: "Project Cipher", shortlistCount: shortlist.length, anchor: fmtMoney(mid) }) },
+      deliverable: { filename: "outreach-plan.md", build: () => outreachPlanDoc({ projectName: PROJECT, shortlistCount: shortlist.length, anchor: fmtMoney(mid) }) },
     },
     {
       id: "dataroom", name: "Data Room Agent", role: "Provisions and gates diligence.",

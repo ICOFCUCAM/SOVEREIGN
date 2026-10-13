@@ -32,8 +32,10 @@ function money(n: number, anonymize = false): string {
   return `$${n.toFixed(0)}`;
 }
 
-function anonName(orig: string, anonymize: boolean): string {
-  return anonymize ? 'Project Cipher' : orig;
+// the code name for an anonymised document (the engine's own default only when a caller gives none)
+const DEFAULT_CODE_NAME = 'Project Cipher';
+function anonName(orig: string, anonymize: boolean, codeName?: string): string {
+  return anonymize ? (codeName ?? DEFAULT_CODE_NAME) : orig;
 }
 
 // Derived three-year ARR trajectory — implied from the current ARR and the
@@ -147,7 +149,7 @@ function constitutionValuationSection(i: MemorandumInputs, heading: string): Mem
 }
 
 function cim(i: MemorandumInputs): MemorandumDocument {
-  const name = anonName(i.company.name, !!i.anonymize);
+  const name = anonName(i.company.name, !!i.anonymize, i.codeName);
   const r = i.company.revenue;
   const sections: MemorandumSection[] = [
     {
@@ -220,7 +222,7 @@ function cim(i: MemorandumInputs): MemorandumDocument {
 }
 
 function executiveSummary(i: MemorandumInputs): MemorandumDocument {
-  const name = anonName(i.company.name, !!i.anonymize);
+  const name = anonName(i.company.name, !!i.anonymize, i.codeName);
   const c = i.company;
   const v = i.valuation;
   const sections: MemorandumSection[] = [
@@ -257,7 +259,7 @@ function executiveSummary(i: MemorandumInputs): MemorandumDocument {
 }
 
 function investorDeck(i: MemorandumInputs): MemorandumDocument {
-  const name = anonName(i.company.name, !!i.anonymize);
+  const name = anonName(i.company.name, !!i.anonymize, i.codeName);
   const slide = (heading: string, body: string, bullets?: string[]): MemorandumSection =>
     ({ heading, body, ...(bullets ? { bullets } : {}) });
 
@@ -287,7 +289,7 @@ function investorDeck(i: MemorandumInputs): MemorandumDocument {
 }
 
 function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
-  const projectName = 'Project Cipher';
+  const projectName = i.codeName ?? DEFAULT_CODE_NAME;
   const c = i.company;
   const sections: MemorandumSection[] = [
     {
@@ -300,7 +302,7 @@ function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
       bullets: [
         `Revenue growth: ${(c.growth.arrGrowthYoyPct * 100).toFixed(0)}% year over year, recurring-revenue led`,
         `Gross margin: ${(c.revenue.grossMarginPct * 100).toFixed(0)}%`,
-        `EBITDA margin: ${(c.revenue.ebitdaMarginPct * 100).toFixed(0)}% — profitable while compounding`,
+        `EBITDA margin: ${(c.revenue.ebitdaMarginPct * 100).toFixed(0)}%`,
         ...(c.revenue.netRetentionPct != null ? [`Net revenue retention: ${(c.revenue.netRetentionPct * 100).toFixed(0)}%`] : []),
         `Market: expanding ${(c.market.marketGrowthPct * 100).toFixed(0)}% per annum; ${c.market.competitiveDensity} competitive density`,
       ],
@@ -308,12 +310,11 @@ function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
     {
       heading: 'Why this asset',
       body: c.product.hasNetworkEffects || c.product.hasDataMoat
-        ? `The asset combines durable moat characteristics — ${[c.product.hasNetworkEffects ? 'structural network effects' : '', c.product.hasDataMoat ? 'a proprietary data position that deepens with usage' : ''].filter(Boolean).join(' and ')} — with sector-leading growth and disciplined unit economics.`
-        : 'The asset combines disciplined unit economics, a defensible product position and a growing addressable market.',
+        ? `The asset combines durable moat characteristics — ${[c.product.hasNetworkEffects ? 'structural network effects' : '', c.product.hasDataMoat ? 'a proprietary data position that deepens with usage' : ''].filter(Boolean).join(' and ')} — with the operating profile above.`
+        : `The asset has ${c.product.differentiation} differentiation in a market growing ${(c.market.marketGrowthPct * 100).toFixed(0)}% per annum.`,
       bullets: [
         `${c.product.differentiation} differentiation · ${c.product.defensibility} defensibility`,
         ...(c.product.aiNative ? ['AI-native architecture embedded in the core workflow'] : []),
-        'Management team intends to support a professional transition',
       ],
     },
     ...(i.constitution ? [{
@@ -330,7 +331,7 @@ function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
 }
 
 function ddRoomIndex(i: MemorandumInputs): MemorandumDocument {
-  const name = anonName(i.company.name, !!i.anonymize);
+  const name = anonName(i.company.name, !!i.anonymize, i.codeName);
   const sections: MemorandumSection[] = i.diligence
     ? i.diligence.documents.map((doc) => ({
         heading: doc.title,
