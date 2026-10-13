@@ -94,9 +94,11 @@ export const Metric: React.FC<{
 export const Bar: React.FC<{ value: number; max?: number; label?: string; tone?: "verified" | "action" | "brass"; width?: string }> = ({ value, max = 100, label, tone = "verified", width = "w-16" }) => {
   const pct = Math.max(0, Math.min(100, (value / (max || 1)) * 100));
   const fill = tone === "action" ? "bg-xo-action" : tone === "brass" ? "bg-xo-brass" : "bg-xo-verified";
+  // a full-width bar needs a full-width wrapper: inside a shrink-to-fit inline-flex, w-full resolved to 0
+  const full = width === "w-full";
   return (
-    <span className="inline-flex items-center gap-2">
-      <span aria-hidden className={`inline-block h-1.5 ${width} overflow-hidden rounded-full bg-xo-line`}>
+    <span className={`${full ? "flex w-full" : "inline-flex"} items-center gap-2`}>
+      <span aria-hidden className={`inline-block h-1.5 ${full ? "min-w-0 flex-1" : width} overflow-hidden rounded-full bg-xo-line`}>
         <span className={`block h-full rounded-full ${fill}`} style={{ width: `${pct}%` }} />
       </span>
       {label != null && <span className="font-mono text-[12px] tabular-nums text-xo-text">{label}</span>}
