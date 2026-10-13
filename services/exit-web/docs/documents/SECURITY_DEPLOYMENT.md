@@ -231,7 +231,61 @@ Applied 13 October 2026.
 - the statements in the migration header;
 - redeploy the v8 functions from git `dc9a0f33~3:supabase/functions/exit-doc-{upload,list}/index.ts`.
 
+## Deliverable 5: NDA lifecycle and buyer data-room access (C-2, 8.1–8.3)
+
+Applied 13 October 2026.
+
+| Change | Live version |
+|---|---|
+| Migration `exitos_nda_lifecycle` (`20261014120000`, commit `32470d7f`) | `20261013190914` |
+| Self-test `exitos_nda_lifecycle_selftest` | `20261013191020` |
+| Revised exchange-state self-test (`8b1e118a`) | `20261013191137` |
+| Edge function `exit-doc-buyer` (new) | v1, JWT required |
+| Edge function `exit-doc-list` (returns `disclosure`) | v10 |
+
+**Preflight**
+- None of the new tables or functions existed.
+- The request guard and the `exitos_docs_read` policy existed and were replaced or altered.
+- No request was marked signed.
+- The `exit-data-room` bucket is private and has no storage policies, so no client role can read its objects directly.
+- No role grants exist.
+
+**What it enforces**
+- **Execution:**
+  - an NDA executes only when every required party has signed from its own account, on the issued document hash, with method-specific evidence;
+  - each signature must be verified by the counterparty;
+  - the request is marked signed only by execution; the owner can only reject it.
+- **Buyer access:** a buyer lists and downloads only through functions that check, on every call:
+  - the buyer's identity;
+  - an executed, unexpired agreement;
+  - the seller and company;
+  - the `post_nda` disclosure;
+  - the review state;
+  - the agreement's scope.
+
+  Downloads are 60-second signed links. The post-NDA branch of `exitos_docs_read` follows the agreement.
+- **Ending access:** expiry (computed), termination and revocation end access immediately.
+- **Audit:** an append-only trail records issue, signatures, verifications, execution, listings, downloads, denials and endings. It is written only by the functions.
+
+**Live verification, 13 October**
+- `exitos_selftest_nda_lifecycle()` returned `SELFTEST PASS (0 failed of 32)`, covering:
+  - incomplete signatures and an altered document;
+  - the wrong party signing and self-verification;
+  - an unrelated account and a buyer without an NDA;
+  - wrong-company, wrong-seller, seller-only and rejected files;
+  - direct reads of data-room rows and of storage objects (the bucket held one real object);
+  - direct writes to state and to the audit trail;
+  - expiry, revocation and termination;
+  - the audit trail;
+  - `anon`.
+- The other three self-tests were re-run afterwards and pass: company stories 25/25, exchange state 15/15 (revised for the new rule), data room 11/11.
+- Rollback was confirmed: no agreements, events or test rows remain.
+- Security advisors show only the intended RPCs as callable by signed-in users.
+
+**Not verified here:** HTTP calls to `exit-doc-buyer` and to the upload function's artifact check. The network policy blocks this sandbox from the project (proxy 403). Tracked as O-15.
+
 ## Rollback
+- **NDA lifecycle (deliverable 5):** the statements in the header of `20261014120000_exitos_nda_lifecycle.sql`; delete the `exit-doc-buyer` function. Rolling back restores the founder flag as the post-NDA gate.
 - **Exchange state integrity (deliverable 5):** the statements in the header of `20261014100000_exitos_exchange_state_integrity.sql`. Rolling back re-opens the self-signing defect.
 - **Company stories (deliverable 4):** the drop statements in the header of `20261014090000_exitos_company_stories.sql`, and `drop function public.exitos_selftest_company_stories();` if the self-test was installed. Data in the four tables is lost on rollback; export it first if any exists.
 - **Database:** the statements in each migration header. Restoring the read policies to `using (true)` re-opens the leak; don't, except to recover from a breaking incident.

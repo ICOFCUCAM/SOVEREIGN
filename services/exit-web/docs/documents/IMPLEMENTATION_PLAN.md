@@ -74,8 +74,8 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 |---|---|---|---|
 | C-1 | Issued NDA can never become active | Fixed `0afb0c6f` (local record) | signatures recorded per party; moves to the server-backed lifecycle in deliverable 4 |
 | S-1 | Buyer could create or edit their own NDA request as `signed` (unlocking post-NDA documents), or mark their own offer `accepted` | Fixed `8013f516`; **deployed and verified live** (self-test 15/15) | state guards and WITH CHECK; client uses PATCH and treats refusals as errors |
-| C-2 | Inbox "Mark executed" is a bare flag | Open | replaced by the NDA lifecycle: executed only with signature evidence for every required party |
-| C-3 | NDA shapes: `one_way_disclosure` has no template; mutual-cure has no cure term; expiry runs from execution; 8 of "14" clauses; no clause text | Open | clause library with provenance and review status (deliverable 4); until then the package says it is a summary, not an agreement |
+| C-2 | Inbox "Mark executed" is a bare flag | Fixed `20261014120000`, `32470d7f`; **deployed and verified live** (self-test 32/32) | "Mark executed" removed; a request is marked signed only when its NDA executes (every required party's signature recorded from its own account on the issued hash and verified by the counterparty); the owner can no longer set it |
+| C-3 | NDA shapes: `one_way_disclosure` has no template; mutual-cure has no cure term; expiry runs from execution; 8 of "14" clauses; no clause text | Partial | Fixed: the executed NDA is a full text fixed by hash; access term separate from survival; ExitOS template text labelled founder draft, not reviewed by counsel. Open: versioned clause library with counsel review (O-6); the local NDA vault and `/report/nda` package still describe template clause counts |
 | C-4 | Data-room completeness counts any upload; missing list matches template filenames | Fixed `244ea1c6`; **deployed and verified live** (self-test 11/11) | upload is tagged with its artifact id; completeness = required artifacts with an accepted file |
 | C-5 | Deal stages have no signing stage | Open | transaction record with explicit milestones (deliverable 3) |
 
@@ -174,6 +174,7 @@ These block a requirement from being complete in production. Nothing below is ma
 | O-9 | ~~Apply migration `20261014090000_exitos_company_stories.sql`~~ **Applied 13 Oct** (`20261013171613`) after preflight; structure verified live. See `SECURITY_DEPLOYMENT.md` | done |
 | O-12 | ~~Run the live self-tests~~ **Passed 13 Oct 18:38 UTC:** company stories 25/25, exchange state 15/15, rollback confirmed (`SECURITY_DEPLOYMENT.md`) | done |
 | O-14 | Confirm the configured backup schedule, retention, and PITR status and window in the Supabase Dashboard (WAL archiving alone does not establish them) | recovery procedure for the story tables |
+| O-15 | When network access permits: authenticated HTTP tests of `exit-doc-upload` (artifact check) and `exit-doc-buyer` (list, download, refusal, 60-second link) | HTTP-level verification of the edge functions |
 | O-13 | Authorise reviewers deliberately (owner decision). Nobody is authorised by default. For each reviewer: identify them, verify their professional qualification and scope, then authorise for that competence only (`exitos_authorize_reviewer`, with name and professional role). The company then engages them. The administrator cannot verify claims or authorise themselves (enforced and tested). No reviewer is authorised today | any "independently verified" figure |
 | O-10 | ~~Decide who may verify~~ **Decided 14 Oct:** only an authorised professional reviewer, engaged by the company, within their competence, with recorded evidence. Founder, ExitOS checks, counsel outside scope and administrators cannot verify. Implemented `5ea9f90e`, `bc2cd4fe` | done |
 | O-11 | If price guidance is ever to be given: approve a separate, counsel-reviewed price-guidance document and who may send it | A.5 |
@@ -257,9 +258,9 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 ### §8 NDA execution and data-room access
 | # | Requirement | Owning | Status |
 |---|---|---|---|
-| 8.1 | Explicit states; never active through a flag | D4 | Partial: local per-party signatures; "Mark executed" (C-2) still open |
-| 8.2 | Signature evidence, identity, timestamps, version, countersignature | D4 | Partial |
-| 8.3 | Server-enforced, auditable data-room access; requested / approved / provisioned / revoked | D2/D5 | Partial: tenant isolation deployed and verified; buyer access requests come with the NDA lifecycle (D5-2), since access requires an executed NDA |
+| 8.1 | Explicit states; never active through a flag | D5 | Done: issued → executed only through verified signatures of every required party; withdrawn, terminated, revoked by named functions; expiry computed on every check; no direct writes | `supabase/tests/nda`; **live self-test 32/32** |
+| 8.2 | Signature evidence, identity, timestamps, version, countersignature | D5 | Done: signer's authenticated account, name, title, method, method-specific evidence, signed hash = issued hash, signing and recording times, counterparty verification with note. Not done: cryptographic e-signature certificate checks or a provider integration; "verified" means a named non-signatory confirmed the evidence | `nda-lifecycle.test.ts`, `supabase/tests/nda`; **live 32/32** |
+| 8.3 | Server-enforced, auditable data-room access; requested / approved / provisioned / revoked | D2/D5 | Done for buyers: access exists only under an executed, unexpired NDA, for the agreement's seller, company and scope, files the seller disclosed post-NDA; re-checked on every list and download; 60-second links; terminate, revoke and expiry close it; audit trail of listings, downloads and denials. Transaction scope waits on D6 (`transaction_id` reserved) | `supabase/tests/nda`; **live 32/32**; edge function HTTP path not yet exercised (network) |
 | 8.4 | A file satisfies only its company, transaction, artifact type and review state (C-4) | D5 | Done for company, artifact and review state; transaction id waits on the transaction record (D6). "Accepted" is the owner's confirmation, labelled as such; independent review of files is not built | `diligence.test.js`, `data-room.test.ts`, `supabase/tests/dataroom`; **live self-test 11/11** |
 
 ### §9 Cross-document consistency
@@ -333,7 +334,7 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 | 12.2 | D2 confidentiality, sample data, isolation | Done in code; **deployed and verified** (`SECURITY_DEPLOYMENT.md`); cleanup O-1, frontend O-2 |
 | 12.3 | D3 registry, generation service, templates, versions, exports | Partial (§9 report): service, versions, workflow, one CIM/checklist/timeline, consistency done; PDF blocked on O-5; 46 types not yet on the service |
 | 12.4 | D4 (revised by the owner): professional CIM and evidence-based intake | Accepted for code review (not production-ready). Story migration deployed and verified live (self-test 25/25); backup and PITR to confirm (O-14); production PDFs blocked on Dispatch deployment |
-| 12.4b | D5 transaction documents, NDA lifecycle, data room (was D4) | Not started |
+| 12.4b | D5 transaction documents, NDA lifecycle, data room (was D4) | D5-1 data-room tagging and D5-2 NDA lifecycle **deployed and verified live**; D5-3 transaction documents next |
 | 12.5 | D6 signing/closing, post-closing, end-to-end (was D5) | Not started |
 | 12.6 | Per-increment reports | §8, §9 |
 | 12.7 | Homepage and unrelated areas untouched | checked each increment (`boardcheck`) |
@@ -644,3 +645,60 @@ An agent swept every generator and page. Fixed:
 ### Rollback
 - Revert the commits.
 - Database: drop the trigger, function and table named in the migration header (the migration is not applied live).
+
+
+## 11. Increment report — deliverable 5, parts 1 and 2 (data-room tagging; NDA lifecycle)
+
+### What changed
+- **D5-1 data-room tagging (C-4).**
+  - Each data-room file carries the artifact it satisfies, its company and a review state.
+  - A required artifact counts only when a tagged file for this company is accepted. Overall completeness = accepted ÷ required.
+  - "Accepted" is the company's own confirmation, and is labelled so.
+- **S-1 security fix.** A buyer could create or edit their own NDA request as signed, or their own offer as accepted. State guards now prevent it.
+- **D5-2 NDA lifecycle (C-2, 8.1–8.3).**
+  - **Agreement:** a seller issues an NDA against a buyer's request. Its text and SHA-256 are fixed at issue.
+  - **Signing:** each party signs from its own account, on that hash, with method-specific evidence. The counterparty verifies.
+  - **Execution:** happens only when every required party is verified. The request is marked signed only by execution.
+  - **Buyer access:** the seller's post-NDA files, for the agreement's company and scope, re-checked on every list and download, through 60-second links.
+  - **Ending access:** expiry, termination and revocation close access at once.
+  - **Audit:** a trail of every transition, signature, verification, listing, download and denial.
+
+### Files and migrations
+- **Migrations:**
+  - `20261014100000_exitos_exchange_state_integrity` (S-1);
+  - `20261014110000_exit_data_room_tagging`;
+  - `20261014120000_exitos_nda_lifecycle`;
+  - self-tests `20261014090100`, `20261014100100`, `20261014110100`, `20261014120100`.
+- **Edge functions:** `exit-doc-upload` v9, `exit-doc-list` v10, `exit-doc-buyer` v1 (new).
+- **Engines:** `diligence/engine.ts` (artifact ids), `diligence/room.ts` (completeness).
+- **Web:**
+  - libraries: `data-room.ts`, `nda-lifecycle.ts`, `nda-template.ts`, `supabase-exit-api.ts` (status changes as PATCH);
+  - pages and components: `components/NdaLifecycle.tsx`, `pages/DataRoom.tsx`, `pages/Nda.tsx`, `pages/FounderInbox.tsx`.
+- **SQL tests:** `supabase/tests/dataroom`, `supabase/tests/nda`, with additions to `isolation` and `stories/selftest.sh`.
+
+### Tests
+- **Local:**
+  - engines 201;
+  - web 374 (eslint, tsc and build clean);
+  - SQL suites `stories`, `isolation`, `documents`, `dataroom` and `nda` all pass;
+  - self-tests 25 + 15 + 11 + 32 pass on a full local stack.
+- **Mutation runs:** each of these makes the NDA self-test fail:
+  - ignoring expiry;
+  - dropping the company check;
+  - dropping the disclosure check;
+  - removing both the counterparty rule and its table constraint.
+- **Live, 13 October:** after the last change, the four self-tests passed on the deployed database: company stories 25/25, exchange state 15/15, data room 11/11, NDA lifecycle 32/32.
+  - Rollback was confirmed: no test rows remain.
+  - Check 23 ran against a bucket holding a real object, which the buyer could not see.
+- **Security advisors:** for the new objects, only the intended remote procedure calls (RPCs) are flagged as callable by signed-in users, and each checks its caller. Nothing is callable by `anon`, and there are no row-level-security or search-path findings.
+
+### Not verified, and limits
+- **HTTP path:** the edge functions' HTTP behaviour (`exit-doc-buyer` list and download, `exit-doc-upload` artifact check) has not been exercised. The network policy here blocks calls to the project (proxy 403). The database authorisation they call is verified live; the functions are verified by code review and client tests. Tracked as O-15.
+- **Signed links:** a link issued before revocation or expiry stays valid for at most 60 seconds.
+- **What "verified" means:** the counterparty confirmed the evidence. There is no cryptographic e-signature check, no signature-provider integration, and no legal opinion.
+- **Signer authority:** the account that signs is authenticated; its authority to sign for its organisation is attested, not checked.
+- **Scope:** access is company- and listing-scoped. `transaction_id` is reserved, and access moves to transaction scope in D6 without weakening the checks.
+- **Remaining work:** a clause library with counsel review (O-6, C-3). Engaging counsel to verify signatures is not built; today the counterparty verifies.
+
+### Rollback
+The statements in each migration header, in reverse order. Redeploy the previous edge-function versions from git (`exit-doc-upload`/`exit-doc-list` v8 from `dc9a0f33~3`; delete `exit-doc-buyer`). Rolling back the NDA lifecycle restores the founder flag as the post-NDA gate; rolling back S-1 re-opens self-signing.
