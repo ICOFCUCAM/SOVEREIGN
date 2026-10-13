@@ -38,6 +38,11 @@ export const LockIcon: React.FC<{ size?: number; className?: string }> = ({ size
   <svg aria-hidden width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" className={`inline-block shrink-0 ${className}`}><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
 );
 
+/** The console's close mark: two drawn strokes in the current colour (the typed ✕ varies by platform font). */
+export const CloseIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
+  <svg aria-hidden width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="block"><path d="M6 6l12 12M18 6 6 18" /></svg>
+);
+
 export const Card: React.FC<{ children: React.ReactNode; className?: string; id?: string }> = ({ children, className = "", id }) => (
   <div id={id} className={`rounded-lg border border-white/10 bg-ink-800/60 ${className}`}>{children}</div>
 );
@@ -167,7 +172,7 @@ export const Modal: React.FC<{
             <h2 id={titleId} className="font-serif text-lg font-bold leading-tight text-white">{title}</h2>
             {subtitle && <div className="mt-0.5 text-[12px] text-white/50">{subtitle}</div>}
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded-md p-1 text-white/50 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">✕</button>
+          <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded-md p-1 text-white/50 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action"><CloseIcon /></button>
         </div>
         <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-h-[64vh] overflow-y-auto overscroll-contain px-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action">{children}</div>
         {footer && <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-white/10 px-6 py-4">{footer}</div>}
