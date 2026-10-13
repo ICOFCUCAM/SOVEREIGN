@@ -9,8 +9,8 @@ import { listCompany, listingFromCompany, unlistCompany, findOwnListing } from "
 import { listingDestination } from "../lib/exit-api";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
-import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
-import { NUMERIC_FIELDS, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
+import { loadSavedIntake, saveIntake, clearIntake, loadIntakeRecord, unconfirmedFields, confirmIntakeFields, type IntakeField } from "../lib/active-company";
+import { NUMERIC_FIELDS, INTAKE_FIELD_LABEL, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
 import { fromQuery, quickIntake } from "../lib/quick-value";
 import { sectorLabel } from "../lib/market-stats";
 import { Section, Metric, Provenance, ScrollRegion, ActionLink, Bar } from "../components/xo";
@@ -75,15 +75,21 @@ const Intake: React.FC = () => {
   const destination = listingDestination();
   const confirmListing = (): void => { listCompany(buildProfile(inp)); setConfirming(false); setListingVersion((v) => v + 1); };
   const withdraw = (): void => { unlistCompany(stored?.id ?? preview.id); setConfirming(false); setListingVersion((v) => v + 1); };
+  // fields still holding the demo company's values (re-read after every save)
+  const [unconfirmed, setUnconfirmed] = useState<IntakeField[]>(() => { const r = loadIntakeRecord(); return r ? unconfirmedFields(r) : []; });
+  const refreshUnconfirmed = (): void => { const r = loadIntakeRecord(); setUnconfirmed(r ? unconfirmedFields(r) : []); };
   const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => {
-    setInp((p) => { const next = { ...p, [k]: v }; saveIntake(next); return next; });
-    setSaved(true); setPrefilled(false);
+    setInp((p) => { const next = { ...p, [k]: v }; saveIntake(next, [k]); return next; });
+    setSaved(true); setPrefilled(false); refreshUnconfirmed();
   };
-  const keepPrefill = (): void => { saveIntake(inp); setSaved(true); setPrefilled(false); };
+  // the homepage hand-off carries the founder's sector, revenue and growth
+  const HANDOFF_FIELDS: IntakeField[] = ["sector", "ttmRevenueUsd", "growthPct"];
+  const keepPrefill = (): void => { saveIntake(inp, HANDOFF_FIELDS); setSaved(true); setPrefilled(false); refreshUnconfirmed(); };
+  const confirmRest = (): void => { confirmIntakeFields(unconfirmed); refreshUnconfirmed(); };
   const applyHandoff = (): void => {
     if (!handoff) return;
     const next = quickIntake(handoff);
-    saveIntake(next); setInp(next); setTexts(textsFor(next)); setErrors({}); setSaved(true); setHandoffDismissed(true);
+    saveIntake(next, HANDOFF_FIELDS); refreshUnconfirmed(); setInp(next); setTexts(textsFor(next)); setErrors({}); setSaved(true); setHandoffDismissed(true);
   };
   // Number fields keep exactly what was typed; only valid values reach the engines.
   const [texts, setTexts] = useState<Record<NumericKey, string>>(() => textsFor(inp));
@@ -95,7 +101,7 @@ const Intake: React.FC = () => {
     setErrors((e) => { const n = { ...e }; if (res.ok) delete n[k]; else n[k] = res.error; return n; });
     if (res.ok) set(k, res.value as never);
   };
-  const clearMine = (): void => { clearIntake(); setInp(SAMPLE_INTAKE); setTexts(textsFor(SAMPLE_INTAKE)); setErrors({}); setSaved(false); };
+  const clearMine = (): void => { clearIntake(); setInp(SAMPLE_INTAKE); setTexts(textsFor(SAMPLE_INTAKE)); setErrors({}); setSaved(false); setUnconfirmed([]); };
 
   const m = report.mandatoryOutputs;
 
@@ -207,6 +213,12 @@ const Intake: React.FC = () => {
                 ? "Your figures are saved in this browser. See below for the pages that use them."
                 : `Showing the demo company (${SAMPLE_INTAKE.name}). Edit any field to value your own company; nothing is saved until you do.`}
             </p>
+            {saved && unconfirmed.length > 0 && (
+              <div className="border border-loi-400/50 bg-loi-500/10 px-3 py-2.5 text-[12px] text-xo-text">
+                <p><span className="font-semibold">{unconfirmed.length} of {Object.keys(INTAKE_FIELD_LABEL).length} values are still the demo company's</span>, not yours: {unconfirmed.map((k) => INTAKE_FIELD_LABEL[k]).join(", ")}. Enter your own, or confirm them. Documents treat them as missing until you do.</p>
+                <Button variant="ghost" className="mt-2" onClick={confirmRest}>These values are mine</Button>
+              </div>
+            )}
           </div>
         </Section>
 
