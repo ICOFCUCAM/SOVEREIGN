@@ -92,6 +92,14 @@ html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px s
    :where() keeps this at zero specificity, so controls that draw their own ring keep theirs */
 .ex-console :where(a, button, summary, select, input, textarea, [tabindex]:not([tabindex="-1"])):focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
 
+/* the console's own selection (an emerald wash, not the browser's blue) and a workspace scrollbar that sits
+   back on the ink */
+.ex-console ::selection { background: rgba(52,211,153,0.28); color: #fff; }
+.ex-console main { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.14) transparent; }
+.ex-console main::-webkit-scrollbar { width: 8px; }
+.ex-console main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+.ex-console main::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,0.24); }
+
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
 
