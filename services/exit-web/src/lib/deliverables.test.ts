@@ -126,11 +126,13 @@ describe("deliverables", () => {
 
   it("intro letter is personalized and confidential", () => {
     const b = BUYERS.candidates[0];
-    const letter = buyerIntroLetter({ buyer: b, projectName: "Project Cipher", askMid: VALUATION_STRATEGIC.headline.mid, fromName: "Anne Kovac" });
+    const letter = buyerIntroLetter({ buyer: b, projectName: "Project Cipher", fromName: "Anne Kovac" });
     expect(letter).toContain("STRICTLY CONFIDENTIAL");
     expect(letter).toContain(b.buyer.name);
     expect(letter).toContain(b.buyer.thesis);
     expect(introFilename(b)).toMatch(/^intro-.+\.txt$/);
+    // pre-NDA: no company value
+    expect(letter).not.toMatch(/enterprise value/i);
     noPlaceholders(letter);
   });
 
@@ -171,7 +173,7 @@ describe("all generated documents have content", () => {
     "closing-checklist.md": closingChecklistDoc,
     "wealth-transition-plan.md": () => wealthPlanDoc(fmt(VALUATION_STRATEGIC.headline.mid)),
     "buyer-shortlist.csv": () => buyerListCsv(shortlist),
-    "intro-letter.txt": () => buyerIntroLetter({ buyer: shortlist[0], projectName: "Project Cipher", askMid: VALUATION_STRATEGIC.headline.mid, fromName: "Anne Kovac" }),
+    "intro-letter.txt": () => buyerIntroLetter({ buyer: shortlist[0], projectName: "Project Cipher", fromName: "Anne Kovac" }),
   };
 
   for (const [filename, build] of Object.entries(builds)) {

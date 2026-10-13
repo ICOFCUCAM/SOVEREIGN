@@ -7,9 +7,9 @@ import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
 import { PageHeader, Section, Metric as XMetric, Provenance, Empty } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { runBuyerDiscovery, type BuyerCandidate, type CompanyProfile } from "@exit/engines";
+import { runBuyerDiscovery, type BuyerCandidate } from "@exit/engines";
 import { inlineLabel, label } from "../lib/labels";
-import { sectorLabel } from "../lib/market-stats";
+import { warmIntro } from "../lib/warm-intro";
 import { loadActiveCompany } from "../lib/active-company";
 
 // Buyer Marketplace — buyer profile cards (not a directory). Each card surfaces
@@ -26,24 +26,6 @@ function interest(c: BuyerCandidate): { label: string; pct: number; cls: string 
   if (p >= 0.35) return { label: "Warm", pct: Math.round(p * 100), cls: "text-xo-caution" };
   return { label: "Cool", pct: Math.round(p * 100), cls: "text-xo-muted" };
 }
-function warmIntro(c: BuyerCandidate, co: CompanyProfile): string {
-  const sector = sectorLabel(co.sector);
-  const arrM = (co.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(0);
-  return (
-    `Subject: Introduction — ${co.name} (${sector})\n\n` +
-    `Hi ${c.buyer.name} team,\n\n` +
-    `I'm reaching out because ${co.name} aligns closely with your acquisition thesis: ${c.buyer.thesis} ` +
-    `We're a ${sector} business at $${arrM}M ARR growing ${(co.growth.arrGrowthYoyPct * 100).toFixed(0)}% YoY, ` +
-    // Only mention recent activity when the registry records deals in the
-    // last three years.
-    (c.history.dealsLast3Years > 0
-      ? `and your recent activity in the space — plus a check range of ${fmtMoney(c.buyer.checkSizeLowUsd)}–${fmtMoney(c.buyer.checkSizeHighUsd)} — `
-      : `and your check range of ${fmtMoney(c.buyer.checkSizeLowUsd)}–${fmtMoney(c.buyer.checkSizeHighUsd)} `) +
-    `makes a conversation worth both our time.\n\n` +
-    `Happy to share an anonymized teaser under NDA. Would the coming week work for a short call?\n\nBest,\n[Your name]`
-  );
-}
-
 const Buyers: React.FC = () => {
   // The founder's saved intake when there is one, else the demo company.
   const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);

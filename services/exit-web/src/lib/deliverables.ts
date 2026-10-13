@@ -462,11 +462,12 @@ export function buyerListCsv(candidates: readonly BuyerCandidate[]): string {
 export function buyerIntroLetter(opts: {
   buyer: BuyerCandidate;
   projectName: string;
-  askMid: number;
   fromName: string;
   anonymized?: boolean;
 }): string {
-  const { buyer, projectName, askMid, fromName, anonymized = true } = opts;
+  // Sent before any NDA: no company figures (value, revenue) appear here — only
+  // the buyer's own mandate and record, which they already know.
+  const { buyer, projectName, fromName, anonymized = true } = opts;
   const eo = buyer.expectedOutcome;
   return [
     `◎ EXITOS · ACQUISITION EXCHANGE`,
@@ -484,12 +485,11 @@ export function buyerIntroLetter(opts: {
     `Why we thought of you specifically: ${buyer.rationale}`,
     "",
     `Indicative parameters:`,
-    `  • Indicated enterprise value (mid): ${money(askMid)}`,
     `  • Estimated fit: ${pct(buyer.probability)} acquisition probability (${eo.overallConfidence.tier} confidence)`,
     `  • Your typical check for this profile: ${money(buyer.estimatedCheck.low)} – ${money(buyer.estimatedCheck.high)}`,
     `  • Benchmark pace from your track record: ~${Math.round(eo.expectedDaysToCash)} days announced-to-close`,
     "",
-    `All identifying materials are gated behind a mutual NDA. On execution we will share the confidential information memorandum and open staged data-room access.`,
+    `All identifying materials are gated behind a mutual NDA. On execution we will share the company's figures, the confidential information memorandum and staged data-room access.`,
     "",
     `If this is of interest, simply reply and we will coordinate a first call at your convenience.`,
     "",
@@ -558,15 +558,16 @@ export function outreachPlanDoc(opts: { projectName: string; shortlistCount: num
 }
 
 export function dataRoomGatingDoc(packageCount: number): string {
-  return structuredDoc("Data-Room Gating Policy", "Permissioned access for a controlled process", [
-    { heading: "Access control", body: "No buyer reaches the data room until they clear a mutual NDA and a Buyer Trust score of Verified. Access is staged by diligence package, fully logged and revocable." },
-    { heading: "Buyer Trust gates", table: { headers: ["Gate", "Requirement"], rows: [
-      ["NDA signed", "Executed mutual NDA on file"],
-      ["Identity verified", "Authorized signatory on the signature record"],
-      ["Acquisition history", "Institutional counterparty with a validated track record"],
-      ["Funds verified", "Capitalised counterparty with damages provision in force"],
+  return structuredDoc("Data-Room Access Policy", "A recommended policy for the seller to apply", [
+    { heading: "Recommended policy", body: "Grant a buyer data-room access only after an NDA is executed and you (or your adviser) have confirmed who they are and how they will fund the deal. Stage access by diligence package and revoke it when a buyer leaves the process." },
+    { heading: "What ExitOS records", table: { headers: ["Record check", "What it reads"], rows: [
+      ["NDA active", "The NDA's status on its record"],
+      ["Signature recorded", "An execution date and a signature event on the record"],
+      ["Named representative", "A representative named on the signature record"],
+      ["Damages provision", "A liquidated-damages amount in the NDA terms"],
     ] } },
-    { heading: "Packages", body: `${packageCount} staged diligence packages, each completeness-scored, with the dollar impact of every gap surfaced before buyers see it.` },
+    { heading: "What ExitOS does not do", body: "It does not verify a buyer's identity, funds or acquisition history, and it does not enforce data-room access on these checks. Those confirmations are yours or your adviser's to make." },
+    { heading: "Packages", body: `${packageCount} diligence packages, each completeness-scored before buyers see them.` },
   ]);
 }
 
