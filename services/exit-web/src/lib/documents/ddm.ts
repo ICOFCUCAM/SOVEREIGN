@@ -24,7 +24,7 @@ export interface ContentSection {
 }
 interface Table { readonly headers: readonly string[]; readonly rows: ReadonlyArray<readonly string[]>; readonly caption?: string }
 
-export type Family = "memorandum" | "checklist" | "diligence";
+export type Family = "memorandum" | "checklist" | "diligence" | "agreement";
 
 export interface DdmInput {
   readonly family: Family;
@@ -67,7 +67,7 @@ export const CLASSIFICATION_HANDLING: Record<Classification, string> = {
   restricted_parties: "Only for the parties to the transaction and their counsel.",
 };
 
-const DOC_TYPE: Record<Family, string> = { memorandum: "proposal_package", checklist: "contract_record", diligence: "due_diligence_report" };
+const DOC_TYPE: Record<Family, string> = { memorandum: "proposal_package", checklist: "contract_record", diligence: "due_diligence_report", agreement: "contract_record" };
 
 // inline Markdown emphasis is not part of DDM text
 const plain = (t: string): string => t.replace(/\*\*(.+?)\*\*/g, "$1").replace(/_(.+?)_/g, "$1").trim();
@@ -121,6 +121,16 @@ export function toDdm(input: DdmInput): DdmDocument {
     const timing = find(secs, /timing/i);
     if (timing >= 0) { roleAt(timing, "term"); sections[timing].blocks.push({ id: `${sections[timing].id}-c`, ...noticeCallout("Timing") }); }
     else add("Timing", "term", [noticeCallout("Timing")]);
+  } else if (input.family === "agreement") {
+    // drafts of transaction instruments: summary, parties, the terms or obligations, and their term
+    roleAt(0, "summary");
+    const parties = find(secs, /^parties/i);
+    if (parties >= 0) roleAt(parties, "parties"); else add("Parties", "parties", [{ type: "bullets", items: [{ text: "As named in the summary" }] }]);
+    const terms = find(secs, /terms|obligations/i);
+    if (terms >= 0) roleAt(terms, "obligations"); else add("Terms", "obligations", [{ type: "paragraph", text: "As set out above." }]);
+    const term = find(secs, /^term\b|timing|next steps|exclusivity/i);
+    if (term >= 0 && !sections[term].role) { roleAt(term, "term"); sections[term].blocks.push({ id: `${sections[term].id}-c`, ...noticeCallout("Status") }); }
+    else add("Status", "term", [noticeCallout("Status")]);
   } else {
     roleAt(0, "summary");
     add("Scope", "scope", [{ type: "paragraph", text: "Rule-based checks on the company's own figures. No documents were read; findings are prompts for diligence, not conclusions." }]);

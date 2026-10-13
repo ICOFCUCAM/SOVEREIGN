@@ -54,6 +54,8 @@ const FAMILY: Record<string, Family> = {
   "exitos.teaser": "memorandum", "exitos.data_room_index": "memorandum",
   "exitos.closing_checklist": "checklist",
   "exitos.diligence_findings": "diligence", "exitos.seller_diligence_report": "diligence",
+  "exitos.process_letter": "memorandum", "exitos.ioi": "memorandum", "exitos.offer_comparison": "memorandum",
+  "exitos.counter_offer": "agreement", "exitos.loi": "agreement", "exitos.exclusivity": "agreement",
 };
 // types whose DDM is built by their own mapper (passed in as `ddm`)
 const BESPOKE = new Set(["exitos.board_memo_process"]);

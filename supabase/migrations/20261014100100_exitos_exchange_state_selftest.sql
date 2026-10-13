@@ -36,7 +36,7 @@ begin
   begin insert into public.exitos_offers values ('zz-selftest-forged-' || gen_random_uuid()::text, L, B, '{"amountUsd":1,"status":"accepted"}'); ok := false; exception when others then ok := true; end;
   out := out || format(E'\n%s 05 buyer cannot create an accepted offer', ok); fails := fails + (not ok)::int;
   insert into public.exitos_offers values (O1, L, B, '{"amountUsd":40000000,"status":"submitted"}');
-  insert into public.exitos_offers values (O2, L, B, '{"amountUsd":42000000,"status":"submitted"}');
+  insert into public.exitos_offers values (O2, L, B, '{"amountUsd":42000000,"status":"submitted","terms":{"cashPct":0.8,"escrowPct":0.1}}');
   begin update public.exitos_offers set data = data || '{"status":"accepted"}' where id = O1; ok := false; exception when others then ok := true; end;
   out := out || format(E'\n%s 06 buyer cannot accept their own offer', ok); fails := fails + (not ok)::int;
   begin update public.exitos_offers set data = data || '{"amountUsd":41000000}' where id = O1; ok := true; exception when others then ok := false; end;
@@ -49,6 +49,8 @@ begin
   perform set_config('request.jwt.claims', json_build_object('sub', A, 'role', 'authenticated')::text, true); perform set_config('request.jwt.claim.sub', A, true);
   begin update public.exitos_offers set data = data || '{"amountUsd":1}' where id = O2; ok := false; exception when others then ok := true; end;
   out := out || format(E'\n%s 09 owner cannot rewrite an offer amount', ok); fails := fails + (not ok)::int;
+  begin update public.exitos_offers set data = jsonb_set(data, '{terms,escrowPct}', '0.05') where id = O2; ok := false; exception when others then ok := true; end;
+  out := out || format(E'\n%s 16 owner cannot rewrite the terms a bidder stated', ok); fails := fails + (not ok)::int;
   begin update public.exitos_offers set data = data || '{"status":"accepted"}' where id = O1; ok := true; exception when others then ok := false; end;
   out := out || format(E'\n%s 10 owner can accept an offer', ok); fails := fails + (not ok)::int;
   begin update public.exitos_nda_requests set data = '{"status":"rejected"}' where id = NR; ok := true; exception when others then ok := false; end;
@@ -67,6 +69,6 @@ begin
   begin select count(*) into n from public.exitos_nda_requests; ok := false; exception when others then ok := true; end;
   out := out || format(E'\n%s 15 anon cannot read NDA requests', ok); fails := fails + (not ok)::int;
 
-  raise exception 'SELFTEST % (% failed of 15; all test rows rolled back)%', case when fails = 0 then 'PASS' else 'FAIL' end, fails, out;
+  raise exception 'SELFTEST % (% failed of 16; all test rows rolled back)%', case when fails = 0 then 'PASS' else 'FAIL' end, fails, out;
 end $$;
 revoke all on function public.exitos_selftest_exchange_state() from public, anon, authenticated;

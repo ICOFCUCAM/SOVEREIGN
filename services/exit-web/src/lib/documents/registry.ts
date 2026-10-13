@@ -139,7 +139,8 @@ export const DOCUMENT_TYPES: readonly DocumentType[] = [
     source: "lib/deliverables.ts:outreachPlanDoc; pages/Banker.tsx (campaign); lib/outreach-plan.ts (waves)", formats: ["md", "screen"], status: "partial", defects: ["D-3"],
     note: "Three overlapping outreach plans." },
   { id: "exitos.process_letter", title: "Process letter and bid instructions", stage: 3, audience: "buyers", kind: "generated", classification: "confidential_nda", inputs: [],
-    source: null, formats: [], status: "not_built" },
+    source: "lib/documents/transaction-docs.ts:processLetter", formats: ["screen", "md"], status: "built", dependsOn: ["exitos.nda"],
+    note: "From the canonical process timeline; the structured IOI fields; no price is indicated." },
 
   // ── 4 · Confidentiality and NDA ──
   { id: "exitos.nda", title: "Non-disclosure agreement", stage: 4, audience: "parties", kind: "counsel", classification: "restricted_parties", inputs: ["name", "jurisdiction"],
@@ -161,16 +162,21 @@ export const DOCUMENT_TYPES: readonly DocumentType[] = [
     source: "exit-engines diligence/engine.ts", formats: ["screen"], status: "built" },
 
   // ── 6 · Offers and negotiation ──
-  { id: "exitos.ioi", title: "Indication of interest", stage: 6, audience: "parties", kind: "tracked", classification: "restricted_parties", inputs: [],
-    source: "lib/exit-api.ts:submitOffer", formats: ["screen"], status: "partial", note: "An amount only; not an IOI document." },
+  { id: "exitos.ioi", title: "Indication of interest", stage: 6, audience: "founder", kind: "tracked", classification: "restricted_parties", inputs: [],
+    source: "lib/documents/transaction-docs.ts:ioiRecord (structured IOI from lib/exit-api.ts:submitOffer)", formats: ["screen", "md"], status: "built",
+    note: "The bidder's own structured terms, restated; a term not given reads \"not yet supplied by the bidder\"." },
   { id: "exitos.offer_comparison", title: "Offer comparison", stage: 6, audience: "founder", kind: "generated", classification: "internal", inputs: [],
-    source: "lib/deliverables.ts:offerComparisonDoc", formats: ["md", "screen"], status: "partial", defects: ["B-7"], note: "Built on the demo company's sample offers; labelled." },
-  { id: "exitos.counter_offer", title: "Counter-offer letter", stage: 6, audience: "buyer", kind: "drafted", classification: "restricted_parties", inputs: ["growthPct"],
-    source: "pages/Negotiator.tsx:draftText", formats: ["clipboard"], status: "partial", defects: ["B-8", "B-9"] },
+    source: "lib/documents/transaction-docs.ts:offerComparison", formats: ["screen", "md"], status: "built",
+    note: "Recorded offers only, bidders by letter; measured against the seller's own positions where set; no ranking." },
+  { id: "exitos.counter_offer", title: "Counter-offer letter", stage: 6, audience: "buyer", kind: "drafted", classification: "restricted_parties", inputs: [],
+    source: "lib/documents/transaction-docs.ts:counterOffer", formats: ["screen", "md"], status: "built",
+    note: "From one recorded offer and the seller's positions; unset positions are not proposed; non-binding." },
   { id: "exitos.loi", title: "Letter of intent / term sheet", stage: 6, audience: "parties", kind: "counsel", classification: "restricted_parties", inputs: [],
-    source: null, formats: [], status: "not_built", reviewRequired: "counsel", executionRequired: true, defects: ["B-12"] },
+    source: "lib/documents/transaction-docs.ts:termSheetDraft", formats: ["screen", "md"], status: "partial", reviewRequired: "counsel", executionRequired: true, defects: ["B-12"],
+    note: "Draft heads of terms from the accepted offer and the seller's positions; binding provisions and governing law are left to counsel." },
   { id: "exitos.exclusivity", title: "Exclusivity agreement", stage: 6, audience: "parties", kind: "counsel", classification: "restricted_parties", inputs: [],
-    source: null, formats: [], status: "not_built", reviewRequired: "counsel", executionRequired: true },
+    source: "lib/documents/transaction-docs.ts:exclusivityDraft", formats: ["screen", "md"], status: "partial", reviewRequired: "counsel", executionRequired: true,
+    note: "Draft letter for counsel from the accepted offer's requested period and the seller's limit." },
 
   // ── 7 · Signing and closing ──
   { id: "exitos.spa", title: "Share purchase agreement", stage: 7, audience: "parties", kind: "counsel", classification: "restricted_parties", inputs: [],

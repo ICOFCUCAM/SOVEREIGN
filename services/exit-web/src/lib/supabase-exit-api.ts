@@ -3,6 +3,7 @@ import type {
   Offer, OfferStatus, OfferFilter, DealDocument, DocVisibility,
   Notification, NotificationKind, Deal, DealStage, DealFilter, Mandate,
 } from "./exit-api";
+import type { OfferTerms } from "./documents/transaction-docs";
 import type { DealEvent } from "./deal-events";
 import { normalizeListing, type Listing } from "./listings";
 
@@ -147,8 +148,8 @@ export class SupabaseExitApi implements ExitApiClient {
   }
 
   // ── offers ──
-  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string }): Promise<Offer> {
-    const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso() };
+  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string; terms?: OfferTerms }): Promise<Offer> {
+    const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso(), ...(input.terms ? { terms: input.terms } : {}) };
     await this.upsert("exitos_offers", [{ id: o.id, listing_id: o.listingId, buyer_account_id: o.buyerAccountId, data: o }]);
     return o;
   }

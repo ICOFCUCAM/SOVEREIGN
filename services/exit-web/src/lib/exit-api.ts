@@ -5,6 +5,7 @@ import { setListingsAdapter, setListingOwner } from "./listings";
 import { SupabaseExitApi, supabaseConfigFromEnv } from "./supabase-exit-api";
 import { ensureSupabaseSession } from "./supabase-auth";
 import { authConfigFromEnv } from "./email-auth";
+import type { OfferTerms } from "./documents/transaction-docs";
 
 // ── THE EXIT-API CONTRACT ───────────────────────────────────────────
 // The boundary between this client and the multi-tenant backend. The whole
@@ -47,6 +48,7 @@ export interface NdaRequest {
 }
 
 export type OfferStatus = "submitted" | "accepted" | "rejected" | "withdrawn";
+export type { OfferTerms };
 /** A price/terms offer a buyer submits against a listing. */
 export interface Offer {
   readonly id: string;
@@ -56,6 +58,8 @@ export interface Offer {
   readonly status: OfferStatus;
   readonly note: string | null;
   readonly createdAt: string;
+  /** The terms the bidder stated with its indication of interest (structured IOI). */
+  readonly terms?: OfferTerms;
 }
 
 export type DocVisibility = "founder" | "post_nda" | "public";
@@ -168,7 +172,7 @@ export interface ExitApiClient {
   updateNdaRequest(id: string, patch: { status: NdaStatus }): Promise<NdaRequest>;
 
   // ── offers ──
-  createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string }): Promise<Offer>;
+  createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string; terms?: OfferTerms }): Promise<Offer>;
   listOffers(filter: OfferFilter): Promise<Offer[]>;
   updateOffer(id: string, patch: { status?: OfferStatus; amountUsd?: number; note?: string }): Promise<Offer>;
 
@@ -239,8 +243,8 @@ export class InMemoryExitApi implements ExitApiClient {
     this.ndas[i] = { ...this.ndas[i], status: patch.status, resolvedAt: patch.status === "requested" ? null : nowIso() }; return this.ndas[i];
   }
 
-  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string }): Promise<Offer> {
-    const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso() };
+  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string; terms?: OfferTerms }): Promise<Offer> {
+    const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso(), ...(input.terms ? { terms: input.terms } : {}) };
     this.offers.push(o); return o;
   }
   async listOffers(filter: OfferFilter): Promise<Offer[]> {
@@ -342,8 +346,8 @@ export class LocalStorageExitApi implements ExitApiClient {
     s.ndaRequests[i] = { ...s.ndaRequests[i], status: patch.status, resolvedAt: patch.status === "requested" ? null : nowIso() }; this.write(s); return s.ndaRequests[i];
   }
 
-  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string }): Promise<Offer> {
-    const s = this.read(); const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso() };
+  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string; terms?: OfferTerms }): Promise<Offer> {
+    const s = this.read(); const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso(), ...(input.terms ? { terms: input.terms } : {}) };
     s.offers.push(o); this.write(s); return o;
   }
   async listOffers(filter: OfferFilter): Promise<Offer[]> {
@@ -497,9 +501,9 @@ export async function signNda(id: string): Promise<NdaRequest> {
 
 // ── offers (first-class records) ────────────────────────────────────
 /** Buyer action: submit an offer on a listing. Attributed to this account. */
-export async function submitOffer(listingId: string, amountUsd: number, note?: string): Promise<Offer | null> {
+export async function submitOffer(listingId: string, amountUsd: number, note?: string, terms?: OfferTerms): Promise<Offer | null> {
   if (!connectedAccountId) return null;
-  return active.createOffer({ listingId, buyerAccountId: connectedAccountId, amountUsd, note });
+  return active.createOffer({ listingId, buyerAccountId: connectedAccountId, amountUsd, ...(note ? { note } : {}), ...(terms ? { terms } : {}) });
 }
 /** Founder view: the offers on a listing they own. */
 export async function offersForListing(listingId: string): Promise<Offer[]> {

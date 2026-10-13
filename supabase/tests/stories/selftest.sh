@@ -14,7 +14,7 @@ for f in $M/0001_exitos_backend.sql $M/0002_exitos_ownership.sql $M/0003_exitos_
          $M/20261013121524_exitos_hide_isolation_test_rows.sql $M/20261013122417_exitos_owns_listing_no_anon.sql \
          $M/20261013130000_exitos_auth_roles.sql $M/20261014090000_exitos_company_stories.sql \
          $M/20261014090100_exitos_company_stories_selftest.sql $M/20261014100000_exitos_exchange_state_integrity.sql \
-         $M/20261014100100_exitos_exchange_state_selftest.sql; do $Q -d $DB -f "$f" >/dev/null 2>/tmp/selftest-mig.err || { echo "migration failed: $f"; cat /tmp/selftest-mig.err; exit 1; }; done
+         $M/20261014100100_exitos_exchange_state_selftest.sql $M/20261014130000_exitos_offer_terms_guard.sql; do $Q -d $DB -f "$f" >/dev/null 2>/tmp/selftest-mig.err || { echo "migration failed: $f"; cat /tmp/selftest-mig.err; exit 1; }; done
 status=0
 for fn in exitos_selftest_company_stories exitos_selftest_exchange_state; do
   res=$(psql -d $DB -tA -c "select public.$fn()" 2>&1 || true)

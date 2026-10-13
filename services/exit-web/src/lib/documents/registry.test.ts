@@ -27,7 +27,7 @@ describe("document registry", () => {
   });
 
   it("lists the missing transaction spine as not built", () => {
-    for (const id of ["exitos.loi", "exitos.exclusivity", "exitos.spa", "exitos.disclosure_schedules", "exitos.escrow_agreement", "exitos.funds_flow", "exitos.post_closing_register"])
+    for (const id of ["exitos.spa", "exitos.disclosure_schedules", "exitos.escrow_agreement", "exitos.funds_flow", "exitos.post_closing_register"])
       expect(documentType(id).status).toBe("not_built");
   });
 
