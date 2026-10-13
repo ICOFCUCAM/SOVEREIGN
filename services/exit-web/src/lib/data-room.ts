@@ -4,6 +4,7 @@
 // the functions take the tenant from that token, so each account sees
 // only its own room. Without a live session there is no data room.
 
+import type { ReviewState, RoomFile } from "@exit/engines";
 import { liveUserToken } from "./exit-api";
 
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)
@@ -28,7 +29,19 @@ export interface DataRoomDocument {
   readonly uploaded_at: string;
   readonly description?: string | null;
   readonly downloadUrl?: string | null;
+  /** The diligence artifact this file is meant to satisfy (null: untagged, counts for nothing). */
+  readonly artifact_id?: string | null;
+  readonly company_id?: string | null;
+  readonly review_state?: ReviewState;
+  readonly reviewed_at?: string | null;
+  readonly review_note?: string | null;
 }
+
+/** The engine's view of a file, for completeness (diligence/room.ts). */
+export const toRoomFile = (d: DataRoomDocument): RoomFile => ({
+  id: d.id, artifactId: d.artifact_id ?? null, companyId: d.company_id ?? null,
+  reviewState: d.review_state ?? "submitted", filename: d.filename, uploadedAt: d.uploaded_at,
+});
 
 interface UploadResponse { ok: boolean; document?: DataRoomDocument; error?: string }
 interface ListResponse   { ok: boolean; items?: DataRoomDocument[];   error?: string }
@@ -61,6 +74,9 @@ export async function uploadDocument(input: {
   file: File;
   description?: string;
   classification?: DataRoomDocument["classification"];
+  /** The artifact the file satisfies; it must belong to roomKind. */
+  artifactId?: string;
+  companyId?: string | null;
 }): Promise<DataRoomDocument> {
   const h = await headers();
   const base64 = await fileToBase64(input.file);
@@ -75,6 +91,8 @@ export async function uploadDocument(input: {
       base64,
       ...(input.description ? { description: input.description } : {}),
       ...(input.classification ? { classification: input.classification } : {}),
+      ...(input.artifactId ? { artifactId: input.artifactId } : {}),
+      ...(input.companyId ? { companyId: input.companyId } : {}),
     }),
   });
   const json = (await res.json()) as UploadResponse;
@@ -93,6 +111,22 @@ export async function listDocuments(roomKind?: RoomKind): Promise<DataRoomDocume
   if (!res.ok || !json.ok) throw new Error(json.error ?? `list failed: ${res.status}`);
   return json.items ?? [];
 }
+
+async function rpc(fn: string, args: Record<string, unknown>, what: string): Promise<void> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, { method: "POST", headers: await headers(), body: JSON.stringify(args) });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null) as { message?: string } | null;
+    throw new Error(`${what}: ${body?.message ?? res.status}`);
+  }
+}
+
+/** Tag (or re-tag) one of your files with the artifact it satisfies; re-tagging returns it to "submitted". */
+export const tagFile = (documentId: string, artifactId: string | null, companyId: string | null): Promise<void> =>
+  rpc("exit_data_room_tag", { p_document: documentId, p_artifact: artifactId, p_company: companyId }, "Tagging the file");
+
+/** Accept or reject a tagged file: only accepted files count towards completeness. */
+export const reviewFile = (documentId: string, state: "accepted" | "rejected", note?: string): Promise<void> =>
+  rpc("exit_data_room_review", { p_document: documentId, p_state: state, p_note: note ?? null }, "Reviewing the file");
 
 export function fmtBytes(n: number): string {
   if (n < 1024)            return `${n} B`;

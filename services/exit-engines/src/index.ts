@@ -74,6 +74,8 @@ export type {
 export type {
   DueDiligenceReport, DiligenceDocumentSpec, DiligenceDocumentKind, DiligenceSection, DiligenceArtifact,
 } from './diligence/engine.js';
+export { roomProgress, suggestedName } from './diligence/room.js';
+export type { RoomFile, ReviewState, ArtifactStatus, ArtifactProgress, PackageProgress, RoomProgress } from './diligence/room.js';
 export type {
   Offer, OfferEvaluation, OfferComparison, NegotiationState, ReservationLines, Term, TermCategory, OfferConflict,
 } from './negotiation/types.js';

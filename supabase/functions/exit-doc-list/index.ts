@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
 
   let q = admin
     .from('exit_data_room_documents')
-    .select('id, room_kind, filename, mime, bytes, storage_path, classification, uploaded_by, uploaded_at, description')
+    .select('id, room_kind, filename, mime, bytes, storage_path, classification, uploaded_by, uploaded_at, description, artifact_id, company_id, review_state, reviewed_at, review_note')
     .eq('tenant_id', tenantId)
     .order('uploaded_at', { ascending: false });
   if (roomKind) q = q.eq('room_kind', roomKind);

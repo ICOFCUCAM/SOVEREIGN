@@ -8,7 +8,10 @@
 // tenant is that user; a tenantId in the body is ignored.
 //
 // Body: { roomKind, filename, mime, bytes, base64,
-//          description?, classification? }
+//          description?, classification?, artifactId?, companyId? }
+// artifactId tags the file with the diligence artifact it satisfies (it must belong to
+// roomKind); the file starts as review_state 'submitted' and counts towards
+// completeness only once accepted (exit_data_room_review).
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
@@ -25,6 +28,12 @@ const VALID_KINDS = new Set([
 const VALID_CLASS = new Set(['unclassified', 'sensitive', 'confidential']);
 
 const MAX_BYTES = 25 * 1024 * 1024; // 25 MB per upload (demo)
+
+// artifact ids are '<room prefix>.<name>' (exit-engines diligence/engine.ts)
+const ROOM_PREFIX: Record<string, string> = {
+  financial: 'financial', market: 'market', user_growth: 'growth', technical_architecture: 'technical',
+  security: 'security', legal: 'legal', commercial: 'commercial',
+};
 
 function err(status: number, message: string) {
   return new Response(JSON.stringify({ ok: false, error: message }), {
@@ -71,6 +80,8 @@ Deno.serve(async (req) => {
   const base64         = String(body.base64     ?? '');
   const description    = body.description ? String(body.description) : null;
   const classification = String(body.classification ?? 'sensitive');
+  const artifactId     = body.artifactId ? String(body.artifactId) : null;
+  const companyId      = body.companyId ? String(body.companyId) : null;
 
   if (!VALID_KINDS.has(roomKind))      return err(400, `roomKind must be one of ${[...VALID_KINDS].join(', ')}`);
   if (!filename)                       return err(400, 'filename required');
@@ -78,6 +89,9 @@ Deno.serve(async (req) => {
   if (bytes <= 0)                      return err(400, 'bytes must be > 0');
   if (bytes > MAX_BYTES)               return err(413, `bytes exceeds ${MAX_BYTES}`);
   if (!VALID_CLASS.has(classification)) return err(400, 'invalid classification');
+  if (artifactId && !/^[a-z]+\.[a-z0-9_]+$/.test(artifactId)) return err(400, 'invalid artifactId');
+  if (artifactId && !artifactId.startsWith(`${ROOM_PREFIX[roomKind]}.`)) return err(400, `artifact ${artifactId} does not belong to the ${roomKind} room`);
+  if (companyId && !/^co-[0-9a-f-]{36}$/.test(companyId)) return err(400, 'invalid companyId');
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const serviceKey  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -112,6 +126,8 @@ Deno.serve(async (req) => {
       classification,
       uploaded_by: principalId,
       description,
+      artifact_id: artifactId,
+      company_id: companyId,
     })
     .select('*')
     .single();
@@ -126,7 +142,7 @@ Deno.serve(async (req) => {
     document_id: ins.data.id,
     principal: principalId,
     action: 'upload',
-    details: { bytes, mime, roomKind },
+    details: { bytes, mime, roomKind, artifactId },
   });
 
   return new Response(JSON.stringify({ ok: true, document: ins.data }), {
