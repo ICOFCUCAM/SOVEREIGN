@@ -1,5 +1,5 @@
 import type { MemorandumInputs, MemorandumDocument, MemorandumSection, MemorandumTable, SectionCoverage } from './types.js';
-import { PROVENANCE_LABEL, effectiveProvenance, usableMarketEstimate, usableForecast, type CompanyStory, type FactMeta } from '../story/story.js';
+import { PROVENANCE_LABEL, cleanStory, effectiveProvenance, usableMarketEstimate, usableForecast, type CompanyStory, type FactMeta } from '../story/story.js';
 import { timelineLines } from '../process/timeline.js';
 import { modelPhrase, sectorPhrase, countryName, rule40, profitabilityPhrase, archPhrase, ASSUMED_LABEL, count, times } from './prose.js';
 import { cimHelpers as h } from './template.js';
@@ -33,7 +33,7 @@ function basisOf(m: FactMeta | undefined, story: CompanyStory): string {
 interface Built { section: MemorandumSection; coverage: SectionCoverage }
 
 export function buildCim(i: MemorandumInputs): MemorandumDocument {
-  const c = i.company, r = c.revenue, s: CompanyStory = i.story ?? { version: 1, updatedAt: '', sources: [] };
+  const c = i.company, r = c.revenue, s: CompanyStory = cleanStory(i.story ?? { version: 1, updatedAt: '', sources: [] });
   const name = h.anonName(c.name, !!i.anonymize, i.codeName);
   const known = (path: string): boolean => !(i.assumed ?? c.assumed ?? []).includes(path);
   const head = (field: string): FactMeta | undefined => s.headline?.[field];

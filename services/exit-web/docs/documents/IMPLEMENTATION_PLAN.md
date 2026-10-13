@@ -170,6 +170,9 @@ These block a requirement from being complete in production. Nothing below is ma
 | O-6 | Counsel review of any legal template before it is offered as more than an educational template | 7.5, D4 legal documents |
 | O-7 | Decide on pooled buyer statistics, only with the controls in `BUYER_STATISTICS_PRIVACY.md` | pooled statistics (not enabled) |
 | O-8 | Outside ExitOS on the same project: `public._imggen` has RLS disabled; leaked-password protection is off | project hygiene |
+| O-9 | Apply migration `20261014090000_exitos_company_stories.sql` to the live project (written and tested locally, **not applied**) | company story saved to the server for signed-in accounts (B.*) |
+| O-10 | Decide who may record an independent verification and by what process (today only the operator grant can, and no workflow exists) | "verified" provenance (B.provenance) |
+| O-11 | If price guidance is ever to be given: approve a separate, counsel-reviewed price-guidance document and who may send it | A.5 |
 
 ### §1 Assignment
 | # | Requirement | Where | Owning | Status | Evidence |
@@ -193,7 +196,7 @@ These block a requirement from being complete in production. Nothing below is ma
 |---|---|---|---|---|---|
 | 3.1 | Document registry, one definition per type | `registry.ts`; service binds type → DDM family | D3 | Partial: 6 types bound to the generation service (5 memoranda, board memo) | `service.test.ts` |
 | 3.2 | Transaction context (company, transaction, buyer, seller, offer, process) | company id `co-<uuid>`; canonical timeline `exit-engines/src/process/timeline.ts` | D3/D4 | Partial: company + process timeline; no transaction record yet (parties, offers on the server) | `timeline.test.js`, `active-company.test.ts` |
-| 3.3 | Input validation (fields, types, units, currency, dates, provenance) | intake supplied/unconfirmed; gate; versions record unconfirmed inputs | D3 | Partial: typed per-document schemas not yet | `active-company.test.ts`, `capability.test.ts` |
+| 3.3 | Input validation (fields, types, units, currency, dates, provenance) | intake supplied/unconfirmed; company story with per-figure provenance (`exit-engines story/story.ts`); `provenanceIssues`, `cleanStory` | D3/D4 | Partial: provenance and completeness rules done; typed per-document input schemas for the other 45 types not yet | `story.test.js`, `company-story.test.ts`, `capability.test.ts` |
 | 3.4 | Deterministic generation from validated inputs and approved templates | `documents/service.ts` → DDM v1 | D3 | Partial (6 types) | `service.test.ts` (Dispatch validator, engine, renderers) |
 | 3.5 | Immutable versions with source refs, time, history, content hash, input snapshot | `exitos_document_versions` (live), `store.ts` | D3 | Done for the 6 types (code + live migration) | `supabase/tests/documents`, `store.test.ts` |
 | 3.6 | Review workflow: draft → review → counsel → approval → supersession | `exitos_document_action()` (live), `DocumentVersions.tsx` | D3 | Done in code and deployed; **in use: Owner O-2, O-3, O-4** | `supabase/tests/documents/scenario.sql`; live rolled-back check |
@@ -211,18 +214,18 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 | 4.1 | No EV midpoint in the introduction letter pre-NDA | D2 | Done | needs O-2 | `deliverables.test.ts` |
 | 4.2 | No company name / ARR in the warm-intro subject | D2 | Done | needs O-2 | `warm-intro.test.ts` |
 | 4.3 | No unsupported verification / signature / access claims | D2/D3 | Done for current outputs; approval labelled "not executed" | needs O-2 | `deliverables.test.ts`, `capability.test.ts` |
-| 4.4 | No demo company, `Project Cipher` or demo offers in real-company outputs | D2/D4 | Partial: the exit run's negotiation step and Autopilot offer comparison still score labelled demo offers (D4) | needs O-2 | `consistency.test.ts` (founder suite has no demo name), `exit-process.test.ts` |
+| 4.4 | No demo company, `Project Cipher`, inferred values or demo offers in real-company outputs | D2/D4 | Partial: inferred profile values are no longer stated or scored anywhere (audit, D4); the exit run's negotiation step and Autopilot offer comparison still score labelled demo offers | needs O-2 | `quality.test.ts` (provenance), `story.test.js` (readiness), `consistency.test.ts` |
 | 4.5 | Tenant isolation for company, transaction, files, documents | D2/D3 | Done for listings, exchange rows, data room, document versions | **deployed and verified**; test data cleanup O-1 | `supabase/tests/isolation`, `supabase/tests/documents`, `SECURITY_DEPLOYMENT.md` |
 | 4.6 | Server-side authorization for generation, retrieval, export, approval, access | D3 | Done for versions, review actions, PDF bridge, data room; roles server-held | deployed; usable after O-2, O-3 | as above |
 | 4.7 | No leak through filenames, subjects, metadata, logs, public URLs | D2/D3 | Done for current exports; versions carry code name as owning body for pre-NDA types | needs O-2 | `listings.test.ts`, `service.test.ts` |
 | 4.8 | Classifications and pre-generation disclosure checks | D2 | Done; the service refuses a withheld document | — | `registry.test.ts`, `service.test.ts` |
-| 4.9 | Missing input → validation error or explicit draft; never sample fallback | D3 | Partial: demo inputs recorded on each version and shown; typed validation not yet | — | `capability.test.ts` |
+| 4.9 | Missing input → validation error or explicit draft; never sample fallback | D3/D4 | Done for memoranda: each CIM section states its gap; readiness, Exit Score and diligence mark unsupplied inputs "not assessed"; typed validation for other types not yet | — | `quality.test.ts`, `story.test.js` |
 | 4.10 | Regression test per known leak and sample-data defect | all | Partial: every fixed item has one | — | §11 |
 
 ### §5 One professional document system
 | # | Requirement | Owning | Status | Evidence |
 |---|---|---|---|---|
-| 5.1 | One CIM generator with validated sections | D3 | Done: `/report/cim`, Documents and Banker render the engine CIM from `memorandumInputs` | `d8a577f5` |
+| 5.1 | One CIM generator with validated sections | D3/D4 | Done: one evidence-driven CIM (`memorandum/cim.ts`) rendered by `/report/cim`, Documents, Banker, Marketplace and Autonomous Exit through `memorandumInputs` | `quality.test.ts` |
 | 5.2 | One closing checklist; screen and export identical | D3 | Done: `closing-checklist.ts` | `closing-checklist.test.ts`, `consistency.test.ts` |
 | 5.3 | Measured word counts and claims | D3 | Done (B-10) | `timeline.test.js` |
 | 5.4 | Design system: covers, classification, version/status/date, page numbers, headers/footers, notices, safe filenames | D3 | Partial: provided by Dispatch's layout for the 6 bound types; other exports still Markdown/print | `service.test.ts` |
@@ -267,7 +270,7 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 |---|---|---|---|
 | 10.1 | Browse by stage and audience | D3 | Not yet (registry has the data; workspace still lists five kinds) |
 | 10.2 | Generated vs user input vs external | D3 | Partial: capability shows "Supplied externally" / "Not built" from the registry |
-| 10.3 | Missing inputs and disclosure restrictions before generating | D2/D3 | Done on Documents, Buyers, Banker |
+| 10.3 | Missing inputs and disclosure restrictions before generating | D2/D3/D4 | Done on Documents (gate + CIM completeness and gaps), Buyers, Banker, Company Story (provenance issues) |
 | 10.4 | Preview before export | D3 | Partial: on-screen view; DDM HTML preview not wired |
 | 10.5 | Compare versions | D3 | Partial: list with hashes and dates; no diff view |
 | 10.6 | Review, approval, signature, execution tracked separately | D3/D4 | Partial: review/approval done (server); signature/execution D4; **in use: O-2–O-4** |
@@ -280,18 +283,43 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 | # | Requirement | Status | Evidence |
 |---|---|---|---|
 | 11.1 | Per document type and required inputs | Partial (6 service types + pre-NDA types) | `service.test.ts`, `registry.test.ts` |
-| 11.2 | Real-company data propagation | Partial | `consistency.test.ts` (founder suite), `exit-process.test.ts` |
-| 11.3 | No unintended sample data | Partial | `consistency.test.ts`, `registry.test.ts` |
+| 11.2 | Real-company data propagation | Done for memoranda and the story (two-company sample pack); other generators partial | `quality.test.ts`, `consistency.test.ts`, `exit-process.test.ts` |
+| 11.3 | No unintended sample data or inferred facts | Done for memoranda, readiness, diligence findings; demo offers remain labelled | `quality.test.ts` (provenance:assumed-stated), `story.test.js` |
 | 11.4 | Pre-NDA disclosure prevention | Done for current generators | `registry.test.ts`, `service.test.ts` |
 | 11.5 | Tenant isolation and server authorization | Done for deployed scope | `supabase/tests/{isolation,documents}`, live checks |
 | 11.6 | NDA transitions and evidence | Partial | `nda-drafts.test.ts` |
 | 11.7 | Data-room completeness and permissions | Not started (D4) | — |
-| 11.8 | PDF rendering, pagination, file types | Done against the real renderer locally; production **O-5** | `service.test.ts`, `download.test.ts` |
-| 11.9 | UI / Markdown / PDF agreement | Partial: one DDM for Markdown/HTML/PDF; on-screen view is the engine document | `service.test.ts` |
+| 11.8 | PDF rendering, pagination, file types | Done against the real renderer locally, inspected with pdftotext/pdfinfo on every test run; production **O-5** | `quality.test.ts` (rendered), `service.test.ts`, `download.test.ts` |
+| 11.9 | UI / Markdown / PDF agreement | Done for the sample pack: every heading and table row checked in the Markdown, the HTML preview and the PDF | `rendered.ts`, `quality.test.ts` |
 | 11.10 | Cross-document financial and timeline consistency | Done for the checks in 9.1 | `consistency.test.ts` |
 | 11.11 | Draft / review / approval / execution distinctions | Partial (execution D4) | `supabase/tests/documents`, `capability.test.ts` |
 | 11.12 | Post-closing obligations | Not started (D5) | — |
 | 11.13 | Lint, type-check, unit, integration, build each increment | Every increment | §8, §9 |
+
+### D4 (owner's decisions of 13–14 October): professional CIM and evidence-based intake
+| # | Requirement | Where | Owning | Status | Evidence |
+|---|---|---|---|---|---|
+| A.1 | No enterprise value or valuation range in the buyer-facing CIM | `memorandum/template.ts`, `cim.ts`, `pages/ReportCIM.tsx` | D4 | Done (also the executive summary, deck, teaser and Management Presentation) | `memorandum.test.js`, `deliverables.test.ts`, `quality.test.ts` |
+| A.2 | Valuation kept in the seller valuation report, negotiation and board materials | `report-model.ts`, `report-docs.ts:buildBoardMemo` | D4 | Done | `quality.test.ts` (board memo keeps it) |
+| A.3 | Financial performance, revenue composition, margins, concentration and growth retained, qualified by source | `cim.ts` sections 5, 7, 9 and the source notes | D4 | Done | `quality.test.ts` |
+| A.4 | Valuation functionality not removed | valuation engines and reports unchanged | D4 | Done | engine tests |
+| A.5 | Price guidance only through a separate, authorised document | registry `exitos.price_guidance` (not built, counsel review) | D4 | Not built; **Owner O-11** | registry |
+| A.6 | Tests for indirect leakage: executive summaries, metadata, embedded tables, appendices, PDFs | `gate.ts` (seller_intelligence), `rendered.ts` | D4 | Done | `quality.test.ts` (metadata/appendix leak, PDF text), `gate.ts` |
+| B.1–B.8 | Intake sections: history; products; customers; market; management; capitalisation; financial history and forecasts; sources | `story/story.ts`, `story-form.ts`, `pages/CompanyStory.tsx` | D4 | Done in code | `story.test.js`, `company-story.test.ts`, `story-form.test.ts`, browser check |
+| B.progressive | Progressive, resumable, optional sections, partial completion, completion indicators, never blocked | Company Story page (autosave; per-section status; `storyCompleteness`) | D4 | Done (browser); server copy needs **O-9** | browser flow, `story.test.js` |
+| B.provenance | Founder-supplied / source-supported / verified / estimated / missing, preserved into documents | `FactMeta`, `effectiveProvenance`, CIM basis column and source notes | D4 | Done; "verified" only with a recorded verification (**O-10**); the server refuses self-verification | `story.test.js`, `supabase/tests/stories` |
+| C.1 | No market size from revenue × constant, headcount from revenue, fixed cap table, invented ranking, retention, growth or history | `CompanyProfile.assumed`, `isKnown`, templates, readiness, Exit Score, diligence, Claude inputs | D4 | Done across all generators found by the audit | `quality.test.ts`, `story.test.js` |
+| C.2 | Calculations only with explicit method and inputs, labelled | ARR per customer "(calculated)", Rule of 40 with its inputs | D4 | Done | sample pack |
+| C.3 | Gaps stated professionally (what, why, what completes it) | `cim.ts` `gap()` | D4 | Done | `quality.test.ts` (coverage:gap-unstated) |
+| C.4 | One canonical context for every path, Autonomous Exit included | `loadActiveCompany` + `memorandumInputs` (story, assumed) | D4 | Done (Documents, Banker, print CIM, Management Presentation, Marketplace, Autonomous Exit) | `exit-process.test.ts`, browser |
+| D.1 | Professional CIM structure, expanding with available evidence | `cim.ts` (14 sections + appendix) | D4 | Done | sample pack: 97% supported (full story) / 33% (headline only) |
+| D.2 | No filler; completeness against purpose and available information | coverage rule replaces word count | D4 | Done | `quality.test.ts` |
+| D.3 | No seller-only material in the buyer CIM | gate + tests | D4 | Done | `quality.test.ts`, `gate.ts` |
+| E.1 | `npm run docs:samples` reproducible | `package.json`, `quality.test.ts` | D4 | Done (two companies, 14 documents) | — |
+| E.2 | Gate checks (consistency; unsupported facts and periods; leakage; seller-only content; placeholders; superlatives; completeness; tables, pagination, layout; state and metadata; preview = PDF) | `quality.ts`, `rendered.ts`, `consistency.ts`, `gate.ts` | D4 | Done; filename and export type covered by `download.test.ts` | `quality.test.ts` |
+| E.3 | PDF inspection, not text-only; a lost table fails | `rendered.ts` with pdftotext/pdfinfo | D4 | Done | `quality.test.ts` (lost-table test) |
+| E.4 | Two independent gates (A integrity, B communication and rendering), both required | `quality.ts` `gateOf`, `scored` | D4 | Done | `quality.test.ts` ("a perfect text score cannot offset…") |
+| E.5 | Regression test for every new defect; human review kept separate | `quality.test.ts` "the review itself" | D4 | Done for every defect in §10; human visual review recorded in `QUALITY_LOOP.md` | — |
 
 ### §12 Delivery
 | # | Requirement | Status |
@@ -299,8 +327,9 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 | 12.1 | D1 plan | Done |
 | 12.2 | D2 confidentiality, sample data, isolation | Done in code; **deployed and verified** (`SECURITY_DEPLOYMENT.md`); cleanup O-1, frontend O-2 |
 | 12.3 | D3 registry, generation service, templates, versions, exports | Partial (§9 report): service, versions, workflow, one CIM/checklist/timeline, consistency done; PDF blocked on O-5; 46 types not yet on the service |
-| 12.4 | D4 transaction documents, NDA lifecycle, data room | Not started |
-| 12.5 | D5 signing/closing, post-closing, end-to-end | Not started |
+| 12.4 | D4 (revised by the owner): professional CIM and evidence-based intake | Done in code (§10 report); server storage needs O-9 |
+| 12.4b | D5 transaction documents, NDA lifecycle, data room (was D4) | Not started |
+| 12.5 | D6 signing/closing, post-closing, end-to-end (was D5) | Not started |
 | 12.6 | Per-increment reports | §8, §9 |
 | 12.7 | Homepage and unrelated areas untouched | checked each increment (`boardcheck`) |
 
@@ -461,3 +490,152 @@ reported separately in `SECURITY_DEPLOYMENT.md`; nothing here depends on it bein
 - Revert the commits.
 - Database: see `SECURITY_DEPLOYMENT.md` → Rollback. Dropping the document tables loses stored versions; export
   them first.
+
+## 10. Increment report — deliverable 4 (professional CIM and evidence-based intake)
+
+Commits `323e7cfe`, `eb6a57dc`, `273f7220` and this one, on `claude/document-integrity-p0`. Production deployment and security status are reported separately in `SECURITY_DEPLOYMENT.md`; nothing here is deployed.
+
+### CIM valuation policy (A)
+- **Valuation removed from buyer documents.** The CIM, executive summary, investor deck, teaser and Management Presentation state no enterprise value, range, premium, buyer universe or buyer probabilities. The teaser's "who it suits" section is gone.
+- **Print CIM.** It renders only the engine CIM, its tables, and two exhibits: market indexes and the timeline. The valuation charts and buyer charts are removed.
+- **Management Presentation.** It was the worst leak: EV, range, premium, buyer ranking and readiness uplift, plus an invitation to offer "at or above" the valuation. It is now rebuilt from the buyer-safe deck.
+- **Gate rule.** The disclosure gate withholds any buyer-audience document that carries the valuation figure, price guidance, buyer targeting or readiness advice.
+- **Valuation kept where it belongs.** It stays in the valuation report and the board memorandum.
+- **Price guidance** is registered as a separate, counsel-reviewed document (not built; O-11).
+
+### Intake fields and provenance rules (B)
+- **Story sections** (`story/story.ts`, Company Story page):
+  - history: origin, milestones, ownership changes;
+  - products: description, use, pricing, revenue share with basis, differentiation, roadmap;
+  - revenue streams;
+  - customers: segments, anonymised profiles, contract terms, gross retention and churn with basis, case studies with an approval flag;
+  - sales and marketing;
+  - market: target markets, geographies, market-size estimates, competitors;
+  - operations, technology and IP;
+  - leadership: biographies, roles and responsibilities, founder flag; headcount by function and date; structure;
+  - shareholders: type, class, shares, % fully diluted; option pool, instruments, fully diluted shares, date and basis;
+  - annual financials: period, period end, revenue, ARR, gross margin, EBITDA, each with basis; forecasts with their basis; definitions;
+  - growth opportunities, risks with mitigations, source documents;
+  - the basis of each headline intake figure.
+- **Provenance.** Each material figure is one of:
+  - supplied by the Company;
+  - supported by an attached source (rejected if the document is not attached);
+  - independently verified (only with a recorded verification; the page never offers it and the database refuses it from owners);
+  - estimated (only with its method);
+  - missing.
+- **Market sizes** are stated only with geography, period, methodology, and a source or a documented estimate. **Forecasts** are stated only with their basis.
+- **Progressive.** Every section is optional, autosaves, and shows its completion ("not started / partly done / complete") and what it still lacks. Incomplete rows are kept in the intake and dropped from documents (`cleanStory`).
+- **Storage.** In the browser, or for signed-in accounts in the new owner-only table `exitos_company_stories` (O-9).
+
+### Documents and generation paths audited (C)
+An agent swept every generator and page. Fixed:
+- **Templates.** Market size, headcount, cap table, competitive position, architecture, bench, gross retention and customer growth are no longer stated when not supplied. The invented prior-year ARR table is gone.
+- **Readiness engine.** Unsupplied inputs are skipped. Dimensions with none are "not assessed" and excluded from the score. The TAM weakness that fired on revenue × 200 is gone.
+- **Exit Score categories.** Categories resting on unsupplied inputs are "not assessed", unpriced and uncounted.
+- **Diligence findings.** They no longer say "founders … hold 40%", the bench or headcount, or regulatory risk the company never gave. The diligence report no longer claims its findings came from documents it read.
+- **Other pages and generators:**
+  - data-room architecture item;
+  - Readiness page labels;
+  - Claude generator inputs;
+  - Marketplace memo;
+  - briefing sector;
+  - wealth plan proceeds;
+  - board memo basis (it now names the assumed model inputs).
+- **One context.** Every memorandum path (Documents, Banker, print CIM, Management Presentation, Marketplace, Autonomous Exit) goes through `loadActiveCompany` and `memorandumInputs` with the story. The profile itself carries its `assumed` list, so engines cannot mistake a neutral value for a fact.
+
+### CIM structure (D)
+- **Sections:**
+  - important notice;
+  - executive summary and highlights;
+  - history;
+  - products;
+  - business model and revenue composition;
+  - market and competition;
+  - customers, concentration and retention;
+  - sales and marketing;
+  - financial history and forecasts;
+  - operations, technology and IP;
+  - management;
+  - ownership;
+  - growth opportunities;
+  - risks;
+  - process;
+  - appendix of source notes.
+- **Evidence or gap.** Each section is written from evidence or states its gap: what, why, what completes it.
+- **Highlights** state strengths only; weaknesses are in the risks section.
+- **Results.** Full story: 2,064 words, 97% supported. Headline intake only: 1,391 words, 33% supported, every gap stated. No filler was added to reach a length.
+
+### Quality rules and regression tests (E)
+- **Gate A (integrity)** covers:
+  - consistency;
+  - disclosure and seller-only leaks in the model, metadata, tables and every rendering;
+  - placeholders;
+  - document state and PDF metadata;
+  - `provenance:assumed-stated`;
+  - `provenance:invented-period`.
+- **Gate B (communication and rendering)** covers:
+  - phrasing and claims;
+  - coverage: each section written or its gap stated;
+  - `table-dense` and `table-empty-column`;
+  - headings and table rows (line-aware, cell by cell) and captions in the Markdown, the HTML preview and the PDF (pdftotext and pdfinfo).
+- **Both gates must pass.** A perfect text score cannot offset a failed PDF inspection (tested).
+- **Regression tests** (`quality.test.ts`, `story.test.js`, `gate.ts`) cover each defect found:
+  - lost table;
+  - metadata or appendix leak;
+  - valuation in the executive summary, deck and teaser PDFs;
+  - assumed headcount, cap table and market size;
+  - invented FY;
+  - dense table;
+  - empty column;
+  - weakness listed as a highlight;
+  - half-filled rows;
+  - readiness scoring of assumed inputs;
+  - self-verification refused (SQL).
+
+### Sample pack and PDF inspection
+- **Two fictional companies, 14 documents.** All pass both gates.
+- **Problems the PDF inspection and visual review found and fixed:**
+  - checklist cells wrapping mid-value ("by weeks 8–" / "10"): Dispatch's renderer now keeps short values on one line;
+  - a six-column market table unreadable on the page: now five columns, with notes for the method;
+  - an empty Description column;
+  - loss-making and below-threshold Rule of 40 listed as highlights.
+- **A checker defect.** The first PDF check reported wrapped tables as lost; it now reads row blocks.
+
+### Files and migrations
+- **Engines:**
+  - `src/story/{story,index}.ts`
+  - `src/memorandum/{cim,template,types,prose,claude,index}.ts`
+  - `src/readiness/{engine,improvements}.ts`
+  - `src/diligence/engine.ts`, `src/valuation/{engine,institutional}.ts`, `src/types.ts`, `src/index.ts`
+  - tests: `test/story.test.js`, `test/memorandum.test.js`
+- **Web:**
+  - `src/lib/{company-story,story-form,company-intake,active-company,exit-readiness-ai,deal-context,diligence-intel,briefing,deliverables,report-docs,report-ui,exit-process}.ts`
+  - `src/lib/documents/{gate,quality,rendered,consistency,ddm,service,memorandum-inputs,sample-pack,sample-story,registry}.ts`
+  - pages: `CompanyStory` (new), `Documents`, `Readiness`, `ReportCIM`, `ReportManagement`, `ReportDiligence`, `Marketplace`
+  - `components/{ExitProcessModal,MorningBriefing}.tsx`, `App.tsx`, `lib/access.ts`, `lib/page-guide.ts`
+  - tests: `company-story.test.ts`, `story-form.test.ts`, `quality.test.ts`
+- **Dispatch:** `packages/ddm-schema/src/render-{html,md}.mjs` (no corporate scheme prefix; headings kept with content; short cells not wrapped) and `services/shared/src/render-docx.mjs`.
+- **Database:** `20261014090000_exitos_company_stories.sql` plus `supabase/tests/stories/`. Not applied live (O-9). Rollback is in the file header.
+
+### Tests run (final commit)
+| Check | Result |
+|---|---|
+| eslint, `tsc -b`, production build | clean |
+| vitest | 59 files, 362 passed, 1 skipped |
+| Engine tests | 193 |
+| SQL tests (Postgres 16) | isolation, documents and stories: pass |
+| Dispatch renderer tests | pass (one Dispatch engine test fails on the untouched base, as before) |
+| Homepage board and ribbon | unchanged |
+| 41 console routes at 390 and 1440 px | no overflow, no errors |
+| Browser, founder flow | Company Story autosave and reload; unsourced estimate flagged and not stated; CIM gaps; Readiness "not assessed"; diligence findings without assumed values |
+
+### Remaining defects and production dependencies
+- **Server storage.** The company story is stored on the server only after O-9. Verification needs a process (O-10).
+- **Coverage of document types.** 45 document types are still not on the generation service; their typed input schemas are not built.
+- **Deliverable 5 not started:** transaction documents, NDA lifecycle, data-room tagging. Demo offers still drive the exit run's negotiation step and the Autopilot offer comparison (labelled).
+- **Uploads.** Source documents are listed, not uploaded through the story page. Linking them to data-room files is by id only.
+- **Production.** PDF in production still needs Dispatch deployed (O-5). The frontend is not deployed (O-2).
+
+### Rollback
+- Revert the commits.
+- Database: drop the trigger, function and table named in the migration header (the migration is not applied live).

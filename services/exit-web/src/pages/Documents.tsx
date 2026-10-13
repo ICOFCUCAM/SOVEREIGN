@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Modal, fmtMoney } from "../lib/ui";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
@@ -104,6 +105,18 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
           <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report →<span className="sr-only"> (opens in a new tab)</span></a>
         </>} />
       <GateNotice gate={gate} className="border border-xo-line bg-xo-panel px-4 py-2.5" />
+      {fromIntake && doc?.coverage && doc.coverage.some((c) => c.status !== "supported") && (() => {
+        const cov = doc.coverage!;
+        const pctDone = Math.round(100 * cov.reduce((t, c) => t + (c.status === "supported" ? 1 : c.status === "partial" ? 0.5 : 0), 0) / cov.length);
+        const gaps = cov.filter((c) => c.status === "gap").map((c) => c.section);
+        return (
+          <p className="border border-xo-caution/40 bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">
+            <span className="font-semibold text-xo-text">This CIM is {pctDone}% supported by your information.</span>{" "}
+            {gaps.length ? `${gaps.length} section${gaps.length === 1 ? " states" : "s state"} a gap (${gaps.slice(0, 4).join(", ")}${gaps.length > 4 ? ", …" : ""}). ` : ""}
+            ExitOS does not fill gaps; add the missing information in <Link to="/console/company-story" className="text-xo-action underline">Company Story</Link>.
+          </p>
+        );
+      })()}
       <DocumentVersions typeId={KIND_TYPE[kind]} doc={doc} gate={gate} company={company} companyId={companyId} unconfirmed={unconfirmed}
         inputs={{ kind, company, engine: engineInputs ?? null, timeline: DEFAULT_PROCESS_TIMELINE }}
         ownerName={kind === "buyer_teaser" ? codeName : company.name} codeName={codeName} valuationMidUsd={valueUsd} sample={!fromIntake} />

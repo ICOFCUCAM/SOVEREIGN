@@ -47,18 +47,29 @@ How generated documents are re-examined until they are fit to send.
 | 4 (human read) | 7 | **Tables were dropped from every rendered document.** The CIM, which goes to buyers, listed the seller's target buyers with probabilities and its own readiness advice ("not an auction"). **Thirteen profile fields the founder never supplies were stated as facts:** market size (revenue × 200), headcount (revenue ÷ $350k), a fixed 40/45/15 cap table, "ahead of its competitors", architecture, gross retention. The ARR history table was invented. | Tables rendered. Seller-side sections removed from the CIM. `MemorandumInputs.assumed`: documents state only supplied facts and say what is still missing. The Autonomous Exit run now uses the same inputs (it was falling back to "Project Cipher"). The ARR table shows only what the growth rate implies. |
 | 5–6 | 7 | Repeated words in new copy. The PDF banner read "CORPORATE STRICTLY CONFIDENTIAL". Headings were orphaned at the foot of a page. Board-memo sections were reordered by Dispatch. | Copy fixed. Dispatch renderers (HTML, Markdown, DOCX) drop the scheme name for corporate documents and keep headings with their content. The board memo carries an explicit section order, and a test checks it. |
 
-## Where it stands
-Every document passes the automated review. What remains is not something rules can fix:
-- **Thin content.** The CIM has about 1,200 words, where professional CIMs run to several thousand; the summary and deck are similar. The missing material is the company's own story:
-  - history
-  - products
-  - customers and case studies
-  - go-to-market
-  - competitors
-  - management biographies
-  - market size with a source
-  - the cap table
+| 7–12 (deliverable 4) | 14 of 14, two companies | Valuation in buyer documents (CIM, summary, deck, teaser, Management Presentation); thirteen inferred facts across readiness, diligence, Exit Score, Claude inputs; wrapped checklist cells and an unreadable six-column market table in the PDF; an empty column; weaknesses listed as highlights; half-filled rows reaching documents. | Valuation removed and gated; profile-carried assumed list; evidence-driven CIM with stated gaps; two independent gates; PDF inspection with pdftotext/pdfinfo; renderer and template fixes; a regression test for each. |
 
-  ExitOS does not ask for any of it. The documents now say so rather than invent it. The fix is new intake fields (a product decision).
-- **Valuation in the CIM.** The CIM states an enterprise value and range. Sell-side practice often keeps price guidance out of the CIM, so as not to anchor bids. This needs your decision.
-- **Buyer names** come from ExitOS's registry, and their probabilities are model estimates. They appear only in internal documents (the board memorandum), labelled as such.
+## Two gates
+Since deliverable 4 the review has two gates, and a document is accepted only when both pass:
+- **Gate A, integrity:**
+  - figures and consistency;
+  - provenance: no assumed value stated, no invented period;
+  - confidentiality and seller-only leaks, in the model, the metadata and every rendering;
+  - placeholders;
+  - document state.
+- **Gate B, communication and rendering:**
+  - structure and substance for the purpose: every section written or its gap stated;
+  - phrasing and claims;
+  - readable tables;
+  - every heading and table row present in the Markdown, the HTML preview and the PDF.
+
+A perfect text score never offsets a failed PDF inspection.
+
+## Where it stands
+- **Sample pack.** All 14 documents for two companies pass both gates.
+  - The full-story CIM is about 2,060 words and 97% supported by the company's information.
+  - The headline-only CIM is about 1,390 words and 33% supported, with every gap stated professionally.
+  - Length follows the evidence, never filler.
+- **Valuation is out of every buyer-facing document** (owner decision). It stays in the valuation report and board materials.
+- **What remains is the company's own information.** A founder adds it on the Company Story page, and the documents grow with it. Server storage of the story waits on the migration being applied (O-9).
+- **Human review stays a separate requirement.** Each problem a reviewer finds becomes a template fix or a new rule, with a regression test.

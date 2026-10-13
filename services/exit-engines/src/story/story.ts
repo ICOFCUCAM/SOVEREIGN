@@ -116,6 +116,8 @@ export interface CompanyStory {
 
 export const EMPTY_STORY: CompanyStory = { version: 1, updatedAt: '1970-01-01T00:00:00.000Z', sources: [] };
 
+const filled = (s: string | undefined | null): boolean => typeof s === 'string' && s.trim().length > 0;
+
 // ── provenance rules ──
 /** The provenance a figure may actually claim, and why a claim was not accepted. */
 export function effectiveProvenance(m: FactMeta | undefined, story: Pick<CompanyStory, 'sources'>): { provenance: Provenance; issue?: string } {
@@ -134,8 +136,8 @@ export function effectiveProvenance(m: FactMeta | undefined, story: Pick<Company
 
 /** A market-size figure a document may state: sourced or estimated with a method, and with geography, period and methodology. */
 export function usableMarketEstimate(e: MarketEstimate, story: Pick<CompanyStory, 'sources'>): { ok: boolean; issue?: string } {
-  if (!(e.valueUsd > 0)) return { ok: false, issue: 'no value' };
-  if (!e.geography.trim() || !e.period.trim() || !e.methodology.trim()) return { ok: false, issue: 'needs its geography, period and methodology' };
+  if (!(Number(e.valueUsd) > 0)) return { ok: false, issue: 'no value' };
+  if (!filled(e.geography) || !filled(e.period) || !filled(e.methodology)) return { ok: false, issue: 'needs its geography, period and methodology' };
   const p = effectiveProvenance(e.meta, story);
   if (p.provenance === 'source' || p.provenance === 'verified') return { ok: true };
   if (p.provenance === 'estimated') return { ok: true };
@@ -143,7 +145,7 @@ export function usableMarketEstimate(e: MarketEstimate, story: Pick<CompanyStory
 }
 
 /** A forecast a document may state: a period, at least one figure and its basis. */
-export const usableForecast = (f: Forecast): boolean => !!f.period.trim() && !!f.basis.trim() && (f.revenueUsd != null || f.ebitdaUsd != null);
+export const usableForecast = (f: Forecast): boolean => filled(f.period) && filled(f.basis) && (f.revenueUsd != null || f.ebitdaUsd != null);
 
 // ── completion ──
 export type SectionId = 'history' | 'products' | 'businessModel' | 'customers' | 'salesMarketing' | 'market' | 'operations' | 'team' | 'capitalization' | 'financials' | 'growth' | 'risks' | 'sources';
@@ -156,13 +158,15 @@ export const SECTION_TITLE: Record<SectionId, string> = {
 export type Completion = 'empty' | 'partial' | 'complete';
 export interface SectionStatus { readonly id: SectionId; readonly status: Completion; readonly missing: readonly string[] }
 
-const filled = (s: string | undefined): boolean => !!s && s.trim().length > 0;
 
 /** Each section's completion and what it still lacks — for the intake and for the CIM's gap statements. */
 export function storyStatus(story: CompanyStory): SectionStatus[] {
+  // anything typed into a section counts as started, even before it is usable
+  const touched = (v: unknown): boolean => v != null && (typeof v === 'string' ? v.trim().length > 0 : typeof v === 'number' ? Number.isFinite(v) : typeof v === 'boolean' ? v : Array.isArray(v) ? v.some(touched) : typeof v === 'object' ? Object.values(v as object).some(touched) : false);
   const st = (id: SectionId, parts: Array<[boolean, string]>): SectionStatus => {
     const have = parts.filter(([ok]) => ok).length;
-    return { id, status: have === 0 ? 'empty' : have === parts.length ? 'complete' : 'partial', missing: parts.filter(([ok]) => !ok).map(([, what]) => what) };
+    const started = have > 0 || touched((story as unknown as Record<string, unknown>)[id]);
+    return { id, status: !started ? 'empty' : have === parts.length ? 'complete' : 'partial', missing: parts.filter(([ok]) => !ok).map(([, what]) => what) };
   };
   const h = story.history, c = story.customers, m = story.market, t = story.team, cap = story.capitalization, f = story.financials;
   return [
@@ -193,11 +197,32 @@ export function provenanceIssues(story: CompanyStory): string[] {
   const out: string[] = [];
   const check = (what: string, m: FactMeta | undefined): void => { const p = effectiveProvenance(m, story); if (p.issue) out.push(`${what}: ${p.issue}`); };
   for (const [k, m] of Object.entries(story.headline ?? {})) check(k, m);
-  for (const a of story.financials?.annual ?? []) check(`financials ${a.period}`, a.meta);
-  for (const e of story.market?.estimates ?? []) { const u = usableMarketEstimate(e, story); if (!u.ok) out.push(`market estimate "${e.label}": ${u.issue}`); }
-  for (const p of story.products ?? []) check(`${p.name} revenue share`, p.revenueShareMeta);
+  for (const a of story.financials?.annual ?? []) check(`financials ${a.period || '(no period)'}`, a.meta);
+  for (const e of story.market?.estimates ?? []) { const u = usableMarketEstimate(e, story); if (!u.ok) out.push(`market estimate "${e.label || '(unnamed)'}": ${u.issue}`); }
+  for (const p of story.products ?? []) check(`${p.name || '(unnamed product)'} revenue share`, p.revenueShareMeta);
   check('gross retention', story.customers?.grossRetentionMeta);
   check('capitalisation table', story.capitalization?.meta);
   for (const f of story.financials?.forecasts ?? []) if (!usableForecast(f)) out.push(`forecast ${f.period || '(no period)'}: needs a period, a figure and its basis`);
+  return out;
+}
+
+// ── a story fit for documents ──
+/** The story with incomplete rows removed: what a document may be written from. The intake keeps
+ *  everything the founder has typed; generators only ever see complete entries. */
+export function cleanStory(st: CompanyStory): CompanyStory {
+  const keep = <T>(xs: readonly T[] | undefined, ok: (x: T) => boolean): T[] => (xs ?? []).filter((x) => x != null && ok(x));
+  const txt = (x: unknown): boolean => typeof x === 'string' && x.trim().length > 0;
+  const num = (x: unknown): boolean => typeof x === 'number' && Number.isFinite(x);
+  const out: { -readonly [K in keyof CompanyStory]: CompanyStory[K] } = { ...st, sources: keep(st.sources, (d) => txt(d.id) && txt(d.title) && txt(d.date)) };
+  if (st.history) out.history = { ...st.history, milestones: keep(st.history.milestones, (m) => num(m.year) && txt(m.event)), ownershipChanges: keep(st.history.ownershipChanges, (o) => txt(o.date) && txt(o.description)) };
+  if (st.products) out.products = keep(st.products, (p) => txt(p.name) && txt(p.description));
+  if (st.businessModel) out.businessModel = { ...st.businessModel, revenueStreams: keep(st.businessModel.revenueStreams, (r) => txt(r.name) && num(r.sharePct)) };
+  if (st.customers) out.customers = { ...st.customers, segments: keep(st.customers.segments, (x) => txt(x.name)), profiles: keep(st.customers.profiles, (x) => txt(x.label) && txt(x.description)), caseStudies: keep(st.customers.caseStudies, (x) => txt(x.title) && txt(x.summary)) };
+  if (st.market) out.market = { ...st.market, geographies: keep(st.market.geographies, txt), estimates: keep(st.market.estimates, (e) => txt(e.label) && num(e.valueUsd)), competitors: keep(st.market.competitors, (x) => txt(x.name)) };
+  if (st.team) out.team = { ...st.team, leaders: keep(st.team.leaders, (l) => txt(l.name) && txt(l.role) && txt(l.bio)), headcount: keep(st.team.headcount, (h) => txt(h.function) && num(h.count)) };
+  if (st.capitalization) out.capitalization = { ...st.capitalization, holders: keep(st.capitalization.holders, (h) => txt(h.name) && num(h.pct)), instruments: keep(st.capitalization.instruments, (x) => txt(x.instrument) && txt(x.terms)) };
+  if (st.financials) out.financials = { ...st.financials, annual: keep(st.financials.annual, (a) => txt(a.period) && (num(a.revenueUsd) || num(a.arrUsd))), forecasts: keep(st.financials.forecasts, usableForecast) };
+  if (st.growth) out.growth = { opportunities: keep(st.growth.opportunities, (g) => txt(g.title) && txt(g.description)) };
+  if (st.risks) out.risks = keep(st.risks, (r) => txt(r.title) && txt(r.description));
   return out;
 }

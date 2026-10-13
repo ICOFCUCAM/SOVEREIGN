@@ -62,3 +62,22 @@ test('readiness never scores an input the company did not supply', () => {
   // with everything supplied, the same profile is scored on all five dimensions
   assert.ok(runReadiness(SAMPLE_SAAS).dimensions.every((d) => d.assessed !== false));
 });
+
+import { cleanStory } from '../dist/story/index.js';
+test('half-filled rows from a progressive intake never reach a document', () => {
+  const partial = { ...EMPTY_STORY, history: { origin: 'x', milestones: [{ year: 2019 }, { year: 2020, event: 'Launched' }], ownershipChanges: [] },
+    market: { geographies: ['', 'DE'], estimates: [{ label: 'EU freight software' }], competitors: [{}] }, products: [{ name: 'A' }] };
+  assert.doesNotThrow(() => storyStatus(partial));
+  assert.doesNotThrow(() => provenanceIssues(partial));
+  const c = cleanStory(partial);
+  assert.deepEqual(c.history.milestones, [{ year: 2020, event: 'Launched' }]);
+  assert.deepEqual(c.market.geographies, ['DE']);
+  assert.equal(c.market.estimates.length, 0);
+  assert.equal(c.market.competitors.length, 0);
+  assert.equal(c.products.length, 0);
+});
+
+test('a section with typed but unusable work shows as started, not empty', () => {
+  const s = { ...EMPTY_STORY, market: { geographies: [], estimates: [{ label: 'EU freight software', valueUsd: 4e9 }], competitors: [] } };
+  assert.equal(storyStatus(s).find((x) => x.id === 'market').status, 'partial');
+});

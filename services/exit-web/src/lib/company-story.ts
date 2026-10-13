@@ -1,4 +1,4 @@
-import { EMPTY_STORY, usableMarketEstimate, type CompanyProfile, type CompanyStory } from "@exit/engines";
+import { EMPTY_STORY, cleanStory, usableMarketEstimate, type CompanyProfile, type CompanyStory } from "@exit/engines";
 import { ASSUMED_PROFILE_FIELDS } from "./company-intake";
 import type { Remote } from "./documents/store";
 
@@ -49,7 +49,8 @@ export async function fetchStory(companyId: string, remote: Remote): Promise<Com
 
 /** The engine profile with what the story supplies, and the profile fields that are still assumed.
  *  A field leaves the assumed list only when the story states it; nothing is inferred. */
-export function profileWithStory(profile: CompanyProfile, story: CompanyStory): { profile: CompanyProfile; assumed: string[] } {
+export function profileWithStory(profile: CompanyProfile, raw: CompanyStory): { profile: CompanyProfile; assumed: string[] } {
+  const story = cleanStory(raw);   // only complete entries count
   const assumed = new Set(ASSUMED_PROFILE_FIELDS);
   let p = profile;
   const head = story.team?.headcount ?? [];

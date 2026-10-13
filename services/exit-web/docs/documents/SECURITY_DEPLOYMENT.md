@@ -98,6 +98,11 @@ delete from auth.users                       where id in ('aaaa4b38-0000-4000-80
 ```
 Also delete the storage object `exit-data-room/aaaa4b38-0000-4000-8000-00000000000a/legal/…_isotest.txt` (Storage dashboard or API).
 
+## Written, not applied (deliverable 4)
+| Migration | What | Status |
+|---|---|---|
+| `20261014090000_exitos_company_stories` | owner-only, revisioned company stories; refuses figures marked "verified" unless the writer holds the operator grant | tested locally (`supabase/tests/stories`); **not applied** to the live project (owner action O-9) |
+
 ## Rollback
 - **Database:** the statements in each migration header. Restoring the read policies to `using (true)` re-opens the leak; don't, except to recover from a breaking incident.
 - **Deliverable 3 migrations:** drop `exitos_document_action`, `exitos_document_events`, `exitos_document_versions`, `exitos_has_role`, `exitos_role_grants` and restore the account policies with the two `alter policy` statements in the `exitos_auth_roles` header. Nothing else depends on them.
