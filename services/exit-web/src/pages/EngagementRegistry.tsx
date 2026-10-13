@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { PageHeader, Section, Metric, ScrollRegion, XO_INPUT } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, XO_INPUT, Empty } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { engagementRegistry } from "../lib/engagement-registry";
@@ -85,7 +85,7 @@ const EngagementRegistry: React.FC = () => {
             </tbody>
           </table>
         </ScrollRegion>
-        {filtered.length === 0 && <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No buyer in the registry matches “{q}”.</p>}
+        {filtered.length === 0 && <Empty title={`No buyer in the registry matches “${q}”.`} />}
       </Section>
     </div>
   );

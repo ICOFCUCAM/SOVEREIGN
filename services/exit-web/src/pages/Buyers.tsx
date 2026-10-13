@@ -5,7 +5,7 @@ import { DNA_AS_OF } from "../lib/buyer-dna";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
-import { PageHeader, Section, Metric as XMetric, Provenance } from "../components/xo";
+import { PageHeader, Section, Metric as XMetric, Provenance, Empty } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { runBuyerDiscovery, type BuyerCandidate, type CompanyProfile } from "@exit/engines";
 import { inlineLabel, label } from "../lib/labels";
@@ -140,7 +140,7 @@ const Buyers: React.FC = () => {
         foot="Fit: hot at 60% or more, warm at 35–59%, cool below — the discovery engine's fit score, not measured interest. Appetite is a registry attribute. Check midpoint is the middle of the buyer's stated check range. Founder-friendliness is not measured per buyer, so it is not shown."
         right={<button type="button" onClick={() => setFilterOpen(true)} className="rounded-sm border border-xo-line px-2.5 py-1 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Filter{activeFilters > 0 ? ` · ${activeFilters}` : ""}</button>}>
         {candidates.length === 0 ? (
-          <p className="px-4 py-6 text-center text-[13px] text-xo-muted">No buyers match these filters. <button type="button" className="font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" onClick={() => setFilter({ type: "all", appetite: "all", interest: "all" })}>Clear filters</button></p>
+          <Empty title="No buyers match these filters."><button type="button" className="font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" onClick={() => setFilter({ type: "all", appetite: "all", interest: "all" })}>Clear filters</button></Empty>
         ) : (
           <ol className="grid grid-cols-1 gap-px bg-xo-line lg:grid-cols-2">
             {candidates.map((c, i) => {

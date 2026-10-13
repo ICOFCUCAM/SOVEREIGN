@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { PageHeader, Section, Metric } from "../components/xo";
+import { PageHeader, Section, Metric, Empty } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
@@ -124,7 +124,7 @@ const DealActivity: React.FC = () => {
                 </li>
               ))}
             </ul>
-          ) : <p className="px-4 py-8 text-center text-[12px] text-xo-muted">No activity recorded yet. Opening buyer profiles, expressing interest or requesting NDAs adds events here.</p>}
+          ) : <Empty title="No activity recorded yet.">Opening buyer profiles, expressing interest or requesting NDAs adds events here.</Empty>}
         </Section>
       </div>
     </div>
