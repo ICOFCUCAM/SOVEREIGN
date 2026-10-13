@@ -47,7 +47,7 @@ export interface DdmInput {
 export type DdmDocument = Record<string, unknown> & { ddmVersion: "1.0"; docType: string; sections: DdmSection[] };
 interface DdmSection { id: string; heading: string; level: number; role?: string; order: number; blocks: Array<Record<string, unknown>> }
 
-const LEVEL: Record<Classification, string> = {
+export const CLASSIFICATION_LEVEL: Record<Classification, string> = {
   public: "PUBLIC",
   pre_nda: "CONFIDENTIAL — PRE-NDA",
   internal: "INTERNAL",
@@ -55,7 +55,7 @@ const LEVEL: Record<Classification, string> = {
   confidential_nda: "STRICTLY CONFIDENTIAL — UNDER NDA",
   restricted_parties: "RESTRICTED — TRANSACTION PARTIES",
 };
-const HANDLING: Record<Classification, string> = {
+export const CLASSIFICATION_HANDLING: Record<Classification, string> = {
   public: "May be shared publicly.",
   pre_nda: "For named prospective buyers before an NDA; identifies the company by code name only.",
   internal: "For the company and its advisers; not for buyers.",
@@ -143,7 +143,7 @@ export function toDdm(input: DdmInput): DdmDocument {
       version: input.version,
       status: input.status,
     },
-    classification: { scheme: "corporate", level: LEVEL[input.classification], handling: HANDLING[input.classification] },
+    classification: { scheme: "corporate", level: CLASSIFICATION_LEVEL[input.classification], handling: CLASSIFICATION_HANDLING[input.classification] },
     sections,
   };
 }

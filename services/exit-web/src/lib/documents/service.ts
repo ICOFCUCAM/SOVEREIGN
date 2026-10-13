@@ -2,7 +2,7 @@ import type { CompanyProfile } from "@exit/engines";
 import type { IntakeField } from "../active-company";
 import { documentType, REGISTRY_SCHEMA_VERSION } from "./registry";
 import { gateDocument, type DisclosureFinding } from "./gate";
-import { toDdm, type ContentSection, type DdmDocument, type Family } from "./ddm";
+import { toDdm, CLASSIFICATION_LEVEL, CLASSIFICATION_HANDLING, type ContentSection, type DdmDocument, type Family } from "./ddm";
 
 // ── DOCUMENT GENERATION SERVICE ─────────────────────────────────────
 // Every export goes through here: the registry says what the document is, the
@@ -55,8 +55,10 @@ const FAMILY: Record<string, Family> = {
   "exitos.closing_checklist": "checklist",
   "exitos.diligence_findings": "diligence", "exitos.seller_diligence_report": "diligence",
 };
+// types whose DDM is built by their own mapper (passed in as `ddm`)
+const BESPOKE = new Set(["exitos.board_memo_process"]);
 /** Whether a type can be rendered through Dispatch yet (has a DDM mapping). */
-export const hasLayout = (typeId: string): boolean => typeId in FAMILY;
+export const hasLayout = (typeId: string): boolean => typeId in FAMILY || BESPOKE.has(typeId);
 
 export interface GenerateInput {
   readonly typeId: string;
@@ -75,13 +77,15 @@ export interface GenerateInput {
   readonly notices?: readonly string[];
   readonly version?: number;           // 1-based number among this company's versions of the type
   readonly now?: Date;
+  /** For a type with its own mapper (the board memorandum): the DDM it built. */
+  readonly ddm?: DdmDocument;
 }
 
 /** Build an immutable version. Throws when the gate withholds a pre-NDA or public document. */
 export async function generateVersion(g: GenerateInput): Promise<DocumentVersion> {
   const type = documentType(g.typeId);
   const family = FAMILY[g.typeId];
-  if (!family) throw new Error(`${g.typeId} has no document layout yet`);
+  if (!family && !(BESPOKE.has(g.typeId) && g.ddm)) throw new Error(`${g.typeId} has no document layout yet`);
   const text = g.sections.map((s) => [s.heading, s.body ?? "", ...(s.bullets ?? []), ...(s.table?.rows.flat() ?? [])].join("\n")).join("\n") + `\n${g.title}\n${g.subtitle ?? ""}`;
   const gate = gateDocument(g.typeId, text, { company: g.company, unconfirmed: g.unconfirmed, ...(g.valuationMidUsd ? { valuationMidUsd: g.valuationMidUsd } : {}) });
   if (gate.blocked) throw new Error(`Withheld: ${gate.disclosure.map((d) => d.what).join(", ")} in a ${type.classification} document`);
@@ -93,7 +97,12 @@ export async function generateVersion(g: GenerateInput): Promise<DocumentVersion
     ...(type.reviewRequired === "counsel" ? ["Requires review by qualified counsel; not a legal instrument."] : []),
   ];
   const version = g.version ?? 1;
-  const draftDdm = toDdm({
+  const stamp = { version: `v${version}`, status: "draft" as const, referenceCode: `${g.typeId} v${version} · ${sourceHash.slice(0, 12)}`, date: now.toISOString().slice(0, 10) };
+  const draftDdm: DdmDocument = !family ? {
+    ...g.ddm!,
+    metadata: { ...((g.ddm!.metadata as Record<string, unknown>) ?? {}), ...stamp, owningBody: g.ownerName, audience: type.audience },
+    classification: { scheme: "corporate", level: CLASSIFICATION_LEVEL[type.classification], handling: CLASSIFICATION_HANDLING[type.classification] },
+  } : toDdm({
     family, typeId: g.typeId, title: g.title, ...(g.subtitle ? { subtitle: g.subtitle } : {}),
     classification: type.classification, date: now.toISOString().slice(0, 10),
     version: `v${version}`, status: "draft", owningBody: g.ownerName, audience: type.audience,

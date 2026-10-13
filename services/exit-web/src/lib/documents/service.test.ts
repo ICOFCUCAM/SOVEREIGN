@@ -79,6 +79,17 @@ describe("Dispatch accepts and renders ExitOS documents (test configuration)", (
     }
   });
 
+  it("the board memorandum's own mapping, stamped as a version, still validates", async () => {
+    const { buildBoardMemo } = await import("../report-docs");
+    const { boardMemoToDdm } = await import("../dispatch-ddm");
+    const v = await generateVersion({ ...base, typeId: "exitos.board_memo_process", title: "Board Transaction Memorandum", sections: [],
+      ddm: boardMemoToDdm(buildBoardMemo(co)) as never, producedBy: "test", inputs: {}, ownerName: co.name });
+    const verdict = validator.validateDocument(v.ddm) as { valid: boolean; errors: unknown[] };
+    expect(verdict.errors).toEqual([]);
+    expect((v.ddm.classification as { level: string }).level).toBe("BOARD CONFIDENTIAL");
+    expect((v.ddm.metadata as { referenceCode: string }).referenceCode).toContain("exitos.board_memo_process v1");
+  });
+
   it("keeps the document's own section order and carries classification, version and reference into the render", async () => {
     const v = await memo("cim", "exitos.cim");
     const lm = engine.buildLayout(v.ddm, { date: "2026-10-13" });

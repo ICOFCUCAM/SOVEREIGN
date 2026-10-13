@@ -40,12 +40,12 @@ export function boardMemoToDdm(memo: BoardMemo): DdmDocument {
           {
             id: "b-an-t", type: "table", caption: "Decision summary",
             columns: [{ key: "k", label: "Parameter" }, { key: "v", label: "Detail", align: "right" }],
-            rows: memo.decision.map((d) => ({ k: d.k, v: d.v })),
+            rows: memo.decision.map((d) => [{ text: d.k }, { text: d.v }]),   // DDM rows are arrays of cells
           },
           {
             id: "b-an-r", type: "table", caption: "Risk factors & value at stake",
             columns: [{ key: "d", label: "Risk factor" }, { key: "i", label: "Value at stake", align: "right" }],
-            rows: memo.risks.map((r) => ({ d: r.dimension, i: r.impact })),
+            rows: memo.risks.map((r) => [{ text: r.dimension }, { text: r.impact }]),
           },
         ],
       },
