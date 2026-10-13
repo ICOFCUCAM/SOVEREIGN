@@ -12,6 +12,7 @@ import {
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { label } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import { loadActiveCompany } from "../lib/active-company";
 
 // BUYER GRAPH — the proprietary acquisition-intelligence layer. Founders
@@ -188,7 +189,7 @@ const BuyerGraph: React.FC = () => {
         </ul>
       </Section>
 
-      <Section title={`Transactions matching the sector keywords · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")}${txForDemoSector ? " (demo company's sector)" : ""}`} className="border border-xo-line"
+      <Section title={`Transactions matching the sector keywords · ${sectorLabel(SAMPLE_COMPANY.sector)}${txForDemoSector ? " (demo company's sector)" : ""}`} className="border border-xo-line"
         right={<span className="text-[11px] text-xo-faint">{SECTOR_TRANSACTIONS.length} keyword matches · {SECTOR_TRANSACTIONS.filter((t) => t.verification_status === "verified").length} verified</span>}
         foot={`Rows whose industry text contains one of the sector keywords — a keyword match can include unrelated deals (e.g. "delivery" in software). Each row traces to a source (Wikipedia acquisition lists; SEC-corroborated where an 8-K item 2.01 matches); the Verification column shows its status. As of ${DNA_AS_OF.slice(0, 10)}.`}>
         <ScrollRegion label="Similar transactions table">

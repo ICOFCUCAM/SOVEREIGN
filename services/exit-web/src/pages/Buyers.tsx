@@ -9,6 +9,7 @@ import { PageHeader, Section, Metric as XMetric, Provenance } from "../component
 import { buildMarketTape } from "../lib/market-tape";
 import { runBuyerDiscovery, type BuyerCandidate, type CompanyProfile } from "@exit/engines";
 import { inlineLabel, label } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import { loadActiveCompany } from "../lib/active-company";
 
 // Buyer Marketplace — buyer profile cards (not a directory). Each card surfaces
@@ -26,7 +27,7 @@ function interest(c: BuyerCandidate): { label: string; pct: number; cls: string 
   return { label: "Cool", pct: Math.round(p * 100), cls: "text-xo-muted" };
 }
 function warmIntro(c: BuyerCandidate, co: CompanyProfile): string {
-  const sector = co.sector.replace(/_/g, " ");
+  const sector = sectorLabel(co.sector);
   const arrM = (co.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(0);
   return (
     `Subject: Introduction — ${co.name} (${sector})\n\n` +

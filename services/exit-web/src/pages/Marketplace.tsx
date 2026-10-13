@@ -11,6 +11,7 @@ import { LISTING_PUBLIC as ENGINE_PUBLIC, LISTING_PRIVATE as ENGINE_PRIVATE, LIS
 import { createListing, matchBuyersToListing, runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type MemorandumInputs } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
 import { label, labels } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 
 // Exit Marketplace — "Become the banker." The sell-side pack gathers the
@@ -79,7 +80,7 @@ const BuyerMarketplace: React.FC = () => {
         <div className="px-4 py-4">
           <ul className="flex flex-wrap gap-2 text-[12px]">
             <Tag>{listing.businessModel}</Tag>
-            <Tag>{listing.sector.replace(/_/g, " ")}</Tag>
+            <Tag>{sectorLabel(listing.sector)}</Tag>
             <Tag>founded {listing.foundedYear}</Tag>
             <Tag>jurisdiction {listing.jurisdiction}</Tag>
           </ul>
@@ -283,7 +284,7 @@ const FounderMarketplace: React.FC = () => {
             )}
             <ul className="mt-3 flex flex-wrap gap-2 text-[12px]">
               <Tag>{listing.businessModel}</Tag>
-              <Tag>{listing.sector.replace(/_/g, " ")}</Tag>
+              <Tag>{sectorLabel(listing.sector)}</Tag>
               <Tag>founded {listing.foundedYear}</Tag>
               <Tag>{listing.jurisdiction}</Tag>
             </ul>
@@ -356,7 +357,7 @@ const FounderMarketplace: React.FC = () => {
         footer={<><Button variant="ghost" onClick={() => { setOverride({ askMid: null, note: "" }); setEditOpen(false); notify("Preview reset to engine values"); }}>Reset</Button><Button disabled={!askParse.ok} onClick={() => { if (!askParse.ok) return; setOverride({ askMid: askParse.value, note: editNote.trim() }); setEditOpen(false); notify("Preview updated — not saved or published"); }}>Apply to preview</Button></>}>
         <div className="space-y-4">
           <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
-            Valuation band (canonical, as everywhere in the console): {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {baseListing.sector.replace(/_/g, " ")}
+            Valuation band (canonical, as everywhere in the console): {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {sectorLabel(baseListing.sector)}
           </p>
           <div>
             <label htmlFor="mkt-ask" className={XO_LABEL}>Asking price, mid ($M)</label>

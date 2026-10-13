@@ -20,6 +20,7 @@ import { emitTelemetry } from "../lib/telemetry";
 import { useAuth } from "../lib/auth";
 import { needsUpgrade, PLAN_LABEL } from "../lib/access";
 import { label } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import type { BuyerCandidate } from "@exit/engines";
 
 // Autonomous Exit Mode — "Sell my company," not "manage the sale." Seven
@@ -82,7 +83,7 @@ const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onT
             <span className="shrink-0 text-[9px] uppercase tracking-wide text-xo-faint">{eo.overallConfidence.tier} conf.</span>
           </div>
           <div className="mt-0.5 text-[11px] leading-snug text-xo-faint">{b.rationale}</div>
-          <div className="mt-1 truncate text-[10px] text-xo-faint">{b.buyer.sectorsActive.slice(0, 3).map((s) => s.replace(/_/g, " ")).join(" · ")} · {b.buyer.geographyPreferred.length ? b.buyer.geographyPreferred.slice(0, 4).join(" ") : "Global"}</div>
+          <div className="mt-1 truncate text-[10px] text-xo-faint">{b.buyer.sectorsActive.slice(0, 3).map((s) => sectorLabel(s)).join(" · ")} · {b.buyer.geographyPreferred.length ? b.buyer.geographyPreferred.slice(0, 4).join(" ") : "Global"}</div>
         </div>
         <div className="shrink-0 text-right">
           <div className="font-mono text-[14px] font-bold text-deal-300">{Math.round(b.probability * 100)}%</div>

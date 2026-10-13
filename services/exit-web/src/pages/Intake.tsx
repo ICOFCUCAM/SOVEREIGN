@@ -12,6 +12,7 @@ import { requiredEngagement } from "../lib/access";
 import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
 import { NUMERIC_FIELDS, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
 import { fromQuery, quickIntake } from "../lib/quick-value";
+import { sectorLabel } from "../lib/market-stats";
 import { Section, Metric, Provenance, ScrollRegion, ActionLink, Bar } from "../components/xo";
 
 // ── VALUE MY COMPANY ────────────────────────────────────────────────
@@ -173,7 +174,7 @@ const Intake: React.FC = () => {
               <div>
                 <label htmlFor="intake-sector" className={LABEL}>Sector</label>
                 <select id="intake-sector" className={`${INPUT} border-xo-line capitalize`} value={inp.sector} onChange={(e) => set("sector", e.target.value as Sector)}>
-                  {SECTORS.map((x) => <option key={x} value={x}>{x.replace(/_/g, " ")}</option>)}
+                  {SECTORS.map((x) => <option key={x} value={x}>{sectorLabel(x)}</option>)}
                 </select>
               </div>
               <div>
@@ -261,7 +262,7 @@ const Intake: React.FC = () => {
             ) : <p className="px-4 py-3 text-[13px] text-xo-muted">No qualified buyers for this sector in the curated registry yet.</p>}
           </Section>
 
-          <Section title="Comparable transactions" eyebrow={inp.sector.replace(/_/g, " ")} className="border border-xo-line"
+          <Section title="Comparable transactions" eyebrow={sectorLabel(inp.sector)} className="border border-xo-line"
             foot={m.data_provenance_summary}>
             {report.comparableTransactions.length ? (
               <ScrollRegion label="Comparable transactions table">

@@ -12,6 +12,7 @@ import { fetchBuyerStats, mergeLiveStatsIntoCandidates, type BuyerLiveStat } fro
 import { DEAL_INTEL_FMT } from "../lib/market-stats";
 import { computePlatformSignals } from "../lib/platform-signals";
 import { label } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 
 // Acquisition Intelligence Engine surface — wired to runBuyerDiscovery.
@@ -60,7 +61,7 @@ function narrative(c: BuyerCandidate, company: CompanyProfile): string {
     ["M&A track record", c.fitDimensions.historyFit],
   ];
   const top = dims.sort((a, b) => b[1] - a[1])[0][0];
-  const sector = company.sector.replace(/_/g, " ");
+  const sector = sectorLabel(company.sector);
   return `${c.buyer.name} likely values ${company.name} for its ${sector} position — strongest on ${top}. ${c.buyer.thesis}`;
 }
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fmtMoney, timeAgo, ConfidenceChip } from "../lib/ui";
 import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
 import { label } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import { fetchCalibration, type CalibrationSummary } from "../lib/calibration";
 
 // Calibration Dashboard — internal. Reads the exit_calibration view
@@ -18,7 +19,7 @@ const PCT = (n: number | null | undefined, signed = false): string => {
   return `${signed && v > 0 ? "+" : ""}${v.toFixed(1)}%`;
 };
 
-const SECTOR_LABEL = (s: string): string => s.replace(/_/g, " ");
+const SECTOR_LABEL = (s: string): string => sectorLabel(s);
 
 function errorTone(pct: number | null | undefined): string {
   if (pct == null) return "text-xo-muted";
