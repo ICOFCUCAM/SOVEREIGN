@@ -141,8 +141,9 @@ Minor: `anon` can execute the two pure helpers `exitos_story_claim` and `exitos_
 1. Open the SQL Editor for project `qvjdivcdefuprnenedje` (SOVEREIGN).
 2. Open `supabase/migrations/20261014090100_exitos_company_stories_selftest.sql` from the repository at `62a57204` or later, and review the complete script. Do not run it if it differs from the reviewed repository version.
 3. Run that script. It only creates the function, and revokes execution from everyone but the database owner.
-4. Run `select public.exitos_selftest_company_stories();`
-5. Confirm the result is an error beginning `SELFTEST PASS (0 failed of 25 …)`. Record the full message as evidence.
+4. Run `select public.exitos_selftest_company_stories();` and confirm the result is an error beginning `SELFTEST PASS (0 failed of 25 …)`.
+5. Repeat steps 2 to 4 for `supabase/migrations/20261014100100_exitos_exchange_state_selftest.sql` and `select public.exitos_selftest_exchange_state();`, expecting `SELFTEST PASS (0 failed of 15 …)`.
+6. Record both full messages as evidence.
 
 How the test rolls back:
 - The whole test runs inside one function call that ends with `raise exception`.
@@ -159,7 +160,42 @@ Checked live in advance (read-only): `exitos_role_grants` has no triggers, and l
 
 **Until then, the live security status of company stories is "deployed, structurally verified, behaviour not yet verified on live". Do not report it as fully verified.**
 
+## Deliverable 5 security fix: NDA requests and offers could be self-resolved by the buyer
+
+Found during the deliverable 5 code survey (14 October). Applied live as `exitos_exchange_state_integrity`, version `20261013182404`. Source: `supabase/migrations/20261014100000_exitos_exchange_state_integrity.sql` at `8013f516`.
+
+**The defect**
+- The insert and update policies on `exitos_nda_requests` and `exitos_offers` checked only that the writer was the buyer, with no rule on the row's state.
+- A buyer could therefore create or edit their own NDA request with status `signed`. That satisfies the `post_nda` branch of `exitos_docs_read` and unlocks every post-NDA document on the listing, with no founder action and no signature.
+- A buyer could likewise mark their own offer `accepted`.
+
+**Exposure**
+- Live data at the time: one listing, one NDA request, one offer and three documents, all isolation-test fixtures (`zz-isotest-*`, O-1).
+- No request was signed and no offer accepted, so no real company data was exposed in the current state.
+- There is no audit log on these tables, so earlier misuse cannot be ruled out from the data alone.
+
+**Fix**
+- **NDA requests:** state guard triggers make a new request start as `requested`. Only the listing owner may move it to `signed` or `rejected`, and the result is final.
+- **Offers:**
+  - a new offer starts as `submitted`;
+  - the owner may accept or reject it;
+  - the buyer may withdraw it, or revise its amount and note while it is submitted;
+  - a resolved offer is final.
+- **Both tables:** the listing and buyer of a row never change, and the update policies gain `WITH CHECK`.
+- **`anon`:** loses its (unused) privileges on `exitos_nda_requests`, `exitos_offers` and `exitos_documents`.
+- **Client:** status changes are now PATCH updates rather than upserts. A refused update raises an error instead of passing silently.
+
+**Preflight:** the vulnerable policies were confirmed live, there were no triggers on the tables, the only data was test fixtures, and the change is additive with rollback statements in the header.
+
+**Verification**
+- **Live structure (read-only):** both guard triggers are present; both update policies have `WITH CHECK`; `anon` has no privileges on the three tables; the guard functions cannot be executed by clients; existing data is unchanged.
+- **Local:** the isolation suite gains the forged-signature, forged-acceptance, row-move and owner paths. Without the migration, nine of them flip to ALLOWED.
+- **Live behaviour: not yet run.** `exitos_selftest_exchange_state()` (`20261014100100_exitos_exchange_state_selftest.sql`) runs 15 checks and passes locally, 15 of 15. Without the fix, 10 fail, including "buyer reads the post-NDA document before the owner signs". It is part of **O-12** below.
+
+**Still open:** "signed" still means the listing owner recorded it, not that signatures exist (C-2). The NDA lifecycle with signature evidence replaces it later in deliverable 5.
+
 ## Rollback
+- **Exchange state integrity (deliverable 5):** the statements in the header of `20261014100000_exitos_exchange_state_integrity.sql`. Rolling back re-opens the self-signing defect.
 - **Company stories (deliverable 4):** the drop statements in the header of `20261014090000_exitos_company_stories.sql`, and `drop function public.exitos_selftest_company_stories();` if the self-test was installed. Data in the four tables is lost on rollback; export it first if any exists.
 - **Database:** the statements in each migration header. Restoring the read policies to `using (true)` re-opens the leak; don't, except to recover from a breaking incident.
 - **Deliverable 3 migrations:** drop `exitos_document_action`, `exitos_document_events`, `exitos_document_versions`, `exitos_has_role`, `exitos_role_grants` and restore the account policies with the two `alter policy` statements in the `exitos_auth_roles` header. Nothing else depends on them.
