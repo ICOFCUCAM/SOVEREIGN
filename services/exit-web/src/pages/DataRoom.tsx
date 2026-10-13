@@ -60,8 +60,16 @@ const DataRoom: React.FC = () => {
 
   useEffect(() => { void refresh(); }, []);
 
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => { await upload(e.target.files?.[0]); };
+  // a file dropped on the package's upload zone goes the same way as one picked (only once the shared-storage
+  // notice is acknowledged)
+  const [dragging, setDragging] = useState(false);
+  const dropProps = {
+    onDragOver: (e: React.DragEvent) => { if (!ack || uploading) return; e.preventDefault(); setDragging(true); },
+    onDragLeave: () => setDragging(false),
+    onDrop: (e: React.DragEvent) => { e.preventDefault(); setDragging(false); if (ack && !uploading) void upload(e.dataTransfer.files?.[0]); },
+  };
+  const upload = async (file: File | undefined) => {
     if (!file) return;
     setUploading(true); setError(null);
     try {
@@ -234,8 +242,8 @@ const DataRoom: React.FC = () => {
 
             <h3 className="mb-2 mt-5 font-serif text-[15px] font-semibold">Uploaded artifacts</h3>
             {docsForActive.length === 0 ? (
-              <div className="border border-dashed border-xo-line px-4 py-6 text-center text-[13px] text-xo-muted">
-                No documents uploaded to this package yet.<br />
+              <div {...dropProps} className={`border border-dashed px-4 py-6 text-center text-[13px] text-xo-muted transition-colors ${dragging ? "border-xo-action bg-xo-action/10" : "border-xo-line"}`}>
+                {dragging ? "Drop to upload to this package." : <>No documents uploaded to this package yet.{ack && <> Drop a file here, or:</>}</>}<br />
                 <button type="button" onClick={() => fileInput.current?.click()} disabled={!ack} aria-describedby="dr-shared" className="mt-2 inline-block py-1 disabled:opacity-60 text-[12px] font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Upload your first artifact →</button>
               </div>
             ) : (
