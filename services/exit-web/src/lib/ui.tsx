@@ -33,6 +33,11 @@ export const StageBadge: React.FC<{ stage: DealStage }> = ({ stage }) => (
   </span>
 );
 
+/** The console's lock: a line icon in the current colour (sized by `size`), for gated pages and steps. */
+export const LockIcon: React.FC<{ size?: number; className?: string }> = ({ size = 12, className = "" }) => (
+  <svg aria-hidden width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" className={`inline-block shrink-0 ${className}`}><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+);
+
 export const Card: React.FC<{ children: React.ReactNode; className?: string; id?: string }> = ({ children, className = "", id }) => (
   <div id={id} className={`rounded-lg border border-white/10 bg-ink-800/60 ${className}`}>{children}</div>
 );

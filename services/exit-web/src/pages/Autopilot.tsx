@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Modal, fmtMoney, notify } from "../lib/ui";
+import { Button, LockIcon, Modal, fmtMoney, notify } from "../lib/ui";
 import { PageHeader } from "../components/xo";
 
 const Card: React.FC<{ className?: string; children: React.ReactNode }> = ({ className = "", children }) => (
@@ -393,7 +393,7 @@ const Autopilot: React.FC = () => {
               <div className="flex items-start gap-4">
                 <div className="flex flex-col items-center">
                   <span className={`flex h-9 w-9 items-center justify-center rounded-sm text-[13px] font-bold ring-1 ${STATUS_STYLE[status]}`}>
-                    {locked ? "🔒" : status === "done" ? "✓" : status === "working" ? <Spinner /> : i + 1}
+                    {locked ? <LockIcon size={12} /> : status === "done" ? "✓" : status === "working" ? <Spinner /> : i + 1}
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">

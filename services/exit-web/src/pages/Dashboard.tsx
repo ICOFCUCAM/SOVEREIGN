@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, fmtMoney, timeAgo } from "../lib/ui";
+import { Button, LockIcon, fmtMoney, timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
 import {
@@ -171,7 +171,7 @@ const Dashboard: React.FC = () => {
                   <span className="font-mono text-[11px]">{state === "done" ? "✓" : st.index}</span>
                   <span className="font-medium">{st.label}</span>
                   {state === "current" && <span className="sr-only">(current phase)</span>}
-                  {st.to && gate(st.to) && <span className="text-[11px] text-xo-caution" title={`Requires ${gate(st.to)}`}><span aria-hidden>🔒</span><span className="sr-only">, requires {gate(st.to)}</span></span>}
+                  {st.to && gate(st.to) && <span className="text-[11px] text-xo-caution" title={`Requires ${gate(st.to)}`}><LockIcon size={11} /><span className="sr-only">, requires {gate(st.to)}</span></span>}
                 </span>
               );
               return (

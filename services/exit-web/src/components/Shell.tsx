@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
-import { Toast } from "../lib/ui";
+import { LockIcon, Toast } from "../lib/ui";
 import { navForRole, needsUpgrade, GROUP_ORDER, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
 import { ExchangeMark } from "./ExchangeMark";
 import InstitutionalRibbon from "./InstitutionalRibbon";
@@ -131,7 +131,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <span className={`block ${locked ? "text-white/45" : ""}`}>{n.label}</span>
           {n.name && !n.label.toLowerCase().includes(n.name.toLowerCase()) && <span className={`block text-[10.5px] font-normal ${locked ? "text-white/35" : "text-white/50"}`}>{n.name}</span>}
         </span>
-        {locked && <span aria-label="Pro feature" title="Upgrade to Pro" className="text-[10px] text-white/35">🔒</span>}
+        {locked && <span title="Upgrade to Pro" className="flex shrink-0 items-center gap-1 rounded-sm px-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40 ring-1 ring-white/10"><LockIcon size={9} />Pro</span>}
       </Link>
     );
   };
