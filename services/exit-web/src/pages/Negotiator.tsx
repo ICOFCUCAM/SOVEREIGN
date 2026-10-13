@@ -103,10 +103,13 @@ const Negotiator: React.FC = () => {
   // Your lines, typed in dollars. Invalid entries are flagged and the last
   // default stands in; the order walk-away ≤ minimum ≤ ideal is checked.
   const DEF = { walk: Math.round(RESERVATION_LINES.minHeadlinePriceUsd * 0.95), min: RESERVATION_LINES.minHeadlinePriceUsd, ideal: Math.round(VALUATION_CANONICAL.headline.high) };
-  const [walkTxt, setWalkTxt]   = useState(String(DEF.walk));
-  const [minTxt, setMinTxt]     = useState(String(DEF.min));
-  const [idealTxt, setIdealTxt] = useState(String(DEF.ideal));
+  // shown with thousands separators ("71,250,000"), regrouped when a field is left; commas are ignored when read
+  const grouped = (n: number): string => Math.round(n).toLocaleString("en-US");
+  const [walkTxt, setWalkTxt]   = useState(grouped(DEF.walk));
+  const [minTxt, setMinTxt]     = useState(grouped(DEF.min));
+  const [idealTxt, setIdealTxt] = useState(grouped(DEF.ideal));
   const usd = (t: string) => parseNumber(t, { min: 0, max: 1e13 });
+  const regroup = (t: string): string => { const p = usd(t); return p.ok ? grouped(p.value) : t; };
   const walkP = usd(walkTxt), minP = usd(minTxt), idealP = usd(idealTxt);
   const walkUsd = walkP.ok ? walkP.value : DEF.walk;
   const minUsd = minP.ok ? minP.value : DEF.min;
@@ -200,9 +203,9 @@ Best regards,
         <div className="px-4 py-3">
           <p className="text-[12px] text-xo-muted">Set your lines. The clauses, earnout alternatives and protections below are standard negotiating positions with fixed figures (for example a 4% reverse break fee) — a starting list to take to your advisers, not legal advice.</p>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <XField id="neg-walk" label="Walk away ($)" error={errWalk}><input id="neg-walk" inputMode="numeric" value={walkTxt} aria-invalid={errWalk ? true : undefined} aria-describedby={errWalk ? "neg-walk-err" : undefined} onChange={(e) => setWalkTxt(e.target.value)} className={XO_INPUT} /></XField>
-            <XField id="neg-min" label="Minimum ($)" error={errMin}><input id="neg-min" inputMode="numeric" value={minTxt} aria-invalid={errMin ? true : undefined} aria-describedby={errMin ? "neg-min-err" : undefined} onChange={(e) => setMinTxt(e.target.value)} className={XO_INPUT} /></XField>
-            <XField id="neg-ideal" label="Ideal ($)" error={errIdeal}><input id="neg-ideal" inputMode="numeric" value={idealTxt} aria-invalid={errIdeal ? true : undefined} aria-describedby={errIdeal ? "neg-ideal-err" : undefined} onChange={(e) => setIdealTxt(e.target.value)} className={XO_INPUT} /></XField>
+            <XField id="neg-walk" label="Walk away ($)" error={errWalk}><input id="neg-walk" inputMode="numeric" value={walkTxt} aria-invalid={errWalk ? true : undefined} aria-describedby={errWalk ? "neg-walk-err" : undefined} onChange={(e) => setWalkTxt(e.target.value)} onBlur={() => setWalkTxt(regroup)} className={`${XO_INPUT} font-mono tabular-nums`} /></XField>
+            <XField id="neg-min" label="Minimum ($)" error={errMin}><input id="neg-min" inputMode="numeric" value={minTxt} aria-invalid={errMin ? true : undefined} aria-describedby={errMin ? "neg-min-err" : undefined} onChange={(e) => setMinTxt(e.target.value)} onBlur={() => setMinTxt(regroup)} className={`${XO_INPUT} font-mono tabular-nums`} /></XField>
+            <XField id="neg-ideal" label="Ideal ($)" error={errIdeal}><input id="neg-ideal" inputMode="numeric" value={idealTxt} aria-invalid={errIdeal ? true : undefined} aria-describedby={errIdeal ? "neg-ideal-err" : undefined} onChange={(e) => setIdealTxt(e.target.value)} onBlur={() => setIdealTxt(regroup)} className={`${XO_INPUT} font-mono tabular-nums`} /></XField>
           </div>
           <p className="mt-3 border border-xo-line px-3 py-2 text-[13px] text-xo-muted">
             Your lines: open at <span className="font-mono font-semibold text-xo-text">{fmtMoney(idealUsd)}</span>, concede no lower than <span className="font-mono font-semibold text-xo-text">{fmtMoney(minUsd)}</span>, and walk below <span className="font-mono font-semibold text-xo-risk">{fmtMoney(walkUsd)}</span>.
