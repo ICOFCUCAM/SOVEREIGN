@@ -60,8 +60,8 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 | B-5 | Exit run (CIM, teaser, NDAs, listing) always on `SAMPLE_COMPANY` | Fixed `137a1a77` | runs on the active company |
 | B-6 | Teaser / CIM "tier-one jurisdiction" | Fixed `969663f0` | jurisdiction omitted when anonymised |
 | B-7 | Negotiator, Investors, Wealth, Pipeline, Process Intelligence show demo offers / cap table to a founder with a saved intake | Fixed `ed9d8511` (founder records or empty state; demo example on request); NDA Vault and Dashboard funnel too | with a saved intake: show the founder's records or an empty state; demo data only in demo mode |
-| B-8 | Counter-offer draft always for the demo company | Open (labelled) | generated from a recorded offer (deliverable 4) |
-| B-9 | Fixed negotiating positions (4% break fee, 10% cap, 8% escrow) | Open | deal-specific, configurable, flagged for review (deliverable 4) |
+| B-8 | Counter-offer draft always for the demo company | Fixed `b17eb619`, `06fcce56` | the counter-proposal is built from one recorded offer and the founder's own positions; a founder with an intake no longer sees the demo Bid Room |
+| B-9 | Fixed negotiating positions (4% break fee, 10% cap, 8% escrow) | Fixed for founders `06fcce56` | positions are the founder's own, per company, with no defaults and who reviewed them; an unset position is "Not proposed". The demo company's example still shows its sample positions, labelled as sample |
 | B-10 | Hard-coded word counts (deck 240, DD index 320) | Fixed `697e4589` | measured from content (deliverable 3) |
 | B-11 | "PDF" labels on print dialogs | Relabelled `016abaf7`; real PDF built (`577b80f6`), blocked on Dispatch deployment | relabel "Print" now; real PDF via Dispatch (deliverable 3) |
 | B-12 | Module list advertises LOIs; "Generate closing docs" links to a page without them | Fixed `016abaf7` | remove the claims now; restore when built |
@@ -175,6 +175,7 @@ These block a requirement from being complete in production. Nothing below is ma
 | O-12 | ~~Run the live self-tests~~ **Passed 13 Oct 18:38 UTC:** company stories 25/25, exchange state 15/15, rollback confirmed (`SECURITY_DEPLOYMENT.md`) | done |
 | O-14 | Confirm the configured backup schedule, retention, and PITR status and window in the Supabase Dashboard (WAL archiving alone does not establish them) | recovery procedure for the story tables |
 | O-15 | When network access permits: authenticated HTTP tests of `exit-doc-upload` (artifact check) and `exit-doc-buyer` (list, download, refusal, 60-second link) | HTTP-level verification of the edge functions |
+| O-16 | Decide whether to integrate an e-signature provider (DocuSign, Adobe Acrobat Sign, Dropbox Sign or another) and provide its account; until then the three signing methods record party-entered evidence, verified by the counterparty, and say so | professional-grade NDA signing |
 | O-13 | Authorise reviewers deliberately (owner decision). Nobody is authorised by default. For each reviewer: identify them, verify their professional qualification and scope, then authorise for that competence only (`exitos_authorize_reviewer`, with name and professional role). The company then engages them. The administrator cannot verify claims or authorise themselves (enforced and tested). No reviewer is authorised today | any "independently verified" figure |
 | O-10 | ~~Decide who may verify~~ **Decided 14 Oct:** only an authorised professional reviewer, engaged by the company, within their competence, with recorded evidence. Founder, ExitOS checks, counsel outside scope and administrators cannot verify. Implemented `5ea9f90e`, `bc2cd4fe` | done |
 | O-11 | If price guidance is ever to be given: approve a separate, counsel-reviewed price-guidance document and who may send it | A.5 |
@@ -241,8 +242,8 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 ### §6 Missing M&A workflow
 | # | Requirement | Owning | Status |
 |---|---|---|---|
-| 6A | Process letter, bid instructions, IOI request and criteria, presentation and diligence instructions | D4 | Not started |
-| 6B.1–6B.5 | Structured IOI; LOI / term sheet; exclusivity draft; counter-offer from the real offer (B-8); offer comparison from real bids (B-3) | D4 | Not started |
+| 6A | Process letter, bid instructions, IOI request and criteria, presentation and diligence instructions | D5 | Done: from the canonical timeline; states what an IOI must contain, how to submit, management meetings and data-room access under NDA, conduct rules, reservation of rights; indicates no price | `quality.test.ts` (both gates and PDF, two companies) |
+| 6B.1–6B.5 | Structured IOI; LOI / term sheet; exclusivity draft; counter-offer from the real offer (B-8); offer comparison from real bids (B-3) | D5 | Done: structured IOI form and record; offer comparison from recorded offers (no ranking); counter-proposal; draft heads of terms and exclusivity letter for counsel (binding provisions, law and conditions left to counsel, stated so). Server: the owner cannot rewrite a bidder's terms (**live self-test 16/16**) | `quality.test.ts`, `IoiTerms.test.ts`, `negotiation-positions.test.ts`, `supabase/tests/nda` |
 | 6C | SPA preparation, disclosure schedules, approvals and consents, escrow, funds flow, closing statement, bring-down, closing cap table, filings, announcements | D5 | Not started (closing checklist items exist, D3) |
 | 6D | Post-closing obligations register | D5 | Not started |
 
@@ -252,7 +253,7 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 | 7.1 | Educational template · founder draft · requires counsel · counsel-reviewed · executed (verified) | D3/D4 | Partial: `requires_counsel` enforced before approval; "counsel reviewed" is a recorded action by a counsel grant; execution states D4 |
 | 7.2 | No claim of compliance, enforceability, execution or approval without evidence | all | Ongoing: approved is labelled "not executed"; a status change never marks execution |
 | 7.3 | Jurisdiction, governing law, structure, parties as explicit inputs | D4 | Partial |
-| 7.4 | No universal negotiation positions (B-9) | D4 | Not started |
+| 7.4 | No universal negotiation positions (B-9) | D5 | Done for founders (see B-9) | `negotiation-positions.test.ts`, sample pack |
 | 7.5 | Versioned clause library, counsel review before production | D4 | Not started; **Owner O-6** |
 
 ### §8 NDA execution and data-room access
@@ -334,7 +335,7 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 | 12.2 | D2 confidentiality, sample data, isolation | Done in code; **deployed and verified** (`SECURITY_DEPLOYMENT.md`); cleanup O-1, frontend O-2 |
 | 12.3 | D3 registry, generation service, templates, versions, exports | Partial (§9 report): service, versions, workflow, one CIM/checklist/timeline, consistency done; PDF blocked on O-5; 46 types not yet on the service |
 | 12.4 | D4 (revised by the owner): professional CIM and evidence-based intake | Accepted for code review (not production-ready). Story migration deployed and verified live (self-test 25/25); backup and PITR to confirm (O-14); production PDFs blocked on Dispatch deployment |
-| 12.4b | D5 transaction documents, NDA lifecycle, data room (was D4) | D5-1 data-room tagging and D5-2 NDA lifecycle **deployed and verified live**; D5-3 transaction documents next |
+| 12.4b | D5 transaction documents, NDA lifecycle, data room (was D4) | D5-1, D5-2 and D5-3 done; the security parts are **deployed and verified live**. Open: e-signature provider integration (owner decision O-16), clause library (O-6), HTTP tests (O-15) |
 | 12.5 | D6 signing/closing, post-closing, end-to-end (was D5) | Not started |
 | 12.6 | Per-increment reports | §8, §9 |
 | 12.7 | Homepage and unrelated areas untouched | checked each increment (`boardcheck`) |
@@ -702,3 +703,57 @@ An agent swept every generator and page. Fixed:
 
 ### Rollback
 The statements in each migration header, in reverse order. Redeploy the previous edge-function versions from git (`exit-doc-upload`/`exit-doc-list` v8 from `dc9a0f33~3`; delete `exit-doc-buyer`). Rolling back the NDA lifecycle restores the founder flag as the post-NDA gate; rolling back S-1 re-opens self-signing.
+
+
+## 12. Increment report — deliverable 5, part 3 (transaction documents)
+
+### What changed
+- **Six transaction documents,** built only from recorded offers and the seller's own positions:
+  - process letter and bid instructions (buyers, under NDA);
+  - IOI record;
+  - offer comparison;
+  - counter-proposal (to one bidder);
+  - draft heads of terms (for counsel);
+  - draft exclusivity letter (for counsel).
+- **Missing information is stated, never filled:** a missing term reads "Not yet supplied by the bidder", and an unset position is "Not proposed". Bidders are named by letter, never by identity. No document indicates a price.
+- **Structured IOI:** buyers can state the terms the process letter asks for. Blank means not stated.
+- **Server:** the listing owner can change only an offer's status; the bidder's terms are its own.
+- **Bid Room (founder):**
+  - recorded proposals;
+  - the founder's own positions, with no defaults and who reviewed them;
+  - each document previewed and handled through the version workflow (save, review, download, render).
+- **NDA signing labels:** each method now says what it does not establish. External e-signature is the default; a typed name is marked weakest.
+
+### Files and migrations
+- **Web:**
+  - documents: `lib/documents/transaction-docs.ts` (builders), with changes to `lib/documents/ddm.ts` (agreement family), `service.ts`, `registry.ts`, `sample-pack.ts` and `quality.test.ts`;
+  - libraries: `lib/negotiation-positions.ts`, and `lib/exit-api.ts` / `supabase-exit-api.ts` (offer terms);
+  - components and pages: `components/IoiTerms.tsx`, `components/TransactionWorkspace.tsx`, `components/DocumentVersions.tsx` (Markdown override), `components/NdaLifecycle.tsx` (labels), `pages/AcquisitionRadar.tsx`, `pages/Negotiator.tsx`.
+- **Migration:** `20261014130000_exitos_offer_terms_guard`, applied live as `exitos_offer_terms_guard`. The exchange-state self-test gains check 16.
+
+### Tests
+- **Local:**
+  - web 379 tests;
+  - engines 201;
+  - SQL suites and all self-tests (25, 16, 11, 32) on the full stack;
+  - the offer-terms check;
+  - check 16 fails on the old guard and passes on the new one.
+- **Quality:** all nine sample transaction documents pass Gate A, Gate B and the rendered-PDF inspection. That is process letter, IOI record and comparison for both companies, plus counter-proposal, heads of terms and exclusivity for the full company.
+  - Completeness follows the evidence: 30% for an amount-only IOI, with every gap stated.
+  - Review found three defects, all fixed:
+    - "enterprise value" in buyer-facing text, which the rendered-output leak check flags;
+    - the company not named in the IOI record;
+    - a repeated-word phrasing.
+- **Browser:** the Bid Room was checked with a saved intake and two recorded offers:
+  - the comparison and counter-proposal refuse to invent positions;
+  - the drafts follow the accepted offer;
+  - the counter builds once positions are set;
+  - no page errors.
+- **Live, 13 October:** `exitos_selftest_exchange_state()` 16/16 after the guard; `exitos_selftest_nda_lifecycle()` 32/32.
+
+### Limits
+- **Counsel review:** the drafts for counsel are not legal instruments. Binding provisions, governing law, the warranty framework and conditions are left to counsel, and the documents say so. A clause library with counsel review is still O-6.
+- **Positions:** kept per browser, not on the server. They are seller-internal, so there is no buyer exposure, but they do not follow the founder to another device.
+- **Counter-proposal and the valuation:** it states the seller's proposed price by design. It is not matched against the valuation figure, but the other seller-only checks still apply.
+- **Signing:** see O-16. There is no e-signature provider integration.
+- **Price guidance:** not built (O-11).

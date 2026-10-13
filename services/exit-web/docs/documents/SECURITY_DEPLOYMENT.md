@@ -284,6 +284,20 @@ Applied 13 October 2026.
 
 **Not verified here:** HTTP calls to `exit-doc-buyer` and to the upload function's artifact check. The network policy blocks this sandbox from the project (proxy 403). Tracked as O-15.
 
+## Deliverable 5: a bidder's offer terms are its own
+
+Applied 13 October 2026:
+- migration `exitos_offer_terms_guard` (`20261014130000`, commit `b17eb619`);
+- the revised exchange-state self-test (`exitos_exchange_state_selftest_v3`, 16 checks).
+
+**Change:** the offer guard now compares everything except the status. The listing owner can only accept or reject; the bidder can revise anything while the offer is submitted, or withdraw it. Before this, only the amount and note were protected, so an owner could have rewritten a bidder's new structured terms.
+
+**Verification:**
+- **Local:** check 16 ("owner cannot rewrite the terms a bidder stated") fails against the previous guard and passes against the new one.
+- **Live:** `SELFTEST PASS (0 failed of 16)`, and the NDA lifecycle self-test is still 32/32.
+
+**Rollback:** re-apply `exitos_offer_guard` from `20261014100000`.
+
 ## Rollback
 - **NDA lifecycle (deliverable 5):** the statements in the header of `20261014120000_exitos_nda_lifecycle.sql`; delete the `exit-doc-buyer` function. Rolling back restores the founder flag as the post-NDA gate.
 - **Exchange state integrity (deliverable 5):** the statements in the header of `20261014100000_exitos_exchange_state_integrity.sql`. Rolling back re-opens the self-signing defect.
