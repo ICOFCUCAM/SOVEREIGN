@@ -68,6 +68,8 @@ describe("acceptance: both gates, every document, both companies", () => {
       expect(docs.has(`${pc.key}/${slug}`), `${pc.key}/${slug}`).toBe(true);
     // the counter-proposal needs positions, the term sheet and exclusivity an accepted offer: only the full company has them
     for (const slug of ["counter_offer", "loi", "exclusivity"]) { expect(docs.has(`full/${slug}`), slug).toBe(true); expect(docs.has(`minimal/${slug}`), slug).toBe(false); }
+    // closing documents come from a transaction record: only the full company has one (closed)
+    for (const slug of ["spa_brief", "funds_flow", "bring_down", "conditions_register", "post_closing", "announcement"]) { expect(docs.has(`full/${slug}`), slug).toBe(true); expect(docs.has(`minimal/${slug}`), slug).toBe(false); }
   });
   it("Gate A (integrity) passes for every document", () => {
     expect(all().filter((d) => !d.report.gateA.pass).map((d) => `${d.item.company}/${d.item.slug}: ${d.report.findings.filter((f) => gateOf(f.rule) === "A").map((f) => f.rule).join(", ")}`)).toEqual([]);

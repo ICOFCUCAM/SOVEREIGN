@@ -31,7 +31,9 @@ export const DocumentVersions: React.FC<{
   sample?: boolean;
   /** The downloaded Markdown, when the memorandum layout does not fit (transaction documents). */
   markdown?: string;
-}> = ({ typeId, doc, gate, company, companyId, unconfirmed, inputs, ownerName, codeName, valuationMidUsd, sample = false, markdown }) => {
+  /** The document's stated basis, for its basis-and-limitations callout. */
+  notices?: readonly string[];
+}> = ({ typeId, doc, gate, company, companyId, unconfirmed, inputs, ownerName, codeName, valuationMidUsd, sample = false, markdown, notices }) => {
   const { session } = useAuth();
   const remote = useDocumentRemote();
   const [versions, setVersions] = useState<StoredVersion[]>([]);
@@ -51,7 +53,7 @@ export const DocumentVersions: React.FC<{
     const v = await generateVersion({
       typeId, title: doc.title, sections: doc.sections, producedBy: doc.producedBy, company, companyId,
       unconfirmed: sample ? INTAKE_FIELDS : unconfirmed, inputs, generatedBy: session?.email ?? "this browser", ownerName,
-      ...(valuationMidUsd ? { valuationMidUsd } : {}), version: (latest?.version.versionNumber ?? 0) + 1,
+      ...(valuationMidUsd ? { valuationMidUsd } : {}), ...(notices ? { notices } : {}), version: (latest?.version.versionNumber ?? 0) + 1,
     });
     // the same content from the same inputs is not saved twice (the version
     // number and date in the stamp differ, so compare inputs and sections)

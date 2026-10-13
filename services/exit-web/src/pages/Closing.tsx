@@ -6,11 +6,15 @@ import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany } from "../lib/active-company";
 import { runDueDiligence } from "@exit/engines";
+import { useDocumentRemote } from "../lib/documents/remote";
+import { TransactionRecordPanel } from "../components/TransactionRecord";
 import { closingRows, loadClosingStatuses, saveClosingStatuses, STATUS_LABEL, closingChecklistDoc, type ItemStatus, type ClosingRow } from "../lib/closing-checklist";
 
-// Deal Closing Center. A closing-checklist template whose statuses the
-// user sets (saved in this browser); the diligence engine surfaces
-// pre-close critical questions and red flags.
+// Deal Closing Center. For a signed-in party, the server-held transaction record
+// (conditions, evidence, both parties' confirmations of signing and completion,
+// post-closing obligations and the closing documents built from it). Below it, a
+// closing-checklist template whose statuses the user sets in this browser, and the
+// diligence engine's pre-close questions and red flags.
 
 // the checklist, its statuses and its timing come from lib/closing-checklist (the export renders the same rows)
 type ChecklistItem = ClosingRow;
@@ -96,6 +100,7 @@ const Closing: React.FC = () => {
   const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const tape = useMemo(() => buildMarketTape(), []);
+  const remote = useDocumentRemote();
 
   return (
     <div data-page="closing" className="space-y-3 text-xo-text">
@@ -106,7 +111,11 @@ const Closing: React.FC = () => {
           <button type="button" onClick={() => setCallOpen(true)} className={BTN}>Closing call</button>
         </>} />
 
-      <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">No deal has reached closing on ExitOS. This is a closing checklist template: set each item's status yourself as your counsel and the buyer report progress. Statuses are saved in this browser only.</p>
+      {remote
+        ? <TransactionRecordPanel remote={remote} />
+        : <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">Sign in to see the transaction record: the conditions, evidence and both parties' confirmations of signing and completion, held on the server.</p>}
+
+      <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">The checklist and readiness figures below are a planning template, not the transaction record: set each item's status yourself as your counsel and the buyer report progress. Statuses are saved in this browser only.</p>
 
       <section aria-label="Closing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Checklist" emphasis value={`${CLOSING.length} items`} sub="template · statuses set by you" /></div>
@@ -146,10 +155,10 @@ const Closing: React.FC = () => {
         <div className="px-4 py-3">
           <p className="text-[14px] leading-relaxed">{topRisk ? <>Clear <span className="font-semibold">{topRisk.title}</span> ({topRisk.owner}) — the top {topRisk.severity}-risk item gating the wire.</> : "Confirm escrow funding and hold the closing call."}</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-            <TakeCell k="Today">No deal in closing — the checklist is a template. {done}/{CLOSING.length} items done, checklist readiness <span className={probTone}>{Math.round(prob * 100)}%</span> (a rule, not a probability).</TakeCell>
+            <TakeCell k="Today">The checklist is a template. {done}/{CLOSING.length} items done, checklist readiness <span className={probTone}>{Math.round(prob * 100)}%</span> (a rule, not a probability).</TakeCell>
             <TakeCell k="If you wait">{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</TakeCell>
-            <TakeCell k="Next">Work the gating items with counsel. ExitOS does not draft closing documents yet; counsel prepares the SPA, schedules, consents and certificates.</TakeCell>
-            <TakeCell k="What ExitOS does">Keeps this checklist and builds the call agenda. It does not track signatures, escrow or filings, and sends no reminders.</TakeCell>
+            <TakeCell k="Next">Work the gating items with counsel. From the transaction record ExitOS drafts a brief for the agreement, the funds flow, the conditions register and certificate and announcement drafts; counsel prepares the agreement, schedules, consents and certificates themselves.</TakeCell>
+            <TakeCell k="What ExitOS does">Holds the transaction record both parties confirm, keeps this checklist and builds the call agenda. It holds no escrow, checks no filing or payment, and sends no reminders.</TakeCell>
           </dl>
         </div>
       </Section>

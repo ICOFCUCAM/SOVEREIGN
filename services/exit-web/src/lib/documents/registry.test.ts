@@ -27,8 +27,15 @@ describe("document registry", () => {
   });
 
   it("lists the missing transaction spine as not built", () => {
-    for (const id of ["exitos.spa", "exitos.disclosure_schedules", "exitos.escrow_agreement", "exitos.funds_flow", "exitos.post_closing_register"])
+    for (const id of ["exitos.disclosure_schedules", "exitos.escrow_agreement", "exitos.consents"])
       expect(documentType(id).status).toBe("not_built");
+  });
+
+  it("documents drawn from the transaction record are partial, never complete: counsel drafts the instruments", () => {
+    for (const id of ["exitos.spa", "exitos.funds_flow", "exitos.bring_down_certificate", "exitos.filings_checklist", "exitos.announcement", "exitos.post_closing_register"]) {
+      expect(documentType(id).status, id).toBe("partial");
+      expect(documentType(id).source, id).toMatch(/closing-docs\.ts/);
+    }
   });
 
   it("depends only on known types and known intake fields", () => {

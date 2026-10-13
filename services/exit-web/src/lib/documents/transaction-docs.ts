@@ -32,6 +32,8 @@ export const NO_POSITIONS: NegotiationPositions = { values: {}, reviewedBy: "nob
 export interface TransactionDoc {
   readonly title: string; readonly subtitle?: string; readonly sections: ContentSection[];
   readonly coverage: SectionCoverage[]; readonly producedBy: string; readonly inputs: Record<string, unknown>;
+  /** The document's basis, stated in its basis-and-limitations callout. */
+  readonly notices?: readonly string[];
 }
 
 const usd = (n: number): string => `$${(n / 1e6).toFixed(1)}M`;

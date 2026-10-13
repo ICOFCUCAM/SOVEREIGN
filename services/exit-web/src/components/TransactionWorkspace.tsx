@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { MemorandumDocument, MemorandumKind } from "@exit/engines";
 import { DEFAULT_PROCESS_TIMELINE } from "@exit/engines";
 import { PageHeader, Section, Provenance } from "./xo";
 import { DocumentVersions } from "./DocumentVersions";
@@ -8,8 +7,7 @@ import { findOwnListing, listingFromCompany } from "../lib/listings";
 import { offersForListing } from "../lib/exit-api";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { gateDocument } from "../lib/documents/gate";
-import { documentType } from "../lib/documents/registry";
-import { CLASSIFICATION_LEVEL } from "../lib/documents/ddm";
+import { asMemorandum, toMarkdown } from "../lib/documents/transaction-doc-view";
 import { loadPositions, savePositions } from "../lib/negotiation-positions";
 import {
   processLetter, ioiRecord, offerComparison, counterOffer, termSheetDraft, exclusivityDraft, bidderLabels,
@@ -33,25 +31,6 @@ const POSITION_FIELDS: ReadonlyArray<readonly [keyof PositionValues, string, "us
   ["maxEscrowPct", "Maximum escrow (%)", "pct"], ["maxEscrowMonths", "Maximum escrow period (months)", "int"], ["maxIndemnityCapPct", "Maximum indemnity cap (% of price)", "pct"],
   ["maxExclusivityDays", "Maximum exclusivity (days)", "int"], ["reverseBreakFeePct", "Reverse break fee you would ask (%)", "pct"],
 ];
-
-/** The memorandum shape the version component expects. */
-const asDoc = (key: DocKey, d: TransactionDoc): MemorandumDocument => ({
-  kind: key as unknown as MemorandumKind, title: d.title, anonymized: false, producedBy: d.producedBy, coverage: d.coverage,
-  wordCount: d.sections.map((s) => [s.body ?? "", ...(s.bullets ?? [])].join(" ")).join(" ").split(/\s+/).filter(Boolean).length,
-  sections: d.sections.map((s) => ({ heading: s.heading, body: s.body ?? "", ...(s.bullets ? { bullets: s.bullets } : {}), ...(s.table ? { tables: [s.table] } : {}) })),
-});
-const toMarkdown = (key: DocKey, d: TransactionDoc): string => {
-  const level = CLASSIFICATION_LEVEL[documentType(TYPE[key]).classification];
-  const out = [`# ${d.title}`, "", `**${level}**${d.subtitle ? ` · ${d.subtitle}` : ""}`, "", "_Draft prepared in ExitOS from the recorded offers and the company's own positions._", ""];
-  for (const s of d.sections) {
-    out.push(`## ${s.heading}`, "");
-    if (s.body) out.push(s.body, "");
-    for (const b of s.bullets ?? []) out.push(`- ${b}`);
-    if (s.bullets?.length) out.push("");
-    if (s.table) out.push(`| ${s.table.headers.join(" | ")} |`, `|${s.table.headers.map(() => "---").join("|")}|`, ...s.table.rows.map((r) => `| ${r.join(" | ")} |`), "");
-  }
-  return out.join("\n");
-};
 
 export const TransactionWorkspace: React.FC = () => {
   const { company, companyId, unconfirmed } = useMemo(() => loadActiveCompany(), []);
@@ -150,8 +129,8 @@ export const TransactionWorkspace: React.FC = () => {
                   </section>
                 ))}
               </article>
-              <DocumentVersions typeId={typeId} doc={asDoc(key, doc)} gate={gate} company={company} companyId={companyId} unconfirmed={unconfirmed}
-                inputs={doc.inputs} ownerName={company.name} codeName={listing.code} markdown={toMarkdown(key, doc)}
+              <DocumentVersions typeId={typeId} doc={asMemorandum(key, doc)} gate={gate} company={company} companyId={companyId} unconfirmed={unconfirmed}
+                inputs={doc.inputs} ownerName={company.name} codeName={listing.code} markdown={toMarkdown(typeId, doc, "Draft prepared in ExitOS from the recorded offers and the company's own positions.")}
                 {...(key === "counter_offer" ? {} : { valuationMidUsd: valuationMid })} />
             </>
           )}
