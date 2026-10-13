@@ -3,8 +3,9 @@
 // Returns documents in a tenant's data room, optionally filtered by
 // roomKind, each with a short-lived signed download URL.
 //
-// Query: ?tenantId=...&roomKind=...
-// Auth:  anon JWT (demo); tightens to founder-tenant JWT in production.
+// Query: ?roomKind=...
+// Auth:  the signed-in user's access token (Authorization: Bearer). The
+//        tenant is that user; a tenantId in the query is ignored.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
@@ -23,19 +24,36 @@ function err(status: number, message: string) {
   });
 }
 
+// The tenant is the signed-in user, read from their own access token — never
+// from the request body or query, so one company cannot reach another's room.
+// The public anon key is not a user and is refused.
+async function tenantOf(req: Request, admin: ReturnType<typeof createClient>): Promise<string | null> {
+  const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
+  if (!token) return null;
+  const { data, error } = await admin.auth.getUser(token);
+  if (error || !data?.user?.id) return null;
+  const id = data.user.id;
+  // the data-room rows hang off exit_tenants; a new account gets its row here
+  await admin.from('exit_tenants').upsert(
+    { id, company_name: 'Unnamed company', company_sector: 'unspecified', jurisdiction: 'unspecified' },
+    { onConflict: 'id', ignoreDuplicates: true },
+  );
+  return id;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'GET')     return err(405, 'method not allowed');
 
   const url = new URL(req.url);
-  const tenantId = url.searchParams.get('tenantId') ?? '';
   const roomKind = url.searchParams.get('roomKind');
-  if (!tenantId) return err(400, 'tenantId required');
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const serviceKey  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   if (!supabaseUrl || !serviceKey) return err(500, 'server not configured');
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+  const tenantId = await tenantOf(req, admin);
+  if (!tenantId) return err(401, 'sign in to use the data room');
 
   let q = admin
     .from('exit_data_room_documents')

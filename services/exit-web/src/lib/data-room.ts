@@ -1,9 +1,10 @@
 // Data Room API client. Calls the Supabase edge functions
 // exit-doc-upload + exit-doc-list. The SPA holds no service-role
-// credentials; the anon key authenticates the function calls and the
-// functions themselves use service-role internally for storage + DB.
+// credentials. Each call carries the signed-in user's own access token;
+// the functions take the tenant from that token, so each account sees
+// only its own room. Without a live session there is no data room.
 
-import { SAMPLE_COMPANY } from "./profile";
+import { liveUserToken } from "./exit-api";
 
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)
   ?? "https://qvjdivcdefuprnenedje.supabase.co";
@@ -12,8 +13,7 @@ const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)
 const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)
   ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2amRpdmNkZWZ1cHJuZW5lZGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NjMwMjYsImV4cCI6MjA5NTIzOTAyNn0.2cKjQRxnspeySCRwsOGz0ntKZ9LD3BVKR80H1mPOu_c";
 
-// Stable demo tenant UUID for the SAMPLE_COMPANY. Production replaces
-// this with the founder's auth.uid().
+// The demo tenant, still used by telemetry and calibration (not by the data room).
 export const DEMO_TENANT_ID = "00000000-0000-0000-0000-000000000099";
 
 export type RoomKind =
@@ -36,11 +36,14 @@ export interface DataRoomDocument {
 interface UploadResponse { ok: boolean; document?: DataRoomDocument; error?: string }
 interface ListResponse   { ok: boolean; items?: DataRoomDocument[];   error?: string }
 
-const HEADERS = {
-  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-  "apikey": SUPABASE_ANON_KEY,
-  "content-type": "application/json",
-};
+export const NO_ROOM = "The data room needs a live account session; it is not available in this browser-only mode.";
+
+/** Headers for a data-room call, as the signed-in user; throws without one. */
+async function headers(): Promise<Record<string, string>> {
+  const token = await liveUserToken();
+  if (!token) throw new Error(NO_ROOM);
+  return { Authorization: `Bearer ${token}`, apikey: SUPABASE_ANON_KEY, "content-type": "application/json" };
+}
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -62,12 +65,12 @@ export async function uploadDocument(input: {
   description?: string;
   classification?: DataRoomDocument["classification"];
 }): Promise<DataRoomDocument> {
+  const h = await headers();
   const base64 = await fileToBase64(input.file);
   const res = await fetch(`${SUPABASE_URL}/functions/v1/exit-doc-upload`, {
     method: "POST",
-    headers: HEADERS,
+    headers: h,
     body: JSON.stringify({
-      tenantId: DEMO_TENANT_ID,
       roomKind: input.roomKind,
       filename: input.file.name,
       mime: input.file.type || "application/octet-stream",
@@ -75,7 +78,6 @@ export async function uploadDocument(input: {
       base64,
       ...(input.description ? { description: input.description } : {}),
       ...(input.classification ? { classification: input.classification } : {}),
-      principalId: SAMPLE_COMPANY.id,
     }),
   });
   const json = (await res.json()) as UploadResponse;
@@ -86,10 +88,10 @@ export async function uploadDocument(input: {
 }
 
 export async function listDocuments(roomKind?: RoomKind): Promise<DataRoomDocument[]> {
+  const h = await headers();
   const url = new URL(`${SUPABASE_URL}/functions/v1/exit-doc-list`);
-  url.searchParams.set("tenantId", DEMO_TENANT_ID);
   if (roomKind) url.searchParams.set("roomKind", roomKind);
-  const res = await fetch(url, { headers: HEADERS });
+  const res = await fetch(url, { headers: h });
   const json = (await res.json()) as ListResponse;
   if (!res.ok || !json.ok) throw new Error(json.error ?? `list failed: ${res.status}`);
   return json.items ?? [];

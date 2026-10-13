@@ -407,6 +407,15 @@ export function createExitApi(): ExitApiClient {
 // so the dependency injection above is the entire backend-swap surface.
 let active: ExitApiClient = createExitApi();
 
+/** The signed-in user's access token on the live backend, or undefined
+ *  (no backend, or auth has not run): the data room needs it, because its
+ *  functions take the tenant from this token. */
+export const liveUserToken = async (): Promise<string | undefined> => {
+  await activation;                       // sign-in may still be obtaining the session
+  return active instanceof SupabaseExitApi ? active.userToken : undefined;
+};
+let activation: Promise<void> = Promise.resolve();
+
 /** The live client, for query accessors. */
 export function backendClient(): ExitApiClient { return active; }
 
@@ -421,7 +430,12 @@ export const listingDestination = (): "exchange" | "browser" => (active instance
  *  the backend runs as that user (RLS scopes to auth.uid()), and bind the
  *  account id to the auth user id. If auth is unreachable or disabled, we
  *  fall back to the durable local backend so the app never breaks. */
-export async function activateBackend(account: Account): Promise<void> {
+export function activateBackend(account: Account): Promise<void> {
+  const run = activate(account);
+  activation = run.catch(() => undefined);
+  return run;
+}
+async function activate(account: Account): Promise<void> {
   if (active instanceof SupabaseExitApi) {
     try {
       const session = await ensureSupabaseSession(active.config);

@@ -52,6 +52,8 @@ export class SupabaseExitApi implements ExitApiClient {
    *  user and RLS scopes to auth.uid(). Without it, requests run as anon. */
   setAccessToken(token?: string, userId?: string): void { this.accessToken = token; this.userId = userId; }
   get config(): SupabaseConfig { return this.cfg; }
+  /** The signed-in user's JWT, once auth has run (never the anon key). */
+  get userToken(): string | undefined { return this.userId ? this.accessToken : undefined; }
 
   private get f(): typeof fetch {
     const impl = this.cfg.fetchImpl ?? globalThis.fetch;

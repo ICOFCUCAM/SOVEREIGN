@@ -4,11 +4,11 @@
 // the 'exit-data-room' bucket, inserts a metadata row, and emits an
 // access-log entry. Returns the document record.
 //
-// Auth: anon JWT (demo). Production tightens this to founder-tenant
-// JWT and verifies tenant_id matches sub.
+// Auth: the signed-in user's access token (Authorization: Bearer). The
+// tenant is that user; a tenantId in the body is ignored.
 //
-// Body: { tenantId, roomKind, filename, mime, bytes, base64,
-//          description?, classification?, principalId? }
+// Body: { roomKind, filename, mime, bytes, base64,
+//          description?, classification? }
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
@@ -33,6 +33,23 @@ function err(status: number, message: string) {
   });
 }
 
+// The tenant is the signed-in user, read from their own access token — never
+// from the request body or query, so one company cannot reach another's room.
+// The public anon key is not a user and is refused.
+async function tenantOf(req: Request, admin: ReturnType<typeof createClient>): Promise<string | null> {
+  const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
+  if (!token) return null;
+  const { data, error } = await admin.auth.getUser(token);
+  if (error || !data?.user?.id) return null;
+  const id = data.user.id;
+  // the data-room rows hang off exit_tenants; a new account gets its row here
+  await admin.from('exit_tenants').upsert(
+    { id, company_name: 'Unnamed company', company_sector: 'unspecified', jurisdiction: 'unspecified' },
+    { onConflict: 'id', ignoreDuplicates: true },
+  );
+  return id;
+}
+
 function base64ToBytes(b64: string): Uint8Array {
   const binary = atob(b64);
   const out = new Uint8Array(binary.length);
@@ -47,7 +64,6 @@ Deno.serve(async (req) => {
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return err(400, 'invalid json'); }
 
-  const tenantId       = String(body.tenantId   ?? '');
   const roomKind       = String(body.roomKind   ?? '');
   const filename       = String(body.filename   ?? '').trim();
   const mime           = String(body.mime       ?? 'application/octet-stream');
@@ -55,9 +71,7 @@ Deno.serve(async (req) => {
   const base64         = String(body.base64     ?? '');
   const description    = body.description ? String(body.description) : null;
   const classification = String(body.classification ?? 'sensitive');
-  const principalId    = body.principalId ? String(body.principalId) : null;
 
-  if (!tenantId)                       return err(400, 'tenantId required');
   if (!VALID_KINDS.has(roomKind))      return err(400, `roomKind must be one of ${[...VALID_KINDS].join(', ')}`);
   if (!filename)                       return err(400, 'filename required');
   if (!base64)                         return err(400, 'base64 content required');
@@ -69,6 +83,9 @@ Deno.serve(async (req) => {
   const serviceKey  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   if (!supabaseUrl || !serviceKey)    return err(500, 'server not configured');
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+  const tenantId = await tenantOf(req, admin);
+  if (!tenantId)                      return err(401, 'sign in to use the data room');
+  const principalId = tenantId;
 
   // storage path: <tenant>/<room_kind>/<timestamp>_<sanitized_filename>
   const safe = filename.replace(/[^A-Za-z0-9._-]+/g, '_').slice(0, 120);
