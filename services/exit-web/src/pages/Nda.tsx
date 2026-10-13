@@ -9,13 +9,16 @@ import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { SAMPLE_NDAS, NDA_ROSTER, LISTING_PRIVATE } from "../lib/engines";
 import { inlineLabel, label } from "../lib/labels";
+import { loadActiveCompany } from "../lib/active-company";
+import { loadIssuedNdas, saveIssuedNdas, founderParty, partiesToSign, signNda } from "../lib/nda-drafts";
 import {
   evaluateNdaStatus, generateBreachNotice, rosterFor,
   STANDARD_TEMPLATES, templateById, issueNda,
   type NdaInstance, type NdaState,
 } from "@exit/engines";
 
-const FOUNDER_PARTY = { id: "founder-helios", name: "Helios Freight, Inc.", representativeName: "Anne Kovac", representativeEmail: "anne@helios.example" };
+// the demo company whose sample NDA portfolio the desk shows
+const DEMO_PARTY_NAME = "Helios Freight, Inc.";
 
 const STATUS_CLS: Record<NdaState, string> = {
   active: "text-xo-verified", pending_signature: "text-xo-caution", expired: "text-xo-faint",
@@ -109,9 +112,21 @@ const BuyerAccessRequests: React.FC = () => {
 };
 
 const FounderNdaVault: React.FC = () => {
-  // Session-issued NDAs sit in front of the seeded portfolio so "Issue NDA"
-  // produces a real, visible counterparty row via the engine's issueNda().
-  const [issued, setIssued] = useState<NdaInstance[]>([]);
+  // NDAs the founder drafts sit in front of the seeded portfolio, kept in this
+  // browser; recording each party's signature is what makes one active.
+  const [issued, setIssued] = useState<NdaInstance[]>(loadIssuedNdas);
+  useEffect(() => { saveIssuedNdas(issued); }, [issued]);
+  const { company } = useMemo(() => loadActiveCompany(), []);
+  const [signer, setSigner] = useState("");
+  const [signErr, setSignErr] = useState<string | null>(null);
+  const sign = (nda: NdaInstance, party: "disclosing" | "receiving"): void => {
+    try {
+      const next = signNda(nda, party, signer);
+      setIssued((prev) => prev.map((n) => (n.id === nda.id ? next : n)));
+      setSigner(""); setSignErr(null);
+      notify(next.state === "active" ? `NDA with ${nda.receiving.name} is now active` : `Signature recorded for ${party === "disclosing" ? nda.disclosing.name : nda.receiving.name}`);
+    } catch (e) { setSignErr(e instanceof Error ? e.message : "Could not record the signature."); }
+  };
   const ndas = useMemo(() => [...issued, ...SAMPLE_NDAS], [issued]);
   const roster = useMemo(() => (issued.length ? rosterFor(ndas) : NDA_ROSTER), [issued, ndas]);
   const verifiedCount = ndas.filter((n) => buyerTrust(n, evaluateNdaStatus(n)).tier === "Verified").length;
@@ -127,7 +142,7 @@ const FounderNdaVault: React.FC = () => {
     const nda = issueNda({
       templateId: form.templateId,
       listingId: LISTING_PRIVATE.listingId,
-      disclosing: FOUNDER_PARTY,
+      disclosing: founderParty(company),
       receiving: { id: `buyer-${Date.now().toString(36)}`, name: buyerName, representativeName: form.rep.trim() || "Authorized signatory" },
     });
     setIssued((prev) => [nda, ...prev]);
@@ -163,7 +178,7 @@ const FounderNdaVault: React.FC = () => {
     <div data-page="nda" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Workspace · NDA" title="NDA Vault"
         badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">{roster.active} active</span></>}
-        description={`A sample NDA portfolio for the demo company (${FOUNDER_PARTY.name}), plus any NDAs you draft in this session.`}
+        description={`A sample NDA portfolio for the demo company (${DEMO_PARTY_NAME}), plus any NDAs you draft in this session.`}
         actions={<>
           <a href="/report/nda" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">NDA Package (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
           <Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button>
@@ -314,6 +329,20 @@ const FounderNdaVault: React.FC = () => {
                     ? "No signatures recorded."
                     : <ul>{openNda.signatureEvents.map((e, i) => <li key={i}>{e.party} — {e.representative} ({new Date(e.at).toLocaleString()})</li>)}</ul>}
                 </div>
+                {issued.some((n) => n.id === openNda.id) && partiesToSign(openNda).length > 0 && (
+                  <div className="mt-3 border-t border-xo-line pt-3">
+                    <div className="text-[12px] font-semibold text-xo-text">Record a signature</div>
+                    <p className="mt-0.5 text-[11px] text-xo-faint">Once a party has signed (on paper or through an e-signature service), record who signed. ExitOS does not collect signatures; the NDA turns active when every party's signature is recorded.</p>
+                    <label htmlFor="nda-signer" className="mt-2 block text-[11px] text-xo-muted">Name of the person who signed</label>
+                    <input id="nda-signer" value={signer} onChange={(e) => setSigner(e.target.value)} className={`${inputCls} mt-1`} autoComplete="off" />
+                    {signErr && <p role="alert" className="mt-1 text-[12px] text-xo-risk">{signErr}</p>}
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {partiesToSign(openNda).map((p) => (
+                        <Button key={p} variant="ghost" onClick={() => sign(openNda, p)}>Signed by {p === "disclosing" ? openNda.disclosing.name : openNda.receiving.name}</Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </Section>
 
