@@ -25,6 +25,7 @@ const SignIn: React.FC = () => {
   const [mode, setMode] = useState<"signin" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [role, setRole] = useState<Role>("founder");
   const [resetSent, setResetSent] = useState(false);
 
@@ -51,7 +52,7 @@ const SignIn: React.FC = () => {
             ) : (
               <form onSubmit={(e) => { e.preventDefault(); setResetSent(true); }} className="space-y-4">
                 <Field label="Email">
-                  <input className={inputCls} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" autoFocus />
+                  <input className={inputCls} type="email" name="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" autoFocus />
                 </Field>
                 <Button type="submit" disabled={!email} className="w-full">Send reset link</Button>
                 <button type="button" onClick={() => setMode("signin")} className="block w-full text-center text-xs font-semibold text-white/50 hover:text-white">Back to sign in</button>
@@ -96,12 +97,17 @@ const SignIn: React.FC = () => {
               </div>
 
               <Field label="Email">
-                <input className={inputCls} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" />
+                <input className={inputCls} type="email" name="email" autoComplete="username" inputMode="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" />
               </Field>
               <div>
-                <Field label="Password">
-                  <input className={inputCls} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-                </Field>
+                {/* the reveal toggle sits outside the label, so the field's name stays "Password" */}
+                <div className="relative">
+                  <Field label="Password">
+                    <input className={`${inputCls} pr-16`} type={showPw ? "text" : "password"} name="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+                  </Field>
+                  <button type="button" onClick={() => setShowPw((v) => !v)} aria-pressed={showPw} aria-label={showPw ? "Hide password" : "Show password"}
+                    className="absolute bottom-1.5 right-1.5 rounded px-2 py-1 text-[11px] font-semibold text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">{showPw ? "Hide" : "Show"}</button>
+                </div>
                 <button type="button" onClick={() => { setMode("reset"); setResetSent(false); }} className="mt-1.5 block w-full text-right text-[11px] font-semibold text-deal-300 hover:text-deal-200">
                   Forgot password?
                 </button>
