@@ -53,6 +53,16 @@ test('buyer teaser anonymizes when requested', async () => {
   const fullText = doc.sections.map((s) => `${s.heading}\n${s.body}\n${(s.bullets ?? []).join('\n')}`).join('\n');
   assert.ok(!fullText.includes(SAMPLE_SAAS.name));
   assert.ok(fullText.includes('Project Cipher'));
+  // no jurisdiction, and no invented one
+  assert.ok(!fullText.includes('tier-one'));
+  assert.ok(!fullText.includes('headquartered in'));
+});
+
+test('anonymized CIM names no jurisdiction', async () => {
+  const doc = await new TemplateMemorandumGenerator().generate('cim', { ...inputs(), anonymize: true });
+  const text = doc.sections.map((s) => s.body).join('\n');
+  assert.ok(!text.includes('tier-one'));
+  assert.ok(!text.includes(`headquartered in ${SAMPLE_SAAS.jurisdiction}`));
 });
 
 test('CIM includes valuation methodology table', async () => {

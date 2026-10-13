@@ -226,7 +226,7 @@ function executiveSummary(i: MemorandumInputs): MemorandumDocument {
   const sections: MemorandumSection[] = [
     {
       heading: 'The opportunity',
-      body: `${name} is ${modelPhrase(c.businessModel)} operating in ${sectorWords(c.sector)}, headquartered in ${i.anonymize ? 'a tier-one jurisdiction' : c.jurisdiction} and founded in ${c.foundedYear}. ${c.narrative ?? `The business combines ${c.product.differentiation} differentiation with ${c.product.defensibility} defensibility in a market growing ${(c.market.marketGrowthPct * 100).toFixed(0)}% per annum.`} The Company is being offered to a curated group of qualified strategic and financial acquirers through a structured, confidential process.`,
+      body: `${name} is ${modelPhrase(c.businessModel)} operating in ${sectorWords(c.sector)}${i.anonymize ? '' : `, headquartered in ${c.jurisdiction}`} and founded in ${c.foundedYear}. ${c.narrative ?? `The business combines ${c.product.differentiation} differentiation with ${c.product.defensibility} defensibility in a market growing ${(c.market.marketGrowthPct * 100).toFixed(0)}% per annum.`} The Company is being offered to a curated group of qualified strategic and financial acquirers through a structured, confidential process.`,
     },
     {
       heading: 'Financial profile',
@@ -292,7 +292,7 @@ function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
   const sections: MemorandumSection[] = [
     {
       heading: 'The opportunity',
-      body: `${projectName} is a ${c.businessModel} operating in ${c.sector.replace(/_/g, ' ')}, headquartered in a tier-one jurisdiction. The business has built a scaled recurring-revenue position growing ${(c.growth.arrGrowthYoyPct * 100).toFixed(0)}% year over year, and is being offered to a small group of qualified acquirers through a structured, confidential process. The Company's identity, detailed financials and the indicative valuation range are disclosed on execution of a mutual NDA.`,
+      body: `${projectName} is a ${c.businessModel} operating in ${c.sector.replace(/_/g, ' ')}. The business has built a scaled recurring-revenue position growing ${(c.growth.arrGrowthYoyPct * 100).toFixed(0)}% year over year, and is being offered to a small group of qualified acquirers through a structured, confidential process. The Company's identity, detailed financials and the indicative valuation range are disclosed on execution of a mutual NDA.`,
     },
     {
       heading: 'Selected metrics',
