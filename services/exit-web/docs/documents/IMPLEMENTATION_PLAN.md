@@ -27,9 +27,9 @@ quality.
 | N-1 | S0 | **Every listing row carries the company's full private profile** (name, every financial), and RLS lets any authenticated user — including the anonymous user every browser gets — read every listing. The UI hides it; the API does not. The buyer-side Radar downloads it to match. | `supabase/migrations/0001_exitos_backend.sql:42-50`, `src/lib/listings.ts:33`, `src/pages/AcquisitionRadar.tsx:81` |
 | N-2 | S0 | Offers, NDA requests, deals, deal documents and deal events are readable by **every** authenticated user (`using (true)`); writes were already restricted by `0002`/`0003`. | `0001_exitos_backend.sql:54-113`, `0003_exitos_network.sql:21` |
 | N-3 | S0 | No real authentication: any role (founder, buyer, operator in dev) is claimed in the browser. Server-side authorization of approvals, counsel review or execution verification is impossible until accounts are real. | `src/lib/auth.tsx` |
-| N-4 | S1 | A saved intake is merged over `SAMPLE_INTAKE`, so any field the founder did not enter silently takes the demo company's value. | `src/lib/active-company.ts:17,36` |
-| N-5 | S1 | Every company's id is `"intake"`, so nothing generated can be traced to a company. | `src/lib/company-intake.ts:64` |
-| N-6 | S1 | Telemetry and calibration write against the demo tenant id. | `src/lib/telemetry.ts`, `calibration.ts`, `buyer-stats.ts` |
+| N-4 | S1 | A saved intake is merged over `SAMPLE_INTAKE`, and the form starts from the demo figures, so editing one field saved every demo figure as the founder's. Fixed `c0a327b6` (supplied vs unconfirmed fields). | `src/lib/active-company.ts:17,36` |
+| N-5 | S1 | Every company's id is `"intake"`, so nothing generated can be traced to a company. Fixed `c0a327b6`. | `src/lib/company-intake.ts:64` |
+| N-6 | S1 | Telemetry and calibration write against the demo tenant id. Fixed in code `016abaf7`; functions not deployed. | `src/lib/telemetry.ts`, `calibration.ts`, `buyer-stats.ts` |
 
 ## 3. Audit findings, verified against current code
 
@@ -43,11 +43,11 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 | A-2 | Warm-intro subject names the company and ARR | Fixed `af7ef82f` | sector + ARR band only, code moved to `lib/warm-intro.ts` | `warm-intro.test.ts` |
 | A-3 | Gating document claims identity / funds verification | Fixed `af7ef82f` | rewritten as an access *policy* stating what is and is not checked | `deliverables.test.ts` |
 | A-4 | All data-room uploads in one shared tenant readable by all | Fixed in code `fc8b8ea2`; **not deployed** | functions take the tenant from the user's token, refuse anon | `data-room.test.ts`; acceptance needs redeploy + a two-account check |
-| N-1 | Listing rows expose private profiles | Open | split: public row holds code + public view; private profile in an owner-only table; buyer-side matching on the public view | migration test (SQL policy assertions), listings unit tests, Radar works on public view |
-| N-2 | Offers / NDA requests / deals / documents / events world-readable | Open | RLS: readable by the buyer party and the listing owner only; documents by visibility and signed NDA | `supabase/tests/isolation/run.sh` (owner / buyer / stranger) |
-| A-5 | Radar says identity is revealed on signature; Inbox says never | Open | one statement, from the disclosure policy (below) | copy test on both pages |
-| A-6 | DiligenceAI `.md` exports have no confidentiality header | Open | route through the shared frame (later: the registry renderer) | export test |
-| A-7 | Filenames and metadata could carry the company name (`docFilename` slugs the title) | Open | safe filenames from document type + project code + version, never the company name for pre-NDA classes | filename test per classification |
+| N-1 | Listing rows expose private profiles | Fixed in code `04a7d16b`; **migration not applied** | split: public row holds code + public view; private profile in an owner-only table; buyer-side matching on the public view | migration test (SQL policy assertions), listings unit tests, Radar works on public view |
+| N-2 | Offers / NDA requests / deals / documents / events world-readable | Fixed in code `04a7d16b`; **migration not applied** | RLS: readable by the buyer party and the listing owner only; documents by visibility and signed NDA | `supabase/tests/isolation/run.sh` (owner / buyer / stranger) |
+| A-5 | Radar says identity is revealed on signature; Inbox says never | Fixed `016abaf7` | one statement, from the disclosure policy (below) | copy test on both pages |
+| A-6 | DiligenceAI `.md` exports have no confidentiality header | Fixed `016abaf7` | route through the shared frame (later: the registry renderer) | export test |
+| A-7 | Filenames and metadata could carry the company name (`docFilename` slugs the title) | Fixed `016abaf7` (memoranda); per-type names for all exports with D3 versions | safe filenames from document type + project code + version, never the company name for pre-NDA classes | filename test per classification |
 
 ### False claims and sample data (S1)
 
@@ -59,14 +59,14 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 | B-4 | Wealth plan claims state-tax / QSBS modelling | Fixed `16c7c68e` | states the flat 23.8% rate |
 | B-5 | Exit run (CIM, teaser, NDAs, listing) always on `SAMPLE_COMPANY` | Fixed `137a1a77` | runs on the active company |
 | B-6 | Teaser / CIM "tier-one jurisdiction" | Fixed `969663f0` | jurisdiction omitted when anonymised |
-| B-7 | Negotiator, Investors, Wealth, Pipeline, Process Intelligence show demo offers / cap table to a founder with a saved intake | Open (labelled) | with a saved intake: show the founder's records or an empty state; demo data only in demo mode |
+| B-7 | Negotiator, Investors, Wealth, Pipeline, Process Intelligence show demo offers / cap table to a founder with a saved intake | Fixed `ed9d8511` (founder records or empty state; demo example on request); NDA Vault and Dashboard funnel too | with a saved intake: show the founder's records or an empty state; demo data only in demo mode |
 | B-8 | Counter-offer draft always for the demo company | Open (labelled) | generated from a recorded offer (deliverable 4) |
 | B-9 | Fixed negotiating positions (4% break fee, 10% cap, 8% escrow) | Open | deal-specific, configurable, flagged for review (deliverable 4) |
 | B-10 | Hard-coded word counts (deck 240, DD index 320) | Open | measured from content (deliverable 3) |
-| B-11 | "PDF" labels on print dialogs | Open | relabel "Print" now; real PDF via Dispatch (deliverable 3) |
-| B-12 | Module list advertises LOIs; "Generate closing docs" links to a page without them | Open | remove the claims now; restore when built |
-| B-13 | `.md` / `.csv` / `.ics` saved as `text/plain` | Open | correct MIME types (`text/markdown`, `text/csv`, `text/calendar`) |
-| B-14 | Banker on-screen teaser drops bullets | Open | render through the shared preview |
+| B-11 | "PDF" labels on print dialogs | Relabelled `016abaf7`; real PDF D3 | relabel "Print" now; real PDF via Dispatch (deliverable 3) |
+| B-12 | Module list advertises LOIs; "Generate closing docs" links to a page without them | Fixed `016abaf7` | remove the claims now; restore when built |
+| B-13 | `.md` / `.csv` / `.ics` saved as `text/plain` | Fixed `016abaf7` | correct MIME types (`text/markdown`, `text/csv`, `text/calendar`) |
+| B-14 | Banker on-screen teaser drops bullets | Fixed `ad1b33e4` | render through the shared preview |
 
 ### Execution states (S1)
 
@@ -195,10 +195,10 @@ is never marked Done because a route, button or placeholder exists.
 | 4.1 | No EV midpoint in the introduction letter pre-NDA | Done | `deliverables.test.ts`, `registry.test.ts` |
 | 4.2 | No company name / ARR in the warm-intro subject | Done | `warm-intro.test.ts`, `registry.test.ts` |
 | 4.3 | No unsupported verification / signature / access claims | Done for the gating document and Autopilot; NDA desk states its checks | `deliverables.test.ts` |
-| 4.4 | Remove `SAMPLE_COMPANY`, `Project Cipher`, hard-coded figures and demo offers from real-company outputs | Partial: exit run, Autopilot findings, teaser code name, intake contamination done; demo offers and cap table on founder pages (B-7) open | `exit-process.test.ts`, `active-company.test.ts`, `registry.test.ts` |
+| 4.4 | Remove `SAMPLE_COMPANY`, `Project Cipher`, hard-coded figures and demo offers from real-company outputs | Partial: exit run, Autopilot findings, code names, intake contamination and founder pages (B-7) done; the negotiation step of the exit run and the Autopilot offer comparison still score demo offers, labelled, until real offers exist (D4) | `exit-process.test.ts`, `active-company.test.ts`, `registry.test.ts` |
 | 4.5 | Tenant isolation for company, transaction, files, documents | Partial: listings (N-1), exchange rows (N-2) and data room (A-4) in code; deployment Owner; document versions D3 | `supabase/tests/isolation/run.sh`, `data-room.test.ts`, `listings.test.ts` |
 | 4.6 | Server-side authorization for generation, retrieval, export, approval, access | Partial: RLS and data-room functions enforce party/tenant; role-based approval needs real auth (N-3, Owner) | isolation test |
-| 4.7 | No leak through filenames, subjects, metadata, logs, public URLs | Partial: subjects, listing ids and listing rows done; filenames (A-7), telemetry (N-6) open | `listings.test.ts` |
+| 4.7 | No leak through filenames, subjects, metadata, logs, public URLs | Partial: subjects, listing ids/rows, memorandum filenames, telemetry tenant done; document metadata with D3 versions | `listings.test.ts` |
 | 4.8 | Classifications and pre-generation disclosure checks | Done for pre-NDA/public types; applied on Buyers, Banker, Documents | `registry.test.ts` |
 | 4.9 | Missing input → validation error or explicit draft; never sample fallback | Partial: unconfirmed intake fields flagged and gated; typed per-document validation D3 | `active-company.test.ts` |
 | 4.10 | Regression test per known leak and sample-data defect | Partial: tests for every fixed item; open items get theirs when fixed | §11 of this matrix |
@@ -210,8 +210,8 @@ is never marked Done because a route, button or placeholder exists.
 | 5.2 | One closing checklist; screen and export identical (items, owners, statuses, dates) | D3 (D-2) |
 | 5.3 | Measured word counts and claims | D3 (B-10) |
 | 5.4 | Design system: branding, covers, title/identity/classification, version/status/date/page numbers, typography, tables, figures, dates, headers/footers, notices, sources/assumptions/disclaimers, placeholders, metadata, safe filenames | D3 (DDM profiles on the Dispatch renderer) |
-| 5.5 | Genuine PDF; print never presented as PDF | Partial: relabel now (B-11, D2); real PDF D3 |
-| 5.6 | Correct MIME types, filenames, extensions; editable formats only when real | D2 (B-13, A-7) |
+| 5.5 | Genuine PDF; print never presented as PDF | Partial: relabelled (B-11); real PDF D3 |
+| 5.6 | Correct MIME types, filenames, extensions; editable formats only when real | Done `016abaf7` (`download.test.ts`) |
 | 5.7 | Distinct layouts per family (financial, board, CIM, legal draft, checklist, statement) | D3 |
 
 ### §6 Missing M&A workflow
@@ -285,9 +285,68 @@ is never marked Done because a route, button or placeholder exists.
 | # | Requirement | Status |
 |---|---|---|
 | 12.1 | D1 plan mapping every finding to code, severity, fix, dependencies, tests, acceptance | Done (this document) |
-| 12.2 | D2 confidentiality, sample data, isolation | In progress |
+| 12.2 | D2 confidentiality, sample data, isolation | Done in code (report §8); deployment Owner |
 | 12.3 | D3 registry, generation service, templates, versions, exports | Planned |
 | 12.4 | D4 transaction documents, NDA lifecycle, data room | Planned |
 | 12.5 | D5 consistency, signing/closing, post-closing, end-to-end | Planned |
 | 12.6 | Per increment: files, migrations, behaviour, tests, remaining defects, rollback | every increment report |
 | 12.7 | Homepage and unrelated areas untouched | checked each increment (`boardcheck`) |
+
+## 8. Increment report — deliverable 2 (confidentiality, sample data, isolation)
+
+Branch `claude/document-integrity-p0`, on top of PR #29 (`6c929573`). Thirteen commits.
+
+### Behaviour changed
+- **Pre-NDA documents.** The introduction letter carries no valuation. The warm introduction names neither the company nor its exact ARR (sector and an ARR bracket). Anonymised documents use the company's own listing code name. The gating document became an access policy that claims no verification. The teaser no longer invents claims (profitable, sector-leading, management transition).
+- **Gate.** A pre-generation gate (`lib/documents/gate.ts`) withholds a pre-NDA or public document containing the company's name, exact revenue, ARR or valuation, and marks a document as a draft when its inputs are still demo values. It is wired to Buyers, Banker and Documents.
+- **Registry.** `lib/documents/registry.ts` lists 52 document types across the eight stages, with classification, audience, kind, inputs, source, formats that actually exist, status and open findings.
+- **Listings.** The shared listing record holds only a code name, sector, region and revenue/growth brackets. The id no longer derives from the company name. Old rows are normalised when read.
+- **Isolation.** Offers, NDA requests, deals, deal events and deal documents are readable only by their parties (migration). The data room, telemetry, calibration and buyer statistics take the tenant from the signed-in user's token.
+- **Company record.** The intake records which fields the founder supplied; the rest are reported as unconfirmed. Each company has its own id.
+- **Sample data.** The exit run and Autonomous Exit run on the founder's company. Founder pages show the founder's records or an empty state, with the demo example only on request. The NDA Vault and Dashboard funnel show the founder's own records. Demo-based exports carry a "sample data" banner.
+- **NDA.** Each party's signature is recorded by its named signatory, and an NDA becomes active only when all required parties have signed.
+- **Exports.** "PDF" buttons now read "Print…" or name the report. Downloads have correct media types and safe names, and memorandum filenames carry the code name, not the company name. The Diligence export is framed. The LOI and closing-document claims are removed.
+
+### Files and migrations
+- **Web:**
+  - `src/lib/{bands,warm-intro,nda-drafts,listings,acquirer,active-company,company-intake,intake-fields,ui,deliverables,data-room,exit-api,supabase-exit-api,exit-process,telemetry,calibration,buyer-stats,social-publish,liquidity-view,module-list}.ts`
+  - `src/lib/documents/{registry,gate}.ts`
+  - `src/components/{DocumentGate,DemoExample,ExitProcessModal}.tsx`
+  - pages: Autopilot, Banker, Buyers, Closing, Dashboard, DiligenceAI, Documents, FounderInbox, Intake, Investors, Nda, Negotiator, Pipeline, ProcessIntelligence, AcquisitionRadar, ReportHub, Wealth and others (PDF labels only)
+- **Engines:** `src/memorandum/{template,types}.ts`.
+- **Database:** `supabase/migrations/20261013010000_exitos_isolation.sql` (read policies, `exitos_owns_listing`, band functions, listing scrub). Its rollback is in the file header; the scrubbed listing data cannot be restored.
+- **Edge functions:** `exit-doc-upload`, `exit-doc-list`, `exit-telemetry`, `exit-calibration`, `exit-buyer-stats`.
+- **Tests:**
+  - web: `bands`, `warm-intro`, `nda-drafts`, `data-room`, `exit-process`, `download`, `documents/registry`, plus additions to `listings`, `active-company`, `deliverables`, `exit-api` and `social-publish`;
+  - engines: `memorandum.test.js`;
+  - `supabase/tests/isolation/`.
+
+### Tests run (all on the final commit)
+- eslint over `src` with no warnings allowed: clean.
+- `tsc -b`: clean.
+- vitest: 50 files, 295 tests, all pass.
+- Engine tests: 180 pass.
+- Production build: passes.
+- Isolation test against Postgres 16 with the real migrations: pass. Owner, buyer and stranger each read what they should, and listing rows are scrubbed.
+- Homepage board and ribbon: unchanged.
+- 40 console routes at 390 and 1440 px: no overflow and no errors.
+- In Chromium:
+  - founder-mode pages;
+  - NDA signing;
+  - the intake's unconfirmed-values notice;
+  - the Documents gate.
+
+**Not run:**
+- Supabase Deno functions: no Deno runtime here, so they are checked by reading only.
+- Migration against the live project: not applied.
+
+### Remaining defects and limits
+- **Not in effect until deployed.** The migration and five edge functions must be applied to the live project (owner action).
+- **Authentication.** Sign-in is still browser-only (N-3), so roles cannot be enforced server-side; approval, counsel review and execution verification wait on real authentication.
+- **Legacy listing ids.** Listings stored under the old name-derived id keep that id until their owner lists again.
+- **Buyer statistics.** These are now per account. A pooled, cross-company view would need an owner decision with a privacy threshold.
+- **Still on samples.** The exit run's negotiation step and the Autopilot offer comparison score demo offers (labelled) until real offers exist (D4). The NDA signing record is local to the browser (server lifecycle D4).
+- **Open for D3 to D5.** D-1, D-2, D-3, B-8, B-9, B-10, C-2, C-3, C-4, C-5 and real PDF.
+
+### Rollback
+Revert the branch commits. For the database, run the policy statements in the migration header. Redeploying the previous edge functions restores the shared-tenant behaviour, which is the leak; don't.
