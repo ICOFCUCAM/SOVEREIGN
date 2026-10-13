@@ -195,6 +195,42 @@ Found during the deliverable 5 code survey (14 October). Applied live as `exitos
 
 **Still open:** "signed" still means the listing owner recorded it, not that signatures exist (C-2). The NDA lifecycle with signature evidence replaces it later in deliverable 5.
 
+## Deliverable 5: data-room tagging and review (C-4)
+
+Applied 13 October 2026.
+
+| Change | Live version |
+|---|---|
+| Migration `exit_data_room_tagging` (`20261014110000`, commit `244ea1c6`) | `20261013184619` |
+| Edge function `exit-doc-upload` | v9 (was v8) |
+| Edge function `exit-doc-list` | v9 (was v8) |
+| Self-test `exit_data_room_selftest` (`dc9a0f33`) | `20261013184801` |
+
+**Preflight**
+- Both live functions (v8) were identical to the repository's previous versions, so there was no drift.
+- The live table had no artifact, company or review columns.
+- `anon` and `authenticated` held every table privilege, including `TRUNCATE`, which row-level security does not cover. The REST API does not expose `TRUNCATE`.
+- One existing row: the earlier isolation test file.
+
+**Order of deployment:** the migration first (new nullable columns, with `review_state` defaulting to `submitted`), then the two functions, because the list function selects the new columns. The previous function versions keep working against the new table.
+
+**Verification**
+- **Live structure:** all six new columns are present. Grants are now `SELECT` only for `authenticated` and none for `anon`, on both data-room tables. The functions remain JWT-verified.
+- **Live behaviour, 13 October 18:48 UTC:** `exit_selftest_data_room()` returned `SELFTEST PASS (0 failed of 11; all test rows rolled back)`. It covers:
+  - the owner reads only their own file;
+  - a file cannot be accepted until it is tagged;
+  - the owner can tag and accept;
+  - re-tagging returns the file to review;
+  - no direct write to the review state;
+  - no tagging, reviewing or reading of another tenant's file;
+  - `anon` cannot read or tag.
+- Rollback was confirmed: no `selftest/` rows remain.
+- **Not tested live:** the upload function's new artifact validation through HTTP. The network policy here blocks direct calls to the project; the validation is covered by reading the code only.
+
+**Rollback**
+- the statements in the migration header;
+- redeploy the v8 functions from git `dc9a0f33~3:supabase/functions/exit-doc-{upload,list}/index.ts`.
+
 ## Rollback
 - **Exchange state integrity (deliverable 5):** the statements in the header of `20261014100000_exitos_exchange_state_integrity.sql`. Rolling back re-opens the self-signing defect.
 - **Company stories (deliverable 4):** the drop statements in the header of `20261014090000_exitos_company_stories.sql`, and `drop function public.exitos_selftest_company_stories();` if the self-test was installed. Data in the four tables is lost on rollback; export it first if any exists.

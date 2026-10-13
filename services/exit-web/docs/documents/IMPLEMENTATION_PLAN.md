@@ -76,7 +76,7 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 | S-1 | Buyer could create or edit their own NDA request as `signed` (unlocking post-NDA documents), or mark their own offer `accepted` | Fixed `8013f516`; **deployed and verified live** (self-test 15/15) | state guards and WITH CHECK; client uses PATCH and treats refusals as errors |
 | C-2 | Inbox "Mark executed" is a bare flag | Open | replaced by the NDA lifecycle: executed only with signature evidence for every required party |
 | C-3 | NDA shapes: `one_way_disclosure` has no template; mutual-cure has no cure term; expiry runs from execution; 8 of "14" clauses; no clause text | Open | clause library with provenance and review status (deliverable 4); until then the package says it is a summary, not an agreement |
-| C-4 | Data-room completeness counts any upload; missing list matches template filenames | Open | upload is tagged with its artifact id; completeness = required artifacts with an accepted file |
+| C-4 | Data-room completeness counts any upload; missing list matches template filenames | Fixed `244ea1c6`; **deployed and verified live** (self-test 11/11) | upload is tagged with its artifact id; completeness = required artifacts with an accepted file |
 | C-5 | Deal stages have no signing stage | Open | transaction record with explicit milestones (deliverable 3) |
 
 ### Contradictions between documents (S2)
@@ -259,8 +259,8 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 |---|---|---|---|
 | 8.1 | Explicit states; never active through a flag | D4 | Partial: local per-party signatures; "Mark executed" (C-2) still open |
 | 8.2 | Signature evidence, identity, timestamps, version, countersignature | D4 | Partial |
-| 8.3 | Server-enforced, auditable data-room access; requested / approved / provisioned / revoked | D2/D4 | Partial: tenant isolation deployed; request/approval states D4 |
-| 8.4 | A file satisfies only its company, transaction, artifact type and review state (C-4) | D4 | Not started |
+| 8.3 | Server-enforced, auditable data-room access; requested / approved / provisioned / revoked | D2/D5 | Partial: tenant isolation deployed and verified; buyer access requests come with the NDA lifecycle (D5-2), since access requires an executed NDA |
+| 8.4 | A file satisfies only its company, transaction, artifact type and review state (C-4) | D5 | Done for company, artifact and review state; transaction id waits on the transaction record (D6). "Accepted" is the owner's confirmation, labelled as such; independent review of files is not built | `diligence.test.js`, `data-room.test.ts`, `supabase/tests/dataroom`; **live self-test 11/11** |
 
 ### §9 Cross-document consistency
 | # | Requirement | Owning | Status | Evidence |
