@@ -112,6 +112,16 @@ test('a verification stops counting when the figure changes, expires or is revok
   assert.equal(r.notCounted[0].state, 'stale');
 });
 
+test('a verification stops counting when the evidence document it cites changes or is removed', () => {
+  const now = new Date('2026-10-14T00:00:00Z');
+  const doc = { id: 'mgmt', title: 'September management accounts', kind: 'management_accounts', date: '2026-10-05' };
+  const st = { ...vstory, sources: [...vstory.sources.filter((d) => d.id !== 'mgmt'), doc] };
+  const v = rec({ evidence: [{ description: 'Management accounts', sourceId: 'mgmt', source: doc }] });
+  assert.equal(verificationState(v, st, now), 'valid');
+  assert.equal(verificationState(v, { ...st, sources: st.sources.map((d) => (d.id === 'mgmt' ? { ...d, date: '2026-11-05' } : d)) }, now), 'stale');
+  assert.equal(verificationState(v, { ...st, sources: st.sources.filter((d) => d.id !== 'mgmt') }, now), 'stale');
+});
+
 test('claims resolve without their basis, and each has the competence that may verify it', () => {
   assert.deepEqual(claimValue(vstory, 'annual:FY2025'), { period: 'FY2025', revenueUsd: 2.09e7 });
   assert.deepEqual(claimCompetence('cap'), ['legal', 'financial']);

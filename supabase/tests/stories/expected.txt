@@ -46,13 +46,21 @@ CONTEXT:  PL/pgSQL function exitos_record_verification(text,text,text,text,text,
 
 12b R reads the verifications it recorded|2
 
+
+psql:scenario.sql:69: ERROR:  the evidence cites a source document that is not attached to the story
+CONTEXT:  PL/pgSQL function exitos_record_verification(text,text,text,text,text,jsonb,text,text,timestamp with time zone,text) line 25 at RAISE
+12c R verifies against an attached document|t
+
+12d after the cited document changed: document-backed stale, others current|1|2
+
 13 after ARR changed: stale ARR, FY2025 still current|annual:FY2025|f
+13 after ARR changed: stale ARR, FY2025 still current|annual:FY2025|t
 13 after ARR changed: stale ARR, FY2025 still current|figure:arrUsd|t
-psql:scenario.sql:69: ERROR:  no such verification of yours
+psql:scenario.sql:79: ERROR:  no such verification of yours
 CONTEXT:  PL/pgSQL function exitos_revoke_verification(uuid,text) line 5 at RAISE
 
 14 R after engagement revoked reads story|0
 
 15 R revoked FY2025|1
 16 anon reads stories|0
-psql:scenario.sql:80: ERROR:  permission denied for function exitos_record_verification
+psql:scenario.sql:90: ERROR:  permission denied for function exitos_record_verification

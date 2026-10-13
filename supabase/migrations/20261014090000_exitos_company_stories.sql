@@ -161,14 +161,17 @@ drop trigger if exists exitos_company_stories_guard on public.exitos_company_sto
 create trigger exitos_company_stories_guard before insert or update on public.exitos_company_stories
   for each row execute function public.exitos_company_stories_guard();
 
--- a verified claim whose value changes is stale: it must be reconsidered
+-- a verified claim whose value changes, or whose cited evidence document changes or is removed, is stale: it must be reconsidered
 create or replace function public.exitos_company_stories_staleness() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
   update public.exitos_verifications v set stale_at = now()
    where v.owner_account_id = new.owner_account_id and v.company_id = new.company_id
      and v.stale_at is null and v.revoked_at is null
-     and public.exitos_story_claim(new.data, v.claim) is distinct from v.claim_value;
+     and (public.exitos_story_claim(new.data, v.claim) is distinct from v.claim_value
+          or exists (select 1 from jsonb_array_elements(v.evidence) e where e ? 'source'
+                     and (select d from jsonb_array_elements(coalesce(new.data->'sources', '[]')) d where d->>'id' = e->>'sourceId' limit 1)
+                         is distinct from e->'source'));
   return new;
 end $$;
 revoke all on function public.exitos_company_stories_staleness() from public, anon, authenticated;
@@ -203,7 +206,7 @@ create or replace function public.exitos_record_verification(
   p_owner text, p_company text, p_claim text, p_competence text, p_scope text,
   p_evidence jsonb, p_limitations text, p_revalidate_when text, p_expires timestamptz, p_note text default null)
 returns uuid language plpgsql security definer set search_path = public as $$
-declare me text := auth.uid()::text; a public.exitos_reviewer_authorizations; v_value jsonb; v_id uuid;
+declare me text := auth.uid()::text; a public.exitos_reviewer_authorizations; v_data jsonb; v_value jsonb; v_evidence jsonb; v_id uuid;
 begin
   if me is null then raise exception 'sign in to record a verification'; end if;
   if me = p_owner then raise exception 'a company cannot verify its own claims'; end if;
@@ -220,12 +223,21 @@ begin
     raise exception 'a verification must record the evidence reviewed';
   end if;
   if length(trim(coalesce(p_scope, ''))) = 0 then raise exception 'a verification must state its scope'; end if;
-  select public.exitos_story_claim(s.data, p_claim) into v_value from public.exitos_company_stories s
-   where s.owner_account_id = p_owner and s.company_id = p_company;
+  select s.data into v_data from public.exitos_company_stories s where s.owner_account_id = p_owner and s.company_id = p_company;
+  v_value := public.exitos_story_claim(v_data, p_claim);
   if v_value is null or v_value = 'null'::jsonb then raise exception 'there is no value for % to verify', p_claim; end if;
+  -- evidence citing an attached source document keeps a snapshot of it: if the document changes, the verification goes stale
+  if exists (select 1 from jsonb_array_elements(p_evidence) e where e ? 'sourceId'
+             and not exists (select 1 from jsonb_array_elements(coalesce(v_data->'sources', '[]')) d where d->>'id' = e->>'sourceId')) then
+    raise exception 'the evidence cites a source document that is not attached to the story';
+  end if;
+  select jsonb_agg(case when e ? 'sourceId'
+           then e || jsonb_build_object('source', (select d from jsonb_array_elements(v_data->'sources') d where d->>'id' = e->>'sourceId' limit 1))
+           else e end) into v_evidence
+    from jsonb_array_elements(p_evidence) e;
   insert into public.exitos_verifications (owner_account_id, company_id, claim, claim_value, reviewer_account_id, reviewer_name, reviewer_role,
     competence, evidence, scope, limitations, expires_at, revalidate_when)
-  values (p_owner, p_company, p_claim, v_value, me, a.reviewer_name, a.reviewer_role, p_competence, p_evidence, trim(p_scope),
+  values (p_owner, p_company, p_claim, v_value, me, a.reviewer_name, a.reviewer_role, p_competence, v_evidence, trim(p_scope),
     nullif(trim(coalesce(p_limitations, '')), ''), p_expires, nullif(trim(coalesce(p_revalidate_when, '')), ''))
   returning id into v_id;
   return v_id;

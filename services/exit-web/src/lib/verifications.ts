@@ -22,7 +22,7 @@ const rpc = async <T>(r: Remote, fn: string, args: Record<string, unknown>, what
 
 interface Row {
   id: string; claim: ClaimKey; claim_value: unknown; reviewer_name: string; reviewer_role: string; competence: Competence;
-  evidence: Array<{ description: string; sourceId?: string }>; scope: string; limitations: string | null; verified_at: string;
+  evidence: Verification["evidence"]; scope: string; limitations: string | null; verified_at: string;
   expires_at: string | null; revalidate_when: string | null; revoked_at: string | null; stale_at: string | null;
   owner_account_id: string; company_id: string;
 }

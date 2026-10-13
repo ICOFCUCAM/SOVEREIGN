@@ -43,6 +43,7 @@ const Reviews: React.FC = () => {
   const [story, setStory] = useState<CompanyStory | null>(null);
   const [mine, setMine] = useState<Verification[]>([]);
   const [form, setForm] = useState({ claim: "", evidence: "", scope: "", limitations: "", revalidate: "", expires: "" });
+  const [docs, setDocs] = useState<string[]>([]);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
@@ -97,8 +98,16 @@ const Reviews: React.FC = () => {
                 <option value="">— choose —</option>
                 {claims.map((c) => <option key={c.claim} value={c.claim}>{c.label}: {show(c.value)}</option>)}
               </select></label>
-            <label className="block" htmlFor="rv-ev"><span className={LABEL}>Evidence reviewed (one item per line, required)</span>
+            <label className="block" htmlFor="rv-ev"><span className={LABEL}>Evidence reviewed (one item per line; this or an attached document is required)</span>
               <textarea id="rv-ev" rows={3} className={INPUT} value={form.evidence} onChange={(e) => setForm({ ...form, evidence: e.target.value })} /></label>
+            {story.sources.length > 0 && (
+              <fieldset><legend className={LABEL}>Attached documents you reviewed (the verification lapses if one is later changed or removed)</legend>
+                {story.sources.map((d) => (
+                  <label key={d.id} className="flex items-center gap-2 text-[12px]"><input type="checkbox" checked={docs.includes(d.id)}
+                    onChange={(e) => setDocs(e.target.checked ? [...docs, d.id] : docs.filter((x) => x !== d.id))} />{d.title} ({d.date})</label>
+                ))}
+              </fieldset>
+            )}
             <label className="block" htmlFor="rv-scope"><span className={LABEL}>Scope (required)</span><input id="rv-scope" className={INPUT} value={form.scope} onChange={(e) => setForm({ ...form, scope: e.target.value })} placeholder="e.g. ARR at 30 September 2026, from the contract register" /></label>
             <label className="block" htmlFor="rv-lim"><span className={LABEL}>Limitations</span><input id="rv-lim" className={INPUT} value={form.limitations} onChange={(e) => setForm({ ...form, limitations: e.target.value })} /></label>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -108,10 +117,11 @@ const Reviews: React.FC = () => {
             <button type="button" className={BTN} disabled={!form.claim} onClick={() => void (async () => {
               try {
                 await recordVerification({ ownerId: sel.owner_account_id, companyId: sel.company_id, claim: form.claim as ClaimKey, competence: sel.competence, scope: form.scope,
-                  evidence: form.evidence.split("\n").map((d) => d.trim()).filter(Boolean).map((description) => ({ description })),
+                  evidence: [...form.evidence.split("\n").map((d) => d.trim()).filter(Boolean).map((description) => ({ description })),
+                    ...story.sources.filter((d) => docs.includes(d.id)).map((d) => ({ description: d.title, sourceId: d.id }))],
                   ...(form.limitations ? { limitations: form.limitations } : {}), ...(form.revalidate ? { revalidateWhen: form.revalidate } : {}),
                   ...(form.expires ? { expiresAt: new Date(form.expires).toISOString() } : {}) }, remote);
-                setMsg("Verification recorded."); setForm({ claim: "", evidence: "", scope: "", limitations: "", revalidate: "", expires: "" });
+                setMsg("Verification recorded."); setDocs([]); setForm({ claim: "", evidence: "", scope: "", limitations: "", revalidate: "", expires: "" });
                 setMine(await fetchVerifications(sel.company_id, remote));
               } catch (e) { setMsg(e instanceof Error ? e.message : "The verification was not recorded"); }
             })()}>Record verification</button>

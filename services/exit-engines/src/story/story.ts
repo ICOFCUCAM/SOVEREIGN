@@ -252,7 +252,8 @@ export interface Verification {
   readonly reviewer: string;              // reviewer's name
   readonly role: string;                  // e.g. "Chartered accountant, Example LLP"
   readonly competence: Competence;
-  readonly evidence: ReadonlyArray<{ readonly description: string; readonly sourceId?: string }>;
+  /** What the reviewer examined; an item citing an attached document carries the document as it was then. */
+  readonly evidence: ReadonlyArray<{ readonly description: string; readonly sourceId?: string; readonly source?: SourceDocument }>;
   readonly scope: string;
   readonly limitations?: string;
   readonly verifiedAt: string;
@@ -299,6 +300,8 @@ export function verificationState(v: Verification, st: CompanyStory, now = new D
   if (v.revokedAt) return 'revoked';
   if (v.expiresAt && new Date(v.expiresAt) <= now) return 'expired';
   if (v.staleAt || canon(claimValue(st, v.claim)) !== canon(v.value)) return 'stale';
+  // the evidence changed: a cited document was altered or removed after the review
+  if (v.evidence.some((e) => e.source && canon(st.sources.find((d) => d.id === e.sourceId)) !== canon(e.source))) return 'stale';
   return 'valid';
 }
 

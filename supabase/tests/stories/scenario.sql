@@ -64,14 +64,24 @@ select '12 A reads verifications', count(*), bool_and(stale_at is null) from exi
 select as_user(:'R');
 select '12b R reads the verifications it recorded', count(*) from exitos_verifications;
 select as_user(:'A');
+update exitos_company_stories set data = jsonb_set(data, '{sources}', '[{"id":"s1","title":"FY2025 statutory accounts","kind":"statutory_accounts","date":"2026-03-01"}]');
+select as_user(:'R');
+select exitos_record_verification(:'A', :'CO', 'annual:FY2025', 'financial', 'FY2025 revenue', '[{"description":"accounts","sourceId":"s9"}]', null, null, null);
+select '12c R verifies against an attached document', exitos_record_verification(:'A', :'CO', 'annual:FY2025', 'financial', 'FY2025 revenue to audited accounts',
+  '[{"description":"FY2025 statutory accounts, revenue note","sourceId":"s1"}]', null, 'on restatement', null) is not null;
+select as_user(:'A');
+update exitos_company_stories set data = jsonb_set(data, '{sources,0,date}', '"2026-06-30"');
+select '12d after the cited document changed: document-backed stale, others current',
+  count(*) filter (where stale_at is not null and evidence @> '[{"sourceId":"s1"}]'), count(*) filter (where stale_at is null) from exitos_verifications;
+select as_user(:'A');
 update exitos_company_stories set data = jsonb_set(data, '{figures,arrUsd}', '23000000');
 select '13 after ARR changed: stale ARR, FY2025 still current', claim, stale_at is not null from exitos_verifications order by claim;
-select exitos_revoke_verification((select id from exitos_verifications where claim = 'annual:FY2025'), 'owner tries');
+select exitos_revoke_verification((select id from exitos_verifications where claim = 'annual:FY2025' and stale_at is null), 'owner tries');
 update exitos_review_engagements set revoked_at = now();
 
 select as_user(:'R');
 select '14 R after engagement revoked reads story', count(*) from exitos_company_stories;
-select exitos_revoke_verification((select id from exitos_verifications where claim = 'annual:FY2025'), 'superseded by audited accounts');
+select exitos_revoke_verification((select id from exitos_verifications where claim = 'annual:FY2025' and stale_at is null), 'superseded by audited accounts');
 select '15 R revoked FY2025', count(*) from exitos_verifications where revoked_at is not null;
 
 reset role;
