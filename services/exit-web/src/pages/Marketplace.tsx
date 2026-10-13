@@ -10,6 +10,7 @@ import { buildMarketTape } from "../lib/market-tape";
 import { LISTING_PUBLIC as ENGINE_PUBLIC, LISTING_PRIVATE as ENGINE_PRIVATE, LISTING_MATCHES, VALUATION_CANONICAL, useMemorandum } from "../lib/engines";
 import { createListing, matchBuyersToListing, runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type MemorandumInputs } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
+import { label, labels } from "../lib/labels";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 
 // Exit Marketplace — "Become the banker." The sell-side pack gathers the
@@ -180,9 +181,9 @@ const FounderMarketplace: React.FC = () => {
 
       <section aria-label="Listing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Asking price (mid)" emphasis value={fmtMoney(listing.askingPriceUsd.mid)} sub={`band ${fmtMoney(listing.askingPriceUsd.low)}–${fmtMoney(listing.askingPriceUsd.high)}`} /></div>
-        <div className="bg-xo-panel"><Metric label="Readiness" value={`${listing.readinessScore.toFixed(0)}/100`} sub={listing.readinessBand.replace(/_/g, " ")} /></div>
+        <div className="bg-xo-panel"><Metric label="Readiness" value={`${listing.readinessScore.toFixed(0)}/100`} sub={label(listing.readinessBand)} /></div>
         <div className="bg-xo-panel"><Metric label="Matched buyers" emphasis value={String(matches.length)} sub={MATCHES.summary.split(".")[0]} /></div>
-        <div className="bg-xo-panel"><Metric label="Visibility" value={listing.visibility.replace(/_/g, " ")} sub={view === "founder" ? "you" : "buyers see"} /></div>
+        <div className="bg-xo-panel"><Metric label="Visibility" value={label(listing.visibility)} sub={view === "founder" ? "what you see" : "what buyers see"} /></div>
       </section>
 
       <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
@@ -305,7 +306,7 @@ const FounderMarketplace: React.FC = () => {
 
             <h4 className="mt-6 text-[13px] font-semibold">Ideal buyer profile</h4>
             <dl className="mt-2 grid grid-cols-1 gap-3 text-[12px] sm:grid-cols-3">
-              <div><dt className="text-xo-muted">Buyer types</dt><dd className="mt-1 font-medium">{listing.idealBuyerProfile.preferredTypes.join(" · ")}</dd></div>
+              <div><dt className="text-xo-muted">Buyer types</dt><dd className="mt-1 font-medium">{labels(listing.idealBuyerProfile.preferredTypes)}</dd></div>
               <div><dt className="text-xo-muted">Check size</dt><dd className="mt-1 font-medium">{fmtMoney(listing.idealBuyerProfile.checkSizeUsd.low)} – {fmtMoney(listing.idealBuyerProfile.checkSizeUsd.high)}</dd></div>
               <div><dt className="text-xo-muted">Geography</dt><dd className="mt-1 font-medium">{listing.idealBuyerProfile.geography.join(" · ")}</dd></div>
             </dl>
