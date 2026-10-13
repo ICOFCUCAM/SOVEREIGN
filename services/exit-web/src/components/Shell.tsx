@@ -53,6 +53,19 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => onGuideChange(() => { const g = guideState(); setGuideHiddenState(g.hidden); setTipsHiddenState(g.tipsHidden); }), []);
   const showGuideLink = guideHidden && (role === "founder" || role === "buyer");
 
+  // The phone drawer behaves as a dialog: focus moves into it when it opens, Escape closes it, and focus
+  // returns to the menu button.
+  const drawer = React.useRef<HTMLElement>(null);
+  const menuButton = React.useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!navOpen) return;
+    const opener = menuButton.current;
+    drawer.current?.querySelector<HTMLElement>("a,button")?.focus();
+    const onKey = (e: KeyboardEvent): void => { if (e.key === "Escape") setNavOpen(false); };
+    addEventListener("keydown", onKey);
+    return () => { removeEventListener("keydown", onKey); if (matchMedia("(max-width: 1023px)").matches) opener?.focus(); };
+  }, [navOpen]);
+
   // Close the mobile drawer whenever the route changes.
   useEffect(() => { setNavOpen(false); }, [loc.pathname, loc.hash]);
 
@@ -144,7 +157,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* Mobile top bar */}
       <header className="flex items-center gap-3 border-b border-white/10 bg-ink-900/80 px-4 py-3 lg:hidden">
-        <button onClick={() => setNavOpen(true)} aria-label="Open navigation menu" aria-expanded={navOpen}
+        <button ref={menuButton} onClick={() => setNavOpen(true)} aria-label="Open navigation menu" aria-expanded={navOpen}
           className="rounded-md p-2 text-white/80 ring-1 ring-white/15 transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M3 6h18M3 12h18M3 18h18" /></svg>
         </button>
@@ -154,7 +167,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <div className="flex flex-1 overflow-hidden">
         {navOpen && <div className="fixed inset-0 z-30 bg-black/60 lg:hidden" aria-hidden onClick={() => setNavOpen(false)} />}
 
-        <aside
+        <aside ref={drawer}
           className={`fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-white/10 bg-ink-900/95 transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 lg:bg-ink-900/70 ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
           aria-label="Sidebar"
         >
