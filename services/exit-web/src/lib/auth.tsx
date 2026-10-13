@@ -121,10 +121,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const cb = typeof window !== "undefined" ? parseCallback(window.location.hash) : null;
         let v: VerifiedSession | null = null;
+        // clear the link's tokens (or error) from the address bar before anything else
+        if (cb) history.replaceState(null, "", window.location.pathname + window.location.search);
         if (cb && "error" in cb) throw new Error(cb.error);
         if (cb) {
-          // clear the tokens from the address bar before anything else
-          history.replaceState(null, "", window.location.pathname + window.location.search);
           const u = await verifyUser(cfg, cb.accessToken);
           v = { accessToken: cb.accessToken, refreshToken: cb.refreshToken, expiresAt: Date.now() + cb.expiresIn * 1000, userId: u.id, email: u.email };
         } else {
