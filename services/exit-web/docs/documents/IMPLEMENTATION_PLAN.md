@@ -170,8 +170,10 @@ These block a requirement from being complete in production. Nothing below is ma
 | O-6 | Counsel review of any legal template before it is offered as more than an educational template | 7.5, D4 legal documents |
 | O-7 | Decide on pooled buyer statistics, only with the controls in `BUYER_STATISTICS_PRIVACY.md` | pooled statistics (not enabled) |
 | O-8 | Outside ExitOS on the same project: `public._imggen` has RLS disabled; leaked-password protection is off | project hygiene |
-| O-9 | Apply migration `20261014090000_exitos_company_stories.sql` to the live project (written and tested locally, **not applied**) | company story saved to the server for signed-in accounts (B.*) |
-| O-10 | Decide who may record an independent verification and by what process (today only the operator grant can, and no workflow exists) | "verified" provenance (B.provenance) |
+| O-9 | ~~Apply migration `20261014090000_exitos_company_stories.sql`~~ **Applied 13 Oct** (`20261013171613`) after preflight; structure verified live. See `SECURITY_DEPLOYMENT.md` | done |
+| O-12 | Run the post-deployment self-test on the live project: apply `20261014090100_exitos_company_stories_selftest.sql`, then `select public.exitos_selftest_company_stories();`. Expect `SELFTEST PASS (0 failed of 25 …)`. Also confirm the backup plan and PITR window in the dashboard | live behavioural verification of story access and isolation |
+| O-13 | Authorise the first professional reviewers (operator action through `exitos_authorize_reviewer`, with name and professional role). No reviewer exists yet, so nothing is verified | any "independently verified" figure |
+| O-10 | ~~Decide who may verify~~ **Decided 14 Oct:** only an authorised professional reviewer, engaged by the company, within their competence, with recorded evidence. Founder, ExitOS checks, counsel outside scope and administrators cannot verify. Implemented `5ea9f90e`, `bc2cd4fe` | done |
 | O-11 | If price guidance is ever to be given: approve a separate, counsel-reviewed price-guidance document and who may send it | A.5 |
 
 ### §1 Assignment
@@ -306,8 +308,9 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 | A.5 | Price guidance only through a separate, authorised document | registry `exitos.price_guidance` (not built, counsel review) | D4 | Not built; **Owner O-11** | registry |
 | A.6 | Tests for indirect leakage: executive summaries, metadata, embedded tables, appendices, PDFs | `gate.ts` (seller_intelligence), `rendered.ts` | D4 | Done | `quality.test.ts` (metadata/appendix leak, PDF text), `gate.ts` |
 | B.1–B.8 | Intake sections: history; products; customers; market; management; capitalisation; financial history and forecasts; sources | `story/story.ts`, `story-form.ts`, `pages/CompanyStory.tsx` | D4 | Done in code | `story.test.js`, `company-story.test.ts`, `story-form.test.ts`, browser check |
-| B.progressive | Progressive, resumable, optional sections, partial completion, completion indicators, never blocked | Company Story page (autosave; per-section status; `storyCompleteness`) | D4 | Done (browser); server copy needs **O-9** | browser flow, `story.test.js` |
-| B.provenance | Founder-supplied / source-supported / verified / estimated / missing, preserved into documents | `FactMeta`, `effectiveProvenance`, CIM basis column and source notes | D4 | Done; "verified" only with a recorded verification (**O-10**); the server refuses self-verification | `story.test.js`, `supabase/tests/stories` |
+| B.progressive | Progressive, resumable, optional sections, partial completion, completion indicators, never blocked | Company Story page (autosave; per-section status; `storyCompleteness`) | D4 | Done (browser); server table deployed; live behavioural check **O-12** | browser flow, `story.test.js` |
+| B.provenance | Founder-supplied / source-supported / verified / estimated / missing, preserved into documents | `FactMeta`, `effectiveProvenance`, CIM basis column and source notes | D4 | Done | `story.test.js`, `supabase/tests/stories` |
+| B.verification | Independent verification by an authorised reviewer only. Each record holds the claim and value, reviewer, role, competence, evidence (with a snapshot of any cited document), scope, limitations, timestamp, expiry and revalidation trigger. It lapses when the value or evidence changes, on expiry, or on withdrawal | migration `20261014090000` (authorisations, engagements, verifications, `exitos_record_verification`), `story.ts` `applyVerifications`/`verificationState`, Company Story reviewers panel, `/console/reviews`, CIM verification appendix | D4 | Done in code; **deployed, structure verified live**; behavioural self-test on live pending (**O-12**); no reviewer authorised yet (**O-13**) | `story.test.js`, `verifications.test.ts`, `supabase/tests/stories` (scenario and self-test) |
 | C.1 | No market size from revenue × constant, headcount from revenue, fixed cap table, invented ranking, retention, growth or history | `CompanyProfile.assumed`, `isKnown`, templates, readiness, Exit Score, diligence, Claude inputs | D4 | Done across all generators found by the audit | `quality.test.ts`, `story.test.js` |
 | C.2 | Calculations only with explicit method and inputs, labelled | ARR per customer "(calculated)", Rule of 40 with its inputs | D4 | Done | sample pack |
 | C.3 | Gaps stated professionally (what, why, what completes it) | `cim.ts` `gap()` | D4 | Done | `quality.test.ts` (coverage:gap-unstated) |
@@ -327,7 +330,7 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 | 12.1 | D1 plan | Done |
 | 12.2 | D2 confidentiality, sample data, isolation | Done in code; **deployed and verified** (`SECURITY_DEPLOYMENT.md`); cleanup O-1, frontend O-2 |
 | 12.3 | D3 registry, generation service, templates, versions, exports | Partial (§9 report): service, versions, workflow, one CIM/checklist/timeline, consistency done; PDF blocked on O-5; 46 types not yet on the service |
-| 12.4 | D4 (revised by the owner): professional CIM and evidence-based intake | Done in code (§10 report); server storage needs O-9 |
+| 12.4 | D4 (revised by the owner): professional CIM and evidence-based intake | Accepted for code review (not production-ready). Story migration deployed and structure verified; live behavioural self-test O-12; production PDFs blocked on Dispatch deployment |
 | 12.4b | D5 transaction documents, NDA lifecycle, data room (was D4) | Not started |
 | 12.5 | D6 signing/closing, post-closing, end-to-end (was D5) | Not started |
 | 12.6 | Per-increment reports | §8, §9 |

@@ -98,12 +98,51 @@ delete from auth.users                       where id in ('aaaa4b38-0000-4000-80
 ```
 Also delete the storage object `exit-data-room/aaaa4b38-0000-4000-8000-00000000000a/legal/…_isotest.txt` (Storage dashboard or API).
 
-## Written, not applied (deliverable 4)
-| Migration | What | Status |
-|---|---|---|
-| `20261014090000_exitos_company_stories` | owner-only, revisioned company stories; refuses figures marked "verified" unless the writer holds the operator grant | tested locally (`supabase/tests/stories`); **not applied** to the live project (owner action O-9) |
+## Deliverable 4: company stories and independent verification
+
+Applied to the live project on 13 October 2026 (owner approval of 14 October decisions). Migration: `exitos_company_stories`, recorded as version `20261013171613`. Source: `supabase/migrations/20261014090000_exitos_company_stories.sql` at `af059769`.
+
+### Preflight (before applying)
+| Check | Result |
+|---|---|
+| Target project | `qvjdivcdefuprnenedje` (SOVEREIGN, eu-west-1, Postgres 17.6, ACTIVE_HEALTHY) |
+| Migration state | last ExitOS migration `exitos_document_versions`; none of the four tables or nine functions existed; no name collisions |
+| Dependencies | `exitos_has_role` present, reads `exitos_role_grants`; `auth.users` present |
+| Access policies | RLS on for all 13 existing ExitOS tables; default privileges grant new public tables to `anon` and `authenticated`, so the migration now revokes and re-grants explicitly instead of relying on RLS alone |
+| Backup and recovery | `archive_mode = on` (WAL archiving behind Supabase backups and point-in-time recovery). Plan, retention and PITR window are not visible to the deployment tools; **the owner should confirm them in the dashboard**. The change is additive: no existing object is altered or dropped |
+| Rollback | the statements in the migration header drop only the objects it created; nothing else depends on them |
+| Compatibility | local suites pass on Postgres 16; the live project runs 17.6. The features used (jsonpath `@?`, column-level grants, `gen_random_uuid`) exist in both |
+
+### Applying it
+- The first two attempts timed out in the deployment tool before reaching the database. Each time, the live state was checked: no tables, no migration record, no running query.
+- The two `drop trigger if exists` lines were then removed (unnecessary on new tables, committed `af059769`), and the third attempt succeeded.
+
+### Verification after deployment (read-only, live)
+| Check | Result |
+|---|---|
+| RLS | on for all four tables |
+| Policies | 9, all `to authenticated`: stories (owner select/insert/update/delete; engaged reviewer select), authorisations (own or operator select), engagements (owner and reviewer select; owner insert; owner update), verifications (owner and recording reviewer select) |
+| `anon` table privileges | none |
+| `authenticated` table privileges | stories: select, insert, update, delete. Engagements: select, insert, and update on `revoked_at` only. Authorisations and verifications: select only (written only through the checked functions) |
+| Functions | the five RPCs are not executable by `anon`; trigger functions are not executable by `anon` or `authenticated`; every function has a fixed `search_path` |
+| Triggers | `exitos_company_stories_guard` (refuses "verified" in a story, from anyone) and `exitos_company_stories_staleness` |
+| Security advisors | no RLS, `anon`-access or search-path finding for the new objects. The only entries are the five RPCs being callable by signed-in users, which is intended: each checks operator role, competence, engagement and non-ownership itself |
+| Data | all four tables empty after the checks |
+
+Minor: `anon` can execute the two pure helpers `exitos_story_claim` and `exitos_claim_competence` through the default `PUBLIC` grant. They read no data; tidy up in the next migration.
+
+### Behavioural test of access and isolation: **not yet run on the live project**
+- The full behavioural test of authorised access and cross-company isolation is a function: `exitos_selftest_company_stories()`, migration `20261014090100_exitos_company_stories_selftest.sql`. It covers 25 checks across owner, stranger, operator, engaged and unengaged reviewers, two companies, and anon.
+- It always ends by raising, so every test row is rolled back, and only the database owner can run it.
+- Locally it passes 25 of 25 (`supabase/tests/stories/selftest.sh`). A deliberately opened read policy makes six isolation checks fail, so the test does catch leaks.
+- The deployment tool would not run it on the live project: SQL containing write statements times out waiting for a confirmation that this session cannot give.
+
+**Owner action O-12:** in the Supabase SQL editor, run the self-test migration file, then `select public.exitos_selftest_company_stories();`. The expected result is an error beginning `SELFTEST PASS (0 failed of 25 …)`.
+
+**Until then, the live security status of company stories is "deployed, structurally verified, behaviour not yet verified on live". Do not report it as fully verified.**
 
 ## Rollback
+- **Company stories (deliverable 4):** the drop statements in the header of `20261014090000_exitos_company_stories.sql`, and `drop function public.exitos_selftest_company_stories();` if the self-test was installed. Data in the four tables is lost on rollback; export it first if any exists.
 - **Database:** the statements in each migration header. Restoring the read policies to `using (true)` re-opens the leak; don't, except to recover from a breaking incident.
 - **Deliverable 3 migrations:** drop `exitos_document_action`, `exitos_document_events`, `exitos_document_versions`, `exitos_has_role`, `exitos_role_grants` and restore the account policies with the two `alter policy` statements in the `exitos_auth_roles` header. Nothing else depends on them.
 - **Functions:** redeploy v7 (v8 for telemetry) from git `6c929573:supabase/functions/<name>/index.ts`. This restores the shared-tenant behaviour.
