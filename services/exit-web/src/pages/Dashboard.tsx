@@ -17,6 +17,7 @@ import ExitProcessModal from "../components/ExitProcessModal";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 import { commanderMetrics } from "../lib/commander-metrics";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
+import { sectorLabel } from "../lib/market-stats";
 import { emitTelemetry } from "../lib/telemetry";
 
 // ── FOUNDER LIQUIDITY COMMAND ───────────────────────────────────────
@@ -139,7 +140,7 @@ const Dashboard: React.FC = () => {
               <Provenance kind={fromIntake ? "company" : "demo"} />
             </div>
             <div className="mt-1 font-mono text-[12px] text-xo-muted">
-              {company.sector.replace(/_/g, " ")} · {arrM.toFixed(1)}M ARR · {company.jurisdiction} · operator {session?.founderId ?? "founder"}
+              {sectorLabel(company.sector)} · ${arrM.toFixed(1)}M ARR · {company.jurisdiction}
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
