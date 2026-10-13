@@ -54,6 +54,15 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Close the mobile drawer whenever the route changes.
   useEffect(() => { setNavOpen(false); }, [loc.pathname, loc.hash]);
 
+  // The browser tab names the page ("Check Readiness · ExitOS"), so a reader with several console tabs can
+  // tell them apart; the site's own title returns when the console closes.
+  useEffect(() => { const site = document.title; return () => { document.title = site; }; }, []);
+  useEffect(() => {
+    const list = navForRole(role);
+    const item = list.find((n) => basePath(n.to) === loc.pathname) ?? list.find((n) => n.to === "/console");
+    document.title = `${loc.pathname === "/console/upgrade" ? "Upgrade" : item?.label ?? "Console"} · ExitOS`;
+  }, [loc.pathname, role]);
+
   // A new page opens at its top: the workspace (<main>, the scrolling region) returns to 0 when the path
   // changes; a link to a section (#hash) is left to the effect below.
   const workspace = React.useRef<HTMLElement>(null);
