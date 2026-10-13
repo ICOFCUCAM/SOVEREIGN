@@ -184,7 +184,8 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <kbd className="rounded border border-white/15 px-1.5 font-mono text-[10px] text-white/45">{typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd>
             </button>
           </div>
-          <nav aria-label="Console" className="flex-1 overflow-y-auto px-3 py-2">
+          {/* the menu fades at its scrolling edges instead of cutting an item in half; a hairline scrollbar */}
+          <nav aria-label="Console" className="ex-navscroll flex-1 overflow-y-auto px-3 py-2">
             {shortMenu && (
               <div className="mb-4">
                 <div className="px-3 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/40">Essentials</div>

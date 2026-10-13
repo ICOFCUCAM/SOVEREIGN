@@ -77,6 +77,11 @@ html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px s
   .ex-console .animate-pulse, .ex-console .animate-ping { animation: none; }
 }
 
+/* the console menu: soft edges where it scrolls, and a thin scrollbar */
+.ex-navscroll { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12px, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(180deg, transparent 0, #000 12px, #000 calc(100% - 28px), transparent); scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.12) transparent; }
+.ex-navscroll::-webkit-scrollbar { width: 6px; }
+.ex-navscroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
+
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
 
