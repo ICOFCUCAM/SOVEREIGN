@@ -58,3 +58,10 @@ export function formatField(spec: FieldSpec, value: number): string {
 
 export const textsFor = (inputs: IntakeInputs): Record<NumericKey, string> =>
   Object.fromEntries(NUMERIC_FIELDS.map((f) => [f.key, formatField(f, inputs[f.key])])) as Record<NumericKey, string>;
+
+/** A label for every intake field, for lists of what is still unconfirmed. */
+export const INTAKE_FIELD_LABEL: Record<keyof IntakeInputs, string> = {
+  name: "Company name", jurisdiction: "Country", sector: "Sector", foundedYear: "Year founded",
+  ...(Object.fromEntries(NUMERIC_FIELDS.map((f) => [f.key, f.label])) as Record<NumericKey, string>),
+  hasNetworkEffects: "Network effects", hasDataMoat: "Data moat",
+};

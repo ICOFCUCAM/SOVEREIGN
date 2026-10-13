@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "test": "vitest run",
-    "verify:live": "node scripts/verify-live.mjs"
+    "verify:live": "node scripts/verify-live.mjs",
+    "docs:samples": "SAMPLE_PACK_DIR=${SAMPLE_PACK_DIR:-docs/documents/samples} vitest run src/lib/documents/quality.test.ts"
   },
   "dependencies": {
     "@exit/engines": "file:../exit-engines",

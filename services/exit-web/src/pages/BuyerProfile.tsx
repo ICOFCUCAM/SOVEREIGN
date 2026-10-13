@@ -9,6 +9,7 @@ import {
 } from "../lib/buyer-dna";
 import { buyerContactRegistry, ENGAGEMENT_DISCLAIMER, ENRICHMENT_PROVIDERS } from "../lib/buyer-contact";
 import { runInstitutionalValuation } from "@exit/engines";
+import { label } from "../lib/labels";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 
 // BUYER INTELLIGENCE PROFILE — every indexed buyer's own page. "Microsoft
@@ -62,7 +63,7 @@ const BuyerProfile: React.FC = () => {
       <Link to="/console/buyer-graph" className="inline-block py-1 text-[12px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">← Buyer Graph</Link>
       <PageHeader eyebrow={`Acquisition DNA · for ${fromIntake ? "your intake" : "the demo company"}: ${company.name}`} title={p.name}
         badge={<Provenance kind={fromIntake ? "company" : "demo"} />}
-        description={<span className="capitalize">{p.buyer_type.replace(/_/g, " ")}{p.country ? ` · ${p.country}` : ""}{p.industry_official ? ` · ${p.industry_official}` : ""}</span>}
+        description={<span>{label(p.buyer_type)}{p.country ? ` · ${p.country}` : ""}{p.industry_official ? ` · ${p.industry_official}` : ""}</span>}
         actions={<>
           <button type="button"
             onClick={() => { if (!interested) { captureDealEvent({ actorRole: "founder", kind: "expressed_interest", subjectType: "buyer", subjectId: p.buyer_id, subjectName: p.name }); setInterested(true); } }}
@@ -70,7 +71,7 @@ const BuyerProfile: React.FC = () => {
             className={`rounded-sm px-3 py-1.5 text-[12px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${interested ? "border border-xo-verified/50 text-xo-verified" : "bg-deal-700 text-white hover:bg-deal-800"}`}>
             {interested ? "✓ Interest captured" : "Express interest"}
           </button>
-          <a href={`/report/buyer/${p.buyer_id}`} target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Briefing Book (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
+          <a href={`/report/buyer/${p.buyer_id}`} target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Briefing Book →<span className="sr-only"> (opens in a new tab)</span></a>
         </>}>
         <p className="mt-2 text-[12px] text-xo-faint">"Express interest" and your visits to this page are saved to your <Link to="/console/activity" className="text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">deal activity</Link> in this browser only. {p.name} is not notified.</p>
       </PageHeader>

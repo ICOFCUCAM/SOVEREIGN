@@ -4,6 +4,8 @@ import type { Listing } from "./listings";
 import { setListingsAdapter, setListingOwner } from "./listings";
 import { SupabaseExitApi, supabaseConfigFromEnv } from "./supabase-exit-api";
 import { ensureSupabaseSession } from "./supabase-auth";
+import { authConfigFromEnv } from "./email-auth";
+import type { OfferTerms } from "./documents/transaction-docs";
 
 // ── THE EXIT-API CONTRACT ───────────────────────────────────────────
 // The boundary between this client and the multi-tenant backend. The whole
@@ -46,6 +48,7 @@ export interface NdaRequest {
 }
 
 export type OfferStatus = "submitted" | "accepted" | "rejected" | "withdrawn";
+export type { OfferTerms };
 /** A price/terms offer a buyer submits against a listing. */
 export interface Offer {
   readonly id: string;
@@ -55,6 +58,8 @@ export interface Offer {
   readonly status: OfferStatus;
   readonly note: string | null;
   readonly createdAt: string;
+  /** The terms the bidder stated with its indication of interest (structured IOI). */
+  readonly terms?: OfferTerms;
 }
 
 export type DocVisibility = "founder" | "post_nda" | "public";
@@ -167,7 +172,7 @@ export interface ExitApiClient {
   updateNdaRequest(id: string, patch: { status: NdaStatus }): Promise<NdaRequest>;
 
   // ── offers ──
-  createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string }): Promise<Offer>;
+  createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string; terms?: OfferTerms }): Promise<Offer>;
   listOffers(filter: OfferFilter): Promise<Offer[]>;
   updateOffer(id: string, patch: { status?: OfferStatus; amountUsd?: number; note?: string }): Promise<Offer>;
 
@@ -238,8 +243,8 @@ export class InMemoryExitApi implements ExitApiClient {
     this.ndas[i] = { ...this.ndas[i], status: patch.status, resolvedAt: patch.status === "requested" ? null : nowIso() }; return this.ndas[i];
   }
 
-  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string }): Promise<Offer> {
-    const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso() };
+  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string; terms?: OfferTerms }): Promise<Offer> {
+    const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso(), ...(input.terms ? { terms: input.terms } : {}) };
     this.offers.push(o); return o;
   }
   async listOffers(filter: OfferFilter): Promise<Offer[]> {
@@ -341,8 +346,8 @@ export class LocalStorageExitApi implements ExitApiClient {
     s.ndaRequests[i] = { ...s.ndaRequests[i], status: patch.status, resolvedAt: patch.status === "requested" ? null : nowIso() }; this.write(s); return s.ndaRequests[i];
   }
 
-  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string }): Promise<Offer> {
-    const s = this.read(); const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso() };
+  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string; terms?: OfferTerms }): Promise<Offer> {
+    const s = this.read(); const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso(), ...(input.terms ? { terms: input.terms } : {}) };
     s.offers.push(o); this.write(s); return o;
   }
   async listOffers(filter: OfferFilter): Promise<Offer[]> {
@@ -407,6 +412,15 @@ export function createExitApi(): ExitApiClient {
 // so the dependency injection above is the entire backend-swap surface.
 let active: ExitApiClient = createExitApi();
 
+/** The signed-in user's access token on the live backend, or undefined
+ *  (no backend, or auth has not run): the data room needs it, because its
+ *  functions take the tenant from this token. */
+export const liveUserToken = async (): Promise<string | undefined> => {
+  await activation;                       // sign-in may still be obtaining the session
+  return active instanceof SupabaseExitApi ? active.userToken : undefined;
+};
+let activation: Promise<void> = Promise.resolve();
+
 /** The live client, for query accessors. */
 export function backendClient(): ExitApiClient { return active; }
 
@@ -421,7 +435,24 @@ export const listingDestination = (): "exchange" | "browser" => (active instance
  *  the backend runs as that user (RLS scopes to auth.uid()), and bind the
  *  account id to the auth user id. If auth is unreachable or disabled, we
  *  fall back to the durable local backend so the app never breaks. */
-export async function activateBackend(account: Account): Promise<void> {
+export function activateBackend(account: Account, verified?: { accessToken: string; userId: string }): Promise<void> {
+  const run = activate(account, verified);
+  activation = run.catch(() => undefined);
+  return run;
+}
+async function activate(account: Account, verified?: { accessToken: string; userId: string }): Promise<void> {
+  // A verified (email-link) session always runs as its own Supabase user.
+  if (verified) {
+    if (!(active instanceof SupabaseExitApi)) {
+      const cfg = supabaseConfigFromEnv() ?? authConfigFromEnv();
+      if (cfg) active = new SupabaseExitApi({ url: cfg.url, anonKey: cfg.anonKey });
+    }
+    if (active instanceof SupabaseExitApi) {
+      active.setAccessToken(verified.accessToken, verified.userId);
+      await connectExitApi(active, { ...account, id: verified.userId });
+      return;
+    }
+  }
   if (active instanceof SupabaseExitApi) {
     try {
       const session = await ensureSupabaseSession(active.config);
@@ -470,9 +501,9 @@ export async function signNda(id: string): Promise<NdaRequest> {
 
 // ── offers (first-class records) ────────────────────────────────────
 /** Buyer action: submit an offer on a listing. Attributed to this account. */
-export async function submitOffer(listingId: string, amountUsd: number, note?: string): Promise<Offer | null> {
+export async function submitOffer(listingId: string, amountUsd: number, note?: string, terms?: OfferTerms): Promise<Offer | null> {
   if (!connectedAccountId) return null;
-  return active.createOffer({ listingId, buyerAccountId: connectedAccountId, amountUsd, note });
+  return active.createOffer({ listingId, buyerAccountId: connectedAccountId, amountUsd, ...(note ? { note } : {}), ...(terms ? { terms } : {}) });
 }
 /** Founder view: the offers on a listing they own. */
 export async function offersForListing(listingId: string): Promise<Offer[]> {

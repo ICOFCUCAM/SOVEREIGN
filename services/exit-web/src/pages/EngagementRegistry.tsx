@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { PageHeader, Section, Metric, ScrollRegion, XO_INPUT } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, XO_INPUT, Empty } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 import { engagementRegistry } from "../lib/engagement-registry";
 import { RegistryTape } from "../components/xo/RegistryTape";
+import { inlineLabel, label, plural } from "../lib/labels";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 
 // BUYER ENGAGEMENT REGISTRY — the consolidated internal registry. For every
@@ -45,7 +46,7 @@ const EngagementRegistry: React.FC = () => {
       <Section title="Buyer engagement registry" className="border border-xo-line"
         right={<span className="flex items-center gap-2"><label htmlFor="er-search" className="text-[11px] text-xo-muted">Search buyer</label><input id="er-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="e.g. Microsoft" className={`${XO_INPUT} h-8 w-40 py-1 text-[12px]`} /></span>}
         foot="NDA / LOI conversion appear once a buyer's own responses are recorded on ExitOS (— until then; your own views and interest do not count). Close rate is from the registry where disclosed. Indexed deals are registry entries, most of them unverified. Contact confidence is a rule on indexed deals — High at 40 or more, Medium at 8 or more, otherwise Low. The contact role is the one typical for the buyer type, never a named person; ExitOS does not store or send to personal contacts.">
-        <p role="status" className="sr-only">{filtered.length} of {rows.length} buyers shown</p>
+        <p role="status" className="sr-only">{filtered.length} of {plural(rows.length, "buyer")} shown</p>
         <ScrollRegion label="Buyer engagement registry table">
           <table className="w-full min-w-[960px] text-[12px]">
             <thead className="text-left text-[11px] text-xo-muted">
@@ -66,7 +67,7 @@ const EngagementRegistry: React.FC = () => {
                 <tr key={r.buyerId} className="border-b border-xo-line last:border-0">
                   <th scope="row" className="px-4 py-2 text-left font-normal">
                     <Link to={`/console/buyer/${r.buyerId}`} className="font-semibold text-xo-text hover:text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{r.buyerName}</Link>
-                    <div className="text-[11px] text-xo-faint">{r.buyerType.replace(/_/g, " ")} · {r.acquisitionDna.appetite.replace("_", " ")} appetite</div>
+                    <div className="text-[11px] text-xo-faint">{label(r.buyerType)} · {inlineLabel(r.acquisitionDna.appetite)} appetite</div>
                   </th>
                   <td className="px-2 py-2 text-xo-muted">{r.strategicIntent.length ? r.strategicIntent.slice(0, 2).join(", ") : "—"}</td>
                   <td className="px-2 py-2 text-right font-mono tabular-nums">{r.acquisitionHistory.total}<span className="text-xo-faint"> · {r.acquisitionHistory.last12m}/12m</span></td>
@@ -84,7 +85,7 @@ const EngagementRegistry: React.FC = () => {
             </tbody>
           </table>
         </ScrollRegion>
-        {filtered.length === 0 && <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No buyer in the registry matches “{q}”.</p>}
+        {filtered.length === 0 && <Empty title={`No buyer in the registry matches “${q}”.`} />}
       </Section>
     </div>
   );

@@ -32,6 +32,10 @@ export default {
         },
         // Urgency / LOI / hot lead — amber
         loi: {
+          // 100 and 200 were used (notices on amber, the Autopilot "working" state) but never defined,
+          // so that text fell back to the inherited colour
+          100: "#fef3c7",
+          200: "#fde68a",
           300: "#fcd34d",
           400: "#fbbf24",
           500: "#f59e0b",

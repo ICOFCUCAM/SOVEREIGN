@@ -1,3 +1,4 @@
+import { sectorPhrase, countryName } from '../memorandum/prose.js';
 import type { CompanyProfile, EngineMeta } from '../types.js';
 import { runValuation, type ValuationBand } from './engine.js';
 import { MULTIPLES } from './multiples.js';
@@ -266,15 +267,15 @@ function confidenceScore(company: CompanyProfile, comparablesUsed: number, fresh
 }
 
 function strategicRationale(company: CompanyProfile): string[] {
-  const label = company.sector.replace(/_/g, ' ');
+  const label = sectorPhrase(company.sector);
   const out: string[] = [];
-  out.push(`Immediate market entry — acquiring an operating ${label} platform versus a multi-year in-house build`);
-  if (company.product?.hasDataMoat) out.push('Technology & data acquisition — proprietary data assets and the moat they create transfer with the deal');
+  out.push(`Immediate market entry — acquiring an operating ${label} business rather than building one in-house`);
+  if (company.product?.hasDataMoat) out.push('Technology and data — the proprietary dataset, and the advantage it gives, transfers with the deal');
   if (company.product?.hasNetworkEffects) out.push('Competitive positioning — denying a network-effects asset to a rival is worth a control premium');
   if ((company.revenue.netRetentionPct ?? 0) >= 1.05) out.push(`Customer acquisition — a durable, expanding base (NRR ${pct(company.revenue.netRetentionPct!)}) to cross-sell into the acquirer's install base`);
   else out.push("Customer acquisition — the company's logos and contracts transfer with the transaction");
-  if (company.jurisdiction) out.push(`Geographic expansion — established presence in ${company.jurisdiction} and adjacent markets`);
-  if ((company.revenue.ebitdaMarginPct ?? 0) > 0 || company.revenue.trailingTwelveMonthsRevenueUsd > 0) out.push('Cost synergies — consolidation of overlapping G&A, platform and go-to-market spend');
+  if (company.jurisdiction) out.push(`Geographic reach — an operating base in ${countryName(company.jurisdiction)}`);
+  if ((company.revenue.ebitdaMarginPct ?? 0) > 0 || company.revenue.trailingTwelveMonthsRevenueUsd > 0) out.push('Cost synergies — for an acquirer with overlapping operations, shared overheads, platform and go-to-market spend');
   return out.slice(0, 6);
 }
 

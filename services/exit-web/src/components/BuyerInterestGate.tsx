@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { BUYERS } from "../lib/engines";
+import { LockIcon } from "../lib/ui";
 import { allDealEvents, subscribe } from "../lib/deal-events";
 
 // CONVERSION LOGIC — the Listed Founder lead-generation engine. A free
@@ -37,7 +38,7 @@ const BuyerInterestGate: React.FC = () => {
     <div className="mb-8 overflow-hidden rounded-xl border border-deal-400/40 bg-gradient-to-r from-deal-600/15 via-deal-600/5 to-transparent">
       <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-deal-500/20 text-deal-300 ring-1 ring-deal-400/40" aria-hidden>🔒</span>
+          <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-deal-500/20 text-deal-300 ring-1 ring-deal-400/40" aria-hidden><LockIcon size={14} /></span>
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">
               {hasInterest ? "Buyer interest · Listed Founder" : "Buyer matches · Listed Founder"}

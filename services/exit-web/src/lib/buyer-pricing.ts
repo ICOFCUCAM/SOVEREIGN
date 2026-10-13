@@ -24,7 +24,7 @@ export const BUYER_TIERS: readonly BuyerTier[] = [
     key: "buyer-free", name: "Buyer Observer", price: "$0", priceSub: "to browse", plan: "free",
     purpose: "Browse the exchange",
     headline: "Browse anonymized opportunities. Upgrade to engage.",
-    features: ["Browse anonymized opportunities", "Research acquirers", "Acquisition radar (view)", "No NDA requests or deal-room access"],
+    features: ["Browse anonymized opportunities", "Research acquirers", "Acquisition radar (view)", "Sign an NDA a seller issues to you and complete any transaction you are party to, free", "No NDA requests of your own or deal-room access"],
   },
   {
     key: "buyer-basic", name: "Buyer Access", price: "$299", priceSub: "/ month", plan: "pro",

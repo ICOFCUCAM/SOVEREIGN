@@ -2,7 +2,7 @@
 // returns aggregated prediction-vs-realized stats from exit_runs +
 // exit_close_events (RLS-locked; service-role inside the function).
 
-import { DEMO_TENANT_ID } from "./data-room";
+import { liveUserToken } from "./exit-api";
 
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)
   ?? "https://qvjdivcdefuprnenedje.supabase.co";
@@ -36,15 +36,18 @@ export interface CalibrationSummary {
 
 interface Response { ok: boolean; summary?: CalibrationSummary; error?: string }
 
-export async function fetchCalibration(tenantId: string = DEMO_TENANT_ID): Promise<CalibrationSummary> {
+/** The signed-in account's own figures (the tenant is taken from the user's token). */
+export async function fetchCalibration(): Promise<CalibrationSummary> {
+  const token = await liveUserToken();
+  if (!token) throw new Error("needs a live account session");
   const res = await fetch(`${SUPABASE_URL}/functions/v1/exit-calibration`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "Authorization": `Bearer ${token}`,
       "apikey": SUPABASE_ANON_KEY,
       "content-type": "application/json",
     },
-    body: JSON.stringify({ tenantId }),
+    body: JSON.stringify({}),
   });
   const json = (await res.json()) as Response;
   if (!res.ok || !json.ok || !json.summary) {

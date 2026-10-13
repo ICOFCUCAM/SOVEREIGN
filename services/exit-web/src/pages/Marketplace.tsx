@@ -8,8 +8,11 @@ import { parseNumber } from "../lib/intake-fields";
 import { useAuth } from "../lib/auth";
 import { buildMarketTape } from "../lib/market-tape";
 import { LISTING_PUBLIC as ENGINE_PUBLIC, LISTING_PRIVATE as ENGINE_PRIVATE, LISTING_MATCHES, VALUATION_CANONICAL, useMemorandum } from "../lib/engines";
-import { createListing, matchBuyersToListing, runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type MemorandumInputs } from "@exit/engines";
+import { createListing, matchBuyersToListing, runInstitutionalValuation, type MemorandumInputs } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
+import { memorandumInputs } from "../lib/documents/memorandum-inputs";
+import { inlineLabel, label, labels } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 
 // Exit Marketplace — "Become the banker." The sell-side pack gathers the
@@ -78,7 +81,7 @@ const BuyerMarketplace: React.FC = () => {
         <div className="px-4 py-4">
           <ul className="flex flex-wrap gap-2 text-[12px]">
             <Tag>{listing.businessModel}</Tag>
-            <Tag>{listing.sector.replace(/_/g, " ")}</Tag>
+            <Tag>{sectorLabel(listing.sector)}</Tag>
             <Tag>founded {listing.foundedYear}</Tag>
             <Tag>jurisdiction {listing.jurisdiction}</Tag>
           </ul>
@@ -108,19 +111,17 @@ const FounderMarketplace: React.FC = () => {
   const [phase, setPhase] = useState<Phase>("idle");
 
   // The founder's saved intake when there is one; the demo company otherwise.
-  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const { company, fromIntake, story } = useMemo(() => loadActiveCompany(), []);
   const own = useMemo(() => {
     if (!fromIntake) return null;
     const institutional = runInstitutionalValuation(company);
     const canonical = canonicalValuationFor(company, institutional);
     const priv = withCanonicalAsk(createListing(company, { visibility: "private_full" }), canonical.headline);
     const pub = withCanonicalAsk(createListing(company, { visibility: "public_anonymized" }), canonical.headline);
-    const memo: Partial<MemorandumInputs> = {
-      company, valuation: canonical, constitution: institutional,
-      readiness: runReadiness(company), buyers: runBuyerDiscovery(company, { limit: 12 }), diligence: runDueDiligence(company),
-    };
+    // the same inputs every other memorandum uses: code name, story, assumed fields
+    const memo: Partial<MemorandumInputs> = memorandumInputs(company, true, story);
     return { priv, pub, matches: matchBuyersToListing(createListing(company, { visibility: "private_full" }), company, { limit: 15 }), memo };
-  }, [company, fromIntake]);
+  }, [company, fromIntake, story]);
   const PRIV = own?.priv ?? LISTING_PRIVATE;
   const PUB = own?.pub ?? LISTING_PUBLIC;
   const MATCHES = own?.matches ?? LISTING_MATCHES;
@@ -174,15 +175,15 @@ const FounderMarketplace: React.FC = () => {
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Become the banker · {view === "founder" ? "Founder view" : "Public view"}</span></>}
         description={fromIntake ? "Listing, sell-side pack and matched buyers built from your saved intake." : "Built from the demo company. Save an intake to build them for your company."}
         actions={<>
-          <a href="/report/cim" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Confidential Information Memorandum (PDF) →</a>
-          <a href="/report/management" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Management Presentation (PDF) →</a>
+          <a href="/report/cim" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Confidential Information Memorandum →</a>
+          <a href="/report/management" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Management Presentation →</a>
         </>} />
 
       <section aria-label="Listing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Asking price (mid)" emphasis value={fmtMoney(listing.askingPriceUsd.mid)} sub={`band ${fmtMoney(listing.askingPriceUsd.low)}–${fmtMoney(listing.askingPriceUsd.high)}`} /></div>
-        <div className="bg-xo-panel"><Metric label="Readiness" value={`${listing.readinessScore.toFixed(0)}/100`} sub={listing.readinessBand.replace(/_/g, " ")} /></div>
+        <div className="bg-xo-panel"><Metric label="Readiness" value={`${listing.readinessScore.toFixed(0)}/100`} sub={label(listing.readinessBand)} /></div>
         <div className="bg-xo-panel"><Metric label="Matched buyers" emphasis value={String(matches.length)} sub={MATCHES.summary.split(".")[0]} /></div>
-        <div className="bg-xo-panel"><Metric label="Visibility" value={listing.visibility.replace(/_/g, " ")} sub={view === "founder" ? "you" : "buyers see"} /></div>
+        <div className="bg-xo-panel"><Metric label="Visibility" value={label(listing.visibility)} sub={view === "founder" ? "what you see" : "what buyers see"} /></div>
       </section>
 
       <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
@@ -257,7 +258,7 @@ const FounderMarketplace: React.FC = () => {
                 <ul className="mt-2 flex flex-wrap gap-1.5">
                   {matches.slice(0, 6).map((m) => (
                     <li key={m.buyerName} className={`rounded-sm border px-1.5 py-px text-[11px] font-medium ${OUTREACH_STYLE[m.suggestedOutreach]}`}>
-                      {m.buyerName} · {m.suggestedOutreach.replace(/_/g, " ")}
+                      {m.buyerName} · {inlineLabel(m.suggestedOutreach)}
                     </li>
                   ))}
                 </ul>
@@ -282,7 +283,7 @@ const FounderMarketplace: React.FC = () => {
             )}
             <ul className="mt-3 flex flex-wrap gap-2 text-[12px]">
               <Tag>{listing.businessModel}</Tag>
-              <Tag>{listing.sector.replace(/_/g, " ")}</Tag>
+              <Tag>{sectorLabel(listing.sector)}</Tag>
               <Tag>founded {listing.foundedYear}</Tag>
               <Tag>{listing.jurisdiction}</Tag>
             </ul>
@@ -305,7 +306,7 @@ const FounderMarketplace: React.FC = () => {
 
             <h4 className="mt-6 text-[13px] font-semibold">Ideal buyer profile</h4>
             <dl className="mt-2 grid grid-cols-1 gap-3 text-[12px] sm:grid-cols-3">
-              <div><dt className="text-xo-muted">Buyer types</dt><dd className="mt-1 font-medium">{listing.idealBuyerProfile.preferredTypes.join(" · ")}</dd></div>
+              <div><dt className="text-xo-muted">Buyer types</dt><dd className="mt-1 font-medium">{labels(listing.idealBuyerProfile.preferredTypes)}</dd></div>
               <div><dt className="text-xo-muted">Check size</dt><dd className="mt-1 font-medium">{fmtMoney(listing.idealBuyerProfile.checkSizeUsd.low)} – {fmtMoney(listing.idealBuyerProfile.checkSizeUsd.high)}</dd></div>
               <div><dt className="text-xo-muted">Geography</dt><dd className="mt-1 font-medium">{listing.idealBuyerProfile.geography.join(" · ")}</dd></div>
             </dl>
@@ -323,7 +324,7 @@ const FounderMarketplace: React.FC = () => {
         </Section>
 
         <div className="flex flex-col gap-px bg-xo-line lg:col-span-4">
-          <Section title="Matched buyers" eyebrow="matchBuyersToListing"
+          <Section title="Matched buyers" eyebrow="Matching engine"
             foot="Fit score: the discovery engine's weighted fit (sector, size, geography, activity), 0–100 — not a measured chance of a bid.">
             <ul>
               {matches.slice(0, 8).map((m) => (
@@ -332,9 +333,9 @@ const FounderMarketplace: React.FC = () => {
                     <span className="font-medium">{m.buyerName}</span>
                     <span className="font-mono text-[12px] tabular-nums"><span className="sr-only">fit score </span>{fit(m.matchScore)}</span>
                   </div>
-                  <div className={`mt-0.5 text-[11px] font-semibold ${TYPE_STYLE[m.buyerType] ?? "text-xo-muted"}`}>{m.buyerType.replace(/_/g, " ")}</div>
+                  <div className={`mt-0.5 text-[11px] font-semibold ${TYPE_STYLE[m.buyerType] ?? "text-xo-muted"}`}>{label(m.buyerType)}</div>
                   <p className="mt-1.5 text-[12px] leading-snug text-xo-muted">{m.rationale}</p>
-                  <span className={`mt-2 inline-block rounded-sm border px-1.5 py-px text-[11px] font-medium ${OUTREACH_STYLE[m.suggestedOutreach]}`}>{m.suggestedOutreach.replace(/_/g, " ")}</span>
+                  <span className={`mt-2 inline-block rounded-sm border px-1.5 py-px text-[11px] font-medium ${OUTREACH_STYLE[m.suggestedOutreach]}`}>{label(m.suggestedOutreach)}</span>
                 </li>
               ))}
             </ul>
@@ -355,7 +356,7 @@ const FounderMarketplace: React.FC = () => {
         footer={<><Button variant="ghost" onClick={() => { setOverride({ askMid: null, note: "" }); setEditOpen(false); notify("Preview reset to engine values"); }}>Reset</Button><Button disabled={!askParse.ok} onClick={() => { if (!askParse.ok) return; setOverride({ askMid: askParse.value, note: editNote.trim() }); setEditOpen(false); notify("Preview updated — not saved or published"); }}>Apply to preview</Button></>}>
         <div className="space-y-4">
           <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
-            Valuation band (canonical, as everywhere in the console): {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {baseListing.sector.replace(/_/g, " ")}
+            Valuation band (canonical, as everywhere in the console): {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {sectorLabel(baseListing.sector)}
           </p>
           <div>
             <label htmlFor="mkt-ask" className={XO_LABEL}>Asking price, mid ($M)</label>

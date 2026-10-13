@@ -6,9 +6,9 @@ import { morningBriefing, fmtUsdShort } from "../lib/briefing";
 // The Chief Investment Banker's morning brief — proactive, on the founder's
 // home. What changed in the market, who to engage, and the value at stake.
 
-const MorningBriefing: React.FC<{ baselineUsd?: number; headlineMidUsd?: number; tokens?: readonly string[] }> = (props) => {
+const MorningBriefing: React.FC<{ baselineUsd?: number; headlineMidUsd?: number; tokens?: readonly string[]; sector?: string }> = (props) => {
   const b = props.baselineUsd != null && props.headlineMidUsd != null
-    ? morningBriefing({ baselineUsd: props.baselineUsd, headlineMidUsd: props.headlineMidUsd, tokens: props.tokens })
+    ? morningBriefing({ baselineUsd: props.baselineUsd, headlineMidUsd: props.headlineMidUsd, tokens: props.tokens, ...(props.sector ? { sector: props.sector } : {}) })
     : morningBriefing();
   return (
     <Card className="overflow-hidden border-deal-400/30 p-0">

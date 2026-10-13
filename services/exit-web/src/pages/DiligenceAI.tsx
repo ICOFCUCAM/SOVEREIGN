@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { frameDoc } from "../lib/deliverables";
 import { fmtMoney, downloadText, downloadJson } from "../lib/ui";
 import { PageHeader, Section, Metric, Chip, Disclosure, Provenance, ActionLink } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
@@ -47,10 +48,18 @@ const DiligenceAI: React.FC = () => {
   const sharePct = (usd: number): string => String(Math.round((usd / MID) * 200) / 2);
   const report = reports.find((r) => r.key === reportKey) ?? reports[0];
 
-  const reportMarkdown = (r: typeof report): string =>
-    `# ${r.title}\n\n${r.headline}\n\nHeadline metric: ${r.metric}\n\n## Findings\n` +
-    (r.points.length ? r.points.map((p) => `- **${p.title}** — ${p.body}`).join("\n") : "- None on this dimension.") +
-    `\n\n## Recommendation\n${r.recommendation}\n`;
+  // framed like every other export: confidentiality line, basis and the standard notices
+  const reportMarkdown = (r: typeof report): string => frameDoc({
+    title: r.title,
+    subtitle: `${company.name} · rule-based diligence checks on the company's figures`,
+    meta: [["Headline metric", r.metric]],
+    sections: [
+      { heading: "Summary", body: r.headline },
+      { heading: "Findings", bullets: r.points.length ? r.points.map((p) => `**${p.title}** — ${p.body}`) : ["None on this dimension."] },
+      { heading: "Recommendation", body: r.recommendation },
+    ],
+    ...(fromIntake ? {} : { sample: "These checks run on the demo company's figures." }),
+  });
 
   // findings grouped by the source file that surfaced them
   const bySource = SOURCE_FILES.map((s) => ({ ...s, count: findings.filter((f) => f.source === s.label).length }));
@@ -109,7 +118,7 @@ const DiligenceAI: React.FC = () => {
         <p className="text-[12px] text-xo-muted"><span className="font-semibold text-xo-text">{findings.length} findings · {reports.length} reports</span> from the same checks — export them or open the printable report.</p>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => downloadJson("exitos-diligence-reports.json", reports)} className={BTN_GHOST}>Export data (.json)</button>
-          <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className={BTN}>Board-ready report (PDF) →</a>
+          <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className={BTN}>Board-ready report →</a>
         </div>
       </section>
 
@@ -166,7 +175,7 @@ const DiligenceAI: React.FC = () => {
               <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">{report.recommendation}</p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <button type="button" className={BTN_GHOST} onClick={() => downloadText(`exitos-${report.key}-report.md`, reportMarkdown(report))}>Export draft (.md)</button>
-                <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className={BTN}>Board-ready report (PDF) →</a>
+                <a href="/report/diligence" target="_blank" rel="noopener noreferrer" className={BTN}>Board-ready report →</a>
               </div>
             </div>
           </div>

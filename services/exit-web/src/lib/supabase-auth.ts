@@ -1,16 +1,10 @@
 import type { SupabaseConfig } from "./supabase-exit-api";
 
 // ── SUPABASE AUTH (GoTrue over fetch — no dependency) ───────────────
-// Real authenticated sessions so the backend's RLS scopes to auth.uid().
-// The console's sign-in UX is unchanged; underneath, this obtains a durable
-// Supabase session for the browser and hands the JWT + user id to the
-// backend. We prefer anonymous sign-in (zero email friction) and persist the
-// refresh token, so the same browser keeps the same identity across sessions
-// — which is what makes telemetry and listings durably account-scoped.
-//
-// NOTE: this requires "Anonymous sign-ins" enabled in the project's Auth
-// settings. If it's off (or auth is unreachable), activateBackend falls back
-// to the durable local backend so the app never breaks.
+// Restores a Supabase session from the refresh token kept in this browser, so
+// the backend's RLS scopes to auth.uid(). There is no anonymous sign-in: an
+// identity comes only from a verified e-mail sign-in (lib/email-auth.ts). With
+// no stored session, activateBackend falls back to this browser's own storage.
 
 export interface SupabaseSession { accessToken: string; userId: string }
 interface TokenResponse { access_token: string; refresh_token: string; user: { id: string } }
@@ -44,9 +38,9 @@ export async function ensureSupabaseSession(cfg: SupabaseConfig): Promise<Supaba
       const r = await gotrue(cfg, "token?grant_type=refresh_token", { refresh_token: stored.refresh_token });
       writeStored(r.refresh_token);
       return { accessToken: r.access_token, userId: r.user.id };
-    } catch { /* stale refresh token — fall through to a fresh anonymous sign-in */ }
+    } catch { /* stale refresh token */ }
   }
-  const r = await gotrue(cfg, "signup", {});   // anonymous sign-in
-  writeStored(r.refresh_token);
-  return { accessToken: r.access_token, userId: r.user.id };
+  // No anonymous sign-in: an identity comes only from a verified e-mail sign-in
+  // (lib/email-auth.ts). Callers fall back to this browser's own storage.
+  throw new Error("no verified session");
 }

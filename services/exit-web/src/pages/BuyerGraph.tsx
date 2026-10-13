@@ -11,6 +11,8 @@ import {
 } from "../lib/buyer-dna";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import { label } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import { loadActiveCompany } from "../lib/active-company";
 
 // BUYER GRAPH — the proprietary acquisition-intelligence layer. Founders
@@ -36,8 +38,8 @@ const DnaCard: React.FC<{ p: DnaProfile; tokens: readonly string[] }> = ({ p, to
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="text-[15px] font-semibold"><Link to={`/console/buyer/${p.buyer_id}`} className="hover:text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{p.name}</Link></h3>
-          <div className="mt-0.5 text-[11px] capitalize text-xo-faint">
-            {p.buyer_type.replace(/_/g, " ")}{p.country ? ` · ${p.country}` : ""}
+          <div className="mt-0.5 text-[11px] text-xo-faint">
+            {label(p.buyer_type)}{p.country ? ` · ${p.country}` : ""}
           </div>
           {p.sector_exitos && p.sector_exitos.length > 0 && (
             <ul aria-label="Sectors" className="mt-1.5 flex flex-wrap gap-1" title={p.industry_official ? `Official: ${p.industry_official}` : undefined}>
@@ -117,7 +119,7 @@ const BuyerGraph: React.FC = () => {
     <div data-page="buyer-graph" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Market Intelligence · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Buyer Graph"
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">The moat · as of {MARKET_INDEX_FMT.asOf} · Wikipedia · Wikidata · EDGAR</span></>}
-        actions={<a href="/report/buyers" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Buyer Intelligence Report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>} />
+        actions={<a href="/report/buyers" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Buyer Intelligence Report →<span className="sr-only"> (opens in a new tab)</span></a>} />
 
       <section aria-label="Registry summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Buyers indexed" value={MARKET_INDEX_FMT.buyers} sub="corporates · PE · sovereign" /></div>
@@ -187,7 +189,7 @@ const BuyerGraph: React.FC = () => {
         </ul>
       </Section>
 
-      <Section title={`Transactions matching the sector keywords · ${SAMPLE_COMPANY.sector.replace(/_/g, " ")}${txForDemoSector ? " (demo company's sector)" : ""}`} className="border border-xo-line"
+      <Section title={`Transactions matching the sector keywords · ${sectorLabel(SAMPLE_COMPANY.sector)}${txForDemoSector ? " (demo company's sector)" : ""}`} className="border border-xo-line"
         right={<span className="text-[11px] text-xo-faint">{SECTOR_TRANSACTIONS.length} keyword matches · {SECTOR_TRANSACTIONS.filter((t) => t.verification_status === "verified").length} verified</span>}
         foot={`Rows whose industry text contains one of the sector keywords — a keyword match can include unrelated deals (e.g. "delivery" in software). Each row traces to a source (Wikipedia acquisition lists; SEC-corroborated where an 8-K item 2.01 matches); the Verification column shows its status. As of ${DNA_AS_OF.slice(0, 10)}.`}>
         <ScrollRegion label="Similar transactions table">

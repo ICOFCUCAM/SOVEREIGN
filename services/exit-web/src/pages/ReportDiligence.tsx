@@ -23,7 +23,7 @@ const ReportDiligence: React.FC = () => {
       <ListOfExhibits items={[
         { n: "II-A", title: "Findings register, by value at stake" },
         { n: "VI-A", title: "Valuation impact by finding" },
-        { n: "VIII-A", title: "Source documents reviewed" },
+        { n: "VIII-A", title: "Where a buyer will look for evidence" },
       ]} />
 
       <Section n={1} title="Executive Summary">
@@ -110,14 +110,14 @@ const ReportDiligence: React.FC = () => {
       </Section>
 
       <Section n={8} title="Methodology & Provenance">
-        <Lead>Findings are derived from the uploaded document set; each is mapped to the source that surfaced it.</Lead>
-        <Exhibit n="VIII-A" title="Source documents reviewed">
+        <Lead>Findings come from rule-based checks on the figures and story the company has supplied. ExitOS has not read the company's documents; each finding names the document set a buyer will check it against.</Lead>
+        <Exhibit n="VIII-A" title="Where a buyer will look for evidence">
           <BankTable
             columns={[{ key: "s", label: "Document set" }, { key: "n", label: "Detail" }, { key: "c", label: "Findings", align: "right" }]}
             rows={r.sources.map((s) => ({ s: s.label, n: s.note, c: String(s.count) }))}
           />
         </Exhibit>
-        <Note>Every finding traces to a source document and carries an estimated valuation impact from the ExitOS diligence engine. Nothing is asserted without a source.</Note>
+        <Note>Each finding carries an estimated valuation impact from the ExitOS diligence engine, a model figure rather than a buyer's view. A finding is a prompt for diligence preparation, not a conclusion.</Note>
       </Section>
     </ReportFrame>
   );

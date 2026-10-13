@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { fmtMoney, timeAgo, ConfidenceChip } from "../lib/ui";
 import { PageHeader, Section, Metric, ScrollRegion } from "../components/xo";
+import { label } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import { fetchCalibration, type CalibrationSummary } from "../lib/calibration";
 
 // Calibration Dashboard — internal. Reads the exit_calibration view
@@ -17,7 +19,7 @@ const PCT = (n: number | null | undefined, signed = false): string => {
   return `${signed && v > 0 ? "+" : ""}${v.toFixed(1)}%`;
 };
 
-const SECTOR_LABEL = (s: string): string => s.replace(/_/g, " ");
+const SECTOR_LABEL = (s: string): string => sectorLabel(s);
 
 function errorTone(pct: number | null | undefined): string {
   if (pct == null) return "text-xo-muted";
@@ -117,7 +119,7 @@ const Calibration: React.FC = () => {
                       <tbody>
                         {summary.byBuyerType.map((b) => (
                           <tr key={b.buyerType} className="border-b border-xo-line last:border-0">
-                            <th scope="row" className="px-4 py-2 text-left font-normal capitalize">{b.buyerType.replace(/_/g, " ")}</th>
+                            <th scope="row" className="px-4 py-2 text-left font-normal">{label(b.buyerType)}</th>
                             <td className="px-2 py-2 text-right"><ConfidenceChip tier={tier(b.n)} sample={b.n} compact /></td>
                             <td className={`px-4 py-2 text-right font-mono tabular-nums ${errorTone(b.meanErrorPct)}`}>{PCT(b.meanErrorPct, true)}</td>
                           </tr>

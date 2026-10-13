@@ -1,9 +1,11 @@
+import type { CompanyStory } from '../story/story.js';
 import type { CompanyProfile } from '../types.js';
 import type { ValuationReport } from '../valuation/engine.js';
 import type { ValuationConstitution } from '../valuation/institutional.js';
 import type { BuyerDiscoveryReport } from '../buyers/engine.js';
 import type { ReadinessReport } from '../readiness/engine.js';
 import type { DueDiligenceReport } from '../diligence/engine.js';
+import type { ProcessTimeline } from '../process/timeline.js';
 
 export type MemorandumKind =
   | 'cim'                  // confidential information memorandum, long form
@@ -24,6 +26,18 @@ export interface MemorandumInputs {
   readonly readiness?: ReadinessReport;
   readonly diligence?: DueDiligenceReport;
   readonly anonymize?: boolean;            // for buyer_teaser
+  // The company's code name on its listing (e.g. 'Project Atlas'), used in
+  // place of its name when anonymised. Callers with a real company pass it.
+  readonly codeName?: string;
+  // The process timeline every milestone is quoted from (the default plan when omitted).
+  readonly timeline?: ProcessTimeline;
+  // Profile fields the company has not supplied, set to neutral values so the
+  // engines can run (paths such as 'team.headcount', 'cap', 'market.addressableMarketUsd').
+  // Documents never state them as facts about the company.
+  readonly assumed?: readonly string[];
+  // The company's story and evidence (history, products, customers, market, people,
+  // ownership, financial history, sources). Documents use only what it holds.
+  readonly story?: CompanyStory;
 }
 
 export interface MemorandumDocument {
@@ -33,6 +47,14 @@ export interface MemorandumDocument {
   readonly anonymized: boolean;
   readonly wordCount: number;
   readonly producedBy: string;             // implementation @ version
+  /** Per section: whether the company's information supports it, partly, or not yet (a gap statement). */
+  readonly coverage?: readonly SectionCoverage[];
+}
+
+export interface SectionCoverage {
+  readonly section: string;
+  readonly status: 'supported' | 'partial' | 'gap';
+  readonly missing: readonly string[];
 }
 
 export interface MemorandumSection {

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, copyText, notify } from "../lib/ui";
+import { Button, CloseIcon, copyText, notify } from "../lib/ui";
 import type { Listing } from "../lib/listings";
 import { CHANNELS, buildListingPost, intentUrl, type SocialChannel, type SocialPost } from "../lib/social-publish";
 import { dispatch, useEngineStatus, type DispatchResult } from "../lib/distribution-engine";
@@ -47,7 +47,7 @@ export const PublishComposer: React.FC<{ listing?: Listing; post?: SocialPost; o
             <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Publish · ExitOS Distribution Engine</div>
             <div className="mt-0.5 text-lg font-bold text-white">{post.title}</div>
           </div>
-          <button onClick={onClose} className="text-white/40 hover:text-white">✕</button>
+          <button type="button" onClick={onClose} aria-label="Close" className="rounded p-1 text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400"><CloseIcon /></button>
         </div>
 
         <textarea value={text} onChange={(e) => setText(e.target.value)}

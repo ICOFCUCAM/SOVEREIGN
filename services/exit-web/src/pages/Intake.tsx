@@ -5,13 +5,14 @@ import { runInstitutionalValuation } from "@exit/engines";
 import {
   buildProfile, SECTORS, SAMPLE_INTAKE, type IntakeInputs, type Sector,
 } from "../lib/company-intake";
-import { listCompany, listingFromCompany, unlistCompany, allListings } from "../lib/listings";
+import { listCompany, listingFromCompany, unlistCompany, findOwnListing } from "../lib/listings";
 import { listingDestination } from "../lib/exit-api";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
-import { loadSavedIntake, saveIntake, clearIntake } from "../lib/active-company";
-import { NUMERIC_FIELDS, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
+import { loadSavedIntake, saveIntake, clearIntake, loadIntakeRecord, unconfirmedFields, confirmIntakeFields, type IntakeField } from "../lib/active-company";
+import { NUMERIC_FIELDS, INTAKE_FIELD_LABEL, parseField, textsFor, type NumericKey } from "../lib/intake-fields";
 import { fromQuery, quickIntake } from "../lib/quick-value";
+import { sectorLabel } from "../lib/market-stats";
 import { Section, Metric, Provenance, ScrollRegion, ActionLink, Bar } from "../components/xo";
 
 // ── VALUE MY COMPANY ────────────────────────────────────────────────
@@ -67,22 +68,28 @@ const Intake: React.FC = () => {
   // Listing: preview exactly what buyers will see, confirm, and allow withdrawal.
   const preview = useMemo(() => listingFromCompany(buildProfile(inp)), [inp]);
   const [, setListingVersion] = useState(0);   // re-render after list / withdraw
-  const stored = allListings().find((l) => l.id === preview.id);
+  const stored = findOwnListing(buildProfile(inp));
   const listed = !!stored;
   const stale = !!stored && JSON.stringify(stored.publicView) !== JSON.stringify(preview.publicView);
   const [confirming, setConfirming] = useState(false);
   const destination = listingDestination();
   const confirmListing = (): void => { listCompany(buildProfile(inp)); setConfirming(false); setListingVersion((v) => v + 1); };
-  const withdraw = (): void => { unlistCompany(preview.id); setConfirming(false); setListingVersion((v) => v + 1); };
+  const withdraw = (): void => { unlistCompany(stored?.id ?? preview.id); setConfirming(false); setListingVersion((v) => v + 1); };
+  // fields still holding the demo company's values (re-read after every save)
+  const [unconfirmed, setUnconfirmed] = useState<IntakeField[]>(() => { const r = loadIntakeRecord(); return r ? unconfirmedFields(r) : []; });
+  const refreshUnconfirmed = (): void => { const r = loadIntakeRecord(); setUnconfirmed(r ? unconfirmedFields(r) : []); };
   const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => {
-    setInp((p) => { const next = { ...p, [k]: v }; saveIntake(next); return next; });
-    setSaved(true); setPrefilled(false);
+    setInp((p) => { const next = { ...p, [k]: v }; saveIntake(next, [k]); return next; });
+    setSaved(true); setPrefilled(false); refreshUnconfirmed();
   };
-  const keepPrefill = (): void => { saveIntake(inp); setSaved(true); setPrefilled(false); };
+  // the homepage hand-off carries the founder's sector, revenue and growth
+  const HANDOFF_FIELDS: IntakeField[] = ["sector", "ttmRevenueUsd", "growthPct"];
+  const keepPrefill = (): void => { saveIntake(inp, HANDOFF_FIELDS); setSaved(true); setPrefilled(false); refreshUnconfirmed(); };
+  const confirmRest = (): void => { confirmIntakeFields(unconfirmed); refreshUnconfirmed(); };
   const applyHandoff = (): void => {
     if (!handoff) return;
     const next = quickIntake(handoff);
-    saveIntake(next); setInp(next); setTexts(textsFor(next)); setErrors({}); setSaved(true); setHandoffDismissed(true);
+    saveIntake(next, HANDOFF_FIELDS); refreshUnconfirmed(); setInp(next); setTexts(textsFor(next)); setErrors({}); setSaved(true); setHandoffDismissed(true);
   };
   // Number fields keep exactly what was typed; only valid values reach the engines.
   const [texts, setTexts] = useState<Record<NumericKey, string>>(() => textsFor(inp));
@@ -94,7 +101,7 @@ const Intake: React.FC = () => {
     setErrors((e) => { const n = { ...e }; if (res.ok) delete n[k]; else n[k] = res.error; return n; });
     if (res.ok) set(k, res.value as never);
   };
-  const clearMine = (): void => { clearIntake(); setInp(SAMPLE_INTAKE); setTexts(textsFor(SAMPLE_INTAKE)); setErrors({}); setSaved(false); };
+  const clearMine = (): void => { clearIntake(); setInp(SAMPLE_INTAKE); setTexts(textsFor(SAMPLE_INTAKE)); setErrors({}); setSaved(false); setUnconfirmed([]); };
 
   const m = report.mandatoryOutputs;
 
@@ -113,7 +120,7 @@ const Intake: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2">
           {listed && <Button variant="ghost" onClick={withdraw}>Withdraw listing</Button>}
           {(!listed || stale) && <Button onClick={() => setConfirming(true)} disabled={!saved} aria-expanded={confirming} aria-controls="listing-confirm" aria-describedby={saved ? undefined : "list-needs-data"}>{stale ? "Update listing" : "List on the exchange"}</Button>}
-          {!saved && !listed && <span id="list-needs-data" className="basis-full text-right text-[11px] text-xo-faint">Enter your figures to list — the demo company can't be listed.</span>}
+          {!saved && !listed && <span id="list-needs-data" className="basis-full text-[11px] text-xo-faint">Enter your figures to list — the demo company can't be listed.</span>}
           {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
         </div>
       </header>
@@ -146,8 +153,8 @@ const Intake: React.FC = () => {
               <p className="mt-1 text-[12px] text-xo-muted">Your company name is withheld. {destination === "exchange" ? "The listing is published to the live exchange." : "This build is not connected to the live exchange: the listing is saved in this browser only."} You can withdraw it at any time.</p>
             </>
           )}
-          <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-5">
-            {(() => { const pv = listed && !confirming && stored ? stored.publicView : preview.publicView; return ([["Sector", pv.sector], ["Region", pv.region], ["TTM revenue", fmtMoney(pv.revenueUsd)], ["Growth", pct(pv.growthPct)], ["EBITDA margin", pct(pv.ebitdaMarginPct)]] as const); })().map(([k, v]) => (
+          <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-4">
+            {(() => { const pv = listed && !confirming && stored ? stored.publicView : preview.publicView; return ([["Sector", pv.sector], ["Region", pv.region], ["TTM revenue", pv.revenueBand?.label ?? "Under NDA"], ["Growth", pv.growthBand?.label ?? "Under NDA"]] as const); })().map(([k, v]) => (
               <div key={k}><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[13px] tabular-nums capitalize">{String(v).replace(/_/g, " ")}</dd></div>
             ))}
           </dl>
@@ -173,7 +180,7 @@ const Intake: React.FC = () => {
               <div>
                 <label htmlFor="intake-sector" className={LABEL}>Sector</label>
                 <select id="intake-sector" className={`${INPUT} border-xo-line capitalize`} value={inp.sector} onChange={(e) => set("sector", e.target.value as Sector)}>
-                  {SECTORS.map((x) => <option key={x} value={x}>{x.replace(/_/g, " ")}</option>)}
+                  {SECTORS.map((x) => <option key={x} value={x}>{sectorLabel(x)}</option>)}
                 </select>
               </div>
               <div>
@@ -206,6 +213,12 @@ const Intake: React.FC = () => {
                 ? "Your figures are saved in this browser. See below for the pages that use them."
                 : `Showing the demo company (${SAMPLE_INTAKE.name}). Edit any field to value your own company; nothing is saved until you do.`}
             </p>
+            {saved && unconfirmed.length > 0 && (
+              <div className="border border-loi-400/50 bg-loi-500/10 px-3 py-2.5 text-[12px] text-xo-text">
+                <p><span className="font-semibold">{unconfirmed.length} of {Object.keys(INTAKE_FIELD_LABEL).length} values are still the demo company's</span>, not yours: {unconfirmed.map((k) => INTAKE_FIELD_LABEL[k]).join(", ")}. Enter your own, or confirm them. Documents treat them as missing until you do.</p>
+                <Button variant="ghost" className="mt-2" onClick={confirmRest}>These values are mine</Button>
+              </div>
+            )}
           </div>
         </Section>
 
@@ -261,7 +274,7 @@ const Intake: React.FC = () => {
             ) : <p className="px-4 py-3 text-[13px] text-xo-muted">No qualified buyers for this sector in the curated registry yet.</p>}
           </Section>
 
-          <Section title="Comparable transactions" eyebrow={inp.sector.replace(/_/g, " ")} className="border border-xo-line"
+          <Section title="Comparable transactions" eyebrow={sectorLabel(inp.sector)} className="border border-xo-line"
             foot={m.data_provenance_summary}>
             {report.comparableTransactions.length ? (
               <ScrollRegion label="Comparable transactions table">
@@ -282,10 +295,10 @@ const Intake: React.FC = () => {
                           <span className="font-medium">{c.target}</span> <span className="text-xo-faint">→</span> <span className="text-xo-muted">{c.buyer}</span>
                           <span className="block text-[11px] text-xo-faint">{c.status}{c.closeDays != null ? ` · ${c.closeDays}d to close` : ""} · {c.rationale}</span>
                         </td>
-                        <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.date ?? "—"}</td>
+                        <td className="whitespace-nowrap px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.date ?? "—"}</td>
                         <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.premiumPct != null ? `+${Math.round(c.premiumPct * 100)}%` : "—"}</td>
-                        <td className="px-2 py-2 text-right font-mono tabular-nums">{c.priceUsd != null ? usd(c.priceUsd) : <span className="font-sans text-[11px] text-xo-faint">undisclosed</span>}</td>
-                        <td className="px-4 py-2 text-right font-mono text-[11px] text-xo-muted" title={c.sourceRef}>{c.sourceRef.split(":")[0].replace(/_/g, " ")}</td>
+                        <td className="whitespace-nowrap px-2 py-2 text-right font-mono tabular-nums">{c.priceUsd != null ? usd(c.priceUsd) : <span className="font-sans text-[11px] text-xo-faint">undisclosed</span>}</td>
+                        <td className="whitespace-nowrap px-4 py-2 text-right font-mono text-[11px] text-xo-muted" title={c.sourceRef}>{c.sourceRef.split(":")[0].replace(/_/g, " ")}</td>
                       </tr>
                     ))}
                   </tbody>

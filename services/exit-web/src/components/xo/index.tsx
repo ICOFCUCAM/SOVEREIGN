@@ -94,9 +94,11 @@ export const Metric: React.FC<{
 export const Bar: React.FC<{ value: number; max?: number; label?: string; tone?: "verified" | "action" | "brass"; width?: string }> = ({ value, max = 100, label, tone = "verified", width = "w-16" }) => {
   const pct = Math.max(0, Math.min(100, (value / (max || 1)) * 100));
   const fill = tone === "action" ? "bg-xo-action" : tone === "brass" ? "bg-xo-brass" : "bg-xo-verified";
+  // a full-width bar needs a full-width wrapper: inside a shrink-to-fit inline-flex, w-full resolved to 0
+  const full = width === "w-full";
   return (
-    <span className="inline-flex items-center gap-2">
-      <span aria-hidden className={`inline-block h-1.5 ${width} overflow-hidden rounded-full bg-xo-line`}>
+    <span className={`${full ? "flex w-full" : "inline-flex"} items-center gap-2`}>
+      <span aria-hidden className={`inline-block h-1.5 ${full ? "min-w-0 flex-1" : width} overflow-hidden rounded-full bg-xo-line`}>
         <span className={`block h-full rounded-full ${fill}`} style={{ width: `${pct}%` }} />
       </span>
       {label != null && <span className="font-mono text-[12px] tabular-nums text-xo-text">{label}</span>}
@@ -163,5 +165,18 @@ export const Chip: React.FC<{ pressed: boolean; onToggle: () => void; children: 
 );
 
 /** Shared form styles for xo pages. */
+/** An empty state: a quiet mark, what is missing in one line, and what will fill it. */
+export const Empty: React.FC<{ title: string; children?: React.ReactNode; className?: string }> = ({ title, children, className = "" }) => (
+  <div className={`flex flex-col items-center px-4 py-7 text-center ${className}`}>
+    <svg aria-hidden width="28" height="28" viewBox="0 0 28 28" fill="none" className="mb-3 text-xo-faint">
+      <circle cx="14" cy="14" r="12.5" stroke="currentColor" strokeOpacity=".5" strokeDasharray="2 3" />
+      <circle cx="14" cy="14" r="6" stroke="currentColor" strokeOpacity=".7" />
+      <circle cx="14" cy="14" r="1.6" fill="currentColor" />
+    </svg>
+    <p className="text-[13px] font-medium text-xo-text">{title}</p>
+    {children && <p className="mt-1 max-w-[52ch] text-[12px] leading-relaxed text-xo-muted">{children}</p>}
+  </div>
+);
+
 export const XO_INPUT = "w-full rounded-sm border border-xo-line bg-xo-ink px-2.5 py-2 text-[13px] text-xo-text placeholder:text-xo-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
 export const XO_LABEL = "mb-1 block text-[12px] font-medium text-xo-muted";

@@ -1,0 +1,27 @@
+
+01 owner sees own files only|1
+psql:scenario.sql:10: ERROR:  tag the file with the artifact it satisfies before reviewing it
+CONTEXT:  PL/pgSQL function exit_data_room_review(uuid,text,text) line 8 at RAISE
+psql:scenario.sql:11: ERROR:  not an artifact id: Not An Id
+CONTEXT:  PL/pgSQL function exit_data_room_tag(uuid,text,text) line 4 at RAISE
+
+02 tagged, awaiting review|financial.audited_accounts|submitted
+psql:scenario.sql:14: ERROR:  a review accepts or rejects
+CONTEXT:  PL/pgSQL function exit_data_room_review(uuid,text,text) line 5 at RAISE
+
+03 accepted by the owner|accepted|t|FY2023-FY2025 audited accounts, signed
+
+04 re-tagging clears the review|financial.management_accounts|submitted|t
+psql:scenario.sql:19: ERROR:  permission denied for table exit_data_room_documents
+psql:scenario.sql:20: ERROR:  permission denied for table exit_data_room_documents
+psql:scenario.sql:21: ERROR:  permission denied for table exit_data_room_documents
+psql:scenario.sql:22: ERROR:  no such file in your data room
+CONTEXT:  PL/pgSQL function exit_data_room_tag(uuid,text,text) line 9 at RAISE
+psql:scenario.sql:23: ERROR:  no such file in your data room
+CONTEXT:  PL/pgSQL function exit_data_room_review(uuid,text,text) line 7 at RAISE
+
+05 other tenant sees one file, untouched|1|submitted
+psql:scenario.sql:28: ERROR:  permission denied for table exit_data_room_documents
+psql:scenario.sql:29: ERROR:  permission denied for function exit_data_room_tag
+06 final state|accounts.pdf|financial.management_accounts|submitted
+06 final state|charter.pdf||submitted

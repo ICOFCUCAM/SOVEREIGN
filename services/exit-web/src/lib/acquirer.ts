@@ -1,5 +1,7 @@
 import type { CompanyProfile } from "@exit/engines";
 import { regionOf, type Region } from "@exit/engines";
+import { bandOverlaps } from "./bands";
+import type { ListingPublicView } from "./listings";
 
 // ── ACQUIRER SIDE — Buyer → Company matching ────────────────────────
 // The reverse of founder→buyer discovery. A buyer configures an acquisition
@@ -58,4 +60,26 @@ export function matchCompanyToCriteria(company: CompanyProfile, c: AcquisitionCr
   // a qualified opportunity must clear the bar AND match the sector mandate
   const qualified = score >= 70 && sectorOk;
   return { score, qualified, reasons };
+}
+
+/** A buyer's view of a listed company: scored on the listing's public brackets
+ *  only (sector, region, revenue and growth bands), since the buyer never
+ *  receives the company's exact figures before an NDA. A band counts as a fit
+ *  when any value in it would meet the criterion, and says so. */
+export function matchListingToCriteria(pv: ListingPublicView, c: AcquisitionCriteria): CompanyMatch {
+  const sectorOk = c.sectors.length === 0 || c.sectors.includes(pv.sector);
+  const revenueOk = !!pv.revenueBand && bandOverlaps(pv.revenueBand, c.minRevUsd, c.maxRevUsd);
+  const regionOk = c.regions.length === 0 || c.regions.includes(pv.region);
+  const growthOk = !!pv.growthBand && bandOverlaps(pv.growthBand, c.minGrowthPct);
+  const reasons: MatchReason[] = [
+    { label: "Sector", ok: sectorOk, detail: `${pv.sector}${sectorOk ? " — in your targets" : " — outside your targets"}` },
+    { label: "Revenue", ok: revenueOk, detail: pv.revenueBand ? `${pv.revenueBand.label} band ${revenueOk ? "overlaps" : "outside"} ${fmtM(c.minRevUsd)}–${fmtM(c.maxRevUsd)}` : "withheld until NDA" },
+    { label: "Region", ok: regionOk, detail: `${pv.region}${regionOk ? " — covered" : " — outside coverage"}` },
+    { label: "Growth", ok: growthOk, detail: pv.growthBand ? `${pv.growthBand.label} band ${growthOk ? "can meet" : "below"} ${Math.round(c.minGrowthPct * 100)}%` : "withheld until NDA" },
+  ];
+  const score = Math.round(100 * (
+    (sectorOk ? WEIGHTS.sector : 0) + (revenueOk ? WEIGHTS.revenue : 0) +
+    (regionOk ? WEIGHTS.region : 0) + (growthOk ? WEIGHTS.growth : 0)
+  ));
+  return { score, qualified: score >= 70 && sectorOk, reasons };
 }

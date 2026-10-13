@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import { LockIcon } from "../lib/ui";
 import { NAV, PLAN_LABEL, needsUpgrade } from "../lib/access";
 import { runInstitutionalValuation, runReadiness, runReadinessAnalysis } from "@exit/engines";
 import { rankedBuyers, expectedOutcomeFor, strategicThemes, buyerRationale, acquisitionAppetiteScore, buyerConfidence, DNA_PROFILES, DNA_AS_OF, fmtUsdShort } from "../lib/buyer-dna";
@@ -316,7 +317,7 @@ const Terminal: React.FC = () => {
                         <span className="block truncate text-[11px] text-xo-faint">{a.meta}</span>
                         {gate && <span className="mt-0.5 block text-[11px] font-medium text-xo-caution">Requires {gate}</span>}
                       </span>
-                      <span className="shrink-0 text-xo-action" aria-hidden>{gate ? "🔒" : "→"}</span>
+                      <span className="shrink-0 text-xo-action" aria-hidden>{gate ? <LockIcon size={12} /> : "→"}</span>
                     </Link>
                   </li>
                 );
@@ -371,7 +372,7 @@ const Terminal: React.FC = () => {
                         <span className="font-medium text-xo-text">{c.target}</span> <span className="text-xo-faint">→</span> <span className="text-xo-muted">{c.buyer}</span>
                         <span className="block text-[11px] text-xo-faint">{c.status}{c.closeDays != null ? ` · ${c.closeDays}d to close` : ""}</span>
                       </td>
-                      <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.date ?? "—"}</td>
+                      <td className="whitespace-nowrap px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.date ?? "—"}</td>
                       <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-text">{c.priceUsd != null ? fmtUsdShort(c.priceUsd) : <span className="font-sans text-[11px] text-xo-faint">undisclosed</span>}</td>
                       <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.premiumPct != null ? `+${Math.round(c.premiumPct * 100)}%` : "—"}</td>
                       <td className="px-4 py-2 text-right">

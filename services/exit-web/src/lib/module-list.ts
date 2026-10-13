@@ -11,7 +11,7 @@ export const FOUNDER_MODULES: Mod[] = [
   { icon: "globe", name: "Buyer Intelligence", body: "Likelihood, range, timing, risk and synergy for every acquirer.", stat: MODULE_FACTS.buyerIntel },
   { icon: "users", name: "Outreach", body: "Teasers, CIMs and a sequenced campaign — drafted by the banker for you to send.", stat: MODULE_FACTS.outreach },
   { icon: "lock", name: "Data Room", body: "A document checklist, completeness-scored, with the dollar impact of every gap.", stat: MODULE_FACTS.dataRoom },
-  { icon: "doc", name: "Documents", body: "CIM, teaser, deck and LOIs, red-teamed against your real numbers.", stat: MODULE_FACTS.documents },
+  { icon: "doc", name: "Documents", body: "CIM, teaser, deck outline and data-room index, checked against your own figures.", stat: MODULE_FACTS.documents },
   { icon: "chart", name: "Negotiator", body: "Offer scoring, counters, protective clauses and earnout alternatives." },
   { icon: "check", name: "Closing Center", body: "The closing checklist: signatures, escrow and filings, item by item." },
   { icon: "shield", name: "WealthOS", body: "Proceeds, taxes, trusts, family office and reinvestment after close." },

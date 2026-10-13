@@ -3,8 +3,9 @@ import type {
   Offer, OfferStatus, OfferFilter, DealDocument, DocVisibility,
   Notification, NotificationKind, Deal, DealStage, DealFilter, Mandate,
 } from "./exit-api";
+import type { OfferTerms } from "./documents/transaction-docs";
 import type { DealEvent } from "./deal-events";
-import type { Listing } from "./listings";
+import { normalizeListing, type Listing } from "./listings";
 
 // ── THE FIRST PRODUCTION BACKEND ────────────────────────────────────
 // SupabaseExitApi satisfies ExitApiClient EXACTLY, over the Supabase REST
@@ -52,6 +53,8 @@ export class SupabaseExitApi implements ExitApiClient {
    *  user and RLS scopes to auth.uid(). Without it, requests run as anon. */
   setAccessToken(token?: string, userId?: string): void { this.accessToken = token; this.userId = userId; }
   get config(): SupabaseConfig { return this.cfg; }
+  /** The signed-in user's JWT, once auth has run (never the anon key). */
+  get userToken(): string | undefined { return this.userId ? this.accessToken : undefined; }
 
   private get f(): typeof fetch {
     const impl = this.cfg.fetchImpl ?? globalThis.fetch;
@@ -87,6 +90,14 @@ export class SupabaseExitApi implements ExitApiClient {
     await this.rq(table, { method: "POST", prefer: "resolution=merge-duplicates,return=minimal", body: JSON.stringify(rows) });
   }
 
+  /** UPDATE one row by id: only `data` changes. Status changes go through here, never through
+   *  an upsert, so the server's state rules (exitos_*_guard triggers) see an update. */
+  private async patch(table: string, id: string, data: object): Promise<void> {
+    const rows = await this.rq<unknown[]>(`${table}?id=eq.${enc(id)}&select=id`, { method: "PATCH", prefer: "return=representation", body: JSON.stringify({ data }) });
+    // RLS filters a row you may not change out of the update silently: treat that as a refusal
+    if (!rows || rows.length === 0) throw new Error(`${table} ${id}: not permitted`);
+  }
+
   // ── accounts ──
   async upsertAccount(a: Account): Promise<Account> { await this.upsert("exitos_accounts", [{ id: a.id, role: a.role, data: a }]); return a; }
   async getAccount(id: string): Promise<Account | null> { return (await this.rows<Account>("exitos_accounts", `id=eq.${enc(id)}`))[0] ?? null; }
@@ -109,7 +120,8 @@ export class SupabaseExitApi implements ExitApiClient {
   async listEventsForSubject(subjectId: string): Promise<DealEvent[]> { return this.rows<DealEvent>("exitos_deal_events", `subject_id=eq.${enc(subjectId)}`); }
 
   // ── listings (shared pool, owner-scoped writes) ──
-  async listListings(): Promise<Listing[]> { return this.rows<Listing>("exitos_listings"); }
+  // rows written by earlier versions may still carry a profile; only public fields come back
+  async listListings(): Promise<Listing[]> { return (await this.rows<unknown>("exitos_listings")).map(normalizeListing); }
   async saveListings(listings: readonly Listing[]): Promise<void> {
     // owner-scoped RLS only permits writing one's own listings; send just
     // those (others already live in the pool, written by their owners).
@@ -131,13 +143,13 @@ export class SupabaseExitApi implements ExitApiClient {
     const cur = (await this.rows<NdaRequest>("exitos_nda_requests", `id=eq.${enc(id)}`))[0];
     if (!cur) throw new Error(`nda ${id} not found`);
     const next: NdaRequest = { ...cur, status: patch.status, resolvedAt: patch.status === "requested" ? null : nowIso() };
-    await this.upsert("exitos_nda_requests", [{ id: next.id, listing_id: next.listingId, buyer_account_id: next.buyerAccountId, data: next }]);
+    await this.patch("exitos_nda_requests", id, next);
     return next;
   }
 
   // ── offers ──
-  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string }): Promise<Offer> {
-    const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso() };
+  async createOffer(input: { listingId: string; buyerAccountId: string; amountUsd: number; note?: string; terms?: OfferTerms }): Promise<Offer> {
+    const o: Offer = { id: rid("off"), listingId: input.listingId, buyerAccountId: input.buyerAccountId, amountUsd: input.amountUsd, status: "submitted", note: input.note ?? null, createdAt: nowIso(), ...(input.terms ? { terms: input.terms } : {}) };
     await this.upsert("exitos_offers", [{ id: o.id, listing_id: o.listingId, buyer_account_id: o.buyerAccountId, data: o }]);
     return o;
   }
@@ -149,7 +161,7 @@ export class SupabaseExitApi implements ExitApiClient {
     const cur = (await this.rows<Offer>("exitos_offers", `id=eq.${enc(id)}`))[0];
     if (!cur) throw new Error(`offer ${id} not found`);
     const next: Offer = { ...cur, ...patch };
-    await this.upsert("exitos_offers", [{ id: next.id, listing_id: next.listingId, buyer_account_id: next.buyerAccountId, data: next }]);
+    await this.patch("exitos_offers", id, next);
     return next;
   }
 

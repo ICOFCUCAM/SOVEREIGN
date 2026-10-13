@@ -1,36 +1,23 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, downloadText, notify } from "../lib/ui";
-import { PageHeader, Section, Metric, ScrollRegion, Provenance, ActionLink } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany } from "../lib/active-company";
 import { runDueDiligence } from "@exit/engines";
+import { useDocumentRemote } from "../lib/documents/remote";
+import { TransactionRecordPanel } from "../components/TransactionRecord";
+import { closingRows, loadClosingStatuses, saveClosingStatuses, STATUS_LABEL, closingChecklistDoc, type ItemStatus, type ClosingRow } from "../lib/closing-checklist";
 
-// Deal Closing Center. A closing-checklist template whose statuses the
-// user sets (saved in this browser); the diligence engine surfaces
-// pre-close critical questions and red flags.
+// Deal Closing Center. For a signed-in party, the server-held transaction record
+// (conditions, evidence, both parties' confirmations of signing and completion,
+// post-closing obligations and the closing documents built from it). Below it, a
+// closing-checklist template whose statuses the user sets in this browser, and the
+// diligence engine's pre-close questions and red flags.
 
-type ItemStatus = "done" | "in_progress" | "blocked" | "pending";
-interface TemplateItem { id: string; title: string; owner: "Founder" | "Counsel" | "Buyer" | "Banker" }
-interface ChecklistItem extends TemplateItem { status: ItemStatus }
-
-// A closing-checklist template. No deal has reached closing on ExitOS, so
-// nothing here has a status until the user sets one.
-const TEMPLATE: readonly TemplateItem[] = [
-  { id: "c-01", title: "SPA execution + signature pages",         owner: "Counsel" },
-  { id: "c-02", title: "Disclosure schedule final review",        owner: "Counsel" },
-  { id: "c-03", title: "Shareholder consent — at the threshold your documents require", owner: "Founder" },
-  { id: "c-04", title: "Bring-down certificate",                  owner: "Founder" },
-  { id: "c-05", title: "Escrow agent engagement",                 owner: "Banker" },
-  { id: "c-06", title: "Wire instructions — buyer side",          owner: "Buyer" },
-  { id: "c-07", title: "Closing escrow funding confirmation",     owner: "Banker" },
-  { id: "c-08", title: "Cap-table snapshot at closing",           owner: "Founder" },
-  { id: "c-09", title: "Regulatory and tax filings — as counsel advises", owner: "Counsel" },
-  { id: "c-10", title: "Press / employee announcement coordination", owner: "Founder" },
-  { id: "c-11", title: "Buyer side board approval",               owner: "Buyer" },
-  { id: "c-12", title: "Closing call — agenda + dial-ins",        owner: "Banker" },
-];
+// the checklist, its statuses and its timing come from lib/closing-checklist (the export renders the same rows)
+type ChecklistItem = ClosingRow;
 
 const STATUS_STYLE: Record<ChecklistItem["status"], string> = {
   done:        "border-xo-verified/50 text-xo-verified",
@@ -59,32 +46,17 @@ function closeProbability(done: number, inProgress: number, total: number, block
 function openRisks(items: readonly ChecklistItem[]): { title: string; owner: string; severity: "high" | "medium" }[] {
   return items
     .filter((c) => c.status !== "done")
-    .map((c) => ({
-      title: c.title,
-      owner: c.owner,
-      // consent, escrow funding, regulatory and board approvals are hard gates
-      severity: (/consent|escrow|regulatory|board approval|bring-down/i.test(c.title) ? "high" : "medium") as "high" | "medium",
-    }))
+    .map((c) => ({ title: c.title, owner: c.owner, severity: (c.gating ? "high" : "medium") as "high" | "medium" }))
     .sort((a, b) => (a.severity === "high" ? -1 : 1) - (b.severity === "high" ? -1 : 1));
 }
 
-const STATUS_LABEL: Record<ItemStatus, string> = { pending: "Not started", in_progress: "In progress", done: "Done", blocked: "Blocked" };
-const STATUS_KEY = "exitos.closing.v1";
-const loadStatuses = (): Record<string, ItemStatus> => {
-  try { return JSON.parse(globalThis.localStorage?.getItem(STATUS_KEY) ?? "{}") as Record<string, ItemStatus>; } catch { return {}; }
-};
-
 const Closing: React.FC = () => {
   // statuses are the user's own, saved in this browser
-  const [statuses, setStatuses] = useState<Record<string, ItemStatus>>(loadStatuses);
+  const [statuses, setStatuses] = useState<Record<string, ItemStatus>>(loadClosingStatuses);
   const setStatus = (id: string, st: ItemStatus): void => {
-    setStatuses((cur) => {
-      const next = { ...cur, [id]: st };
-      try { globalThis.localStorage?.setItem(STATUS_KEY, JSON.stringify(next)); } catch { /* in-memory only */ }
-      return next;
-    });
+    setStatuses((cur) => { const next = { ...cur, [id]: st }; saveClosingStatuses(next); return next; });
   };
-  const CLOSING: readonly ChecklistItem[] = TEMPLATE.map((t) => ({ ...t, status: statuses[t.id] ?? "pending" }));
+  const CLOSING: readonly ChecklistItem[] = closingRows(statuses);
   const done       = CLOSING.filter((c) => c.status === "done").length;
   const inProgress = CLOSING.filter((c) => c.status === "in_progress").length;
   const blocked    = CLOSING.filter((c) => c.status === "blocked").length;
@@ -99,8 +71,9 @@ const Closing: React.FC = () => {
   // Closing call — agenda built from the open gating items + diligence flags,
   // plus a downloadable calendar invite.
   const [callOpen, setCallOpen] = useState(false);
-  // the invite is for the day after tomorrow, 08:00 local time
-  const inviteAt = useMemo(() => { const d = new Date(); d.setDate(d.getDate() + 2); d.setHours(8, 0, 0, 0); return d; }, []);
+  // the invite is for the date and time the person chooses (two days out at 08:00 until they change it)
+  const [inviteLocal, setInviteLocal] = useState(() => { const d = new Date(); d.setDate(d.getDate() + 2); d.setHours(8, 0, 0, 0); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); });
+  const inviteAt = useMemo(() => new Date(inviteLocal), [inviteLocal]);
   const inviteLabel = inviteAt.toLocaleString(undefined, { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
   const agenda: string[] = [
     "Confirm escrow funding and wire instructions (both sides)",
@@ -127,17 +100,22 @@ const Closing: React.FC = () => {
   const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const tape = useMemo(() => buildMarketTape(), []);
+  const remote = useDocumentRemote();
 
   return (
     <div data-page="closing" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Operator · Closing · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Deal Closing Center"
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Sign · escrow · file · <span className={probTone}>checklist readiness {Math.round(prob * 100)}%</span></span></>}
         actions={<>
-          <button type="button" onClick={() => window.print()} className={BTN_GHOST}>Print checklist</button>
+          <button type="button" onClick={() => downloadText("closing-checklist.md", closingChecklistDoc(statuses))} className={BTN_GHOST}>Download checklist (.md)</button>
           <button type="button" onClick={() => setCallOpen(true)} className={BTN}>Closing call</button>
         </>} />
 
-      <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">No deal has reached closing on ExitOS. This is a closing checklist template: set each item's status yourself as your counsel and the buyer report progress. Statuses are saved in this browser only.</p>
+      {remote
+        ? <TransactionRecordPanel remote={remote} />
+        : <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">Sign in to see the transaction record: the conditions, evidence and both parties' confirmations of signing and completion, held on the server.</p>}
+
+      <p role="note" className="border border-xo-line bg-xo-panel px-4 py-2.5 text-[12px] text-xo-muted">The checklist and readiness figures below are a planning template, not the transaction record: set each item's status yourself as your counsel and the buyer report progress. Statuses are saved in this browser only.</p>
 
       <section aria-label="Closing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Checklist" emphasis value={`${CLOSING.length} items`} sub="template · statuses set by you" /></div>
@@ -152,6 +130,10 @@ const Closing: React.FC = () => {
       <Modal open={callOpen} onClose={() => setCallOpen(false)} title="Closing call" subtitle={`Invite for ${inviteLabel} · checklist readiness ${Math.round(prob * 100)}%`}
         footer={<><Button variant="ghost" onClick={() => setCallOpen(false)}>Close</Button><Button onClick={downloadInvite}>Download invite (.ics)</Button></>}>
         <div className="space-y-4">
+          <label className="block text-[12px] text-xo-muted">Date and time (your time zone)
+            <input type="datetime-local" value={inviteLocal} onChange={(e) => e.target.value && setInviteLocal(e.target.value)}
+              className="mt-1 block w-full rounded-sm border border-xo-line bg-xo-ink px-2.5 py-2 text-[13px] text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" />
+          </label>
           <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
             Suggested participants: Founder · Counsel · Banker · Buyer. ExitOS does not send invitations or create a dial-in: download the invite, add a meeting link in your calendar and invite the participants yourself.
           </p>
@@ -173,10 +155,10 @@ const Closing: React.FC = () => {
         <div className="px-4 py-3">
           <p className="text-[14px] leading-relaxed">{topRisk ? <>Clear <span className="font-semibold">{topRisk.title}</span> ({topRisk.owner}) — the top {topRisk.severity}-risk item gating the wire.</> : "Confirm escrow funding and hold the closing call."}</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-            <TakeCell k="Today">No deal in closing — the checklist is a template. {done}/{CLOSING.length} items done, checklist readiness <span className={probTone}>{Math.round(prob * 100)}%</span> (a rule, not a probability).</TakeCell>
+            <TakeCell k="Today">The checklist is a template. {done}/{CLOSING.length} items done, checklist readiness <span className={probTone}>{Math.round(prob * 100)}%</span> (a rule, not a probability).</TakeCell>
             <TakeCell k="If you wait">{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</TakeCell>
-            <TakeCell k="Next">Generate the closing documents, then work the gating items with counsel. <ActionLink to="/console/documents">Generate closing docs →</ActionLink></TakeCell>
-            <TakeCell k="What ExitOS does">Keeps this checklist and builds the call agenda. It does not track signatures, escrow or filings, and sends no reminders.</TakeCell>
+            <TakeCell k="Next">Work the gating items with counsel. From the transaction record ExitOS drafts a brief for the agreement, the funds flow, the conditions register and certificate and announcement drafts; counsel prepares the agreement, schedules, consents and certificates themselves.</TakeCell>
+            <TakeCell k="What ExitOS does">Holds the transaction record both parties confirm, keeps this checklist and builds the call agenda. It holds no escrow, checks no filing or payment, and sends no reminders.</TakeCell>
           </dl>
         </div>
       </Section>
@@ -248,7 +230,7 @@ const Closing: React.FC = () => {
           </ScrollRegion>
         </Section>
 
-        <Section title="From diligence" eyebrow={`runDueDiligence · ${company.name}`} className="lg:col-span-4"
+        <Section title="From diligence" eyebrow={`Diligence engine · ${company.name}`} className="lg:col-span-4"
           foot={fromIntake ? "From the diligence engine on your saved intake." : "From the diligence engine on the demo company; save an intake to run it on yours."}>
           <div className="space-y-4 px-4 py-3">
             {redFlags.length > 0 && (

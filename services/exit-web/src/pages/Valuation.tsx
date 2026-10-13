@@ -76,7 +76,7 @@ const Valuation: React.FC = () => {
       <Section title="Valuation fact sheet · every figure traced to a source" className="border border-xo-line"
         right={<>
           <button type="button" onClick={() => downloadJson("exitos-valuation-model.json", { company: C.name, institutional: INST, factSheet: FACTS, dcf: dcfValue, medianPrecedentDealSizeUsd: compMid, assumptions: { growthPct: growth, discountPct: discount } })} className="rounded-sm border border-xo-line px-2 py-1 text-[11px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Export data (.json)</button>
-          <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-2 py-1 text-[11px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report (PDF) →</a>
+          <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-2 py-1 text-[11px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report →</a>
         </>}
         foot="Hover or focus any figure for its methodology, source and last-updated date.">
         <dl className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-3 lg:grid-cols-5">
@@ -158,7 +158,7 @@ const Valuation: React.FC = () => {
                   <tr key={`${c.buyer}-${c.target}`} className="border-b border-xo-line last:border-0">
                     <th scope="row" className="px-4 py-2 text-left font-normal">{c.target}</th>
                     <td className="px-2 py-2 text-xo-muted">{c.buyer}</td>
-                    <td className="px-2 py-2 font-mono text-xo-muted">{c.date ?? "—"}</td>
+                    <td className="whitespace-nowrap px-2 py-2 font-mono text-xo-muted">{c.date ?? "—"}</td>
                     <td className="px-2 py-2 text-right font-mono">{c.priceUsd != null ? fmtMoney(c.priceUsd) : "undisc."}</td>
                     <td className="px-4 py-2 text-right font-mono text-xo-verified">{c.premiumPct != null ? pctStr(c.premiumPct) : "—"}</td>
                   </tr>

@@ -1,0 +1,56 @@
+
+C offers|0
+C ndas|0
+C deals|0
+C docs|1
+C events|0
+C listings|3
+
+B offers|1
+B ndas|1
+B docs|1
+B events|1
+
+A offers|1
+A ndas|1
+A deals|1
+A docs|3
+A events|1
+
+B docs after signed NDA|2
+listing rows with profile|0
+lst-a|{"region": "North America", "sector": "AI", "disclosed": true, "growthBand": {"low": 0.25, "high": 0.5, "label": "25–50%"}, "revenueBand": {"low": 25000000, "high": 50000000, "label": "$25–50M"}}
+lst-demo-helios|{"region": "North America", "sector": "Logistics", "growthBand": {"low": 0.25, "high": 0.5, "label": "25–50%"}, "revenueBand": {"low": 10000000, "high": 25000000, "label": "$10–25M"}}
+lst-sov-x|{"region": "North America", "sector": "AI", "disclosed": false}
+late write|f|$100–250M|declining
+
+psql:check.sql:35: NOTICE:  self-grant: denied
+psql:check.sql:35: NOTICE:  claim advisor: denied
+claim founder|1
+psql:check.sql:41: NOTICE:  promote to advisor: denied
+has approver (before grant)|f
+
+has approver (after server grant)|t
+sees own grants|1
+
+C has approver|f
+C sees grants|0
+
+psql:check.sql:74: NOTICE:  buyer inserts signed NDA: denied
+psql:check.sql:74: NOTICE:  buyer requests NDA: ok
+psql:check.sql:74: NOTICE:  buyer signs own NDA: denied
+psql:check.sql:74: NOTICE:  buyer moves NDA to another listing: denied
+psql:check.sql:74: NOTICE:  buyer inserts accepted offer: denied
+psql:check.sql:74: NOTICE:  buyer accepts own offer: denied
+psql:check.sql:74: NOTICE:  buyer revises a submitted offer: ok
+
+C signs B's NDA (rows)|0
+
+psql:check.sql:88: NOTICE:  owner signs the NDA request: ok
+psql:check.sql:88: NOTICE:  owner reopens a resolved NDA: denied
+psql:check.sql:88: NOTICE:  owner rewrites an offer amount: denied
+psql:check.sql:88: NOTICE:  owner accepts an offer: ok
+
+psql:check.sql:95: NOTICE:  buyer revises an accepted offer: denied
+psql:check.sql:95: NOTICE:  buyer withdraws a submitted offer: ok
+psql:check.sql:100: NOTICE:  anon reads NDA requests: denied

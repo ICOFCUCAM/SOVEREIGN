@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { DemoExample } from "../components/DemoExample";
 import { Button, Modal, Field, inputCls, notify } from "../lib/ui";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
@@ -6,6 +7,7 @@ import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../compon
 import { SAMPLE_COMPANY } from "../lib/profile";
 import { loadActiveCompany } from "../lib/active-company";
 import { buildMarketTape } from "../lib/market-tape";
+import { plural } from "../lib/labels";
 import {
   CAPTABLE_ANALYSIS, CAPTABLE_SIGNATORY, CAPTABLE_DRAGALONG,
   SAMPLE_CAPTABLE, OFFER_WATERFALLS, SAMPLE_OFFERS, fmt,
@@ -29,7 +31,7 @@ const ROLE_LABEL: Record<string, string> = {
   executive: "Executive", advisor: "Advisor", employee: "Employee", other: "Other",
 };
 
-const Investors: React.FC = () => {
+const InvestorsDemo: React.FC = () => {
   // The cap table and offers are the demo company's samples; an intake holds
   // neither, so this page stays on demo data and says so.
   const { fromIntake } = useMemo(() => loadActiveCompany(), []);
@@ -65,10 +67,10 @@ const Investors: React.FC = () => {
         description={<>The sample cap table and sample offers of the demo company ({SAMPLE_COMPANY.name}).{fromIntake ? " Your intake has no cap table or offers, so these figures are not yours." : ""}</>} />
 
       <section aria-label="Cap-table summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-5">
-        <div className="bg-xo-panel"><Metric label="Fully diluted" value={analysis.fullyDilutedShares.toLocaleString()} sub={`${analysis.ownershipByStakeholder.length} stakeholders`} /></div>
+        <div className="bg-xo-panel"><Metric label="Fully diluted" value={analysis.fullyDilutedShares.toLocaleString()} sub={plural(analysis.ownershipByStakeholder.length, "stakeholder")} /></div>
         <div className="bg-xo-panel"><Metric label="Founder ownership" value={`${(analysis.ownershipByRole.founder * 100).toFixed(1)}%`} sub="of fully-diluted" /></div>
         <div className="bg-xo-panel"><Metric label="Signatory coverage" value={<span className={signatory.meetsThreshold ? "text-xo-verified" : "text-xo-caution"}>{Math.round(signatory.coverageOfShares * 100)}%</span>} sub={signatory.meetsThreshold ? "meets 95%" : "below 95%"} /></div>
-        <div className="bg-xo-panel"><Metric label="Drag-along" value={drag.meets ? "Met" : "Short"} sub={`${Math.round(drag.committedPct * 100)}% · ${drag.holdouts.length} holdouts`} /></div>
+        <div className="bg-xo-panel"><Metric label="Drag-along" value={drag.meets ? "Met" : "Short"} sub={`${Math.round(drag.committedPct * 100)}% · ${plural(drag.holdouts.length, "holdout")}`} /></div>
         <div className="bg-xo-panel"><Metric label="Founders' risk-adjusted value" emphasis value={<span className="text-xo-verified">{fmt(selectedWf.waterfall.netToFoundersUsd)}</span>} sub={`${selectedOffer.buyerName} · engine NPV (stock −15%, earnout −45%)`} /></div>
       </section>
 
@@ -259,5 +261,17 @@ const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, child
     <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
   </div>
 );
+
+// With a saved intake the founder's own records are shown (none yet), and the
+// demo company's example only on request.
+const Investors: React.FC = () => {
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
+  return (
+    <DemoExample fromIntake={fromIntake} page={{ id: "cap-table", eyebrow: "◉ Founder · Cap table", title: "Cap Table" }}
+      title="No cap table recorded for your company" demo={<InvestorsDemo />}>
+      <>ExitOS does not yet hold your cap table, so it cannot show stakeholders, signatories or a waterfall for your company. Entering and importing a cap table is part of the closing workflow.</>
+    </DemoExample>
+  );
+};
 
 export default Investors;

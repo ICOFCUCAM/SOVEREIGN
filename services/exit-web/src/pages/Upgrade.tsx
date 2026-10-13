@@ -70,9 +70,9 @@ const Upgrade: React.FC<{ feature?: string }> = ({ feature }) => {
     <div data-page="upgrade" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="Select a mandate" title="Choose your engagement"
         description={isBuyer
-          ? `${feature ? `${feature} requires Buyer Access. ` : ""}Buyer Observer browses the exchange for free. Buyer Access ($299 a month) unlocks NDA requests and the Deal Room. Premium Buyer Access is admitted by request.`
+          ? `${feature ? `${feature} requires Buyer Access. ` : ""}Buyer Observer browses the exchange for free. Buyer Access ($299 a month) unlocks NDA requests and the Deal Room. Premium Buyer Access is admitted by request. Signing an NDA a seller issues to you and taking part in a transaction are free, under Your NDAs and Transactions.`
           : feature
-          ? `${feature} requires an active engagement. Preparation makes you market-ready; an Active Mandate runs the process — its 2.5% success fee is paid only on close.`
+          ? `${feature} requires an active engagement. Preparation makes you market-ready; an Active Mandate runs the process — its 2.5% success fee is paid only on close. Your own NDAs and transactions stay free, under Your NDAs and Transactions.`
           : "Listed Founder gets you discovered for free. Preparation makes you market-ready. An Active Mandate runs the live process for $995 a month — its 2.5% success fee is paid only when you close."} />
 
       <p id="upgrade-demo" role="note" className="border border-xo-caution/50 bg-xo-panel px-4 py-2.5 text-[13px]">

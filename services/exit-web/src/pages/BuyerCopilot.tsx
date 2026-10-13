@@ -9,6 +9,7 @@ import { requiredEngagement } from "../lib/access";
 import { buildMarketTape } from "../lib/market-tape";
 import { dealContextFor } from "../lib/deal-context";
 import { loadActiveCompany } from "../lib/active-company";
+import { label } from "../lib/labels";
 import { type BuyerCandidate, VALUATION_FRAMEWORK } from "@exit/engines";
 
 // Buyer Intelligence (Buyer Copilot) — for each top-ranked acquirer: the
@@ -123,7 +124,7 @@ const BuyerCopilot: React.FC = () => {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h3 className="text-[15px] font-semibold"><span className="sr-only">Rank {i + 1}: </span>{c.buyer.name}</h3>
-                    <span className="mt-0.5 inline-block text-[11px] font-medium capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</span>
+                    <span className="mt-0.5 inline-block text-[11px] font-medium text-xo-muted">{label(c.buyer.buyerType)}</span>
                   </div>
                   <div className="text-right">
                     <div className="text-[11px] text-xo-faint">Fit probability</div>

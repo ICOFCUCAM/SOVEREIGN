@@ -1,0 +1,38 @@
+
+O insert v1|ok
+O insert as approved|refused: new row violates row-level security policy for table "exitos_document_versions"
+O insert v2|ok
+statuses|v1=superseded v2=draft
+O update directly|refused: permission denied for table exitos_document_versions
+O delete|refused: permission denied for table exitos_document_versions
+O forge approve event|refused: new row violates row-level security policy for table "exitos_document_events"
+O log download|ok
+O approve own (not submitted)|refused: approval needs an approver grant
+O submit|ok
+O approve own|refused: approval needs an approver grant
+
+X reads|0
+X approves|refused: approval needs an approver grant
+
+K counsel-reviews (not with counsel)|refused: this version is not awaiting counsel (status is in_review)
+
+A reads (in review)|1
+A approves|ok
+
+O submit nda|ok
+
+A approves nda before counsel|refused: this document needs counsel review before approval
+
+O sends to counsel|ok
+
+X counsel-reviews|refused: counsel review needs a counsel grant
+
+K reads (with counsel)|1
+K counsel-reviews|ok
+
+A approves nda|ok
+
+O (also approver) approves own|refused: the owner cannot approve their own document
+
+O event trail|v1:superseded v2:downloaded v2:submit v2:approve n1:submit n1:send_to_counsel n1:counsel_reviewed n1:approve
+final|n1=approved s1=in_review v1=superseded v2=approved

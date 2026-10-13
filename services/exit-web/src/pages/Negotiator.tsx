@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { TransactionWorkspace } from "../components/TransactionWorkspace";
 import { Button, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
 import { PageHeader, Section, Metric, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
@@ -8,6 +9,9 @@ import { parseNumber } from "../lib/intake-fields";
 import { loadActiveCompany } from "../lib/active-company";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_CANONICAL } from "../lib/engines";
+
+/** The engine's stage code as a reader's word ("loi" → "LOI", "diligence" → "Diligence"). */
+const stageName = (stage: string): string => (stage === "loi" ? "LOI" : stage.charAt(0).toUpperCase() + stage.slice(1).replace(/_/g, " "));
 
 interface Reserve { minHeadlinePriceUsd: number; minCashPct: number; maxEarnoutPct: number; premiumOverride: number | null }
 
@@ -80,7 +84,7 @@ function autonomousTerms(offer: Offer | undefined, t: Thresholds): { clauses: st
   return { clauses, earnouts, protections };
 }
 
-const Negotiator: React.FC = () => {
+const NegotiatorDemo: React.FC = () => {
   // The engine's leading offer (OFFER_COMPARISON.leader is an offer id) —
   // selected by default and shown as the leading bid whatever is selected.
   const leader = OFFER_EVALUATIONS.find((e) => e.offer.offerId === OFFER_COMPARISON.leader) ?? OFFER_EVALUATIONS[0];
@@ -100,10 +104,13 @@ const Negotiator: React.FC = () => {
   // Your lines, typed in dollars. Invalid entries are flagged and the last
   // default stands in; the order walk-away ≤ minimum ≤ ideal is checked.
   const DEF = { walk: Math.round(RESERVATION_LINES.minHeadlinePriceUsd * 0.95), min: RESERVATION_LINES.minHeadlinePriceUsd, ideal: Math.round(VALUATION_CANONICAL.headline.high) };
-  const [walkTxt, setWalkTxt]   = useState(String(DEF.walk));
-  const [minTxt, setMinTxt]     = useState(String(DEF.min));
-  const [idealTxt, setIdealTxt] = useState(String(DEF.ideal));
+  // shown with thousands separators ("71,250,000"), regrouped when a field is left; commas are ignored when read
+  const grouped = (n: number): string => Math.round(n).toLocaleString("en-US");
+  const [walkTxt, setWalkTxt]   = useState(grouped(DEF.walk));
+  const [minTxt, setMinTxt]     = useState(grouped(DEF.min));
+  const [idealTxt, setIdealTxt] = useState(grouped(DEF.ideal));
   const usd = (t: string) => parseNumber(t, { min: 0, max: 1e13 });
+  const regroup = (t: string): string => { const p = usd(t); return p.ok ? grouped(p.value) : t; };
   const walkP = usd(walkTxt), minP = usd(minTxt), idealP = usd(idealTxt);
   const walkUsd = walkP.ok ? walkP.value : DEF.walk;
   const minUsd = minP.ok ? minP.value : DEF.min;
@@ -115,7 +122,9 @@ const Negotiator: React.FC = () => {
   const { fromIntake } = useMemo(() => loadActiveCompany(), []);
 
   const draftText = active && counter
-    ? `Re: Acquisition of ${SAMPLE_COMPANY.name} — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
+    ? `[SAMPLE — a reply to one of the demo company's sample offers (${SAMPLE_COMPANY.name}). Not for sending.]
+
+Re: Acquisition of ${SAMPLE_COMPANY.name} — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
 
 Dear ${active.offer.buyerName} team,
 
@@ -139,14 +148,14 @@ Best regards,
     <div data-page="bid-room" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Operator · Negotiation desk · Demo company: ${SAMPLE_COMPANY.name}`} title="Bid Room"
         description={<>Sample offers of the demo company ({SAMPLE_COMPANY.name}).{fromIntake ? " Your intake has no offers, so these are not yours." : ""}</>}
-        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Stage: {NEGOTIATION_STATE.stage} · Leverage {NEGOTIATION_STATE.leverage}</span></>}
+        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Stage: {stageName(NEGOTIATION_STATE.stage)} · Leverage {NEGOTIATION_STATE.leverage}</span></>}
         actions={<>
           <Button variant="ghost" onClick={() => setReserveOpen(true)}>Edit reservation lines</Button>
           <Button onClick={() => setDraftOpen(true)}>Generate counter</Button>
         </>} />
 
       <section aria-label="Negotiation summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Active offers" value={String(NEGOTIATION_STATE.activeOffers)} sub={NEGOTIATION_STATE.stage} /></div>
+        <div className="bg-xo-panel"><Metric label="Active offers" value={String(NEGOTIATION_STATE.activeOffers)} sub={stageName(NEGOTIATION_STATE.stage)} /></div>
         <div className="bg-xo-panel"><Metric label="Leverage" value={<span className="capitalize">{NEGOTIATION_STATE.leverage}</span>} sub="market posture" /></div>
         <div className="bg-xo-panel"><Metric label="Leading bid" emphasis value={leader ? `${leader.score.toFixed(0)}/100` : "—"} sub={leader?.offer.buyerName} /></div>
         <div className="bg-xo-panel"><Metric label="Enterprise value" value={fmtMoney(reserveMid)} sub="institutional framework · counter reference" /></div>
@@ -197,9 +206,9 @@ Best regards,
         <div className="px-4 py-3">
           <p className="text-[12px] text-xo-muted">Set your lines. The clauses, earnout alternatives and protections below are standard negotiating positions with fixed figures (for example a 4% reverse break fee) — a starting list to take to your advisers, not legal advice.</p>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <XField id="neg-walk" label="Walk away ($)" error={errWalk}><input id="neg-walk" inputMode="numeric" value={walkTxt} aria-invalid={errWalk ? true : undefined} aria-describedby={errWalk ? "neg-walk-err" : undefined} onChange={(e) => setWalkTxt(e.target.value)} className={XO_INPUT} /></XField>
-            <XField id="neg-min" label="Minimum ($)" error={errMin}><input id="neg-min" inputMode="numeric" value={minTxt} aria-invalid={errMin ? true : undefined} aria-describedby={errMin ? "neg-min-err" : undefined} onChange={(e) => setMinTxt(e.target.value)} className={XO_INPUT} /></XField>
-            <XField id="neg-ideal" label="Ideal ($)" error={errIdeal}><input id="neg-ideal" inputMode="numeric" value={idealTxt} aria-invalid={errIdeal ? true : undefined} aria-describedby={errIdeal ? "neg-ideal-err" : undefined} onChange={(e) => setIdealTxt(e.target.value)} className={XO_INPUT} /></XField>
+            <XField id="neg-walk" label="Walk away ($)" error={errWalk}><input id="neg-walk" inputMode="numeric" value={walkTxt} aria-invalid={errWalk ? true : undefined} aria-describedby={errWalk ? "neg-walk-err" : undefined} onChange={(e) => setWalkTxt(e.target.value)} onBlur={() => setWalkTxt(regroup)} className={`${XO_INPUT} font-mono tabular-nums`} /></XField>
+            <XField id="neg-min" label="Minimum ($)" error={errMin}><input id="neg-min" inputMode="numeric" value={minTxt} aria-invalid={errMin ? true : undefined} aria-describedby={errMin ? "neg-min-err" : undefined} onChange={(e) => setMinTxt(e.target.value)} onBlur={() => setMinTxt(regroup)} className={`${XO_INPUT} font-mono tabular-nums`} /></XField>
+            <XField id="neg-ideal" label="Ideal ($)" error={errIdeal}><input id="neg-ideal" inputMode="numeric" value={idealTxt} aria-invalid={errIdeal ? true : undefined} aria-describedby={errIdeal ? "neg-ideal-err" : undefined} onChange={(e) => setIdealTxt(e.target.value)} onBlur={() => setIdealTxt(regroup)} className={`${XO_INPUT} font-mono tabular-nums`} /></XField>
           </div>
           <p className="mt-3 border border-xo-line px-3 py-2 text-[13px] text-xo-muted">
             Your lines: open at <span className="font-mono font-semibold text-xo-text">{fmtMoney(idealUsd)}</span>, concede no lower than <span className="font-mono font-semibold text-xo-text">{fmtMoney(minUsd)}</span>, and walk below <span className="font-mono font-semibold text-xo-risk">{fmtMoney(walkUsd)}</span>.
@@ -384,5 +393,13 @@ const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
     <dd className="mt-1 font-mono text-[15px] font-semibold">{value}</dd>
   </div>
 );
+
+// With a saved intake the founder's own records are shown (none yet), and the
+// demo company's example only on request.
+const Negotiator: React.FC = () => {
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
+  // a founder with an intake works on their own recorded proposals; the demo company's example stays separate
+  return fromIntake ? <TransactionWorkspace /> : <NegotiatorDemo />;
+};
 
 export default Negotiator;

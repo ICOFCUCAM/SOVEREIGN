@@ -1,3 +1,4 @@
+import { schemePrefix } from "./render-html.mjs";
 // Sovereign Dispatch — Markdown renderer (Epic 6/7 sibling, P1 first end-to-end).
 //
 // Pure: renderMarkdown(layoutModel) → { text, warnings }. Consumes the same
@@ -121,7 +122,7 @@ export function renderMarkdown(lm) {
   const lvl = lm.classification?.level;
   const sensitive = lvl && !/^(unclassified|none)$/i.test(lvl);
   if (lm.renderHints.classificationBanner !== "none" && sensitive) {
-    out.push("", `**${esc(lm.classification.scheme?.toUpperCase() || "")} ${esc(lvl)}**`);
+    out.push("", `**${esc(schemePrefix(lm.classification.scheme))}${esc(lvl)}**`);
   }
   out.push("", "---", "");
 

@@ -11,6 +11,8 @@ import type { CompanyProfile } from "@exit/engines";
 import { fetchBuyerStats, mergeLiveStatsIntoCandidates, type BuyerLiveStat } from "../lib/buyer-stats";
 import { DEAL_INTEL_FMT } from "../lib/market-stats";
 import { computePlatformSignals } from "../lib/platform-signals";
+import { label } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 
 // Acquisition Intelligence Engine surface — wired to runBuyerDiscovery.
@@ -59,7 +61,7 @@ function narrative(c: BuyerCandidate, company: CompanyProfile): string {
     ["M&A track record", c.fitDimensions.historyFit],
   ];
   const top = dims.sort((a, b) => b[1] - a[1])[0][0];
-  const sector = company.sector.replace(/_/g, " ");
+  const sector = sectorLabel(company.sector);
   return `${c.buyer.name} likely values ${company.name} for its ${sector} position — strongest on ${top}. ${c.buyer.thesis}`;
 }
 
@@ -195,7 +197,7 @@ const Intelligence: React.FC = () => {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-[14px] font-semibold"><span className="sr-only">Rank {r.rank}: </span>{r.candidate.buyer.name}</h3>
-                        <span className="text-[11px] capitalize text-xo-muted">{r.candidate.buyer.buyerType.replace(/_/g, " ")}</span>
+                        <span className="text-[11px] text-xo-muted">{label(r.candidate.buyer.buyerType)}</span>
                         <span className={`text-[11px] font-semibold ${r.intent.tier === "high" ? "text-xo-verified" : r.intent.tier === "medium" ? "text-xo-caution" : "text-xo-muted"}`}>intent {r.intent.score}</span>
                       </div>
                       <ul className="mt-2 grid gap-x-6 gap-y-1 sm:grid-cols-2">
@@ -313,7 +315,7 @@ const Intelligence: React.FC = () => {
                     <div className="text-[11px] text-xo-faint">fit probability</div>
                   </div>
                 </div>
-                <div className="text-[11px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</div>
+                <div className="text-[11px] text-xo-muted">{label(c.buyer.buyerType)}</div>
                 <h4 className="mt-3 text-[11px] font-semibold text-xo-faint">Reasons</h4>
                 <ul className="mt-1 space-y-1 text-[12px]">
                   {reasons.map((s) => (
@@ -404,7 +406,7 @@ const Intelligence: React.FC = () => {
                       <div className="font-semibold"><span className="mr-1.5 font-mono text-[11px] text-xo-faint">#{rank + 1}</span>{c.buyer.name}</div>
                       <div className="mt-1 max-w-md text-[12px] leading-snug text-xo-muted">{c.buyer.thesis}</div>
                     </th>
-                    <td className="px-4 py-3 align-top text-[12px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</td>
+                    <td className="px-4 py-3 align-top text-[12px] text-xo-muted">{label(c.buyer.buyerType)}</td>
                     <td className={`px-4 py-3 align-top text-[12px] font-semibold capitalize ${APPETITE_STYLE[c.buyer.appetite]}`}>{c.buyer.appetite}</td>
                     <td className="px-4 py-3 align-top text-[12px] text-xo-muted">{fmtMoney(c.buyer.checkSizeLowUsd)} – {fmtMoney(c.buyer.checkSizeHighUsd)}</td>
                     <td className="px-4 py-3 align-top">

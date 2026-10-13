@@ -48,11 +48,12 @@ describe("exit-api contract — the multi-tenant backend bridge", () => {
     await connectExitApi(api, founder);
     listCompany(buildProfile({ ...SAMPLE_INTAKE, name: "Networked Co", sector: "ai_infra" }));
     const pool = await api.listListings();
-    expect(pool.some((l) => l.profile.name === "Networked Co")).toBe(true);
+    expect(pool.some((l) => l.publicView.sector === "AI")).toBe(true);
+    expect(JSON.stringify(pool)).not.toContain("Networked Co");   // the shared pool never holds the name
     // a buyer connecting later sees it in the shared pool
     const buyer: Account = { id: "acct-buyer-1", role: "buyer", name: "Buyer One", createdAt: new Date().toISOString() };
     await connectExitApi(api, buyer);
-    expect(allListings().some((l) => l.profile.name === "Networked Co")).toBe(true);
+    expect(allListings().some((l) => pool.some((p) => p.id === l.id && l.id !== "lst-demo-helios" && !l.id.startsWith("lst-sov-")))).toBe(true);
   });
 
   it("the reference client implements the full contract", async () => {
@@ -197,6 +198,12 @@ function fakeSupabaseFetch(): typeof fetch {
       for (const row of JSON.parse(String(init?.body ?? "[]")) as Record<string, unknown>[]) t.set(String(row.id), row);
       return new Response("", { status: 200 });
     }
+    if (method === "PATCH") {
+      const patch = JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>;
+      const hit = [...t.values()].filter(matches);
+      for (const row of hit) Object.assign(row, patch);
+      return new Response(JSON.stringify(hit.map((r) => ({ id: r.id }))), { status: 200 });
+    }
     if (method === "DELETE") {
       for (const [id, row] of [...t]) if (matches(row)) t.delete(id);
       return new Response("", { status: 200 });
@@ -223,7 +230,7 @@ function contractSuite(name: string, make: () => ExitApiClient): void {
     });
     it("listings: a saved listing is in the shared pool", async () => {
       const api = make();
-      await api.saveListings([{ id: "lst-z", code: "Project Z", listedAt: "t", profile: { name: "Z" } as never, publicView: { sector: "AI", region: "North America", revenueUsd: 1, growthPct: 0, ebitdaMarginPct: 0 } }]);
+      await api.saveListings([{ id: "lst-z", code: "Project Z", listedAt: "t", publicView: { sector: "AI", region: "North America" } }]);
       expect((await api.listListings()).some((l) => l.id === "lst-z")).toBe(true);
     });
     it("NDA + offer lifecycle", async () => {
@@ -265,11 +272,26 @@ describe("ownership hardening — owner-scoped listing writes", () => {
     const api = new SupabaseExitApi({ url: "https://x.supabase.co", anonKey: "anon", fetchImpl: fakeSupabaseFetch() });
     api.setAccessToken("jwt", "userU");
     const mk = (id: string, owner?: string): Parameters<typeof api.saveListings>[0][number] =>
-      ({ id, ownerAccountId: owner, code: "Project X", listedAt: "t", profile: { name: id } as never, publicView: { sector: "AI", region: "North America", revenueUsd: 1, growthPct: 0, ebitdaMarginPct: 0 } });
+      ({ id, ownerAccountId: owner, code: "Project X", listedAt: "t", publicView: { sector: "AI", region: "North America" } });
     // a session that holds the whole pool tries to write all of it…
     await api.saveListings([mk("mine", "userU"), mk("theirs", "userOther"), mk("seed", undefined)]);
     const pool = await api.listListings();
     // …but only the user's own listing is sent (RLS would reject the rest)
     expect(pool.map((l) => l.id)).toEqual(["mine"]);
+  });
+});
+
+describe("SupabaseExitApi status changes are updates, and a refused update is an error", () => {
+  it("sends PATCH for an NDA resolution and throws when RLS leaves no row to update", async () => {
+    const calls: Array<{ method: string; url: string }> = [];
+    const f = (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+      const method = init?.method ?? "GET"; calls.push({ method, url: String(input) });
+      if (method === "GET") return new Response(JSON.stringify([{ data: { id: "nda-1", listingId: "l", buyerAccountId: "b", status: "requested", requestedAt: "t", resolvedAt: null } }]), { status: 200 });
+      return new Response("[]", { status: 200 });   // PATCH matched nothing: not permitted
+    }) as typeof fetch;
+    const api = new SupabaseExitApi({ url: "https://x.supabase.co", anonKey: "anon", fetchImpl: f });
+    await expect(api.updateNdaRequest("nda-1", { status: "signed" })).rejects.toThrow("not permitted");
+    expect(calls.some((c) => c.method === "PATCH" && c.url.includes("exitos_nda_requests?id=eq.nda-1"))).toBe(true);
+    expect(calls.some((c) => c.method === "POST")).toBe(false);
   });
 });

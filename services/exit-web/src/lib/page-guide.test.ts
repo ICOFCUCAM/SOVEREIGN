@@ -21,6 +21,6 @@ describe("page guide", () => {
   it("covers buyer profiles by prefix and nothing unknown", () => {
     expect(pageGuide("/console/buyer/abc", "founder")?.purpose).toMatch(/One buyer/);
     expect(pageGuide("/console/upgrade", "founder")).toBeNull();
-    expect(PAGE_GUIDE_PATHS.length).toBe(40); // every route but Upgrade
+    expect(PAGE_GUIDE_PATHS.length).toBe(42); // every route but Upgrade (Company Story added in D4)
   });
 });

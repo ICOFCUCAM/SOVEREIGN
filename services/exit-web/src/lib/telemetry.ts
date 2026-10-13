@@ -5,7 +5,7 @@
 // offer evaluations, page views) and we accumulate the calibration
 // surface that powers the Acquisition Intelligence Engine.
 
-import { DEMO_TENANT_ID } from "./data-room";
+import { liveUserToken } from "./exit-api";
 
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)
   ?? "https://qvjdivcdefuprnenedje.supabase.co";
@@ -120,9 +120,6 @@ export type TelemetryEvent =
 
 const queue: TelemetryEvent[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
-let tenantId: string = DEMO_TENANT_ID;
-
-export function setTenant(id: string): void { tenantId = id; }
 
 function scheduleFlush(): void {
   if (flushTimer) return;
@@ -133,15 +130,19 @@ export async function flush(): Promise<void> {
   if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
   if (queue.length === 0) return;
   const batch = queue.splice(0, MAX_BATCH);
+  // sent as the signed-in user, whose account is the tenant; without a live
+  // session nothing leaves this browser (the batch is dropped)
+  const token = await liveUserToken().catch(() => undefined);
+  if (!token) return;
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/exit-telemetry`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Authorization": `Bearer ${token}`,
         "apikey": SUPABASE_ANON_KEY,
         "content-type": "application/json",
       },
-      body: JSON.stringify({ tenantId, events: batch }),
+      body: JSON.stringify({ events: batch }),
     });
     if (!res.ok && typeof console !== "undefined") {
       // Telemetry must never throw — log + drop.

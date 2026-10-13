@@ -18,9 +18,12 @@ import {
   type BuyerDiscoveryReport,
   type DueDiligenceReport,
   type NdaInstance,
+  type CompanyProfile,
 } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile";
 import { canonicalValuationFor } from "./canonical-valuation";
+import { memorandumInputs } from "./documents/memorandum-inputs";
+import type { CompanyStory } from "@exit/engines";
 import { RESERVATION_LINES, SAMPLE_OFFERS } from "./engines";
 import { listDocuments } from "./data-room";
 import { emitRunStarted, emitRunStep, emitRunCompleted, flush } from "./telemetry";
@@ -132,11 +135,17 @@ function sleep(ms: number): Promise<void> {
 const STEP_DELAY_MS = 380;                   // visible-but-fast pacing
 
 export interface RunExitOptions {
+  /** The company to run on; the demo company when omitted. */
+  company?: CompanyProfile;
+  /** The company's story (the same one the Document Generator uses). */
+  story?: CompanyStory;
   readonly onStepChange?: (run: ExitRun) => void;
   readonly fastMode?: boolean;                // skip artificial pacing
 }
 
 export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun> {
+  // the founder's company when given (the saved intake), else the demo company
+  const C = opts.company ?? SAMPLE_COMPANY;
   const run: ExitRun = {
     id: `run-${Date.now().toString(36)}`,
     startedAt: new Date().toISOString(),
@@ -179,41 +188,43 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
 
   try {
     // 1. Profile
-    await runStep("profile", () => SAMPLE_COMPANY,
+    await runStep("profile", () => C,
       (c) => `${c.name} · ${c.sector.replace(/_/g, " ")} · ${(c.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(1)}M ARR`);
 
     // 2. Valuation
     const valuation = await runStep("valuation", () => ({
-      standard:    runValuation(SAMPLE_COMPANY, { reportType: "standard" }),
+      standard:    runValuation(C, { reportType: "standard" }),
       // D1: the run's headline value is the institutional framework's.
-      strategic:   canonicalValuationFor(SAMPLE_COMPANY),
-      replacement: assetReplacementReport(SAMPLE_COMPANY),
+      strategic:   canonicalValuationFor(C),
+      replacement: assetReplacementReport(C),
     }), (v) => `Strategic mid $${(v.strategic.headline.mid / 1_000_000).toFixed(0)}M (band $${(v.strategic.headline.low / 1_000_000).toFixed(0)}M–$${(v.strategic.headline.high / 1_000_000).toFixed(0)}M)`);
     run.artifacts.valuation = valuation;
 
     // 3. Readiness
     const readiness = await runStep("readiness", () => {
-      const report = runReadiness(SAMPLE_COMPANY);
-      const analysis = runReadinessAnalysis(SAMPLE_COMPANY, report);
+      const report = runReadiness(C);
+      const analysis = runReadinessAnalysis(C, report);
       return { report, analysis };
     }, (r) => `Score ${r.report.overallScore.toFixed(0)}/100 · ${r.report.band.replace(/_/g, " ")} · ${r.analysis.weaknesses.length} improvements identified`);
     run.artifacts.readiness = readiness;
 
     // 4. CIM
     const memoGen = new TemplateMemorandumGenerator();
-    const buyersPreliminary = runBuyerDiscovery(SAMPLE_COMPANY, { limit: 12 });
-    const diligence = runDueDiligence(SAMPLE_COMPANY);
+    const buyersPreliminary = runBuyerDiscovery(C, { limit: 12 });
+    const diligence = runDueDiligence(C);
     run.artifacts.diligence = diligence;
+    // the same inputs as every other memorandum: code name, canonical valuation, timeline, assumed fields
+    const shared = memorandumInputs(C, C !== SAMPLE_COMPANY, opts.story);
     const cim = await runStep("cim", () => memoGen.generate("cim", {
-      company: SAMPLE_COMPANY, valuation: valuation.strategic,
-      readiness: readiness.report, buyers: buyersPreliminary, diligence,
+      company: C, valuation: valuation.strategic,
+      readiness: readiness.report, buyers: buyersPreliminary, diligence, ...shared,
     }), (m) => `${m.sections.length} sections · ${m.wordCount.toLocaleString()} words`);
     run.artifacts.cim = cim;
 
     // 5. Teaser
     const teaser = await runStep("teaser", () => memoGen.generate("buyer_teaser", {
-      company: SAMPLE_COMPANY, valuation: valuation.strategic,
-      readiness: readiness.report, buyers: buyersPreliminary, diligence,
+      company: C, valuation: valuation.strategic,
+      readiness: readiness.report, buyers: buyersPreliminary, diligence, ...shared,
       anonymize: true,
     }), (m) => `Anonymized · ${m.wordCount.toLocaleString()} words · ${m.sections.length} sections`);
     run.artifacts.teaser = teaser;
@@ -226,13 +237,13 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
       } catch {
         return 0;                              // network/permission failures are non-fatal
       }
-    }, (n) => n > 0 ? `Active · ${n} document${n === 1 ? "" : "s"} indexed` : `Provisioned · 7 rooms ready (financial · market · growth · tech · security · legal · commercial)`);
+    }, (n) => n > 0 ? `Active · ${n} document${n === 1 ? "" : "s"} indexed` : `No documents uploaded yet · 7 packages to fill (financial · market · growth · tech · security · legal · commercial)`);
     run.artifacts.dataRoomDocs = dataRoomDocs;
 
     // 7. NDA — load templates + draft against top buyers (held locally, not sent)
-    const listingPrivate = createListing(SAMPLE_COMPANY, { visibility: "private_full" });
-    const listingPublic  = createListing(SAMPLE_COMPANY, { visibility: "public_anonymized" });
-    const founderParty = { id: `founder-${SAMPLE_COMPANY.id}`, name: SAMPLE_COMPANY.name, representativeEmail: "founder@example.com" };
+    const listingPrivate = createListing(C, { visibility: "private_full" });
+    const listingPublic  = createListing(C, { visibility: "public_anonymized" });
+    const founderParty = { id: `founder-${C.id}`, name: C.name, representativeEmail: "founder@example.com" };
     const ndas = await runStep("nda", () => {
       const issued: NdaInstance[] = [];
       for (const c of buyersPreliminary.candidates.slice(0, 5)) {
@@ -252,7 +263,7 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
     run.artifacts.ndasIssued = ndas;
 
     // 8. Buyer list (already computed in step 4 — re-run with full limit for the artifact)
-    const buyers = await runStep("buyers", () => runBuyerDiscovery(SAMPLE_COMPANY, { limit: 20 }),
+    const buyers = await runStep("buyers", () => runBuyerDiscovery(C, { limit: 20 }),
       (b) => `${b.candidates.length} qualified · ${b.byType.strategic} strategic · ${b.byType.pe} PE · ${b.byType.vc} VC · ${b.byType.family_office} family office`);
     run.artifacts.buyers = buyers;
 

@@ -1,18 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { PageHeader, Section, Metric, Provenance } from "../components/xo";
+import { PageHeader, Section, Metric, Provenance, Empty } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany } from "../lib/active-company";
-import { listingFromCompany, allListings } from "../lib/listings";
+import { listingFromCompany, allListings, findOwnListing } from "../lib/listings";
 import {
-  eventsForSubject, ndaRequestsForListing, signNda, offersForListing, resolveOffer,
+  eventsForSubject, ndaRequestsForListing, offersForListing, resolveOffer,
   dealsForListing, advanceDeal, DEAL_STAGES, dealStageIndex, allMandates,
   listingDestination, type NdaRequest, type Offer, type Deal, type DealStage, type Mandate,
 } from "../lib/exit-api";
 import { matchCompanyToCriteria } from "../lib/acquirer";
-import { captureDealEvent, subscribe, type DealEvent } from "../lib/deal-events";
+import { subscribe, type DealEvent } from "../lib/deal-events";
 import type { Region } from "@exit/engines";
 
 const DEMO_LISTING_ID = "lst-demo-helios";
@@ -68,7 +68,7 @@ const FounderInbox: React.FC = () => {
   // the founder's own listing id is deterministic from their company; the
   // inbox tracks interest landing on it whether or not it's listed yet. With
   // no intake the demo company is the exchange's seeded demo listing.
-  const listing = useMemo(() => listingFromCompany(company, fromIntake ? undefined : DEMO_LISTING_ID), [company, fromIntake]);
+  const listing = useMemo(() => (fromIntake ? findOwnListing(company) ?? listingFromCompany(company) : listingFromCompany(company, DEMO_LISTING_ID)), [company, fromIntake]);
   const isLive = useMemo(() => allListings().some((l) => l.id === listing.id), [listing.id]);
 
   const [events, setEvents] = useState<DealEvent[]>([]);
@@ -85,12 +85,12 @@ const FounderInbox: React.FC = () => {
     // liquidity: which published buyer mandates match THIS listing
     void allMandates().then((ms) => setMatched(ms
       .map((m) => {
-        const r = matchCompanyToCriteria(listing.profile, { sectors: [...m.sectors], minRevUsd: m.minCheckUsd, maxRevUsd: m.maxCheckUsd, regions: [...m.regions] as Region[], minGrowthPct: m.minGrowthPct });
+        const r = matchCompanyToCriteria(company, { sectors: [...m.sectors], minRevUsd: m.minCheckUsd, maxRevUsd: m.maxCheckUsd, regions: [...m.regions] as Region[], minGrowthPct: m.minGrowthPct });
         return { m, score: r.score, qualified: r.qualified };
       })
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score)));
-  }, [listing.id]);
+  }, [listing.id, company]);
 
   const [pending, setPending] = useState<Pending>(null);
   const trigger = useRef<HTMLElement | null>(null);
@@ -111,11 +111,6 @@ const FounderInbox: React.FC = () => {
   const executedNdas = ndas.filter((r) => r.status === "signed");
   const openOffers = offers.filter((o) => o.status === "submitted");
 
-  const execute = (req: NdaRequest): void => {
-    void signNda(req.id).then(refresh);
-    // capture the telemetry too (feeds the funnel + engagement analytics)
-    captureDealEvent({ actorRole: "founder", kind: "nda_signed", subjectType: "listing", subjectId: listing.id, subjectName: listing.code });
-  };
   const decide = (offer: Offer, status: "accepted" | "rejected"): void => {
     void resolveOffer(offer.id, status).then(refresh);
   };
@@ -128,7 +123,7 @@ const FounderInbox: React.FC = () => {
     <div data-page="inbox" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Founder · Demand · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Inbox"
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className={`rounded-sm border px-1.5 py-px text-[11px] font-semibold ${isLive ? "border-xo-verified/50 text-xo-verified" : "border-xo-caution/50 text-xo-caution"}`}>{isLive ? "Listed" : "Draft"}</span></>}
-        description={<>Listing <span className="font-mono">{listing.code}</span> · {listing.publicView.sector} · {listing.publicView.region} · revenue {usd(listing.publicView.revenueUsd)}. {fromIntake
+        description={<>Listing <span className="font-mono">{listing.code}</span> · {listing.publicView.sector} · {listing.publicView.region} · revenue {usd(company.revenue.trailingTwelveMonthsRevenueUsd)} (buyers see {listing.publicView.revenueBand?.label ?? "no figure"}). {fromIntake
           ? "Your company's listing, from your saved intake."
           : <>No intake saved, so this shows the demo company's listing on the exchange — requests and offers here come from anyone using the demo. <Link to="/console/intake" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Save an intake</Link> to see your own.</>}</>} />
 
@@ -166,7 +161,7 @@ const FounderInbox: React.FC = () => {
               </li>
             ))}
           </ul>
-        ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No published mandates match yet. As buyers publish acquisition mandates on the radar, qualified demand appears here before you ever run a process.</p>}
+        ) : <Empty title="No published mandates match yet.">As buyers publish acquisition mandates on the radar, qualified demand appears here before you ever run a process.</Empty>}
       </Section>
 
       {/* deal pipeline — advance each transaction through the lifecycle */}
@@ -207,13 +202,13 @@ const FounderInbox: React.FC = () => {
               );
             })}
           </ul>
-        ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No open deals yet. A deal opens when a buyer requests an NDA or submits an offer on {listing.code}.</p>}
+        ) : <Empty title="No open deals yet.">A deal opens when a buyer requests an NDA or submits an offer on {listing.code}.</Empty>}
       </Section>
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
         {/* pending NDA requests — first-class records to resolve */}
         <Section title="NDA requests · awaiting you"
-          foot="Execute NDA marks the request signed; the buyer sees “NDA signed”. ExitOS does not send or sign an NDA document and does not reveal your company to the buyer — share it yourself once the NDA is in place. Buyers are shown anonymously.">
+          foot="Issue the NDA from the NDA page. It executes only when you and the buyer have both signed and each has verified the other's signature; a request is marked signed only by that execution, never by hand. Buyers are shown anonymously.">
           {pendingNdas.length ? (
             <ul>
               {pendingNdas.map((r) => (
@@ -222,15 +217,11 @@ const FounderInbox: React.FC = () => {
                     <span className="font-semibold">A buyer</span> <span className="text-xo-muted">requested an NDA</span>
                     <span className="ml-2 font-mono text-[11px] text-xo-faint">{timeAgo(r.requestedAt)}</span>
                   </div>
-                  <button type="button" onClick={ask({ kind: "nda", id: r.id })} aria-expanded={isPending("nda", r.id)} className={BTN}>Execute NDA…</button>
-                  {isPending("nda", r.id) && (
-                    <Confirm text="Mark this NDA request as executed? The buyer will see “NDA signed”. No document is sent or signed, and your company is not revealed. This cannot be undone here."
-                      confirm="Mark executed" onConfirm={() => { setPending(null); execute(r); }} onCancel={cancel} />
-                  )}
+                  <Link to="/console/nda" className={BTN}>Issue the NDA →</Link>
                 </li>
               ))}
             </ul>
-          ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No NDA requests awaiting you.</p>}
+          ) : <Empty title="No NDA requests awaiting you." />}
         </Section>
 
         {/* offers — first-class records to accept / decline */}
@@ -260,7 +251,7 @@ const FounderInbox: React.FC = () => {
                 </li>
               ))}
             </ul>
-          ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No offers yet.</p>}
+          ) : <Empty title="No offers yet." />}
         </Section>
       </div>
 
@@ -284,9 +275,9 @@ const FounderInbox: React.FC = () => {
             })}
           </ul>
         ) : (
-          <p className="px-4 py-8 text-center text-[12px] text-xo-muted">
-            No interest yet. When a buyer on the <Link to="/console/acquisition-radar" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar</Link> expresses interest in {listing.code}, it lands here.
-          </p>
+          <Empty title="No interest yet.">
+            When a buyer on the <Link to="/console/acquisition-radar" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar</Link> expresses interest in {listing.code}, it lands here.
+          </Empty>
         )}
       </Section>
     </div>

@@ -2,13 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   docToMarkdown, docFilename, buyerIntroLetter, introFilename, buyerListCsv,
   valuationMemo, institutionalValuationMemo, buyerShortlistMemo, riskReportDoc, structuredDoc, frameDoc,
-  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc, tracedDocMarkdown,
+  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, wealthPlanDoc, tracedDocMarkdown,
 } from "./deliverables.js";
 import { BUYERS, VALUATION_STRATEGIC, VALUATION_INSTITUTIONAL, VALUATION_FACTS, DOCUMENT_SUITE, OFFER_COMPARISON, NEGOTIATION_STATE, DILIGENCE } from "./engines.js";
 import { TemplateMemorandumGenerator } from "@exit/engines";
 import type { MemorandumKind } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile.js";
 import { discoverFindings, buildSellerReport } from "./diligence-intel.js";
+import { closingChecklistDoc } from "./closing-checklist.js";
 
 const noPlaceholders = (s: string): void => {
   expect(s).not.toMatch(/undefined|NaN|\[object Object\]/);
@@ -126,11 +127,13 @@ describe("deliverables", () => {
 
   it("intro letter is personalized and confidential", () => {
     const b = BUYERS.candidates[0];
-    const letter = buyerIntroLetter({ buyer: b, projectName: "Project Cipher", askMid: VALUATION_STRATEGIC.headline.mid, fromName: "Anne Kovac" });
+    const letter = buyerIntroLetter({ buyer: b, projectName: "Project Cipher", fromName: "Anne Kovac" });
     expect(letter).toContain("STRICTLY CONFIDENTIAL");
     expect(letter).toContain(b.buyer.name);
     expect(letter).toContain(b.buyer.thesis);
     expect(introFilename(b)).toMatch(/^intro-.+\.txt$/);
+    // pre-NDA: no company value
+    expect(letter).not.toMatch(/enterprise value/i);
     noPlaceholders(letter);
   });
 
@@ -138,7 +141,8 @@ describe("deliverables", () => {
     const doc = await new TemplateMemorandumGenerator().generate("buyer_teaser", { company: SAMPLE_COMPANY, valuation: VALUATION_STRATEGIC });
     const md = docToMarkdown(doc);
     expect(md).toContain(`# ${doc.title}`);
-    expect(docFilename(doc)).toMatch(/\.md$/);
+    expect(docFilename(doc, "Project Atlas")).toMatch(/^exitos-buyer-teaser-project-atlas-\d{4}-\d{2}-\d{2}\.md$/);
+    expect(docFilename(doc, "Project Atlas")).not.toContain(SAMPLE_COMPANY.name.toLowerCase().split(" ")[0]);
     noPlaceholders(md);
   });
 
@@ -168,10 +172,10 @@ describe("all generated documents have content", () => {
       dynamics: OFFER_COMPARISON.delta.map((d) => [d.term, d.notes] as [string, string]),
       posture: [`Leverage: ${NEGOTIATION_STATE.leverage}`, `Leading bid: ${leaderName ?? "—"}`],
     }),
-    "closing-checklist.md": closingChecklistDoc,
+    "closing-checklist.md": () => closingChecklistDoc({}),
     "wealth-transition-plan.md": () => wealthPlanDoc(fmt(VALUATION_STRATEGIC.headline.mid)),
     "buyer-shortlist.csv": () => buyerListCsv(shortlist),
-    "intro-letter.txt": () => buyerIntroLetter({ buyer: shortlist[0], projectName: "Project Cipher", askMid: VALUATION_STRATEGIC.headline.mid, fromName: "Anne Kovac" }),
+    "intro-letter.txt": () => buyerIntroLetter({ buyer: shortlist[0], projectName: "Project Cipher", fromName: "Anne Kovac" }),
   };
 
   for (const [filename, build] of Object.entries(builds)) {
@@ -200,26 +204,57 @@ describe("all generated documents have content", () => {
     }
   });
 
-  it("memoranda INHERIT the Valuation Constitution when supplied", async () => {
+  it("buyer memoranda state no price, even when the valuation constitution is supplied", async () => {
     const gen = new TemplateMemorandumGenerator();
-    const fwVersion = VALUATION_INSTITUTIONAL.frameworkVersion;
-    // CIM, exec summary and deck must render the framework's governed figures
-    for (const kind of ["cim", "executive_summary", "investor_deck"] as const) {
+    for (const kind of ["cim", "executive_summary", "investor_deck", "buyer_teaser"] as const) {
       const doc = await gen.generate(kind, {
         company: SAMPLE_COMPANY, valuation: VALUATION_STRATEGIC,
         constitution: VALUATION_INSTITUTIONAL, buyers: BUYERS, diligence: DILIGENCE,
       });
       const md = docToMarkdown(doc);
-      expect(md, kind).toContain(`Framework v${fwVersion}`);
-      // the governed midpoint figure appears verbatim (no per-doc recomputation)
-      expect(md, kind).toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.midpoint_valuation);
+      expect(md, kind).not.toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.midpoint_valuation);
+      expect(md, kind).not.toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.enterprise_value_range);
+      expect(md, kind).not.toMatch(/Valuation Framework|strategic premium|buyer universe|probability of engagement/i);
     }
-    // the anonymized teaser inherits the basis without leaking absolute figures
-    const teaser = await gen.generate("buyer_teaser", {
-      company: SAMPLE_COMPANY, valuation: VALUATION_STRATEGIC, constitution: VALUATION_INSTITUTIONAL,
-    });
-    const tmd = docToMarkdown(teaser);
-    expect(tmd).toContain(`Framework v${fwVersion}`);
-    expect(tmd).not.toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.midpoint_valuation);
+  });
+});
+
+describe("sample data is labelled", () => {
+  it("the offer comparison says its figures are not the company's; the closing checklist carries the person's own statuses", () => {
+    const oc = offerComparisonDoc({ summary: "s", offers: [], dynamics: [], posture: [] });
+    expect(oc).toContain("SAMPLE DATA — NOT YOUR COMPANY'S");
+    expect(oc).toContain("Sample data, not company records");
+    expect(closingChecklistDoc({})).not.toContain("SAMPLE DATA");          // now the person's own statuses
+  });
+  it("company documents carry no sample banner", () => {
+    expect(structuredDoc("T", "S", [{ heading: "h", body: "b" }])).not.toContain("SAMPLE DATA");
+  });
+  it("the wealth plan does not claim a state-tax or QSBS model", () => {
+    const w = wealthPlanDoc("$10M");
+    expect(w).toContain("does not model state tax or QSBS");
+    expect(w).not.toMatch(/modeled through federal and state tax/);
+  });
+  it("the data-room policy claims no verification", () => {
+    const d = dataRoomGatingDoc(7);
+    expect(d).toContain("does not verify a buyer's identity, funds or acquisition history");
+    expect(d).not.toMatch(/Funds verified|Identity verified/);
+  });
+});
+
+describe("one closing checklist", () => {
+  it("the export renders exactly the rows the Closing page shows, with the person's statuses", async () => {
+    const { closingRows, CLOSING_ITEMS, STATUS_LABEL } = await import("./closing-checklist.js");
+    const statuses = { "c-01": "done", "c-07": "blocked" } as const;
+    const rows = closingRows(statuses);
+    const md = closingChecklistDoc(statuses);
+    expect(rows).toHaveLength(CLOSING_ITEMS.length);
+    for (const r of rows) {
+      expect(md).toContain(r.title);
+      expect(md).toContain(r.timing);
+    }
+    expect(md).toContain(`| 1 | ${rows[0].title} | Counsel | ${rows[0].timing} |  | ${STATUS_LABEL.done} |`);
+    expect(md).toContain("1 of 12 items marked done, 0 in progress, 1 blocked");
+    // no invented statuses or terms
+    expect(md).not.toMatch(/≤8%|30–45 day|≥95%/);
   });
 });

@@ -1,4 +1,7 @@
 import React, { useMemo } from "react";
+import { DemoExample } from "../components/DemoExample";
+import { loadActiveCompany } from "../lib/active-company";
+import { Link } from "react-router-dom";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
@@ -18,7 +21,7 @@ const stages: ReadonlyArray<{ label: string; n: number; note: string }> = [
   { label: "Closed", n: F.closed, note: "definitive" },
 ];
 
-const ProcessIntelligence: React.FC = () => {
+const ProcessIntelligenceDemo: React.FC = () => {
   const max = Math.max(F.matched, 1);
   const tape = useMemo(() => buildMarketTape(), []);
   return (
@@ -83,6 +86,18 @@ const ProcessIntelligence: React.FC = () => {
         </Section>
       </div>
     </div>
+  );
+};
+
+// With a saved intake the founder's own records are shown (none yet), and the
+// demo company's example only on request.
+const ProcessIntelligence: React.FC = () => {
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
+  return (
+    <DemoExample fromIntake={fromIntake} page={{ id: "process-intel", eyebrow: "◉ Founder · Buyer funnel", title: "Process Intelligence" }}
+      title="No process data recorded for your company" demo={<ProcessIntelligenceDemo />}>
+      <>The funnel is built from NDAs and offers, and none are recorded for your company yet. Activity on your listing is in your <Link to="/console/inbox" className="font-medium text-xo-action underline">Inbox</Link>.</>
+    </DemoExample>
   );
 };
 

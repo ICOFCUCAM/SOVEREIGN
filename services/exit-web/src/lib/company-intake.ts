@@ -57,11 +57,21 @@ export const DEFAULT_INTAKE: IntakeInputs = {
   hasDataMoat: false,
 };
 
+/** Profile fields buildProfile sets to neutral values because the intake does not ask for them.
+ *  The engines need them to run; documents must not state them as facts (MemorandumInputs.assumed). */
+export const ASSUMED_PROFILE_FIELDS: readonly string[] = [
+  "market.addressableMarketUsd", "market.marketGrowthPct", "market.competitiveDensity", "market.regulatoryRisk",
+  "product.differentiation", "product.defensibility", "product.technicalArchitecture",
+  "team.headcount", "team.foundersStillActive", "team.leadershipBenchStrength", "cap",
+  "revenue.grossRetentionPct", "growth.customerGrowthYoyPct", "cap.fullyDilutedShares",
+];
+
 /** Build a full, engine-ready CompanyProfile from the founder's inputs. */
 export function buildProfile(i: IntakeInputs): CompanyProfile {
   const rule40 = i.growthPct + i.ebitdaMarginPct;
   return {
     id: "intake",
+    assumed: ASSUMED_PROFILE_FIELDS,
     name: i.name.trim() || "Your Company",
     jurisdiction: (i.jurisdiction || "US").toUpperCase(),
     businessModel: MODEL_FOR[i.sector],

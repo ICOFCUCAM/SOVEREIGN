@@ -5,7 +5,7 @@ import { canAccess, needsUpgrade, homeFor, featureLabel } from "./lib/access";
 import Shell from "./components/Shell";
 import { ExchangeMark } from "./components/ExchangeMark";
 import Landing from "./pages/Landing";
-import SignIn from "./pages/SignIn";
+import SignIn, { ChooseSide } from "./pages/SignIn";
 
 const Pricing      = lazy(() => import("./pages/Pricing"));
 // Development-only design preview (not routed in production builds).
@@ -34,6 +34,7 @@ const Documents    = lazy(() => import("./pages/Documents"));
 const Nda          = lazy(() => import("./pages/Nda"));
 const Pipeline     = lazy(() => import("./pages/Pipeline"));
 const Closing      = lazy(() => import("./pages/Closing"));
+const Deals        = lazy(() => import("./pages/Deals"));
 const Marketplace  = lazy(() => import("./pages/Marketplace"));
 const Calibration  = lazy(() => import("./pages/Calibration"));
 const Simulator    = lazy(() => import("./pages/Simulator"));
@@ -47,6 +48,8 @@ const KnowledgeGraph = lazy(() => import("./pages/KnowledgeGraph"));
 const OutcomeIntelligence = lazy(() => import("./pages/OutcomeIntelligence"));
 const Indexes      = lazy(() => import("./pages/Indexes"));
 const Intake       = lazy(() => import("./pages/Intake"));
+const CompanyStory = lazy(() => import("./pages/CompanyStory"));
+const Reviews      = lazy(() => import("./pages/Reviews"));
 const AcquisitionRadar = lazy(() => import("./pages/AcquisitionRadar"));
 const ProcessIntelligence = lazy(() => import("./pages/ProcessIntelligence"));
 const OutreachPlan = lazy(() => import("./pages/OutreachPlan"));
@@ -65,10 +68,11 @@ const Network      = lazy(() => import("./pages/Network"));
 const Upgrade      = lazy(() => import("./pages/Upgrade"));
 const Admin        = lazy(() => import("./pages/Admin"));
 
+// shown while a page's code loads; announced to assistive technology as a status, not just drawn
 const RouteFallback: React.FC = () => (
-  <div className="flex flex-col items-center justify-center gap-3 py-24">
+  <div role="status" aria-live="polite" className="flex flex-col items-center justify-center gap-3 py-24">
     <ExchangeMark size={44} loading title="Loading ExitOS" />
-    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/35">Routing the exchange…</span>
+    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/55">Routing the exchange…</span>
   </div>
 );
 
@@ -87,6 +91,8 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
   { path: "/",             policy: "/console",                el: <Terminal /> },
   { path: "command",       policy: "/console",                el: <Dashboard /> },
   { path: "intake",        policy: "/console/intake",         el: <Intake /> },
+  { path: "company-story", policy: "/console/company-story",  el: <CompanyStory /> },
+  { path: "reviews",       policy: "/console/reviews",        el: <Reviews /> },
   { path: "acquisition-radar", policy: "/console/acquisition-radar", el: <AcquisitionRadar /> },
   { path: "commander",     policy: "/console/commander",      el: <Commander /> },
   { path: "network",       policy: "/console/network",        el: <Network /> },
@@ -116,6 +122,7 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
   { path: "outreach-plan", policy: "/console/outreach-plan",  el: <OutreachPlan /> },
   { path: "engagement-registry", policy: "/console/engagement-registry", el: <EngagementRegistry /> },
   { path: "closing",       policy: "/console/closing",        el: <Closing /> },
+  { path: "deals",         policy: "/console/deals",          el: <Deals /> },
   { path: "marketplace",   policy: "/console/marketplace",    el: <Marketplace /> },
   { path: "valuation",     policy: "/console/valuation",      el: <Valuation /> },
   { path: "diligence-ai",  policy: "/console/diligence-ai",   el: <DiligenceAI /> },
@@ -128,8 +135,18 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
 ];
 
 const Console: React.FC = () => {
-  const { session } = useAuth();
+  const { session, ready } = useAuth();
+  // the phone browser's bar takes the console's ink, and the site's graphite back on leaving
+  React.useEffect(() => {
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const site = meta?.content;
+    meta?.setAttribute("content", "#0a1018");
+    return () => { if (meta && site) meta.setAttribute("content", site); };
+  }, []);
+  if (!ready) return <RouteFallback />;
   if (!session) return <SignIn />;
+  // a verified account says once whether it sells or buys (operators excepted)
+  if (session.verified && !session.side && session.role !== "superadmin") return <ChooseSide />;
   return (
     <Shell>
       <Suspense fallback={<RouteFallback />}>

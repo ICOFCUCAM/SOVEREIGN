@@ -32,16 +32,16 @@ test('template generator produces all five document kinds', async () => {
   }
 });
 
-test('CIM inherits the Valuation Constitution — no per-document valuation logic', async () => {
+test('buyer memoranda state no price: no valuation, range, premium or framework figures', async () => {
   const gen = new TemplateMemorandumGenerator();
   const constitution = runValuationConstitution(SAMPLE_SAAS);
-  const doc = await gen.generate('cim', { ...inputs(), constitution });
-  const text = doc.sections.map((s) => `${s.heading}\n${s.body}\n${(s.tables ?? []).flatMap((t) => t.rows.flat()).join(' ')}`).join('\n');
-  // the governed midpoint and framework stamp appear verbatim
-  assert.ok(text.includes(constitution.mandatoryOutputs.midpoint_valuation), 'CIM shows the constitution midpoint');
-  assert.ok(text.includes(`Framework v${constitution.frameworkVersion}`), 'CIM stamps the framework version');
-  // the mandatory strategic-premium basis is inherited, not invented
-  assert.ok(text.includes(constitution.mandatoryOutputs.strategic_premium_basis));
+  for (const kind of ['cim', 'executive_summary', 'investor_deck', 'buyer_teaser']) {
+    const doc = await gen.generate(kind, { ...inputs(), constitution });
+    const text = doc.sections.map((s) => `${s.heading}\n${s.body}\n${(s.bullets ?? []).join('\n')}\n${(s.tables ?? []).flatMap((t) => t.rows.flat()).join(' ')}`).join('\n');
+    assert.ok(!text.includes(constitution.mandatoryOutputs.midpoint_valuation), `${kind}: no midpoint`);
+    assert.ok(!text.includes(constitution.mandatoryOutputs.enterprise_value_range), `${kind}: no range`);
+    assert.doesNotMatch(text, /enterprise value|valuation range|strategic premium|buyer universe|probability/i, kind);
+  }
 });
 
 test('buyer teaser anonymizes when requested', async () => {
@@ -53,6 +53,27 @@ test('buyer teaser anonymizes when requested', async () => {
   const fullText = doc.sections.map((s) => `${s.heading}\n${s.body}\n${(s.bullets ?? []).join('\n')}`).join('\n');
   assert.ok(!fullText.includes(SAMPLE_SAAS.name));
   assert.ok(fullText.includes('Project Cipher'));
+  // no jurisdiction, and no invented one
+  assert.ok(!fullText.includes('tier-one'));
+  assert.ok(!fullText.includes('headquartered in'));
+});
+
+test('teaser uses the code name it is given and makes no unsupported claims', async () => {
+  const loss = { ...SAMPLE_SAAS, revenue: { ...SAMPLE_SAAS.revenue, ebitdaMarginPct: -0.12 } };
+  const doc = await new TemplateMemorandumGenerator().generate('buyer_teaser', { ...inputs(), company: loss, anonymize: true, codeName: 'Project Atlas' });
+  const text = doc.sections.map((s) => `${s.body}\n${(s.bullets ?? []).join('\n')}`).join('\n');
+  assert.ok(doc.title.startsWith('Project Atlas'));
+  assert.ok(!text.includes('Project Cipher'));
+  assert.ok(!/profitable/i.test(text));           // a -12% margin is not 'profitable'
+  assert.ok(!/sector-leading/i.test(text));
+  assert.ok(!/Management team intends/i.test(text));
+});
+
+test('anonymized CIM names no jurisdiction', async () => {
+  const doc = await new TemplateMemorandumGenerator().generate('cim', { ...inputs(), anonymize: true });
+  const text = doc.sections.map((s) => s.body).join('\n');
+  assert.ok(!text.includes('tier-one'));
+  assert.ok(!text.includes(`headquartered in ${SAMPLE_SAAS.jurisdiction}`));
 });
 
 test('CIM includes valuation methodology table', async () => {

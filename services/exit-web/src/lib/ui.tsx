@@ -33,15 +33,25 @@ export const StageBadge: React.FC<{ stage: DealStage }> = ({ stage }) => (
   </span>
 );
 
+/** The console's lock: a line icon in the current colour (sized by `size`), for gated pages and steps. */
+export const LockIcon: React.FC<{ size?: number; className?: string }> = ({ size = 12, className = "" }) => (
+  <svg aria-hidden width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" className={`inline-block shrink-0 ${className}`}><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+);
+
+/** The console's close mark: two drawn strokes in the current colour (the typed ✕ varies by platform font). */
+export const CloseIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
+  <svg aria-hidden width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="block"><path d="M6 6l12 12M18 6 6 18" /></svg>
+);
+
 export const Card: React.FC<{ children: React.ReactNode; className?: string; id?: string }> = ({ children, className = "", id }) => (
   <div id={id} className={`rounded-lg border border-white/10 bg-ink-800/60 ${className}`}>{children}</div>
 );
 
 export const Kpi: React.FC<{ label: string; value: string; sub?: string; accent?: string }> = ({ label, value, sub, accent }) => (
   <Card className="p-5">
-    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{label}</div>
+    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">{label}</div>
     <div className="mt-2 text-3xl font-bold tabular-nums" style={accent ? { color: accent } : undefined}>{value}</div>
-    {sub && <div className="mt-1 text-[11px] text-white/45">{sub}</div>}
+    {sub && <div className="mt-1 text-[11px] text-white/55">{sub}</div>}
   </Card>
 );
 
@@ -57,7 +67,7 @@ export const Button: React.FC<
   return (
     <button
       {...p}
-      className={`inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 focus-visible:ring-offset-1 focus-visible:ring-offset-ink-900 disabled:opacity-40 disabled:cursor-not-allowed ${v} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition active:translate-y-px active:brightness-95 motion-reduce:active:translate-y-0 disabled:active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 focus-visible:ring-offset-1 focus-visible:ring-offset-ink-900 disabled:opacity-40 disabled:cursor-not-allowed ${v} ${className}`}
     />
   );
 };
@@ -84,30 +94,52 @@ function triggerDownload(filename: string, blob: Blob): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   notify(`Downloaded ${filename}`);
 }
+// the media type for what is actually in the file, by its extension
+const MIME: Record<string, string> = {
+  md: "text/markdown;charset=utf-8", csv: "text/csv;charset=utf-8", ics: "text/calendar;charset=utf-8",
+  json: "application/json", txt: "text/plain;charset=utf-8",
+};
+export const mimeFor = (filename: string): string => MIME[filename.split(".").pop()?.toLowerCase() ?? ""] ?? "text/plain;charset=utf-8";
+
+/** A filename safe on every system: lower case, letters, digits, dots and hyphens. */
+export const safeFilename = (name: string): string => {
+  const dot = name.lastIndexOf(".");
+  const [base, ext] = dot > 0 ? [name.slice(0, dot), name.slice(dot + 1)] : [name, ""];
+  const clean = (x: string): string => x.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w.-]+/g, "-").replace(/_/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return ext ? `${clean(base).slice(0, 100) || "document"}.${clean(ext)}` : clean(base).slice(0, 100) || "document";
+};
+
 export function downloadText(filename: string, text: string): void {
-  triggerDownload(filename, new Blob([text], { type: "text/plain;charset=utf-8" }));
+  const name = safeFilename(filename);
+  triggerDownload(name, new Blob([text], { type: mimeFor(name) }));
 }
 export function downloadJson(filename: string, data: unknown): void {
-  triggerDownload(filename, new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+  triggerDownload(safeFilename(filename), new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
 }
 
 export const Toast: React.FC = () => {
   const [msg, setMsg] = React.useState<string | null>(null);
+  const [n, setN] = React.useState(0);
   React.useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const handler = (e: Event): void => {
-      setMsg((e as CustomEvent<string>).detail);
+      setMsg((e as CustomEvent<string>).detail); setN((x) => x + 1);
       clearTimeout(timer);
       timer = setTimeout(() => setMsg(null), 2600);
     };
     window.addEventListener("exitos:toast", handler);
     return () => { window.removeEventListener("exitos:toast", handler); clearTimeout(timer); };
   }, []);
-  if (!msg) return null;
+  // the live region is always present (a region inserted with its message is often not announced); each
+  // message rises in, keyed so a repeat of the same text announces again
   return (
-    <div role="status" aria-live="polite"
-      className="pointer-events-none fixed bottom-6 right-6 z-[100] rounded-lg border border-deal-400/30 bg-ink-800/95 px-4 py-2.5 text-[13px] font-medium text-white shadow-xl shadow-black/40">
-      {msg}
+    <div role="status" aria-live="polite" className="pointer-events-none fixed bottom-6 right-6 z-[100]">
+      {msg && (
+        <div key={n} className="ex-toast flex items-center gap-2.5 rounded-lg border border-deal-400/30 bg-ink-800/95 px-4 py-2.5 text-[13px] font-medium text-white shadow-xl shadow-black/40 backdrop-blur">
+          <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-deal-300"><path d="M20 6 9 17l-5-5" /></svg>
+          {msg}
+        </div>
+      )}
     </div>
   );
 };
@@ -147,16 +179,18 @@ export const Modal: React.FC<{
   if (!open) return null;
   const maxW = size === "xl" ? "max-w-4xl" : size === "md" ? "max-w-lg" : "max-w-2xl";
   return (
-    <div className="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-[6vh] backdrop-blur-sm" onClick={onClose}>
-      <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={`w-full ${maxW} rounded-xl border border-white/10 bg-ink-800 shadow-2xl shadow-black/60 focus:outline-none`} onClick={(e) => e.stopPropagation()}>
+    // the backdrop fades and the dialog settles into place (not under reduced motion); scrolling inside
+    // never carries on into the page behind (overscroll-contain)
+    <div className="ex-scrim fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto overscroll-contain bg-black/70 px-4 py-[6vh] backdrop-blur-sm" onClick={onClose}>
+      <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={`ex-dialog w-full ${maxW} rounded-xl border border-white/10 bg-ink-800 shadow-2xl shadow-black/60 focus:outline-none`} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-4">
           <div className="min-w-0">
             <h2 id={titleId} className="font-serif text-lg font-bold leading-tight text-white">{title}</h2>
             {subtitle && <div className="mt-0.5 text-[12px] text-white/50">{subtitle}</div>}
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded-md p-1 text-white/50 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">✕</button>
+          <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded-md p-1 text-white/50 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action"><CloseIcon /></button>
         </div>
-        <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-h-[64vh] overflow-y-auto px-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action">{children}</div>
+        <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-h-[64vh] overflow-y-auto overscroll-contain px-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action">{children}</div>
         {footer && <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-white/10 px-6 py-4">{footer}</div>}
       </div>
     </div>

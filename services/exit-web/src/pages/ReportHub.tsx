@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { loadActiveCompany } from "../lib/active-company";
 import { buildBoardMemo } from "../lib/report-docs";
 import { boardMemoToDdm } from "../lib/dispatch-ddm";
-import { submitToDispatch } from "../lib/dispatch-client";
+import { renderVersionPdf } from "../lib/dispatch-client";
+import { useAuth } from "../lib/auth";
+import { useDocumentRemote } from "../lib/documents/remote";
+import { generateVersion } from "../lib/documents/service";
+import { saveVersion } from "../lib/documents/store";
 import { notify } from "../lib/ui";
 
 // ── PUBLISHING CENTER ───────────────────────────────────────────────
@@ -27,17 +31,30 @@ const DOCUMENTS: DocCard[] = [
 
 const ReportHub: React.FC = () => {
   const nav = useNavigate();
-  const { company } = useMemo(() => loadActiveCompany(), []);
+  const { company, companyId, unconfirmed } = useMemo(() => loadActiveCompany(), []);
+  const { session } = useAuth();
+  const remote = useDocumentRemote();
   const [dispatching, setDispatching] = useState(false);
 
+  // the board memorandum becomes a saved, hashed version, which Dispatch renders by id
   const submitBoardToDispatch = async (): Promise<void> => {
+    if (!remote || !session) { notify("PDF rendering needs a signed-in account (e-mail sign-in)."); return; }
     setDispatching(true);
-    const memo = buildBoardMemo(company);
-    const r = await submitToDispatch(boardMemoToDdm(memo), ["pdf"]);
-    setDispatching(false);
-    if (r.ok) notify(`Submitted to Dispatch · ${r.lifecycleState ?? r.status ?? "queued"}${r.documentId ? ` · ${r.documentId.slice(0, 8)}` : ""}`);
-    else if (!r.configured) notify("Sovereign Dispatch not connected yet — deploy the API and set its secrets");
-    else notify(`Dispatch error: ${r.error}`);
+    try {
+      const memo = buildBoardMemo(company);
+      const v = await generateVersion({
+        typeId: "exitos.board_memo_process", title: "Board Transaction Memorandum", sections: [], ddm: boardMemoToDdm(memo) as never,
+        producedBy: "lib/report-docs:buildBoardMemo", company, companyId, unconfirmed, inputs: { memo },
+        generatedBy: session.email, ownerName: company.name,
+      });
+      await saveVersion(v, remote);
+      const r = await renderVersionPdf(v.id, remote.accessToken);
+      if (r.ok) notify(`PDF requested from Dispatch${r.jobId ? ` · job ${r.jobId.slice(0, 8)}` : ""}`);
+      else if (!r.configured) notify("PDF rendering is not connected yet: the version is saved, but no PDF was produced.");
+      else notify(`Dispatch error: ${r.error}`);
+    } catch (e) {
+      notify(e instanceof Error ? e.message : "Could not prepare the document");
+    } finally { setDispatching(false); }
   };
 
   return (
@@ -53,7 +70,7 @@ const ReportHub: React.FC = () => {
           <h1 className="mt-2 font-serif text-[40px] font-bold leading-tight text-white">{company.name}</h1>
           <p className="mt-2 max-w-[640px] text-[14px] leading-relaxed text-white/55">
             Every document below is generated from the live valuation, buyer DNA and market registries, then set in the
-            institutional publishing layer and rendered to a board-ready PDF in your browser.
+            institutional publishing layer as a print-ready page.
           </p>
         </div>
 
@@ -64,7 +81,7 @@ const ReportHub: React.FC = () => {
           </div>
           <button onClick={submitBoardToDispatch} disabled={dispatching}
             className="shrink-0 rounded-md bg-deal-500 px-4 py-2 text-[12.5px] font-semibold text-ink-950 transition hover:bg-deal-400 disabled:opacity-60">
-            {dispatching ? "Submitting…" : "Submit to Dispatch →"}
+            {dispatching ? "Preparing…" : "Board memo · render PDF via Dispatch →"}
           </button>
         </div>
 
@@ -75,7 +92,7 @@ const ReportHub: React.FC = () => {
               <>
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-deal-300">{d.kind}</span>
-                  {openable && <span className="text-[11px] font-semibold text-deal-400 group-hover:text-deal-300">Open PDF →</span>}
+                  {openable && <span className="text-[11px] font-semibold text-deal-400 group-hover:text-deal-300">Open →</span>}
                 </div>
                 <div className="mt-2 text-[16px] font-bold text-white">{d.title}</div>
                 <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/55">{d.blurb}</p>
@@ -96,8 +113,8 @@ const ReportHub: React.FC = () => {
         </div>
 
         <p className="mt-6 text-[11px] leading-relaxed text-white/35">
-          Documents open in a new tab. Use “Download PDF” in the document toolbar (or your browser's print dialog) to export a
-          print-safe PDF with running headers, page numbers and confidentiality markings.
+          Documents open in a new tab. “Print…” in the document toolbar opens your browser's print dialog, which can also save the
+          page as a PDF with its running headers, page numbers and confidentiality markings. ExitOS does not yet generate PDFs itself.
         </p>
       </div>
     </div>

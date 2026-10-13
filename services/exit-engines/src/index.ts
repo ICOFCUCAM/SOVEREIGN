@@ -13,6 +13,10 @@ export * as exchange     from './exchange/index.js';
 export * as documents    from './documents/index.js';
 export * as marketdata   from './marketdata/index.js';
 export * as market       from './market/index.js';
+export * as process      from './process/index.js';
+export * from './story/index.js';
+export { DEFAULT_PROCESS_TIMELINE, milestone, weeksLabel, weeksPhrase, timelineLines, validateTimeline } from './process/index.js';
+export type { ProcessTimeline, Milestone, MilestoneId } from './process/index.js';
 
 // Top-level convenience re-exports — the most common entrypoints.
 export { runValuation, strategicBuyerReport, assetReplacementReport, tenMillionReport, twentyFiveMillionReport, runInstitutionalValuation, runValuationConstitution, VALUATION_FRAMEWORK, VALUATION_FRAMEWORK_VERSION } from './valuation/index.js';
@@ -22,13 +26,13 @@ export type { SectorMultiples, MultiplesBand } from './valuation/index.js';
 export { runReadiness, runReadinessAnalysis } from './readiness/index.js';
 export { runBuyerDiscovery } from './buyers/index.js';
 export { runDueDiligence }   from './diligence/index.js';
-export { TemplateMemorandumGenerator, ClaudeMemorandumGenerator } from './memorandum/index.js';
+export { TemplateMemorandumGenerator, ClaudeMemorandumGenerator, ASSUMED_LABEL, countryName, sectorPhrase } from './memorandum/index.js';
 export { runMarketplace }    from './marketplace/index.js';
 export { evaluateOffer, compareOffers, deriveNegotiationState } from './negotiation/index.js';
 export { createListing, matchBuyersToListing } from './listing/index.js';
 
 export type {
-  MemorandumKind, MemorandumInputs, MemorandumDocument, MemorandumSection, MemorandumTable, MemorandumGenerator,
+  MemorandumKind, MemorandumInputs, MemorandumDocument, MemorandumSection, MemorandumTable, MemorandumGenerator, SectionCoverage,
 } from './memorandum/types.js';
 export type { MarketplaceRun, MarketplaceRunOptions } from './marketplace/engine.js';
 export type {
@@ -70,6 +74,8 @@ export type {
 export type {
   DueDiligenceReport, DiligenceDocumentSpec, DiligenceDocumentKind, DiligenceSection, DiligenceArtifact,
 } from './diligence/engine.js';
+export { roomProgress, suggestedName } from './diligence/room.js';
+export type { RoomFile, ReviewState, ArtifactStatus, ArtifactProgress, PackageProgress, RoomProgress } from './diligence/room.js';
 export type {
   Offer, OfferEvaluation, OfferComparison, NegotiationState, ReservationLines, Term, TermCategory, OfferConflict,
 } from './negotiation/types.js';

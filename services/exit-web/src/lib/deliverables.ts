@@ -1,4 +1,5 @@
 // Deliverables — turns engine output into real, downloadable artifacts the
+import { outreachSequence, DEFAULT_PROCESS_TIMELINE } from "./process-plan";
 // founder can review and send. Every builder is pure (string in / string out)
 // so the same Markdown a modal previews is exactly what downloads. Documents
 // are framed to a consistent, institutional standard: a confidential header,
@@ -59,13 +60,16 @@ export function frameDoc(opts: {
   sections: readonly DocSection[];
   confidential?: boolean;
   disclaimerOverride?: string;
+  /** Set when the figures are not the company's own (demo fixtures, illustrative statuses): says so at the top. */
+  sample?: string;
 }): string {
-  const { title, subtitle, meta = [], sections, confidential = true, disclaimerOverride } = opts;
+  const { title, subtitle, meta = [], sections, confidential = true, disclaimerOverride, sample } = opts;
   const lines: string[] = [...MASTHEAD, `# ${title}`];
   if (subtitle) lines.push(`### ${subtitle}`);
   lines.push("");
+  if (sample) lines.push(`> **SAMPLE DATA — NOT YOUR COMPANY'S.** ${sample}`, "");
   lines.push(`${confidential ? "**STRICTLY CONFIDENTIAL** · " : ""}Prepared by **ExitOS Advisory** · ${today()}`);
-  const metaAll: Array<[string, string]> = [["Basis", "Company records and management information"], ...meta];
+  const metaAll: Array<[string, string]> = [["Basis", sample ? "Sample data, not company records" : "Company records and management information"], ...meta];
   lines.push("", ...metaAll.map(([k, v]) => `- **${k}:** ${v}`), "", "---", "");
   sections.forEach((s, i) => {
     lines.push(`## ${i + 1}. ${s.heading}`, "");
@@ -107,7 +111,10 @@ export function docToMarkdown(doc: MemorandumDocument): string {
   return lines.join("\n");
 }
 
-export const docFilename = (doc: MemorandumDocument): string => `${slug(doc.title)}.md`;
+/** A memorandum's filename: its type, the company's code name and the date — never the
+ *  company's name, so a forwarded or listed file reveals nothing on its own. */
+export const docFilename = (doc: MemorandumDocument, codeName: string): string =>
+  `exitos-${doc.kind.replace(/_/g, "-")}-${slug(codeName)}-${new Date().toISOString().slice(0, 10)}.md`;
 
 // ── Valuation summary ───────────────────────────────────────────────
 
@@ -462,11 +469,12 @@ export function buyerListCsv(candidates: readonly BuyerCandidate[]): string {
 export function buyerIntroLetter(opts: {
   buyer: BuyerCandidate;
   projectName: string;
-  askMid: number;
   fromName: string;
   anonymized?: boolean;
 }): string {
-  const { buyer, projectName, askMid, fromName, anonymized = true } = opts;
+  // Sent before any NDA: no company figures (value, revenue) appear here — only
+  // the buyer's own mandate and record, which they already know.
+  const { buyer, projectName, fromName, anonymized = true } = opts;
   const eo = buyer.expectedOutcome;
   return [
     `◎ EXITOS · ACQUISITION EXCHANGE`,
@@ -484,12 +492,11 @@ export function buyerIntroLetter(opts: {
     `Why we thought of you specifically: ${buyer.rationale}`,
     "",
     `Indicative parameters:`,
-    `  • Indicated enterprise value (mid): ${money(askMid)}`,
     `  • Estimated fit: ${pct(buyer.probability)} acquisition probability (${eo.overallConfidence.tier} confidence)`,
     `  • Your typical check for this profile: ${money(buyer.estimatedCheck.low)} – ${money(buyer.estimatedCheck.high)}`,
     `  • Benchmark pace from your track record: ~${Math.round(eo.expectedDaysToCash)} days announced-to-close`,
     "",
-    `All identifying materials are gated behind a mutual NDA. On execution we will share the confidential information memorandum and open staged data-room access.`,
+    `All identifying materials are gated behind a mutual NDA. On execution we will share the company's figures, the confidential information memorandum and staged data-room access.`,
     "",
     `If this is of interest, simply reply and we will coordinate a first call at your convenience.`,
     "",
@@ -534,8 +541,8 @@ export function riskReportDoc(report: RiskReport): string {
 
 // ── Generic structured doc (for the remaining agent work products) ──
 
-export function structuredDoc(title: string, subtitle: string, sections: readonly DocSection[]): string {
-  return frameDoc({ title, subtitle, sections });
+export function structuredDoc(title: string, subtitle: string, sections: readonly DocSection[], sample?: string): string {
+  return frameDoc({ title, subtitle, sections, ...(sample ? { sample } : {}) });
 }
 
 // ── Agent work products (Autonomous Exit + The Banker) ─────────────
@@ -545,28 +552,23 @@ export function structuredDoc(title: string, subtitle: string, sections: readonl
 export function outreachPlanDoc(opts: { projectName: string; shortlistCount: number; anchor: string }): string {
   return structuredDoc("Outreach Plan", `${opts.projectName} · sell-side process`, [
     { heading: "Approach", body: `A ${opts.shortlistCount}-buyer competitive process run in parallel to build leverage, anchored at ${opts.anchor}. All outreach is anonymized pre-NDA; identity and the data room unlock only on a signed NDA.` },
-    { heading: "Sequence", table: { headers: ["Step", "Timing", "Action"], rows: [
-      ["1 · Target list", "Day 0", "Rank acquirers by fit, appetite and recent activity"],
-      ["2 · Teaser", "Day 1", "Issue the anonymized teaser to tier-1 targets"],
-      ["3 · NDA + data room", "Day 3–7", "Counter-sign NDAs; grant staged data-room access"],
-      ["4 · Management presentations", "Week 2–3", "Distribute the CIM; schedule calls with engaged buyers"],
-      ["5 · Indications", "Week 4", "Solicit non-binding IOIs; build the offer comparison"],
-      ["6 · LOI", "Week 5–6", "Drive a competitive process to a signed letter of intent"],
-    ] } },
+    { heading: "Sequence", body: `Timed from the process timeline (${DEFAULT_PROCESS_TIMELINE.basis}).`,
+      table: { headers: ["Step", "Timing", "Action"], rows: outreachSequence().map((st, n) => [`${n + 1} · ${st.step}`, st.timing, st.body]) } },
     { heading: "Personalization", body: "Each shortlisted buyer receives an introduction letter written to its own mandate thesis and the specific strategic rationale for the fit." },
   ]);
 }
 
 export function dataRoomGatingDoc(packageCount: number): string {
-  return structuredDoc("Data-Room Gating Policy", "Permissioned access for a controlled process", [
-    { heading: "Access control", body: "No buyer reaches the data room until they clear a mutual NDA and a Buyer Trust score of Verified. Access is staged by diligence package, fully logged and revocable." },
-    { heading: "Buyer Trust gates", table: { headers: ["Gate", "Requirement"], rows: [
-      ["NDA signed", "Executed mutual NDA on file"],
-      ["Identity verified", "Authorized signatory on the signature record"],
-      ["Acquisition history", "Institutional counterparty with a validated track record"],
-      ["Funds verified", "Capitalised counterparty with damages provision in force"],
+  return structuredDoc("Data-Room Access Policy", "A recommended policy for the seller to apply", [
+    { heading: "Recommended policy", body: "Grant a buyer data-room access only after an NDA is executed and you (or your adviser) have confirmed who they are and how they will fund the deal. Stage access by diligence package and revoke it when a buyer leaves the process." },
+    { heading: "What ExitOS records", table: { headers: ["Record check", "What it reads"], rows: [
+      ["NDA active", "The NDA's status on its record"],
+      ["Signature recorded", "An execution date and a signature event on the record"],
+      ["Named representative", "A representative named on the signature record"],
+      ["Damages provision", "A liquidated-damages amount in the NDA terms"],
     ] } },
-    { heading: "Packages", body: `${packageCount} staged diligence packages, each completeness-scored, with the dollar impact of every gap surfaced before buyers see it.` },
+    { heading: "What ExitOS does not do", body: "It does not verify a buyer's identity, funds or acquisition history, and it does not enforce data-room access on these checks. Those confirmations are yours or your adviser's to make." },
+    { heading: "Packages", body: `${packageCount} diligence packages, each completeness-scored before buyers see them.` },
   ]);
 }
 
@@ -577,35 +579,20 @@ export function offerComparisonDoc(opts: {
   dynamics: ReadonlyArray<[string, string]>;
   posture: readonly string[];
 }): string {
+  // ExitOS stores no real offers yet, so the bids compared are always the demo company's.
   return structuredDoc("Offer Comparison", "Cross-bid analysis & negotiation posture", [
     { heading: "Summary", body: opts.summary },
     { heading: "Bids", table: { headers: ["Buyer", "Type", "Score", "Headline", "Net to founders"], rows: opts.offers.map((o) => [o.buyer, o.type, o.score, o.headline, o.net]) } },
     { heading: "Field dynamics", bullets: opts.dynamics.map(([term, notes]) => `**${term}:** ${notes}`) },
     { heading: "Posture", bullets: opts.posture },
-  ]);
+  ], "The bids are the demo company's sample offers; ExitOS does not yet record real offers.");
 }
 
-export function closingChecklistDoc(): string {
-  return structuredDoc("Closing Checklist", "Signature, escrow & filing orchestration to the wire", [
-    { heading: "Workstreams", table: { headers: ["Item", "Owner", "Status"], rows: [
-      ["SPA + signature pages", "Counsel", "In progress"],
-      ["Disclosure schedules", "Counsel", "In progress"],
-      ["Shareholder consent (≥95%)", "Founder", "In progress"],
-      ["Escrow agent engagement", "Banker", "Done"],
-      ["Escrow funding confirmation", "Banker", "Pending"],
-      ["Regulatory filings", "Counsel", "In progress"],
-    ] } },
-    { heading: "Economics", bullets: [
-      "Escrow capped at ≤8% of consideration, released in 12 months",
-      "Reverse break-fee in force; no founder indemnity beyond escrow",
-      "30–45 day sign-to-close target",
-    ] },
-  ]);
-}
+// The closing checklist lives in lib/closing-checklist.ts (one source for the page and the export).
 
 export function wealthPlanDoc(headline: string): string {
   return structuredDoc("Wealth Transition Plan", "From a concentrated position to durable wealth", [
-    { heading: "Proceeds", body: `Headline consideration of ${headline} modeled through federal and state tax, with QSBS treatment evaluated where the holding qualifies.` },
+    { heading: "Proceeds", body: `An enterprise value of ${headline} (ExitOS estimate) is not what you receive: your proceeds depend on your ownership, share classes, any liquidation preferences, debt and transaction costs, which this plan does not model. ExitOS applies one flat illustrative rate (23.8%: US federal long-term capital gains plus NIIT); it does not model state tax or QSBS, which a tax adviser should evaluate for your holding.` },
     { heading: "Plan", bullets: [
       "Staged liquidity schedule across the months after close",
       "Diversification out of the single concentrated position into a durable portfolio",

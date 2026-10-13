@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import { loadActiveCompany, activeTokens } from "./active-company.js";
 import { SAMPLE_COMPANY } from "./profile.js";
+import { SAMPLE_INTAKE as SAMPLE_COMPANY_INTAKE } from "./company-intake.js";
 
 // in-memory localStorage shim (the test env is node, not jsdom)
 beforeEach(() => {
@@ -43,5 +44,49 @@ describe("saved intake", () => {
     clearIntake();
     expect(loadSavedIntake()).toBeNull();
     expect(loadActiveCompany().fromIntake).toBe(false);
+  });
+});
+
+describe("what the founder supplied vs the demo company's values", () => {
+  it("a field counts as the founder's only once entered or confirmed", async () => {
+    const { saveIntake, loadActiveCompany: load, confirmIntakeFields } = await import("./active-company.js");
+    const { SAMPLE_INTAKE } = await import("./company-intake.js");
+    // the form starts from the demo figures; the founder types only the name
+    saveIntake({ ...SAMPLE_INTAKE, name: "Northwind" }, ["name"]);
+    const a = load();
+    expect(a.company.name).toBe("Northwind");
+    expect(a.unconfirmed).toContain("ttmRevenueUsd");
+    expect(a.unconfirmed).not.toContain("name");
+    // then enters revenue
+    saveIntake({ ...SAMPLE_INTAKE, name: "Northwind", ttmRevenueUsd: 12e6 }, ["ttmRevenueUsd"]);
+    expect(load().unconfirmed).not.toContain("ttmRevenueUsd");
+    expect(load().unconfirmed).not.toContain("name");          // earlier fields stay supplied
+    confirmIntakeFields(load().unconfirmed);
+    expect(load().unconfirmed).toEqual([]);
+  });
+
+  it("gives each saved company its own stable id", async () => {
+    const { saveIntake, loadActiveCompany: load, clearIntake } = await import("./active-company.js");
+    const { SAMPLE_INTAKE } = await import("./company-intake.js");
+    saveIntake({ ...SAMPLE_INTAKE, name: "One" }, ["name"]);
+    const id1 = load().company.id;
+    saveIntake({ ...SAMPLE_INTAKE, name: "One Inc" }, ["name"]);
+    expect(load().company.id).toBe(id1);
+    expect(id1).toMatch(/^co-/);
+    expect(id1).not.toBe("intake");
+    clearIntake();
+    saveIntake({ ...SAMPLE_INTAKE, name: "Two" }, ["name"]);
+    expect(load().company.id).not.toBe(id1);
+  });
+
+  it("migrates an earlier saved intake: only values that differ from the demo count as supplied", () => {
+    localStorage.setItem("exitos.intake.v1", JSON.stringify({ ...JSON.parse(JSON.stringify(SAMPLE_COMPANY_INTAKE)), name: "Legacy Co", ttmRevenueUsd: 9e6 }));
+    const a = loadActiveCompany();
+    expect(a.company.name).toBe("Legacy Co");
+    expect(a.unconfirmed).not.toContain("name");
+    expect(a.unconfirmed).not.toContain("ttmRevenueUsd");
+    expect(a.unconfirmed).toContain("grossMarginPct");
+    expect(localStorage.getItem("exitos.intake.v1")).toBeNull();
+    expect(loadActiveCompany().company.id).toBe(a.company.id);   // migrated once, id kept
   });
 });

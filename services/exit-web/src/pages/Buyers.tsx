@@ -5,9 +5,12 @@ import { DNA_AS_OF } from "../lib/buyer-dna";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
-import { PageHeader, Section, Metric as XMetric, Provenance } from "../components/xo";
+import { PageHeader, Section, Metric as XMetric, Provenance, Empty } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { runBuyerDiscovery, type BuyerCandidate, type CompanyProfile } from "@exit/engines";
+import { runBuyerDiscovery, type BuyerCandidate } from "@exit/engines";
+import { inlineLabel, label } from "../lib/labels";
+import { warmIntro } from "../lib/warm-intro";
+import { useDocumentGate, GateNotice } from "../components/DocumentGate";
 import { loadActiveCompany } from "../lib/active-company";
 
 // Buyer Marketplace — buyer profile cards (not a directory). Each card surfaces
@@ -24,24 +27,6 @@ function interest(c: BuyerCandidate): { label: string; pct: number; cls: string 
   if (p >= 0.35) return { label: "Warm", pct: Math.round(p * 100), cls: "text-xo-caution" };
   return { label: "Cool", pct: Math.round(p * 100), cls: "text-xo-muted" };
 }
-function warmIntro(c: BuyerCandidate, co: CompanyProfile): string {
-  const sector = co.sector.replace(/_/g, " ");
-  const arrM = (co.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(0);
-  return (
-    `Subject: Introduction — ${co.name} (${sector})\n\n` +
-    `Hi ${c.buyer.name} team,\n\n` +
-    `I'm reaching out because ${co.name} aligns closely with your acquisition thesis: ${c.buyer.thesis} ` +
-    `We're a ${sector} business at $${arrM}M ARR growing ${(co.growth.arrGrowthYoyPct * 100).toFixed(0)}% YoY, ` +
-    // Only mention recent activity when the registry records deals in the
-    // last three years.
-    (c.history.dealsLast3Years > 0
-      ? `and your recent activity in the space — plus a check range of ${fmtMoney(c.buyer.checkSizeLowUsd)}–${fmtMoney(c.buyer.checkSizeHighUsd)} — `
-      : `and your check range of ${fmtMoney(c.buyer.checkSizeLowUsd)}–${fmtMoney(c.buyer.checkSizeHighUsd)} `) +
-    `makes a conversation worth both our time.\n\n` +
-    `Happy to share an anonymized teaser under NDA. Would the coming week work for a short call?\n\nBest,\n[Your name]`
-  );
-}
-
 const Buyers: React.FC = () => {
   // The founder's saved intake when there is one, else the demo company.
   const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
@@ -63,6 +48,7 @@ const Buyers: React.FC = () => {
   const medianCheckUsd = medianCheck ? (medianCheck.buyer.checkSizeLowUsd + medianCheck.buyer.checkSizeHighUsd) / 2 : 0;
 
   const [intro, setIntro] = useState<{ name: string; text: string } | null>(null);
+  const introGate = useDocumentGate("exitos.warm_intro", intro?.text);
   const { session } = useAuth();
   // Outreach is an Active Mandate surface; say so before the click.
   const outreachGate = requiredEngagement("/console/banker", session?.role ?? "founder", session?.plan ?? "free");
@@ -124,7 +110,7 @@ const Buyers: React.FC = () => {
               <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
                 <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(topCheck)}</span> check-size midpoint for {top.buyer.name}; {activeBucket.length} active-appetite buyer{activeBucket.length === 1 ? "" : "s"} (registry).</TakeCell>
                 <TakeCell k="If you wait">The ranking reflects the registry snapshot; a buyer's appetite can change, and nothing here tracks it over time.</TakeCell>
-                <TakeCell k="Pursue">{top.buyer.name} — fit {it.label.toLowerCase()} at {it.pct}%, {top.buyer.buyerType.replace(/_/g, " ")}.</TakeCell>
+                <TakeCell k="Pursue">{top.buyer.name} — fit {it.label.toLowerCase()} at {it.pct}%, {inlineLabel(top.buyer.buyerType)}.</TakeCell>
                 <TakeCell k="What ExitOS does">Drafts a warm introduction for each buyer from its thesis and the company's figures. Nothing is sent from this page.</TakeCell>
               </dl>
               <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link>
@@ -138,7 +124,7 @@ const Buyers: React.FC = () => {
         foot="Fit: hot at 60% or more, warm at 35–59%, cool below — the discovery engine's fit score, not measured interest. Appetite is a registry attribute. Check midpoint is the middle of the buyer's stated check range. Founder-friendliness is not measured per buyer, so it is not shown."
         right={<button type="button" onClick={() => setFilterOpen(true)} className="rounded-sm border border-xo-line px-2.5 py-1 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Filter{activeFilters > 0 ? ` · ${activeFilters}` : ""}</button>}>
         {candidates.length === 0 ? (
-          <p className="px-4 py-6 text-center text-[13px] text-xo-muted">No buyers match these filters. <button type="button" className="font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" onClick={() => setFilter({ type: "all", appetite: "all", interest: "all" })}>Clear filters</button></p>
+          <Empty title="No buyers match these filters."><button type="button" className="font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" onClick={() => setFilter({ type: "all", appetite: "all", interest: "all" })}>Clear filters</button></Empty>
         ) : (
           <ol className="grid grid-cols-1 gap-px bg-xo-line lg:grid-cols-2">
             {candidates.map((c, i) => {
@@ -150,7 +136,7 @@ const Buyers: React.FC = () => {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h3 className="text-[15px] font-semibold"><span className="sr-only">Rank {i + 1}: </span>{c.buyer.name}</h3>
-                      <span className="text-[11px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</span>
+                      <span className="text-[11px] text-xo-muted">{label(c.buyer.buyerType)}</span>
                     </div>
                     <span className={`shrink-0 text-[12px] font-semibold ${it.cls}`}>Fit: {it.label} · {it.pct}%</span>
                   </div>
@@ -173,8 +159,9 @@ const Buyers: React.FC = () => {
       </Section>
 
       <Modal open={intro != null} onClose={() => setIntro(null)} title={`Warm introduction · ${intro?.name ?? ""}`} size="md"
-        footer={<>{outreachGate && <span className="mr-auto text-[12px] text-xo-caution">Outreach requires {outreachGate}</span>}<Button variant="ghost" onClick={() => intro && copyText(intro.text)}>Copy</Button><Link to="/console/banker" className="rounded-sm bg-deal-700 px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link></>}>
+        footer={<>{outreachGate && <span className="mr-auto text-[12px] text-xo-caution">Outreach requires {outreachGate}</span>}<Button variant="ghost" disabled={!!introGate?.blocked} onClick={() => intro && !introGate?.blocked && copyText(intro.text)}>Copy</Button><Link to="/console/banker" className="rounded-sm bg-deal-700 px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link></>}>
         <p className="mb-3 text-[12px] text-xo-muted">A draft generated from the buyer's thesis and the company's figures. Nothing is sent from this page — copy it, or take it to Outreach.</p>
+        <GateNotice gate={introGate} className="mb-2" />
         <pre className="whitespace-pre-wrap border border-xo-line bg-xo-ink p-4 font-sans text-[13px] leading-relaxed text-xo-text">{intro?.text}</pre>
       </Modal>
     </div>

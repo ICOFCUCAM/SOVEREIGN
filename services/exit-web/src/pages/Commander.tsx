@@ -41,8 +41,9 @@ const AcquirerMixRadar: React.FC<{ data: { label: string; n: number }[] }> = ({ 
   const pt = (i: number, r: number): [number, number] => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
   const poly = data.map((d, i) => pt(i, (d.n / max) * R).join(",")).join(" ");
   const ring = (f: number): string => data.map((_, i) => pt(i, R * f).join(",")).join(" ");
+  // the view box reaches 36 units past each side so the longest label ("Private Equity 0") is not cut off
   return (
-    <svg viewBox="0 0 300 256" className="w-full" role="img" aria-label={`Acquirer mix by type: ${data.map((d) => `${d.label} ${d.n}`).join(", ")}`}>
+    <svg viewBox="-36 0 372 256" className="w-full" role="img" aria-label={`Acquirer mix by type: ${data.map((d) => `${d.label} ${d.n}`).join(", ")}`}>
       {[0.25, 0.5, 0.75, 1].map((f) => <polygon key={f} points={ring(f)} fill="none" stroke="#22314b" strokeWidth="1" />)}
       <text x={cx} y={cy - R - 4} textAnchor="middle" fill="#8796ad" style={{ fontSize: 8, fontFamily: "ui-monospace, monospace" }}>{max}</text>
       {data.map((_, i) => { const [x, y] = pt(i, R); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#22314b" strokeWidth="1" />; })}
@@ -113,7 +114,7 @@ const Commander: React.FC = () => {
       <PageHeader eyebrow="◉ Chief Investment Banker · Transaction desk" title={company.name}
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">demand {m.demandLabel} · horizon {m.timeToExitMonths}mo · confidence index {m.confidencePct}%</span></>}
         actions={<>
-          <a href="/report/board" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board Memorandum (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
+          <a href="/report/board" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board Memorandum →<span className="sr-only"> (opens in a new tab)</span></a>
           <a href="/report" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
         </>} />
 
@@ -163,7 +164,7 @@ const Commander: React.FC = () => {
             {factors.map((f) => (
               <li key={f.label} className="flex items-center justify-between gap-3 text-[12px]">
                 <span className="text-xo-muted">{f.label}</span>
-                <span className="flex shrink-0 items-center gap-2"><Bar value={f.v} max={f.max} width="w-20" /><span className="w-16 text-right font-mono tabular-nums">{f.v.toFixed(1)} / {f.max}</span></span>
+                <span className="flex shrink-0 items-center gap-2"><Bar value={f.v} max={f.max} width="w-20" /><span className="min-w-16 whitespace-nowrap text-right font-mono tabular-nums">{f.v.toFixed(1)} / {f.max}</span></span>
               </li>
             ))}
             <li className="flex justify-between border-t border-xo-line pt-2 text-[12px]"><span className="text-xo-muted">Total (rounded)</span><span className="font-mono tabular-nums">{m.exitProbability}</span></li>

@@ -1,4 +1,4 @@
-import type { CompanyProfile } from '../types.js';
+import { isKnown, type CompanyProfile } from '../types.js';
 import type { ReadinessReport } from './engine.js';
 import { runValuation } from '../valuation/engine.js';
 
@@ -51,6 +51,12 @@ function planForDimension(
   dim: ReadinessReport['dimensions'][number],
   strategicMid: number,
 ): ImprovementPlan | undefined {
+  // a dimension the company has not supplied inputs for: the plan is to supply them, not a weakness
+  if (dim.assessed === false) return {
+    dimension: dim.name, weakness: `${dim.name}: ${dim.evidence[0] ?? 'not assessed'}.`, severity: 'medium',
+    recommendation: dim.name === 'Market Penetration' ? 'Add a market-size estimate with its source, geography, period and method to the company story.' : 'Describe the main competitors and how the company wins against them in the company story.',
+    effort: 'days', valuationUpliftPct: 0, valuationUpliftUsd: 0,
+  };
   if (dim.score >= 70) return undefined;       // no plan — already strong
   const severity: ImprovementPlan['severity'] = dim.score < 35 ? 'high' : dim.score < 55 ? 'medium' : 'low';
 
@@ -78,7 +84,9 @@ function planForDimension(
       effort = 'quarters';
     }
   } else if (dim.name === 'Market Penetration') {
-    weakness = `Penetration low relative to TAM ($${(c.market.addressableMarketUsd / 1_000_000_000).toFixed(1)}B). Growth optionality un-narrated.`;
+    weakness = isKnown(c, 'market.addressableMarketUsd')
+      ? `Penetration low relative to TAM ($${(c.market.addressableMarketUsd / 1_000_000_000).toFixed(1)}B). Growth optionality un-narrated.`
+      : 'Market growth optionality un-narrated; no sourced market size supplied.';
     recommendation = 'Articulate a 5-year market-capture thesis in the CIM. Add bottom-up SAM/SOM model with proof points.';
     effort = 'weeks';
   } else if (dim.name === 'Technology Moat') {
@@ -91,22 +99,22 @@ function planForDimension(
       recommendation = 'File 2–3 core-architecture patents this quarter; build trademark portfolio for the most-referenced product surfaces.';
       effort = 'quarters';
     } else {
-      weakness = 'Moat dimension under-scored relative to differentiation claim.';
+      weakness = 'Moat dimension under-scored: defensibility evidence is thin.';
       recommendation = 'Surface defensibility evidence: switching costs, integrations, customer-specific configurations.';
       effort = 'months';
     }
   } else if (dim.name === 'Competitive Advantage') {
-    if (c.product.differentiation === 'parity' || c.product.differentiation === 'commodity') {
+    if (isKnown(c, 'product.differentiation') && (c.product.differentiation === 'parity' || c.product.differentiation === 'commodity')) {
       weakness = `Differentiation: ${c.product.differentiation}. Buyers will price as a commodity in the headline range.`;
       recommendation = 'Identify the two strongest product wedges; double-down on them; deprioritize parity features. Frame as the category-defining alternative.';
       effort = 'quarters';
     } else {
-      weakness = `Competitive advantage signal weaker than differentiation claim warrants.`;
+      weakness = 'Competitive advantage is not yet evidenced.';
       recommendation = 'Surface win/loss evidence: comparable competitor analysis, customer migration cases, analyst quadrant positioning.';
       effort = 'weeks';
     }
   } else if (dim.name === 'Scalability') {
-    if (c.team.leadershipBenchStrength === 'thin') {
+    if (isKnown(c, 'team.leadershipBenchStrength') && c.team.leadershipBenchStrength === 'thin') {
       weakness = 'Leadership bench: thin. Founder-dependence priced as transition risk.';
       recommendation = 'Hire 2 senior leaders (CFO + CRO or COO) within two quarters; establish operating cadence the founders do not own day-to-day.';
       effort = 'quarters';
@@ -147,7 +155,7 @@ export function runReadinessAnalysis(company: CompanyProfile, readiness: Readine
   weaknesses.sort((a, b) => b.valuationUpliftUsd - a.valuationUpliftUsd);
 
   const projectedUplift = weaknesses.reduce((s, w) => s + w.valuationUpliftUsd, 0);
-  const projectedScore = Math.min(100, readiness.overallScore + weaknesses.length * 8);
+  const projectedScore = Math.min(100, readiness.overallScore + weaknesses.filter((w) => w.valuationUpliftUsd > 0).length * 8);
 
   const headline = weaknesses.length === 0
     ? `Acquisition-ready at ${readiness.overallScore.toFixed(0)}/100. No dimension scores below 70 — no material uplift available through preparation work.`

@@ -11,6 +11,12 @@ import {
   structuredDoc, downloadDeliverable,
 } from "../lib/deliverables";
 import type { BuyerCandidate } from "@exit/engines";
+import { label } from "../lib/labels";
+import { codeNameFor } from "../lib/listings";
+import { memorandumInputs } from "../lib/documents/memorandum-inputs";
+import { outreachSequence, closingWindow, DEFAULT_PROCESS_TIMELINE } from "../lib/process-plan";
+import { milestone, weeksPhrase } from "@exit/engines";
+import { useDocumentGate, GateNotice } from "../components/DocumentGate";
 import {
   useDirectives, applyToBuyers, outreachPosture, valuationGuardrail, recommendedActions,
   type AdjustedBuyer,
@@ -31,23 +37,18 @@ const STATUS_STYLE: Record<WorkStatus, string> = {
   queued: "border-xo-line text-xo-muted",
 };
 
-const PROJECT = "Project Cipher";
 const FROM_NAME = "[Your name]";   // the founder signs; no invented signatory
 
-const SEQUENCE = [
-  { step: "Build target list", timing: "Day 0", body: "Rank acquirers by fit, appetite and recent activity; segment strategic vs financial." },
-  { step: "Issue anonymized teaser", timing: "Day 1", body: "Send Project Cipher teaser to tier-1 targets; no company name pre-NDA." },
-  { step: "NDA + data room", timing: "Day 3–7", body: "Counter-sign NDAs, grant staged data-room access on execution." },
-  { step: "Management presentations", timing: "Week 2–3", body: "Schedule calls with engaged buyers; distribute the CIM." },
-  { step: "Solicit indications", timing: "Week 4", body: "Request non-binding indications of interest; build the offer comparison." },
-  { step: "Drive to LOI", timing: "Week 5–6", body: "Run a competitive process to a signed letter of intent." },
-];
+// the outreach sequence, timed from the one process timeline
+const SEQUENCE = outreachSequence();
 
 const Banker: React.FC = () => {
   const [tab, setTab] = useState<Tab>("outreach");
   // The founder's saved intake when there is one; the demo company otherwise
   // (the same engine inputs the Documents page uses).
-  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const { company, fromIntake, story } = useMemo(() => loadActiveCompany(), []);
+  // documents name the company by its listing's code name before an NDA
+  const PROJECT = useMemo(() => codeNameFor(company, !fromIntake), [company, fromIntake]);
   const own = useMemo(() => {
     if (!fromIntake) return null;
     const institutional = runInstitutionalValuation(company);
@@ -60,9 +61,11 @@ const Banker: React.FC = () => {
   const BUYERS = own?.buyers ?? DEMO_BUYERS;
   const DILIGENCE = own?.diligence ?? DEMO_DILIGENCE;
   const VALUATION_CANONICAL = own?.canonical ?? DEMO_CANONICAL;
-  const teaser  = useMemorandum("buyer_teaser", own?.memo);
-  const summary = useMemorandum("executive_summary", own?.memo);
-  const cim     = useMemorandum("cim", own?.memo);
+  // the same engine inputs the Document Generator and the CIM report page use
+  const memoInputs = useMemo(() => memorandumInputs(company, fromIntake, story), [company, fromIntake, story]);
+  const teaser  = useMemorandum("buyer_teaser", memoInputs);
+  const summary = useMemorandum("executive_summary", memoInputs);
+  const cim     = useMemorandum("cim", memoInputs);
   // ── Banker directives — real mandate intelligence, not a placebo ──
   // Saved in this browser, parsed into structured preferences, and applied
   // here to re-weight the engine's buyer discovery, outreach and valuation.
@@ -154,7 +157,11 @@ const Banker: React.FC = () => {
       `Anchoring the process at ${fmtMoney(target)}`,
     ] },
   ]);
-  const introMd = (b: BuyerCandidate): string => buyerIntroLetter({ buyer: b, projectName: PROJECT, askMid: mid, fromName: FROM_NAME });
+  const introMd = (b: BuyerCandidate): string => buyerIntroLetter({ buyer: b, projectName: PROJECT, fromName: FROM_NAME });
+  // the pre-generation gate on what is about to be downloaded
+  const introGate = useDocumentGate("exitos.intro_letter", introBuyer ? introMd(introBuyer) : null, VALUATION_CANONICAL.headline.mid);
+  const tabDoc = tab === "teaser" ? teaser : tab === "summary" ? summary : null;
+  const docGate = useDocumentGate(tab === "teaser" ? "exitos.teaser" : "exitos.executive_summary", tabDoc ? docToMarkdown(tabDoc) : null, VALUATION_CANONICAL.headline.mid);
 
   const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
   const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
@@ -202,8 +209,9 @@ const Banker: React.FC = () => {
       <Modal open={!!introBuyer} onClose={() => setIntroBuyer(null)} title={introBuyer ? `Introduction — ${introBuyer.buyer.name}` : ""} subtitle="Draft personalized from the buyer's match rationale — download it and send it yourself; ExitOS does not send email" size="lg"
         footer={introBuyer ? <>
           <Button variant="ghost" onClick={() => setIntroBuyer(null)}>Close</Button>
-          <Button onClick={() => downloadDeliverable(introFilename(introBuyer), introMd(introBuyer))}>Download draft</Button>
+          <Button disabled={!!introGate?.blocked} onClick={() => !introGate?.blocked && downloadDeliverable(introFilename(introBuyer), introMd(introBuyer))}>Download draft</Button>
         </> : null}>
+        <GateNotice gate={introGate} className="mb-2" />
         {introBuyer && <pre className="whitespace-pre-wrap rounded-md border border-white/5 bg-black/40 p-4 text-[12.5px] leading-relaxed text-white/80">{introMd(introBuyer)}</pre>}
       </Modal>
 
@@ -336,7 +344,7 @@ const Banker: React.FC = () => {
           { q: "Best outreach", general: false, a: `Anonymized teaser → ${strategy.shortlist}-buyer shortlist (your setting) → competitive indications of interest.` },
           { q: "Best valuation", general: false, a: `Anchor at the canonical ${strategy.anchor === "high" ? "high" : "midpoint"} — ${fmtMoney(mid)} midpoint, ${fmtMoney(VALUATION_CANONICAL.headline.high)} high.` },
           { q: "Best negotiation", general: true, a: "Run all buyers in parallel; counter above the canonical midpoint with a leverage premium." },
-          { q: "Best closing", general: true, a: "Escrow ≤8% released in 12 months; reverse break-fee; 30–45 day sign-to-close." },
+          { q: "Best closing", general: true, a: `${closingWindow()} Escrow, break-fee and indemnity terms are negotiated for your deal and reviewed by counsel; ExitOS sets no standard figures.` },
         ];
         return (
           <Section title="Ask your banker" className="border border-xo-line"
@@ -345,7 +353,7 @@ const Banker: React.FC = () => {
               <div className="border border-xo-verified/40 bg-xo-ink p-3">
                 <div className="text-[12px] text-xo-muted">"What is the fastest path to a {fmtMoney(target)} exit?" <span className="text-xo-caution">· general guidance</span></div>
                 <p className="mt-1.5 text-[14px] leading-relaxed">
-                  Shortlist {strategy.shortlist} strategics, run a 6-week teaser → IOI → LOI process in parallel, and anchor at{" "}
+                  Shortlist {strategy.shortlist} strategics, run a teaser → IOI → LOI process in parallel (LOI targeted in {weeksPhrase(milestone(DEFAULT_PROCESS_TIMELINE, "loi"))}), and anchor at{" "}
                   <span className="font-mono font-semibold text-xo-verified">{fmtMoney(target)}</span>. Close cash-heavy (≥{strategy.cashFloor}%) with a tight escrow — the readiness fixes and competitive tension carry the rest.
                 </p>
               </div>
@@ -418,7 +426,7 @@ const Banker: React.FC = () => {
                         {moved && <span className="ml-1 font-mono text-[11px] text-xo-muted line-through"><span className="sr-only">before directives </span>{Math.round(adj!.baseProbability * 100)}/100</span>}
                       </span>
                     </div>
-                    <div className="text-[12px] text-xo-muted">{b.buyer.buyerType.replace(/_/g, " ")}</div>
+                    <div className="text-[12px] text-xo-muted">{label(b.buyer.buyerType)}</div>
                     {adj && adj.reasons.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {adj.reasons.map((r, i) => <span key={i} className="rounded-sm border border-xo-verified/40 px-1.5 py-px text-[11px] text-xo-verified">{r}</span>)}
@@ -449,14 +457,16 @@ const Banker: React.FC = () => {
                       <div className="mt-1 text-[12px] text-xo-muted">{doc.sections.length} sections · {doc.wordCount} words{doc.anonymized ? " · anonymized" : ""}</div>
                     </div>
                     <div className="flex shrink-0 gap-2">
-                      <button type="button" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))} className={BTN}>Download</button>
+                      <button type="button" disabled={!!docGate?.blocked} onClick={() => !docGate?.blocked && downloadDeliverable(docFilename(doc, PROJECT), docToMarkdown(doc))} className={`${BTN} disabled:opacity-50`}>Download</button>
                     </div>
                   </div>
+                  <GateNotice gate={docGate} className="mt-2" />
                   <div className="mt-4 space-y-4">
                     {doc.sections.map((s, i) => (
                       <section key={`${i}-${s.heading}`}>
                         <h4 className="text-[14px] font-semibold">{s.heading}</h4>
                         <p className="mt-1 text-[13px] leading-relaxed text-xo-muted">{s.body}</p>
+                        {s.bullets && s.bullets.length > 0 && <ul className="mt-1 list-disc space-y-0.5 pl-5 text-[13px] text-xo-muted">{s.bullets.map((b) => <li key={b}>{b}</li>)}</ul>}
                       </section>
                     ))}
                   </div>

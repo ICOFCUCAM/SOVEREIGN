@@ -1,4 +1,4 @@
-import { runInstitutionalValuation, runReadiness, runReadinessAnalysis, STANDARD_TEMPLATES, type CompanyProfile, type NdaTemplate } from "@exit/engines";
+import { ASSUMED_LABEL, runInstitutionalValuation, runReadiness, runReadinessAnalysis, STANDARD_TEMPLATES, DEFAULT_PROCESS_TIMELINE, milestone, weeksLabel, timelineLines, type CompanyProfile, type NdaTemplate } from "@exit/engines";
 import {
   rankedBuyers, expectedOutcomeFor, sectorOverlap, buyerConfidence, fmtUsdShort,
   buyerById, acquisitionProbability, buyerRationale, acquisitionSignals,
@@ -267,27 +267,50 @@ export function buildDiligenceReport(company: CompanyProfile): DiligenceReportMo
 export interface BoardMemo {
   meta: ReportMeta;
   recommendation: string;
+  /** One paragraph for the top of the memorandum. */
+  summary: string;
   decision: { k: string; v: string }[];
   highlights: string[];
   risks: { dimension: string; impact: string }[];
+  /** What the business is, in its own figures. */
+  background: string;
+  /** The canonical process timeline, as dated lines. */
+  process: string[];
+  /** Resolutions proposed to the board (for counsel to adapt); proposed, never "resolved". */
+  resolutions: string[];
+  basis: string;
 }
-export function buildBoardMemo(company: CompanyProfile): BoardMemo {
+/** `assumed`: profile fields the company has not supplied, which the valuation model filled with neutral values. */
+export function buildBoardMemo(company: CompanyProfile, assumed: readonly string[] = []): BoardMemo {
   const INST = runInstitutionalValuation(company);
   const ra = runReadinessAnalysis(company, runReadiness(company));
   const lead = INST.mostLikelyBuyers[0];
+  const r = company.revenue, t = DEFAULT_PROCESS_TIMELINE;
+  const ev = `${fmtUsd(INST.headline.mid)} (range ${fmtUsd(INST.headline.low)}–${fmtUsd(INST.headline.high)})`;
   return {
     meta: meta("Board Transaction Memorandum", company.name, INST.frameworkVersion),
-    recommendation: `Authorise the preparation and launch of a competitive sale process for ${company.name}, targeting a strategic-buyer enterprise value of ${fmtUsd(INST.headline.mid)} (range ${fmtUsd(INST.headline.low)}–${fmtUsd(INST.headline.high)}).`,
+    recommendation: `That the Board authorise management to prepare and launch a competitive sale process for ${company.name}, with a strategic-buyer enterprise value of ${ev} as the reference point for evaluating offers.`,
+    summary: `Management recommends a competitive sale process for ${company.name}. ExitOS estimates the enterprise value to a strategic buyer at ${ev}, with ${INST.buyerUniverse.qualified} qualified buyers in view. On the process plan, a definitive agreement would be signed in ${weeksLabel(milestone(t, "signing")).toLowerCase()} after launch. The Board is asked to approve the proposed resolutions.`,
     decision: [
-      { k: "Recommended enterprise value", v: `${fmtUsd(INST.headline.mid)} (${fmtUsd(INST.headline.low)}–${fmtUsd(INST.headline.high)})` },
-      { k: "Confidence", v: `${INST.confidence.score}% · ${INST.confidence.tier}` },
+      { k: "Indicative enterprise value", v: ev },
+      { k: "Valuation confidence", v: `${INST.confidence.score}% · ${INST.confidence.tier}` },
       { k: "Qualified buyers", v: `${INST.buyerUniverse.qualified} of ${INST.buyerUniverse.scored} scored` },
-      { k: "Lead acquirer", v: lead ? `${lead.name} (${lead.probabilityPct}%)` : "competitive process" },
+      { k: "Most likely buyer (model estimate)", v: lead ? `${lead.name} (${lead.probabilityPct}%)` : "competitive process" },
       { k: "Strategic premium", v: `+${pctS(INST.premium.appliedPct)} (n=${INST.premium.observedPremiums.length})` },
-      { k: "Expected time to close", v: `${INST.timeToClose.lowDays}–${INST.timeToClose.highDays} days` },
-      { k: "Readiness", v: `${Math.round(ra.currentScore)}/100` },
+      { k: "Planned timing", v: `signing ${weeksLabel(milestone(t, "signing")).toLowerCase()}; closing ${weeksLabel(milestone(t, "closing")).toLowerCase()} from launch` },
+      { k: "Time to close in comparable deals", v: `${INST.timeToClose.lowDays}–${INST.timeToClose.highDays} days` },
+      { k: "Exit readiness", v: `${Math.round(ra.currentScore)}/100` },
     ],
     highlights: INST.strategicRationale.slice(0, 5),
     risks: [...ra.weaknesses].sort((a, b) => b.valuationUpliftUsd - a.valuationUpliftUsd).slice(0, 5).map((w) => ({ dimension: w.dimension, impact: fmtUsd(w.valuationUpliftUsd) })),
+    background: `${company.name} has ${fmtUsd(r.annualRecurringRevenueUsd)} of annual recurring revenue, growing ${pctS(company.growth.arrGrowthYoyPct)} year over year, and ${fmtUsd(r.trailingTwelveMonthsRevenueUsd)} of revenue over the last twelve months, at a ${pctS(r.grossMarginPct)} gross margin and a ${pctS(r.ebitdaMarginPct)} EBITDA margin.${r.netRetentionPct != null ? ` Net revenue retention is ${pctS(r.netRetentionPct)}.` : ""}${r.customerConcentrationTop10Pct != null ? ` The ten largest customers account for ${pctS(r.customerConcentrationTop10Pct)} of revenue.` : ""} Management believes a sale process now would test the value of the business with the buyers most likely to pay for it. The valuation below is an estimate for setting expectations, not a price any buyer has offered.`,
+    process: timelineLines(t),
+    resolutions: [
+      "Authorise management to prepare the sale materials (teaser, confidential information memorandum and data room) and to approach qualified buyers under signed confidentiality agreements.",
+      "Delegate the day-to-day conduct of the process to a transaction committee of the Board, which reports at each milestone.",
+      "Require that no letter of intent or exclusivity be signed, and no definitive agreement be entered into, without a further resolution of the Board.",
+      "Authorise the engagement of legal counsel and, if the committee decides, a financial adviser, on terms the committee approves.",
+    ],
+    basis: `Figures are as supplied by management, unaudited, in US dollars. The valuation is prepared under ExitOS Valuation Framework v${INST.frameworkVersion}; buyer probabilities and the strategic premium are model estimates from comparable transactions.${assumed.length ? ` The Company has not yet supplied ${assumed.map((a) => ASSUMED_LABEL[a] ?? a).join(", ")}; the valuation model used neutral values for these, so the range will move when they are supplied.` : ""} The timeline is a planning assumption. The proposed resolutions are a starting point for the Company's counsel, not a form of minutes.`,
   };
 }

@@ -31,7 +31,7 @@ const MarketMap: React.FC = () => {
       <PageHeader eyebrow="◉ Market Intelligence" title="Global Acquisition Activity"
         badge={<span className="text-[12px] text-xo-muted">The map · as of {m.as_of.slice(0, 10)} · {m.geoDensity.length} regions</span>}
         description={`Source: ${m.source}. Most events are source-cited entries from Wikipedia acquisition lists that are not yet verified; a minority are verified against SEC EDGAR or Wikidata. Values are as disclosed in those sources.`}
-        actions={<a href="/report/market" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Market Intelligence Report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>} />
+        actions={<a href="/report/market" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Market Intelligence Report →<span className="sr-only"> (opens in a new tab)</span></a>} />
 
       <section aria-label="Registry totals" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Indexed acquisitions" emphasis value={m.totalEvents.toLocaleString()} sub="queryable events" /></div>

@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Modal, fmtMoney, notify } from "../lib/ui";
+import { Button, LockIcon, Modal, fmtMoney, notify } from "../lib/ui";
 import { PageHeader } from "../components/xo";
+import { codeNameFor } from "../lib/listings";
+import { closingChecklistDoc } from "../lib/closing-checklist";
 
 const Card: React.FC<{ className?: string; children: React.ReactNode }> = ({ className = "", children }) => (
   <div className={`border border-xo-line bg-xo-panel ${className}`}>{children}</div>
@@ -13,12 +15,14 @@ import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
 import {
   institutionalValuationMemo, buyerShortlistMemo, riskReportDoc,
-  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc,
+  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, wealthPlanDoc,
   downloadDeliverable,
 } from "../lib/deliverables";
 import { emitTelemetry } from "../lib/telemetry";
 import { useAuth } from "../lib/auth";
 import { needsUpgrade, PLAN_LABEL } from "../lib/access";
+import { label, plural } from "../lib/labels";
+import { sectorLabel } from "../lib/market-stats";
 import type { BuyerCandidate } from "@exit/engines";
 
 // Autonomous Exit Mode — "Sell my company," not "manage the sale." Seven
@@ -77,11 +81,11 @@ const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onT
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="truncate text-[13px] font-semibold text-xo-text">{b.buyer.name}</span>
-            <span className="shrink-0 rounded-full bg-xo-raise px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-xo-faint ring-1 ring-xo-line">{b.buyer.buyerType.replace(/_/g, " ")}</span>
+            <span className="shrink-0 rounded-full bg-xo-raise px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-xo-faint ring-1 ring-xo-line">{label(b.buyer.buyerType)}</span>
             <span className="shrink-0 text-[9px] uppercase tracking-wide text-xo-faint">{eo.overallConfidence.tier} conf.</span>
           </div>
           <div className="mt-0.5 text-[11px] leading-snug text-xo-faint">{b.rationale}</div>
-          <div className="mt-1 truncate text-[10px] text-xo-faint">{b.buyer.sectorsActive.slice(0, 3).map((s) => s.replace(/_/g, " ")).join(" · ")} · {b.buyer.geographyPreferred.length ? b.buyer.geographyPreferred.slice(0, 4).join(" ") : "Global"}</div>
+          <div className="mt-1 truncate text-[10px] text-xo-faint">{b.buyer.sectorsActive.slice(0, 3).map((s) => sectorLabel(s)).join(" · ")} · {b.buyer.geographyPreferred.length ? b.buyer.geographyPreferred.slice(0, 4).join(" ") : "Global"}</div>
         </div>
         <div className="shrink-0 text-right">
           <div className="font-mono text-[14px] font-bold text-deal-300">{Math.round(b.probability * 100)}%</div>
@@ -105,8 +109,8 @@ const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onT
 };
 
 const Autopilot: React.FC = () => {
-  // Valuation and buyer discovery run on the founder's company (or the demo
-  // company); diligence findings and offers are still demo fixtures.
+  // Valuation, buyer discovery and diligence findings run on the founder's
+  // company (or the demo company); offers are still demo fixtures.
   const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
   const { VALUATION_INSTITUTIONAL, VALUATION_STRATEGIC, VALUATION_CANONICAL, BUYERS, DILIGENCE } = useMemo(() => {
     const inst = runInstitutionalValuation(company);
@@ -118,8 +122,9 @@ const Autopilot: React.FC = () => {
     };
   }, [company]);
   const mid = VALUATION_CANONICAL.headline.mid;
+  const PROJECT = useMemo(() => codeNameFor(company, !fromIntake), [company, fromIntake]);
   const allBuyers = BUYERS.candidates;
-  const findings = useMemo(() => discoverFindings(), []);
+  const findings = useMemo(() => discoverFindings(company, mid), [company, mid]);
   const high = findings.filter((f) => f.severity === "high").length;
   const sellerReport = useMemo(() => buildSellerReport(findings), [findings]);
   const leaderName = OFFER_COMPARISON.offers[0]?.offer.buyerName;
@@ -163,19 +168,19 @@ const Autopilot: React.FC = () => {
         </div>
       ),
       decision: `Approve the ${shortlist.length}-buyer target list?`, approveLabel: "Approve the list",
-      deliverable: { filename: "buyer-target-list.md", build: () => buyerShortlistMemo(shortlist, "Project Cipher") },
+      deliverable: { filename: "buyer-target-list.md", build: () => buyerShortlistMemo(shortlist, PROJECT) },
       reportPath: "/report/buyers",
     },
     {
       id: "outreach", name: "Outreach Agent", role: "Drafts and runs the approach.",
-      work: <>Wrote the anonymized teaser and a six-step outreach sequence; intros personalized per buyer.</>,
+      work: <>Planned a six-step outreach sequence and per-buyer introductions; generate the anonymized teaser on the Documents page.</>,
       decision: `Send the anonymized teaser to the ${shortlist.length} shortlisted buyers?`, approveLabel: "Send outreach",
-      deliverable: { filename: "outreach-plan.md", build: () => outreachPlanDoc({ projectName: "Project Cipher", shortlistCount: shortlist.length, anchor: fmtMoney(mid) }) },
+      deliverable: { filename: "outreach-plan.md", build: () => outreachPlanDoc({ projectName: PROJECT, shortlistCount: shortlist.length, anchor: fmtMoney(mid) }) },
     },
     {
       id: "dataroom", name: "Data Room Agent", role: "Provisions and gates diligence.",
-      work: <>Provisioned seven rooms and wired access behind signed NDAs + the Buyer Trust score.</>,
-      decision: "Auto-grant data-room access to verified, NDA-signed buyers?", approveLabel: "Approve gating",
+      work: <>Organised {DILIGENCE.documents.length} diligence packages and drafted an access policy: NDA first, then your own check of each buyer's identity and funds.</>,
+      decision: "Adopt the data-room access policy?", approveLabel: "Adopt the policy",
       deliverable: { filename: "data-room-gating.md", build: () => dataRoomGatingDoc(DILIGENCE.documents.length) },
     },
     {
@@ -191,14 +196,14 @@ const Autopilot: React.FC = () => {
           ))}
         </div>
       ),
-      ...(fromIntake ? { detailNote: "Diligence findings use the demo company's sample data." } : {}),
-      decision: "Approve the pre-market remediation plan and disclosure schedule?", approveLabel: "Approve the plan",
+      decision: "Approve the pre-market remediation plan?", approveLabel: "Approve the plan",
       deliverable: { filename: "seller-diligence-report.md", build: () => riskReportDoc(sellerReport) },
       reportPath: "/report/readiness",
     },
     {
       id: "negotiation", name: "Negotiation Agent", role: "Scores offers and counters.",
       work: <>Scoring <span className="font-mono text-xo-text">{NEGOTIATION_STATE.activeOffers}</span> sample offers (demo data); leverage <span className="text-xo-text">{NEGOTIATION_STATE.leverage}</span>{leaderName ? <> · <span className="text-xo-text">{leaderName}</span> leads</> : null}.</>,
+      ...(fromIntake ? { detailNote: "Offers are the demo company's sample offers; ExitOS does not yet record real offers." } : {}),
       decision: leaderName ? `Approve the counter and drive ${leaderName} to a signed LOI?` : "Approve the counter strategy and drive to LOI?", approveLabel: "Approve the counter",
       deliverable: { filename: "offer-comparison.md", build: () => offerComparisonDoc({
         summary: OFFER_COMPARISON.summary,
@@ -219,7 +224,7 @@ const Autopilot: React.FC = () => {
       id: "closing", name: "Closing Agent", role: "Orchestrates signatures and escrow.",
       work: <>Assembled the closing checklist; tracking signatures, escrow funding and regulatory filings to the wire.</>,
       decision: "Approve proceeding to signing and funding the escrow?", approveLabel: "Approve close",
-      deliverable: { filename: "closing-checklist.md", build: closingChecklistDoc },
+      deliverable: { filename: "closing-checklist.md", build: () => closingChecklistDoc() },
     },
     {
       id: "wealth", name: "Wealth Agent", role: "Manages the proceeds after the wire.",
@@ -313,7 +318,7 @@ const Autopilot: React.FC = () => {
       <Modal open={!!reviewAgent} onClose={() => setReviewIdx(null)} title={reviewAgent ? reviewAgent.name : ""} subtitle={reviewAgent?.role} size="lg"
         footer={reviewAgent ? <>
           {reviewAgent.reportPath
-            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-800">Open board-ready PDF →</a>
+            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-800">Open board-ready report →</a>
             : <Button variant="ghost" onClick={() => downloadDeliverable(reviewAgent.deliverable.filename, reviewAgent.deliverable.build())}>Download draft (.md)</Button>}
           <Button onClick={() => { send(reviewAgent); }}>{sent.has(reviewAgent.id) ? "✓ Marked ready" : "Mark ready"}</Button>
         </> : null}>
@@ -393,7 +398,7 @@ const Autopilot: React.FC = () => {
               <div className="flex items-start gap-4">
                 <div className="flex flex-col items-center">
                   <span className={`flex h-9 w-9 items-center justify-center rounded-sm text-[13px] font-bold ring-1 ${STATUS_STYLE[status]}`}>
-                    {locked ? "🔒" : status === "done" ? "✓" : status === "working" ? <Spinner /> : i + 1}
+                    {locked ? <LockIcon size={12} /> : status === "done" ? "✓" : status === "working" ? <Spinner /> : i + 1}
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
@@ -436,7 +441,7 @@ const Autopilot: React.FC = () => {
                       <span className="text-xo-faint">·</span>
                       <button className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" onClick={() => setReviewIdx(i)}>Review</button>
                       {a.reportPath
-                        ? <a className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" href={a.reportPath} target="_blank" rel="noopener noreferrer">PDF →</a>
+                        ? <a className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" href={a.reportPath} target="_blank" rel="noopener noreferrer">Report →</a>
                         : <button className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" onClick={() => downloadDeliverable(a.deliverable.filename, a.deliverable.build())}>Download .md</button>}
                       <button className="text-[11px] font-semibold uppercase tracking-wide text-deal-300 hover:text-deal-200" onClick={() => send(a)}>{sent.has(a.id) ? "✓ Ready" : "Mark ready"}</button>
                     </div>
@@ -461,7 +466,7 @@ const Autopilot: React.FC = () => {
           <div className="p-6">
             <h3 className="font-serif text-xl font-bold text-xo-text">This is where listing ends — and the deal begins.</h3>
             <p className="mt-2 text-[13.5px] leading-relaxed text-xo-muted">
-              ExitOS priced the company and matched {shortlist.length} buyers. To open
+              ExitOS priced the company and matched {plural(shortlist.length, "buyer")}. To open
               conversations, run outreach, negotiate offers and close — and let the remaining agents finish the job —
               launch an Active Mandate.
             </p>

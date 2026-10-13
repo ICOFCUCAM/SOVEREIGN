@@ -1,4 +1,4 @@
-import type { CompanyProfile, EngineMeta } from '../types.js';
+import { isKnown, type CompanyProfile, type EngineMeta } from '../types.js';
 
 export type DiligenceDocumentKind =
   | 'financial'
@@ -24,6 +24,9 @@ export interface DiligenceSection {
 }
 
 export interface DiligenceArtifact {
+  /** Stable id an uploaded file is tagged with; completeness counts files by this id, never by filename. */
+  readonly id: string;
+  /** Suggested name in the room ({n} = the period); never used for matching. */
   readonly filename: string;
   readonly description: string;
   readonly required: boolean;
@@ -79,10 +82,10 @@ function financialDD(c: CompanyProfile): DiligenceDocumentSpec {
       },
     ],
     artifacts: [
-      { filename: 'financials/audited_FY{n-2}_FY{n}.pdf', description: 'Audited annual financials', required: true },
-      { filename: 'financials/management_pack_Q{n}.xlsx', description: 'Latest management accounts', required: true },
-      { filename: 'financials/cap_table_v{n}.xlsx',       description: 'Cap table with waterfall',   required: true },
-      { filename: 'financials/cohort_analysis.xlsx',      description: 'Customer cohort waterfall',   required: true },
+      { id: 'financial.audited_accounts', filename: 'financials/audited_FY{n-2}_FY{n}.pdf', description: 'Audited annual financials', required: true },
+      { id: 'financial.management_accounts', filename: 'financials/management_pack_Q{n}.xlsx', description: 'Latest management accounts', required: true },
+      { id: 'financial.cap_table', filename: 'financials/cap_table_v{n}.xlsx',       description: 'Cap table with waterfall',   required: true },
+      { id: 'financial.cohort_analysis', filename: 'financials/cohort_analysis.xlsx',      description: 'Customer cohort waterfall',   required: true },
     ],
   };
 }
@@ -124,9 +127,9 @@ function marketDD(c: CompanyProfile): DiligenceDocumentSpec {
       },
     ],
     artifacts: [
-      { filename: 'market/tam_sam_som_v{n}.pdf',       description: 'TAM/SAM/SOM model deck',      required: true },
-      { filename: 'market/competitor_matrix.xlsx',     description: 'Competitive feature matrix',  required: true },
-      { filename: 'market/win_loss_24mo.pdf',          description: 'Win/loss analysis package',    required: true },
+      { id: 'market.size_model', filename: 'market/tam_sam_som_v{n}.pdf',       description: 'TAM/SAM/SOM model deck',      required: true },
+      { id: 'market.competitor_matrix', filename: 'market/competitor_matrix.xlsx',     description: 'Competitive feature matrix',  required: true },
+      { id: 'market.win_loss', filename: 'market/win_loss_24mo.pdf',          description: 'Win/loss analysis package',    required: true },
     ],
   };
 }
@@ -167,9 +170,9 @@ function userGrowthDD(c: CompanyProfile): DiligenceDocumentSpec {
       },
     ],
     artifacts: [
-      { filename: 'growth/arr_bridge.xlsx',            description: 'ARR bridge by source',         required: true },
-      { filename: 'growth/cohort_retention.xlsx',      description: 'Cohort retention curves',      required: true },
-      { filename: 'growth/sales_productivity.xlsx',    description: 'Sales rep productivity',       required: false },
+      { id: 'growth.arr_bridge', filename: 'growth/arr_bridge.xlsx',            description: 'ARR bridge by source',         required: true },
+      { id: 'growth.cohort_retention', filename: 'growth/cohort_retention.xlsx',      description: 'Cohort retention curves',      required: true },
+      { id: 'growth.sales_productivity', filename: 'growth/sales_productivity.xlsx',    description: 'Sales rep productivity',       required: false },
     ],
   };
 }
@@ -183,7 +186,7 @@ function technicalArchitectureDD(c: CompanyProfile): DiligenceDocumentSpec {
       {
         heading: 'System architecture',
         questions: [
-          `Architecture diagram (${c.product.technicalArchitecture})`,
+          isKnown(c, 'product.technicalArchitecture') ? `Architecture diagram (${c.product.technicalArchitecture.replace(/_/g, ' ')})` : 'Architecture diagram',
           'Service inventory and ownership map',
           'Data model and schema documentation',
           'Third-party dependencies and SLAs',
@@ -212,9 +215,9 @@ function technicalArchitectureDD(c: CompanyProfile): DiligenceDocumentSpec {
       },
     ],
     artifacts: [
-      { filename: 'technical/architecture_overview.pdf', description: 'High-level architecture',   required: true },
-      { filename: 'technical/service_catalog.xlsx',      description: 'Service inventory',         required: true },
-      { filename: 'technical/incident_log_24mo.pdf',     description: 'Incident log',              required: true },
+      { id: 'technical.architecture', filename: 'technical/architecture_overview.pdf', description: 'High-level architecture',   required: true },
+      { id: 'technical.service_catalog', filename: 'technical/service_catalog.xlsx',      description: 'Service inventory',         required: true },
+      { id: 'technical.incident_log', filename: 'technical/incident_log_24mo.pdf',     description: 'Incident log',              required: true },
     ],
   };
 }
@@ -255,9 +258,9 @@ function securityDD(_c: CompanyProfile): DiligenceDocumentSpec {
       },
     ],
     artifacts: [
-      { filename: 'security/soc2_type2_FY{n}.pdf',    description: 'SOC 2 Type II',          required: true },
-      { filename: 'security/pentest_report.pdf',       description: 'Most recent pen test',   required: true },
-      { filename: 'security/incident_log.pdf',         description: 'Security incident log',  required: true },
+      { id: 'security.soc2', filename: 'security/soc2_type2_FY{n}.pdf',    description: 'SOC 2 Type II',          required: true },
+      { id: 'security.pentest', filename: 'security/pentest_report.pdf',       description: 'Most recent pen test',   required: true },
+      { id: 'security.incident_log', filename: 'security/incident_log.pdf',         description: 'Security incident log',  required: true },
     ],
   };
 }
@@ -285,9 +288,9 @@ function legalDD(_c: CompanyProfile): DiligenceDocumentSpec {
       },
     ],
     artifacts: [
-      { filename: 'legal/charter_documents.pdf',       description: 'Articles, bylaws',          required: true },
-      { filename: 'legal/material_contracts/index.pdf', description: 'Material contracts index',  required: true },
-      { filename: 'legal/litigation_register.pdf',     description: 'Litigation register',       required: true },
+      { id: 'legal.charter', filename: 'legal/charter_documents.pdf',       description: 'Articles, bylaws',          required: true },
+      { id: 'legal.material_contracts', filename: 'legal/material_contracts/index.pdf', description: 'Material contracts index',  required: true },
+      { id: 'legal.litigation_register', filename: 'legal/litigation_register.pdf',     description: 'Litigation register',       required: true },
     ],
   };
 }
@@ -319,9 +322,9 @@ function commercialDD(c: CompanyProfile): DiligenceDocumentSpec {
       },
     ],
     artifacts: [
-      { filename: 'commercial/nps_dashboard.pdf',       description: 'Customer health dashboard',  required: true },
-      { filename: 'commercial/case_studies.pdf',        description: 'Case-study compilation',     required: true },
-      { filename: 'commercial/synergy_memo.pdf',        description: 'Synergy thesis memo',        required: false },
+      { id: 'commercial.customer_health', filename: 'commercial/nps_dashboard.pdf',       description: 'Customer health dashboard',  required: true },
+      { id: 'commercial.case_studies', filename: 'commercial/case_studies.pdf',        description: 'Case-study compilation',     required: true },
+      { id: 'commercial.synergy_memo', filename: 'commercial/synergy_memo.pdf',        description: 'Synergy thesis memo',        required: false },
     ],
   };
 }
