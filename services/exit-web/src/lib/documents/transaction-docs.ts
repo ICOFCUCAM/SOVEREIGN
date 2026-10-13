@@ -47,7 +47,7 @@ export function bidderLabels(offers: readonly RecordedOffer[]): Map<string, stri
 const termRows = (o: RecordedOffer): Array<[string, string]> => {
   const t = o.terms ?? {};
   return [
-    ["Headline enterprise value proposed", usd(o.amountUsd)],
+    ["Headline price proposed", usd(o.amountUsd)],
     ["Cash at completion", t.cashPct != null ? pct(t.cashPct) : NS],
     ["Shares in the buyer", t.stockPct != null ? pct(t.stockPct) : NS],
     ["Earn-out", t.earnoutPct != null ? `${pct(t.earnoutPct)}${t.earnoutMonths ? ` over ${t.earnoutMonths} months` : ""}` : NS],
@@ -72,7 +72,7 @@ export function processLetter(company: CompanyProfile, timeline: ProcessTimeline
       body: `The dates below follow ${timeline.basis.toLowerCase().startsWith("exitos default") ? "the company's planning timeline; they may move as the process develops" : "the company's timeline"}.`,
       table: { headers: ["Stage", "Weeks", "What happens"], rows: timeline.milestones.map((m) => [m.label, m.startWeek === m.endWeek ? `Week ${m.startWeek}` : `Weeks ${m.startWeek}–${m.endWeek}`, m.description]) } },
     { heading: "What an indication of interest must contain", bullets: [
-      "The headline enterprise value proposed, on a cash-free, debt-free basis unless stated otherwise.",
+      "The headline price proposed, on a cash-free, debt-free basis unless stated otherwise.",
       "The form of consideration: cash at completion, shares, earn-out, management rollover, each as a share of the price.",
       "Any escrow or holdback, the indemnity cap you would seek and the exclusivity period you would ask for.",
       "How the purchase would be financed, and any condition attached to the financing.",
@@ -100,7 +100,7 @@ export function ioiRecord(company: CompanyProfile, offer: RecordedOffer, all: re
   const missing = missingTerms(offer);
   const cash = cashAtCompletion(offer);
   const sections: ContentSection[] = [
-    { heading: "Summary", body: `${label} submitted an indication of interest of ${usd(offer.amountUsd)} on ${offer.createdAt.slice(0, 10)}. Its status is ${offer.status}. This record restates what the bidder entered; it adds nothing.` },
+    { heading: "Summary", body: `${label} submitted an indication of interest of ${usd(offer.amountUsd)} for ${company.name} on ${offer.createdAt.slice(0, 10)}. Its status is ${offer.status}. This record restates what the bidder entered; it adds nothing.` },
     { heading: "Terms stated by the bidder", table: { headers: ["Term", "As stated"], rows: termRows(offer) } },
     { heading: "Cash at completion", body: cash != null ? `On the stated cash share less escrow, about ${usd(cash)} would be paid at completion, before transaction costs and adjustments.` : `Not yet supplied by the bidder: without the cash share the amount paid at completion cannot be worked out. Ask ${label} for it.` },
     { heading: "Conditions and approvals", ...(offer.terms?.conditions?.length || offer.terms?.approvals?.length
@@ -138,15 +138,15 @@ export function offerComparison(company: CompanyProfile, offers: readonly Record
   });
   const anyPositions = Object.values(p).some((v) => v != null);
   const sections: ContentSection[] = [
-    { heading: "Summary", body: `${ordered.length} live proposal${ordered.length === 1 ? "" : "s"} recorded for ${company.name}. The table restates each bidder's own terms side by side; "not stated" means the bidder did not give that term. No ranking is implied.` },
-    { heading: "Terms side by side", table: { headers: ["Term", ...ordered.map((o) => labels.get(o.id)!)], rows } },
+    { heading: "Summary", body: `${ordered.length} live proposal${ordered.length === 1 ? "" : "s"} recorded for ${company.name}. The table restates the terms each bidder gave, in one place; "not stated" means the bidder did not give that term. No ranking is implied.` },
+    { heading: "Terms compared", table: { headers: ["Term", ...ordered.map((o) => labels.get(o.id)!)], rows } },
     { heading: "Cash at completion", body: ordered.map((o) => { const c = cashAtCompletion(o); return `${labels.get(o.id)}: ${c != null ? `about ${usd(c)} at completion` : "cannot be worked out until the bidder states its cash share"}.`; }).join(" ") },
     { heading: "Against your positions", ...(anyPositions ? { bullets: against } : { body: "Not yet supplied: you have not set any negotiating positions, so the proposals are not measured against them. Set them in the negotiation workspace; ExitOS proposes none." }) },
   ];
   return { title: "Offer Comparison", subtitle: company.name, sections,
     coverage: [
       { section: "Summary", status: "supported", missing: [] },
-      { section: "Terms side by side", status: ordered.some((o) => missingTerms(o).length) ? "partial" : "supported", missing: [] },
+      { section: "Terms compared", status: ordered.some((o) => missingTerms(o).length) ? "partial" : "supported", missing: [] },
       { section: "Cash at completion", status: ordered.every((o) => cashAtCompletion(o) != null) ? "supported" : "partial", missing: [] },
       { section: "Against your positions", status: anyPositions ? "supported" : "gap", missing: anyPositions ? [] : ["negotiating positions"] },
     ],
@@ -158,7 +158,7 @@ function positionRows(o: RecordedOffer, p: PositionValues): Array<[string, strin
   const t = o.terms ?? {};
   const row = (term: string, theirs: string, ours: string | null): [string, string, string] => [term, theirs, ours ?? "Not proposed"];
   return [
-    row("Headline enterprise value", usd(o.amountUsd), p.headlineUsd != null ? usd(p.headlineUsd) : null),
+    row("Headline price", usd(o.amountUsd), p.headlineUsd != null ? usd(p.headlineUsd) : null),
     row("Cash at completion", t.cashPct != null ? pct(t.cashPct) : "not stated", p.minCashPct != null ? `at least ${pct(p.minCashPct)}` : null),
     row("Earn-out", t.earnoutPct != null ? pct(t.earnoutPct) : "not stated", p.maxEarnoutPct != null ? `no more than ${pct(p.maxEarnoutPct)}` : null),
     row("Escrow or holdback", t.escrowPct != null ? pct(t.escrowPct) : "not stated", p.maxEscrowPct != null ? `no more than ${pct(p.maxEscrowPct)}${p.maxEscrowMonths ? ` for ${p.maxEscrowMonths} months` : ""}` : null),

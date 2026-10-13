@@ -64,8 +64,10 @@ const all = (): Doc[] => [...docs.values()];
 
 describe("acceptance: both gates, every document, both companies", () => {
   it("covers every document on the generation service for both companies", () => {
-    for (const pc of SAMPLE_PACK_COMPANIES) for (const slug of ["cim", "executive_summary", "investor_deck", "buyer_teaser", "dd_room_index", "closing_checklist", "board_memo"])
+    for (const pc of SAMPLE_PACK_COMPANIES) for (const slug of ["cim", "executive_summary", "investor_deck", "buyer_teaser", "dd_room_index", "closing_checklist", "board_memo", "process_letter", "ioi", "offer_comparison"])
       expect(docs.has(`${pc.key}/${slug}`), `${pc.key}/${slug}`).toBe(true);
+    // the counter-proposal needs positions, the term sheet and exclusivity an accepted offer: only the full company has them
+    for (const slug of ["counter_offer", "loi", "exclusivity"]) { expect(docs.has(`full/${slug}`), slug).toBe(true); expect(docs.has(`minimal/${slug}`), slug).toBe(false); }
   });
   it("Gate A (integrity) passes for every document", () => {
     expect(all().filter((d) => !d.report.gateA.pass).map((d) => `${d.item.company}/${d.item.slug}: ${d.report.findings.filter((f) => gateOf(f.rule) === "A").map((f) => f.rule).join(", ")}`)).toEqual([]);
