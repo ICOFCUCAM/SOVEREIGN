@@ -10,6 +10,8 @@ import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { loadActiveCompany } from "../lib/active-company";
 import { label } from "../lib/labels";
 import { listDocuments, uploadDocument, tagFile, reviewFile, toRoomFile, fmtBytes, type DataRoomDocument, type RoomKind } from "../lib/data-room";
+import { setDisclosure } from "../lib/nda-lifecycle";
+import { useDocumentRemote } from "../lib/documents/remote";
 
 // Completeness model (exit-engines diligence/room.ts): a required artifact counts only
 // when a file tagged with it, for this company, has been accepted. Untagged uploads,
@@ -51,6 +53,7 @@ const DataRoom: React.FC = () => {
   // the artifact the next picked file will be tagged with (null: an untagged upload)
   const [target, setTarget] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const remote = useDocumentRemote();
 
   const active = DILIGENCE.documents.find((d) => d.kind === activeKind) ?? DILIGENCE.documents[0];
 
@@ -129,7 +132,7 @@ const DataRoom: React.FC = () => {
 
       <section aria-labelledby="dr-access-h" className="border border-xo-line bg-xo-panel px-4 py-3">
         <h2 id="dr-access-h" className="text-[14px] font-semibold">Who can see these files</h2>
-        <p className="mt-1 text-[13px] leading-relaxed text-xo-muted">Files are stored in your own account's room: only you can list and download them, through short-lived links. Buyers have no access yet; granting it under an executed NDA is a later step. The confidential and sensitive labels describe the files and do not add further restrictions. <span className="text-xo-text">"Accepted" is your own confirmation that a file is the document the artifact asks for, not an independent review.</span></p>
+        <p className="mt-1 text-[13px] leading-relaxed text-xo-muted">Files are stored in your own account's room: only you can list and download them, through short-lived links. A buyer sees a file only if you mark it "share under NDA" and that buyer's NDA with you is executed and unexpired; every listing and download is re-checked and recorded. The confidential and sensitive labels describe the files and do not add further restrictions. <span className="text-xo-text">"Accepted" is your own confirmation that a file is the document the artifact asks for, not an independent review.</span></p>
       </section>
 
       {error && <p role="alert" className="border border-xo-risk/50 bg-xo-panel px-4 py-3 text-[13px] text-xo-risk">{error}</p>}
@@ -245,6 +248,7 @@ const DataRoom: React.FC = () => {
                           <span className="flex items-center gap-2">
                             {d.review_state !== "accepted" && <button type="button" disabled={busy === d.id} onClick={() => void act(d.id, "Accepting the file", () => reviewFile(d.id, "accepted"))} className="font-semibold text-xo-verified hover:underline disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Accept<span className="sr-only"> {d.filename}</span></button>}
                             {d.review_state !== "rejected" && <button type="button" disabled={busy === d.id} onClick={() => void act(d.id, "Rejecting the file", () => reviewFile(d.id, "rejected"))} className="font-semibold text-xo-risk hover:underline disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Reject<span className="sr-only"> {d.filename}</span></button>}
+                            {remote && <button type="button" disabled={busy === d.id} aria-pressed={d.disclosure === "post_nda"} onClick={() => void act(d.id, "Changing what buyers may see", () => setDisclosure(d.id, d.disclosure === "post_nda" ? "seller_only" : "post_nda", remote))} className="font-semibold text-xo-muted hover:underline disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{d.disclosure === "post_nda" ? "Visible to buyers under NDA · stop" : "Seller only · share under NDA"}<span className="sr-only"> {d.filename}</span></button>}
                             {d.downloadUrl && <a href={d.downloadUrl} target="_blank" rel="noreferrer" className="font-semibold text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Download<span className="sr-only"> {d.filename} (opens in a new tab)</span></a>}
                           </span>
                         </li>

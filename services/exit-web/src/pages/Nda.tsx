@@ -10,6 +10,8 @@ import { buildMarketTape } from "../lib/market-tape";
 import { SAMPLE_NDAS, NDA_ROSTER, LISTING_PRIVATE } from "../lib/engines";
 import { inlineLabel, label } from "../lib/labels";
 import { loadActiveCompany } from "../lib/active-company";
+import { useDocumentRemote } from "../lib/documents/remote";
+import { NdaLifecycle } from "../components/NdaLifecycle";
 import { loadIssuedNdas, saveIssuedNdas, founderParty, partiesToSign, signNda } from "../lib/nda-drafts";
 import {
   evaluateNdaStatus, generateBreachNotice, rosterFor,
@@ -64,7 +66,13 @@ const Nda: React.FC = () => {
   const { session } = useAuth();
   // Buyers share this route ("Access Requests") but must never see the
   // founder's register of other counterparties.
-  return session?.role === "buyer" ? <BuyerAccessRequests /> : <FounderNdaVault />;
+  const remote = useDocumentRemote();
+  return (
+    <>
+      {remote && <div className="mb-3"><NdaLifecycle remote={remote} /></div>}
+      {session?.role === "buyer" ? <BuyerAccessRequests /> : <FounderNdaVault />}
+    </>
+  );
 };
 
 const REQ_LABEL: Record<NdaRequest["status"], string> = { requested: "Awaiting the founder", signed: "NDA signed", rejected: "Declined" };
@@ -84,7 +92,7 @@ const BuyerAccessRequests: React.FC = () => {
       <PageHeader eyebrow="Deals · Your access" title="Access Requests"
         description="Requests you make to see a listed company's materials under NDA." />
       <Section title="Your requests" className="border border-xo-line"
-        foot="You request access from a listing on the Acquisition Radar. The founder decides; once an NDA is signed a deal room can open for you. You only ever see your own requests — never other bidders.">
+        foot="You request access from a listing on the Acquisition Radar. The founder issues an NDA in reply; it executes only when both parties have signed and each has verified the other's signature, and only then can you open the files the founder discloses. You only ever see your own requests — never other bidders.">
         <div className="px-4 py-3 text-[13px] text-xo-muted">
           {reqs == null ? <p role="status">Loading your requests…</p>
             : failed ? <p role="alert" className="text-xo-risk">Your requests could not be loaded. Try again later.</p>
@@ -180,7 +188,7 @@ const FounderNdaVault: React.FC = () => {
       <PageHeader eyebrow="◉ Workspace · NDA" title="NDA Vault"
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">{roster.active} active</span></>}
         description={fromIntake
-          ? `The NDAs you have drafted for ${company.name}, kept in this browser. An NDA is active only once every party's signature is recorded.`
+          ? `Local practice records for ${company.name}, kept in this browser only. They execute no NDA and grant no access: use "NDAs with signature evidence" above (sign in) for that.`
           : `A sample NDA portfolio for the demo company (${DEMO_PARTY_NAME}), plus any NDAs you draft in this browser.`}
         actions={<>
           <a href="/report/nda" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">NDA Package →<span className="sr-only"> (opens in a new tab)</span></a>

@@ -7,12 +7,12 @@ import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany } from "../lib/active-company";
 import { listingFromCompany, allListings, findOwnListing } from "../lib/listings";
 import {
-  eventsForSubject, ndaRequestsForListing, signNda, offersForListing, resolveOffer,
+  eventsForSubject, ndaRequestsForListing, offersForListing, resolveOffer,
   dealsForListing, advanceDeal, DEAL_STAGES, dealStageIndex, allMandates,
   listingDestination, type NdaRequest, type Offer, type Deal, type DealStage, type Mandate,
 } from "../lib/exit-api";
 import { matchCompanyToCriteria } from "../lib/acquirer";
-import { captureDealEvent, subscribe, type DealEvent } from "../lib/deal-events";
+import { subscribe, type DealEvent } from "../lib/deal-events";
 import type { Region } from "@exit/engines";
 
 const DEMO_LISTING_ID = "lst-demo-helios";
@@ -111,11 +111,6 @@ const FounderInbox: React.FC = () => {
   const executedNdas = ndas.filter((r) => r.status === "signed");
   const openOffers = offers.filter((o) => o.status === "submitted");
 
-  const execute = (req: NdaRequest): void => {
-    void signNda(req.id).then(refresh);
-    // capture the telemetry too (feeds the funnel + engagement analytics)
-    captureDealEvent({ actorRole: "founder", kind: "nda_signed", subjectType: "listing", subjectId: listing.id, subjectName: listing.code });
-  };
   const decide = (offer: Offer, status: "accepted" | "rejected"): void => {
     void resolveOffer(offer.id, status).then(refresh);
   };
@@ -213,7 +208,7 @@ const FounderInbox: React.FC = () => {
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
         {/* pending NDA requests — first-class records to resolve */}
         <Section title="NDA requests · awaiting you"
-          foot="Execute NDA marks the request signed; the buyer sees “NDA signed”. ExitOS does not send or sign an NDA document and does not reveal your company to the buyer — share it yourself once the NDA is in place. Buyers are shown anonymously.">
+          foot="Issue the NDA from the NDA page. It executes only when you and the buyer have both signed and each has verified the other's signature; a request is marked signed only by that execution, never by hand. Buyers are shown anonymously.">
           {pendingNdas.length ? (
             <ul>
               {pendingNdas.map((r) => (
@@ -222,11 +217,7 @@ const FounderInbox: React.FC = () => {
                     <span className="font-semibold">A buyer</span> <span className="text-xo-muted">requested an NDA</span>
                     <span className="ml-2 font-mono text-[11px] text-xo-faint">{timeAgo(r.requestedAt)}</span>
                   </div>
-                  <button type="button" onClick={ask({ kind: "nda", id: r.id })} aria-expanded={isPending("nda", r.id)} className={BTN}>Execute NDA…</button>
-                  {isPending("nda", r.id) && (
-                    <Confirm text="Mark this NDA request as executed? The buyer will see “NDA signed”. No document is sent or signed, and your company is not revealed. This cannot be undone here."
-                      confirm="Mark executed" onConfirm={() => { setPending(null); execute(r); }} onCancel={cancel} />
-                  )}
+                  <Link to="/console/nda" className={BTN}>Issue the NDA →</Link>
                 </li>
               ))}
             </ul>

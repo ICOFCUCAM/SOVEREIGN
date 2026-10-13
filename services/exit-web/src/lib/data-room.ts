@@ -35,6 +35,8 @@ export interface DataRoomDocument {
   readonly review_state?: ReviewState;
   readonly reviewed_at?: string | null;
   readonly review_note?: string | null;
+  /** seller_only (default) or post_nda: visible to a buyer only under an executed, unexpired NDA */
+  readonly disclosure?: "seller_only" | "post_nda";
 }
 
 /** The engine's view of a file, for completeness (diligence/room.ts). */
