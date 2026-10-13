@@ -87,6 +87,11 @@ html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px s
 .ex-hscroll { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); scrollbar-width: none; }
 .ex-hscroll::-webkit-scrollbar { display: none; }
 
+/* one focus mark across the console: controls without a focus style of their own (about 110 buttons set
+   none) showed the browser's default outline, black or blue by platform; they now take the console's emerald.
+   :where() keeps this at zero specificity, so controls that draw their own ring keep theirs */
+.ex-console :where(a, button, summary, select, input, textarea, [tabindex]:not([tabindex="-1"])):focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
+
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
 
