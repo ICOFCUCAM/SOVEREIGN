@@ -372,7 +372,7 @@ const Terminal: React.FC = () => {
                         <span className="font-medium text-xo-text">{c.target}</span> <span className="text-xo-faint">→</span> <span className="text-xo-muted">{c.buyer}</span>
                         <span className="block text-[11px] text-xo-faint">{c.status}{c.closeDays != null ? ` · ${c.closeDays}d to close` : ""}</span>
                       </td>
-                      <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.date ?? "—"}</td>
+                      <td className="whitespace-nowrap px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.date ?? "—"}</td>
                       <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-text">{c.priceUsd != null ? fmtUsdShort(c.priceUsd) : <span className="font-sans text-[11px] text-xo-faint">undisclosed</span>}</td>
                       <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-muted">{c.premiumPct != null ? `+${Math.round(c.premiumPct * 100)}%` : "—"}</td>
                       <td className="px-4 py-2 text-right">

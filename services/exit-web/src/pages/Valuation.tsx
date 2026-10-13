@@ -158,7 +158,7 @@ const Valuation: React.FC = () => {
                   <tr key={`${c.buyer}-${c.target}`} className="border-b border-xo-line last:border-0">
                     <th scope="row" className="px-4 py-2 text-left font-normal">{c.target}</th>
                     <td className="px-2 py-2 text-xo-muted">{c.buyer}</td>
-                    <td className="px-2 py-2 font-mono text-xo-muted">{c.date ?? "—"}</td>
+                    <td className="whitespace-nowrap px-2 py-2 font-mono text-xo-muted">{c.date ?? "—"}</td>
                     <td className="px-2 py-2 text-right font-mono">{c.priceUsd != null ? fmtMoney(c.priceUsd) : "undisc."}</td>
                     <td className="px-4 py-2 text-right font-mono text-xo-verified">{c.premiumPct != null ? pctStr(c.premiumPct) : "—"}</td>
                   </tr>
