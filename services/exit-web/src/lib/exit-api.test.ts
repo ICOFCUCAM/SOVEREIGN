@@ -48,11 +48,12 @@ describe("exit-api contract — the multi-tenant backend bridge", () => {
     await connectExitApi(api, founder);
     listCompany(buildProfile({ ...SAMPLE_INTAKE, name: "Networked Co", sector: "ai_infra" }));
     const pool = await api.listListings();
-    expect(pool.some((l) => l.profile.name === "Networked Co")).toBe(true);
+    expect(pool.some((l) => l.publicView.sector === "AI")).toBe(true);
+    expect(JSON.stringify(pool)).not.toContain("Networked Co");   // the shared pool never holds the name
     // a buyer connecting later sees it in the shared pool
     const buyer: Account = { id: "acct-buyer-1", role: "buyer", name: "Buyer One", createdAt: new Date().toISOString() };
     await connectExitApi(api, buyer);
-    expect(allListings().some((l) => l.profile.name === "Networked Co")).toBe(true);
+    expect(allListings().some((l) => pool.some((p) => p.id === l.id && l.id !== "lst-demo-helios" && !l.id.startsWith("lst-sov-")))).toBe(true);
   });
 
   it("the reference client implements the full contract", async () => {
@@ -223,7 +224,7 @@ function contractSuite(name: string, make: () => ExitApiClient): void {
     });
     it("listings: a saved listing is in the shared pool", async () => {
       const api = make();
-      await api.saveListings([{ id: "lst-z", code: "Project Z", listedAt: "t", profile: { name: "Z" } as never, publicView: { sector: "AI", region: "North America", revenueUsd: 1, growthPct: 0, ebitdaMarginPct: 0 } }]);
+      await api.saveListings([{ id: "lst-z", code: "Project Z", listedAt: "t", publicView: { sector: "AI", region: "North America" } }]);
       expect((await api.listListings()).some((l) => l.id === "lst-z")).toBe(true);
     });
     it("NDA + offer lifecycle", async () => {
@@ -265,7 +266,7 @@ describe("ownership hardening — owner-scoped listing writes", () => {
     const api = new SupabaseExitApi({ url: "https://x.supabase.co", anonKey: "anon", fetchImpl: fakeSupabaseFetch() });
     api.setAccessToken("jwt", "userU");
     const mk = (id: string, owner?: string): Parameters<typeof api.saveListings>[0][number] =>
-      ({ id, ownerAccountId: owner, code: "Project X", listedAt: "t", profile: { name: id } as never, publicView: { sector: "AI", region: "North America", revenueUsd: 1, growthPct: 0, ebitdaMarginPct: 0 } });
+      ({ id, ownerAccountId: owner, code: "Project X", listedAt: "t", publicView: { sector: "AI", region: "North America" } });
     // a session that holds the whole pool tries to write all of it…
     await api.saveListings([mk("mine", "userU"), mk("theirs", "userOther"), mk("seed", undefined)]);
     const pool = await api.listListings();

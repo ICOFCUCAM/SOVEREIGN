@@ -6,7 +6,8 @@ describe("social publishing", () => {
   it("never leaks the company identity in a founder-listing post", () => {
     const helios = allListings().find((l) => l.id === "lst-demo-helios")!;
     const post = buildListingPost(helios, "https://exit.sovereigndo.com");
-    expect(post.text).not.toContain(helios.profile.name);   // anonymized
+    expect(post.text).not.toContain("Helios");               // anonymized
+    expect(post.text).toMatch(/Revenue \$\d+–\d+M/);         // a bracket, not the exact figure
     expect(post.title).toBe(helios.code);                   // code name only
     expect(post.text).toContain("ExitOS");
   });

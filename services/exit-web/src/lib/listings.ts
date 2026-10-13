@@ -4,13 +4,18 @@ import { SAMPLE_COMPANY } from "./profile";
 import { exitosSectorOf } from "./acquirer";
 import { buildProfile } from "./company-intake";
 import { SOVEREIGN_PRODUCTS, SOVEREIGN_OWNER_ACCOUNT } from "./sovereign-intel";
+import { revenueBand, growthBand, type Band } from "./bands";
 
 // ── LISTINGS REPOSITORY ─────────────────────────────────────────────
 // Real listings — the supply side of the exchange. A founder lists their
 // company (anonymized); buyers' mandates match against the POOL, not a demo.
 // Persisted through a swappable adapter (localStorage now, the exit-api
-// when it ships — the API and consumers never change). The public view is
-// always anonymized: sector, region, revenue band, growth — never the name.
+// when it ships — the API and consumers never change).
+//
+// A listing is shared with every buyer, so it holds ONLY public fields: a code
+// name, sector, region and revenue / growth brackets. The company's profile
+// (name, exact figures) never enters it — the owner works from their own
+// company record — and the id is not derived from the name.
 
 /** Real product descriptor for catalog-style listings (e.g. Sovereign estate). */
 export interface ListingProductMeta {
@@ -30,15 +35,47 @@ export interface Listing {
   readonly code: string;                 // anonymized handle, e.g. "Project Atlas"
   readonly listedAt: string;
   readonly ownerAccountId?: string;      // the founder who listed it — drives owner-scoped write RLS (never shown publicly)
-  readonly profile: CompanyProfile;      // internal — used for matching, never shown raw
   readonly productMeta?: ListingProductMeta; // present for named-product (catalog) listings
-  readonly publicView: {
-    readonly sector: string;             // ExitOS sector
-    readonly region: Region;
-    readonly revenueUsd: number;
-    readonly growthPct: number;
-    readonly ebitdaMarginPct: number;
-    readonly disclosed?: boolean;        // false ⇒ financials withheld pending NDA (never fabricated); undefined ⇒ disclosed
+  readonly publicView: ListingPublicView;
+}
+
+export interface ListingPublicView {
+  readonly sector: string;               // ExitOS sector
+  readonly region: Region;
+  readonly revenueBand?: Band;           // brackets, never exact figures (absent when withheld)
+  readonly growthBand?: Band;
+  readonly disclosed?: boolean;          // false ⇒ financials withheld pending NDA (never fabricated)
+}
+
+// a short, non-reversible id: djb2 over the seed, base 36
+const shortHash = (seed: string): string => {
+  let h = 5381;
+  for (const c of seed) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0;
+  return h.toString(36);
+};
+
+/** The listing id an earlier version derived from the company name; owners still look it up. */
+export const legacyListingId = (profile: CompanyProfile): string => `lst-${profile.name.toLowerCase().replace(/[^\w]+/g, "-").slice(0, 24)}`;
+
+/** A listing as stored by an earlier version (with the profile and exact figures) → public fields only. */
+export function normalizeListing(raw: unknown): Listing {
+  const r = raw as Record<string, unknown> & { publicView?: Record<string, unknown> };
+  const pv = r.publicView ?? {};
+  const disclosed = pv.disclosed === false ? false : true;
+  const band = (b: unknown, exact: unknown, f: (n: number) => Band): Band | undefined =>
+    !disclosed ? undefined : (b && typeof b === "object" ? (b as Band) : typeof exact === "number" ? f(exact) : undefined);
+  const revenueBandV = band(pv.revenueBand, pv.revenueUsd, revenueBand);
+  const growthBandV = band(pv.growthBand, pv.growthPct, growthBand);
+  return {
+    id: String(r.id), code: String(r.code), listedAt: String(r.listedAt),
+    ...(r.ownerAccountId ? { ownerAccountId: String(r.ownerAccountId) } : {}),
+    ...(r.productMeta ? { productMeta: r.productMeta as ListingProductMeta } : {}),
+    publicView: {
+      sector: String(pv.sector ?? "Other"), region: pv.region as Region,
+      ...(revenueBandV ? { revenueBand: revenueBandV } : {}),
+      ...(growthBandV ? { growthBand: growthBandV } : {}),
+      ...(disclosed ? {} : { disclosed: false }),
+    },
   };
 }
 
@@ -52,20 +89,18 @@ let currentOwner: string | undefined;
 export function setListingOwner(id?: string): void { currentOwner = id; }
 
 export function listingFromCompany(profile: CompanyProfile, id?: string): Listing {
-  const lid = id ?? `lst-${profile.name.toLowerCase().replace(/[^\w]+/g, "-").slice(0, 24)}`;
+  // one listing per owner account (or per company in a browser-only session)
+  const lid = id ?? `lst-${shortHash(currentOwner ?? `local:${profile.name}`)}`;
   return {
     id: lid,
     code: codeFor(lid),
     listedAt: new Date().toISOString(),
-    ownerAccountId: currentOwner,
-    profile,
+    ...(currentOwner ? { ownerAccountId: currentOwner } : {}),
     publicView: {
       sector: exitosSectorOf(profile),
       region: regionOf(profile.jurisdiction),
-      revenueUsd: profile.revenue.trailingTwelveMonthsRevenueUsd,
-      growthPct: profile.growth.arrGrowthYoyPct,
-      ebitdaMarginPct: profile.revenue.ebitdaMarginPct,
-      disclosed: true,
+      revenueBand: revenueBand(profile.revenue.trailingTwelveMonthsRevenueUsd),
+      growthBand: growthBand(profile.growth.arrGrowthYoyPct),
     },
   };
 }
@@ -89,7 +124,6 @@ function buildSovereignListings(): Listing[] {
       code: p.name,                         // catalog listing — the product name is the handle
       listedAt: "2026-01-01T00:00:00.000Z",
       ownerAccountId: SOVEREIGN_OWNER_ACCOUNT,
-      profile,
       productMeta: {
         productLine: p.name, category: p.category, descriptor: p.label, capability: p.description,
         valueLabel: p.valueLabel, valueText: p.valueText, coverage: p.coverage, tags: p.tags,
@@ -99,7 +133,7 @@ function buildSovereignListings(): Listing[] {
         sector: exitosSectorOf(profile), region: regionOf(profile.jurisdiction),
         // revenue/EBITDA not published; the real published figure is the
         // deployment/infrastructure VALUE, surfaced via productMeta.valueText.
-        revenueUsd: 0, growthPct: 0, ebitdaMarginPct: 0, disclosed: false,
+        disclosed: false,
       },
     };
   });
@@ -107,7 +141,7 @@ function buildSovereignListings(): Listing[] {
 
 export interface ListingsAdapter { read(): Listing[]; write(l: Listing[]): void }
 const localAdapter: ListingsAdapter = {
-  read() { try { return JSON.parse(globalThis.localStorage?.getItem(KEY) ?? "[]") as Listing[]; } catch { return []; } },
+  read() { try { return (JSON.parse(globalThis.localStorage?.getItem(KEY) ?? "[]") as unknown[]).map(normalizeListing); } catch { return []; } },
   write(l) { try { globalThis.localStorage?.setItem(KEY, JSON.stringify(l)); } catch { /* in-memory */ } },
 };
 let adapter: ListingsAdapter = localAdapter;
@@ -139,7 +173,9 @@ export function subscribeListings(l: () => void): () => void { listeners.add(l);
 /** List (or update) a company — the supply side of the network. */
 export function listCompany(profile: CompanyProfile): Listing {
   const l = listingFromCompany(profile);
-  const rest = load().filter((x) => x.id !== l.id);
+  // replaces this company's listing, including one stored under the old name-derived id
+  const legacy = legacyListingId(profile);
+  const rest = load().filter((x) => x.id !== l.id && x.id !== legacy);
   cache = [l, ...rest];
   adapter.write(cache);
   emit();
@@ -154,6 +190,12 @@ export function unlistCompany(id: string): void {
 }
 
 export const isListed = (id: string): boolean => load().some((x) => x.id === id);
+
+/** The owner's own listing of this company, under its current or its old name-derived id. */
+export const findOwnListing = (profile: CompanyProfile): Listing | undefined => {
+  const ids = [listingFromCompany(profile).id, legacyListingId(profile)];
+  return load().find((x) => ids.includes(x.id));
+};
 
 /** Where a listing came from: a founder's own listing, the bundled demo
  *  company, or the Sovereign product catalog (both seeded, not founders). */

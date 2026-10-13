@@ -5,7 +5,7 @@ import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { loadActiveCompany } from "../lib/active-company";
-import { listingFromCompany, allListings } from "../lib/listings";
+import { listingFromCompany, allListings, findOwnListing } from "../lib/listings";
 import {
   eventsForSubject, ndaRequestsForListing, signNda, offersForListing, resolveOffer,
   dealsForListing, advanceDeal, DEAL_STAGES, dealStageIndex, allMandates,
@@ -68,7 +68,7 @@ const FounderInbox: React.FC = () => {
   // the founder's own listing id is deterministic from their company; the
   // inbox tracks interest landing on it whether or not it's listed yet. With
   // no intake the demo company is the exchange's seeded demo listing.
-  const listing = useMemo(() => listingFromCompany(company, fromIntake ? undefined : DEMO_LISTING_ID), [company, fromIntake]);
+  const listing = useMemo(() => (fromIntake ? findOwnListing(company) ?? listingFromCompany(company) : listingFromCompany(company, DEMO_LISTING_ID)), [company, fromIntake]);
   const isLive = useMemo(() => allListings().some((l) => l.id === listing.id), [listing.id]);
 
   const [events, setEvents] = useState<DealEvent[]>([]);
@@ -85,12 +85,12 @@ const FounderInbox: React.FC = () => {
     // liquidity: which published buyer mandates match THIS listing
     void allMandates().then((ms) => setMatched(ms
       .map((m) => {
-        const r = matchCompanyToCriteria(listing.profile, { sectors: [...m.sectors], minRevUsd: m.minCheckUsd, maxRevUsd: m.maxCheckUsd, regions: [...m.regions] as Region[], minGrowthPct: m.minGrowthPct });
+        const r = matchCompanyToCriteria(company, { sectors: [...m.sectors], minRevUsd: m.minCheckUsd, maxRevUsd: m.maxCheckUsd, regions: [...m.regions] as Region[], minGrowthPct: m.minGrowthPct });
         return { m, score: r.score, qualified: r.qualified };
       })
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score)));
-  }, [listing.id, listing.profile]);
+  }, [listing.id, company]);
 
   const [pending, setPending] = useState<Pending>(null);
   const trigger = useRef<HTMLElement | null>(null);
@@ -128,7 +128,7 @@ const FounderInbox: React.FC = () => {
     <div data-page="inbox" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Founder · Demand · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Inbox"
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className={`rounded-sm border px-1.5 py-px text-[11px] font-semibold ${isLive ? "border-xo-verified/50 text-xo-verified" : "border-xo-caution/50 text-xo-caution"}`}>{isLive ? "Listed" : "Draft"}</span></>}
-        description={<>Listing <span className="font-mono">{listing.code}</span> · {listing.publicView.sector} · {listing.publicView.region} · revenue {usd(listing.publicView.revenueUsd)}. {fromIntake
+        description={<>Listing <span className="font-mono">{listing.code}</span> · {listing.publicView.sector} · {listing.publicView.region} · revenue {usd(company.revenue.trailingTwelveMonthsRevenueUsd)} (buyers see {listing.publicView.revenueBand?.label ?? "no figure"}). {fromIntake
           ? "Your company's listing, from your saved intake."
           : <>No intake saved, so this shows the demo company's listing on the exchange — requests and offers here come from anyone using the demo. <Link to="/console/intake" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Save an intake</Link> to see your own.</>}</>} />
 

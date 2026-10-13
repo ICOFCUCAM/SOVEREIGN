@@ -5,7 +5,7 @@ import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import { ACQ_INDEXES, fmtUsd } from "../lib/market-intel";
-import { matchCompanyToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
+import { matchListingToCriteria, type AcquisitionCriteria } from "../lib/acquirer";
 import { allListings, subscribeListings, listingOrigin, type Listing } from "../lib/listings";
 import { captureDealEvent } from "../lib/deal-events";
 import { requestNda, submitOffer, startDeal, advanceDeal, saveMandate, myMandate } from "../lib/exit-api";
@@ -78,7 +78,7 @@ const AcquisitionRadar: React.FC = () => {
   // matching scores the buyer's mandate against the whole pool.
   const listings = useSyncExternalStore(subscribeListings, allListings, allListings);
   const scored = useMemo(() => listings
-    .map((l) => ({ listing: l, match: matchCompanyToCriteria(l.profile, criteria) }))
+    .map((l) => ({ listing: l, match: matchListingToCriteria(l.publicView, criteria) }))
     .sort((a, b) => b.match.score - a.match.score), [listings, criteria]);
   const qualified = scored.filter((s) => s.match.qualified);
   const founderCount = listings.filter((l) => listingOrigin(l) === "founder").length;
@@ -223,7 +223,7 @@ const AcquisitionRadar: React.FC = () => {
                       </>
                     : l.publicView.disclosed === false
                       ? <span>Financials under NDA</span>
-                      : <span className="font-mono tabular-nums">Revenue {fmtUsd(l.publicView.revenueUsd)} · Growth {Math.round(l.publicView.growthPct * 100)}%</span>}
+                      : <span className="font-mono tabular-nums">Revenue {l.publicView.revenueBand?.label ?? "—"} · Growth {l.publicView.growthBand?.label ?? "—"}</span>}
                   <button type="button" aria-pressed={!!watched[l.id]}
                     onClick={() => {
                       // record the follow once, not again when unfollowing

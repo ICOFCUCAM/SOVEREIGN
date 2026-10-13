@@ -25,7 +25,7 @@ quality.
 | ID | Sev | Finding | Where |
 |---|---|---|---|
 | N-1 | S0 | **Every listing row carries the company's full private profile** (name, every financial), and RLS lets any authenticated user — including the anonymous user every browser gets — read every listing. The UI hides it; the API does not. The buyer-side Radar downloads it to match. | `supabase/migrations/0001_exitos_backend.sql:42-50`, `src/lib/listings.ts:33`, `src/pages/AcquisitionRadar.tsx:81` |
-| N-2 | S0 | Offers, NDA requests, deals and deal documents are readable by **every** authenticated user (`using (true)`); offers and documents are also writable by anyone (`0001` write policies are only partly replaced in `0002`). | `0001_exitos_backend.sql:72-113`, `0003_exitos_network.sql:21` |
+| N-2 | S0 | Offers, NDA requests, deals, deal documents and deal events are readable by **every** authenticated user (`using (true)`); writes were already restricted by `0002`/`0003`. | `0001_exitos_backend.sql:54-113`, `0003_exitos_network.sql:21` |
 | N-3 | S0 | No real authentication: any role (founder, buyer, operator in dev) is claimed in the browser. Server-side authorization of approvals, counsel review or execution verification is impossible until accounts are real. | `src/lib/auth.tsx` |
 | N-4 | S1 | A saved intake is merged over `SAMPLE_INTAKE`, so any field the founder did not enter silently takes the demo company's value. | `src/lib/active-company.ts:17,36` |
 | N-5 | S1 | Every company's id is `"intake"`, so nothing generated can be traced to a company. | `src/lib/company-intake.ts:64` |
@@ -44,7 +44,7 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 | A-3 | Gating document claims identity / funds verification | Fixed `af7ef82f` | rewritten as an access *policy* stating what is and is not checked | `deliverables.test.ts` |
 | A-4 | All data-room uploads in one shared tenant readable by all | Fixed in code `fc8b8ea2`; **not deployed** | functions take the tenant from the user's token, refuse anon | `data-room.test.ts`; acceptance needs redeploy + a two-account check |
 | N-1 | Listing rows expose private profiles | Open | split: public row holds code + public view; private profile in an owner-only table; buyer-side matching on the public view | migration test (SQL policy assertions), listings unit tests, Radar works on public view |
-| N-2 | Offers / NDA requests / deals / documents world-readable | Open | RLS: readable by the buyer party and the listing owner only; drop the `0001` blanket write policies | policy tests in a migration test script; adapter tests |
+| N-2 | Offers / NDA requests / deals / documents / events world-readable | Open | RLS: readable by the buyer party and the listing owner only; documents by visibility and signed NDA | `supabase/tests/isolation/run.sh` (owner / buyer / stranger) |
 | A-5 | Radar says identity is revealed on signature; Inbox says never | Open | one statement, from the disclosure policy (below) | copy test on both pages |
 | A-6 | DiligenceAI `.md` exports have no confidentiality header | Open | route through the shared frame (later: the registry renderer) | export test |
 | A-7 | Filenames and metadata could carry the company name (`docFilename` slugs the title) | Open | safe filenames from document type + project code + version, never the company name for pre-NDA classes | filename test per classification |

@@ -4,7 +4,7 @@ import type {
   Notification, NotificationKind, Deal, DealStage, DealFilter, Mandate,
 } from "./exit-api";
 import type { DealEvent } from "./deal-events";
-import type { Listing } from "./listings";
+import { normalizeListing, type Listing } from "./listings";
 
 // ── THE FIRST PRODUCTION BACKEND ────────────────────────────────────
 // SupabaseExitApi satisfies ExitApiClient EXACTLY, over the Supabase REST
@@ -111,7 +111,8 @@ export class SupabaseExitApi implements ExitApiClient {
   async listEventsForSubject(subjectId: string): Promise<DealEvent[]> { return this.rows<DealEvent>("exitos_deal_events", `subject_id=eq.${enc(subjectId)}`); }
 
   // ── listings (shared pool, owner-scoped writes) ──
-  async listListings(): Promise<Listing[]> { return this.rows<Listing>("exitos_listings"); }
+  // rows written by earlier versions may still carry a profile; only public fields come back
+  async listListings(): Promise<Listing[]> { return (await this.rows<unknown>("exitos_listings")).map(normalizeListing); }
   async saveListings(listings: readonly Listing[]): Promise<void> {
     // owner-scoped RLS only permits writing one's own listings; send just
     // those (others already live in the pool, written by their owners).

@@ -63,18 +63,12 @@ export function buildListingPost(l: Listing, origin = typeof window !== "undefin
   // founder listing — anonymised: code name only, never the company identity
   const fin = l.publicView.disclosed === false
     ? "Financials under NDA"
-    : `Revenue ${usdShort(l.publicView.revenueUsd)} · Growth ${Math.round(l.publicView.growthPct * 100)}%`;
+    : `Revenue ${l.publicView.revenueBand?.label ?? "under NDA"} · Growth ${l.publicView.growthBand?.label ?? "under NDA"}`;
   return compose(
     l.code,
     [`🟢 New on the ExitOS Acquisition Exchange`, ``, `${l.code} — ${l.publicView.sector} · ${l.publicView.region}`, fin, `Qualified buyers can request an NDA to engage.`],
     tags, url,
   );
-}
-
-function usdShort(n: number): string {
-  if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `$${Math.round(n / 1e6)}M`;
-  return `$${n.toLocaleString()}`;
 }
 
 // ── Official per-network share intents (real, client-side) ──────────

@@ -1,0 +1,24 @@
+
+C offers|0
+C ndas|0
+C deals|0
+C docs|1
+C events|0
+C listings|3
+
+B offers|1
+B ndas|1
+B docs|1
+B events|1
+
+A offers|1
+A ndas|1
+A deals|1
+A docs|3
+A events|1
+
+B docs after signed NDA|2
+listing rows with profile|0
+lst-a|{"region": "North America", "sector": "AI", "disclosed": true, "growthBand": {"low": 0.25, "high": 0.5, "label": "25–50%"}, "revenueBand": {"low": 25000000, "high": 50000000, "label": "$25–50M"}}
+lst-demo-helios|{"region": "North America", "sector": "Logistics", "growthBand": {"low": 0.25, "high": 0.5, "label": "25–50%"}, "revenueBand": {"low": 10000000, "high": 25000000, "label": "$10–25M"}}
+lst-sov-x|{"region": "North America", "sector": "AI", "disclosed": false}

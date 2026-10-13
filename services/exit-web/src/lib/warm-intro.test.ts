@@ -17,7 +17,7 @@ describe("warm introduction (pre-NDA)", () => {
   it("gives the ARR as a band", () => {
     expect(arrBand(3e6)).toBe("under $5M");
     expect(arrBand(12e6)).toBe("$10–25M");
-    expect(arrBand(250e6)).toBe("over $100M");
+    expect(arrBand(250e6)).toBe("over $250M");
     expect(text).toContain(`${arrBand(SAMPLE_COMPANY.revenue.annualRecurringRevenueUsd)} ARR band`);
   });
 });

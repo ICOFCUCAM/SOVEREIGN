@@ -5,7 +5,7 @@ import { runInstitutionalValuation } from "@exit/engines";
 import {
   buildProfile, SECTORS, SAMPLE_INTAKE, type IntakeInputs, type Sector,
 } from "../lib/company-intake";
-import { listCompany, listingFromCompany, unlistCompany, allListings } from "../lib/listings";
+import { listCompany, listingFromCompany, unlistCompany, findOwnListing } from "../lib/listings";
 import { listingDestination } from "../lib/exit-api";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
@@ -68,13 +68,13 @@ const Intake: React.FC = () => {
   // Listing: preview exactly what buyers will see, confirm, and allow withdrawal.
   const preview = useMemo(() => listingFromCompany(buildProfile(inp)), [inp]);
   const [, setListingVersion] = useState(0);   // re-render after list / withdraw
-  const stored = allListings().find((l) => l.id === preview.id);
+  const stored = findOwnListing(buildProfile(inp));
   const listed = !!stored;
   const stale = !!stored && JSON.stringify(stored.publicView) !== JSON.stringify(preview.publicView);
   const [confirming, setConfirming] = useState(false);
   const destination = listingDestination();
   const confirmListing = (): void => { listCompany(buildProfile(inp)); setConfirming(false); setListingVersion((v) => v + 1); };
-  const withdraw = (): void => { unlistCompany(preview.id); setConfirming(false); setListingVersion((v) => v + 1); };
+  const withdraw = (): void => { unlistCompany(stored?.id ?? preview.id); setConfirming(false); setListingVersion((v) => v + 1); };
   const set = <K extends keyof IntakeInputs>(k: K, v: IntakeInputs[K]): void => {
     setInp((p) => { const next = { ...p, [k]: v }; saveIntake(next); return next; });
     setSaved(true); setPrefilled(false);
@@ -147,8 +147,8 @@ const Intake: React.FC = () => {
               <p className="mt-1 text-[12px] text-xo-muted">Your company name is withheld. {destination === "exchange" ? "The listing is published to the live exchange." : "This build is not connected to the live exchange: the listing is saved in this browser only."} You can withdraw it at any time.</p>
             </>
           )}
-          <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-5">
-            {(() => { const pv = listed && !confirming && stored ? stored.publicView : preview.publicView; return ([["Sector", pv.sector], ["Region", pv.region], ["TTM revenue", fmtMoney(pv.revenueUsd)], ["Growth", pct(pv.growthPct)], ["EBITDA margin", pct(pv.ebitdaMarginPct)]] as const); })().map(([k, v]) => (
+          <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-4">
+            {(() => { const pv = listed && !confirming && stored ? stored.publicView : preview.publicView; return ([["Sector", pv.sector], ["Region", pv.region], ["TTM revenue", pv.revenueBand?.label ?? "Under NDA"], ["Growth", pv.growthBand?.label ?? "Under NDA"]] as const); })().map(([k, v]) => (
               <div key={k}><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[13px] tabular-nums capitalize">{String(v).replace(/_/g, " ")}</dd></div>
             ))}
           </dl>
