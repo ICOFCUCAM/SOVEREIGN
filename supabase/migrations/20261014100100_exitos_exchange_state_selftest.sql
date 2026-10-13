@@ -2,6 +2,8 @@
 --
 -- select public.exitos_selftest_exchange_state();
 --
+-- Since 20261014120000 a request becomes signed only through NDA execution (exitos_selftest_nda_lifecycle
+-- covers that); here the owner may only reject.
 -- Acts as a listing owner, a buyer and a stranger on a throwaway listing and ALWAYS ends by
 -- raising, so every row it wrote is rolled back: the message begins SELFTEST PASS or
 -- SELFTEST FAIL and lists each check. Only the database owner can execute it.
@@ -49,14 +51,14 @@ begin
   out := out || format(E'\n%s 09 owner cannot rewrite an offer amount', ok); fails := fails + (not ok)::int;
   begin update public.exitos_offers set data = data || '{"status":"accepted"}' where id = O1; ok := true; exception when others then ok := false; end;
   out := out || format(E'\n%s 10 owner can accept an offer', ok); fails := fails + (not ok)::int;
-  begin update public.exitos_nda_requests set data = '{"status":"signed"}' where id = NR; ok := true; exception when others then ok := false; end;
-  out := out || format(E'\n%s 11 owner can resolve the NDA request', ok); fails := fails + (not ok)::int;
+  begin update public.exitos_nda_requests set data = '{"status":"rejected"}' where id = NR; ok := true; exception when others then ok := false; end;
+  out := out || format(E'\n%s 11 owner can resolve (reject) the NDA request', ok); fails := fails + (not ok)::int;
   begin update public.exitos_nda_requests set data = '{"status":"requested"}' where id = NR; ok := false; exception when others then ok := true; end;
   out := out || format(E'\n%s 12 a resolved NDA request is final', ok); fails := fails + (not ok)::int;
 
   perform set_config('request.jwt.claims', json_build_object('sub', B, 'role', 'authenticated')::text, true); perform set_config('request.jwt.claim.sub', B, true);
-  select count(*) into n from public.exitos_documents where id = D; ok := n = 1;
-  out := out || format(E'\n%s 13 buyer reads the post-NDA document once the owner resolved the request (%s)', ok, n); fails := fails + (not ok)::int;
+  select count(*) into n from public.exitos_documents where id = D; ok := n = 0;
+  out := out || format(E'\n%s 13 a resolved request alone opens no post-NDA document (%s)', ok, n); fails := fails + (not ok)::int;
   begin update public.exitos_offers set data = data || '{"amountUsd":1}' where id = O1; ok := false; exception when others then ok := true; end;
   out := out || format(E'\n%s 14 buyer cannot revise an accepted offer', ok); fails := fails + (not ok)::int;
 
