@@ -13,9 +13,11 @@ create schema if not exists extensions; create schema if not exists storage; cre
 do $x$ begin if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if; end $x$;
 alter default privileges in schema public grant all on tables to anon, authenticated;
 SQL
-for f in ../../../supabase_migration_0027_exit_data_room.sql ../../migrations/20261014110000_exit_data_room_tagging.sql; do
+for f in ../../../supabase_migration_0027_exit_data_room.sql ../../migrations/20261014110000_exit_data_room_tagging.sql ../../migrations/20261014110100_exit_data_room_selftest.sql; do
   $Q -d $DB -f "$f" >/dev/null 2>/tmp/dataroom-mig.err || { echo "migration failed: $f"; cat /tmp/dataroom-mig.err; exit 1; }
 done
 psql -q -d $DB -tA -f scenario.sql > actual.txt 2>&1 || true
+self=$(psql -d $DB -tA -c "select public.exit_selftest_data_room()" 2>&1 || true)
+echo "$self" | grep -E "SELFTEST|^f "
 $Q -c "drop database $DB" >/dev/null
-if diff -u expected.txt actual.txt; then echo "dataroom: pass"; rm -f actual.txt; else echo "dataroom: FAIL"; exit 1; fi
+if echo "$self" | grep -q "SELFTEST PASS" && diff -u expected.txt actual.txt; then echo "dataroom: pass"; rm -f actual.txt; else echo "dataroom: FAIL"; exit 1; fi
