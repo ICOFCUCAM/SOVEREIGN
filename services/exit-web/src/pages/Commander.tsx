@@ -41,8 +41,9 @@ const AcquirerMixRadar: React.FC<{ data: { label: string; n: number }[] }> = ({ 
   const pt = (i: number, r: number): [number, number] => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
   const poly = data.map((d, i) => pt(i, (d.n / max) * R).join(",")).join(" ");
   const ring = (f: number): string => data.map((_, i) => pt(i, R * f).join(",")).join(" ");
+  // the view box reaches 36 units past each side so the longest label ("Private Equity 0") is not cut off
   return (
-    <svg viewBox="0 0 300 256" className="w-full" role="img" aria-label={`Acquirer mix by type: ${data.map((d) => `${d.label} ${d.n}`).join(", ")}`}>
+    <svg viewBox="-36 0 372 256" className="w-full" role="img" aria-label={`Acquirer mix by type: ${data.map((d) => `${d.label} ${d.n}`).join(", ")}`}>
       {[0.25, 0.5, 0.75, 1].map((f) => <polygon key={f} points={ring(f)} fill="none" stroke="#22314b" strokeWidth="1" />)}
       <text x={cx} y={cy - R - 4} textAnchor="middle" fill="#8796ad" style={{ fontSize: 8, fontFamily: "ui-monospace, monospace" }}>{max}</text>
       {data.map((_, i) => { const [x, y] = pt(i, R); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#22314b" strokeWidth="1" />; })}
