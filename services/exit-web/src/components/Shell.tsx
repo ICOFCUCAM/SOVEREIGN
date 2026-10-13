@@ -287,7 +287,12 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </main>
       </div>
       <TermsDialog open={termsOpen} onClose={() => setTermsOpen(false)} />
-      <CommandPalette items={items} role={role} plan={plan} open={paletteOpen} onOpenChange={setPaletteOpen} />
+      <CommandPalette items={items} role={role} plan={plan} open={paletteOpen} onOpenChange={setPaletteOpen}
+        actions={[
+          { label: "Plain-language terms", hint: "glossary definitions", run: () => setTermsOpen(true) },
+          tipsHidden ? { label: "Show page tips", hint: "help", run: () => setTipsHidden(false) } : { label: "Hide page tips", hint: "help", run: () => setTipsHidden(true) },
+          { label: "Sign out", hint: "log out leave", run: () => { signOut(); nav("/"); } },
+        ]} />
       <Toast />
     </div>
   );
