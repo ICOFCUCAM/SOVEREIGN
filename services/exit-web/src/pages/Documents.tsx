@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Modal, fmtMoney } from "../lib/ui";
+import { Modal, fmtMoney } from "../lib/ui";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
@@ -118,11 +118,12 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
       <PageHeader eyebrow={`◉ Workspace · Documents · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Document Generator"
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Engine-composed · {flags.length > 0 ? `${flags.length} consistency flags` : "no conflicts in the four checks"}</span></>}
         actions={<>
+          {/* one size for the four header actions: three outlined, the report filled */}
           <span className="text-[12px] text-xo-faint">Nothing is sent from ExitOS — download a draft to share it.</span>
-          <Button variant="ghost" onClick={() => setLibraryOpen(true)}>Library</Button>
+          <button type="button" onClick={() => setLibraryOpen(true)} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Library</button>
           <a href="/report" target="_blank" rel="noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
           <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
-          {doc && <Button variant="ghost" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))}>Download draft (.md)</Button>}
+          {doc && <button type="button" onClick={() => downloadDeliverable(docFilename(doc), docToMarkdown(doc))} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Download draft (.md)</button>}
         </>} />
 
       <section aria-label="Document summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
