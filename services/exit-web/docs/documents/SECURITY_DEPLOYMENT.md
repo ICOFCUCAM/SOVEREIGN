@@ -355,7 +355,38 @@ Applied 13 October 2026:
 
 **Not verified here:** HTTP calls through `exit-doc-buyer` against a transaction-bound NDA (O-15). The database function it calls is covered by checks 06 and 24.
 
+## Deliverable 6: end-to-end self-test of one deal (D6-4)
+
+Applied 13 October 2026 as `exitos_deal_end_to_end_selftest` (`20261014150000`), live version `20261013222831`. It adds one owner-only function and changes no schema. Signed-in users cannot execute it; that was confirmed.
+
+**Before running:**
+- **Source check:** the deployed source was compared with the reviewed repository file. With comment lines excluded (the apply tool drops them), they are identical: MD5 `259f0e3f…`, 15,436 characters.
+- **Rollback behaviour:** the function always ends by raising, and every write is scoped to its own `zz-selftest` rows. The only owner-made rows are the test listing and two data-room files; every other step is taken as the seller, the buyer, an unrelated account or anon.
+
+**Live result:** `SELFTEST PASS (0 failed of 20)`. The deal goes:
+1. the buyer requests an NDA;
+2. the seller issues it;
+3. a typed signature and an e-signature are each verified by the other party, and the NDA executes;
+4. the buyer sees only the disclosed file;
+5. the buyer offers with terms; it cannot accept its own offer;
+6. the seller accepts the offer and opens the transaction (an unrelated account and the buyer cannot);
+7. each signing condition is evidenced by its owner and confirmed by the other party;
+8. signing is recorded on matching hashes;
+9. one completion condition is waived by both parties and the rest are confirmed;
+10. completion is recorded on matching amounts;
+11. post-closing obligations are created and one is discharged;
+12. the completed deal cannot be terminated.
+
+It also checks that both audit trails are complete, and that an unrelated account and anon see nothing.
+
+**After:** zero transactions, items, events, NDAs, NDA events, requests, offers, listings or data-room files remain.
+
+**Local mutation check:** with buyer downloads made to ignore disclosure, check 03 fails, and so does NDA check 19.
+
+**Rollback:** `drop function public.exitos_selftest_deal_end_to_end();`
+
 ## Rollback
+- **End-to-end self-test (deliverable 6):** `drop function public.exitos_selftest_deal_end_to_end();`
 - **Transactions (deliverable 6):** the ordered statements in the header of `20261014140000_exitos_transactions.sql`. Restore the two buyer functions first, then drop the transaction objects. Any transaction data is lost; export it first if any exists.
 - **NDA lifecycle (deliverable 5):** the statements in the header of `20261014120000_exitos_nda_lifecycle.sql`; delete the `exit-doc-buyer` function. Rolling back restores the founder flag as the post-NDA gate.
 - **Exchange state integrity (deliverable 5):** the statements in the header of `20261014100000_exitos_exchange_state_integrity.sql`. Rolling back re-opens the self-signing defect.

@@ -77,7 +77,7 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 | C-2 | Inbox "Mark executed" is a bare flag | Fixed `20261014120000`, `32470d7f`; **deployed and verified live** (self-test 32/32) | "Mark executed" removed; a request is marked signed only when its NDA executes (every required party's signature recorded from its own account on the issued hash and verified by the counterparty); the owner can no longer set it |
 | C-3 | NDA shapes: `one_way_disclosure` has no template; mutual-cure has no cure term; expiry runs from execution; 8 of "14" clauses; no clause text | Partial | Fixed: the executed NDA is a full text fixed by hash; access term separate from survival; ExitOS template text labelled founder draft, not reviewed by counsel. Open: versioned clause library with counsel review (O-6); the local NDA vault and `/report/nda` package still describe template clause counts |
 | C-4 | Data-room completeness counts any upload; missing list matches template filenames | Fixed `244ea1c6`; **deployed and verified live** (self-test 11/11) | upload is tagged with its artifact id; completeness = required artifacts with an accepted file |
-| C-5 | Deal stages have no signing stage | **Server done, live-verified; UI pending (D6-2)** | `exitos_transactions` (D6): negotiating → signed → closed / terminated. Each milestone needs both parties' confirmations on the same agreement hash or amount, with every required condition met. Buyer data-room access is transaction-scoped once an NDA is bound. Live self-test 25/25 |
+| C-5 | Deal stages have no signing stage | **Done (server, UI); live-verified** | `exitos_transactions` (D6): negotiating → signed → closed / terminated. Each milestone needs both parties' confirmations on the same agreement hash or amount, with every required condition met. Buyer data-room access is transaction-scoped once an NDA is bound. UI: Closing Center (seller) and the NDA page (buyer). Live self-tests: transaction 25/25, end-to-end 20/20; browser check 15/15 against a stand-in API |
 
 ### Contradictions between documents (S2)
 
@@ -176,6 +176,7 @@ These block a requirement from being complete in production. Nothing below is ma
 | O-14 | Confirm the configured backup schedule, retention, and PITR status and window in the Supabase Dashboard (WAL archiving alone does not establish them) | recovery procedure for the story tables |
 | O-15 | When network access permits: authenticated HTTP tests of `exit-doc-upload` (artifact check) and `exit-doc-buyer` (list, download, refusal, 60-second link) | HTTP-level verification of the edge functions |
 | O-16 | Decide whether to integrate an e-signature provider (DocuSign, Adobe Acrobat Sign, Dropbox Sign or another) and provide its account; until then the three signing methods record party-entered evidence, verified by the counterparty, and say so | professional-grade NDA signing |
+| O-17 | Decide plan gating for transaction parties. The NDA page and the Closing Center are Pro-only for founders **and buyers**, and every e-mail sign-in starts on the free plan, so a free buyer cannot reach its NDA signing or its side of the transaction in the UI (the server functions are unaffected). Proposed: never gate a counterparty's own NDA and transaction actions behind a plan | buyers can complete an NDA and a transaction |
 | O-13 | Authorise reviewers deliberately (owner decision). Nobody is authorised by default. For each reviewer: identify them, verify their professional qualification and scope, then authorise for that competence only (`exitos_authorize_reviewer`, with name and professional role). The company then engages them. The administrator cannot verify claims or authorise themselves (enforced and tested). No reviewer is authorised today | any "independently verified" figure |
 | O-10 | ~~Decide who may verify~~ **Decided 14 Oct:** only an authorised professional reviewer, engaged by the company, within their competence, with recorded evidence. Founder, ExitOS checks, counsel outside scope and administrators cannot verify. Implemented `5ea9f90e`, `bc2cd4fe` | done |
 | O-11 | If price guidance is ever to be given: approve a separate, counsel-reviewed price-guidance document and who may send it | A.5 |
@@ -244,8 +245,8 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 |---|---|---|---|
 | 6A | Process letter, bid instructions, IOI request and criteria, presentation and diligence instructions | D5 | Done: from the canonical timeline; states what an IOI must contain, how to submit, management meetings and data-room access under NDA, conduct rules, reservation of rights; indicates no price | `quality.test.ts` (both gates and PDF, two companies) |
 | 6B.1–6B.5 | Structured IOI; LOI / term sheet; exclusivity draft; counter-offer from the real offer (B-8); offer comparison from real bids (B-3) | D5 | Done: structured IOI form and record; offer comparison from recorded offers (no ranking); counter-proposal; draft heads of terms and exclusivity letter for counsel (binding provisions, law and conditions left to counsel, stated so). Server: the owner cannot rewrite a bidder's terms (**live self-test 16/16**) | `quality.test.ts`, `IoiTerms.test.ts`, `negotiation-positions.test.ts`, `supabase/tests/nda` |
-| 6C | SPA preparation, disclosure schedules, approvals and consents, escrow, funds flow, closing statement, bring-down, closing cap table, filings, announcements | D6 | Partial. **Server:** signing and closing conditions (standard set, plus either party's additions) with evidence, counterparty confirmation, two-party waivers and two-party milestone confirmation (live 25/25). **Not yet built:** the UI and the closing documents (D6-2) | `supabase/tests/nda` (transaction self-test) |
-| 6D | Post-closing obligations register | D6 | Partial. **Server:** created at closing from the terms (escrow release, earn-out end, NDA survival) with due dates; either party adds more; each is closed by evidence and counterparty confirmation (live). **Not yet built:** the register UI and document (D6-3) | `supabase/tests/nda` |
+| 6C | SPA preparation, disclosure schedules, approvals and consents, escrow, funds flow, closing statement, bring-down, closing cap table, filings, announcements | D6 | Partial. **Done:** conditions to signing and completion with evidence, the other party's confirmation and two-party waivers; both parties' signing and completion confirmations (server, live; UI). Documents from the record, both quality gates at 100: agreement drafting brief for counsel, funds flow and closing statement, bring-down certificate draft, conditions/consents/filings register, completion announcement draft. **Not built:** the agreement, disclosure schedules, escrow agreement and consents themselves (counsel instruments; O-6); closing cap table (still the sample on screen, B-7) | `transactions.test.ts`, `closing-docs.test.ts`, `quality.test.ts`, `supabase/tests/nda` (transaction 25, end-to-end 20), `scripts/transaction-record-ui.mjs` |
+| 6D | Post-closing obligations register | D6 | Done as a record: created at completion from the accepted terms (escrow release, earn-out, NDA survival) with due dates; either party adds more; each discharged by evidence and the other party's confirmation (server, live; UI); register document through both gates. ExitOS sends no reminders and holds no escrow, stated | end-to-end self-test checks 15–16, `closing-docs.test.ts` |
 
 ### §7 Legal and compliance boundaries
 | # | Requirement | Owning | Status |
@@ -261,8 +262,8 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 |---|---|---|---|
 | 8.1 | Explicit states; never active through a flag | D5 | Done: issued → executed only through verified signatures of every required party; withdrawn, terminated, revoked by named functions; expiry computed on every check; no direct writes | `supabase/tests/nda`; **live self-test 32/32** |
 | 8.2 | Signature evidence, identity, timestamps, version, countersignature | D5 | Done: signer's authenticated account, name, title, method, method-specific evidence, signed hash = issued hash, signing and recording times, counterparty verification with note. Not done: cryptographic e-signature certificate checks or a provider integration; "verified" means a named non-signatory confirmed the evidence | `nda-lifecycle.test.ts`, `supabase/tests/nda`; **live 32/32** |
-| 8.3 | Server-enforced, auditable data-room access; requested / approved / provisioned / revoked | D2/D5 | Done for buyers: access exists only under an executed, unexpired NDA, for the agreement's seller, company and scope, files the seller disclosed post-NDA; re-checked on every list and download; 60-second links; terminate, revoke and expiry close it; audit trail of listings, downloads and denials. Transaction scope waits on D6 (`transaction_id` reserved) | `supabase/tests/nda`; **live 32/32**; edge function HTTP path not yet exercised (network) |
-| 8.4 | A file satisfies only its company, transaction, artifact type and review state (C-4) | D5 | Done for company, artifact and review state; transaction id waits on the transaction record (D6). "Accepted" is the owner's confirmation, labelled as such; independent review of files is not built | `diligence.test.js`, `data-room.test.ts`, `supabase/tests/dataroom`; **live self-test 11/11** |
+| 8.3 | Server-enforced, auditable data-room access; requested / approved / provisioned / revoked | D2/D5/D6 | Done for buyers: access exists only under an executed, unexpired NDA, for the agreement's seller, company and scope, files the seller disclosed post-NDA; re-checked on every list and download; 60-second links; terminate, revoke and expiry close it; audit trail of listings, downloads and denials. **Transaction-scoped (D6):** once the NDA is bound to a transaction, access also needs that transaction live or completed for the same buyer; termination ends it | `supabase/tests/nda`; **live 32/32, transaction 25/25, end-to-end 20/20**; edge function HTTP path not yet exercised (network, O-15) |
+| 8.4 | A file satisfies only its company, transaction, artifact type and review state (C-4) | D5/D6 | Done for company, artifact and review state, and for transaction through the bound NDA (D6). "Accepted" is the owner's confirmation, labelled as such; independent review of files is not built | `diligence.test.js`, `data-room.test.ts`, `supabase/tests/dataroom`; **live self-test 11/11** |
 
 ### §9 Cross-document consistency
 | # | Requirement | Owning | Status | Evidence |
@@ -299,7 +300,7 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 | 11.9 | UI / Markdown / PDF agreement | Done for the sample pack: every heading and table row checked in the Markdown, the HTML preview and the PDF | `rendered.ts`, `quality.test.ts` |
 | 11.10 | Cross-document financial and timeline consistency | Done for the checks in 9.1 | `consistency.test.ts` |
 | 11.11 | Draft / review / approval / execution distinctions | Partial (execution D4) | `supabase/tests/documents`, `capability.test.ts` |
-| 11.12 | Post-closing obligations | Partial: server record live (D6-1); register UI pending (D6-3) | transaction self-test checks 18, 20, 21 |
+| 11.12 | Post-closing obligations | Done as a record (D6): server, UI and register document | end-to-end self-test 15–16, transaction self-test 18, 20, 21, `closing-docs.test.ts` |
 | 11.13 | Lint, type-check, unit, integration, build each increment | Every increment | §8, §9 |
 
 ### D4 (owner's decisions of 13–14 October): professional CIM and evidence-based intake
@@ -757,3 +758,87 @@ The statements in each migration header, in reverse order. Redeploy the previous
 - **Counter-proposal and the valuation:** it states the seller's proposed price by design. It is not matched against the valuation figure, but the other seller-only checks still apply.
 - **Signing:** see O-16. There is no e-signature provider integration.
 - **Price guidance:** not built (O-11).
+
+## 13. Increment report — deliverable 6 (signing, closing and post-closing)
+
+### What changed
+- **Transaction record on the server (D6-1):** opened by the seller from an offer it accepted and that buyer's executed NDA. Price and terms are fixed from the offer, and the NDA is bound to the transaction.
+  - **Conditions:** each one is evidenced by the party that owns it and confirmed by the other party; a waiver needs both parties.
+  - **Signing:** recorded only when both parties name the same agreement SHA-256 and every required signing condition is met.
+  - **Completion:** recorded only when both state the same amount paid and every required completion condition is met.
+  - **Post-closing obligations:** completion creates them from the terms. Either party can terminate before completion.
+  - **Data-room access** becomes transaction-scoped: termination ends it even while the NDA is in term.
+- **UI (D6-2, D6-3):** the Closing Center shows the record to the seller; a buyer works its side on the NDA page.
+  - Each control mirrors what the server allows, and the server still decides.
+  - Documents are hashed in the browser and never uploaded.
+  - Disagreements (different hashes or amounts) are shown, not resolved. The audit trail is on the record.
+  - The page's own claims were corrected: the checklist is labelled a planning template, and "what ExitOS does" now names the record and what it does not hold.
+- **Closing documents from the record:**
+  - agreement drafting brief for counsel;
+  - funds flow and closing statement;
+  - bring-down certificate draft;
+  - conditions, consents and filings register;
+  - post-closing obligations register;
+  - completion announcement draft.
+
+  Nothing is filled in: adjustments, the buyer's legal entity, the signing officer and exceptions read "Not yet supplied". A draft exists only once the record reaches its stage. The announcement needs the buyer's name and states no price.
+- **End-to-end test (D6-4):** one self-test takes a deal from the buyer's NDA request to post-closing, through the real functions and policies, each step signed in as the party that takes it.
+
+### Files and migrations
+- **Migrations:**
+  - `20261014140000_exitos_transactions`, live `20261013215241`;
+  - `20261014140100_exitos_transactions_selftest`, live `20261013215354`;
+  - `20261014150000_exitos_deal_end_to_end_selftest`, live `20261013222831`.
+- **Web:**
+  - libraries: `lib/transactions.ts`;
+  - documents: `lib/documents/closing-docs.ts`, `lib/documents/transaction-doc-view.ts`;
+  - components and pages: `components/TransactionRecord.tsx`, `pages/Closing.tsx`, `pages/Nda.tsx`;
+  - changed: `DocumentVersions` (notices), `TransactionWorkspace` (shared view helpers), registry, service, sample pack.
+- **Tests:** `lib/transactions.test.ts`, `lib/documents/closing-docs.test.ts`, `scripts/transaction-record-ui.mjs`, and `supabase/tests/nda/run.sh`, which now runs all five self-tests.
+
+### Tests
+- **Local:**
+  - web 65 files, 390 tests;
+  - engines 201;
+  - lint, typecheck and build clean;
+  - SQL self-tests on the full stack: NDA 32, exchange 16, data room 11, transaction 25, end-to-end 20, plus the offer-terms check.
+- **Mutations:** the self-tests caught every deliberate break:
+  - signing that ignores the agreement hash;
+  - downloads that ignore the transaction;
+  - milestones that ignore open conditions;
+  - downloads that ignore disclosure (end-to-end check 03 and NDA check 19).
+- **Quality:** six closing documents (full company, closed sample transaction) pass Gate A and Gate B at 100, including the rendered-PDF inspection.
+  - Review found and fixed:
+    - a closing statement whose amount contradicted the split;
+    - a duplicate "Status" section;
+    - waivers shown as "None recorded";
+    - an irrelevant "What recipients receive" section;
+    - a basis notice that named the company's figures instead of the transaction record.
+- **Browser:** the Closing page as seller and as buyer, against a stand-in API that applies the transaction rules: 15/15. It covers:
+  - offers to open and to evidence only what the party owns;
+  - the other party's review;
+  - a hash mismatch blocking signing;
+  - signing, completion and post-closing;
+  - the documents built from the record.
+
+  The stand-in is not the database, which the self-tests cover. The test accounts used the operator grant to pass the plan gate (O-17).
+- **Live, 13 October:**
+  - before running, each deployed self-test was compared with the reviewed repository version and found identical, comments excluded;
+  - transaction 25/25, end-to-end 20/20;
+  - after the buyer functions were redefined: NDA 32/32, exchange 16/16, data room 11/11, company stories 25/25;
+  - zero rows left behind.
+
+### Limits
+- **What the record is:** a record of what the two parties state and confirm to each other. ExitOS holds no funds, sees no payment and no signed agreement, checks no bank record or signature, and gives no legal opinion. Each screen and document says so.
+- **Not built:** the agreement, schedules, escrow agreement and consents themselves (counsel instruments, O-6), and the closing cap table (B-7).
+- **No HTTP-level test** of the buyer's download function against a transaction-bound NDA (O-15). Its database function is covered by the self-tests.
+- **Plan gating** keeps free buyers out of the NDA and transaction pages (O-17, owner decision).
+- **E-signature:** no provider is integrated (O-16).
+
+### Rollback
+In order:
+1. `drop function public.exitos_selftest_deal_end_to_end();`
+2. `drop function public.exitos_selftest_transaction_lifecycle();`
+3. The ordered statements in the header of `20261014140000_exitos_transactions.sql`: restore the two buyer functions, then drop the transaction objects.
+4. Revert commits `17e5da51` and `ce6af8bf` for the web and docs.
+
