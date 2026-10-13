@@ -9,6 +9,19 @@ import { needsUpgrade, type NavItem, type Plan, type Role } from "../lib/access"
 
 const basePath = (to: string): string => to.split("#")[0];
 
+// the last pages opened in this browser, newest first (the palette lists them first when nothing is typed)
+const RECENT_KEY = "exitos.recentPages";
+export const readRecent = (): string[] => { try { const v = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]"); return Array.isArray(v) ? v.filter((x) => typeof x === "string") : []; } catch { return []; } };
+export const noteRecent = (path: string): void => {
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify([path, ...readRecent().filter((p) => p !== path)].slice(0, 5))); } catch { /* storage unavailable */ }
+};
+
+/** With nothing typed: the recent pages first (in recency order), then the rest of the menu. */
+export const orderForEmpty = (items: readonly NavItem[], recent: readonly string[]): NavItem[] => {
+  const first = recent.map((p) => items.find((n) => basePath(n.to) === p)).filter((n): n is NavItem => !!n);
+  return [...first, ...items.filter((n) => !first.includes(n))];
+};
+
 /** Pages whose menu name, page name or group contain every word typed, in menu order. */
 export const searchPages = (items: readonly NavItem[], query: string): NavItem[] => {
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
@@ -24,7 +37,9 @@ const CommandPalette: React.FC<{ items: readonly NavItem[]; role: Role; plan: Pl
   const input = useRef<HTMLInputElement>(null);
   const [q, setQ] = useState("");
   const [at, setAt] = useState(0);
-  const found = useMemo(() => searchPages(items, q), [items, q]);
+  const recent = useMemo(() => (open ? readRecent() : []), [open]);
+  const found = useMemo(() => (q.trim() ? searchPages(items, q) : orderForEmpty(items, recent)), [items, q, recent]);
+  const recentCount = q.trim() ? 0 : found.filter((n) => recent.includes(basePath(n.to))).length;
 
   // the shortcut, from anywhere in the console
   useEffect(() => {
@@ -78,7 +93,7 @@ const CommandPalette: React.FC<{ items: readonly NavItem[]; role: Role; plan: Pl
                   <span className="block truncate text-[13.5px] font-medium text-white">{n.label}</span>
                   {n.name && n.name !== n.label && <span className="block truncate text-[11px] text-white/50">{n.name}</span>}
                 </span>
-                <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{locked ? "Pro · " : ""}{n.group}</span>
+                <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">{i < recentCount ? "Recent" : `${locked ? "Pro · " : ""}${n.group}`}</span>
               </li>
             );
           })}

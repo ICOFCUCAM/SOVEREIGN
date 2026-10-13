@@ -9,7 +9,7 @@ import LayerBar from "./LayerBar";
 import LayerSubNav from "./LayerSubNav";
 import TermsDialog from "./TermsDialog";
 import PageTip from "./PageTip";
-import CommandPalette from "./CommandPalette";
+import CommandPalette, { noteRecent } from "./CommandPalette";
 import { guideState, markVisited, onGuideChange, setGuideHidden, setTipsHidden, ESSENTIALS, loadAllToolsOpen, saveAllToolsOpen } from "../lib/onboarding";
 
 // Role-aware console rail. The navigation is driven by the access policy:
@@ -47,7 +47,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // Pages opened in this browser — the "Opened" marks in the Start-here guide.
   // A plan-gated page shows the upgrade screen instead, so it is not marked.
-  useEffect(() => { if (!needsUpgrade(loc.pathname, role, plan)) markVisited(loc.pathname); }, [loc.pathname, role, plan]);
+  useEffect(() => { if (!needsUpgrade(loc.pathname, role, plan)) { markVisited(loc.pathname); noteRecent(loc.pathname); } }, [loc.pathname, role, plan]);
   const [guideHidden, setGuideHiddenState] = useState(() => guideState().hidden);
   const [tipsHidden, setTipsHiddenState] = useState(() => guideState().tipsHidden);
   useEffect(() => onGuideChange(() => { const g = guideState(); setGuideHiddenState(g.hidden); setTipsHiddenState(g.tipsHidden); }), []);
