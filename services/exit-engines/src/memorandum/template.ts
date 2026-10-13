@@ -2,6 +2,7 @@ import type {
   MemorandumGenerator, MemorandumKind, MemorandumInputs, MemorandumDocument,
   MemorandumSection, MemorandumTable,
 } from './types.js';
+import { DEFAULT_PROCESS_TIMELINE, milestone, timelineLines, weeksPhrase, type ProcessTimeline } from '../process/timeline.js';
 
 // codes as prose: "a logistics business operating in logistics freight", "a modular monolith"
 const MODEL_PHRASE: Record<string, string> = {
@@ -34,6 +35,13 @@ function money(n: number, anonymize = false): string {
 
 // the code name for an anonymised document (the engine's own default only when a caller gives none)
 const DEFAULT_CODE_NAME = 'Project Cipher';
+/** Words actually in the document: section bodies and bullets, counted, not estimated. */
+export function countWords(sections: readonly MemorandumSection[]): number {
+  const words = (t: string): number => t.split(/\s+/).filter(Boolean).length;
+  return sections.reduce((n, s) => n + words(s.heading) + words(s.body) + (s.bullets ?? []).reduce((b, x) => b + words(x), 0), 0);
+}
+const timelineOf = (i: MemorandumInputs): ProcessTimeline => i.timeline ?? DEFAULT_PROCESS_TIMELINE;
+
 function anonName(orig: string, anonymize: boolean, codeName?: string): string {
   return anonymize ? (codeName ?? DEFAULT_CODE_NAME) : orig;
 }
@@ -207,17 +215,12 @@ function cim(i: MemorandumInputs): MemorandumDocument {
     } as MemorandumSection] : []),
     {
       heading: '10. Process & timing',
-      body: 'The Company is being offered through a targeted, confidential process: bilateral outreach to qualified candidates, with a structured timeline through indications of interest, term sheet, exclusivity, confirmatory diligence and signing. All requests for information should be directed through the process coordinator; direct contact with management, customers or employees is not permitted at this stage.',
-      bullets: [
-        'Weeks 1–2 · NDA execution, CIM distribution and management presentations',
-        'Weeks 3–4 · Data-room access and preliminary diligence; indications of interest due',
-        'Weeks 5–6 · Selected parties to confirmatory diligence under exclusivity',
-        'Weeks 7–10 · Definitive documentation, signing and announcement',
-      ],
+      body: `The Company is being offered through a targeted, confidential process: bilateral outreach to qualified candidates, through indications of interest, a letter of intent and exclusivity, confirmatory diligence and signing. All requests for information should be directed through the process coordinator; direct contact with management, customers or employees is not permitted at this stage. Timeline (${timelineOf(i).basis}):`,
+      bullets: timelineLines(timelineOf(i), ['nda', 'management_presentations', 'ioi', 'loi', 'confirmatory_diligence', 'signing']),
     },
   ];
 
-  const wordCount = sections.reduce((s, sec) => s + sec.body.split(/\s+/).length + (sec.bullets?.length ?? 0) * 8, 0);
+  const wordCount = countWords(sections);
   return { kind: 'cim', title: `Confidential Information Memorandum — ${name}`, sections, anonymized: !!i.anonymize, wordCount, producedBy: `${IMPL}@${VERSION}` };
 }
 
@@ -251,10 +254,10 @@ function executiveSummary(i: MemorandumInputs): MemorandumDocument {
     },
     {
       heading: 'Process & timeline',
-      body: 'Bilateral outreach to qualified counterparties on a strictly confidential basis. Interested parties execute a mutual NDA, receive the confidential information memorandum and staged data-room access, and attend a management presentation within ten business days. Indications of interest are requested within four weeks, with a signed letter of intent targeted in four to six weeks.',
+      body: `Bilateral outreach to qualified counterparties on a strictly confidential basis. Interested parties execute a mutual NDA, receive the confidential information memorandum and staged data-room access, and attend a management presentation in ${weeksPhrase(milestone(timelineOf(i), 'management_presentations'))} of the process. Indications of interest are due in ${weeksPhrase(milestone(timelineOf(i), 'ioi'))}, with a signed letter of intent targeted in ${weeksPhrase(milestone(timelineOf(i), 'loi'))}. These dates are a planning assumption.`,
     },
   ];
-  const wordCount = sections.reduce((s, sec) => s + sec.body.split(/\s+/).length + (sec.bullets?.length ?? 0) * 10, 0);
+  const wordCount = countWords(sections);
   return { kind: 'executive_summary', title: `${name} — Executive Summary`, sections, anonymized: !!i.anonymize, wordCount, producedBy: `${IMPL}@${VERSION}` };
 }
 
@@ -282,10 +285,10 @@ function investorDeck(i: MemorandumInputs): MemorandumDocument {
       i.constitution
         ? [`Strategic premium ${i.constitution.mandatoryOutputs.strategic_premium_basis}`, `${i.constitution.comparablesUsed} comparable transactions`, `Buyer universe: ${i.constitution.mandatoryOutputs.buyer_universe_size}`]
         : i.valuation.premiums.map((p) => `${p.name}: ${(p.pct * 100).toFixed(0)}%`)),
-    slide('Slide 9 · Process',         'Bilateral outreach. Targeted process. LOI in 4–6 weeks.'),
+    slide('Slide 9 · Process',         `Bilateral outreach. Targeted process. Indications due ${weeksPhrase(milestone(timelineOf(i), 'ioi'))}; LOI targeted ${weeksPhrase(milestone(timelineOf(i), 'loi'))} (planning assumption).`),
     slide('Slide 10 · Contact',        'Bilateral inquiries through the ExitOS dispatch desk.'),
   ];
-  return { kind: 'investor_deck', title: `${name} — Investor deck`, sections, anonymized: !!i.anonymize, wordCount: 240, producedBy: `${IMPL}@${VERSION}` };
+  return { kind: 'investor_deck', title: `${name} — Investor deck`, sections, anonymized: !!i.anonymize, wordCount: countWords(sections), producedBy: `${IMPL}@${VERSION}` };
 }
 
 function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
@@ -323,10 +326,10 @@ function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
     } as MemorandumSection] : []),
     {
       heading: 'Process & next steps',
-      body: 'Interested parties should request the mutual NDA. On execution: identity disclosure, the confidential information memorandum, staged data-room access, and a management presentation within ten business days. The process is being run on a strict timetable; early engagement is advised.',
+      body: `Interested parties should request the mutual NDA. On execution: the confidential information memorandum, staged data-room access, and a management presentation in ${weeksPhrase(milestone(timelineOf(i), 'management_presentations'))} of the process. Indications of interest are due in ${weeksPhrase(milestone(timelineOf(i), 'ioi'))} (planning assumption).`,
     },
   ];
-  const wordCount = sections.reduce((s, sec) => s + sec.body.split(/\s+/).length + (sec.bullets?.length ?? 0) * 10, 0);
+  const wordCount = countWords(sections);
   return { kind: 'buyer_teaser', title: `${projectName} — Confidential opportunity overview`, sections, anonymized: true, wordCount, producedBy: `${IMPL}@${VERSION}` };
 }
 
@@ -342,7 +345,7 @@ function ddRoomIndex(i: MemorandumInputs): MemorandumDocument {
         heading: 'Diligence package not generated',
         body: 'Run the due-diligence engine to populate this index.',
       }];
-  return { kind: 'dd_room_index', title: `${name} — Data room index`, sections, anonymized: !!i.anonymize, wordCount: 320, producedBy: `${IMPL}@${VERSION}` };
+  return { kind: 'dd_room_index', title: `${name} — Data room index`, sections, anonymized: !!i.anonymize, wordCount: countWords(sections), producedBy: `${IMPL}@${VERSION}` };
 }
 
 export class TemplateMemorandumGenerator implements MemorandumGenerator {

@@ -13,6 +13,9 @@ export * as exchange     from './exchange/index.js';
 export * as documents    from './documents/index.js';
 export * as marketdata   from './marketdata/index.js';
 export * as market       from './market/index.js';
+export * as process      from './process/index.js';
+export { DEFAULT_PROCESS_TIMELINE, milestone, weeksLabel, weeksPhrase, timelineLines, validateTimeline } from './process/index.js';
+export type { ProcessTimeline, Milestone, MilestoneId } from './process/index.js';
 
 // Top-level convenience re-exports — the most common entrypoints.
 export { runValuation, strategicBuyerReport, assetReplacementReport, tenMillionReport, twentyFiveMillionReport, runInstitutionalValuation, runValuationConstitution, VALUATION_FRAMEWORK, VALUATION_FRAMEWORK_VERSION } from './valuation/index.js';

@@ -1,4 +1,5 @@
 // Deliverables — turns engine output into real, downloadable artifacts the
+import { outreachSequence, closingWindow, DEFAULT_PROCESS_TIMELINE } from "./process-plan";
 // founder can review and send. Every builder is pure (string in / string out)
 // so the same Markdown a modal previews is exactly what downloads. Documents
 // are framed to a consistent, institutional standard: a confidential header,
@@ -551,14 +552,8 @@ export function structuredDoc(title: string, subtitle: string, sections: readonl
 export function outreachPlanDoc(opts: { projectName: string; shortlistCount: number; anchor: string }): string {
   return structuredDoc("Outreach Plan", `${opts.projectName} · sell-side process`, [
     { heading: "Approach", body: `A ${opts.shortlistCount}-buyer competitive process run in parallel to build leverage, anchored at ${opts.anchor}. All outreach is anonymized pre-NDA; identity and the data room unlock only on a signed NDA.` },
-    { heading: "Sequence", table: { headers: ["Step", "Timing", "Action"], rows: [
-      ["1 · Target list", "Day 0", "Rank acquirers by fit, appetite and recent activity"],
-      ["2 · Teaser", "Day 1", "Issue the anonymized teaser to tier-1 targets"],
-      ["3 · NDA + data room", "Day 3–7", "Counter-sign NDAs; grant staged data-room access"],
-      ["4 · Management presentations", "Week 2–3", "Distribute the CIM; schedule calls with engaged buyers"],
-      ["5 · Indications", "Week 4", "Solicit non-binding IOIs; build the offer comparison"],
-      ["6 · LOI", "Week 5–6", "Drive a competitive process to a signed letter of intent"],
-    ] } },
+    { heading: "Sequence", body: `Timed from the process timeline (${DEFAULT_PROCESS_TIMELINE.basis}).`,
+      table: { headers: ["Step", "Timing", "Action"], rows: outreachSequence().map((st, n) => [`${n + 1} · ${st.step}`, st.timing, st.body]) } },
     { heading: "Personalization", body: "Each shortlisted buyer receives an introduction letter written to its own mandate thesis and the specific strategic rationale for the fit." },
   ]);
 }
@@ -606,7 +601,7 @@ export function closingChecklistDoc(): string {
     { heading: "Economics", bullets: [
       "Escrow capped at ≤8% of consideration, released in 12 months",
       "Reverse break-fee in force; no founder indemnity beyond escrow",
-      "30–45 day sign-to-close target",
+      closingWindow(),
     ] },
   ], "The statuses are illustrative, not your process's; track the live checklist on the Closing page.");
 }

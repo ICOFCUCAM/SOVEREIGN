@@ -4,6 +4,7 @@ import type { ValuationConstitution } from '../valuation/institutional.js';
 import type { BuyerDiscoveryReport } from '../buyers/engine.js';
 import type { ReadinessReport } from '../readiness/engine.js';
 import type { DueDiligenceReport } from '../diligence/engine.js';
+import type { ProcessTimeline } from '../process/timeline.js';
 
 export type MemorandumKind =
   | 'cim'                  // confidential information memorandum, long form
@@ -27,6 +28,8 @@ export interface MemorandumInputs {
   // The company's code name on its listing (e.g. 'Project Atlas'), used in
   // place of its name when anonymised. Callers with a real company pass it.
   readonly codeName?: string;
+  // The process timeline every milestone is quoted from (the default plan when omitted).
+  readonly timeline?: ProcessTimeline;
 }
 
 export interface MemorandumDocument {

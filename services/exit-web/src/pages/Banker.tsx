@@ -13,6 +13,8 @@ import {
 import type { BuyerCandidate } from "@exit/engines";
 import { label } from "../lib/labels";
 import { codeNameFor } from "../lib/listings";
+import { outreachSequence, closingWindow, DEFAULT_PROCESS_TIMELINE } from "../lib/process-plan";
+import { milestone, weeksPhrase } from "@exit/engines";
 import { useDocumentGate, GateNotice } from "../components/DocumentGate";
 import {
   useDirectives, applyToBuyers, outreachPosture, valuationGuardrail, recommendedActions,
@@ -36,14 +38,8 @@ const STATUS_STYLE: Record<WorkStatus, string> = {
 
 const FROM_NAME = "[Your name]";   // the founder signs; no invented signatory
 
-const SEQUENCE = [
-  { step: "Build target list", timing: "Day 0", body: "Rank acquirers by fit, appetite and recent activity; segment strategic vs financial." },
-  { step: "Issue anonymized teaser", timing: "Day 1", body: "Send the teaser, under your listing's code name, to tier-1 targets; no company name pre-NDA." },
-  { step: "NDA + data room", timing: "Day 3–7", body: "Counter-sign NDAs, grant staged data-room access on execution." },
-  { step: "Management presentations", timing: "Week 2–3", body: "Schedule calls with engaged buyers; distribute the CIM." },
-  { step: "Solicit indications", timing: "Week 4", body: "Request non-binding indications of interest; build the offer comparison." },
-  { step: "Drive to LOI", timing: "Week 5–6", body: "Run a competitive process to a signed letter of intent." },
-];
+// the outreach sequence, timed from the one process timeline
+const SEQUENCE = outreachSequence();
 
 const Banker: React.FC = () => {
   const [tab, setTab] = useState<Tab>("outreach");
@@ -346,7 +342,7 @@ const Banker: React.FC = () => {
           { q: "Best outreach", general: false, a: `Anonymized teaser → ${strategy.shortlist}-buyer shortlist (your setting) → competitive indications of interest.` },
           { q: "Best valuation", general: false, a: `Anchor at the canonical ${strategy.anchor === "high" ? "high" : "midpoint"} — ${fmtMoney(mid)} midpoint, ${fmtMoney(VALUATION_CANONICAL.headline.high)} high.` },
           { q: "Best negotiation", general: true, a: "Run all buyers in parallel; counter above the canonical midpoint with a leverage premium." },
-          { q: "Best closing", general: true, a: "Escrow ≤8% released in 12 months; reverse break-fee; 30–45 day sign-to-close." },
+          { q: "Best closing", general: true, a: `${closingWindow()} Escrow, break-fee and indemnity terms are negotiated for your deal and reviewed by counsel; ExitOS sets no standard figures.` },
         ];
         return (
           <Section title="Ask your banker" className="border border-xo-line"
@@ -355,7 +351,7 @@ const Banker: React.FC = () => {
               <div className="border border-xo-verified/40 bg-xo-ink p-3">
                 <div className="text-[12px] text-xo-muted">"What is the fastest path to a {fmtMoney(target)} exit?" <span className="text-xo-caution">· general guidance</span></div>
                 <p className="mt-1.5 text-[14px] leading-relaxed">
-                  Shortlist {strategy.shortlist} strategics, run a 6-week teaser → IOI → LOI process in parallel, and anchor at{" "}
+                  Shortlist {strategy.shortlist} strategics, run a teaser → IOI → LOI process in parallel (LOI targeted in {weeksPhrase(milestone(DEFAULT_PROCESS_TIMELINE, "loi"))}), and anchor at{" "}
                   <span className="font-mono font-semibold text-xo-verified">{fmtMoney(target)}</span>. Close cash-heavy (≥{strategy.cashFloor}%) with a tight escrow — the readiness fixes and competitive tension carry the rest.
                 </p>
               </div>
