@@ -26,10 +26,10 @@ quality.
 |---|---|---|---|
 | N-1 | S0 | **Every listing row carries the company's full private profile** (name, every financial), and RLS lets any authenticated user — including the anonymous user every browser gets — read every listing. The UI hides it; the API does not. The buyer-side Radar downloads it to match. | `supabase/migrations/0001_exitos_backend.sql:42-50`, `src/lib/listings.ts:33`, `src/pages/AcquisitionRadar.tsx:81` |
 | N-2 | S0 | Offers, NDA requests, deals, deal documents and deal events are readable by **every** authenticated user (`using (true)`); writes were already restricted by `0002`/`0003`. | `0001_exitos_backend.sql:54-113`, `0003_exitos_network.sql:21` |
-| N-3 | S0 | No real authentication: any role (founder, buyer, operator in dev) is claimed in the browser. Server-side authorization of approvals, counsel review or execution verification is impossible until accounts are real. | `src/lib/auth.tsx` |
+| N-3 | S0 | (Email-link sign-in and server-held roles built `6df20979`; not live until the frontend and Auth settings are deployed.) No real authentication: any role (founder, buyer, operator in dev) is claimed in the browser. Server-side authorization of approvals, counsel review or execution verification is impossible until accounts are real. | `src/lib/auth.tsx` |
 | N-4 | S1 | A saved intake is merged over `SAMPLE_INTAKE`, and the form starts from the demo figures, so editing one field saved every demo figure as the founder's. Fixed `c0a327b6` (supplied vs unconfirmed fields). | `src/lib/active-company.ts:17,36` |
 | N-5 | S1 | Every company's id is `"intake"`, so nothing generated can be traced to a company. Fixed `c0a327b6`. | `src/lib/company-intake.ts:64` |
-| N-6 | S1 | Telemetry and calibration write against the demo tenant id. Fixed in code `016abaf7`; functions not deployed. | `src/lib/telemetry.ts`, `calibration.ts`, `buyer-stats.ts` |
+| N-6 | S1 | Telemetry and calibration write against the demo tenant id. Fixed `016abaf7`; functions deployed and verified. | `src/lib/telemetry.ts`, `calibration.ts`, `buyer-stats.ts` |
 
 ## 3. Audit findings, verified against current code
 
@@ -42,9 +42,9 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 | A-1 | Introduction letter states the EV midpoint pre-NDA | Fixed `af7ef82f` | removed; figures follow under NDA | `deliverables.test.ts`: no "enterprise value" in the letter |
 | A-2 | Warm-intro subject names the company and ARR | Fixed `af7ef82f` | sector + ARR band only, code moved to `lib/warm-intro.ts` | `warm-intro.test.ts` |
 | A-3 | Gating document claims identity / funds verification | Fixed `af7ef82f` | rewritten as an access *policy* stating what is and is not checked | `deliverables.test.ts` |
-| A-4 | All data-room uploads in one shared tenant readable by all | Fixed in code `fc8b8ea2`; **not deployed** | functions take the tenant from the user's token, refuse anon | `data-room.test.ts`; acceptance needs redeploy + a two-account check |
-| N-1 | Listing rows expose private profiles | Fixed in code `04a7d16b`; **migration not applied** | split: public row holds code + public view; private profile in an owner-only table; buyer-side matching on the public view | migration test (SQL policy assertions), listings unit tests, Radar works on public view |
-| N-2 | Offers / NDA requests / deals / documents / events world-readable | Fixed in code `04a7d16b`; **migration not applied** | RLS: readable by the buyer party and the listing owner only; documents by visibility and signed NDA | `supabase/tests/isolation/run.sh` (owner / buyer / stranger) |
+| A-4 | All data-room uploads in one shared tenant readable by all | Fixed `fc8b8ea2`; **deployed and verified** | functions take the tenant from the user's token, refuse anon | `data-room.test.ts`; acceptance needs redeploy + a two-account check |
+| N-1 | Listing rows expose private profiles | Fixed `04a7d16b`; **deployed and verified** (`ee1bef15`) | split: public row holds code + public view; private profile in an owner-only table; buyer-side matching on the public view | migration test (SQL policy assertions), listings unit tests, Radar works on public view |
+| N-2 | Offers / NDA requests / deals / documents / events world-readable | Fixed `04a7d16b`; **deployed and verified** (`ee1bef15`) | RLS: readable by the buyer party and the listing owner only; documents by visibility and signed NDA | `supabase/tests/isolation/run.sh` (owner / buyer / stranger) |
 | A-5 | Radar says identity is revealed on signature; Inbox says never | Fixed `016abaf7` | one statement, from the disclosure policy (below) | copy test on both pages |
 | A-6 | DiligenceAI `.md` exports have no confidentiality header | Fixed `016abaf7` | route through the shared frame (later: the registry renderer) | export test |
 | A-7 | Filenames and metadata could carry the company name (`docFilename` slugs the title) | Fixed `016abaf7` (memoranda); per-type names for all exports with D3 versions | safe filenames from document type + project code + version, never the company name for pre-NDA classes | filename test per classification |
@@ -62,8 +62,8 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 | B-7 | Negotiator, Investors, Wealth, Pipeline, Process Intelligence show demo offers / cap table to a founder with a saved intake | Fixed `ed9d8511` (founder records or empty state; demo example on request); NDA Vault and Dashboard funnel too | with a saved intake: show the founder's records or an empty state; demo data only in demo mode |
 | B-8 | Counter-offer draft always for the demo company | Open (labelled) | generated from a recorded offer (deliverable 4) |
 | B-9 | Fixed negotiating positions (4% break fee, 10% cap, 8% escrow) | Open | deal-specific, configurable, flagged for review (deliverable 4) |
-| B-10 | Hard-coded word counts (deck 240, DD index 320) | Open | measured from content (deliverable 3) |
-| B-11 | "PDF" labels on print dialogs | Relabelled `016abaf7`; real PDF D3 | relabel "Print" now; real PDF via Dispatch (deliverable 3) |
+| B-10 | Hard-coded word counts (deck 240, DD index 320) | Fixed `697e4589` | measured from content (deliverable 3) |
+| B-11 | "PDF" labels on print dialogs | Relabelled `016abaf7`; real PDF built (`577b80f6`), blocked on Dispatch deployment | relabel "Print" now; real PDF via Dispatch (deliverable 3) |
 | B-12 | Module list advertises LOIs; "Generate closing docs" links to a page without them | Fixed `016abaf7` | remove the claims now; restore when built |
 | B-13 | `.md` / `.csv` / `.ics` saved as `text/plain` | Fixed `016abaf7` | correct MIME types (`text/markdown`, `text/csv`, `text/calendar`) |
 | B-14 | Banker on-screen teaser drops bullets | Fixed `ad1b33e4` | render through the shared preview |
@@ -82,9 +82,9 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 
 | ID | Finding | Fix (deliverable 3) |
 |---|---|---|
-| D-1 | Two CIMs: engine (10 sections, `.md`) vs `/report/cim` (8 sections, print) | one CIM definition; the report page becomes its preview |
-| D-2 | Two closing checklists: 12 items on screen vs 6 hard-coded items in `.md` | one checklist record; screen and export render the same items, owners, statuses, dates |
-| D-3 | Four timelines: CIM signing weeks 7–10 (`template.ts:214`); deck / exec summary LOI in 4–6 weeks; outreach LOI weeks 5–6 (`deliverables.ts:554`); teaser management presentation within 10 business days | one canonical process timeline on the transaction record; every document quotes it |
+| D-1 | Two CIMs (fixed `d8a577f5`): engine (10 sections, `.md`) vs `/report/cim` (8 sections, print) | one CIM definition; the report page becomes its preview |
+| D-2 | Two closing checklists (fixed `aed608e4`): 12 items on screen vs 6 hard-coded items in `.md` | one checklist record; screen and export render the same items, owners, statuses, dates |
+| D-3 | Four timelines (fixed `697e4589`): CIM signing weeks 7–10 (`template.ts:214`); deck / exec summary LOI in 4–6 weeks; outreach LOI weeks 5–6 (`deliverables.ts:554`); teaser management presentation within 10 business days | one canonical process timeline on the transaction record; every document quotes it |
 | D-4 | Board memo authorises launching a process but reads like approval | registry purpose + title make the scope explicit |
 | D-5 | Dead code: `valuationMemo`, `tracedDocMarkdown`, `briefMarkdown`, `sendDeliverable`, the traced suite, the unused Claude generator | retire `valuationMemo`, `briefMarkdown`, `sendDeliverable`; keep the traced suite's provenance model as input to the registry; Claude generator stays off until it can be reviewed and labelled |
 
@@ -153,143 +153,155 @@ rollback. Migrations are additive and reversible (each ships with its `down` sta
 ## 7. Mandate traceability (sections 1–12)
 
 Every requirement of the mandate, with where it is handled, the deliverable that owns it, its status and the
-evidence. Status: **Done** (in code, with a test) · **Partial** (started; what remains is stated) · **D3/D4/D5**
-(planned in that deliverable) · **Owner** (needs a decision or access only the owner has, §5). A requirement
+evidence. Status: **Done** (in code, with a test) · **Partial** (started; what remains is stated) · **Not started**
+(owned by the deliverable named) · **Blocked: O-n** (needs the owner action listed first). A requirement
 is never marked Done because a route, button or placeholder exists.
 
+### Dependencies on you (Owner)
+These block a requirement from being complete in production. Nothing below is marked Done if it depends on one of them.
+
+| ID | What you need to do | Unblocks |
+|---|---|---|
+| O-1 | Confirm deletion of the verification test data (SQL in `SECURITY_DEPLOYMENT.md`), then restore the listing read policy | 4.5 clean live state |
+| O-2 | Deploy the new frontend (the deployed build is the old one; data room and telemetry fail closed on it) | 4.5, 4.6, 10.x live |
+| O-3 | Supabase Auth settings: Site URL and redirect allow-list for `/console`, custom SMTP, a decision on `mailer_autoconfirm` (currently on) | 3.6, 4.6, 10.6 live; any verified session |
+| O-4 | Grant approver / counsel roles to named people (SQL in `SECURITY_DEPLOYMENT.md`) | 3.6, 10.6 in use |
+| O-5 | Deploy the Dispatch API and worker; rotate the `svc-exitos` secret; set `DISPATCH_API_URL`, `DISPATCH_CLIENT_ID`, `DISPATCH_CLIENT_SECRET` on `exit-dispatch-submit` | 3.7, 5.5, 11.8 in production |
+| O-6 | Counsel review of any legal template before it is offered as more than an educational template | 7.5, D4 legal documents |
+| O-7 | Decide on pooled buyer statistics, only with the controls in `BUYER_STATISTICS_PRIVACY.md` | pooled statistics (not enabled) |
+| O-8 | Outside ExitOS on the same project: `public._imggen` has RLS disabled; leaked-password protection is off | project hygiene |
+
 ### §1 Assignment
-| # | Requirement | Where | Status | Evidence |
-|---|---|---|---|---|
-| 1.1 | Read the audit; inspect generators, routes, schemas, data, exports, states, tests | §1–3 of this plan | Done | this document |
-| 1.2 | Treat findings as claims to verify against current code | §3 status column | Done | each row re-checked on this branch |
-| 1.3 | Rebuild the architecture, not more templates or a new Documents page | §4 | D3 | — |
-| 1.4 | Work in the existing app; no demo, duplicate system or prototype | all changes in `exit-web`/`exit-engines`/`supabase` | Ongoing | — |
+| # | Requirement | Where | Owning | Status | Evidence |
+|---|---|---|---|---|---|
+| 1.1 | Read the audit; inspect generators, routes, schemas, data, exports, states, tests | §1–3 of this plan | D1 | Done | this document |
+| 1.2 | Treat findings as claims to verify against current code | §3 status column | D1 | Done | each row re-checked on this branch |
+| 1.3 | Rebuild the architecture, not more templates or a new Documents page | `src/lib/documents/*`, `supabase/migrations/20261013140000_*` | D3 | Partial: registry, gate, service, versions, workflow, consistency exist; 6 of 52 types go through the service | §9 below |
+| 1.4 | Work in the existing app; no demo, duplicate system or prototype | changes in `exit-web`/`exit-engines`/`supabase` only; Dispatch reused | all | Ongoing | `boardcheck` each increment |
 
 ### §2 Authoritative inventory
-| # | Requirement | Where | Status | Evidence |
-|---|---|---|---|---|
-| 2.1 | Machine-readable registry over all eight stages | `src/lib/documents/registry.ts` (52 types), `registryJson()` | Done | `registry.test.ts` |
-| 2.2 | Per type: id, stage, audience, method, source, inputs, classification, kind, formats, export behaviour, review/execution, dependencies, defects, status | registry fields | Partial | versioning per type arrives with D3 versions; tests per type in §11 of this matrix |
-| 2.3 | Human-readable report | this plan + audit doc | Done | — |
-| 2.4 | Inventory both CIMs, both closing checklists, the four timelines, dead code, every sample-data output | registry `exitos.cim`, `exitos.closing_checklist`, D-3, `dead_code` entries, B-3/B-7/B-8 | Done | registry + §3 |
-| 2.5 | Say what to consolidate, reuse, repair or retire | §3 (D-1, D-2, D-5) | Done | — |
+| # | Requirement | Where | Owning | Status | Evidence |
+|---|---|---|---|---|---|
+| 2.1 | Machine-readable registry over all eight stages | `src/lib/documents/registry.ts` (52 types), `registryJson()` | D2 | Done | `registry.test.ts` |
+| 2.2 | Per type: id, stage, audience, method, source, inputs, classification, kind, formats, export behaviour, review/execution, dependencies, defects, status | registry fields; template version `TEMPLATE_VERSION` in the service | D2/D3 | Partial: per-type schema version and typed input schemas not yet | `registry.test.ts` |
+| 2.3 | Human-readable report | this plan + audit doc | D1 | Done | — |
+| 2.4 | Inventory both CIMs, both checklists, the four timelines, dead code, every sample-data output | registry, §3 | D1 | Done | registry + §3 |
+| 2.5 | Say what to consolidate, reuse, repair or retire | §3 (D-1, D-2, D-5) | D1 | Done | — |
 
 ### §3 Architecture
-| # | Requirement | Where | Status |
-|---|---|---|---|
-| 3.1 | Document registry, one definition per type | registry | Partial (definitions; generation binding D3) |
-| 3.2 | Transaction context (company, transaction, buyer, seller, offer, process) | company record with stable id (N-5) done; transaction record | D3 |
-| 3.3 | Input validation (fields, types, units, currency, dates, provenance) | intake parsing + supplied/unconfirmed fields; gate inputs check | Partial (D3 adds typed schemas per document) |
-| 3.4 | Deterministic generation from validated inputs and approved templates | DDM generation | D3 |
-| 3.5 | Immutable versions with source refs, time, history, content hash, input snapshot | `exitos_document_versions` | D3 |
-| 3.6 | Review workflow: draft → validation → review → counsel → approval → supersession | review states | D3 (server-enforced approval: Owner, auth) |
-| 3.7 | Genuine PDF and structured exports | Dispatch renderer | D3 (credentials: Owner) |
-| 3.8 | Consistency engine | §4.8 | D5 |
-| 3.9 | Audit trail (generated, viewed, downloaded, changed, approved, superseded) | `exitos_document_events` | D3 |
-| 3.10 | Stable type ids and explicit schema versions | registry ids, `REGISTRY_SCHEMA_VERSION` | Done (registry); per-document schema versions D3 |
-| 3.11 | Existing database and migration conventions; no second source of truth | `exitos_*` tables, `ExitApiClient` adapters | Ongoing |
+| # | Requirement | Where | Owning | Status | Evidence |
+|---|---|---|---|---|---|
+| 3.1 | Document registry, one definition per type | `registry.ts`; service binds type → DDM family | D3 | Partial: 6 types bound to the generation service (5 memoranda, board memo) | `service.test.ts` |
+| 3.2 | Transaction context (company, transaction, buyer, seller, offer, process) | company id `co-<uuid>`; canonical timeline `exit-engines/src/process/timeline.ts` | D3/D4 | Partial: company + process timeline; no transaction record yet (parties, offers on the server) | `timeline.test.js`, `active-company.test.ts` |
+| 3.3 | Input validation (fields, types, units, currency, dates, provenance) | intake supplied/unconfirmed; gate; versions record unconfirmed inputs | D3 | Partial: typed per-document schemas not yet | `active-company.test.ts`, `capability.test.ts` |
+| 3.4 | Deterministic generation from validated inputs and approved templates | `documents/service.ts` → DDM v1 | D3 | Partial (6 types) | `service.test.ts` (Dispatch validator, engine, renderers) |
+| 3.5 | Immutable versions with source refs, time, history, content hash, input snapshot | `exitos_document_versions` (live), `store.ts` | D3 | Done for the 6 types (code + live migration) | `supabase/tests/documents`, `store.test.ts` |
+| 3.6 | Review workflow: draft → review → counsel → approval → supersession | `exitos_document_action()` (live), `DocumentVersions.tsx` | D3 | Done in code and deployed; **in use: Owner O-2, O-3, O-4** | `supabase/tests/documents/scenario.sql`; live rolled-back check |
+| 3.7 | Genuine PDF and structured exports | `exit-dispatch-submit` v8 (live), Dispatch renderer | D3 | **Blocked: Owner O-5.** PDF proven against Dispatch's real renderer in tests only | `service.test.ts` (pdftotext); live `configured:false` |
+| 3.8 | Consistency engine | `documents/consistency.ts` | D3 | Partial: figures, valuation, timeline, closing items, names, currency, concentration; offers/NDA/post-closing checks need D4/D5 records; no "intentional difference" note yet | `consistency.test.ts` |
+| 3.9 | Audit trail (generated, viewed, downloaded, changed, approved, superseded) | `exitos_document_events` | D3 | Partial: generated, downloaded, review actions, rendered_pdf, superseded; "viewed" not logged | `supabase/tests/documents` |
+| 3.10 | Stable type ids and explicit schema versions | registry ids, `REGISTRY_SCHEMA_VERSION`, `TEMPLATE_VERSION` on each version | D3 | Done | `service.test.ts` |
+| 3.11 | Existing conventions; no second source of truth | `exitos_*` tables, local fallback in `store.ts` only without a session | all | Ongoing | — |
 
 ### §4 Confidentiality and integrity (release-blocking)
-| # | Requirement | Status | Evidence |
-|---|---|---|---|
-| 4.1 | No EV midpoint in the introduction letter pre-NDA | Done | `deliverables.test.ts`, `registry.test.ts` |
-| 4.2 | No company name / ARR in the warm-intro subject | Done | `warm-intro.test.ts`, `registry.test.ts` |
-| 4.3 | No unsupported verification / signature / access claims | Done for the gating document and Autopilot; NDA desk states its checks | `deliverables.test.ts` |
-| 4.4 | Remove `SAMPLE_COMPANY`, `Project Cipher`, hard-coded figures and demo offers from real-company outputs | Partial: exit run, Autopilot findings, code names, intake contamination and founder pages (B-7) done; the negotiation step of the exit run and the Autopilot offer comparison still score demo offers, labelled, until real offers exist (D4) | `exit-process.test.ts`, `active-company.test.ts`, `registry.test.ts` |
-| 4.5 | Tenant isolation for company, transaction, files, documents | Partial: listings (N-1), exchange rows (N-2) and data room (A-4) in code; deployment Owner; document versions D3 | `supabase/tests/isolation/run.sh`, `data-room.test.ts`, `listings.test.ts` |
-| 4.6 | Server-side authorization for generation, retrieval, export, approval, access | Partial: RLS and data-room functions enforce party/tenant; role-based approval needs real auth (N-3, Owner) | isolation test |
-| 4.7 | No leak through filenames, subjects, metadata, logs, public URLs | Partial: subjects, listing ids/rows, memorandum filenames, telemetry tenant done; document metadata with D3 versions | `listings.test.ts` |
-| 4.8 | Classifications and pre-generation disclosure checks | Done for pre-NDA/public types; applied on Buyers, Banker, Documents | `registry.test.ts` |
-| 4.9 | Missing input → validation error or explicit draft; never sample fallback | Partial: unconfirmed intake fields flagged and gated; typed per-document validation D3 | `active-company.test.ts` |
-| 4.10 | Regression test per known leak and sample-data defect | Partial: tests for every fixed item; open items get theirs when fixed | §11 of this matrix |
+Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" here means done in code with a test; the live column says what is deployed and verified.
+
+| # | Requirement | Owning | Code | Live | Evidence |
+|---|---|---|---|---|---|
+| 4.1 | No EV midpoint in the introduction letter pre-NDA | D2 | Done | needs O-2 | `deliverables.test.ts` |
+| 4.2 | No company name / ARR in the warm-intro subject | D2 | Done | needs O-2 | `warm-intro.test.ts` |
+| 4.3 | No unsupported verification / signature / access claims | D2/D3 | Done for current outputs; approval labelled "not executed" | needs O-2 | `deliverables.test.ts`, `capability.test.ts` |
+| 4.4 | No demo company, `Project Cipher` or demo offers in real-company outputs | D2/D4 | Partial: the exit run's negotiation step and Autopilot offer comparison still score labelled demo offers (D4) | needs O-2 | `consistency.test.ts` (founder suite has no demo name), `exit-process.test.ts` |
+| 4.5 | Tenant isolation for company, transaction, files, documents | D2/D3 | Done for listings, exchange rows, data room, document versions | **deployed and verified**; test data cleanup O-1 | `supabase/tests/isolation`, `supabase/tests/documents`, `SECURITY_DEPLOYMENT.md` |
+| 4.6 | Server-side authorization for generation, retrieval, export, approval, access | D3 | Done for versions, review actions, PDF bridge, data room; roles server-held | deployed; usable after O-2, O-3 | as above |
+| 4.7 | No leak through filenames, subjects, metadata, logs, public URLs | D2/D3 | Done for current exports; versions carry code name as owning body for pre-NDA types | needs O-2 | `listings.test.ts`, `service.test.ts` |
+| 4.8 | Classifications and pre-generation disclosure checks | D2 | Done; the service refuses a withheld document | — | `registry.test.ts`, `service.test.ts` |
+| 4.9 | Missing input → validation error or explicit draft; never sample fallback | D3 | Partial: demo inputs recorded on each version and shown; typed validation not yet | — | `capability.test.ts` |
+| 4.10 | Regression test per known leak and sample-data defect | all | Partial: every fixed item has one | — | §11 |
 
 ### §5 One professional document system
-| # | Requirement | Status |
-|---|---|---|
-| 5.1 | One CIM generator with validated sections | D3 (D-1) |
-| 5.2 | One closing checklist; screen and export identical (items, owners, statuses, dates) | D3 (D-2) |
-| 5.3 | Measured word counts and claims | D3 (B-10) |
-| 5.4 | Design system: branding, covers, title/identity/classification, version/status/date/page numbers, typography, tables, figures, dates, headers/footers, notices, sources/assumptions/disclaimers, placeholders, metadata, safe filenames | D3 (DDM profiles on the Dispatch renderer) |
-| 5.5 | Genuine PDF; print never presented as PDF | Partial: relabelled (B-11); real PDF D3 |
-| 5.6 | Correct MIME types, filenames, extensions; editable formats only when real | Done `016abaf7` (`download.test.ts`) |
-| 5.7 | Distinct layouts per family (financial, board, CIM, legal draft, checklist, statement) | D3 |
+| # | Requirement | Owning | Status | Evidence |
+|---|---|---|---|---|
+| 5.1 | One CIM generator with validated sections | D3 | Done: `/report/cim`, Documents and Banker render the engine CIM from `memorandumInputs` | `d8a577f5` |
+| 5.2 | One closing checklist; screen and export identical | D3 | Done: `closing-checklist.ts` | `closing-checklist.test.ts`, `consistency.test.ts` |
+| 5.3 | Measured word counts and claims | D3 | Done (B-10) | `timeline.test.js` |
+| 5.4 | Design system: covers, classification, version/status/date, page numbers, headers/footers, notices, safe filenames | D3 | Partial: provided by Dispatch's layout for the 6 bound types; other exports still Markdown/print | `service.test.ts` |
+| 5.5 | Genuine PDF; print never presented as PDF | D3 | Print relabelled (Done); genuine PDF **Blocked: O-5** | — |
+| 5.6 | Correct MIME types, filenames, extensions | D2 | Done | `download.test.ts` |
+| 5.7 | Distinct layouts per family | D3 | Partial: memorandum, checklist, diligence, board memo; legal-draft and statement layouts D4/D5 | `ddm.ts` |
 
 ### §6 Missing M&A workflow
-| # | Requirement | Status |
-|---|---|---|
-| 6A | Process letter, bid instructions, IOI request and criteria, management-presentation and diligence instructions | D4 |
-| 6B.1 | Structured IOI (amount, currency, consideration, assumptions, financing, conditions, timing), separate from binding terms | D4 |
-| 6B.2 | LOI / term sheet with unresolved terms | D4 |
-| 6B.3 | Exclusivity draft (duration, scope, start/end, termination) | D4 |
-| 6B.4 | Counter-offer from the actual transaction and selected offer | D4 (B-8) |
-| 6B.5 | Offer comparison from real bids (consideration, conditions, financing, certainty, timing) | D4 (B-3) |
-| 6C | SPA preparation; disclosure schedules linked to reps and warranties; board/shareholder approvals and consents; escrow draft; funds flow and closing statement; bring-down certificate; closing cap table and allocation; filings checklist marked for jurisdiction verification; announcements; counsel attachments and versions | D5 |
-| 6D | Post-closing register: working-capital true-up, earn-outs, escrow release, indemnity deadlines and claims, IP assignments, regulatory/contractual actions, notices, deliverables — each with owner, due date, evidence, status, dependencies, reminders | D5 |
+| # | Requirement | Owning | Status |
+|---|---|---|---|
+| 6A | Process letter, bid instructions, IOI request and criteria, presentation and diligence instructions | D4 | Not started |
+| 6B.1–6B.5 | Structured IOI; LOI / term sheet; exclusivity draft; counter-offer from the real offer (B-8); offer comparison from real bids (B-3) | D4 | Not started |
+| 6C | SPA preparation, disclosure schedules, approvals and consents, escrow, funds flow, closing statement, bring-down, closing cap table, filings, announcements | D5 | Not started (closing checklist items exist, D3) |
+| 6D | Post-closing obligations register | D5 | Not started |
 
 ### §7 Legal and compliance boundaries
-| # | Requirement | Status |
-|---|---|---|
-| 7.1 | Distinguish educational template · founder draft · requires counsel · counsel-reviewed · executed (verified) | D3 (legal status field), D4 (applied) |
-| 7.2 | No claim of compliance, enforceability, execution or approval without evidence | Ongoing; NDA desk and gating document done |
-| 7.3 | Jurisdiction, governing law, structure, parties as explicit inputs; no invented clauses, deadlines, tax or regulatory rules | Partial: teaser jurisdiction and wealth tax claims removed; transaction inputs D3 |
-| 7.4 | No universal negotiation positions; configurable, attributed, validated, flagged | D4 (B-9) |
-| 7.5 | Versioned clause library with jurisdiction, provenance, review status, effective dates; counsel review before production use | D4 (clause content and review: Owner) |
+| # | Requirement | Owning | Status |
+|---|---|---|---|
+| 7.1 | Educational template · founder draft · requires counsel · counsel-reviewed · executed (verified) | D3/D4 | Partial: `requires_counsel` enforced before approval; "counsel reviewed" is a recorded action by a counsel grant; execution states D4 |
+| 7.2 | No claim of compliance, enforceability, execution or approval without evidence | all | Ongoing: approved is labelled "not executed"; a status change never marks execution |
+| 7.3 | Jurisdiction, governing law, structure, parties as explicit inputs | D4 | Partial |
+| 7.4 | No universal negotiation positions (B-9) | D4 | Not started |
+| 7.5 | Versioned clause library, counsel review before production | D4 | Not started; **Owner O-6** |
 
 ### §8 NDA execution and data-room access
-| # | Requirement | Status |
-|---|---|---|
-| 8.1 | Explicit states and transitions; never active through a flag | Partial: signatures recorded per party (local); server lifecycle D4; "Mark executed" (C-2) D4 |
-| 8.2 | Signature evidence, signatory identity, timestamps, document version, countersignature; external-execution workflow if no provider | Partial: signatory and time recorded; evidence attachment and version D4 |
-| 8.3 | Data-room access from policy checks with server-enforced permissions; auditable; requested / approved / provisioned / revoked distinct | Partial: tenant isolation in code; access requests and audit D4 |
-| 8.4 | Fix upload count vs missing artifacts; a file satisfies only its company, transaction, artifact type and review state | D4 (C-4) |
+| # | Requirement | Owning | Status |
+|---|---|---|---|
+| 8.1 | Explicit states; never active through a flag | D4 | Partial: local per-party signatures; "Mark executed" (C-2) still open |
+| 8.2 | Signature evidence, identity, timestamps, version, countersignature | D4 | Partial |
+| 8.3 | Server-enforced, auditable data-room access; requested / approved / provisioned / revoked | D2/D4 | Partial: tenant isolation deployed; request/approval states D4 |
+| 8.4 | A file satisfies only its company, transaction, artifact type and review state (C-4) | D4 | Not started |
 
 ### §9 Cross-document consistency
-| # | Requirement | Status |
-|---|---|---|
-| 9.1 | Checks: name and anonymised identity; EV, equity value, consideration, currency; ARR and periods; dates and assumptions; buyer/seller identities; offer terms; NDA and disclosure permissions; LOI, exclusivity and signing milestones; closing deliverables; post-closing dates | D5 (identity and disclosure already enforced by the gate) |
-| 9.2 | One canonical timeline; milestones derived; contradictions flagged | D3 (timeline), D5 (checks) |
-| 9.3 | Findings with severity, documents, values, sources; documented intentional differences | D5 |
+| # | Requirement | Owning | Status | Evidence |
+|---|---|---|---|---|
+| 9.1 | Checks across documents | D3/D5 | Partial: name and code name, demo contamination, ARR, revenue, growth, margins, NRR, valuation midpoint and range, currency, timeline milestones, closing items, undisclosed concentration. Not yet: equity value/consideration, buyer/seller identities, offer terms, NDA permissions, post-closing dates (need D4/D5 records) | `consistency.test.ts` |
+| 9.2 | One canonical timeline; milestones derived; contradictions flagged | D3 | Done | `timeline.test.js`, `consistency.test.ts` |
+| 9.3 | Findings with severity, documents, values; documented intentional differences | D3/D5 | Partial: severity, document, found, expected shown on Documents; intentional-difference notes not yet | — |
 
 ### §10 Document experience
-| # | Requirement | Status |
-|---|---|---|
-| 10.1 | Browse by stage and audience | D3 (registry-driven workspace) |
-| 10.2 | See what ExitOS generates vs user input vs external parties | D3 (registry `kind`) |
-| 10.3 | Generate from validated data; see missing inputs and disclosure restrictions first | Partial: gate notices on Buyers, Banker, Documents |
-| 10.4 | Preview before export | Partial (on-screen views exist); unified preview D3 |
-| 10.5 | Compare versions | D3 |
-| 10.6 | Review, approval, signature and execution tracked separately | D3/D4 |
-| 10.7 | Dependencies and outstanding actions | D3 |
-| 10.8 | Correct version, drafts never confused with executed documents | D3/D4 |
-| 10.9 | Export only when authorised and valid | Partial: blocked on disclosure findings; authorisation D3 |
-| 10.10 | Capability status per document (available, needs inputs, draft only, awaiting review, externally supplied, blocked, completed); never claim an action that did not occur | Partial: registry `status`/`kind`; UI D3; false claims removed so far: B-1, B-5, data room |
+| # | Requirement | Owning | Status |
+|---|---|---|---|
+| 10.1 | Browse by stage and audience | D3 | Not yet (registry has the data; workspace still lists five kinds) |
+| 10.2 | Generated vs user input vs external | D3 | Partial: capability shows "Supplied externally" / "Not built" from the registry |
+| 10.3 | Missing inputs and disclosure restrictions before generating | D2/D3 | Done on Documents, Buyers, Banker |
+| 10.4 | Preview before export | D3 | Partial: on-screen view; DDM HTML preview not wired |
+| 10.5 | Compare versions | D3 | Partial: list with hashes and dates; no diff view |
+| 10.6 | Review, approval, signature, execution tracked separately | D3/D4 | Partial: review/approval done (server); signature/execution D4; **in use: O-2–O-4** |
+| 10.7 | Dependencies and outstanding actions | D3 | Not yet |
+| 10.8 | Correct version; drafts never confused with executed documents | D3 | Partial: version number, status and hash on every row; DDM stamped draft |
+| 10.9 | Export only when authorised and valid | D3 | Partial: blocked on disclosure; PDF only for the owner's own hash-checked version |
+| 10.10 | Capability status per document | D3 | Partial: `capability.ts` on Documents (8 states + sample); not yet on every page |
 
 ### §11 Tests and release gates
-| # | Requirement | Status |
-|---|---|---|
-| 11.1 | Per document type and required inputs | Partial (pre-NDA types; all types D3) |
-| 11.2 | Real-company data propagation | Partial (exit run, teaser, gate tests) |
-| 11.3 | No unintended sample data | Partial (`registry.test.ts`, `exit-process.test.ts`, `active-company.test.ts`) |
-| 11.4 | Pre-NDA disclosure prevention | Done for current pre-NDA generators |
-| 11.5 | Tenant isolation and server authorization | Partial (`supabase/tests/isolation`, `data-room.test.ts`) |
-| 11.6 | NDA transitions and evidence | Partial (`nda-drafts.test.ts`) |
-| 11.7 | Data-room completeness and permissions | D4 |
-| 11.8 | PDF rendering, pagination, file types | D3 |
-| 11.9 | UI / Markdown / PDF / structured export agreement | D3 |
-| 11.10 | Cross-document financial and timeline consistency | D5 |
-| 11.11 | Draft / review / approval / execution distinctions | D3/D4 |
-| 11.12 | Post-closing obligations | D5 |
-| 11.13 | Run lint, type-check, unit, integration, build; no weakened tests; report what cannot run | every increment (see the increment report) |
+| # | Requirement | Status | Evidence |
+|---|---|---|---|
+| 11.1 | Per document type and required inputs | Partial (6 service types + pre-NDA types) | `service.test.ts`, `registry.test.ts` |
+| 11.2 | Real-company data propagation | Partial | `consistency.test.ts` (founder suite), `exit-process.test.ts` |
+| 11.3 | No unintended sample data | Partial | `consistency.test.ts`, `registry.test.ts` |
+| 11.4 | Pre-NDA disclosure prevention | Done for current generators | `registry.test.ts`, `service.test.ts` |
+| 11.5 | Tenant isolation and server authorization | Done for deployed scope | `supabase/tests/{isolation,documents}`, live checks |
+| 11.6 | NDA transitions and evidence | Partial | `nda-drafts.test.ts` |
+| 11.7 | Data-room completeness and permissions | Not started (D4) | — |
+| 11.8 | PDF rendering, pagination, file types | Done against the real renderer locally; production **O-5** | `service.test.ts`, `download.test.ts` |
+| 11.9 | UI / Markdown / PDF agreement | Partial: one DDM for Markdown/HTML/PDF; on-screen view is the engine document | `service.test.ts` |
+| 11.10 | Cross-document financial and timeline consistency | Done for the checks in 9.1 | `consistency.test.ts` |
+| 11.11 | Draft / review / approval / execution distinctions | Partial (execution D4) | `supabase/tests/documents`, `capability.test.ts` |
+| 11.12 | Post-closing obligations | Not started (D5) | — |
+| 11.13 | Lint, type-check, unit, integration, build each increment | Every increment | §8, §9 |
 
 ### §12 Delivery
 | # | Requirement | Status |
 |---|---|---|
-| 12.1 | D1 plan mapping every finding to code, severity, fix, dependencies, tests, acceptance | Done (this document) |
-| 12.2 | D2 confidentiality, sample data, isolation | Done in code (report §8); deployment Owner |
-| 12.3 | D3 registry, generation service, templates, versions, exports | Planned |
-| 12.4 | D4 transaction documents, NDA lifecycle, data room | Planned |
-| 12.5 | D5 consistency, signing/closing, post-closing, end-to-end | Planned |
-| 12.6 | Per increment: files, migrations, behaviour, tests, remaining defects, rollback | every increment report |
+| 12.1 | D1 plan | Done |
+| 12.2 | D2 confidentiality, sample data, isolation | Done in code; **deployed and verified** (`SECURITY_DEPLOYMENT.md`); cleanup O-1, frontend O-2 |
+| 12.3 | D3 registry, generation service, templates, versions, exports | Partial (§9 report): service, versions, workflow, one CIM/checklist/timeline, consistency done; PDF blocked on O-5; 46 types not yet on the service |
+| 12.4 | D4 transaction documents, NDA lifecycle, data room | Not started |
+| 12.5 | D5 signing/closing, post-closing, end-to-end | Not started |
+| 12.6 | Per-increment reports | §8, §9 |
 | 12.7 | Homepage and unrelated areas untouched | checked each increment (`boardcheck`) |
 
 ## 8. Increment report — deliverable 2 (confidentiality, sample data, isolation)
@@ -350,3 +362,102 @@ Branch `claude/document-integrity-p0`, on top of PR #29 (`6c929573`). Thirteen c
 
 ### Rollback
 Revert the branch commits. For the database, run the policy statements in the migration header. Redeploying the previous edge functions restores the shared-tenant behaviour, which is the leak; don't.
+
+## 9. Increment report — deliverable 3 (generation service, versions, one CIM / checklist / timeline, consistency)
+
+Branch `claude/document-integrity-p0`, commits `697e4589` … `78b94bb6` plus this report. Security deployment is
+reported separately in `SECURITY_DEPLOYMENT.md`; nothing here depends on it being declared secure.
+
+### Behaviour changed
+- **One process timeline** (`exit-engines/src/process/timeline.ts`). Every document quotes it: the CIM, the
+  executive summary, the deck, the teaser, the outreach plan and the closing checklist. Word counts are measured,
+  not fixed numbers (D-3, B-10).
+- **One closing checklist** (`lib/closing-checklist.ts`). The Closing page and the export use the same 12 items,
+  with the same owners, statuses and timing. Statuses are labelled as tracking notes, not evidence of execution (D-2).
+- **One CIM.** `/report/cim`, the Document Generator and the Banker all render the engine CIM from the same inputs
+  (`memorandumInputs`) (D-1).
+- **Generation service** (`lib/documents/service.ts`). Each document becomes a Dispatch DDM v1 document, and each
+  version records:
+  - the registry schema and template versions;
+  - an input snapshot and its hash, and a content hash;
+  - the inputs that are still demo values, and the disclosure findings.
+
+  The service refuses any document the gate withholds.
+- **Stored versions and review** (`exitos_document_versions`, `exitos_document_events`, `exitos_document_action`,
+  all live).
+  - Versions are immutable and owned by their creator.
+  - Review status changes only through the server function. It checks the caller's server-held grant, requires
+    a second person to approve, and requires counsel review first when the type needs it.
+  - Approval is labelled "not executed".
+- **PDF** (`exit-dispatch-submit` v8, live).
+  - The browser sends only a version id. The function loads it under the caller's own permissions and checks the
+    content hash. It uses only the dedicated `svc-exitos` client, whose credentials live in function secrets, and
+    refuses `svc-a`.
+  - It reports `configured:false` until Dispatch is deployed. **No production PDF exists yet.**
+- **Documents workspace.** The download button became a versions panel: save, download (logged), version list with
+  hashes, review actions shown only to roles the server accepts, and PDF. Each document carries a capability status:
+  - not built, supplied externally, blocked, sample company;
+  - needs inputs, available, draft;
+  - awaiting review, approved (not executed).
+- **Cross-document consistency** (`lib/documents/consistency.ts`). Every document for the company is checked
+  together against:
+  - the company's figures, the canonical valuation (midpoint and range) and the timeline;
+  - the closing items, the name or code name, demo-company contamination, the currency, and an undisclosed
+    material concentration.
+
+  It found a real omission: the CIM and the executive summary did not disclose a 40% top-10 customer
+  concentration. Both now state it.
+- **Authentication** (`6df20979`). Supabase email-link sign-in with verified sessions and server-held roles. No
+  anonymous sign-up. The fake SSO and password-reset paths are removed.
+
+### Files and migrations
+- **Web:**
+  - `src/lib/documents/{service,ddm,store,remote,capability,consistency,memorandum-inputs}.ts`
+  - `src/lib/{closing-checklist,process-plan,email-auth,auth,exit-api,supabase-auth,dispatch-client,dispatch-ddm,engines}.ts`
+  - `src/components/DocumentVersions.tsx`
+  - pages: `Documents`, `Closing`, `ReportCIM`, `ReportHub`, `Banker`, `SignIn`, `App`
+- **Engines:** `src/process/timeline.ts`, `src/memorandum/template.ts`
+- **Database:** `20261013130000_exitos_auth_roles.sql`, `20261013140000_exitos_document_versions.sql` (both applied
+  live). Rollback is in `SECURITY_DEPLOYMENT.md`.
+- **Function:** `exit-dispatch-submit` (v8).
+- **Tests:**
+  - `service`, `store`, `capability`, `consistency`, `closing-checklist`, `email-auth`
+  - `timeline.test.js`
+  - `supabase/tests/documents/`, plus role checks in `supabase/tests/isolation/`
+
+### Tests run (final commit)
+| Check | Result |
+|---|---|
+| eslint (`--max-warnings 0`) | clean |
+| `tsc -b` | clean |
+| vitest | 56 files, 334 tests passed, 1 skipped (pre-existing) |
+| Engine tests | 185 passed |
+| Production build | passes |
+| SQL isolation test (Postgres 16, real migrations) | pass |
+| SQL documents test (Postgres 16, real migrations) | pass |
+| Dispatch validator, layout engine, Markdown/HTML renderers and Chromium PDF on generated versions | pass |
+| Homepage board and ribbon | unchanged |
+| 40 console routes at 390 and 1440 px | no overflow, no errors |
+| Chromium: versions panel | save, re-save without duplicate, download, sample labelling, consistency section |
+
+**Not run:**
+- Deno functions: no runtime here, so they were checked live through `pg_net` instead.
+- A real PDF in production: blocked on O-5.
+
+### Remaining defects and limits
+- 46 of 52 document types are not yet on the generation service. The closing checklist export is still Markdown
+  outside the service.
+- No transaction record: parties and offers are not yet on the server (D4).
+- Still open:
+  - version diff view;
+  - DDM HTML preview in the workspace;
+  - browse by stage and audience;
+  - typed per-document input schemas;
+  - intentional-difference notes on consistency findings;
+  - "viewed" audit events.
+- C-2, C-3, C-4, B-8 and B-9 are open (D4).
+
+### Rollback
+- Revert the commits.
+- Database: see `SECURITY_DEPLOYMENT.md` → Rollback. Dropping the document tables loses stored versions; export
+  them first.

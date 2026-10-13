@@ -28,6 +28,16 @@ This record is kept separate from development progress.
 | `exit-buyer-stats` | v8 | on |
 | `exit-telemetry` | v9 | on |
 
+### Later the same day (deliverable 3)
+| Version | Migration | What |
+|---|---|---|
+| 20261013130000 | `exitos_auth_roles` | `exitos_role_grants` (operator, counsel, approver): readable only by the grantee, no insert or update for `anon` or `authenticated`, so a role cannot be self-assigned; `exitos_has_role()`; an account may write its own row only as founder or buyer |
+| 20261013140000 | `exitos_document_versions` | `exitos_document_versions` (immutable: no update or delete for clients; inserted only as a draft by its owner) and `exitos_document_events` (audit); a trigger supersedes the previous version; `exitos_document_action()` is the only way to change review status (submit, withdraw, send to counsel, counsel reviewed, approve) and checks the caller's grant, four-eyes approval and counsel review first when the type requires it |
+
+| Function | Version | JWT verification | What |
+|---|---|---|---|
+| `exit-dispatch-submit` | v8 | on | requires a verified user; takes only a version id, loads it under the caller's own RLS, refuses a version whose stored document does not match its content hash, refuses the demo `svc-a` client; with no Dispatch secrets it answers `configured:false` and renders nothing |
+
 The repo's migration files and function sources match what was applied.
 
 ## Verification on the live project
@@ -49,6 +59,9 @@ This sandbox cannot reach `*.supabase.co` (network policy), so the HTTP checks r
 | Stranger lists, asking for the owner's tenant | 0 files |
 | Stranger fetches the owner's storage object directly | not found (private bucket); no public URL exists |
 | Stranger reads calibration / buyer statistics | 200 with the stranger's own (empty) figures only |
+| Account tries to grant itself `approver` or write its role as `operator` | refused |
+| Owner approves own version; approver without counsel review on a counsel type; buyer reads owner's version | refused / refused / 0 rows (in a rolled-back transaction) |
+| `exit-dispatch-submit`: own version / tampered content / another user's version | `configured:false` / 409 / 404 |
 | Security advisor | no ExitOS errors; the remaining `authenticated` execute warning on `exitos_owns_listing` is intended (the policies call it) |
 
 Local equivalent: `supabase/tests/isolation/run.sh` (Postgres 16, same migration files) passes.
@@ -57,11 +70,13 @@ Local equivalent: `supabase/tests/isolation/run.sh` (Postgres 16, same migration
 The isolation fixes are **deployed and verified** for the database policies, the listing trigger and the five functions.
 The live system is **not** declared secure overall:
 
-1. **Test data awaiting your confirmation to delete.** Deleting rows needs your confirmation in the Supabase connector, and it timed out unconfirmed. The rows left are the `zz-isotest-*` rows, the two disabled test users, their `exit_tenants` and `user_roles` rows, one uploaded test file and the access-log and telemetry rows those calls wrote. The test listing is hidden meanwhile. Cleanup SQL is below.
+1. **Test data awaiting your confirmation to delete.** Deleting rows needs your confirmation in the Supabase connector, and it timed out unconfirmed. The rows left are the `zz-isotest-*` rows (including document versions `zz-isotest-dv-good` and `zz-isotest-dv-bad`, owned by the disabled test owner and used for the Dispatch bridge check), the two disabled test users, their `exit_tenants` and `user_roles` rows, one uploaded test file and the access-log and telemetry rows those calls wrote. The test listing is hidden meanwhile. Cleanup SQL is below.
 2. **The web app is still the old build.** It sends the anon key to the data room and telemetry, which now return 401 (fail closed). The data room and server telemetry stay unavailable until the new frontend and email-link sign-in are deployed.
-3. **Anonymous sign-ins are disabled on the project.** So the current app has never had a server identity; every visitor has run on browser storage. Email-link sign-in (deliverable 3 work) is what gives users a server identity.
-4. **Sign-in is still browser-only** until email-link authentication ships (in progress).
-5. **Outside ExitOS, on the same project.** `public._imggen` has RLS disabled (advisor ERROR); leaked-password protection is off. Not changed here.
+3. **Anonymous sign-ins are disabled on the project.** So the deployed app has never had a server identity; every visitor has run on browser storage.
+4. **Email-link sign-in is built but not live.** It is in the new frontend (not deployed) and needs the project's Auth settings: Site URL and redirect allow-list for `/console`, custom SMTP for production mail, and a decision on `mailer_autoconfirm` (currently on: password sign-ups are confirmed without an e-mail). Until then no one can hold a verified session, so review actions and PDF rendering cannot be used live.
+5. **No reviewer or counsel exists yet.** `exitos_role_grants` is empty; grants are made by you in SQL (`insert into public.exitos_role_grants (account_id, role, granted_by) values ('<auth user id>', 'approver', 'sql')`).
+6. **PDF rendering is not connected.** The Dispatch API and worker are not deployed, and the function has no `DISPATCH_API_URL`, `DISPATCH_CLIENT_ID` (`svc-exitos`) or `DISPATCH_CLIENT_SECRET`. No real PDF has been produced in production.
+7. **Outside ExitOS, on the same project.** `public._imggen` has RLS disabled (advisor ERROR); leaked-password protection is off. Not changed here.
 
 ### Cleanup SQL (run after confirming)
 ```sql
@@ -71,6 +86,8 @@ delete from public.exitos_deals        where id like 'zz-isotest%';
 delete from public.exitos_nda_requests where id like 'zz-isotest%';
 delete from public.exitos_offers       where id like 'zz-isotest%';
 delete from public.exitos_listings     where id like 'zz-isotest%';
+delete from public.exitos_document_events   where version_id like 'zz-isotest%';
+delete from public.exitos_document_versions where id like 'zz-isotest%';
 alter policy exitos_listings_read on public.exitos_listings using (true);
 delete from public.exit_data_room_access_log where tenant_id in ('aaaa4b38-0000-4000-8000-00000000000a','cccc4b38-0000-4000-8000-00000000000c');
 delete from public.exit_data_room_documents  where tenant_id = 'aaaa4b38-0000-4000-8000-00000000000a';
@@ -83,4 +100,5 @@ Also delete the storage object `exit-data-room/aaaa4b38-0000-4000-8000-000000000
 
 ## Rollback
 - **Database:** the statements in each migration header. Restoring the read policies to `using (true)` re-opens the leak; don't, except to recover from a breaking incident.
+- **Deliverable 3 migrations:** drop `exitos_document_action`, `exitos_document_events`, `exitos_document_versions`, `exitos_has_role`, `exitos_role_grants` and restore the account policies with the two `alter policy` statements in the `exitos_auth_roles` header. Nothing else depends on them.
 - **Functions:** redeploy v7 (v8 for telemetry) from git `6c929573:supabase/functions/<name>/index.ts`. This restores the shared-tenant behaviour.
