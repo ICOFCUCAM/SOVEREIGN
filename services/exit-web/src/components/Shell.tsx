@@ -244,7 +244,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {showStarterNotice && (
             <div className="border-b border-loi-400/30 bg-loi-500/10">
               <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
-                <span className="text-[13px] text-loi-100">🔔 <span className="font-semibold">Buyers are reviewing your listing.</span> Upgrade to Pro to open conversations, run outreach and continue with the agents.</span>
+                <span className="flex items-center gap-2 text-[13px] text-loi-100"><svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-loi-300"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg><span><span className="font-semibold">Buyers are reviewing your listing.</span> Upgrade to Pro to open conversations, run outreach and continue with the agents.</span></span>
                 <Link to="/console/upgrade" className="ml-auto rounded-md bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-deal-800">Upgrade to Pro →</Link>
                 <button onClick={() => setNoticeDismissed(true)} aria-label="Dismiss" className="rounded p-1 text-white/45 hover:text-white">✕</button>
               </div>
