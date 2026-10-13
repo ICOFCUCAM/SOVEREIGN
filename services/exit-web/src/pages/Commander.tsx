@@ -164,7 +164,7 @@ const Commander: React.FC = () => {
             {factors.map((f) => (
               <li key={f.label} className="flex items-center justify-between gap-3 text-[12px]">
                 <span className="text-xo-muted">{f.label}</span>
-                <span className="flex shrink-0 items-center gap-2"><Bar value={f.v} max={f.max} width="w-20" /><span className="w-16 text-right font-mono tabular-nums">{f.v.toFixed(1)} / {f.max}</span></span>
+                <span className="flex shrink-0 items-center gap-2"><Bar value={f.v} max={f.max} width="w-20" /><span className="min-w-16 whitespace-nowrap text-right font-mono tabular-nums">{f.v.toFixed(1)} / {f.max}</span></span>
               </li>
             ))}
             <li className="flex justify-between border-t border-xo-line pt-2 text-[12px]"><span className="text-xo-muted">Total (rounded)</span><span className="font-mono tabular-nums">{m.exitProbability}</span></li>
