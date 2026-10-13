@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { Button, Field, inputCls } from "../lib/ui";
 import { ROLE_LABEL, type Role } from "../lib/access";
@@ -31,8 +32,19 @@ const SignIn: React.FC = () => {
 
   const sso = (provider: string) => signIn(`${role}@${provider}.com`, "sso", role).catch(() => {});
 
+  // the tab says where the reader is; the site's title returns when they leave
+  useEffect(() => {
+    const site = document.title;
+    document.title = `${mode === "reset" ? "Reset your password" : "Sign in"} · ExitOS`;
+    return () => { document.title = site; };
+  }, [mode]);
+
   return (
-    <div className="flex min-h-full items-center justify-center px-4 py-10">
+    <div className="relative flex min-h-full items-center justify-center px-4 py-10">
+      {/* the way back to the site, for a reader who arrived here by mistake or wants to read first */}
+      <Link to="/" className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded px-2 py-1 text-[12px] font-medium text-white/60 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 sm:left-6 sm:top-6">
+        <span aria-hidden>←</span> ExitOS home
+      </Link>
       <div className="w-full max-w-sm">
         <div className="mb-7 text-center">
           <ExchangeMark size={52} detail className="mx-auto mb-4" />
