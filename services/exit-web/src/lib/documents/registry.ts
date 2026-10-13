@@ -188,8 +188,8 @@ export const DOCUMENT_TYPES: readonly DocumentType[] = [
   { id: "exitos.announcement", title: "Closing announcement drafts", stage: 7, audience: "founder", kind: "drafted", classification: "restricted_parties", inputs: [],
     source: null, formats: [], status: "not_built" },
   { id: "exitos.closing_checklist", title: "Closing checklist", stage: 7, audience: "parties", kind: "tracked", classification: "restricted_parties", inputs: [],
-    source: "pages/Closing.tsx:TEMPLATE; lib/deliverables.ts:closingChecklistDoc", formats: ["screen", "print", "md"], status: "partial", defects: ["D-2"],
-    note: "Two checklists that disagree (12 items vs 6)." },
+    source: "lib/closing-checklist.ts (page and export)", formats: ["screen", "md"], status: "built",
+    note: "One checklist: the page and the export show the same items, owners, timing and statuses (tracking notes, not execution evidence)." },
   { id: "exitos.closing_call", title: "Closing call invitation", stage: 7, audience: "parties", kind: "generated", classification: "restricted_parties", inputs: [],
     source: "pages/Closing.tsx:downloadInvite", formats: ["ics"], status: "partial", defects: ["B-13"], note: "Always two days out at 08:00." },
 

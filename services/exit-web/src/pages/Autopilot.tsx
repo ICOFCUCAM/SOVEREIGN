@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button, LockIcon, Modal, fmtMoney, notify } from "../lib/ui";
 import { PageHeader } from "../components/xo";
 import { codeNameFor } from "../lib/listings";
+import { closingChecklistDoc } from "../lib/closing-checklist";
 
 const Card: React.FC<{ className?: string; children: React.ReactNode }> = ({ className = "", children }) => (
   <div className={`border border-xo-line bg-xo-panel ${className}`}>{children}</div>
@@ -14,7 +15,7 @@ import { canonicalValuationFor } from "../lib/canonical-valuation";
 import { discoverFindings, buildSellerReport } from "../lib/diligence-intel";
 import {
   institutionalValuationMemo, buyerShortlistMemo, riskReportDoc,
-  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc,
+  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, wealthPlanDoc,
   downloadDeliverable,
 } from "../lib/deliverables";
 import { emitTelemetry } from "../lib/telemetry";
@@ -223,7 +224,7 @@ const Autopilot: React.FC = () => {
       id: "closing", name: "Closing Agent", role: "Orchestrates signatures and escrow.",
       work: <>Assembled the closing checklist; tracking signatures, escrow funding and regulatory filings to the wire.</>,
       decision: "Approve proceeding to signing and funding the escrow?", approveLabel: "Approve close",
-      deliverable: { filename: "closing-checklist.md", build: closingChecklistDoc },
+      deliverable: { filename: "closing-checklist.md", build: () => closingChecklistDoc() },
     },
     {
       id: "wealth", name: "Wealth Agent", role: "Manages the proceeds after the wire.",

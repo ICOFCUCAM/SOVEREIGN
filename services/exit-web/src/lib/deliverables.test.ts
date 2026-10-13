@@ -2,13 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   docToMarkdown, docFilename, buyerIntroLetter, introFilename, buyerListCsv,
   valuationMemo, institutionalValuationMemo, buyerShortlistMemo, riskReportDoc, structuredDoc, frameDoc,
-  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, closingChecklistDoc, wealthPlanDoc, tracedDocMarkdown,
+  outreachPlanDoc, dataRoomGatingDoc, offerComparisonDoc, wealthPlanDoc, tracedDocMarkdown,
 } from "./deliverables.js";
 import { BUYERS, VALUATION_STRATEGIC, VALUATION_INSTITUTIONAL, VALUATION_FACTS, DOCUMENT_SUITE, OFFER_COMPARISON, NEGOTIATION_STATE, DILIGENCE } from "./engines.js";
 import { TemplateMemorandumGenerator } from "@exit/engines";
 import type { MemorandumKind } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile.js";
 import { discoverFindings, buildSellerReport } from "./diligence-intel.js";
+import { closingChecklistDoc } from "./closing-checklist.js";
 
 const noPlaceholders = (s: string): void => {
   expect(s).not.toMatch(/undefined|NaN|\[object Object\]/);
@@ -171,7 +172,7 @@ describe("all generated documents have content", () => {
       dynamics: OFFER_COMPARISON.delta.map((d) => [d.term, d.notes] as [string, string]),
       posture: [`Leverage: ${NEGOTIATION_STATE.leverage}`, `Leading bid: ${leaderName ?? "—"}`],
     }),
-    "closing-checklist.md": closingChecklistDoc,
+    "closing-checklist.md": () => closingChecklistDoc({}),
     "wealth-transition-plan.md": () => wealthPlanDoc(fmt(VALUATION_STRATEGIC.headline.mid)),
     "buyer-shortlist.csv": () => buyerListCsv(shortlist),
     "intro-letter.txt": () => buyerIntroLetter({ buyer: shortlist[0], projectName: "Project Cipher", fromName: "Anne Kovac" }),
@@ -228,11 +229,11 @@ describe("all generated documents have content", () => {
 });
 
 describe("sample data is labelled", () => {
-  it("offer comparison and closing checklist say their figures are not the company's", () => {
+  it("the offer comparison says its figures are not the company's; the closing checklist carries the person's own statuses", () => {
     const oc = offerComparisonDoc({ summary: "s", offers: [], dynamics: [], posture: [] });
     expect(oc).toContain("SAMPLE DATA — NOT YOUR COMPANY'S");
     expect(oc).toContain("Sample data, not company records");
-    expect(closingChecklistDoc()).toContain("SAMPLE DATA");
+    expect(closingChecklistDoc({})).not.toContain("SAMPLE DATA");          // now the person's own statuses
   });
   it("company documents carry no sample banner", () => {
     expect(structuredDoc("T", "S", [{ heading: "h", body: "b" }])).not.toContain("SAMPLE DATA");
@@ -246,5 +247,23 @@ describe("sample data is labelled", () => {
     const d = dataRoomGatingDoc(7);
     expect(d).toContain("does not verify a buyer's identity, funds or acquisition history");
     expect(d).not.toMatch(/Funds verified|Identity verified/);
+  });
+});
+
+describe("one closing checklist", () => {
+  it("the export renders exactly the rows the Closing page shows, with the person's statuses", async () => {
+    const { closingRows, CLOSING_ITEMS, STATUS_LABEL } = await import("./closing-checklist.js");
+    const statuses = { "c-01": "done", "c-07": "blocked" } as const;
+    const rows = closingRows(statuses);
+    const md = closingChecklistDoc(statuses);
+    expect(rows).toHaveLength(CLOSING_ITEMS.length);
+    for (const r of rows) {
+      expect(md).toContain(r.title);
+      expect(md).toContain(r.timing);
+    }
+    expect(md).toContain(`| 1 | ${rows[0].title} | Counsel | ${rows[0].timing} |  | ${STATUS_LABEL.done} |`);
+    expect(md).toContain("1 of 12 items marked done, 0 in progress, 1 blocked");
+    // no invented statuses or terms
+    expect(md).not.toMatch(/≤8%|30–45 day|≥95%/);
   });
 });

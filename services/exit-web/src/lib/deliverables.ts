@@ -1,5 +1,5 @@
 // Deliverables — turns engine output into real, downloadable artifacts the
-import { outreachSequence, closingWindow, DEFAULT_PROCESS_TIMELINE } from "./process-plan";
+import { outreachSequence, DEFAULT_PROCESS_TIMELINE } from "./process-plan";
 // founder can review and send. Every builder is pure (string in / string out)
 // so the same Markdown a modal previews is exactly what downloads. Documents
 // are framed to a consistent, institutional standard: a confidential header,
@@ -588,23 +588,7 @@ export function offerComparisonDoc(opts: {
   ], "The bids are the demo company's sample offers; ExitOS does not yet record real offers.");
 }
 
-export function closingChecklistDoc(): string {
-  return structuredDoc("Closing Checklist", "Signature, escrow & filing orchestration to the wire", [
-    { heading: "Workstreams", table: { headers: ["Item", "Owner", "Status"], rows: [
-      ["SPA + signature pages", "Counsel", "In progress"],
-      ["Disclosure schedules", "Counsel", "In progress"],
-      ["Shareholder consent (≥95%)", "Founder", "In progress"],
-      ["Escrow agent engagement", "Banker", "Done"],
-      ["Escrow funding confirmation", "Banker", "Pending"],
-      ["Regulatory filings", "Counsel", "In progress"],
-    ] } },
-    { heading: "Economics", bullets: [
-      "Escrow capped at ≤8% of consideration, released in 12 months",
-      "Reverse break-fee in force; no founder indemnity beyond escrow",
-      closingWindow(),
-    ] },
-  ], "The statuses are illustrative, not your process's; track the live checklist on the Closing page.");
-}
+// The closing checklist lives in lib/closing-checklist.ts (one source for the page and the export).
 
 export function wealthPlanDoc(headline: string): string {
   return structuredDoc("Wealth Transition Plan", "From a concentrated position to durable wealth", [
