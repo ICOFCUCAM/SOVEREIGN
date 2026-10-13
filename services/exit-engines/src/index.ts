@@ -26,13 +26,13 @@ export type { SectorMultiples, MultiplesBand } from './valuation/index.js';
 export { runReadiness, runReadinessAnalysis } from './readiness/index.js';
 export { runBuyerDiscovery } from './buyers/index.js';
 export { runDueDiligence }   from './diligence/index.js';
-export { TemplateMemorandumGenerator, ClaudeMemorandumGenerator } from './memorandum/index.js';
+export { TemplateMemorandumGenerator, ClaudeMemorandumGenerator, ASSUMED_LABEL, countryName, sectorPhrase } from './memorandum/index.js';
 export { runMarketplace }    from './marketplace/index.js';
 export { evaluateOffer, compareOffers, deriveNegotiationState } from './negotiation/index.js';
 export { createListing, matchBuyersToListing } from './listing/index.js';
 
 export type {
-  MemorandumKind, MemorandumInputs, MemorandumDocument, MemorandumSection, MemorandumTable, MemorandumGenerator,
+  MemorandumKind, MemorandumInputs, MemorandumDocument, MemorandumSection, MemorandumTable, MemorandumGenerator, SectionCoverage,
 } from './memorandum/types.js';
 export type { MarketplaceRun, MarketplaceRunOptions } from './marketplace/engine.js';
 export type {

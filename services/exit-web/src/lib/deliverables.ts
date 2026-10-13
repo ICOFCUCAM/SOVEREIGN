@@ -592,7 +592,7 @@ export function offerComparisonDoc(opts: {
 
 export function wealthPlanDoc(headline: string): string {
   return structuredDoc("Wealth Transition Plan", "From a concentrated position to durable wealth", [
-    { heading: "Proceeds", body: `Headline consideration of ${headline}. ExitOS applies one flat illustrative rate (23.8%: US federal long-term capital gains plus NIIT); it does not model state tax or QSBS, which a tax adviser should evaluate for your holding.` },
+    { heading: "Proceeds", body: `An enterprise value of ${headline} (ExitOS estimate) is not what you receive: your proceeds depend on your ownership, share classes, any liquidation preferences, debt and transaction costs, which this plan does not model. ExitOS applies one flat illustrative rate (23.8%: US federal long-term capital gains plus NIIT); it does not model state tax or QSBS, which a tax adviser should evaluate for your holding.` },
     { heading: "Plan", bullets: [
       "Staged liquidity schedule across the months after close",
       "Diversification out of the single concentrated position into a durable portfolio",

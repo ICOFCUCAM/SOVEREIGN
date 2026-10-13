@@ -1,5 +1,5 @@
-# Northwind Analytics — Investor deck
-_Northwind Analytics · 2026-10-13 · Ref: exitos.investor\_deck · 4a3574ef1b15 · v1 · draft_
+# Calder Freight Software — Investor deck
+_Calder Freight Software · 2026-10-13 · Ref: exitos.investor\_deck · 361a6b4cd641 · v1 · draft_
 
 **STRICTLY CONFIDENTIAL — UNDER NDA**
 
@@ -23,65 +23,61 @@ _Northwind Analytics · 2026-10-13 · Ref: exitos.investor\_deck · 4a3574ef1b15
 
 ## 1 Slide 1 · Title
 
-Northwind Analytics — Acquisition opportunity
+Calder Freight Software — Acquisition opportunity
 
-- Software-as-a-service · Vertical software
-- Founded 2016
+- Logistics · Logistics and freight
+- Founded 2014
 - Strictly confidential
 
 ## 2 Slide 2 · The opportunity
 
-A software-as-a-service business in vertical software.
+A business in logistics and freight.
 
 - Market size: to be supplied by the Company
-- $21.8M ARR growing 36% a year
+- $8.9M ARR growing 19% a year
 
 ## 3 Slide 3 · Traction
 
-$21.8M ARR · 36% YoY growth.
+$8.9M ARR · 19% YoY growth.
 
-- 640 customers
-- 78% gross margin
-- 117% net retention
-- Top ten customers 22% of revenue
+- 210 customers
+- 61% gross margin
+- 102% net retention
+- Top ten customers 41% of revenue
 
 ## 4 Slide 4 · Product
 
 Product and technology overview to be supplied by the Company.
 
-- Network effects (company-reported)
-- Proprietary data asset (company-reported)
 - Technical documentation available for diligence
 
 ## 5 Slide 5 · Customers
 
 Revenue quality: what recurs, how it grows inside the base, and how concentrated it is.
 
-- 640 customers, averaging $34k of ARR each
-- Net revenue retention: 117%
+- 210 customers, averaging $42k of ARR each
+- Net revenue retention: 102%
 
 ## 6 Slide 6 · Financials
 
-$24.6M TTM revenue; EBITDA-positive at a 14% margin.
+$11.3M TTM revenue; loss-making at EBITDA level (-4% margin).
 
-- Rule of 40: 50
-- Gross margin 78%
+- Rule of 40: 15
+- Gross margin 61%
 
 ## 7 Slide 7 · Team
 
-Northwind Analytics has not yet supplied its headcount or management team; buyers will ask for an organisation chart and the leadership team's backgrounds.
+Calder Freight Software has not yet supplied its headcount or management team; buyers will ask for an organisation chart and the leadership team's backgrounds.
 
 - Management presentations to engaged buyers in the process
 
 ## 8 Slide 8 · Investment highlights
 
-Why Northwind Analytics is worth a closer look.
+Why Calder Freight Software is worth a closer look.
 
-- Recurring revenue of $21.8M ARR, up 36% on the prior year
-- 78% gross margin; EBITDA-positive at a 14% margin
-- Rule of 40: 50 (ARR growth 36% plus EBITDA margin 14%), above the 40 that buyers of recurring-revenue businesses commonly use as a threshold
-- Net revenue retention of 117%: existing customers, taken together, spend more each year than the last
-- A diversified customer base: the ten largest customers are 22% of revenue
+- Recurring revenue of $8.9M ARR, up 19% on the prior year
+- 61% gross margin
+- Net revenue retention of 102%: existing customers, taken together, spend more each year than the last
 
 ## 9 Slide 9 · Process
 

@@ -107,7 +107,8 @@ export function toDdm(input: DdmInput): DdmDocument {
     const process = find(secs, /process|timeline|next steps/i);
     if (process >= 0 && !sections[process].role) roleAt(process, "deliverables");
     else add("What recipients receive", "deliverables", [{ type: "paragraph", text: "This document, and on an executed NDA the materials it describes." }]);
-    const val = find(secs, /valuation/i);
+    // a buyer memorandum states no valuation: its basis of preparation carries the "commercials" role
+    const val = find(secs, /valuation|source notes|basis of preparation|^basis$/i);
     if (val >= 0 && !sections[val].role) { roleAt(val, "commercials"); sections[val].blocks.push({ id: `${sections[val].id}-c`, ...noticeCallout("Basis") }); }
     else add("Basis and limitations", "commercials", [noticeCallout("Basis")]);
     if (!sections.some((s) => s.role === "approach")) add("Scope", "approach", [{ type: "paragraph", text: "The sections above." }]);

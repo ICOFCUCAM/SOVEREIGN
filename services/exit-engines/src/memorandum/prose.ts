@@ -19,7 +19,17 @@ const MODEL: Record<string, string> = {
   commerce: 'commerce business', media: 'media business', services: 'services business', other: 'business',
 };
 /** With its article: "a software-as-a-service business", "an AI platform business". */
-export const modelPhrase = (m: string): string => { const p = MODEL[m] ?? `${m.replace(/_/g, ' ')} business`; return `${/^[aeiouAEIOU]/.test(p) ? 'an' : 'a'} ${p}`; };
+export const modelPhrase = (m: string, sector?: string): string => {
+  let p = MODEL[m] ?? `${m.replace(/_/g, ' ')} business`;
+  // "a logistics business in logistics and freight" says the same thing twice: drop the repeated word
+  if (sector && sectorPhrase(sector).toLowerCase().includes((p.split(' ')[0] ?? '').toLowerCase())) p = 'business';
+  return `${/^[aeiouAEIOU]/.test(p) ? 'an' : 'a'} ${p}`;
+};
+const NUM = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+/** "three products", "12 products". */
+export const count = (n: number, one: string, many = `${one}s`): string => `${n <= 10 ? NUM[n] : n} ${n === 1 ? one : many}`;
+/** "once", "twice", "3 times". */
+export const times = (n: number): string => (n === 1 ? 'once' : n === 2 ? 'twice' : `${n <= 10 ? NUM[n] : n} times`);
 /** A deck or cover line: "Software-as-a-service · Vertical software". */
 export const categoryLine = (c: CompanyProfile): string => {
   const cap = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
@@ -76,5 +86,5 @@ export const ASSUMED_LABEL: Record<string, string> = {
   'market.regulatoryRisk': 'regulatory exposure', 'product.differentiation': 'competitive position', 'product.defensibility': 'defensibility',
   'product.technicalArchitecture': 'technical architecture', 'team.headcount': 'headcount', 'team.foundersStillActive': 'founders\' role',
   'team.leadershipBenchStrength': 'leadership team', cap: 'capitalisation table', 'revenue.grossRetentionPct': 'gross retention',
-  'growth.customerGrowthYoyPct': 'customer growth',
+  'growth.customerGrowthYoyPct': 'customer growth', 'cap.fullyDilutedShares': 'fully diluted share count',
 };

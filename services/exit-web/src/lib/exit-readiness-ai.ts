@@ -1,3 +1,4 @@
+import { isKnown } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile";
 import type { CompanyProfile } from "@exit/engines";
 
@@ -14,6 +15,8 @@ export interface ReadinessCategory {
   fix: string;          // what to do
   impactUsd: number;    // valuation impact of closing the gap (0 when on track)
   weight: number;       // importance to valuation (internal)
+  /** Set when the category rests on inputs the company has not supplied: it is not scored, priced or counted. */
+  notAssessed?: string;
 }
 
 const clamp = (n: number): number => Math.max(0, Math.min(100, Math.round(n)));
@@ -27,7 +30,8 @@ function rawCategories(C: CompanyProfile = SAMPLE_COMPANY): Omit<ReadinessCatego
   const conc = C.revenue.customerConcentrationTop10Pct ?? 0.2;
   const granted = C.product.intellectualProperty?.patentsGranted ?? 0;
   const pending = C.product.intellectualProperty?.patentsPending ?? 0;
-  const arrPerHead = C.team.headcount > 0 ? C.revenue.annualRecurringRevenueUsd / C.team.headcount : 0;
+  const known = (p: string): boolean => isKnown(C, p);
+  const arrPerHead = known("team.headcount") && C.team.headcount > 0 ? C.revenue.annualRecurringRevenueUsd / C.team.headcount : 0;
 
   // Financial Readiness — margins + recurring quality.
   const financial = clamp(100 * (0.4 * Math.min(1, gross / 0.80) + 0.35 * Math.min(1, ebitda / 0.25) + 0.25 * Math.min(1, recurring / 0.6)));
@@ -60,7 +64,10 @@ function rawCategories(C: CompanyProfile = SAMPLE_COMPANY): Omit<ReadinessCatego
   founderIndep = clamp(founderIndep);
 
   // Operational Scalability — margin headroom + revenue per head + AI leverage.
-  let scalability = 100 * (0.5 * Math.min(1, gross / 0.75) + 0.3 * Math.min(1, arrPerHead / 150_000) + 0.2 * (C.product.aiNative ? 1 : 0.4));
+  // revenue per head counts only with a supplied headcount; otherwise the other two terms are re-weighted
+  let scalability = known("team.headcount")
+    ? 100 * (0.5 * Math.min(1, gross / 0.75) + 0.3 * Math.min(1, arrPerHead / 150_000) + 0.2 * (C.product.aiNative ? 1 : 0.4))
+    : 100 * ((0.5 * Math.min(1, gross / 0.75) + 0.2 * (C.product.aiNative ? 1 : 0.4)) / 0.7);
   scalability = clamp(scalability);
 
   // Customer Concentration — inverse of top-10 share.
@@ -88,7 +95,7 @@ function rawCategories(C: CompanyProfile = SAMPLE_COMPANY): Omit<ReadinessCatego
   if ((C.team.tenureMedianYears ?? 0) >= 3) team += 4;
   team = clamp(team);
 
-  return [
+  const cats: Array<Omit<ReadinessCategory, "impactUsd">> = [
     { key: "financial",     label: "Financial Readiness",      score: financial,     weight: 0.18, fix: "Lift gross margin and normalize EBITDA with a quality-of-earnings pack." },
     { key: "concentration", label: "Customer Concentration",   score: concentration, weight: 0.16, fix: "Diversify the book — multi-year renewals on the top accounts before launch." },
     { key: "founderIndep",  label: "Founder Independence",     score: founderIndep,  weight: 0.12, fix: "Push relationships and decisions to the team; document the playbook." },
@@ -100,13 +107,23 @@ function rawCategories(C: CompanyProfile = SAMPLE_COMPANY): Omit<ReadinessCatego
     { key: "technical",     label: "Technical Readiness",      score: tech,          weight: 0.06, fix: "Document the architecture, security posture and scalability headroom." },
     { key: "team",          label: "Team Depth",               score: team,          weight: 0.05, fix: "Retention + succession for the critical few; deepen the bench." },
   ];
+  // categories that rest on inputs the company has not supplied are shown as such, never scored
+  const missing: Record<string, string | null> = {
+    legal: known("market.regulatoryRisk") ? null : "regulatory exposure",
+    technical: known("product.technicalArchitecture") || known("product.defensibility") ? null : "technical architecture and defensibility",
+    market: known("market.marketGrowthPct") || C.market.serviceableMarketUsd ? null : "a sourced market size and growth",
+    founderIndep: known("team.foundersStillActive") || known("team.leadershipBenchStrength") ? null : "the leadership team and the founders' roles",
+    governance: known("cap") ? null : "the capitalisation table",
+    team: known("team.leadershipBenchStrength") ? null : "the leadership team",
+  };
+  return cats.map((c) => (missing[c.key] ? { ...c, notAssessed: `not assessed — ${missing[c.key]} not yet supplied` } : c));
 }
 
 // Distribute the value-left-on-the-table across the weak categories by
 // (weight × gap-to-target), so per-category dollars sum to the cascade gap.
 export function exitReadinessCategories(valueLeftUsd: number, company: CompanyProfile = SAMPLE_COMPANY): ReadinessCategory[] {
   const cats = rawCategories(company);
-  const raw = cats.map((c) => c.weight * Math.max(0, (TARGET - c.score) / 100));
+  const raw = cats.map((c) => (c.notAssessed ? 0 : c.weight * Math.max(0, (TARGET - c.score) / 100)));
   const sum = raw.reduce((s, r) => s + r, 0) || 1;
   return cats.map((c, i) => ({
     ...c,

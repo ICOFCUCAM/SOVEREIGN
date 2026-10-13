@@ -1,4 +1,4 @@
-import type { CompanyProfile, EngineMeta } from '../types.js';
+import { isKnown, type CompanyProfile, type EngineMeta } from '../types.js';
 
 export type DiligenceDocumentKind =
   | 'financial'
@@ -183,7 +183,7 @@ function technicalArchitectureDD(c: CompanyProfile): DiligenceDocumentSpec {
       {
         heading: 'System architecture',
         questions: [
-          `Architecture diagram (${c.product.technicalArchitecture})`,
+          isKnown(c, 'product.technicalArchitecture') ? `Architecture diagram (${c.product.technicalArchitecture.replace(/_/g, ' ')})` : 'Architecture diagram',
           'Service inventory and ownership map',
           'Data model and schema documentation',
           'Third-party dependencies and SLAs',

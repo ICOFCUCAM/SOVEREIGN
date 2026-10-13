@@ -41,6 +41,8 @@ interface BriefingContext {
   baselineUsd: number;
   headlineMidUsd: number;
   tokens?: readonly string[];
+  /** The company's sector, so a buyer's thesis names this company's sector, not the demo company's. */
+  sector?: string;
 }
 
 export function morningBriefing(ctx?: BriefingContext): MorningBriefingReport {
@@ -69,7 +71,7 @@ export function morningBriefing(ctx?: BriefingContext): MorningBriefingReport {
     name: r.profile.name,
     buyerId: r.profile.buyer_id,
     probabilityPct: r.probability.pct,
-    why: buyerRationale(r.profile, baseline, tokens).points[0]?.detail ?? buyerRationale(r.profile, baseline, tokens).thesis,
+    why: buyerRationale(r.profile, baseline, tokens, ctx?.sector).points[0]?.detail ?? buyerRationale(r.profile, baseline, tokens, ctx?.sector).thesis,
     expectedValueUsd: expectedOutcomeFor(r.profile, baseline).expectedClose,
   }));
 

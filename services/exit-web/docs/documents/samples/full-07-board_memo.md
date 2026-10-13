@@ -1,5 +1,5 @@
 # Northwind Analytics — Board Transaction Memorandum
-_Northwind Analytics · 2026-10-13 · Ref: exitos.board\_memo\_process · c661da545374 · v1 · draft_
+_Northwind Analytics · 2026-10-13 · Ref: exitos.board\_memo\_process · e2885552e850 · v1 · draft_
 
 **BOARD CONFIDENTIAL**
 
@@ -29,9 +29,9 @@ Northwind Analytics has $22M of annual recurring revenue, growing 36% year over 
 
 1. Immediate market entry — acquiring an operating vertical software business rather than building one in-house
 2. Technology and data — the proprietary dataset, and the advantage it gives, transfers with the deal
-3. Competitive positioning — denying a network-effects asset to a rival is worth a control premium
-4. Customer acquisition — a durable, expanding base (NRR 117%) to cross-sell into the acquirer's install base
-5. Geographic reach — an operating base in the United Kingdom
+3. Customer acquisition — a durable, expanding base (NRR 117%) to cross-sell into the acquirer's install base
+4. Geographic reach — an operating base in the United Kingdom
+5. Cost synergies — for an acquirer with overlapping operations, shared overheads, platform and go-to-market spend
 
 ## 4 Transaction Parameters
 
@@ -47,13 +47,15 @@ The recommended transaction parameters and the risk factors most likely to be pr
 | Strategic premium | +24% (n=1) |
 | Planned timing | signing weeks 8–10; closing weeks 10–16 from launch |
 | Time to close in comparable deals | 50–178 days |
-| Exit readiness | 60/100 |
+| Exit readiness | 53/100 |
 
 **Table 2. Risk factors & value at stake**
 | Risk factor | Value at stake |
 | --- | ---: |
-| Market Penetration | $27M |
-| Scalability | $23M |
+| Scalability | $21M |
+| Market Penetration | $15M |
+| Technology Moat | $11M |
+| Competitive Advantage | $0 |
 
 ## 5 Process and Timing
 
@@ -77,4 +79,4 @@ The recommended transaction parameters and the risk factors most likely to be pr
 
 ## 7 Basis of Preparation
 
-Figures are as supplied by management, unaudited, in US dollars. The valuation is prepared under ExitOS Valuation Framework v1.0.0; buyer probabilities and the strategic premium are model estimates from comparable transactions. The timeline is a planning assumption. The proposed resolutions are a starting point for the Company's counsel, not a form of minutes.
+Figures are as supplied by management, unaudited, in US dollars. The valuation is prepared under ExitOS Valuation Framework v1.0.0; buyer probabilities and the strategic premium are model estimates from comparable transactions. The Company has not yet supplied intensity of competition, regulatory exposure, competitive position, defensibility, technical architecture, leadership team, customer growth; the valuation model used neutral values for these, so the range will move when they are supplied. The timeline is a planning assumption. The proposed resolutions are a starting point for the Company's counsel, not a form of minutes.

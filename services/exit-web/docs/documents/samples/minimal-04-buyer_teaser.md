@@ -1,5 +1,5 @@
-# Project Meridian — Confidential opportunity overview
-_Project Meridian · 2026-10-13 · Ref: exitos.teaser · c6ead6234374 · v1 · draft_
+# Project Atlas — Confidential opportunity overview
+_Project Atlas · 2026-10-13 · Ref: exitos.teaser · d5eb6ccf2ec2 · v1 · draft_
 
 **CONFIDENTIAL — PRE-NDA**
 
@@ -18,23 +18,23 @@ _Project Meridian · 2026-10-13 · Ref: exitos.teaser · c6ead6234374 · v1 · d
 
 ## 1 The opportunity
 
-Project Meridian is a software-as-a-service business in vertical software. It has built a recurring-revenue business growing 36% year over year, and its shareholders are inviting a small group of qualified acquirers to consider a purchase through a structured, confidential process. The Company's identity and detailed financials are disclosed once a mutual NDA is signed.
+Project Atlas is a business in logistics and freight. It has built a recurring-revenue business growing 19% year over year, and its shareholders are inviting a small group of qualified acquirers to consider a purchase through a structured, confidential process. The Company's identity and detailed financials are disclosed once a mutual NDA is signed.
 
 ## 2 Selected metrics
 
 Headline operating profile (absolute figures disclosed under NDA):
 
-- Revenue growth: 36% year over year, recurring-revenue led
-- Gross margin: 78%
-- EBITDA margin: 14%
-- Net revenue retention: 117%
-- Rule of 40: 50
+- Revenue growth: 19% year over year, recurring-revenue led
+- Gross margin: 61%
+- EBITDA margin: -4%
+- Net revenue retention: 102%
+- Rule of 40: 15
 
 ## 3 Why this asset
 
-Project Meridian combines recurring revenue with 78% gross margins. The Company reports network effects and a proprietary data asset built up through use. Existing customers spend more each year, so growth does not rely on new customers alone.
+Project Atlas combines recurring revenue with 61% gross margins. Existing customers spend more each year, so growth does not rely on new customers alone.
 
-- 78% gross margin; EBITDA-positive at a 14% margin
+- 61% gross margin; loss-making at EBITDA level (-4% margin)
 
 ## 4 Process & next steps
 

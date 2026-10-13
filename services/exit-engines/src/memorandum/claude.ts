@@ -33,6 +33,12 @@ const KIND_DIRECTIVES: Record<MemorandumKind, string> = {
   dd_room_index:      'Produce a structured index of the virtual data-room contents organized by diligence package.',
 };
 
+/** An object without the fields listed as assumed under `prefix` ('market.addressableMarketUsd' → addressableMarketUsd). */
+function withoutAssumed<T extends object>(o: T, prefix: string, assumed: readonly string[] | undefined): Partial<T> {
+  const drop = new Set((assumed ?? []).filter((a) => a.startsWith(`${prefix}.`)).map((a) => a.slice(prefix.length + 1)));
+  return Object.fromEntries(Object.entries(o).filter(([k]) => !drop.has(k))) as Partial<T>;
+}
+
 function compactInputs(i: MemorandumInputs): string {
   const c = i.company;
   return JSON.stringify({
@@ -41,12 +47,15 @@ function compactInputs(i: MemorandumInputs): string {
     businessModel: c.businessModel,
     sector: c.sector,
     foundedYear: c.foundedYear,
+    // only what the company supplied: assumed (neutral) values are withheld, and listed so the model states the gap
     revenue: c.revenue,
     growth: c.growth,
     users: c.users,
-    market: c.market,
-    product: c.product,
-    team: c.team,
+    market: withoutAssumed(c.market, 'market', i.assumed ?? c.assumed),
+    product: withoutAssumed(c.product, 'product', i.assumed ?? c.assumed),
+    team: withoutAssumed(c.team, 'team', i.assumed ?? c.assumed),
+    notSupplied: i.assumed ?? c.assumed ?? [],
+    story: i.story ?? null,
     // Valuation MUST be taken from the constitution when present — the LLM
     // is given the framework's mandatory outputs and is instructed (below)
     // not to invent or alter any valuation figure.

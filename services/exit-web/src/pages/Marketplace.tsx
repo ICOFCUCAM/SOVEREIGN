@@ -8,8 +8,9 @@ import { parseNumber } from "../lib/intake-fields";
 import { useAuth } from "../lib/auth";
 import { buildMarketTape } from "../lib/market-tape";
 import { LISTING_PUBLIC as ENGINE_PUBLIC, LISTING_PRIVATE as ENGINE_PRIVATE, LISTING_MATCHES, VALUATION_CANONICAL, useMemorandum } from "../lib/engines";
-import { createListing, matchBuyersToListing, runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type MemorandumInputs } from "@exit/engines";
+import { createListing, matchBuyersToListing, runInstitutionalValuation, type MemorandumInputs } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
+import { memorandumInputs } from "../lib/documents/memorandum-inputs";
 import { inlineLabel, label, labels } from "../lib/labels";
 import { sectorLabel } from "../lib/market-stats";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
@@ -110,19 +111,17 @@ const FounderMarketplace: React.FC = () => {
   const [phase, setPhase] = useState<Phase>("idle");
 
   // The founder's saved intake when there is one; the demo company otherwise.
-  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const { company, fromIntake, story } = useMemo(() => loadActiveCompany(), []);
   const own = useMemo(() => {
     if (!fromIntake) return null;
     const institutional = runInstitutionalValuation(company);
     const canonical = canonicalValuationFor(company, institutional);
     const priv = withCanonicalAsk(createListing(company, { visibility: "private_full" }), canonical.headline);
     const pub = withCanonicalAsk(createListing(company, { visibility: "public_anonymized" }), canonical.headline);
-    const memo: Partial<MemorandumInputs> = {
-      company, valuation: canonical, constitution: institutional,
-      readiness: runReadiness(company), buyers: runBuyerDiscovery(company, { limit: 12 }), diligence: runDueDiligence(company),
-    };
+    // the same inputs every other memorandum uses: code name, story, assumed fields
+    const memo: Partial<MemorandumInputs> = memorandumInputs(company, true, story);
     return { priv, pub, matches: matchBuyersToListing(createListing(company, { visibility: "private_full" }), company, { limit: 15 }), memo };
-  }, [company, fromIntake]);
+  }, [company, fromIntake, story]);
   const PRIV = own?.priv ?? LISTING_PRIVATE;
   const PUB = own?.pub ?? LISTING_PUBLIC;
   const MATCHES = own?.matches ?? LISTING_MATCHES;

@@ -1,3 +1,4 @@
+import { isKnown } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile";
 import { VALUATION_CANONICAL } from "./engines";
 import type { CompanyProfile } from "@exit/engines";
@@ -131,10 +132,10 @@ export function discoverFindings(C: CompanyProfile = SAMPLE_COMPANY, mid: number
   out.push({
     id: "leg-compliance",
     category: "Legal", subcategory: "Compliance",
-    title: `Regulatory risk assessed ${C.market.regulatoryRisk}`,
-    severity: C.market.regulatoryRisk === "high" ? "high" : C.market.regulatoryRisk === "medium" ? "medium" : "low",
+    title: isKnown(C, "market.regulatoryRisk") ? `Regulatory risk assessed ${C.market.regulatoryRisk}` : "Regulatory standing not yet documented",
+    severity: !isKnown(C, "market.regulatoryRisk") ? "medium" : C.market.regulatoryRisk === "high" ? "high" : C.market.regulatoryRisk === "medium" ? "medium" : "low",
     source: "Contracts",
-    detail: `The profile rates regulatory risk ${C.market.regulatoryRisk}. A buyer will verify licences and regulatory standing in every operating jurisdiction; ExitOS holds no evidence of current standing.`,
+    detail: `${isKnown(C, "market.regulatoryRisk") ? `The company rates its regulatory risk ${C.market.regulatoryRisk}.` : "The company has not yet described its regulatory exposure."} A buyer will verify licences and regulatory standing in every operating jurisdiction; ExitOS holds no evidence of current standing.`,
     buyerView: "Verifies licences and broker bonds; unresolved compliance becomes a representation-and-warranty exposure.",
     sellerAction: "Compile licences, bonds and compliance certifications by jurisdiction into a compliance binder.",
     impactUsd: impact(2.5),
@@ -155,10 +156,12 @@ export function discoverFindings(C: CompanyProfile = SAMPLE_COMPANY, mid: number
   out.push({
     id: "ops-founder",
     category: "Operational", subcategory: "Founder dependency",
-    title: "Revenue and relationships concentrate on the founders",
-    severity: C.team.foundersStillActive ? "high" : "low",
+    title: isKnown(C, "team.foundersStillActive") ? "Revenue and relationships concentrate on the founders" : "Founder dependency not yet assessed",
+    severity: !isKnown(C, "team.foundersStillActive") ? "medium" : C.team.foundersStillActive ? "high" : "low",
     source: "Employment agreements",
-    detail: `Founders remain active and hold ${Math.round((C.cap.foundersOwnershipPct ?? 0) * 100)}% — key customer relationships and decisions still route through them.`,
+    detail: isKnown(C, "team.foundersStillActive")
+      ? `Founders ${C.team.foundersStillActive ? "remain active" : "are no longer active"}${isKnown(C, "cap") ? ` and hold ${Math.round((C.cap.foundersOwnershipPct ?? 0) * 100)}%` : ""}${C.team.foundersStillActive ? " — a buyer will test how far customer relationships and decisions route through them." : "."}`
+      : "The company has not yet said who leads it or what the founders' roles are; a buyer will test how far customer relationships and decisions route through them.",
     buyerView: "Conditions value on founder retention; structures an earnout or escrow tied to a 12–24 month transition.",
     sellerAction: "Push key relationships down to the team, document the playbook, and define a transition plan that de-risks your exit.",
     impactUsd: impact(8),
@@ -177,10 +180,10 @@ export function discoverFindings(C: CompanyProfile = SAMPLE_COMPANY, mid: number
   out.push({
     id: "ops-keyemployee",
     category: "Operational", subcategory: "Key employee exposure",
-    title: `Leadership bench is ${C.team.leadershipBenchStrength}; median tenure ${C.team.tenureMedianYears ?? "—"}y`,
-    severity: C.team.leadershipBenchStrength === "thin" ? "high" : "medium",
+    title: isKnown(C, "team.leadershipBenchStrength") ? `Leadership bench is ${C.team.leadershipBenchStrength}${C.team.tenureMedianYears != null ? `; median tenure ${C.team.tenureMedianYears}y` : ""}` : "Key people not yet identified",
+    severity: isKnown(C, "team.leadershipBenchStrength") && C.team.leadershipBenchStrength === "thin" ? "high" : "medium",
     source: "Employment agreements",
-    detail: `With ${C.team.engineeringHeadcount ?? 0} of ${C.team.headcount} in engineering and a ${C.team.leadershipBenchStrength} leadership bench, a buyer will look for key people who carry outsized knowledge.`,
+    detail: `${isKnown(C, "team.headcount") ? `With ${C.team.headcount} people${C.team.engineeringHeadcount != null ? `, ${C.team.engineeringHeadcount} of them in engineering` : ""}` : "The company has not yet supplied its headcount or leadership team"}; a buyer will look for key people who carry outsized knowledge.`,
     buyerView: "Identifies key-person risk and requires retention packages and non-competes for the critical few.",
     sellerAction: "Put retention and equity-vesting in place for key staff and build succession depth before going to market.",
     impactUsd: impact(3),

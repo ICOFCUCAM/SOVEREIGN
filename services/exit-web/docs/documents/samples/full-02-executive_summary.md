@@ -1,5 +1,5 @@
 # Northwind Analytics — Executive Summary
-_Northwind Analytics · 2026-10-13 · Ref: exitos.executive\_summary · cd0a6d67920d · v1 · draft_
+_Northwind Analytics · 2026-10-13 · Ref: exitos.executive\_summary · 18637b140ab0 · v1 · draft_
 
 **STRICTLY CONFIDENTIAL — UNDER NDA**
 
@@ -14,7 +14,6 @@ _Northwind Analytics · 2026-10-13 · Ref: exitos.executive\_summary · cd0a6d67
 - 5 Key considerations
 - 6 Process & timeline
 - 7 Basis
-- 8 Basis and limitations
 
 ---
 
@@ -36,12 +35,6 @@ Northwind Analytics reports $24.6M in trailing twelve-month revenue, with $21.8M
 | EBITDA margin | 14% |
 | Net revenue retention | 117% |
 
-**Table 2. ARR: current and prior year (prior year implied from the reported growth rate)**
-|   | Prior year (implied) | Current |
-| --- | --- | --- |
-| ARR | $16.0M | $21.8M |
-| YoY growth | — | 36% |
-
 ## 3 Investment highlights
 
 The points an acquirer is likely to weigh most, each drawn from the figures above or attributed to the Company:
@@ -51,18 +44,19 @@ The points an acquirer is likely to weigh most, each drawn from the figures abov
 - Rule of 40: 50 (ARR growth 36% plus EBITDA margin 14%), above the 40 that buyers of recurring-revenue businesses commonly use as a threshold
 - Net revenue retention of 117%: existing customers, taken together, spend more each year than the last
 - A diversified customer base: the ten largest customers are 22% of revenue
-- Network effects reported by the Company: the product becomes more useful as more customers use it
+- A $640.0M market (UK and Ireland community-pharmacy software, 2025, growing 7% a year; published estimate)
 - A proprietary data asset reported by the Company, accumulated through use of the product
+- Founders active in the business and available through a transition
 
 ## 4 Market position
 
-Northwind Analytics has not yet supplied its market size, growth or competitive position. Buyers will expect an estimate of the addressable market with its source, and a view of the main competitors and how Northwind Analytics wins against them. It serves 640 customers.
+The UK and Ireland community-pharmacy software market is estimated at $640.0M (United Kingdom and Ireland, 2025; a published estimate, cited in the CIM). Its main competitors are Cairn Pharmacy Systems (fictional) and MedStock Cloud (fictional). It serves 640 customers.
 
 ## 5 Key considerations
 
 Matters buyers are likely to examine closely, raised now so they can be prepared for:
 
-- Information not yet supplied (market size, headcount, leadership team, capitalisation table); buyers will ask for it early
+- Information not yet supplied (leadership team); buyers will ask for it early
 
 ## 6 Process & timeline
 
@@ -71,7 +65,5 @@ Outreach is to qualified counterparties on a strictly confidential basis. Intere
 ## 7 Basis
 
 Prepared from information supplied by the Company, unaudited, in US dollars. Market figures are company estimates. This summary is not an offer; any transaction is governed only by a definitive agreement.
-
-## 8 Basis and limitations
 
 > **[INFO] Basis** Prepared by ExitOS from the company's own figures.

@@ -47,6 +47,14 @@ export interface MemorandumDocument {
   readonly anonymized: boolean;
   readonly wordCount: number;
   readonly producedBy: string;             // implementation @ version
+  /** Per section: whether the company's information supports it, partly, or not yet (a gap statement). */
+  readonly coverage?: readonly SectionCoverage[];
+}
+
+export interface SectionCoverage {
+  readonly section: string;
+  readonly status: 'supported' | 'partial' | 'gap';
+  readonly missing: readonly string[];
 }
 
 export interface MemorandumSection {

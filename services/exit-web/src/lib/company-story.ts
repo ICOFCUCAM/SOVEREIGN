@@ -67,6 +67,7 @@ export function profileWithStory(profile: CompanyProfile, story: CompanyStory): 
       esopOwnershipPct: story.capitalization?.optionPoolPct ?? sum("employee"),
       ...(story.capitalization?.fullyDilutedShares ? { fullyDilutedShares: story.capitalization.fullyDilutedShares } : {}) } };
     assumed.delete("cap");
+    if (story.capitalization?.fullyDilutedShares) assumed.delete("cap.fullyDilutedShares");
   }
   const est = (story.market?.estimates ?? []).filter((e) => usableMarketEstimate(e, story).ok).sort((a, b) => b.valueUsd - a.valueUsd)[0];
   if (est) {
@@ -78,5 +79,5 @@ export function profileWithStory(profile: CompanyProfile, story: CompanyStory): 
     p = { ...p, revenue: { ...p.revenue, grossRetentionPct: story.customers.grossRetentionPct } };
     assumed.delete("revenue.grossRetentionPct");
   }
-  return { profile: p, assumed: [...assumed] };
+  return { profile: { ...p, assumed: [...assumed] }, assumed: [...assumed] };
 }

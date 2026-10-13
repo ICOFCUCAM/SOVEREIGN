@@ -6,7 +6,7 @@ import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, Bar, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { runReadiness, runReadinessAnalysis } from "@exit/engines";
+import { isKnown, runReadiness, runReadinessAnalysis } from "@exit/engines";
 import { dealContextFor } from "../lib/deal-context";
 import { plural } from "../lib/labels";
 import { loadActiveCompany } from "../lib/active-company";
@@ -48,23 +48,25 @@ const Readiness: React.FC = () => {
   // run the process. Strong growth + open market window argue for going now;
   // a large, fixable readiness gap argues for two quarters of prep first.
   const growthYoy = company.growth.arrGrowthYoyPct;
-  const marketGrowth = company.market.marketGrowthPct ?? 0;
+  // market growth counts only when the company supplied it (a sourced estimate in its story)
+  const marketKnown = isKnown(company, "market.marketGrowthPct");
+  const marketGrowth = marketKnown ? company.market.marketGrowthPct ?? 0 : 0;
   const gapRatio = current > 0 ? left / current : 0;
   const growthStrong = growthYoy >= 0.3;
-  const marketOpen = marketGrowth >= 0.05;
+  const marketOpen = marketKnown && marketGrowth >= 0.05;
   const verdict = gapRatio > 0.25
     ? { tone: "#fbbf24", label: "Prepare — don't list yet",
         body: `${fmtMoney(left)} of upside is still fixable. Two to three quarters of prep lifts the headline before you ever run a process.` }
     : growthStrong && marketOpen
       ? { tone: "#34d399", label: "Window open — go",
-          body: "ARR growth and the company's market-growth input both clear the thresholds, and the value left is small enough — the rule says start the process now." }
+          body: "ARR growth and the company's sourced market growth both clear the thresholds, and the value left is small enough — the rule says start the process now." }
       : { tone: "#94a3b8", label: "Monitor — hold",
-          body: "Neither rule fires. Keep building and check this verdict again when your figures change." };
+          body: marketKnown ? "Neither rule fires. Keep building and check this verdict again when your figures change." : "No market growth has been supplied, so the market-window rule cannot fire. Add a sourced market estimate to your company story." };
 
   const signals = [
     { label: "Exit Score", value: `${score.toFixed(0)}/100`, ok: score >= 60 },
     { label: "Growth momentum", value: `${Math.round(growthYoy * 100)}% YoY`, ok: growthStrong },
-    { label: "Market growth (company input)", value: `${Math.round(marketGrowth * 100)}%`, ok: marketOpen },
+    { label: "Market growth (from your company story)", value: marketKnown ? `${Math.round(marketGrowth * 100)}%` : "not supplied", ok: marketOpen },
     { label: "Upside still on table", value: fmtMoney(left), ok: gapRatio <= 0.15 },
   ];
 
@@ -76,7 +78,7 @@ const Readiness: React.FC = () => {
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Exit Score {score.toFixed(0)}/100 · readiness engine {engineScore}/100 (<span className="capitalize">{band.replace(/_/g, " ")}</span>) · {verdict.label}</span></>}
         actions={<a href="/report/readiness" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Readiness Report →<span className="sr-only"> (opens in a new tab)</span></a>}>
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
-          {([["ARR growth", `${Math.round(growthYoy * 100)}%`], ["Market growth (input)", `${Math.round(marketGrowth * 100)}%`], ["Categories", String(categories.length)]] as const).map(([k, v]) => (
+          {([["ARR growth", `${Math.round(growthYoy * 100)}%`], ["Market growth", marketKnown ? `${Math.round(marketGrowth * 100)}%` : "not supplied"], ["Categories", String(categories.length)]] as const).map(([k, v]) => (
             <div key={k} className="flex items-baseline gap-1.5"><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[12px] font-semibold tabular-nums">{v}</dd></div>
           ))}
         </dl>
@@ -107,7 +109,7 @@ const Readiness: React.FC = () => {
                 <div className="text-[11px] text-xo-faint">/ 100</div>
               </div>
             </div>
-            <p className="mt-2 max-w-[16rem] text-center text-[12px] leading-snug text-xo-muted">Weighted average of the ten categories below. The readiness engine scores the same company <span className="font-mono font-semibold tabular-nums text-xo-text">{engineScore}/100</span> (<span className="capitalize">{band.replace(/_/g, " ")}</span>) — the number shown as Readiness on the Terminal; it uses its own dimensions and weights.</p>
+            <p className="mt-2 max-w-[16rem] text-center text-[12px] leading-snug text-xo-muted">Weighted average of the categories below that the company's information supports. The readiness engine scores the same company <span className="font-mono font-semibold tabular-nums text-xo-text">{engineScore}/100</span> (<span className="capitalize">{band.replace(/_/g, " ")}</span>) — the number shown as Readiness on the Terminal; it uses its own dimensions and weights.</p>
           </div>
         </Section>
 
@@ -153,15 +155,17 @@ const Readiness: React.FC = () => {
           {categories.map((cat) => (
             <li key={cat.key} className="grid items-center gap-3 px-4 py-2.5 sm:grid-cols-[200px_1fr_130px]">
               <div className="flex items-baseline gap-2">
-                <span className="font-mono text-[17px] font-semibold tabular-nums">{cat.score}</span>
+                <span className="font-mono text-[17px] font-semibold tabular-nums">{cat.notAssessed ? "—" : cat.score}</span>
                 <span className="text-[13px] font-medium">{cat.label}</span>
               </div>
               <div className="min-w-0">
-                <Bar value={Math.max(2, cat.score)} width="w-full" tone="action" />
-                <p className="mt-1 text-[12px] leading-snug text-xo-muted">{cat.fix}</p>
+                {cat.notAssessed
+                  ? <p className="text-[12px] leading-snug text-xo-caution">{cat.notAssessed.replace(/^not assessed — /, "Not assessed: ")}. Add it to your company story; it is not counted in the Exit Score.</p>
+                  : <><Bar value={Math.max(2, cat.score)} width="w-full" tone="action" />
+                    <p className="mt-1 text-[12px] leading-snug text-xo-muted">{cat.fix}</p></>}
               </div>
               <div className="text-right">
-                {cat.impactUsd > 0
+                {cat.notAssessed ? <span className="text-[12px] text-xo-faint">not counted</span> : cat.impactUsd > 0
                   ? <Evidence align="right" meta={{ methodology: cat.fix, source: "rule-based category score · value left allocated by weighted gap to 85", confidence: `${cat.score}/100 category score (rule-based)` }}><span className="font-mono text-[14px] font-semibold tabular-nums text-xo-verified">+{fmtMoney(cat.impactUsd)}</span></Evidence>
                   : <span className="text-[12px] font-medium text-xo-verified">On track ✓</span>}
               </div>

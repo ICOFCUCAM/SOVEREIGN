@@ -41,3 +41,24 @@ test('provenance problems are listed before anything is generated', () => {
   assert.ok(issues.some((i) => /FY2025.*not attached/.test(i)));
   assert.ok(issues.some((i) => /forecast FY2027/.test(i)));
 });
+
+import { runReadiness, runReadinessAnalysis } from '../dist/readiness/index.js';
+import { SAMPLE_SAAS } from './sample.js';
+
+test('readiness never scores an input the company did not supply', () => {
+  const assumed = ['market.addressableMarketUsd', 'market.marketGrowthPct', 'market.competitiveDensity', 'market.regulatoryRisk', 'product.differentiation', 'product.defensibility', 'product.technicalArchitecture', 'team.leadershipBenchStrength'];
+  const c = { ...SAMPLE_SAAS, drivers: [], assumed };   // no supplied drivers either
+  const r = runReadiness(c);
+  const mp = r.dimensions.find((d) => d.name === 'Market Penetration');
+  const ca = r.dimensions.find((d) => d.name === 'Competitive Advantage');
+  assert.equal(mp.assessed, false);
+  assert.equal(ca.assessed, false);
+  assert.ok(r.gaps.some((g) => /Market Penetration: not assessed/.test(g)));
+  const plan = runReadinessAnalysis(c, r);
+  const w = plan.weaknesses.find((x) => x.dimension === 'Market Penetration');
+  assert.match(w.recommendation, /market-size estimate with its source/);
+  assert.equal(w.valuationUpliftUsd, 0);
+  assert.ok(!plan.weaknesses.some((x) => /TAM \(\$/.test(x.weakness)));
+  // with everything supplied, the same profile is scored on all five dimensions
+  assert.ok(runReadiness(SAMPLE_SAAS).dimensions.every((d) => d.assessed !== false));
+});

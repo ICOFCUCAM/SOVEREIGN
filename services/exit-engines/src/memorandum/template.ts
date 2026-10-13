@@ -4,10 +4,13 @@ import type {
 } from './types.js';
 import { DEFAULT_PROCESS_TIMELINE, milestone, timelineLines, weeksPhrase, type ProcessTimeline } from '../process/timeline.js';
 
+import { buildCim } from './cim.js';
 import { modelPhrase, sectorPhrase, categoryLine, positionPhrase, level, archPhrase, benchPhrase, rule40, profitabilityPhrase, countryName, ASSUMED_LABEL } from './prose.js';
 
 /** Whether a profile field was supplied by the company (not set to a neutral value for the engines). */
-const known = (i: MemorandumInputs, path: string): boolean => !(i.assumed ?? []).includes(path);
+import { usableMarketEstimate as usable } from '../story/story.js';
+const usableMarketEstimate = (e: Parameters<typeof usable>[0], st: Parameters<typeof usable>[1]): boolean => usable(e, st).ok;
+const known = (i: MemorandumInputs, path: string): boolean => !(i.assumed ?? i.company.assumed ?? []).includes(path);
 
 const pct = (x: number): string => `${(x * 100).toFixed(0)}%`;
 
@@ -41,22 +44,6 @@ function anonName(orig: string, anonymize: boolean, codeName?: string): string {
   return anonymize ? (codeName ?? DEFAULT_CODE_NAME) : orig;
 }
 
-// Last year's ARR as implied by the reported growth rate — the only history the
-// supplied figures support. Earlier years and their growth rates are not shown,
-// because nothing the company supplied states them.
-function arrTrajectory(i: MemorandumInputs): MemorandumTable {
-  const arr = i.company.revenue.annualRecurringRevenueUsd;
-  const g = i.company.growth.arrGrowthYoyPct;
-  return {
-    caption: 'ARR: current and prior year (prior year implied from the reported growth rate)',
-    headers: ['', 'Prior year (implied)', 'Current'],
-    rows: [
-      ['ARR', money(arr / (1 + g), !!i.anonymize), money(arr, !!i.anonymize)],
-      ['YoY growth', '—', `${(g * 100).toFixed(0)}%`],
-    ],
-  };
-}
-
 function financialProfileTable(i: MemorandumInputs): MemorandumTable {
   const r = i.company.revenue;
   return {
@@ -83,16 +70,17 @@ function concentrationSentence(r: { readonly customerConcentrationTop10Pct?: num
 
 function investmentHighlights(i: MemorandumInputs): string[] {
   const c = i.company, r = c.revenue, anon = !!i.anonymize;
+  // highlights are the strengths the figures support; weaknesses belong in the risks section, stated there
   const out = [
-    `Recurring revenue of ${money(r.annualRecurringRevenueUsd, anon)} ARR, up ${pct(c.growth.arrGrowthYoyPct)} on the prior year`,
-    `${pct(r.grossMarginPct)} gross margin; ${profitabilityPhrase(c)}`,
-    `Rule of 40: ${rule40(c).text}`,
+    `Recurring revenue of ${money(r.annualRecurringRevenueUsd, anon)} ARR, ${c.growth.arrGrowthYoyPct >= 0 ? `up ${pct(c.growth.arrGrowthYoyPct)}` : `down ${pct(-c.growth.arrGrowthYoyPct)}`} on the prior year`,
+    r.ebitdaMarginPct > 0 ? `${pct(r.grossMarginPct)} gross margin; ${profitabilityPhrase(c)}` : `${pct(r.grossMarginPct)} gross margin`,
+    ...(rule40(c).score >= 40 ? [`Rule of 40: ${rule40(c).text}`] : []),
   ];
-  if (r.netRetentionPct != null) out.push(r.netRetentionPct >= 1
-    ? `Net revenue retention of ${pct(r.netRetentionPct)}: existing customers, taken together, spend more each year than the last`
-    : `Net revenue retention of ${pct(r.netRetentionPct)}: growth depends on new customers replacing contraction and churn`);
+  if (r.netRetentionPct != null && r.netRetentionPct >= 1) out.push(`Net revenue retention of ${pct(r.netRetentionPct)}: existing customers, taken together, spend more each year than the last`);
   if (r.customerConcentrationTop10Pct != null && r.customerConcentrationTop10Pct < 0.25) out.push(`A diversified customer base: the ten largest customers are ${pct(r.customerConcentrationTop10Pct)} of revenue`);
-  if (known(i, 'market.addressableMarketUsd') && known(i, 'market.marketGrowthPct')) out.push(`A ${money(c.market.addressableMarketUsd, anon)} addressable market growing ${pct(c.market.marketGrowthPct)} a year (company estimate)`);
+  const est = (i.story?.market?.estimates ?? []).filter((e) => usableMarketEstimate(e, i.story!)).sort((a, b) => b.valueUsd - a.valueUsd)[0];
+  if (est) out.push(`A ${money(est.valueUsd, anon)} market (${est.label}, ${est.period}${est.growthPct != null ? `, growing ${pct(est.growthPct)} a year` : ''}; ${est.meta.provenance === 'estimated' ? 'company estimate' : 'published estimate'})`);
+  else if (known(i, 'market.addressableMarketUsd') && known(i, 'market.marketGrowthPct')) out.push(`A ${money(c.market.addressableMarketUsd, anon)} addressable market growing ${pct(c.market.marketGrowthPct)} a year (company estimate)`);
   if (c.product.hasNetworkEffects) out.push('Network effects reported by the Company: the product becomes more useful as more customers use it');
   if (c.product.hasDataMoat) out.push('A proprietary data asset reported by the Company, accumulated through use of the product');
   if (c.product.aiNative) out.push('Machine learning built into the core workflow');
@@ -109,18 +97,6 @@ function importantNotice(name: string): MemorandumSection {
 }
 
 /** Where every figure came from and what was assumed. */
-function basisOfPreparation(i: MemorandumInputs, name: string): MemorandumSection {
-  return {
-    heading: 'Basis of preparation',
-    body: `Figures are as supplied by ${name} through ExitOS and are stated in US dollars. Revenue is trailing twelve months; ARR is the annualised value of recurring contracts at the date of preparation. Growth is measured against the same date a year earlier. The prior-year ARR in the ARR table is implied from current ARR and the reported growth rate, not taken from accounts.`,
-    bullets: [
-      `Timeline: ${timelineOf(i).basis}`,
-      'Market size and growth: company estimates, not independently sourced',
-      'Product and team characteristics: as described by the Company',
-      ...((i.assumed ?? []).length ? [`Not yet supplied by the Company: ${(i.assumed ?? []).map((a) => ASSUMED_LABEL[a] ?? a).join(', ')}. The valuation model used neutral values for these; this document does not state them`] : []),
-    ],
-  };
-}
 
 function customersSection(i: MemorandumInputs, name: string, heading: string): MemorandumSection {
   const c = i.company, r = c.revenue, u = c.users, anon = !!i.anonymize;
@@ -138,22 +114,6 @@ function customersSection(i: MemorandumInputs, name: string, heading: string): M
   };
 }
 
-function ownershipSection(i: MemorandumInputs, heading: string): MemorandumSection {
-  const cap = i.company.cap;
-  if (!known(i, 'cap')) return {
-    heading,
-    body: 'The capitalisation table has not yet been supplied. Buyers will need fully diluted ownership, any liquidation preferences and the option arrangements to work out how the proceeds of a sale are shared.',
-  };
-  return {
-    heading,
-    body: 'Ownership on a fully diluted basis, as supplied by the Company. Buyers will expect the detailed capitalisation table, any liquidation preferences and the allocation of proceeds in the data room.',
-    bullets: [
-      `Founders: ${pct(cap.foundersOwnershipPct)}`,
-      `Investors: ${pct(cap.investorOwnershipPct)}`,
-      `Employee option pool: ${pct(cap.esopOwnershipPct)}`,
-    ],
-  };
-}
 
 function risksSection(i: MemorandumInputs, heading: string): MemorandumSection {
   const flags = i.diligence?.redFlags ?? [];
@@ -165,6 +125,8 @@ function risksSection(i: MemorandumInputs, heading: string): MemorandumSection {
   if (known(i, 'team.foundersStillActive') && !c.team.foundersStillActive) own.push('The founders are no longer active; continuity of leadership will be examined');
   if (known(i, 'team.leadershipBenchStrength') && c.team.leadershipBenchStrength === 'thin') own.push('Leadership depth below the founders is thin; retention and succession will be examined');
   if (c.revenue.ebitdaMarginPct < 0) own.push('The business is loss-making at EBITDA level; buyers will model the path to profitability');
+  if (c.revenue.netRetentionPct != null && c.revenue.netRetentionPct < 1) own.push(`Net revenue retention is ${(c.revenue.netRetentionPct * 100).toFixed(0)}%: revenue from existing customers shrinks without new sales, and buyers will ask for cohort data`);
+  if (rule40(c).score < 40) own.push(`The Rule of 40 score is ${rule40(c).text}`);
   const missing = (i.assumed ?? []).filter((a) => ['cap', 'team.headcount', 'market.addressableMarketUsd', 'team.leadershipBenchStrength'].includes(a));
   if (missing.length) own.push(`Information not yet supplied (${missing.map((a) => ASSUMED_LABEL[a] ?? a).join(', ')}); buyers will ask for it early`);
   const items = [...flags, ...own].slice(0, 8);
@@ -179,7 +141,11 @@ function risksSection(i: MemorandumInputs, heading: string): MemorandumSection {
 /** The market, stated only from what the company supplied. */
 function marketParagraph(i: MemorandumInputs, name: string): string {
   const c = i.company, anon = !!i.anonymize, parts: string[] = [];
-  if (known(i, 'market.addressableMarketUsd')) parts.push(`The Company estimates its addressable market at ${money(c.market.addressableMarketUsd, anon)}${known(i, 'market.marketGrowthPct') ? `, growing ${pct(c.market.marketGrowthPct)} a year` : ''}${c.market.serviceableMarketUsd ? `, of which ${money(c.market.serviceableMarketUsd, anon)} is serviceable with its current product` : ''}.`);
+  const est = (i.story?.market?.estimates ?? []).filter((e) => usableMarketEstimate(e, i.story!)).sort((a, b) => b.valueUsd - a.valueUsd)[0];
+  if (est) parts.push(`The ${est.label} market is estimated at ${money(est.valueUsd, anon)} (${est.geography}, ${est.period}; ${est.meta.provenance === 'estimated' ? `the Company's estimate: ${est.methodology}` : 'a published estimate, cited in the CIM'}).`);
+  else if (known(i, 'market.addressableMarketUsd')) parts.push(`The Company estimates its addressable market at ${money(c.market.addressableMarketUsd, anon)}${known(i, 'market.marketGrowthPct') ? `, growing ${pct(c.market.marketGrowthPct)} a year` : ''}${c.market.serviceableMarketUsd ? `, of which ${money(c.market.serviceableMarketUsd, anon)} is serviceable with its current product` : ''}.`);
+  const comps = i.story?.market?.competitors ?? [];
+  if (comps.length) parts.push(`Its main competitors are ${comps.slice(0, 4).map((x) => x.name).join(', ').replace(/, ([^,]*)$/, ' and $1')}.`);
   if (known(i, 'market.competitiveDensity') && known(i, 'market.regulatoryRisk')) parts.push(`Competition is ${level(c.market.competitiveDensity)} and regulatory exposure ${level(c.market.regulatoryRisk)}.`);
   if (known(i, 'product.differentiation')) parts.push(`${name} competes with ${positionPhrase(c)}${known(i, 'product.defensibility') ? `, and its defensibility is assessed as ${level(c.product.defensibility)}` : ''}.`);
   return parts.length ? parts.join(' ') : `${name} has not yet supplied its market size, growth or competitive position. Buyers will expect an estimate of the addressable market with its source, and a view of the main competitors and how ${name} wins against them.`;
@@ -193,72 +159,18 @@ function managementSentence(i: MemorandumInputs, name: string): string {
   return parts.length ? parts.join(' ') : `${name} has not yet supplied its headcount or management team; buyers will ask for an organisation chart and the leadership team's backgrounds.`;
 }
 
-function cim(i: MemorandumInputs): MemorandumDocument {
-  const name = anonName(i.company.name, !!i.anonymize, i.codeName);
-  const c = i.company, r = c.revenue, anon = !!i.anonymize;
-  const n = ((k = 0) => () => `${++k}.`)();
-  const sections: MemorandumSection[] = [
-    importantNotice(name),
-    {
-      heading: `${n()} Executive overview`,
-      body: `${name} is ${modelPhrase(c.businessModel)} in ${sectorPhrase(c.sector)}, founded in ${c.foundedYear}${anon ? '' : ` and headquartered in ${countryName(c.jurisdiction)}`}. It has ${money(r.annualRecurringRevenueUsd, anon)} of annual recurring revenue, growing ${pct(c.growth.arrGrowthYoyPct)} year over year, and ${money(r.trailingTwelveMonthsRevenueUsd, anon)} of revenue over the last twelve months. It is ${profitabilityPhrase(c)}. Its shareholders are inviting a small number of qualified acquirers to consider a purchase of the Company through a structured, confidential process.`,
-      bullets: [
-        `Revenue (TTM): ${money(r.trailingTwelveMonthsRevenueUsd, anon)}`,
-        `ARR: ${money(r.annualRecurringRevenueUsd, anon)} — ${pct(c.growth.arrGrowthYoyPct)} YoY growth`,
-        `Gross margin: ${pct(r.grossMarginPct)}`,
-        `EBITDA margin: ${pct(r.ebitdaMarginPct)}`,
-        r.netRetentionPct != null ? `Net retention: ${pct(r.netRetentionPct)}` : 'Net retention: not yet supplied',
-      ],
-    },
-    {
-      heading: `${n()} Investment highlights`,
-      body: c.narrative ?? `The case for ${name} rests on the quality of its recurring revenue and its economics. Each point below is drawn from the figures in this memorandum or attributed to the Company.`,
-      bullets: investmentHighlights(i),
-    },
-    {
-      heading: `${n()} Market`,
-      body: marketParagraph(i, name),
-    },
-    {
-      heading: `${n()} Product and technology`,
-      body: `${known(i, 'product.technicalArchitecture') ? `The platform is built as ${archPhrase(c.product.technicalArchitecture)}.` : `${name} has not yet described its technical architecture.`}${c.product.aiNative ? ' Machine learning is part of the core workflow rather than an add-on.' : ''}${c.product.hasNetworkEffects ? ' The Company reports network effects: each additional customer makes the product more useful to the others.' : ''}${c.product.hasDataMoat ? ' It also reports a proprietary data asset built up through use of the product.' : ''}${c.product.intellectualProperty?.patentsGranted ? ` It holds ${c.product.intellectualProperty.patentsGranted} granted patent${c.product.intellectualProperty.patentsGranted === 1 ? '' : 's'}${c.product.intellectualProperty.patentsPending ? ` and ${c.product.intellectualProperty.patentsPending} pending` : ''}.` : ''} Buyers will expect architecture, security and code-quality documentation in the data room for technical diligence.`,
-    },
-    customersSection(i, name, `${n()} Customers and revenue quality`),
-    {
-      heading: `${n()} Financial performance`,
-      body: `${name} reports ${money(r.trailingTwelveMonthsRevenueUsd, anon)} in trailing twelve-month revenue at ${pct(r.grossMarginPct)} gross margin and ${pct(r.ebitdaMarginPct)} EBITDA margin. ARR grew ${pct(c.growth.arrGrowthYoyPct)} over the year to ${money(r.annualRecurringRevenueUsd, anon)}. Its Rule of 40 score is ${rule40(c).text}. Buyers will expect monthly management accounts and statutory financial statements in the data room; the tables below summarise the figures supplied.`,
-      tables: [financialProfileTable(i), arrTrajectory(i)],
-    },
-    {
-      heading: `${n()} Management and organisation`,
-      body: `${managementSentence(i, name)} Management presentations to engaged buyers are part of the process; key-person and retention arrangements are a matter for the definitive agreement.`,
-    },
-    ownershipSection(i, `${n()} Ownership`),
-    risksSection(i, `${n()} Key considerations for diligence`),
-    {
-      heading: `${n()} Process and timing`,
-      body: `The Company is being offered through a targeted, confidential process: outreach to qualified candidates, then indications of interest, a letter of intent with exclusivity, confirmatory diligence and signing. All requests for information go through the process coordinator; recipients must not contact management, customers or employees directly. The dates below are ${timelineOf(i).basis.replace(/^ExitOS default process plan — /, '')}.`,
-      bullets: timelineLines(timelineOf(i), ['nda', 'management_presentations', 'ioi', 'loi', 'confirmatory_diligence', 'signing']),
-    },
-    basisOfPreparation(i, name),
-  ];
-
-  const wordCount = countWords(sections);
-  return { kind: 'cim', title: `Confidential Information Memorandum — ${name}`, sections, anonymized: !!i.anonymize, wordCount, producedBy: `${IMPL}@${VERSION}` };
-}
-
 function executiveSummary(i: MemorandumInputs): MemorandumDocument {
   const name = anonName(i.company.name, !!i.anonymize, i.codeName);
   const c = i.company, anon = !!i.anonymize;
   const sections: MemorandumSection[] = [
     {
       heading: 'The opportunity',
-      body: `${name} is ${modelPhrase(c.businessModel)} in ${sectorPhrase(c.sector)}${anon ? '' : `, headquartered in ${countryName(c.jurisdiction)}`} and founded in ${c.foundedYear}. ${c.narrative ?? (known(i, 'product.differentiation') ? `It competes with ${positionPhrase(c)}.` : `It has ${money(c.revenue.annualRecurringRevenueUsd, anon)} of recurring revenue growing ${pct(c.growth.arrGrowthYoyPct)} a year.`)} Its shareholders are inviting a small group of qualified strategic and financial acquirers to consider a purchase through a structured, confidential process.`,
+      body: `${name} is ${modelPhrase(c.businessModel, c.sector)} in ${sectorPhrase(c.sector)}${anon ? '' : `, headquartered in ${countryName(c.jurisdiction)}`} and founded in ${c.foundedYear}. ${c.narrative ?? (known(i, 'product.differentiation') ? `It competes with ${positionPhrase(c)}.` : `It has ${money(c.revenue.annualRecurringRevenueUsd, anon)} of recurring revenue growing ${pct(c.growth.arrGrowthYoyPct)} a year.`)} Its shareholders are inviting a small group of qualified strategic and financial acquirers to consider a purchase through a structured, confidential process.`,
     },
     {
       heading: 'Financial profile',
       body: `${name} reports ${money(c.revenue.trailingTwelveMonthsRevenueUsd, anon)} in trailing twelve-month revenue, with ${money(c.revenue.annualRecurringRevenueUsd, anon)} of annual recurring revenue growing ${pct(c.growth.arrGrowthYoyPct)} year over year. It is ${profitabilityPhrase(c)}, with a Rule of 40 score of ${rule40(c).score}.${concentrationSentence(c.revenue)}`,
-      tables: [financialProfileTable(i), arrTrajectory(i)],
+      tables: [financialProfileTable(i)],
     },
     {
       heading: 'Investment highlights',
@@ -295,8 +207,8 @@ function investorDeck(i: MemorandumInputs): MemorandumDocument {
 
   const sections: MemorandumSection[] = [
     slide('Slide 1 · Title', `${name} — Acquisition opportunity`, [categoryLine(c), `Founded ${c.foundedYear}`, 'Strictly confidential']),
-    slide('Slide 2 · The opportunity', `${modelPhrase(c.businessModel).replace(/^a/, 'A')} in ${sectorPhrase(c.sector)}${known(i, 'product.differentiation') ? `, competing with ${positionPhrase(c)}` : ''}.`, [
-      ...(known(i, 'market.addressableMarketUsd') ? [`Addressable market ${money(c.market.addressableMarketUsd, anon)}, growing ${pct(c.market.marketGrowthPct)} a year (company estimate)`] : ['Market size: to be supplied by the Company']),
+    slide('Slide 2 · The opportunity', `${modelPhrase(c.businessModel, c.sector).replace(/^a/, 'A')} in ${sectorPhrase(c.sector)}${known(i, 'product.differentiation') ? `, competing with ${positionPhrase(c)}` : ''}.`, [
+      ...(known(i, 'market.addressableMarketUsd') ? [`Addressable market ${money(c.market.addressableMarketUsd, anon)}${known(i, 'market.marketGrowthPct') ? `, growing ${pct(c.market.marketGrowthPct)} a year` : ''} (see the CIM for its source)`] : ['Market size: to be supplied by the Company']),
       ...(known(i, 'market.competitiveDensity') ? [`Competition ${level(c.market.competitiveDensity)}; regulatory exposure ${level(c.market.regulatoryRisk)}`] : []),
       `${money(c.revenue.annualRecurringRevenueUsd, anon)} ARR growing ${pct(c.growth.arrGrowthYoyPct)} a year`,
     ]),
@@ -332,7 +244,7 @@ function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
   const sections: MemorandumSection[] = [
     {
       heading: 'The opportunity',
-      body: `${projectName} is ${modelPhrase(c.businessModel)} in ${sectorPhrase(c.sector)}. It has built a recurring-revenue business growing ${pct(c.growth.arrGrowthYoyPct)} year over year, and its shareholders are inviting a small group of qualified acquirers to consider a purchase through a structured, confidential process. The Company's identity and detailed financials are disclosed once a mutual NDA is signed.`,
+      body: `${projectName} is ${modelPhrase(c.businessModel, c.sector)} in ${sectorPhrase(c.sector)}. It has built a recurring-revenue business growing ${pct(c.growth.arrGrowthYoyPct)} year over year, and its shareholders are inviting a small group of qualified acquirers to consider a purchase through a structured, confidential process. The Company's identity and detailed financials are disclosed once a mutual NDA is signed.`,
     },
     {
       heading: 'Selected metrics',
@@ -399,7 +311,7 @@ export class TemplateMemorandumGenerator implements MemorandumGenerator {
 
   async generate(kind: MemorandumKind, inputs: MemorandumInputs): Promise<MemorandumDocument> {
     switch (kind) {
-      case 'cim':                return cim(inputs);
+      case 'cim':                return buildCim(inputs);
       case 'executive_summary':  return executiveSummary(inputs);
       case 'investor_deck':      return investorDeck(inputs);
       case 'buyer_teaser':       return buyerTeaser(inputs);
@@ -407,3 +319,6 @@ export class TemplateMemorandumGenerator implements MemorandumGenerator {
     }
   }
 }
+
+/** Shared with cim.ts (internal). */
+export const cimHelpers = { money, anonName, investmentHighlights, concentrationSentence, risksSection, importantNotice, timelineOf, countWords, IMPL, VERSION };

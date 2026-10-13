@@ -1,4 +1,4 @@
-import { runInstitutionalValuation, runReadiness, runReadinessAnalysis, STANDARD_TEMPLATES, DEFAULT_PROCESS_TIMELINE, milestone, weeksLabel, timelineLines, type CompanyProfile, type NdaTemplate } from "@exit/engines";
+import { ASSUMED_LABEL, runInstitutionalValuation, runReadiness, runReadinessAnalysis, STANDARD_TEMPLATES, DEFAULT_PROCESS_TIMELINE, milestone, weeksLabel, timelineLines, type CompanyProfile, type NdaTemplate } from "@exit/engines";
 import {
   rankedBuyers, expectedOutcomeFor, sectorOverlap, buyerConfidence, fmtUsdShort,
   buyerById, acquisitionProbability, buyerRationale, acquisitionSignals,
@@ -280,7 +280,8 @@ export interface BoardMemo {
   resolutions: string[];
   basis: string;
 }
-export function buildBoardMemo(company: CompanyProfile): BoardMemo {
+/** `assumed`: profile fields the company has not supplied, which the valuation model filled with neutral values. */
+export function buildBoardMemo(company: CompanyProfile, assumed: readonly string[] = []): BoardMemo {
   const INST = runInstitutionalValuation(company);
   const ra = runReadinessAnalysis(company, runReadiness(company));
   const lead = INST.mostLikelyBuyers[0];
@@ -310,6 +311,6 @@ export function buildBoardMemo(company: CompanyProfile): BoardMemo {
       "Require that no letter of intent or exclusivity be signed, and no definitive agreement be entered into, without a further resolution of the Board.",
       "Authorise the engagement of legal counsel and, if the committee decides, a financial adviser, on terms the committee approves.",
     ],
-    basis: `Figures are as supplied by management, unaudited, in US dollars. The valuation is prepared under ExitOS Valuation Framework v${INST.frameworkVersion}; buyer probabilities and the strategic premium are model estimates from comparable transactions. The timeline is a planning assumption. The proposed resolutions are a starting point for the Company's counsel, not a form of minutes.`,
+    basis: `Figures are as supplied by management, unaudited, in US dollars. The valuation is prepared under ExitOS Valuation Framework v${INST.frameworkVersion}; buyer probabilities and the strategic premium are model estimates from comparable transactions.${assumed.length ? ` The Company has not yet supplied ${assumed.map((a) => ASSUMED_LABEL[a] ?? a).join(", ")}; the valuation model used neutral values for these, so the range will move when they are supplied.` : ""} The timeline is a planning assumption. The proposed resolutions are a starting point for the Company's counsel, not a form of minutes.`,
   };
 }

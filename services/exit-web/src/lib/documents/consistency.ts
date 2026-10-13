@@ -1,4 +1,4 @@
-import { DEFAULT_PROCESS_TIMELINE, milestone, weeksLabel, type CompanyProfile, type MilestoneId, type ProcessTimeline } from "@exit/engines";
+import { type CompanyStory, DEFAULT_PROCESS_TIMELINE, milestone, weeksLabel, type CompanyProfile, type MilestoneId, type ProcessTimeline } from "@exit/engines";
 import { SAMPLE_COMPANY } from "../profile";
 import { CLOSING_ITEMS } from "../closing-checklist";
 
@@ -37,6 +37,9 @@ export interface Truth {
   /** The canonical valuation (USD): headline low, mid, high. */
   readonly valuation?: { readonly low: number; readonly mid: number; readonly high: number };
   readonly timeline?: ProcessTimeline;
+  /** The company story the documents were made from, and the profile fields still assumed. */
+  readonly story?: CompanyStory;
+  readonly assumed?: readonly string[];
 }
 
 const pct = (x: number): number => Math.round(x * 100);
@@ -102,7 +105,7 @@ export function checkDocument(d: DocText, t: Truth): Finding[] {
   };
   figure("ARR growth", numbers(text, /(\d{1,3})%\s*(?:YoY|year[- ]over[- ]year)|compounding at (\d{1,3})%|Revenue growth:\s*(\d{1,3})%/gi), pct(C.growth.arrGrowthYoyPct), 1, "%");
   figure("Gross margin", numbers(text, /(\d{1,3})%\s*gross margin|gross margin:?\s*(\d{1,3})%/gi), pct(C.revenue.grossMarginPct), 1, "%");
-  figure("EBITDA margin", numbers(text, /(\d{1,3}(?:\.\d)?)%\s*EBITDA margin|EBITDA margin:?\s*(\d{1,3}(?:\.\d)?)%|EBITDA \((\d{1,3}(?:\.\d)?)% margin\)/gi), pct(C.revenue.ebitdaMarginPct), 1, "%");
+  figure("EBITDA margin", numbers(text, /(-?\d{1,3}(?:\.\d)?)%\s*EBITDA margin|EBITDA margin:?\s*(-?\d{1,3}(?:\.\d)?)%|EBITDA \((-?\d{1,3}(?:\.\d)?)% margin\)/gi), pct(C.revenue.ebitdaMarginPct), 1, "%");
   if (C.revenue.netRetentionPct != null) figure("Net retention", numbers(text, /(\d{2,3})%\s*net (?:revenue )?retention|net (?:revenue )?retention:?\s*(\d{2,3})%|(\d{2,3})%\s*NRR/gi), pct(C.revenue.netRetentionPct), 1, "%");
   figure("ARR", numbers(text, /\$(\d[\d,]*(?:\.\d+)?)M\s*(?:ARR|of annual recurring revenue)|ARR:?\s*\$(\d[\d,]*(?:\.\d+)?)M/gi), m1(C.revenue.annualRecurringRevenueUsd), 0.1, "M");
   figure("TTM revenue", numbers(text, /\$(\d[\d,]*(?:\.\d+)?)M\s*(?:TTM revenue|in trailing twelve-month revenue)|Revenue \(TTM\):?\s*\$(\d[\d,]*(?:\.\d+)?)M/gi), m1(C.revenue.trailingTwelveMonthsRevenueUsd), 0.1, "M");

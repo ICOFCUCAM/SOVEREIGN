@@ -51,8 +51,10 @@ function build({ company, valuationBand, readiness, analysis }: ContextInputs): 
   const readinessCategories = exitReadinessCategories(valueLeftUsd, company);
   // Exit Score = the weighted average of the ten categories, so the headline
   // score and the category breakdown always reconcile (no two-number drift).
-  const catWeight = readinessCategories.reduce((s, c) => s + c.weight, 0) || 1;
-  const exitScore = Math.round(readinessCategories.reduce((s, c) => s + c.score * c.weight, 0) / catWeight);
+  // the Exit Score averages only the categories the company's own information supports
+  const assessed = readinessCategories.filter((c) => !c.notAssessed);
+  const catWeight = assessed.reduce((s, c) => s + c.weight, 0) || 1;
+  const exitScore = Math.round(assessed.reduce((s, c) => s + c.score * c.weight, 0) / catWeight);
 
   // One buyer pool, anchored to the implied price and ranked by expected
   // outcome — used wherever per-buyer economics are shown.

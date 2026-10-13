@@ -53,8 +53,8 @@ export function inspectRendered(v: DocumentVersion, r: Rendered, opts: { buyerFa
         const cells = row.map((c) => c.text.trim()).filter((c) => c && c !== "—");
         if (!cells.length) return false;
         const first = norm(lead(cells[0])), last = norm(cells[cells.length - 1].split(/\s+/)[0]);
-        // a row whose long cells wrap spans up to three lines of extracted PDF text
-        return !lines.some((_, k) => { const w = lines.slice(Math.max(0, k - 1), k + 2).join(" "); return w.includes(first) && w.includes(last); });
+                // a row whose long cells wrap spans several lines of extracted PDF text (one table row block)
+        return !lines.some((_, k) => { const w = lines.slice(Math.max(0, k - 8), k + 8).join(" "); return first.split(" ").every((x) => w.includes(x)) && w.includes(last) && lines[k]!.includes(first.split(" ")[0]!); });
       });
       const caption = (b as { caption?: string }).caption;
       if (caption && !has(text, caption)) lostRows.push([]);

@@ -119,7 +119,13 @@ export interface CompanyProfile {
   readonly cap: CapTable;
   readonly drivers?: readonly DriverProfile[];
   readonly narrative?: string;                // free-text founder framing
+  /** Profile paths the company has not supplied (e.g. 'team.headcount', 'cap'): set to neutral values so the
+   *  engines can run, never to be stated or scored as the company's own. Absent = everything supplied. */
+  readonly assumed?: readonly string[];
 }
+
+/** Whether a profile field holds the company's own value (not a neutral stand-in). */
+export const isKnown = (c: Pick<CompanyProfile, 'assumed'>, path: string): boolean => !(c.assumed ?? []).includes(path);
 
 export interface Citation { readonly source: string; readonly fact: string }
 
