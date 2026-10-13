@@ -131,27 +131,28 @@ Applied to the live project on 13 October 2026 (owner approval of 14 October dec
 
 Minor: `anon` can execute the two pure helpers `exitos_story_claim` and `exitos_claim_competence` through the default `PUBLIC` grant. They read no data; tidy up in the next migration.
 
-### Behavioural test of access and isolation: **not yet run on the live project**
-- The full behavioural test of authorised access and cross-company isolation is a function: `exitos_selftest_company_stories()`, migration `20261014090100_exitos_company_stories_selftest.sql`. It covers 25 checks across owner, stranger, operator, engaged and unengaged reviewers, two companies, and anon.
-- It always ends by raising, so every test row is rolled back, and only the database owner can run it.
-- Locally it passes 25 of 25 (`supabase/tests/stories/selftest.sh`). A deliberately opened read policy makes six isolation checks fail, so the test does catch leaks.
-- The deployment tool would not run it on the live project: SQL containing write statements times out waiting for a confirmation that this session cannot give.
+### Live behavioural verification: **passed, 13 October 2026, 18:38 UTC**
+Both self-tests were applied verbatim from the repository (`03c2b563`) and run on the live project through the connected Supabase account.
 
-**Owner action O-12** (owner decision, 14 October). In the Supabase Dashboard:
-1. Open the SQL Editor for project `qvjdivcdefuprnenedje` (SOVEREIGN).
-2. Open `supabase/migrations/20261014090100_exitos_company_stories_selftest.sql` from the repository at `62a57204` or later, and review the complete script. Do not run it if it differs from the reviewed repository version.
-3. Run that script. It only creates the function, and revokes execution from everyone but the database owner.
-4. Run `select public.exitos_selftest_company_stories();` and confirm the result is an error beginning `SELFTEST PASS (0 failed of 25 …)`.
-5. Repeat steps 2 to 4 for `supabase/migrations/20261014100100_exitos_exchange_state_selftest.sql` and `select public.exitos_selftest_exchange_state();`, expecting `SELFTEST PASS (0 failed of 15 …)`.
-6. Record both full messages as evidence.
+| Self-test | Migration version | Result |
+|---|---|---|
+| `exitos_selftest_company_stories()` | `20261013183831` | `SELFTEST PASS (0 failed of 25; all test rows rolled back)` |
+| `exitos_selftest_exchange_state()` | `20261013183711` | `SELFTEST PASS (0 failed of 15; all test rows rolled back)` |
 
-How the test rolls back:
-- The whole test runs inside one function call that ends with `raise exception`.
-- Postgres undoes every write of a statement that fails, so the test operator grant, stories, engagements, authorisations and verifications are all removed. This holds whatever the SQL editor's transaction mode.
-- The checks it runs never commit.
-- Only the function definition from step 3 persists. Remove it afterwards, if wanted, with `drop function public.exitos_selftest_company_stories();`.
+The checks cover:
+- authorised access: owner; reviewer while engaged, for the engaged company only;
+- cross-company and cross-user isolation: stranger, operator, unengaged reviewer, ended engagement, anon;
+- refusal of self-verification and of operator verification;
+- the fields of a verification record, and staleness when the evidence changes;
+- refusal of buyer self-signing, self-acceptance and row moves, with owner-only resolution and a post-NDA document readable only after it.
 
-Checked live in advance (read-only): `exitos_role_grants` has no triggers, and live `auth.uid()` reads `request.jwt.claim.sub`, then `request.jwt.claims`; the test sets both.
+**Rollback confirmed afterwards:**
+- the company-story, verification, engagement and authorisation tables are all empty;
+- there are no `selftest` role grants and no `zz-selftest-*` rows.
+
+**Why the test was revised before applying:** the first version of the company-stories self-test had three `UPDATE` statements without a `WHERE` clause. The deployment tool held them for a confirmation it could not display, which caused the earlier timeouts. They are now scoped to the test's own companies. The checks and results are unchanged.
+
+Re-run both self-tests after any change to these tables (`select public.exitos_selftest_company_stories();` and `select public.exitos_selftest_exchange_state();`).
 
 **O-14, backup and recovery** (owner decision). WAL archiving alone does not establish which recovery options the project has. In the Dashboard (Database → Backups), record:
 - the backup schedule;
@@ -190,7 +191,7 @@ Found during the deliverable 5 code survey (14 October). Applied live as `exitos
 **Verification**
 - **Live structure (read-only):** both guard triggers are present; both update policies have `WITH CHECK`; `anon` has no privileges on the three tables; the guard functions cannot be executed by clients; existing data is unchanged.
 - **Local:** the isolation suite gains the forged-signature, forged-acceptance, row-move and owner paths. Without the migration, nine of them flip to ALLOWED.
-- **Live behaviour: not yet run.** `exitos_selftest_exchange_state()` (`20261014100100_exitos_exchange_state_selftest.sql`) runs 15 checks and passes locally, 15 of 15. Without the fix, 10 fail, including "buyer reads the post-NDA document before the owner signs". It is part of **O-12** below.
+- **Live behaviour: passed 13 October, 18:38 UTC.** `exitos_selftest_exchange_state()` returned `SELFTEST PASS (0 failed of 15)`. Locally, without the fix, 10 of its checks fail.
 
 **Still open:** "signed" still means the listing owner recorded it, not that signatures exist (C-2). The NDA lifecycle with signature evidence replaces it later in deliverable 5.
 
