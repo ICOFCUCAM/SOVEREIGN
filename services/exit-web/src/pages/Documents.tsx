@@ -5,9 +5,9 @@ import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { useMemorandum, VALUATION_CANONICAL } from "../lib/engines";
-import { runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, type CompanyProfile, type MemorandumInputs } from "@exit/engines";
-import { canonicalValuationFor } from "../lib/canonical-valuation";
+import type { CompanyProfile } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
+import { memorandumInputs } from "../lib/documents/memorandum-inputs";
 import { codeNameFor } from "../lib/listings";
 import { useDocumentGate, GateNotice } from "../components/DocumentGate";
 import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
@@ -76,21 +76,8 @@ const Documents: React.FC = () => {
   // The founder's saved intake when there is one; the demo company otherwise
   // (its engine runs are the hook's defaults, so no inputs are passed).
   const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
-  const inputs = useMemo<Partial<MemorandumInputs> | undefined>(() => {
-    // anonymised documents use the company's own listing code name
-    const codeName = codeNameFor(company, !fromIntake);
-    if (!fromIntake) return { codeName };
-    const institutional = runInstitutionalValuation(company);
-    return {
-      codeName,
-      company,
-      valuation: canonicalValuationFor(company, institutional),
-      constitution: institutional,
-      readiness: runReadiness(company),
-      buyers: runBuyerDiscovery(company, { limit: 12 }),
-      diligence: runDueDiligence(company),
-    };
-  }, [company, fromIntake]);
+  // the same engine inputs the CIM report page and the Banker use
+  const inputs = useMemo(() => memorandumInputs(company, fromIntake), [company, fromIntake]);
   const doc = useMemorandum(kind, inputs);
   const flags = useMemo(() => redTeam(doc, company), [doc, company]);
   const valueUsd = inputs?.valuation?.headline.mid ?? VALUATION_CANONICAL.headline.mid;

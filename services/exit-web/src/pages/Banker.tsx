@@ -13,6 +13,7 @@ import {
 import type { BuyerCandidate } from "@exit/engines";
 import { label } from "../lib/labels";
 import { codeNameFor } from "../lib/listings";
+import { memorandumInputs } from "../lib/documents/memorandum-inputs";
 import { outreachSequence, closingWindow, DEFAULT_PROCESS_TIMELINE } from "../lib/process-plan";
 import { milestone, weeksPhrase } from "@exit/engines";
 import { useDocumentGate, GateNotice } from "../components/DocumentGate";
@@ -60,7 +61,8 @@ const Banker: React.FC = () => {
   const BUYERS = own?.buyers ?? DEMO_BUYERS;
   const DILIGENCE = own?.diligence ?? DEMO_DILIGENCE;
   const VALUATION_CANONICAL = own?.canonical ?? DEMO_CANONICAL;
-  const memoInputs = useMemo<Partial<MemorandumInputs>>(() => ({ ...(own?.memo ?? {}), codeName: PROJECT }), [own, PROJECT]);
+  // the same engine inputs the Document Generator and the CIM report page use
+  const memoInputs = useMemo(() => memorandumInputs(company, fromIntake), [company, fromIntake]);
   const teaser  = useMemorandum("buyer_teaser", memoInputs);
   const summary = useMemorandum("executive_summary", memoInputs);
   const cim     = useMemorandum("cim", memoInputs);
