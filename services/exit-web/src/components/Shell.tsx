@@ -9,6 +9,7 @@ import LayerBar from "./LayerBar";
 import LayerSubNav from "./LayerSubNav";
 import TermsDialog from "./TermsDialog";
 import PageTip from "./PageTip";
+import CommandPalette from "./CommandPalette";
 import { guideState, markVisited, onGuideChange, setGuideHidden, setTipsHidden, ESSENTIALS, loadAllToolsOpen, saveAllToolsOpen } from "../lib/onboarding";
 
 // Role-aware console rail. The navigation is driven by the access policy:
@@ -36,6 +37,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const loc = useLocation();
   const [navOpen, setNavOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   const role: Role = session?.role ?? "founder";
   const plan: Plan = session?.plan ?? "free";
@@ -157,6 +159,15 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             {Brand}
             <button onClick={() => setNavOpen(false)} aria-label="Close navigation menu" className="rounded p-1 text-white/50 hover:text-white lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">✕</button>
           </div>
+          {/* go to any page by name: the command palette (⌘K / Ctrl+K) */}
+          <div className="px-3 pb-2">
+            <button type="button" onClick={() => setPaletteOpen(true)} aria-keyshortcuts="Meta+K Control+K"
+              className="flex w-full items-center gap-2.5 rounded-md bg-white/[0.04] px-3 py-2 text-left text-[12.5px] text-white/55 ring-1 ring-white/10 transition hover:bg-white/[0.07] hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
+              <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+              <span className="flex-1">Go to a page</span>
+              <kbd className="rounded border border-white/15 px-1.5 font-mono text-[10px] text-white/45">{typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd>
+            </button>
+          </div>
           <nav aria-label="Console" className="flex-1 overflow-y-auto px-3 py-2">
             {shortMenu && (
               <div className="mb-4">
@@ -246,6 +257,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </main>
       </div>
       <TermsDialog open={termsOpen} onClose={() => setTermsOpen(false)} />
+      <CommandPalette items={items} role={role} plan={plan} open={paletteOpen} onOpenChange={setPaletteOpen} />
       <Toast />
     </div>
   );
