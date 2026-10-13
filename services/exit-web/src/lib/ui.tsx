@@ -98,21 +98,27 @@ export function downloadJson(filename: string, data: unknown): void {
 
 export const Toast: React.FC = () => {
   const [msg, setMsg] = React.useState<string | null>(null);
+  const [n, setN] = React.useState(0);
   React.useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const handler = (e: Event): void => {
-      setMsg((e as CustomEvent<string>).detail);
+      setMsg((e as CustomEvent<string>).detail); setN((x) => x + 1);
       clearTimeout(timer);
       timer = setTimeout(() => setMsg(null), 2600);
     };
     window.addEventListener("exitos:toast", handler);
     return () => { window.removeEventListener("exitos:toast", handler); clearTimeout(timer); };
   }, []);
-  if (!msg) return null;
+  // the live region is always present (a region inserted with its message is often not announced); each
+  // message rises in, keyed so a repeat of the same text announces again
   return (
-    <div role="status" aria-live="polite"
-      className="pointer-events-none fixed bottom-6 right-6 z-[100] rounded-lg border border-deal-400/30 bg-ink-800/95 px-4 py-2.5 text-[13px] font-medium text-white shadow-xl shadow-black/40">
-      {msg}
+    <div role="status" aria-live="polite" className="pointer-events-none fixed bottom-6 right-6 z-[100]">
+      {msg && (
+        <div key={n} className="ex-toast flex items-center gap-2.5 rounded-lg border border-deal-400/30 bg-ink-800/95 px-4 py-2.5 text-[13px] font-medium text-white shadow-xl shadow-black/40 backdrop-blur">
+          <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-deal-300"><path d="M20 6 9 17l-5-5" /></svg>
+          {msg}
+        </div>
+      )}
     </div>
   );
 };
