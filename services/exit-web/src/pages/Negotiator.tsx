@@ -121,7 +121,9 @@ const Negotiator: React.FC = () => {
   const { fromIntake } = useMemo(() => loadActiveCompany(), []);
 
   const draftText = active && counter
-    ? `Re: Acquisition of ${SAMPLE_COMPANY.name} — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
+    ? `[SAMPLE — a reply to one of the demo company's sample offers (${SAMPLE_COMPANY.name}). Not for sending.]
+
+Re: Acquisition of ${SAMPLE_COMPANY.name} — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
 
 Dear ${active.offer.buyerName} team,
 

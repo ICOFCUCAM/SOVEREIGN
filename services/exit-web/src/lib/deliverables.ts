@@ -59,13 +59,16 @@ export function frameDoc(opts: {
   sections: readonly DocSection[];
   confidential?: boolean;
   disclaimerOverride?: string;
+  /** Set when the figures are not the company's own (demo fixtures, illustrative statuses): says so at the top. */
+  sample?: string;
 }): string {
-  const { title, subtitle, meta = [], sections, confidential = true, disclaimerOverride } = opts;
+  const { title, subtitle, meta = [], sections, confidential = true, disclaimerOverride, sample } = opts;
   const lines: string[] = [...MASTHEAD, `# ${title}`];
   if (subtitle) lines.push(`### ${subtitle}`);
   lines.push("");
+  if (sample) lines.push(`> **SAMPLE DATA — NOT YOUR COMPANY'S.** ${sample}`, "");
   lines.push(`${confidential ? "**STRICTLY CONFIDENTIAL** · " : ""}Prepared by **ExitOS Advisory** · ${today()}`);
-  const metaAll: Array<[string, string]> = [["Basis", "Company records and management information"], ...meta];
+  const metaAll: Array<[string, string]> = [["Basis", sample ? "Sample data, not company records" : "Company records and management information"], ...meta];
   lines.push("", ...metaAll.map(([k, v]) => `- **${k}:** ${v}`), "", "---", "");
   sections.forEach((s, i) => {
     lines.push(`## ${i + 1}. ${s.heading}`, "");
@@ -534,8 +537,8 @@ export function riskReportDoc(report: RiskReport): string {
 
 // ── Generic structured doc (for the remaining agent work products) ──
 
-export function structuredDoc(title: string, subtitle: string, sections: readonly DocSection[]): string {
-  return frameDoc({ title, subtitle, sections });
+export function structuredDoc(title: string, subtitle: string, sections: readonly DocSection[], sample?: string): string {
+  return frameDoc({ title, subtitle, sections, ...(sample ? { sample } : {}) });
 }
 
 // ── Agent work products (Autonomous Exit + The Banker) ─────────────
@@ -578,12 +581,13 @@ export function offerComparisonDoc(opts: {
   dynamics: ReadonlyArray<[string, string]>;
   posture: readonly string[];
 }): string {
+  // ExitOS stores no real offers yet, so the bids compared are always the demo company's.
   return structuredDoc("Offer Comparison", "Cross-bid analysis & negotiation posture", [
     { heading: "Summary", body: opts.summary },
     { heading: "Bids", table: { headers: ["Buyer", "Type", "Score", "Headline", "Net to founders"], rows: opts.offers.map((o) => [o.buyer, o.type, o.score, o.headline, o.net]) } },
     { heading: "Field dynamics", bullets: opts.dynamics.map(([term, notes]) => `**${term}:** ${notes}`) },
     { heading: "Posture", bullets: opts.posture },
-  ]);
+  ], "The bids are the demo company's sample offers; ExitOS does not yet record real offers.");
 }
 
 export function closingChecklistDoc(): string {
@@ -601,12 +605,12 @@ export function closingChecklistDoc(): string {
       "Reverse break-fee in force; no founder indemnity beyond escrow",
       "30–45 day sign-to-close target",
     ] },
-  ]);
+  ], "The statuses are illustrative, not your process's; track the live checklist on the Closing page.");
 }
 
 export function wealthPlanDoc(headline: string): string {
   return structuredDoc("Wealth Transition Plan", "From a concentrated position to durable wealth", [
-    { heading: "Proceeds", body: `Headline consideration of ${headline} modeled through federal and state tax, with QSBS treatment evaluated where the holding qualifies.` },
+    { heading: "Proceeds", body: `Headline consideration of ${headline}. ExitOS applies one flat illustrative rate (23.8%: US federal long-term capital gains plus NIIT); it does not model state tax or QSBS, which a tax adviser should evaluate for your holding.` },
     { heading: "Plan", bullets: [
       "Staged liquidity schedule across the months after close",
       "Diversification out of the single concentrated position into a durable portfolio",

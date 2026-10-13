@@ -107,8 +107,8 @@ const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onT
 };
 
 const Autopilot: React.FC = () => {
-  // Valuation and buyer discovery run on the founder's company (or the demo
-  // company); diligence findings and offers are still demo fixtures.
+  // Valuation, buyer discovery and diligence findings run on the founder's
+  // company (or the demo company); offers are still demo fixtures.
   const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
   const { VALUATION_INSTITUTIONAL, VALUATION_STRATEGIC, VALUATION_CANONICAL, BUYERS, DILIGENCE } = useMemo(() => {
     const inst = runInstitutionalValuation(company);
@@ -121,7 +121,7 @@ const Autopilot: React.FC = () => {
   }, [company]);
   const mid = VALUATION_CANONICAL.headline.mid;
   const allBuyers = BUYERS.candidates;
-  const findings = useMemo(() => discoverFindings(), []);
+  const findings = useMemo(() => discoverFindings(company, mid), [company, mid]);
   const high = findings.filter((f) => f.severity === "high").length;
   const sellerReport = useMemo(() => buildSellerReport(findings), [findings]);
   const leaderName = OFFER_COMPARISON.offers[0]?.offer.buyerName;
@@ -170,14 +170,14 @@ const Autopilot: React.FC = () => {
     },
     {
       id: "outreach", name: "Outreach Agent", role: "Drafts and runs the approach.",
-      work: <>Wrote the anonymized teaser and a six-step outreach sequence; intros personalized per buyer.</>,
+      work: <>Planned a six-step outreach sequence and per-buyer introductions; generate the anonymized teaser on the Documents page.</>,
       decision: `Send the anonymized teaser to the ${shortlist.length} shortlisted buyers?`, approveLabel: "Send outreach",
       deliverable: { filename: "outreach-plan.md", build: () => outreachPlanDoc({ projectName: "Project Cipher", shortlistCount: shortlist.length, anchor: fmtMoney(mid) }) },
     },
     {
       id: "dataroom", name: "Data Room Agent", role: "Provisions and gates diligence.",
-      work: <>Provisioned seven rooms and wired access behind signed NDAs + the Buyer Trust score.</>,
-      decision: "Auto-grant data-room access to verified, NDA-signed buyers?", approveLabel: "Approve gating",
+      work: <>Organised {DILIGENCE.documents.length} diligence packages and drafted an access policy: NDA first, then your own check of each buyer's identity and funds.</>,
+      decision: "Adopt the data-room access policy?", approveLabel: "Adopt the policy",
       deliverable: { filename: "data-room-gating.md", build: () => dataRoomGatingDoc(DILIGENCE.documents.length) },
     },
     {
@@ -193,14 +193,14 @@ const Autopilot: React.FC = () => {
           ))}
         </div>
       ),
-      ...(fromIntake ? { detailNote: "Diligence findings use the demo company's sample data." } : {}),
-      decision: "Approve the pre-market remediation plan and disclosure schedule?", approveLabel: "Approve the plan",
+      decision: "Approve the pre-market remediation plan?", approveLabel: "Approve the plan",
       deliverable: { filename: "seller-diligence-report.md", build: () => riskReportDoc(sellerReport) },
       reportPath: "/report/readiness",
     },
     {
       id: "negotiation", name: "Negotiation Agent", role: "Scores offers and counters.",
       work: <>Scoring <span className="font-mono text-xo-text">{NEGOTIATION_STATE.activeOffers}</span> sample offers (demo data); leverage <span className="text-xo-text">{NEGOTIATION_STATE.leverage}</span>{leaderName ? <> · <span className="text-xo-text">{leaderName}</span> leads</> : null}.</>,
+      ...(fromIntake ? { detailNote: "Offers are the demo company's sample offers; ExitOS does not yet record real offers." } : {}),
       decision: leaderName ? `Approve the counter and drive ${leaderName} to a signed LOI?` : "Approve the counter strategy and drive to LOI?", approveLabel: "Approve the counter",
       deliverable: { filename: "offer-comparison.md", build: () => offerComparisonDoc({
         summary: OFFER_COMPARISON.summary,

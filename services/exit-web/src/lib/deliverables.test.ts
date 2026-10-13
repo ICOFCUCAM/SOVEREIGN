@@ -225,3 +225,25 @@ describe("all generated documents have content", () => {
     expect(tmd).not.toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.midpoint_valuation);
   });
 });
+
+describe("sample data is labelled", () => {
+  it("offer comparison and closing checklist say their figures are not the company's", () => {
+    const oc = offerComparisonDoc({ summary: "s", offers: [], dynamics: [], posture: [] });
+    expect(oc).toContain("SAMPLE DATA — NOT YOUR COMPANY'S");
+    expect(oc).toContain("Sample data, not company records");
+    expect(closingChecklistDoc()).toContain("SAMPLE DATA");
+  });
+  it("company documents carry no sample banner", () => {
+    expect(structuredDoc("T", "S", [{ heading: "h", body: "b" }])).not.toContain("SAMPLE DATA");
+  });
+  it("the wealth plan does not claim a state-tax or QSBS model", () => {
+    const w = wealthPlanDoc("$10M");
+    expect(w).toContain("does not model state tax or QSBS");
+    expect(w).not.toMatch(/modeled through federal and state tax/);
+  });
+  it("the data-room policy claims no verification", () => {
+    const d = dataRoomGatingDoc(7);
+    expect(d).toContain("does not verify a buyer's identity, funds or acquisition history");
+    expect(d).not.toMatch(/Funds verified|Identity verified/);
+  });
+});
