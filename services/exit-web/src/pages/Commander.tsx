@@ -114,7 +114,7 @@ const Commander: React.FC = () => {
       <PageHeader eyebrow="◉ Chief Investment Banker · Transaction desk" title={company.name}
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">demand {m.demandLabel} · horizon {m.timeToExitMonths}mo · confidence index {m.confidencePct}%</span></>}
         actions={<>
-          <a href="/report/board" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board Memorandum (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
+          <a href="/report/board" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board Memorandum →<span className="sr-only"> (opens in a new tab)</span></a>
           <a href="/report" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
         </>} />
 

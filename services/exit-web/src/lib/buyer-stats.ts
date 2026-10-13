@@ -7,7 +7,7 @@
 import {
   computeExpectedOutcome, type BuyerCandidate, type BuyerDealOutcomeRollup,
 } from "@exit/engines";
-import { DEMO_TENANT_ID } from "./data-room";
+import { liveUserToken } from "./exit-api";
 
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)
   ?? "https://qvjdivcdefuprnenedje.supabase.co";
@@ -26,15 +26,18 @@ export interface BuyerLiveStat {
 
 interface Response { ok: boolean; stats?: BuyerLiveStat[]; error?: string }
 
-export async function fetchBuyerStats(tenantId: string = DEMO_TENANT_ID): Promise<readonly BuyerLiveStat[]> {
+/** The signed-in account's own figures (the tenant is taken from the user's token). */
+export async function fetchBuyerStats(): Promise<readonly BuyerLiveStat[]> {
+  const token = await liveUserToken();
+  if (!token) throw new Error("needs a live account session");
   const res = await fetch(`${SUPABASE_URL}/functions/v1/exit-buyer-stats`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "Authorization": `Bearer ${token}`,
       "apikey": SUPABASE_ANON_KEY,
       "content-type": "application/json",
     },
-    body: JSON.stringify({ tenantId }),
+    body: JSON.stringify({}),
   });
   const json = (await res.json()) as Response;
   if (!res.ok || !json.ok) throw new Error(json.error ?? `stats fetch failed: ${res.status}`);

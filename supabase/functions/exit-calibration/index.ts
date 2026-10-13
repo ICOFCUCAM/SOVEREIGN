@@ -5,7 +5,7 @@
 // bypasses RLS on exit_runs / exit_close_events / exit_calibration
 // and returns JSON aggregates (no row-level data).
 //
-// Body: { tenantId: uuid }
+// Auth: the signed-in user's access token; the tenant is that user.
 // Returns: {
 //   ok: true,
 //   summary: {
@@ -31,10 +31,6 @@ function err(status: number, message: string): Response {
   });
 }
 
-function isUuid(s: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
-}
-
 interface CalibrationRow {
   run_id: string;
   predicted_mid_usd: number | null;
@@ -58,19 +54,35 @@ function median(arr: number[]): number | null {
   return s[Math.floor(s.length / 2)];
 }
 
+// The tenant is the signed-in user, read from their own access token — never
+// from the request body or query, so one company cannot reach another's room.
+// The public anon key is not a user and is refused.
+async function tenantOf(req: Request, admin: ReturnType<typeof createClient>): Promise<string | null> {
+  const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
+  if (!token) return null;
+  const { data, error } = await admin.auth.getUser(token);
+  if (error || !data?.user?.id) return null;
+  const id = data.user.id;
+  // the data-room rows hang off exit_tenants; a new account gets its row here
+  await admin.from('exit_tenants').upsert(
+    { id, company_name: 'Unnamed company', company_sector: 'unspecified', jurisdiction: 'unspecified' },
+    { onConflict: 'id', ignoreDuplicates: true },
+  );
+  return id;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST')   return err(405, 'method not allowed');
 
-  let body: { tenantId?: string };
-  try { body = await req.json(); } catch { return err(400, 'invalid json'); }
-  const tenantId = String(body.tenantId ?? '');
-  if (!tenantId || !isUuid(tenantId)) return err(400, 'tenantId required (uuid)');
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const serviceKey  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   if (!supabaseUrl || !serviceKey) return err(500, 'server not configured');
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+  // the tenant is the signed-in user (a tenantId in the body is ignored)
+  const tenantId = await tenantOf(req, admin);
+  if (!tenantId) return err(401, 'sign in to read calibration');
 
   // Total runs (denominator for any "of X runs, Y closed" stats).
   const runsCount = await admin.from('exit_runs')

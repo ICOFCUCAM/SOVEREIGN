@@ -176,8 +176,8 @@ const FounderMarketplace: React.FC = () => {
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Become the banker · {view === "founder" ? "Founder view" : "Public view"}</span></>}
         description={fromIntake ? "Listing, sell-side pack and matched buyers built from your saved intake." : "Built from the demo company. Save an intake to build them for your company."}
         actions={<>
-          <a href="/report/cim" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Confidential Information Memorandum (PDF) →</a>
-          <a href="/report/management" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Management Presentation (PDF) →</a>
+          <a href="/report/cim" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Confidential Information Memorandum →</a>
+          <a href="/report/management" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Management Presentation →</a>
         </>} />
 
       <section aria-label="Listing summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">

@@ -53,7 +53,7 @@ const ReportHub: React.FC = () => {
           <h1 className="mt-2 font-serif text-[40px] font-bold leading-tight text-white">{company.name}</h1>
           <p className="mt-2 max-w-[640px] text-[14px] leading-relaxed text-white/55">
             Every document below is generated from the live valuation, buyer DNA and market registries, then set in the
-            institutional publishing layer and rendered to a board-ready PDF in your browser.
+            institutional publishing layer as a print-ready page.
           </p>
         </div>
 
@@ -75,7 +75,7 @@ const ReportHub: React.FC = () => {
               <>
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-deal-300">{d.kind}</span>
-                  {openable && <span className="text-[11px] font-semibold text-deal-400 group-hover:text-deal-300">Open PDF →</span>}
+                  {openable && <span className="text-[11px] font-semibold text-deal-400 group-hover:text-deal-300">Open →</span>}
                 </div>
                 <div className="mt-2 text-[16px] font-bold text-white">{d.title}</div>
                 <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/55">{d.blurb}</p>
@@ -96,8 +96,8 @@ const ReportHub: React.FC = () => {
         </div>
 
         <p className="mt-6 text-[11px] leading-relaxed text-white/35">
-          Documents open in a new tab. Use “Download PDF” in the document toolbar (or your browser's print dialog) to export a
-          print-safe PDF with running headers, page numbers and confidentiality markings.
+          Documents open in a new tab. “Print…” in the document toolbar opens your browser's print dialog, which can also save the
+          page as a PDF with its running headers, page numbers and confidentiality markings. ExitOS does not yet generate PDFs itself.
         </p>
       </div>
     </div>

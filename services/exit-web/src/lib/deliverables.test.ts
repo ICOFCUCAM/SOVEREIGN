@@ -140,7 +140,8 @@ describe("deliverables", () => {
     const doc = await new TemplateMemorandumGenerator().generate("buyer_teaser", { company: SAMPLE_COMPANY, valuation: VALUATION_STRATEGIC });
     const md = docToMarkdown(doc);
     expect(md).toContain(`# ${doc.title}`);
-    expect(docFilename(doc)).toMatch(/\.md$/);
+    expect(docFilename(doc, "Project Atlas")).toMatch(/^exitos-buyer-teaser-project-atlas-\d{4}-\d{2}-\d{2}\.md$/);
+    expect(docFilename(doc, "Project Atlas")).not.toContain(SAMPLE_COMPANY.name.toLowerCase().split(" ")[0]);
     noPlaceholders(md);
   });
 

@@ -317,7 +317,7 @@ const Autopilot: React.FC = () => {
       <Modal open={!!reviewAgent} onClose={() => setReviewIdx(null)} title={reviewAgent ? reviewAgent.name : ""} subtitle={reviewAgent?.role} size="lg"
         footer={reviewAgent ? <>
           {reviewAgent.reportPath
-            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-800">Open board-ready PDF →</a>
+            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-800">Open board-ready report →</a>
             : <Button variant="ghost" onClick={() => downloadDeliverable(reviewAgent.deliverable.filename, reviewAgent.deliverable.build())}>Download draft (.md)</Button>}
           <Button onClick={() => { send(reviewAgent); }}>{sent.has(reviewAgent.id) ? "✓ Marked ready" : "Mark ready"}</Button>
         </> : null}>
@@ -440,7 +440,7 @@ const Autopilot: React.FC = () => {
                       <span className="text-xo-faint">·</span>
                       <button className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" onClick={() => setReviewIdx(i)}>Review</button>
                       {a.reportPath
-                        ? <a className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" href={a.reportPath} target="_blank" rel="noopener noreferrer">PDF →</a>
+                        ? <a className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" href={a.reportPath} target="_blank" rel="noopener noreferrer">Report →</a>
                         : <button className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" onClick={() => downloadDeliverable(a.deliverable.filename, a.deliverable.build())}>Download .md</button>}
                       <button className="text-[11px] font-semibold uppercase tracking-wide text-deal-300 hover:text-deal-200" onClick={() => send(a)}>{sent.has(a.id) ? "✓ Ready" : "Mark ready"}</button>
                     </div>

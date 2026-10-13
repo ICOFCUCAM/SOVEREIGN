@@ -183,7 +183,7 @@ const FounderNdaVault: React.FC = () => {
           ? `The NDAs you have drafted for ${company.name}, kept in this browser. An NDA is active only once every party's signature is recorded.`
           : `A sample NDA portfolio for the demo company (${DEMO_PARTY_NAME}), plus any NDAs you draft in this browser.`}
         actions={<>
-          <a href="/report/nda" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">NDA Package (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
+          <a href="/report/nda" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">NDA Package →<span className="sr-only"> (opens in a new tab)</span></a>
           <Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button>
           <Button onClick={() => setIssueOpen(true)}>Issue NDA</Button>
         </>} />

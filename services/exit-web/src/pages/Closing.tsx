@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Button, Modal, downloadText, notify } from "../lib/ui";
-import { PageHeader, Section, Metric, ScrollRegion, Provenance, ActionLink } from "../components/xo";
+import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
@@ -175,7 +175,7 @@ const Closing: React.FC = () => {
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
             <TakeCell k="Today">No deal in closing — the checklist is a template. {done}/{CLOSING.length} items done, checklist readiness <span className={probTone}>{Math.round(prob * 100)}%</span> (a rule, not a probability).</TakeCell>
             <TakeCell k="If you wait">{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</TakeCell>
-            <TakeCell k="Next">Generate the closing documents, then work the gating items with counsel. <ActionLink to="/console/documents">Generate closing docs →</ActionLink></TakeCell>
+            <TakeCell k="Next">Work the gating items with counsel. ExitOS does not draft closing documents yet; counsel prepares the SPA, schedules, consents and certificates.</TakeCell>
             <TakeCell k="What ExitOS does">Keeps this checklist and builds the call agenda. It does not track signatures, escrow or filings, and sends no reminders.</TakeCell>
           </dl>
         </div>

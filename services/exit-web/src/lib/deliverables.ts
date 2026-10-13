@@ -110,7 +110,10 @@ export function docToMarkdown(doc: MemorandumDocument): string {
   return lines.join("\n");
 }
 
-export const docFilename = (doc: MemorandumDocument): string => `${slug(doc.title)}.md`;
+/** A memorandum's filename: its type, the company's code name and the date — never the
+ *  company's name, so a forwarded or listed file reveals nothing on its own. */
+export const docFilename = (doc: MemorandumDocument, codeName: string): string =>
+  `exitos-${doc.kind.replace(/_/g, "-")}-${slug(codeName)}-${new Date().toISOString().slice(0, 10)}.md`;
 
 // ── Valuation summary ───────────────────────────────────────────────
 

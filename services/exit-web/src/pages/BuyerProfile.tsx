@@ -71,7 +71,7 @@ const BuyerProfile: React.FC = () => {
             className={`rounded-sm px-3 py-1.5 text-[12px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${interested ? "border border-xo-verified/50 text-xo-verified" : "bg-deal-700 text-white hover:bg-deal-800"}`}>
             {interested ? "✓ Interest captured" : "Express interest"}
           </button>
-          <a href={`/report/buyer/${p.buyer_id}`} target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Briefing Book (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
+          <a href={`/report/buyer/${p.buyer_id}`} target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Briefing Book →<span className="sr-only"> (opens in a new tab)</span></a>
         </>}>
         <p className="mt-2 text-[12px] text-xo-faint">"Express interest" and your visits to this page are saved to your <Link to="/console/activity" className="text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">deal activity</Link> in this browser only. {p.name} is not notified.</p>
       </PageHeader>

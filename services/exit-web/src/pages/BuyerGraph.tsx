@@ -119,7 +119,7 @@ const BuyerGraph: React.FC = () => {
     <div data-page="buyer-graph" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Market Intelligence · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Buyer Graph"
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">The moat · as of {MARKET_INDEX_FMT.asOf} · Wikipedia · Wikidata · EDGAR</span></>}
-        actions={<a href="/report/buyers" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Buyer Intelligence Report (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>} />
+        actions={<a href="/report/buyers" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Buyer Intelligence Report →<span className="sr-only"> (opens in a new tab)</span></a>} />
 
       <section aria-label="Registry summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Buyers indexed" value={MARKET_INDEX_FMT.buyers} sub="corporates · PE · sovereign" /></div>

@@ -256,7 +256,7 @@ const AcquisitionRadar: React.FC = () => {
                 {pending[l.id] && (
                   <div id={`confirm-${l.id}`} role="group" aria-label="Confirm action" className="mt-3 border border-xo-caution/50 bg-xo-ink px-3 py-2 text-[12px]">
                     <p className="text-xo-text">{pending[l.id] === "nda"
-                      ? <>This sends an NDA request for <span className="font-mono">{l.code}</span> to its founder and opens a deal record they can see. The company's identity is revealed only if they sign.</>
+                      ? <>This sends an NDA request for <span className="font-mono">{l.code}</span> to its founder and opens a deal record they can see. ExitOS does not reveal the company's identity; the founder shares it once an NDA is in place.</>
                       : <>This records an indicative offer of <span className="font-mono">${offerInput[l.id]}M</span> on <span className="font-mono">{l.code}</span> and moves the deal to indication of interest. The founder sees it in their inbox; it is not a binding offer.</>}</p>
                     <div className="mt-2 flex gap-2">
                       <button type="button" className={`${SMALL_BTN} border-xo-verified bg-xo-verified/90 text-ink-950`}

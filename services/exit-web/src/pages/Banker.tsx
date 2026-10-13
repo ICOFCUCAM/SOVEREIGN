@@ -459,7 +459,7 @@ const Banker: React.FC = () => {
                       <div className="mt-1 text-[12px] text-xo-muted">{doc.sections.length} sections · {doc.wordCount} words{doc.anonymized ? " · anonymized" : ""}</div>
                     </div>
                     <div className="flex shrink-0 gap-2">
-                      <button type="button" disabled={!!docGate?.blocked} onClick={() => !docGate?.blocked && downloadDeliverable(docFilename(doc), docToMarkdown(doc))} className={`${BTN} disabled:opacity-50`}>Download</button>
+                      <button type="button" disabled={!!docGate?.blocked} onClick={() => !docGate?.blocked && downloadDeliverable(docFilename(doc, PROJECT), docToMarkdown(doc))} className={`${BTN} disabled:opacity-50`}>Download</button>
                     </div>
                   </div>
                   <GateNotice gate={docGate} className="mt-2" />

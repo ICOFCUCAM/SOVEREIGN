@@ -94,11 +94,27 @@ function triggerDownload(filename: string, blob: Blob): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   notify(`Downloaded ${filename}`);
 }
+// the media type for what is actually in the file, by its extension
+const MIME: Record<string, string> = {
+  md: "text/markdown;charset=utf-8", csv: "text/csv;charset=utf-8", ics: "text/calendar;charset=utf-8",
+  json: "application/json", txt: "text/plain;charset=utf-8",
+};
+export const mimeFor = (filename: string): string => MIME[filename.split(".").pop()?.toLowerCase() ?? ""] ?? "text/plain;charset=utf-8";
+
+/** A filename safe on every system: lower case, letters, digits, dots and hyphens. */
+export const safeFilename = (name: string): string => {
+  const dot = name.lastIndexOf(".");
+  const [base, ext] = dot > 0 ? [name.slice(0, dot), name.slice(dot + 1)] : [name, ""];
+  const clean = (x: string): string => x.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w.-]+/g, "-").replace(/_/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return ext ? `${clean(base).slice(0, 100) || "document"}.${clean(ext)}` : clean(base).slice(0, 100) || "document";
+};
+
 export function downloadText(filename: string, text: string): void {
-  triggerDownload(filename, new Blob([text], { type: "text/plain;charset=utf-8" }));
+  const name = safeFilename(filename);
+  triggerDownload(name, new Blob([text], { type: mimeFor(name) }));
 }
 export function downloadJson(filename: string, data: unknown): void {
-  triggerDownload(filename, new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+  triggerDownload(safeFilename(filename), new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
 }
 
 export const Toast: React.FC = () => {

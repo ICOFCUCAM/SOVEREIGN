@@ -13,9 +13,6 @@ const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)
 const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)
   ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2amRpdmNkZWZ1cHJuZW5lZGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NjMwMjYsImV4cCI6MjA5NTIzOTAyNn0.2cKjQRxnspeySCRwsOGz0ntKZ9LD3BVKR80H1mPOu_c";
 
-// The demo tenant, still used by telemetry and calibration (not by the data room).
-export const DEMO_TENANT_ID = "00000000-0000-0000-0000-000000000099";
-
 export type RoomKind =
   | "financial" | "market" | "user_growth" | "technical_architecture"
   | "security" | "legal" | "commercial";
