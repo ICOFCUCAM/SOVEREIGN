@@ -7,7 +7,7 @@
 -- an engaged reviewer, an authorised but unengaged reviewer and anon, against two
 -- companies, and ALWAYS ends by raising an exception, so every row it wrote is
 -- rolled back: the message begins SELFTEST PASS or SELFTEST FAIL and lists each check.
--- Nobody but the owner can execute it.
+-- Every write is scoped to the test's own rows. Nobody but the owner can execute it.
 --
 -- Rollback: drop function public.exitos_selftest_company_stories();
 
@@ -43,7 +43,7 @@ begin
 
   perform set_config('request.jwt.claims', json_build_object('sub', C, 'role', 'authenticated')::text, true); perform set_config('request.jwt.claim.sub', C, true);
   select count(*) into n from public.exitos_company_stories; ok := n = 0; out := out || format(E'\n%s 06 stranger reads no stories (%s)', ok, n); fails := fails + (not ok)::int;
-  update public.exitos_company_stories set data = '{"version":"1","sources":[]}'; get diagnostics n = row_count; ok := n = 0;
+  update public.exitos_company_stories set data = '{"version":"1","sources":[]}' where company_id in (CO1, CO2); get diagnostics n = row_count; ok := n = 0;
   out := out || format(E'\n%s 07 stranger updates no stories (%s)', ok, n); fails := fails + (not ok)::int;
   begin perform public.exitos_authorize_reviewer(C, 'financial', null, 'X|Y'); ok := false; exception when others then ok := true; end;
   out := out || format(E'\n%s 08 non-operator cannot authorise reviewers', ok); fails := fails + (not ok)::int;
@@ -96,9 +96,9 @@ begin
   update public.exitos_company_stories set data = jsonb_set(data, '{sources,0,date}', '"2026-06-30"') where company_id = CO1;
   select stale_at is not null into ok from public.exitos_verifications where id = vid; ok := coalesce(ok, false);
   out := out || format(E'\n%s 21 verification stale once its evidence document changed', ok); fails := fails + (not ok)::int;
-  begin update public.exitos_review_engagements set reviewer_account_id = Q; ok := false; exception when others then ok := true; end;
+  begin update public.exitos_review_engagements set reviewer_account_id = Q where company_id = CO1; ok := false; exception when others then ok := true; end;
   out := out || format(E'\n%s 22 owner cannot reassign an engagement', ok); fails := fails + (not ok)::int;
-  update public.exitos_review_engagements set revoked_at = now();
+  update public.exitos_review_engagements set revoked_at = now() where company_id = CO1;
 
   perform set_config('request.jwt.claims', json_build_object('sub', R, 'role', 'authenticated')::text, true); perform set_config('request.jwt.claim.sub', R, true);
   select count(*) into n from public.exitos_company_stories; ok := n = 0; out := out || format(E'\n%s 23 reviewer reads nothing once the engagement ends (%s)', ok, n); fails := fails + (not ok)::int;
