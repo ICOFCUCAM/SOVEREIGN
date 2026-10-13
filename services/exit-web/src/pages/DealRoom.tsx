@@ -4,6 +4,7 @@ import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../compon
 import { runBuyerDiscovery } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
 import { useAuth } from "../lib/auth";
+import { label } from "../lib/labels";
 import { dealRoomActivity, documentAttention, fmtDuration, type BuyerActivity } from "../lib/deal-room-activity";
 
 // Deal Room (founder) — a preview of what the room will report: who is in it,
@@ -157,7 +158,7 @@ const BuyerCard: React.FC<{ a: BuyerActivity; rank: number }> = ({ a, rank }) =>
           <span aria-hidden className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-xo-line font-mono text-[11px] font-semibold text-xo-muted">{rank}</span>
           <div className="min-w-0">
             <h3 className="text-[14px] font-semibold"><span className="sr-only">Rank {rank}: </span>{a.buyerName}</h3>
-            <div className="text-[12px] capitalize text-xo-faint">{a.buyerType.replace(/_/g, " ")}</div>
+            <div className="text-[12px] text-xo-faint">{label(a.buyerType)}</div>
           </div>
         </div>
         <div className="text-right">

@@ -8,6 +8,7 @@ import { runStrategySimulator, runInstitutionalValuation, type BuyerType, type C
 import { loadActiveCompany } from "../lib/active-company";
 import { parseNumber } from "../lib/intake-fields";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
+import { label } from "../lib/labels";
 import { emitTelemetry } from "../lib/telemetry";
 
 // ExitOS Scenario Engine — the founder simulates futures. The baseline
@@ -460,7 +461,7 @@ const Simulator: React.FC = () => {
                       <div className="font-medium">{c.buyer.name}</div>
                       <div className="mt-0.5 max-w-md text-[12px] leading-snug text-xo-muted">{c.buyer.thesis}</div>
                     </th>
-                    <td className="px-2 py-2.5 text-[12px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</td>
+                    <td className="px-2 py-2.5 text-[12px] text-xo-muted">{label(c.buyer.buyerType)}</td>
                     <td className="px-2 py-2.5 text-right font-mono tabular-nums">{fmtMoney(c.expectedOutcome.expectedHeadlineUsd)}</td>
                     <td className="px-2 py-2.5 text-right font-mono tabular-nums">{FMT_PCT(c.expectedOutcome.closeRatePct)}</td>
                     <td className="px-2 py-2.5 text-right font-mono tabular-nums">{c.expectedOutcome.expectedDaysToCash}d</td>

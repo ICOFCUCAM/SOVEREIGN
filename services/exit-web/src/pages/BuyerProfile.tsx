@@ -9,6 +9,7 @@ import {
 } from "../lib/buyer-dna";
 import { buyerContactRegistry, ENGAGEMENT_DISCLAIMER, ENRICHMENT_PROVIDERS } from "../lib/buyer-contact";
 import { runInstitutionalValuation } from "@exit/engines";
+import { label } from "../lib/labels";
 import { loadActiveCompany, activeTokens } from "../lib/active-company";
 
 // BUYER INTELLIGENCE PROFILE — every indexed buyer's own page. "Microsoft
@@ -62,7 +63,7 @@ const BuyerProfile: React.FC = () => {
       <Link to="/console/buyer-graph" className="inline-block py-1 text-[12px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">← Buyer Graph</Link>
       <PageHeader eyebrow={`Acquisition DNA · for ${fromIntake ? "your intake" : "the demo company"}: ${company.name}`} title={p.name}
         badge={<Provenance kind={fromIntake ? "company" : "demo"} />}
-        description={<span className="capitalize">{p.buyer_type.replace(/_/g, " ")}{p.country ? ` · ${p.country}` : ""}{p.industry_official ? ` · ${p.industry_official}` : ""}</span>}
+        description={<span>{label(p.buyer_type)}{p.country ? ` · ${p.country}` : ""}{p.industry_official ? ` · ${p.industry_official}` : ""}</span>}
         actions={<>
           <button type="button"
             onClick={() => { if (!interested) { captureDealEvent({ actorRole: "founder", kind: "expressed_interest", subjectType: "buyer", subjectId: p.buyer_id, subjectName: p.name }); setInterested(true); } }}

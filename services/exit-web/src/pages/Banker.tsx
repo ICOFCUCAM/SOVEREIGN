@@ -11,6 +11,7 @@ import {
   structuredDoc, downloadDeliverable,
 } from "../lib/deliverables";
 import type { BuyerCandidate } from "@exit/engines";
+import { label } from "../lib/labels";
 import {
   useDirectives, applyToBuyers, outreachPosture, valuationGuardrail, recommendedActions,
   type AdjustedBuyer,
@@ -418,7 +419,7 @@ const Banker: React.FC = () => {
                         {moved && <span className="ml-1 font-mono text-[11px] text-xo-muted line-through"><span className="sr-only">before directives </span>{Math.round(adj!.baseProbability * 100)}/100</span>}
                       </span>
                     </div>
-                    <div className="text-[12px] text-xo-muted">{b.buyer.buyerType.replace(/_/g, " ")}</div>
+                    <div className="text-[12px] text-xo-muted">{label(b.buyer.buyerType)}</div>
                     {adj && adj.reasons.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {adj.reasons.map((r, i) => <span key={i} className="rounded-sm border border-xo-verified/40 px-1.5 py-px text-[11px] text-xo-verified">{r}</span>)}

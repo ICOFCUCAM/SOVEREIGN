@@ -11,6 +11,7 @@ import {
 } from "../lib/buyer-dna";
 import { MARKET_INDEX_FMT } from "../lib/market-index";
 import { SAMPLE_COMPANY } from "../lib/profile";
+import { label } from "../lib/labels";
 import { loadActiveCompany } from "../lib/active-company";
 
 // BUYER GRAPH — the proprietary acquisition-intelligence layer. Founders
@@ -36,8 +37,8 @@ const DnaCard: React.FC<{ p: DnaProfile; tokens: readonly string[] }> = ({ p, to
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="text-[15px] font-semibold"><Link to={`/console/buyer/${p.buyer_id}`} className="hover:text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{p.name}</Link></h3>
-          <div className="mt-0.5 text-[11px] capitalize text-xo-faint">
-            {p.buyer_type.replace(/_/g, " ")}{p.country ? ` · ${p.country}` : ""}
+          <div className="mt-0.5 text-[11px] text-xo-faint">
+            {label(p.buyer_type)}{p.country ? ` · ${p.country}` : ""}
           </div>
           {p.sector_exitos && p.sector_exitos.length > 0 && (
             <ul aria-label="Sectors" className="mt-1.5 flex flex-wrap gap-1" title={p.industry_official ? `Official: ${p.industry_official}` : undefined}>

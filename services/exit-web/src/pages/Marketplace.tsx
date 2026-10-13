@@ -333,7 +333,7 @@ const FounderMarketplace: React.FC = () => {
                     <span className="font-medium">{m.buyerName}</span>
                     <span className="font-mono text-[12px] tabular-nums"><span className="sr-only">fit score </span>{fit(m.matchScore)}</span>
                   </div>
-                  <div className={`mt-0.5 text-[11px] font-semibold ${TYPE_STYLE[m.buyerType] ?? "text-xo-muted"}`}>{m.buyerType.replace(/_/g, " ")}</div>
+                  <div className={`mt-0.5 text-[11px] font-semibold ${TYPE_STYLE[m.buyerType] ?? "text-xo-muted"}`}>{label(m.buyerType)}</div>
                   <p className="mt-1.5 text-[12px] leading-snug text-xo-muted">{m.rationale}</p>
                   <span className={`mt-2 inline-block rounded-sm border px-1.5 py-px text-[11px] font-medium ${OUTREACH_STYLE[m.suggestedOutreach]}`}>{m.suggestedOutreach.replace(/_/g, " ")}</span>
                 </li>

@@ -16,5 +16,8 @@ export const label = (code: string): string => {
   return words.charAt(0).toUpperCase() + words.slice(1);
 };
 
+/** The same, set inside a sentence: lower case except acronyms ("a strategic", "a PE fund"). */
+export const inlineLabel = (code: string): string => { const l = label(code); return /^[A-Z]{2,}$/.test(l) ? l : l.charAt(0).toLowerCase() + l.slice(1); };
+
 /** A list of codes as one line: ["strategic", "pe", "vc"] → "Strategic · PE · VC". */
 export const labels = (codes: readonly string[], sep = " · "): string => codes.map(label).join(sep);

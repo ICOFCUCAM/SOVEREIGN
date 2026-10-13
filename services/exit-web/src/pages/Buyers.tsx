@@ -8,6 +8,7 @@ import { requiredEngagement } from "../lib/access";
 import { PageHeader, Section, Metric as XMetric, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
 import { runBuyerDiscovery, type BuyerCandidate, type CompanyProfile } from "@exit/engines";
+import { inlineLabel, label } from "../lib/labels";
 import { loadActiveCompany } from "../lib/active-company";
 
 // Buyer Marketplace — buyer profile cards (not a directory). Each card surfaces
@@ -124,7 +125,7 @@ const Buyers: React.FC = () => {
               <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
                 <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(topCheck)}</span> check-size midpoint for {top.buyer.name}; {activeBucket.length} active-appetite buyer{activeBucket.length === 1 ? "" : "s"} (registry).</TakeCell>
                 <TakeCell k="If you wait">The ranking reflects the registry snapshot; a buyer's appetite can change, and nothing here tracks it over time.</TakeCell>
-                <TakeCell k="Pursue">{top.buyer.name} — fit {it.label.toLowerCase()} at {it.pct}%, {top.buyer.buyerType.replace(/_/g, " ")}.</TakeCell>
+                <TakeCell k="Pursue">{top.buyer.name} — fit {it.label.toLowerCase()} at {it.pct}%, {inlineLabel(top.buyer.buyerType)}.</TakeCell>
                 <TakeCell k="What ExitOS does">Drafts a warm introduction for each buyer from its thesis and the company's figures. Nothing is sent from this page.</TakeCell>
               </dl>
               <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link>
@@ -150,7 +151,7 @@ const Buyers: React.FC = () => {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h3 className="text-[15px] font-semibold"><span className="sr-only">Rank {i + 1}: </span>{c.buyer.name}</h3>
-                      <span className="text-[11px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</span>
+                      <span className="text-[11px] text-xo-muted">{label(c.buyer.buyerType)}</span>
                     </div>
                     <span className={`shrink-0 text-[12px] font-semibold ${it.cls}`}>Fit: {it.label} · {it.pct}%</span>
                   </div>

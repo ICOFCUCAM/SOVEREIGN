@@ -18,6 +18,7 @@ import BuyerInterestGate from "../components/BuyerInterestGate";
 import { commanderMetrics } from "../lib/commander-metrics";
 import { loadRun, clearRun, type ExitRun } from "../lib/exit-process";
 import { sectorLabel } from "../lib/market-stats";
+import { label } from "../lib/labels";
 import { emitTelemetry } from "../lib/telemetry";
 
 // ── FOUNDER LIQUIDITY COMMAND ───────────────────────────────────────
@@ -279,7 +280,7 @@ const Dashboard: React.FC = () => {
                 {topBuyers.map((c) => (
                   <tr key={c.buyer.name} className="border-b border-xo-line/60 last:border-0 hover:bg-xo-raise/60">
                     <th scope="row" className="px-4 py-2 text-left font-medium text-xo-text">{c.buyer.name}</th>
-                    <td className="px-2 py-2 text-[12px] capitalize text-xo-muted">{c.buyer.buyerType.replace(/_/g, " ")}</td>
+                    <td className="px-2 py-2 text-[12px] text-xo-muted">{label(c.buyer.buyerType)}</td>
                     <td className="px-2 py-2 text-right font-mono tabular-nums text-xo-text">{fmtMoney(c.estimatedCheck.low)} – {fmtMoney(c.estimatedCheck.high)}</td>
                     <td className="px-4 py-2 text-right"><Bar value={Math.round(c.probability * 100)} label={`${(c.probability * 100).toFixed(0)}%`} width="w-12" /></td>
                   </tr>

@@ -19,6 +19,7 @@ import {
 import { emitTelemetry } from "../lib/telemetry";
 import { useAuth } from "../lib/auth";
 import { needsUpgrade, PLAN_LABEL } from "../lib/access";
+import { label } from "../lib/labels";
 import type { BuyerCandidate } from "@exit/engines";
 
 // Autonomous Exit Mode — "Sell my company," not "manage the sale." Seven
@@ -77,7 +78,7 @@ const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onT
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="truncate text-[13px] font-semibold text-xo-text">{b.buyer.name}</span>
-            <span className="shrink-0 rounded-full bg-xo-raise px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-xo-faint ring-1 ring-xo-line">{b.buyer.buyerType.replace(/_/g, " ")}</span>
+            <span className="shrink-0 rounded-full bg-xo-raise px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-xo-faint ring-1 ring-xo-line">{label(b.buyer.buyerType)}</span>
             <span className="shrink-0 text-[9px] uppercase tracking-wide text-xo-faint">{eo.overallConfidence.tier} conf.</span>
           </div>
           <div className="mt-0.5 text-[11px] leading-snug text-xo-faint">{b.rationale}</div>
