@@ -110,7 +110,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!session) return;
     const ms = session.expiresAt - Date.now() - 5000;
-    const t = setTimeout(() => setSession(null), Math.max(ms, 0));
+    // the session ends on time, and the sign-in screen says why rather than simply reappearing
+    const t = setTimeout(() => { setSession(null); setError("Your session ended after 8 hours, so you were signed out. Sign in again to continue."); }, Math.max(ms, 0));
     return () => clearTimeout(t);
   }, [session]);
 
