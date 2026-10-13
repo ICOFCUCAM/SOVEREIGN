@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { CloseIcon, LockIcon, Toast } from "../lib/ui";
-import { navForRole, needsUpgrade, GROUP_ORDER, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
+import { homeFor, navForRole, needsUpgrade, GROUP_ORDER, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
 import { ExchangeMark } from "./ExchangeMark";
 import InstitutionalRibbon from "./InstitutionalRibbon";
 import LayerBar from "./LayerBar";
@@ -151,14 +151,15 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const subtitle = role === "buyer" ? "Buyer Access" : role === "admin" || role === "superadmin" ? "Operator Console" : "Founder Acquisition Suite";
 
+  // the mark leads home, as a reader expects of a product's logo
   const Brand = (
-    <div className="flex items-center gap-2.5">
+    <Link to={homeFor(role)} aria-label={`ExitOS ${subtitle} — home`} className="flex items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
       <ExchangeMark size={32} />
       <div className="leading-tight">
         <div className="text-sm font-bold tracking-tight text-white">ExitOS</div>
-        <div className="text-[10px] uppercase tracking-[0.22em] text-white/45">{subtitle}</div>
+        <div className="text-[10px] uppercase tracking-[0.22em] text-white/55">{subtitle}</div>
       </div>
-    </div>
+    </Link>
   );
 
   return (
