@@ -158,8 +158,10 @@ export const Modal: React.FC<{
   if (!open) return null;
   const maxW = size === "xl" ? "max-w-4xl" : size === "md" ? "max-w-lg" : "max-w-2xl";
   return (
-    <div className="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-[6vh] backdrop-blur-sm" onClick={onClose}>
-      <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={`w-full ${maxW} rounded-xl border border-white/10 bg-ink-800 shadow-2xl shadow-black/60 focus:outline-none`} onClick={(e) => e.stopPropagation()}>
+    // the backdrop fades and the dialog settles into place (not under reduced motion); scrolling inside
+    // never carries on into the page behind (overscroll-contain)
+    <div className="ex-scrim fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto overscroll-contain bg-black/70 px-4 py-[6vh] backdrop-blur-sm" onClick={onClose}>
+      <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={`ex-dialog w-full ${maxW} rounded-xl border border-white/10 bg-ink-800 shadow-2xl shadow-black/60 focus:outline-none`} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-4">
           <div className="min-w-0">
             <h2 id={titleId} className="font-serif text-lg font-bold leading-tight text-white">{title}</h2>
@@ -167,7 +169,7 @@ export const Modal: React.FC<{
           </div>
           <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded-md p-1 text-white/50 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">✕</button>
         </div>
-        <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-h-[64vh] overflow-y-auto px-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action">{children}</div>
+        <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-h-[64vh] overflow-y-auto overscroll-contain px-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action">{children}</div>
         {footer && <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-white/10 px-6 py-4">{footer}</div>}
       </div>
     </div>

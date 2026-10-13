@@ -63,6 +63,13 @@ html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px s
 /* console toasts rise into place (not under reduced motion) */
 @keyframes exToastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) { .ex-toast { animation: exToastIn .28s cubic-bezier(.2,.7,.2,1); } }
+/* console dialogs: the scrim fades in, the dialog settles from slightly below */
+@keyframes exScrimIn { from { opacity: 0; } }
+@keyframes exDialogIn { from { opacity: 0; transform: translateY(10px) scale(.985); } }
+@media (prefers-reduced-motion: no-preference) {
+  .ex-scrim { animation: exScrimIn .2s ease-out; }
+  .ex-dialog { animation: exDialogIn .26s cubic-bezier(.2,.7,.2,1); }
+}
 
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
