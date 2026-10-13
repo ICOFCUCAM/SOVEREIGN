@@ -188,7 +188,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <nav aria-label="Console" className="ex-navscroll flex-1 overflow-y-auto px-3 py-2">
             {shortMenu && (
               <div className="mb-4">
-                <div className="px-3 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/40">Essentials</div>
+                <div className="px-3 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/55">Essentials</div>
                 <div className="space-y-1">{essentials.map(renderItem)}</div>
                 <button type="button" onClick={toggleTools} aria-expanded={toolsOpen} aria-controls={toolsId}
                   className="mt-3 flex w-full items-center justify-between rounded-md px-3 py-2 text-[12px] font-semibold text-white/70 ring-1 ring-white/10 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
@@ -200,7 +200,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div id={toolsId} hidden={shortMenu && !toolsOpen}>
             {GROUP_ORDER.filter((g) => groups[g]).map((group) => (
               <div key={group} className="mb-4">
-                <div className="px-3 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/40">{group}</div>
+                <div className="px-3 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/55">{group}</div>
                 <div className="space-y-1">
                   {groups[group]!.map(renderItem)}
                 </div>

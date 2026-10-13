@@ -44,9 +44,9 @@ export const Card: React.FC<{ children: React.ReactNode; className?: string; id?
 
 export const Kpi: React.FC<{ label: string; value: string; sub?: string; accent?: string }> = ({ label, value, sub, accent }) => (
   <Card className="p-5">
-    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{label}</div>
+    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">{label}</div>
     <div className="mt-2 text-3xl font-bold tabular-nums" style={accent ? { color: accent } : undefined}>{value}</div>
-    {sub && <div className="mt-1 text-[11px] text-white/45">{sub}</div>}
+    {sub && <div className="mt-1 text-[11px] text-white/55">{sub}</div>}
   </Card>
 );
 

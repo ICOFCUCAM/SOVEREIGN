@@ -68,7 +68,7 @@ const Admin        = lazy(() => import("./pages/Admin"));
 const RouteFallback: React.FC = () => (
   <div className="flex flex-col items-center justify-center gap-3 py-24">
     <ExchangeMark size={44} loading title="Loading ExitOS" />
-    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/35">Routing the exchange…</span>
+    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/55">Routing the exchange…</span>
   </div>
 );
 
