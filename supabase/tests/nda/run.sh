@@ -38,5 +38,9 @@ for fn in exitos_selftest_nda_lifecycle exitos_selftest_exchange_state exit_self
 done
 terms=$(psql -d $DB -tA -f offer_terms.sql 2>&1 | grep -o "owner rewrites.*" || true); echo "$terms"
 echo "$terms" | grep -q "owner rewrites terms refused=t; owner accepts=t; bidder revises after acceptance refused=t" || status=1
+# O-17: what a party may do is decided by identity, membership, NDA, disclosure and transaction stage only;
+# no ExitOS function or policy may consult a plan or subscription (a counterparty never pays to meet its obligations)
+plan=$(psql -d $DB -tA -c "select (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname ~ '^exit' and p.prosrc ~* 'subscription|\\mplan\\M') + (select count(*) from pg_policy where polrelid::regclass::text ~ 'exit' and (coalesce(pg_get_expr(polqual, polrelid), '') || coalesce(pg_get_expr(polwithcheck, polrelid), '')) ~* 'subscription|\\mplan\\M')")
+echo "plan-independent authorization: $plan functions or policies consult a plan"; [ "$plan" = "0" ] || status=1
 $Q -c "drop database $DB" >/dev/null
 [ $status -eq 0 ] && echo "nda: pass" || { echo "nda: FAIL"; exit 1; }

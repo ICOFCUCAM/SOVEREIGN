@@ -12,7 +12,6 @@ import { inlineLabel, label } from "../lib/labels";
 import { loadActiveCompany } from "../lib/active-company";
 import { useDocumentRemote } from "../lib/documents/remote";
 import { NdaLifecycle } from "../components/NdaLifecycle";
-import { TransactionRecordPanel } from "../components/TransactionRecord";
 import { loadIssuedNdas, saveIssuedNdas, founderParty, partiesToSign, signNda } from "../lib/nda-drafts";
 import {
   evaluateNdaStatus, generateBreachNotice, rosterFor,
@@ -71,8 +70,6 @@ const Nda: React.FC = () => {
   return (
     <>
       {remote && <div className="mb-3"><NdaLifecycle remote={remote} /></div>}
-      {/* a buyer works its side of the transaction here, beside the NDA it grew from (the Closing Center is the seller's) */}
-      {remote && session?.role === "buyer" && <div className="mb-3"><TransactionRecordPanel remote={remote} /></div>}
       {session?.role === "buyer" ? <BuyerAccessRequests /> : <FounderNdaVault />}
     </>
   );

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { needsUpgrade } from "./access.js";
+import { needsUpgrade, canAccess } from "./access.js";
 
 describe("plan gating", () => {
   it("free founders must upgrade for any pro surface", () => {
@@ -34,6 +34,25 @@ describe("plan gating", () => {
     expect(needsUpgrade("/console/banker", "founder", "pro")).toBe(false);
     expect(needsUpgrade("/console/closing", "founder", "pro")).toBe(false);
     expect(needsUpgrade("/console/banker", "admin", "free")).toBe(false);
+  });
+});
+
+describe("counterparty actions are free on every plan (O-17)", () => {
+  it("both parties reach their NDAs and transactions on the free plan", () => {
+    for (const role of ["founder", "buyer"] as const) {
+      expect(canAccess("/console/deals", role), role).toBe(true);
+      for (const plan of ["free", "starter", "prep", "pro"] as const) expect(needsUpgrade("/console/deals", role, plan), `${role}/${plan}`).toBe(false);
+    }
+  });
+  it("the premium tools keep their plans", () => {
+    expect(needsUpgrade("/console/closing", "founder", "free")).toBe(true);
+    expect(needsUpgrade("/console/nda", "founder", "free")).toBe(true);
+    expect(needsUpgrade("/console/negotiator", "founder", "free")).toBe(true);
+    expect(needsUpgrade("/console/deal-room", "buyer", "free")).toBe(true);
+    expect(needsUpgrade("/console/nda", "buyer", "free")).toBe(true);
+  });
+  it("an account with no role on the page is still refused (the free page grants nothing by itself)", () => {
+    expect(canAccess("/console/deals", "admin")).toBe(false);
   });
 });
 

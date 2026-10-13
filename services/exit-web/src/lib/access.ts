@@ -55,6 +55,8 @@ export const NAV: NavItem[] = [
   { to: "/console/buyer-copilot",      label: "Compare Top Buyers", name: "Buyer Intelligence",   group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/buyers",             label: "Find Buyers", name: "Buyer Profiles",       group: "Market Intelligence", roles: ["founder"] },
   { to: "/console/marketplace",        label: "List My Company", name: "Anonymous Listings",   group: "Exchange", roles: ["founder"] },
+  // a counterparty's own NDA and transaction actions are free on every plan (O-17); the server decides what each party may do
+  { to: "/console/deals",              label: "Your NDAs and Transactions", name: "Your Deals", group: "Exchange", roles: ["founder"] },
   { to: "/console/intelligence",       label: "Rank Buyers by Fit", name: "Acquisition Intelligence", group: "Market Intelligence", roles: ["founder"] },
 
   // ── Engage (founder) ───────────────────────────────────────────
@@ -85,6 +87,7 @@ export const NAV: NavItem[] = [
   { to: "/console/marketplace",        label: "Browse Opportunities", group: "Marketplace", roles: ["buyer"] },
   { to: "/console/intelligence",       label: "Research Acquirers", name: "Acquisition Intelligence", group: "Marketplace", roles: ["buyer"] },
   // ── Buyer · Deals ──────────────────────────────────────────────
+  { to: "/console/deals",              label: "Your NDAs and Transactions", name: "Your Deals", group: "Deals", roles: ["buyer"] },
   { to: "/console/deal-room",          label: "Open the Deal Room", name: "Deal Room",            group: "Deals", roles: ["buyer"], pro: true },
   { to: "/console/nda",                label: "Track Access Requests", name: "Access Requests",      group: "Deals", roles: ["buyer"], pro: true },
 

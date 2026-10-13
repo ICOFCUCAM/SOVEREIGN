@@ -174,9 +174,12 @@ These block a requirement from being complete in production. Nothing below is ma
 | O-9 | ~~Apply migration `20261014090000_exitos_company_stories.sql`~~ **Applied 13 Oct** (`20261013171613`) after preflight; structure verified live. See `SECURITY_DEPLOYMENT.md` | done |
 | O-12 | ~~Run the live self-tests~~ **Passed 13 Oct 18:38 UTC:** company stories 25/25, exchange state 15/15, rollback confirmed (`SECURITY_DEPLOYMENT.md`) | done |
 | O-14 | Confirm the configured backup schedule, retention, and PITR status and window in the Supabase Dashboard (WAL archiving alone does not establish them) | recovery procedure for the story tables |
-| O-15 | When network access permits: authenticated HTTP tests of `exit-doc-upload` (artifact check) and `exit-doc-buyer` (list, download, refusal, 60-second link) | HTTP-level verification of the edge functions |
+| O-15 | ~~HTTP tests of the edge functions~~ **`exit-doc-buyer` passed over HTTP, 13 Oct 22:47–22:51 UTC** (17 cases, signed link valid / tampered / expired, direct transaction RPCs; `HTTP_TEST_O15.md`). Remaining: a successful `exit-doc-upload` (only its refusal was exercised) and deleting the fixtures (`supabase/tests/http/cleanup_o15_fixtures.sql`, needs a person to run it; fixtures neutralised meanwhile) | HTTP-level verification of the edge functions |
 | O-16 | Decide whether to integrate an e-signature provider (DocuSign, Adobe Acrobat Sign, Dropbox Sign or another) and provide its account; until then the three signing methods record party-entered evidence, verified by the counterparty, and say so | professional-grade NDA signing |
-| O-17 | Decide plan gating for transaction parties. The NDA page and the Closing Center are Pro-only for founders **and buyers**, and every e-mail sign-in starts on the free plan, so a free buyer cannot reach its NDA signing or its side of the transaction in the UI (the server functions are unaffected). Proposed: never gate a counterparty's own NDA and transaction actions behind a plan | buyers can complete an NDA and a transaction |
+| O-17 | ~~Plan gating for transaction parties~~ **Implemented 14 Oct:** "Your NDAs and Transactions" (`/console/deals`) is free for founders and buyers on every plan; premium tools keep their plans. The server never consulted a plan (verified live: no ExitOS function or policy reads one; no subscriptions table), and a CI check now fails if one ever does. Remaining owner decision: whether a free *seller* may also open a transaction and issue NDAs (implemented as yes, consistent with "plans must not decide whether a party completes its obligations"; reverse by adding a seller-only check to `exitos_txn_create` / `exitos_nda_issue`) | buyers and sellers can complete NDAs and transactions on any plan |
+| O-18 | `anon` and `authenticated` hold SELECT on `net._http_response` (pg_net's response store, which can hold tokens returned to database-made requests). Not reachable through the API today: PostgREST exposes only `public` and `graphql_public` (checked: 406 for `net`). Harden: `revoke all on all tables in schema net from anon, authenticated` after checking no project job depends on it | defence in depth |
+| O-19 | `exit-doc-buyer` writes a denial into the target agreement's audit trail for any signed-in caller, so an unrelated account can add rows (attributed to itself) to another deal's trail; and it has no rate limit of its own. Decide: log denials by non-parties to a separate security log, and add per-account rate limiting | audit-trail integrity, abuse resistance |
+| O-20 | The plan shown in the app is not read from the server: an e-mail sign-in is always "free" unless it holds the operator grant, and the Upgrade page switches the plan in the browser only ("demo mode"). Premium tools are therefore gated in the browser alone, and a paying customer cannot be represented. Billing for ExitOS is not built on this project (the deployed `stripe-webhook` belongs to another product and its table does not exist here) | paid plans |
 | O-13 | Authorise reviewers deliberately (owner decision). Nobody is authorised by default. For each reviewer: identify them, verify their professional qualification and scope, then authorise for that competence only (`exitos_authorize_reviewer`, with name and professional role). The company then engages them. The administrator cannot verify claims or authorise themselves (enforced and tested). No reviewer is authorised today | any "independently verified" figure |
 | O-10 | ~~Decide who may verify~~ **Decided 14 Oct:** only an authorised professional reviewer, engaged by the company, within their competence, with recorded evidence. Founder, ExitOS checks, counsel outside scope and administrators cannot verify. Implemented `5ea9f90e`, `bc2cd4fe` | done |
 | O-11 | If price guidance is ever to be given: approve a separate, counsel-reviewed price-guidance document and who may send it | A.5 |
@@ -841,4 +844,71 @@ In order:
 2. `drop function public.exitos_selftest_transaction_lifecycle();`
 3. The ordered statements in the header of `20261014140000_exitos_transactions.sql`: restore the two buyer functions, then drop the transaction objects.
 4. Revert commits `17e5da51` and `ce6af8bf` for the web and docs.
+
+## 14. Post-implementation hardening — D6 (O-17, O-15) and the open-items register
+
+### Findings before changes
+1. **Plan gating is browser-only.** It is enforced in `App.tsx` (`needsUpgrade`) and `Shell.tsx` (lock badges). No ExitOS server function or policy reads a plan, which was checked live, and the project has no subscriptions table. A verified session is always "free" unless it holds the operator grant (O-20).
+2. **The effect on counterparties:** the NDA page and Closing Center are Pro-only for both roles, so free counterparties could not reach their own NDA and transaction actions in the UI. The server would have allowed them; only the browser blocked them.
+3. **The sandbox cannot reach `*.supabase.co`** (proxy 403). The live database's `pg_net` can, which gave a real HTTP path to the deployed functions.
+4. **`net._http_response` privileges:** readable at the privilege level by API roles, though not exposed (O-18).
+5. **`exit-doc-buyer` audit trail and rate limits:** it lets any signed-in account append denials to another agreement's audit trail, and it has no rate limit of its own (O-19).
+
+### O-17 decision implemented
+- **The rule:** a counterparty's own NDA and transaction actions are free on every plan, for founders and buyers. These are issuing, signing and verifying an NDA, opening the files it grants, and opening and working a transaction to completion and after. They live on one page, "Your NDAs and Transactions" (`/console/deals`).
+- **Still paid:** valuation, readiness, outreach, the NDA Vault register, the Bid Room, the Closing Center's checklist and diligence, and the buyer Deal Room.
+- **Authorisation is unchanged** and decided on the server on every call: identity, party membership, NDA state and scope, disclosure, transaction stage, termination, and the audit trail. Termination overrides an in-term NDA (c07, c08 and check 24).
+- **No server change was needed** because no plan was ever an input. A regression check in `supabase/tests/nda/run.sh` now fails if any ExitOS function or policy starts reading a plan or subscription. A probe confirmed that it detects one.
+- **Pricing copy** (buyer tiers, founder tiers, Upgrade page) now says which counterparty actions are free.
+
+### Files changed
+- **Web:**
+  - new: `src/pages/Deals.tsx`;
+  - changed: `src/App.tsx` (route), `src/lib/access.ts` (nav entries, no plan), `src/lib/page-guide.ts`, `src/pages/Nda.tsx` (transaction panel moved to Deals), `src/pages/Upgrade.tsx`, `src/pages/Pricing.tsx`, `src/lib/buyer-pricing.ts`;
+  - tests: `src/lib/access.test.ts`, `src/lib/page-guide.test.ts`, `scripts/transaction-record-ui.mjs`.
+- **Database tests:** `supabase/tests/nda/run.sh` (plan-independence check); new `supabase/tests/http/buyer_download_http.sh` and `cleanup_o15_fixtures.sql`.
+- **Docs:** `HTTP_TEST_O15.md`, this file, `SECURITY_DEPLOYMENT.md`.
+- **Unchanged:** no migration and no function.
+
+### Test results
+
+| Category | Result |
+|---|---|
+| **Local** | web 65 files, 393 tests; engines 201; lint, typecheck and build clean; database: NDA 32, exchange 16, data room 11, transaction 25, end-to-end 20, offer terms, plan independence 0 |
+| **Live database** (13 Oct) | end-to-end 20/20, transaction 25/25, NDA 32/32, exchange 16/16, data room 11/11, company stories 25/25 (§13); no self-test residue |
+| **Live HTTP** (13 Oct, `HTTP_TEST_O15.md`) | `exit-doc-buyer`: 17/17 as expected; signed link: valid 200, tampered path 400, tampered token 400, expired 400; direct transaction RPCs: 11/11 as expected, including a free buyer evidencing and the seller confirming; upload refusal 400 |
+| **Browser, stand-in API** | free seller + free buyer 18/18; Pro (operator) seller + free buyer 17/17; free accounts still get the upgrade page for the Closing Center and Deal Room |
+
+**Not possible:** "free seller + paid buyer" cannot be represented. The only route to Pro is the operator grant, which makes an account an operator, not a buyer (O-20).
+
+### Open-items register (from the current documents, code and live checks)
+
+| Item | Outstanding | Kind | Evidence needed to close | Evidence now | Next action · who |
+|---|---|---|---|---|---|
+| O-1 | Isolation fixtures still live: 1 `zz-isotest-` listing, the isotest storage object, plus the O-15 fixtures (neutralised); the listing read policy still excludes `zz-isotest-%` | engineering, needs approval to delete | the clean-up SQL run; counts 0; read policy restored | counts taken 13 Oct (1 + 5 hidden listings) | run `SECURITY_DEPLOYMENT.md` O-1 SQL and `cleanup_o15_fixtures.sql` · owner/operator |
+| O-6 | No counsel-reviewed clause library; the agreement, schedules, escrow and consents are unbuilt | legal review | counsel sign-off per template, recorded with version | none | engage counsel · owner |
+| O-11 | Price guidance not built | owner decision + legal review | approved, counsel-reviewed price-guidance document and sender policy | none (deliberately unbuilt) | none until approved · owner |
+| O-13 | No reviewer authorised (`exitos_reviewer_authorizations` = 0, checked live) | owner decision | named, qualified reviewers authorised for their competence | the mechanism is enforced and tested (company stories 25/25) | identify and authorise reviewers · owner |
+| O-14 | Backup schedule, retention and PITR window unknown; only `archive_mode = on` visible | external (dashboard) | a screenshot or export of Database → Backups and the PITR setting | `archive_mode = on` (live) | record from the dashboard · owner |
+| O-15 | Successful upload not exercised; fixtures not yet deleted | engineering + approval | one successful upload plus Storage-API deletion; cleanup counts 0 | buyer download fully tested over HTTP (`HTTP_TEST_O15.md`) | run the cleanup SQL; run an upload test from a networked machine · operator |
+| O-16 | No e-signature provider integrated | owner decision + external | a provider account and an integration with certificate retrieval | labels state the limits | choose a provider · owner |
+| O-17 | Done; one confirmation remains (free *seller* may open transactions) | owner decision | owner confirms or asks for the seller check | implementation, CI check, HTTP r03/r12, browser 18/18 | confirm · owner |
+| O-18 | API roles can read pg_net responses at the privilege level | engineering | revoke applied; a REST request for the `net` schema still refused | `net` not exposed (406) | revoke after checking other jobs · engineer with owner approval |
+| O-19 | Audit-trail pollution by non-parties; no rate limit | engineering + owner decision | separate security log for non-party denials; rate-limit test | behaviour observed (c05, c06, c15) | design and deploy · engineer |
+| O-20 | Plans not read from the server; no billing on this project | engineering + owner decision | server-sourced plan (or entitlement) table; premium tools checked server-side where they touch data | none | decide billing · owner |
+| O-5 (related) | Production PDFs: Dispatch API and worker not deployed (`exit-dispatch-submit` v8 deployed, backend absent) | external dependency | one real document rendered through deployed Dispatch end to end | local renderer verified only | deploy Dispatch · owner/operator. **Production PDFs stay blocked** |
+
+### Verdict
+**Not production-ready.** The transaction lifecycle is production-ready as a server-enforced record, with these limitations:
+- verified live through the database and over HTTP;
+- counterparties are no longer blocked by a plan;
+- ExitOS proves no signature, settlement or legal validity, and says so.
+
+The product as a whole is not production-ready until:
+- the test fixtures are deleted (O-1, O-15);
+- backups and PITR are confirmed (O-14);
+- plans and billing are real and server-side (O-20);
+- the non-party audit and rate-limit gap is closed (O-19);
+- Dispatch is deployed for production PDFs (O-5);
+- counsel review exists for any legal instrument offered beyond a brief or draft (O-6).
 

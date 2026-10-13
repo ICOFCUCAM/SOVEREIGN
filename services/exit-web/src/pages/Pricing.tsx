@@ -42,8 +42,8 @@ const FOUNDER_TIERS: readonly Tier[] = [
     ],
     restrictions: [
       "Cannot initiate outreach or contact buyers",
-      "Cannot open an NDA process or see buyer identities",
-      "Cannot launch a transaction — upgrade to engage",
+      "Cannot start an NDA process with buyers or see buyer identities",
+      "Premium process tools need an engagement; responding to an NDA request and completing a transaction you are party to are free",
     ],
     lockedTeaser: "Buyers that match your company are shown once you list.",
     cta: "List my company free",

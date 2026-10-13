@@ -11,7 +11,10 @@ const S = "11111111-1111-4111-8111-111111111111", B = "22222222-2222-4222-8222-2
 const users = { seller: { id: S, email: "seller@test.dev", role: "founder" }, buyer: { id: B, email: "buyer@test.dev", role: "buyer" } };
 const terms = { cashPct: 0.85, escrowPct: 0.08, escrowMonths: 18, earnoutPct: 0.1, earnoutMonths: 24, rolloverPct: 0.05, indemnityCapPct: 0.15 };
 const db = { txns: [], items: [], confs: [], events: [], nda: { id: "aaaaaaaa-0000-4000-8000-000000000001", listing_id: "L1", company_id: CO, transaction_id: null, owner_account_id: S, buyer_account_id: B,
-  state: "executed", executed_at: "2026-10-10T00:00:00Z", access_until: "2027-10-10T00:00:00Z", required_signers: ["seller", "buyer"], issued_at: "2026-10-09T00:00:00Z", title: "NDA" } };
+  state: "executed", executed_at: "2026-10-10T00:00:00Z", access_until: "2027-10-10T00:00:00Z", required_signers: ["seller", "buyer"], issued_at: "2026-10-09T00:00:00Z", title: "NDA",
+  // the rest of a real exitos_nda_agreements row
+  nda_request_id: "R1", document_version: "v1", document_origin: "seller_supplied", document_text: "Mutual NDA (UI test).", document_sha256: "1".repeat(64), shape: "mutual",
+  access_term_months: 12, survival_months: 24, scope_room_kinds: null, ended_at: null, ended_by: null, end_reason: null } };
 const now = () => new Date().toISOString();
 let n = 0; const id = () => `bbbbbbbb-0000-4000-8000-${String(++n).padStart(12, "0")}`;
 const party = (t, uid) => t.seller_account_id === uid ? "seller" : t.buyer_account_id === uid ? "buyer" : null;
@@ -77,8 +80,8 @@ async function serve(route) {
     const ids = (url.searchParams.get("transaction_id") ?? "").replace(/^in\.\(|\)$/g, "").split(",");
     switch (p) {
       case "/rest/v1/exitos_accounts": return json([{ role: u.role }]);
-      // the Closing and NDA pages are plan-gated (O-17); the operator grant lifts the gate in this UI test only
-      case "/rest/v1/exitos_role_grants": return json([{ role: "operator" }]);
+      // SELLER_PLAN=pro gives the seller the operator grant (the only way the app reaches the Pro plan today); otherwise both parties are on the free plan
+      case "/rest/v1/exitos_role_grants": return json(u.id === S && process.env.SELLER_PLAN === "pro" ? [{ role: "operator" }] : []);
       case "/rest/v1/exitos_listings": return json(u.id === S ? [{ id: "L1" }] : []);
       case "/rest/v1/exitos_offers": return json(u.id === S ? [{ id: "O1", listing_id: "L1", buyer_account_id: B, data: { amountUsd: 112000000, status: "accepted", terms } }] : []);
       case "/rest/v1/exitos_nda_agreements": return json([db.nda]);
@@ -97,7 +100,7 @@ async function as(who) {
   await ctx.addInitScript(([tok, co]) => { localStorage.setItem("exitos.auth.v1", tok); localStorage.setItem("exitos.intake.v2", JSON.stringify({ id: co, inputs: { name: "Northwind Analytics" }, provided: ["name"] })); }, [who, CO]);
   const page = await ctx.newPage(); page.on("pageerror", (e) => console.log("PAGEERROR", e.message));
   page.on("requestfailed", (r) => console.log("FAILED", r.url(), r.failure()?.errorText));
-  await page.goto(`${BASE}/console/closing`); await page.getByText("Transaction record").first().waitFor({ timeout: 15000 });
+  await page.goto(`${BASE}/console/deals`); await page.getByText("Transaction record").first().waitFor({ timeout: 15000 });
   return page;
 }
 const status = async (pg) => (await pg.locator('[role=status]').first().textContent().catch(() => "")) ?? "";
@@ -105,6 +108,16 @@ const reload = async (pg) => { await pg.reload(); await pg.getByText("Transactio
 let failed = 0;
 const check = (label, ok) => { if (!ok) failed++; console.log(`${ok ? "PASS" : "FAIL"} ${label}`); };
 
+// O-17: a free account is still sent to the upgrade page for the premium tools, but not for its own deals
+async function gated(who, path) {
+  const ctx = await browser.newContext(); await ctx.route(`${API}/**`, serve);
+  await ctx.addInitScript((tok) => localStorage.setItem("exitos.auth.v1", tok), who);
+  const pg = await ctx.newPage(); await pg.goto(`${BASE}${path}`); await pg.waitForTimeout(2500);
+  const up = await pg.locator('[data-page="upgrade"]').count(); await ctx.close(); return up > 0;
+}
+check("free buyer: the Deal Room (premium) still asks for an upgrade", await gated("buyer", "/console/deal-room"));
+if (process.env.SELLER_PLAN !== "pro") check("free seller: the Closing Center (premium) still asks for an upgrade", await gated("seller", "/console/closing"));
+check("free buyer: Your NDAs and Transactions opens without an upgrade", !(await gated("buyer", "/console/deals")));
 const seller = await as("seller");
 await seller.waitForTimeout(800);
 check("seller is offered to open the transaction from the accepted offer and executed NDA", await seller.getByRole("button", { name: "Open the transaction" }).isVisible());

@@ -52,6 +52,9 @@ const G: Record<string, Guide> = {
   "/console/inbox": { purpose: "Buyer interest in your listing: NDA requests to sign and offers to accept or decline.", next: "/console/nda" },
   "/console/outreach-plan": { purpose: "Who to approach first, in three waves. A suggested plan: nothing is sent.", next: "/console/banker" },
   "/console/engagement-registry": { purpose: "How likely each indexed buyer is to engage, based on its past behaviour.", next: "/console/outreach-plan" },
+  "/console/deals": {
+    purpose: "Your NDAs and transactions, free on every plan: sign or verify an NDA, open the files it grants, and work the transaction to completion.",
+    next: { founder: "/console/closing", buyer: "/console/marketplace" } },
   "/console/closing": { purpose: "The closing checklist: track each item through to signing.", next: "/console/wealth" },
   "/console/marketplace": {
     purpose: { founder: "List your company anonymously and prepare the pack buyers see.", buyer: "Companies listed for sale, shown anonymously." },

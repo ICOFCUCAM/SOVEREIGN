@@ -385,6 +385,40 @@ It also checks that both audit trails are complete, and that an unrelated accoun
 
 **Rollback:** `drop function public.exitos_selftest_deal_end_to_end();`
 
+## O-15: HTTP test of the deployed functions, and its fixtures
+
+Run 13 October 2026, 22:47–22:51 UTC. The full evidence is in `HTTP_TEST_O15.md`.
+
+**How it was run:**
+- the requests were made from the project database with `pg_net`, to the public HTTPS endpoints, because this sandbox's egress is blocked;
+- three controlled test accounts got real sessions from the Auth API;
+- tokens were never displayed.
+
+**Results:**
+- `exit-doc-buyer`: all 17 cases as expected;
+- signed link: valid, tampered and expired cases as expected;
+- direct transaction RPCs: as expected;
+- `exit-doc-upload`: refusal as expected.
+
+**No schema or function was changed.** The changes were test rows and accounts only:
+- `auth.users` and `auth.identities`: 3 rows, `zz-httptest-*@exitos.invalid`;
+- listings, requests, offers, NDAs, transactions and data-room rows with ids `feed0000-…` and `zz-httptest-…`.
+
+**Current state (deletion pending):** the deployment tools could not run DELETE, which waits on a confirmation they cannot display. Everything was neutralised instead:
+- the accounts are banned, with unknown passwords and revoked refresh tokens;
+- token-bearing `pg_net` responses are overwritten;
+- the listings are hidden by the read policy;
+- the NDAs and transactions are terminated;
+- the files are seller-only and rejected.
+
+No storage object was created.
+
+**To finish:** run `supabase/tests/http/cleanup_o15_fixtures.sql` in the SQL editor. It ends with counts that must read 0.
+
+**Findings:**
+- O-18: `net._http_response` is readable by API roles at the privilege level, but not exposed through the API.
+- O-19: non-party denials are written into another deal's audit trail, and there is no rate limit.
+
 ## Rollback
 - **End-to-end self-test (deliverable 6):** `drop function public.exitos_selftest_deal_end_to_end();`
 - **Transactions (deliverable 6):** the ordered statements in the header of `20261014140000_exitos_transactions.sql`. Restore the two buyer functions first, then drop the transaction objects. Any transaction data is lost; export it first if any exists.

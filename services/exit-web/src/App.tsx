@@ -34,6 +34,7 @@ const Documents    = lazy(() => import("./pages/Documents"));
 const Nda          = lazy(() => import("./pages/Nda"));
 const Pipeline     = lazy(() => import("./pages/Pipeline"));
 const Closing      = lazy(() => import("./pages/Closing"));
+const Deals        = lazy(() => import("./pages/Deals"));
 const Marketplace  = lazy(() => import("./pages/Marketplace"));
 const Calibration  = lazy(() => import("./pages/Calibration"));
 const Simulator    = lazy(() => import("./pages/Simulator"));
@@ -121,6 +122,7 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
   { path: "outreach-plan", policy: "/console/outreach-plan",  el: <OutreachPlan /> },
   { path: "engagement-registry", policy: "/console/engagement-registry", el: <EngagementRegistry /> },
   { path: "closing",       policy: "/console/closing",        el: <Closing /> },
+  { path: "deals",         policy: "/console/deals",          el: <Deals /> },
   { path: "marketplace",   policy: "/console/marketplace",    el: <Marketplace /> },
   { path: "valuation",     policy: "/console/valuation",      el: <Valuation /> },
   { path: "diligence-ai",  policy: "/console/diligence-ai",   el: <DiligenceAI /> },
