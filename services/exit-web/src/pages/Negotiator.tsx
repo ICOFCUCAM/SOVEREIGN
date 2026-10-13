@@ -9,6 +9,9 @@ import { loadActiveCompany } from "../lib/active-company";
 import { buildMarketTape } from "../lib/market-tape";
 import { OFFER_EVALUATIONS, OFFER_COMPARISON, NEGOTIATION_STATE, RESERVATION_LINES, VALUATION_CANONICAL } from "../lib/engines";
 
+/** The engine's stage code as a reader's word ("loi" → "LOI", "diligence" → "Diligence"). */
+const stageName = (stage: string): string => (stage === "loi" ? "LOI" : stage.charAt(0).toUpperCase() + stage.slice(1).replace(/_/g, " "));
+
 interface Reserve { minHeadlinePriceUsd: number; minCashPct: number; maxEarnoutPct: number; premiumOverride: number | null }
 
 const REC_CLS: Record<string, string> = {
@@ -139,14 +142,14 @@ Best regards,
     <div data-page="bid-room" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Operator · Negotiation desk · Demo company: ${SAMPLE_COMPANY.name}`} title="Bid Room"
         description={<>Sample offers of the demo company ({SAMPLE_COMPANY.name}).{fromIntake ? " Your intake has no offers, so these are not yours." : ""}</>}
-        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Stage: {NEGOTIATION_STATE.stage} · Leverage {NEGOTIATION_STATE.leverage}</span></>}
+        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Stage: {stageName(NEGOTIATION_STATE.stage)} · Leverage {NEGOTIATION_STATE.leverage}</span></>}
         actions={<>
           <Button variant="ghost" onClick={() => setReserveOpen(true)}>Edit reservation lines</Button>
           <Button onClick={() => setDraftOpen(true)}>Generate counter</Button>
         </>} />
 
       <section aria-label="Negotiation summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Active offers" value={String(NEGOTIATION_STATE.activeOffers)} sub={NEGOTIATION_STATE.stage} /></div>
+        <div className="bg-xo-panel"><Metric label="Active offers" value={String(NEGOTIATION_STATE.activeOffers)} sub={stageName(NEGOTIATION_STATE.stage)} /></div>
         <div className="bg-xo-panel"><Metric label="Leverage" value={<span className="capitalize">{NEGOTIATION_STATE.leverage}</span>} sub="market posture" /></div>
         <div className="bg-xo-panel"><Metric label="Leading bid" emphasis value={leader ? `${leader.score.toFixed(0)}/100` : "—"} sub={leader?.offer.buyerName} /></div>
         <div className="bg-xo-panel"><Metric label="Enterprise value" value={fmtMoney(reserveMid)} sub="institutional framework · counter reference" /></div>
