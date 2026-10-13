@@ -11,7 +11,9 @@ import {
 import { loadActiveCompany } from "../lib/active-company";
 import { dealContextFor } from "../lib/deal-context";
 import { SAMPLE_NDAS, SAMPLE_OFFERS, LISTING_PRIVATE, OFFER_COMPARISON, NEGOTIATION_STATE } from "../lib/engines";
-import { liquidityIndex, scenariosFor, heatFor, funnelFor, LIFECYCLE, TWELVE_MONTH_MULTIPLIER } from "../lib/liquidity-view";
+import { liquidityIndex, scenariosFor, heatFor, funnelFor, ownFunnelFor, LIFECYCLE, TWELVE_MONTH_MULTIPLIER } from "../lib/liquidity-view";
+import { findOwnListing } from "../lib/listings";
+import { ndaRequestsForListing, offersForListing } from "../lib/exit-api";
 import { Section, Metric, Provenance, Bar, ScrollRegion, ActionLink, Fact } from "../components/xo";
 import ExitProcessModal from "../components/ExitProcessModal";
 import BuyerInterestGate from "../components/BuyerInterestGate";
@@ -122,7 +124,21 @@ const Dashboard: React.FC = () => {
   const liquidity = liquidityIndex(E.ctx.activeBuyers);
   const heat = heatFor(E.ctx.dealBuyers);
   const sampleNdas = SAMPLE_NDAS.filter((n) => n.listingId === LISTING_PRIVATE.listingId && n.state === "active").length;
-  const funnel = funnelFor(E.matches.matches.length, sampleNdas, SAMPLE_OFFERS.length, !!OFFER_COMPARISON.leader);
+  // a founder's funnel counts the records on their own listing; the demo's uses its fixtures
+  const [own, setOwn] = useState<{ ndas: number; offers: number } | null>(null);
+  useEffect(() => {
+    if (!fromIntake) return;
+    const listing = findOwnListing(company);
+    if (!listing) { setOwn({ ndas: 0, offers: 0 }); return; }
+    let alive = true;
+    void Promise.all([ndaRequestsForListing(listing.id), offersForListing(listing.id)])
+      .then(([n, o]) => { if (alive) setOwn({ ndas: n.filter((r) => r.status === "signed").length, offers: o.length }); })
+      .catch(() => { if (alive) setOwn({ ndas: 0, offers: 0 }); });
+    return () => { alive = false; };
+  }, [fromIntake, company]);
+  const funnel = fromIntake
+    ? ownFunnelFor(E.matches.matches.length, own?.ndas ?? 0, own?.offers ?? 0)
+    : funnelFor(E.matches.matches.length, sampleNdas, SAMPLE_OFFERS.length, !!OFFER_COMPARISON.leader);
   const funnelTop = Math.max(1, funnel[0].n);
   const matchFeed = E.matches.matches.slice(0, 4);
 
@@ -153,7 +169,7 @@ const Dashboard: React.FC = () => {
             ) : (
               <Button onClick={startExit}>Start Exit Process →</Button>
             )}
-            {fromIntake && <p className="basis-full text-right text-[11px] text-xo-caution">The Exit Process run still uses the demo company and sample offers.</p>}
+            {fromIntake && <p className="basis-full text-right text-[11px] text-xo-caution">The Exit Process run uses your company; its negotiation step still scores the demo company's sample offers.</p>}
           </div>
         </div>
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
@@ -358,7 +374,9 @@ const Dashboard: React.FC = () => {
           </div>
         </Section>
         <Section title="Deal funnel" eyebrow="From the buyer registry to the leading bid" className="lg:col-span-8"
-          foot="Registry and matches come from the engines for this company. The NDA, offer and bid stages are demo fixtures (sample NDAs and sample offers); they will reflect real activity only once buyers sign or bid.">
+          foot={fromIntake
+            ? "Registry and matches come from the engines for your company; NDAs signed and offers received are the records on your listing."
+            : "Registry and matches come from the engines for this company. The NDA, offer and bid stages are demo fixtures (sample NDAs and sample offers)."}>
           <ol className="space-y-1.5 px-4 py-3">
             {funnel.map((f) => (
               <li key={f.label} className="grid grid-cols-[9.5rem_1fr] items-center gap-3 text-[12px]">

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { DemoExample } from "../components/DemoExample";
 import { Button, Modal, Field, inputCls, notify } from "../lib/ui";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
@@ -30,7 +31,7 @@ const ROLE_LABEL: Record<string, string> = {
   executive: "Executive", advisor: "Advisor", employee: "Employee", other: "Other",
 };
 
-const Investors: React.FC = () => {
+const InvestorsDemo: React.FC = () => {
   // The cap table and offers are the demo company's samples; an intake holds
   // neither, so this page stays on demo data and says so.
   const { fromIntake } = useMemo(() => loadActiveCompany(), []);
@@ -260,5 +261,17 @@ const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, child
     <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
   </div>
 );
+
+// With a saved intake the founder's own records are shown (none yet), and the
+// demo company's example only on request.
+const Investors: React.FC = () => {
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
+  return (
+    <DemoExample fromIntake={fromIntake} page={{ id: "cap-table", eyebrow: "◉ Founder · Cap table", title: "Cap Table" }}
+      title="No cap table recorded for your company" demo={<InvestorsDemo />}>
+      <>ExitOS does not yet hold your cap table, so it cannot show stakeholders, signatories or a waterfall for your company. Entering and importing a cap table is part of the closing workflow.</>
+    </DemoExample>
+  );
+};
 
 export default Investors;

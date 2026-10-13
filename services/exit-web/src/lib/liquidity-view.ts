@@ -38,6 +38,14 @@ export const funnelFor = (matched: number, sampleNdas: number, sampleOffers: num
   { label: "Leading bid", n: hasLeader ? 1 : 0, sample: true },
 ];
 
+/** The founder's own funnel: NDA requests signed and offers received on their listing (recorded records, not samples). */
+export const ownFunnelFor = (matched: number, signedNdas: number, offers: number): FunnelStage[] => [
+  { label: "Registry mandates", n: MARKET.buyers, sample: false },
+  { label: "Matched", n: matched, sample: false },
+  { label: "NDAs signed", n: signedNdas, sample: false },
+  { label: "Offers received", n: offers, sample: false },
+];
+
 export interface LifecycleStage { readonly key: string; readonly index: string; readonly label: string; readonly to?: string }
 export const LIFECYCLE: readonly LifecycleStage[] = [
   { key: "build", index: "01", label: "Position" },

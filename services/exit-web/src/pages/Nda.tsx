@@ -116,7 +116,6 @@ const FounderNdaVault: React.FC = () => {
   // browser; recording each party's signature is what makes one active.
   const [issued, setIssued] = useState<NdaInstance[]>(loadIssuedNdas);
   useEffect(() => { saveIssuedNdas(issued); }, [issued]);
-  const { company } = useMemo(() => loadActiveCompany(), []);
   const [signer, setSigner] = useState("");
   const [signErr, setSignErr] = useState<string | null>(null);
   const sign = (nda: NdaInstance, party: "disclosing" | "receiving"): void => {
@@ -127,8 +126,10 @@ const FounderNdaVault: React.FC = () => {
       notify(next.state === "active" ? `NDA with ${nda.receiving.name} is now active` : `Signature recorded for ${party === "disclosing" ? nda.disclosing.name : nda.receiving.name}`);
     } catch (e) { setSignErr(e instanceof Error ? e.message : "Could not record the signature."); }
   };
-  const ndas = useMemo(() => [...issued, ...SAMPLE_NDAS], [issued]);
-  const roster = useMemo(() => (issued.length ? rosterFor(ndas) : NDA_ROSTER), [issued, ndas]);
+  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  // a founder sees only their own NDAs; the sample portfolio belongs to the demo company
+  const ndas = useMemo(() => (fromIntake ? issued : [...issued, ...SAMPLE_NDAS]), [issued, fromIntake]);
+  const roster = useMemo(() => (fromIntake || issued.length ? rosterFor(ndas) : NDA_ROSTER), [issued, ndas, fromIntake]);
   const verifiedCount = ndas.filter((n) => buyerTrust(n, evaluateNdaStatus(n)).tier === "Verified").length;
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -177,8 +178,10 @@ const FounderNdaVault: React.FC = () => {
   return (
     <div data-page="nda" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Workspace · NDA" title="NDA Vault"
-        badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">{roster.active} active</span></>}
-        description={`A sample NDA portfolio for the demo company (${DEMO_PARTY_NAME}), plus any NDAs you draft in this session.`}
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">{roster.active} active</span></>}
+        description={fromIntake
+          ? `The NDAs you have drafted for ${company.name}, kept in this browser. An NDA is active only once every party's signature is recorded.`
+          : `A sample NDA portfolio for the demo company (${DEMO_PARTY_NAME}), plus any NDAs you draft in this browser.`}
         actions={<>
           <a href="/report/nda" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-xo-action/50 px-3 py-1.5 text-[12px] font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">NDA Package (PDF) →<span className="sr-only"> (opens in a new tab)</span></a>
           <Button variant="ghost" onClick={() => setTemplatesOpen(true)}>Templates</Button>

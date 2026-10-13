@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { DemoExample } from "../components/DemoExample";
 import { fmtMoney } from "../lib/ui";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
@@ -24,7 +25,7 @@ const ALLOC: { label: string; pct: number; note: string; tint: string }[] = [
   { label: "Giving / DAF",          pct: 0.10, note: "Donor-advised fund, tax-efficient",  tint: "#fbbf24" },
 ];
 
-const Wealth: React.FC = () => {
+const WealthDemo: React.FC = () => {
   // Offers and the cap table are the demo company's samples; an intake holds
   // neither, so this page stays on demo data and says so.
   const { fromIntake } = useMemo(() => loadActiveCompany(), []);
@@ -216,5 +217,17 @@ const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, child
     <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
   </div>
 );
+
+// With a saved intake the founder's own records are shown (none yet), and the
+// demo company's example only on request.
+const Wealth: React.FC = () => {
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
+  return (
+    <DemoExample fromIntake={fromIntake} page={{ id: "wealth", eyebrow: "◉ Founder · Liquidity", title: "Liquidity & Transition" }}
+      title="No offer or cap table to model proceeds from" demo={<WealthDemo />}>
+      <>Proceeds depend on a real offer and your cap table, and ExitOS holds neither for your company yet. Your valuation is on Value my company; it is not an offer.</>
+    </DemoExample>
+  );
+};
 
 export default Wealth;

@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from "react";
+import { DemoExample } from "../components/DemoExample";
+import { Link } from "react-router-dom";
 import { Button, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
 import { PageHeader, Section, Metric, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
@@ -83,7 +85,7 @@ function autonomousTerms(offer: Offer | undefined, t: Thresholds): { clauses: st
   return { clauses, earnouts, protections };
 }
 
-const Negotiator: React.FC = () => {
+const NegotiatorDemo: React.FC = () => {
   // The engine's leading offer (OFFER_COMPARISON.leader is an offer id) —
   // selected by default and shown as the leading bid whatever is selected.
   const leader = OFFER_EVALUATIONS.find((e) => e.offer.offerId === OFFER_COMPARISON.leader) ?? OFFER_EVALUATIONS[0];
@@ -392,5 +394,17 @@ const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
     <dd className="mt-1 font-mono text-[15px] font-semibold">{value}</dd>
   </div>
 );
+
+// With a saved intake the founder's own records are shown (none yet), and the
+// demo company's example only on request.
+const Negotiator: React.FC = () => {
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
+  return (
+    <DemoExample fromIntake={fromIntake} page={{ id: "bid-room", eyebrow: "◉ Founder · Negotiation desk", title: "Bid Room" }}
+      title="No offers recorded for your company" demo={<NegotiatorDemo />}>
+      <>Offers buyers submit on your listing arrive in your <Link to="/console/inbox" className="font-medium text-xo-action underline">Inbox</Link>. ExitOS does not yet hold full offer terms, so the Bid Room has nothing of yours to compare.</>
+    </DemoExample>
+  );
+};
 
 export default Negotiator;

@@ -1,4 +1,6 @@
 import React, { useMemo } from "react";
+import { DemoExample } from "../components/DemoExample";
+import { loadActiveCompany } from "../lib/active-company";
 import { Link } from "react-router-dom";
 import { STAGE_ORDER, fmtMoney, timeAgo, type DealStage } from "../lib/ui";
 import { Evidence } from "../lib/workstation";
@@ -109,7 +111,7 @@ const LEV_CLS: Record<string, string> = { high: "text-xo-verified", medium: "tex
 const STAGE_LABEL: Partial<Record<DealStage, string>> = { sourcing: "Sourcing", engaged: "Engaged", diligence: "Diligence", loi: "LOI", signed: "Signed", closed: "Closed", dead: "Dead" };
 const STAGE_CLS: Partial<Record<DealStage, string>> = { sourcing: "text-xo-muted", engaged: "text-xo-action", diligence: "text-xo-caution", loi: "text-xo-caution", signed: "text-xo-verified", closed: "text-xo-verified", dead: "text-xo-faint" };
 
-const Pipeline: React.FC = () => {
+const PipelineDemo: React.FC = () => {
   const live = DEALS.filter((d) => d.stage !== 'dead');
   const totalWeighted = weighted(live);
   const lead = live.slice().sort((a, b) => b.probability - a.probability)[0];
@@ -264,5 +266,17 @@ const TakeCell: React.FC<{ k: string; children: React.ReactNode }> = ({ k, child
     <dd className="mt-0.5 text-[13px] leading-snug text-xo-muted">{children}</dd>
   </div>
 );
+
+// With a saved intake the founder's own records are shown (none yet), and the
+// demo company's example only on request.
+const Pipeline: React.FC = () => {
+  const { fromIntake } = useMemo(() => loadActiveCompany(), []);
+  return (
+    <DemoExample fromIntake={fromIntake} page={{ id: "pipeline", eyebrow: "◉ Founder · Active processes", title: "Active Processes" }}
+      title="No active process recorded for your company" demo={<PipelineDemo />}>
+      <>Buyer interest, NDA requests and offers on your listing are in your <Link to="/console/inbox" className="font-medium text-xo-action underline">Inbox</Link>.</>
+    </DemoExample>
+  );
+};
 
 export default Pipeline;
