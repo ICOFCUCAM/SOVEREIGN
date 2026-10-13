@@ -10,7 +10,10 @@ import { loadActiveCompany } from "../lib/active-company";
 import { memorandumInputs } from "../lib/documents/memorandum-inputs";
 import { codeNameFor } from "../lib/listings";
 import { useDocumentGate, GateNotice } from "../components/DocumentGate";
-import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
+import { DocumentVersions } from "../components/DocumentVersions";
+import { DEFAULT_PROCESS_TIMELINE } from "@exit/engines";
+import type { IntakeField } from "../lib/active-company";
+import { docToMarkdown } from "../lib/deliverables";
 import { label, plural } from "../lib/labels";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
 
@@ -75,14 +78,15 @@ const Documents: React.FC = () => {
   const [kind, setKind] = useState<MemorandumKind>("cim");
   // The founder's saved intake when there is one; the demo company otherwise
   // (its engine runs are the hook's defaults, so no inputs are passed).
-  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const { company, fromIntake, companyId, unconfirmed } = useMemo(() => loadActiveCompany(), []);
   // the same engine inputs the CIM report page and the Banker use
   const inputs = useMemo(() => memorandumInputs(company, fromIntake), [company, fromIntake]);
   const doc = useMemorandum(kind, inputs);
   const flags = useMemo(() => redTeam(doc, company), [doc, company]);
   const valueUsd = inputs?.valuation?.headline.mid ?? VALUATION_CANONICAL.headline.mid;
   return (
-    <DocumentsView kind={kind} setKind={setKind} doc={doc} flags={flags} company={company} fromIntake={fromIntake} valueUsd={valueUsd} />
+    <DocumentsView kind={kind} setKind={setKind} doc={doc} flags={flags} company={company} fromIntake={fromIntake} valueUsd={valueUsd}
+      companyId={companyId} unconfirmed={unconfirmed} engineInputs={inputs} />
   );
 };
 
@@ -94,7 +98,10 @@ const DocumentsView: React.FC<{
   company: CompanyProfile;
   fromIntake: boolean;
   valueUsd: number;
-}> = ({ kind, setKind, doc, flags, company, fromIntake, valueUsd }) => {
+  companyId: string | null;
+  unconfirmed: readonly IntakeField[];
+  engineInputs: Record<string, unknown> | undefined;
+}> = ({ kind, setKind, doc, flags, company, fromIntake, valueUsd, companyId, unconfirmed, engineInputs }) => {
   const gate = useDocumentGate(KIND_TYPE[kind], doc ? docToMarkdown(doc) : null, valueUsd);
   const codeName = useMemo(() => codeNameFor(company, !fromIntake), [company, fromIntake]);
 
@@ -123,9 +130,11 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
           <button type="button" onClick={() => setLibraryOpen(true)} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Library</button>
           <a href="/report" target="_blank" rel="noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
           <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report →<span className="sr-only"> (opens in a new tab)</span></a>
-          {doc && <button type="button" disabled={!!gate?.blocked} onClick={() => !gate?.blocked && downloadDeliverable(docFilename(doc, codeName), docToMarkdown(doc))} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Download draft (.md)</button>}
         </>} />
       <GateNotice gate={gate} className="border border-xo-line bg-xo-panel px-4 py-2.5" />
+      <DocumentVersions typeId={KIND_TYPE[kind]} doc={doc} gate={gate} company={company} companyId={companyId} unconfirmed={unconfirmed}
+        inputs={{ kind, company, engine: engineInputs ?? null, timeline: DEFAULT_PROCESS_TIMELINE }}
+        ownerName={kind === "buyer_teaser" ? codeName : company.name} codeName={codeName} valuationMidUsd={valueUsd} sample={!fromIntake} />
 
       <section aria-label="Document summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Templates" value={String(KINDS.length)} sub="document kinds" /></div>
