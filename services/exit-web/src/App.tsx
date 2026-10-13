@@ -5,7 +5,7 @@ import { canAccess, needsUpgrade, homeFor, featureLabel } from "./lib/access";
 import Shell from "./components/Shell";
 import { ExchangeMark } from "./components/ExchangeMark";
 import Landing from "./pages/Landing";
-import SignIn from "./pages/SignIn";
+import SignIn, { ChooseSide } from "./pages/SignIn";
 
 const Pricing      = lazy(() => import("./pages/Pricing"));
 // Development-only design preview (not routed in production builds).
@@ -129,7 +129,7 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
 ];
 
 const Console: React.FC = () => {
-  const { session } = useAuth();
+  const { session, ready } = useAuth();
   // the phone browser's bar takes the console's ink, and the site's graphite back on leaving
   React.useEffect(() => {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -137,7 +137,10 @@ const Console: React.FC = () => {
     meta?.setAttribute("content", "#0a1018");
     return () => { if (meta && site) meta.setAttribute("content", site); };
   }, []);
+  if (!ready) return <RouteFallback />;
   if (!session) return <SignIn />;
+  // a verified account says once whether it sells or buys (operators excepted)
+  if (session.verified && !session.side && session.role !== "superadmin") return <ChooseSide />;
   return (
     <Shell>
       <Suspense fallback={<RouteFallback />}>

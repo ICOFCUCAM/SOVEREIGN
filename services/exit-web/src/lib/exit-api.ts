@@ -4,6 +4,7 @@ import type { Listing } from "./listings";
 import { setListingsAdapter, setListingOwner } from "./listings";
 import { SupabaseExitApi, supabaseConfigFromEnv } from "./supabase-exit-api";
 import { ensureSupabaseSession } from "./supabase-auth";
+import { authConfigFromEnv } from "./email-auth";
 
 // ── THE EXIT-API CONTRACT ───────────────────────────────────────────
 // The boundary between this client and the multi-tenant backend. The whole
@@ -430,12 +431,24 @@ export const listingDestination = (): "exchange" | "browser" => (active instance
  *  the backend runs as that user (RLS scopes to auth.uid()), and bind the
  *  account id to the auth user id. If auth is unreachable or disabled, we
  *  fall back to the durable local backend so the app never breaks. */
-export function activateBackend(account: Account): Promise<void> {
-  const run = activate(account);
+export function activateBackend(account: Account, verified?: { accessToken: string; userId: string }): Promise<void> {
+  const run = activate(account, verified);
   activation = run.catch(() => undefined);
   return run;
 }
-async function activate(account: Account): Promise<void> {
+async function activate(account: Account, verified?: { accessToken: string; userId: string }): Promise<void> {
+  // A verified (email-link) session always runs as its own Supabase user.
+  if (verified) {
+    if (!(active instanceof SupabaseExitApi)) {
+      const cfg = supabaseConfigFromEnv() ?? authConfigFromEnv();
+      if (cfg) active = new SupabaseExitApi({ url: cfg.url, anonKey: cfg.anonKey });
+    }
+    if (active instanceof SupabaseExitApi) {
+      active.setAccessToken(verified.accessToken, verified.userId);
+      await connectExitApi(active, { ...account, id: verified.userId });
+      return;
+    }
+  }
   if (active instanceof SupabaseExitApi) {
     try {
       const session = await ensureSupabaseSession(active.config);

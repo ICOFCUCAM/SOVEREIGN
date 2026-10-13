@@ -25,3 +25,27 @@ select id, data->'publicView' from exitos_listings order by id;
 -- a listing written after the migration, profile and all, is stored without them
 insert into exitos_listings (id, data, owner_account_id) values ('lst-late', '{"id":"lst-late","code":"Project Orion","listedAt":"t","profile":{"name":"Late Secret Co"},"publicView":{"sector":"AI","region":"Europe","revenueUsd":120000000,"growthPct":-0.1,"ebitdaMarginPct":0.3}}', 'x');
 select 'late write', data::text like '%Late Secret%' as leaked, data->'publicView'->'revenueBand'->>'label', data->'publicView'->'growthBand'->>'label' from exitos_listings where id = 'lst-late';
+-- roles: a user cannot grant themselves a privileged role, nor claim one on their account
+set role authenticated; select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+do $$ begin
+  begin insert into exitos_role_grants (account_id, role, granted_by) values ('00000000-0000-0000-0000-00000000000a', 'approver', 'me');
+        raise notice 'self-grant: ALLOWED'; exception when others then raise notice 'self-grant: denied'; end;
+  begin insert into exitos_accounts (id, role, data) values ('00000000-0000-0000-0000-00000000000a', 'advisor', '{}');
+        raise notice 'claim advisor: ALLOWED'; exception when others then raise notice 'claim advisor: denied'; end;
+end $$;
+insert into exitos_accounts (id, role, data) values ('00000000-0000-0000-0000-00000000000a', 'founder', '{}');
+select 'claim founder', count(*) from exitos_accounts;
+do $$ begin
+  begin update exitos_accounts set role = 'advisor' where id = '00000000-0000-0000-0000-00000000000a';
+        raise notice 'promote to advisor: ALLOWED'; exception when others then raise notice 'promote to advisor: denied'; end;
+end $$;
+select 'has approver (before grant)', exitos_has_role('approver');
+reset role;
+insert into exitos_role_grants (account_id, role, granted_by) values ('00000000-0000-0000-0000-00000000000a', 'approver', 'sql');
+set role authenticated; select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select 'has approver (after server grant)', exitos_has_role('approver');
+select 'sees own grants', count(*) from exitos_role_grants;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+select 'C has approver', exitos_has_role('approver');
+select 'C sees grants', count(*) from exitos_role_grants;
+reset role;

@@ -23,3 +23,15 @@ lst-a|{"region": "North America", "sector": "AI", "disclosed": true, "growthBand
 lst-demo-helios|{"region": "North America", "sector": "Logistics", "growthBand": {"low": 0.25, "high": 0.5, "label": "25–50%"}, "revenueBand": {"low": 10000000, "high": 25000000, "label": "$10–25M"}}
 lst-sov-x|{"region": "North America", "sector": "AI", "disclosed": false}
 late write|f|$100–250M|declining
+
+psql:check.sql:35: NOTICE:  self-grant: denied
+psql:check.sql:35: NOTICE:  claim advisor: denied
+claim founder|1
+psql:check.sql:41: NOTICE:  promote to advisor: denied
+has approver (before grant)|f
+
+has approver (after server grant)|t
+sees own grants|1
+
+C has approver|f
+C sees grants|0

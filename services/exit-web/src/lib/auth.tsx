@@ -1,37 +1,64 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Role, Plan } from "./access";
 import { activateBackend, type AccountRole } from "./exit-api";
+import {
+  authConfigFromEnv, sendSignInLink, parseCallback, verifyUser, refreshSession, signOutRemote,
+  loadAccess, saveSide, consoleRole, storeRefresh, storedRefresh, rememberSide, takePendingSide,
+  type Side, type Grant, type VerifiedSession,
+} from "./email-auth";
 
-// Session role → backend AccountRole. The backend models three actor kinds;
-// admins/superadmins act as advisors over the network.
+// ── SESSIONS ────────────────────────────────────────────────────────
+// Two modes, decided at build time:
+//  * "email_link" — every production build. Who someone is comes from a
+//    Supabase Auth session that Supabase itself verifies; privileged roles
+//    (operator, counsel, approver) come only from server-side grants.
+//  * "development" — only in a development build (`import.meta.env.DEV`), and
+//    only unless VITE_EXITOS_AUTH=email_link. Any e-mail opens a local session
+//    in this browser; it has no server identity and the sign-in screen says so.
+
+export type AuthMode = "email_link" | "development";
+export const authMode = (): AuthMode =>
+  import.meta.env.DEV && import.meta.env.VITE_EXITOS_AUTH !== "email_link" ? "development" : "email_link";
+
+// Session role → backend AccountRole. Operators act as advisors over the
+// network; a verified account's row only ever holds founder or buyer.
 const accountRoleOf = (role: Role): AccountRole =>
   role === "founder" ? "founder" : role === "buyer" ? "buyer" : "advisor";
 
-// Session model. ExitOS auth will exchange a Supabase user JWT against
-// exit-api once that service exists; for now the console accepts any
-// non-empty (email, password) plus a demo role + plan and synthesizes a
-// session token, so each account type can be exercised end-to-end. The wire
-// format is stable — when exit-api ships, only this file changes.
-
 interface Session {
-  token: string;
+  mode: AuthMode;
+  /** Present only for a verified (email_link) session. */
+  verified: VerifiedSession | null;
   founderId: string;
   email: string;
-  workspace: string;
   scopes: string[];
   role: Role;
+  /** Server-made grants (email_link only); development sessions have none. */
+  grants: Grant[];
+  /** The side the person chose for their own account; null until chosen. */
+  side: Side | null;
   plan: Plan;
   expiresAt: number;
 }
 
 interface AuthCtx {
   session: Session | null;
+  mode: AuthMode;
+  /** development mode only */
   signIn: (email: string, password: string, role?: Role, plan?: Plan) => Promise<void>;
+  /** email_link mode: e-mail a sign-in link; the chosen side applies when the person returns */
+  sendLink: (email: string, side: Side) => Promise<void>;
+  /** email_link mode: the e-mail a link was just sent to */
+  linkSentTo: string | null;
+  /** email_link mode: a verified account that has not chosen founder or buyer yet */
+  chooseSide: (side: Side) => Promise<void>;
   signOut: () => void;
   upgrade: () => void;                 // → pro (kept for existing callers)
   upgradeTo: (plan: Plan) => void;     // set any plan (starter / pro)
   has: (scope: string) => boolean;
   loading: boolean;
+  /** false while a returning sign-in link or a stored session is being verified */
+  ready: boolean;
   error: string | null;
 }
 
@@ -48,22 +75,11 @@ const DEFAULT_SCOPES = [
   "exit:close",
 ];
 
-function fakeToken(email: string): string {
-  // Browser-safe synthetic JWT — header.payload.signature, payload only
-  // base64-encoded for display. Replaced by real exit-api token at sign-in.
-  const payload = btoa(JSON.stringify({
-    sub: email, scopes: DEFAULT_SCOPES, exp: Math.floor(Date.now() / 1000) + 8 * 3600,
-  }));
-  return `dev.${payload}.dev`;
-}
-
-// ── Operator bootstrap ──────────────────────────────────────────────
-// This session is synthesized in the browser, so any role granted here can
-// be claimed by any visitor. Production builds therefore grant NO elevated
-// role from the sign-in form: `import.meta.env.DEV` is false there and the
-// branch is removed at build time. Locally, set VITE_EXITOS_DEV_OPERATOR_EMAIL
-// to exercise the operator console. Production admin access must come from
-// server-side roles once real auth is wired.
+// ── Development operator ────────────────────────────────────────────
+// A development session is synthesized in the browser, so any role granted
+// here could be claimed by any visitor. Only development builds have this
+// branch (`import.meta.env.DEV` is false in production and the code is
+// removed at build time). Production operators come from exitos_role_grants.
 export function devOperatorEmail(): string {
   if (!import.meta.env.DEV) return "";
   return String(import.meta.env.VITE_EXITOS_DEV_OPERATOR_EMAIL ?? "").trim().toLowerCase();
@@ -73,65 +89,145 @@ export function isDevOperator(email: string, operatorEmail: string): boolean {
   return operatorEmail !== "" && email.trim().toLowerCase() === operatorEmail;
 }
 
+/** A verified session plus what the server says the person may do → a console session. */
+async function verifiedConsoleSession(cfg: NonNullable<ReturnType<typeof authConfigFromEnv>>, v: VerifiedSession, plan: Plan): Promise<Session> {
+  const access = await loadAccess(cfg, v);
+  const { grants } = access;
+  let { side } = access;
+  const pending = takePendingSide();
+  if (!side && pending) { await saveSide(cfg, v, pending); side = pending; }
+  const role = consoleRole(side, grants) ?? "founder";
+  return {
+    mode: "email_link", verified: v, founderId: v.userId, email: v.email, scopes: DEFAULT_SCOPES,
+    role, grants, side, plan: grants.includes("operator") ? "pro" : plan, expiresAt: v.expiresAt,
+  };
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const mode = authMode();
+  const cfg = useMemo(() => authConfigFromEnv(), []);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(mode !== "email_link");
   const [error, setError] = useState<string | null>(null);
+  const [linkSentTo, setLinkSentTo] = useState<string | null>(null);
+
+  // email_link: complete a sign-in link that brought the person back, or restore the last session
+  useEffect(() => {
+    if (mode !== "email_link") return;
+    if (!cfg) { setReady(true); setError("Sign-in is not configured for this build."); return; }
+    let alive = true;
+    void (async () => {
+      try {
+        const cb = typeof window !== "undefined" ? parseCallback(window.location.hash) : null;
+        let v: VerifiedSession | null = null;
+        if (cb && "error" in cb) throw new Error(cb.error);
+        if (cb) {
+          // clear the tokens from the address bar before anything else
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+          const u = await verifyUser(cfg, cb.accessToken);
+          v = { accessToken: cb.accessToken, refreshToken: cb.refreshToken, expiresAt: Date.now() + cb.expiresIn * 1000, userId: u.id, email: u.email };
+        } else {
+          const stored = storedRefresh();
+          if (stored) v = await refreshSession(cfg, stored).catch(() => { storeRefresh(null); return null; });
+        }
+        if (!v) return;
+        storeRefresh(v.refreshToken);
+        const s = await verifiedConsoleSession(cfg, v, "free");
+        if (alive) setSession(s);
+      } catch (e) {
+        if (alive) setError(e instanceof Error ? e.message : "Sign-in failed.");
+      } finally {
+        if (alive) setReady(true);
+      }
+    })();
+    return () => { alive = false; };
+  }, [mode, cfg]);
 
   const signIn = useCallback(async (email: string, password: string, role: Role = "founder", plan: Plan = "free") => {
+    if (mode !== "development") throw new Error("Use the e-mail sign-in link.");
     setLoading(true); setError(null);
     try {
       if (!email || !password) throw new Error("email and password required");
       await new Promise((r) => setTimeout(r, 250));
       // Operator elevation is local-development only (see devOperatorEmail).
       const isSuper = isDevOperator(email, devOperatorEmail());
-      const finalRole: Role = isSuper ? "superadmin" : role;
-      const finalPlan: Plan = isSuper ? "pro" : plan;
       setSession({
-        token: fakeToken(email),
+        mode: "development", verified: null,
         founderId: email.split("@")[0] ?? "founder",
         email,
-        workspace: "primary",
         scopes: DEFAULT_SCOPES,
-        role: finalRole,
-        plan: finalPlan,
+        role: isSuper ? "superadmin" : role,
+        grants: [], side: role === "buyer" ? "buyer" : "founder",
+        plan: isSuper ? "pro" : plan,
         expiresAt: Date.now() + 8 * 3600 * 1000,
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : "sign-in failed");
       throw e;
     } finally { setLoading(false); }
-  }, []);
+  }, [mode]);
 
-  const signOut = useCallback(() => setSession(null), []);
+  const sendLink = useCallback(async (email: string, side: Side) => {
+    if (mode !== "email_link" || !cfg) throw new Error("E-mail sign-in is not configured for this build.");
+    setLoading(true); setError(null); setLinkSentTo(null);
+    try {
+      rememberSide(side);
+      await sendSignInLink(cfg, email, `${window.location.origin}/console`);
+      setLinkSentTo(email.trim());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not send the sign-in link.");
+      throw e;
+    } finally { setLoading(false); }
+  }, [mode, cfg]);
+
+  const chooseSide = useCallback(async (side: Side) => {
+    if (!cfg || !session?.verified) return;
+    await saveSide(cfg, session.verified, side);
+    setSession(await verifiedConsoleSession(cfg, session.verified, session.plan));
+  }, [cfg, session]);
+
+  const signOut = useCallback(() => {
+    if (cfg && session?.verified) void signOutRemote(cfg, session.verified.accessToken);
+    storeRefresh(null);
+    setSession(null);
+  }, [cfg, session]);
+  // Plans are a commercial setting held in this browser; they grant no approval, review or execution rights.
   const upgradeTo = useCallback((plan: Plan) => setSession((s) => (s ? { ...s, plan } : s)), []);
   const upgrade = useCallback(() => upgradeTo("pro"), [upgradeTo]);
 
+  // keep a verified session fresh; a development session ends after 8 hours and says why
   useEffect(() => {
     if (!session) return;
-    const ms = session.expiresAt - Date.now() - 5000;
-    // the session ends on time, and the sign-in screen says why rather than simply reappearing
-    const t = setTimeout(() => { setSession(null); setError("Your session ended after 8 hours, so you were signed out. Sign in again to continue."); }, Math.max(ms, 0));
+    const ms = session.expiresAt - Date.now() - 60_000;
+    const t = setTimeout(() => {
+      if (session.mode === "email_link" && cfg && session.verified) {
+        void refreshSession(cfg, session.verified.refreshToken)
+          .then(async (v) => { storeRefresh(v.refreshToken); setSession(await verifiedConsoleSession(cfg, v, session.plan)); })
+          .catch(() => { storeRefresh(null); setSession(null); setError("Your session expired. Sign in again with a new link."); });
+      } else {
+        setSession(null); setError("Your session ended after 8 hours, so you were signed out. Sign in again to continue.");
+      }
+    }, Math.max(ms, 0));
     return () => clearTimeout(t);
-  }, [session]);
+  }, [session, cfg]);
 
-  // Activate the durable, account-scoped backend on sign-in: from here every
-  // captured event and listing persists through the exit-api contract, keyed
-  // to this account — the multi-tenant spine, live for the session.
+  // Activate the account-scoped backend: a verified session runs as its own
+  // Supabase user (RLS scopes to auth.uid()); a development session uses this browser.
   useEffect(() => {
     if (!session) return;
     void activateBackend({
       id: session.founderId,
-      role: accountRoleOf(session.role),
+      role: session.verified ? (session.side ?? "founder") : accountRoleOf(session.role),
       name: session.email,
       createdAt: new Date().toISOString(),
-    });
+    }, session.verified ? { accessToken: session.verified.accessToken, userId: session.verified.userId } : undefined);
   }, [session]);
 
   const has = useCallback((scope: string) => !!session?.scopes.includes(scope), [session]);
 
-  const value = useMemo<AuthCtx>(() => ({ session, signIn, signOut, upgrade, upgradeTo, has, loading, error }),
-    [session, signIn, signOut, upgrade, upgradeTo, has, loading, error]);
+  const value = useMemo<AuthCtx>(() => ({ session, mode, signIn, sendLink, linkSentTo, chooseSide, signOut, upgrade, upgradeTo, has, loading, ready, error }),
+    [session, mode, signIn, sendLink, linkSentTo, chooseSide, signOut, upgrade, upgradeTo, has, loading, ready, error]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 
