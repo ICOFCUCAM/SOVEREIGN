@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { PageHeader, Section, Metric, Provenance } from "../components/xo";
+import { PageHeader, Section, Metric, Provenance, Empty } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { buildMarketTape } from "../lib/market-tape";
@@ -166,7 +166,7 @@ const FounderInbox: React.FC = () => {
               </li>
             ))}
           </ul>
-        ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No published mandates match yet. As buyers publish acquisition mandates on the radar, qualified demand appears here before you ever run a process.</p>}
+        ) : <Empty title="No published mandates match yet.">As buyers publish acquisition mandates on the radar, qualified demand appears here before you ever run a process.</Empty>}
       </Section>
 
       {/* deal pipeline — advance each transaction through the lifecycle */}
@@ -207,7 +207,7 @@ const FounderInbox: React.FC = () => {
               );
             })}
           </ul>
-        ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No open deals yet. A deal opens when a buyer requests an NDA or submits an offer on {listing.code}.</p>}
+        ) : <Empty title="No open deals yet.">A deal opens when a buyer requests an NDA or submits an offer on {listing.code}.</Empty>}
       </Section>
 
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-2">
@@ -230,7 +230,7 @@ const FounderInbox: React.FC = () => {
                 </li>
               ))}
             </ul>
-          ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No NDA requests awaiting you.</p>}
+          ) : <Empty title="No NDA requests awaiting you." />}
         </Section>
 
         {/* offers — first-class records to accept / decline */}
@@ -260,7 +260,7 @@ const FounderInbox: React.FC = () => {
                 </li>
               ))}
             </ul>
-          ) : <p className="px-4 py-6 text-center text-[12px] text-xo-muted">No offers yet.</p>}
+          ) : <Empty title="No offers yet." />}
         </Section>
       </div>
 
@@ -284,9 +284,9 @@ const FounderInbox: React.FC = () => {
             })}
           </ul>
         ) : (
-          <p className="px-4 py-8 text-center text-[12px] text-xo-muted">
-            No interest yet. When a buyer on the <Link to="/console/acquisition-radar" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar</Link> expresses interest in {listing.code}, it lands here.
-          </p>
+          <Empty title="No interest yet.">
+            When a buyer on the <Link to="/console/acquisition-radar" className="font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar</Link> expresses interest in {listing.code}, it lands here.
+          </Empty>
         )}
       </Section>
     </div>

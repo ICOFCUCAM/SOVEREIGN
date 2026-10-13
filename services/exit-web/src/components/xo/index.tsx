@@ -165,5 +165,18 @@ export const Chip: React.FC<{ pressed: boolean; onToggle: () => void; children: 
 );
 
 /** Shared form styles for xo pages. */
+/** An empty state: a quiet mark, what is missing in one line, and what will fill it. */
+export const Empty: React.FC<{ title: string; children?: React.ReactNode; className?: string }> = ({ title, children, className = "" }) => (
+  <div className={`flex flex-col items-center px-4 py-7 text-center ${className}`}>
+    <svg aria-hidden width="28" height="28" viewBox="0 0 28 28" fill="none" className="mb-3 text-xo-faint">
+      <circle cx="14" cy="14" r="12.5" stroke="currentColor" strokeOpacity=".5" strokeDasharray="2 3" />
+      <circle cx="14" cy="14" r="6" stroke="currentColor" strokeOpacity=".7" />
+      <circle cx="14" cy="14" r="1.6" fill="currentColor" />
+    </svg>
+    <p className="text-[13px] font-medium text-xo-text">{title}</p>
+    {children && <p className="mt-1 max-w-[52ch] text-[12px] leading-relaxed text-xo-muted">{children}</p>}
+  </div>
+);
+
 export const XO_INPUT = "w-full rounded-sm border border-xo-line bg-xo-ink px-2.5 py-2 text-[13px] text-xo-text placeholder:text-xo-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
 export const XO_LABEL = "mb-1 block text-[12px] font-medium text-xo-muted";
