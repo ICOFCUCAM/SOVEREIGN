@@ -65,8 +65,9 @@ const Network      = lazy(() => import("./pages/Network"));
 const Upgrade      = lazy(() => import("./pages/Upgrade"));
 const Admin        = lazy(() => import("./pages/Admin"));
 
+// shown while a page's code loads; announced to assistive technology as a status, not just drawn
 const RouteFallback: React.FC = () => (
-  <div className="flex flex-col items-center justify-center gap-3 py-24">
+  <div role="status" aria-live="polite" className="flex flex-col items-center justify-center gap-3 py-24">
     <ExchangeMark size={44} loading title="Loading ExitOS" />
     <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/55">Routing the exchange…</span>
   </div>
