@@ -19,7 +19,7 @@ const PageTip: React.FC<{ onHide: () => void }> = ({ onHide }) => {
   const gate = next ? requiredEngagement(next, role, plan) : null;
   return (
     <div data-guide="page-tip" className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-xo-line bg-xo-ink px-4 py-2 text-[12px] sm:px-5">
-      <p className="min-w-0 flex-1 text-xo-muted"><span className="font-semibold text-xo-text">This page: </span>{g.purpose}</p>
+      <p className="min-w-0 flex-1 basis-full text-xo-muted sm:basis-0"><span className="font-semibold text-xo-text">This page: </span>{g.purpose}</p>
       {next && nextLabel && (
         <Link to={next} className="shrink-0 rounded-sm font-medium text-xo-action hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">
           Next: {nextLabel} <span aria-hidden>→</span>{gate && <span className="ml-1 font-normal text-xo-caution">(needs {gate})</span>}
