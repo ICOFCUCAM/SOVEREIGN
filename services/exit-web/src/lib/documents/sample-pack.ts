@@ -84,7 +84,7 @@ export async function buildCompanyPack(pc: PackCompany): Promise<{ items: PackIt
   });
   // transaction documents, from the recorded offers and the company's own positions
   // a counter-proposal states the seller's proposed price by design, so it is not matched against the valuation figure
-  const { valuationMidUsd: _mid, ...noValuation } = common;
+  const noValuation: Omit<typeof common, "valuationMidUsd"> = { company: common.company, companyId: common.companyId, unconfirmed: common.unconfirmed, generatedBy: common.generatedBy, now: common.now };
   const tx = async (typeId: string, slug: string, d: TransactionDoc): Promise<void> => {
     items.push({ version: await generateVersion({ ...(typeId === "exitos.counter_offer" ? noValuation : common), typeId, title: d.title, ...(d.subtitle ? { subtitle: d.subtitle } : {}),
       sections: d.sections, producedBy: d.producedBy, inputs: d.inputs, ownerName: company.name }), anonymized: false, slug, company: pc.key, coverage: d.coverage });
