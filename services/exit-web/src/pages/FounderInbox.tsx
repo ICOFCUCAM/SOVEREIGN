@@ -90,7 +90,7 @@ const FounderInbox: React.FC = () => {
       })
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score)));
-  }, [listing.id]);
+  }, [listing.id, listing.profile]);
 
   const [pending, setPending] = useState<Pending>(null);
   const trigger = useRef<HTMLElement | null>(null);
