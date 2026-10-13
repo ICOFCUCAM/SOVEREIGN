@@ -298,7 +298,65 @@ Applied 13 October 2026:
 
 **Rollback:** re-apply `exitos_offer_guard` from `20261014100000`.
 
+## Deliverable 6: the transaction record and transaction-scoped access (C-5)
+
+Applied 13 October 2026:
+
+| Change | Live version |
+|---|---|
+| Migration `exitos_transactions` (`20261014140000`, commit `ce6af8bf`) | `20261013215241` |
+| Self-test `exitos_transactions_selftest` (`20261014140100`) | `20261013215354` |
+
+**Preflight**
+- None of the four tables or the `exitos_txn_*` functions existed.
+- `exitos_nda_agreements.transaction_id` existed and was null on every row.
+- The two buyer data-room functions were replaced in place, keeping their signatures and grants.
+
+**What it enforces**
+- **Opening a transaction:** only the listing owner can open one, from an offer it accepted, with that buyer's executed NDA for the same listing that is inside its term. There can be one live transaction per listing. The NDA is bound to the transaction.
+- **Items:** each condition belongs to a party, and the owning party records the evidence. Only the counterparty confirms it; a rejection reopens it. A waiver needs both parties.
+- **Signing:** both parties confirm, naming the same agreement SHA-256, and every required signing condition must be satisfied or waived. A mismatch is logged and does not advance the transaction.
+- **Closing:** both parties confirm the same amount, with a payment reference, and every required closing condition must be satisfied or waived. Closing creates the post-closing obligations from the terms snapshot. A closed transaction cannot be terminated.
+- **Data-room access:** once an NDA is bound to a transaction, buyer listing and download also require that transaction to be negotiating, signed or closed for the same buyer. Termination ends access even while the NDA is in term. Every earlier check still applies.
+- **No direct writes:** clients cannot write the tables or the audit trail directly; only the functions write them.
+
+**What it is not:** the transaction is a record of what the two parties state, each statement confirmed by the other party. ExitOS does not hold or trace funds, compare a hash with a signed original it has never seen, or judge whether a condition is legally met.
+
+**Live verification, 13 October 2026, about 22:05 UTC**
+- **Source check before running:** the deployed self-test was compared with the repository version, as required. Its source was 274 characters shorter, because the apply tool strips comment-only lines. With those 8 comment lines removed, the repository source is identical to the live source: MD5 `aabfe839…`, 16,573 characters.
+- **Transaction self-test:** `exitos_selftest_transaction_lifecycle()` returned `SELFTEST PASS (0 failed of 25)`. It covers:
+  - buyer, unrelated-account and anon refusals;
+  - an unaccepted offer and an NDA from another listing;
+  - evidence by the wrong party, and self-confirmation;
+  - a one-sided waiver;
+  - signing with open conditions and with different agreement hashes;
+  - closing with open conditions and with different amounts;
+  - post-closing obligations from the terms;
+  - termination after closing;
+  - direct writes;
+  - the audit trail;
+  - termination ending data-room access.
+- **The other four self-tests, re-run because the buyer functions changed:**
+
+  | Self-test | Result |
+  |---|---|
+  | NDA lifecycle | 32/32 |
+  | Exchange state | 16/16 |
+  | Data room | 11/11 |
+  | Company stories | 25/25 |
+
+- **Rollback confirmed:** zero transactions, items, confirmations and events, and no `zz-selftest` listings or offers.
+- **Live structure:**
+  - RLS is on for all four tables, and clients have no write grants;
+  - the eight `exitos_txn_*` RPCs can be executed by `authenticated` and not by `anon`;
+  - `exitos_txn_try_advance` and `exitos_txn_log` cannot be called by any client role;
+  - the self-test is owner-only.
+- **Security advisors:** nothing new beyond the intended signed-in RPCs. `exitos_txn_party` is listed too; it returns only the caller's own role, and null for both "not a party" and "no such transaction".
+
+**Not verified here:** HTTP calls through `exit-doc-buyer` against a transaction-bound NDA (O-15). The database function it calls is covered by checks 06 and 24.
+
 ## Rollback
+- **Transactions (deliverable 6):** the ordered statements in the header of `20261014140000_exitos_transactions.sql`. Restore the two buyer functions first, then drop the transaction objects. Any transaction data is lost; export it first if any exists.
 - **NDA lifecycle (deliverable 5):** the statements in the header of `20261014120000_exitos_nda_lifecycle.sql`; delete the `exit-doc-buyer` function. Rolling back restores the founder flag as the post-NDA gate.
 - **Exchange state integrity (deliverable 5):** the statements in the header of `20261014100000_exitos_exchange_state_integrity.sql`. Rolling back re-opens the self-signing defect.
 - **Company stories (deliverable 4):** the drop statements in the header of `20261014090000_exitos_company_stories.sql`, and `drop function public.exitos_selftest_company_stories();` if the self-test was installed. Data in the four tables is lost on rollback; export it first if any exists.

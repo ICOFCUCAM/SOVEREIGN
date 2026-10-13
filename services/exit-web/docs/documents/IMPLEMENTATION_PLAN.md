@@ -77,7 +77,7 @@ Status: **Fixed** = fixed on this branch with a test · **Open** = verified stil
 | C-2 | Inbox "Mark executed" is a bare flag | Fixed `20261014120000`, `32470d7f`; **deployed and verified live** (self-test 32/32) | "Mark executed" removed; a request is marked signed only when its NDA executes (every required party's signature recorded from its own account on the issued hash and verified by the counterparty); the owner can no longer set it |
 | C-3 | NDA shapes: `one_way_disclosure` has no template; mutual-cure has no cure term; expiry runs from execution; 8 of "14" clauses; no clause text | Partial | Fixed: the executed NDA is a full text fixed by hash; access term separate from survival; ExitOS template text labelled founder draft, not reviewed by counsel. Open: versioned clause library with counsel review (O-6); the local NDA vault and `/report/nda` package still describe template clause counts |
 | C-4 | Data-room completeness counts any upload; missing list matches template filenames | Fixed `244ea1c6`; **deployed and verified live** (self-test 11/11) | upload is tagged with its artifact id; completeness = required artifacts with an accepted file |
-| C-5 | Deal stages have no signing stage | Open | transaction record with explicit milestones (deliverable 3) |
+| C-5 | Deal stages have no signing stage | **Server done, live-verified; UI pending (D6-2)** | `exitos_transactions` (D6): negotiating → signed → closed / terminated. Each milestone needs both parties' confirmations on the same agreement hash or amount, with every required condition met. Buyer data-room access is transaction-scoped once an NDA is bound. Live self-test 25/25 |
 
 ### Contradictions between documents (S2)
 
@@ -244,8 +244,8 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 |---|---|---|---|
 | 6A | Process letter, bid instructions, IOI request and criteria, presentation and diligence instructions | D5 | Done: from the canonical timeline; states what an IOI must contain, how to submit, management meetings and data-room access under NDA, conduct rules, reservation of rights; indicates no price | `quality.test.ts` (both gates and PDF, two companies) |
 | 6B.1–6B.5 | Structured IOI; LOI / term sheet; exclusivity draft; counter-offer from the real offer (B-8); offer comparison from real bids (B-3) | D5 | Done: structured IOI form and record; offer comparison from recorded offers (no ranking); counter-proposal; draft heads of terms and exclusivity letter for counsel (binding provisions, law and conditions left to counsel, stated so). Server: the owner cannot rewrite a bidder's terms (**live self-test 16/16**) | `quality.test.ts`, `IoiTerms.test.ts`, `negotiation-positions.test.ts`, `supabase/tests/nda` |
-| 6C | SPA preparation, disclosure schedules, approvals and consents, escrow, funds flow, closing statement, bring-down, closing cap table, filings, announcements | D5 | Not started (closing checklist items exist, D3) |
-| 6D | Post-closing obligations register | D5 | Not started |
+| 6C | SPA preparation, disclosure schedules, approvals and consents, escrow, funds flow, closing statement, bring-down, closing cap table, filings, announcements | D6 | Partial. **Server:** signing and closing conditions (standard set, plus either party's additions) with evidence, counterparty confirmation, two-party waivers and two-party milestone confirmation (live 25/25). **Not yet built:** the UI and the closing documents (D6-2) | `supabase/tests/nda` (transaction self-test) |
+| 6D | Post-closing obligations register | D6 | Partial. **Server:** created at closing from the terms (escrow release, earn-out end, NDA survival) with due dates; either party adds more; each is closed by evidence and counterparty confirmation (live). **Not yet built:** the register UI and document (D6-3) | `supabase/tests/nda` |
 
 ### §7 Legal and compliance boundaries
 | # | Requirement | Owning | Status |
@@ -299,7 +299,7 @@ Security deployment is reported separately in `SECURITY_DEPLOYMENT.md`. "Done" h
 | 11.9 | UI / Markdown / PDF agreement | Done for the sample pack: every heading and table row checked in the Markdown, the HTML preview and the PDF | `rendered.ts`, `quality.test.ts` |
 | 11.10 | Cross-document financial and timeline consistency | Done for the checks in 9.1 | `consistency.test.ts` |
 | 11.11 | Draft / review / approval / execution distinctions | Partial (execution D4) | `supabase/tests/documents`, `capability.test.ts` |
-| 11.12 | Post-closing obligations | Not started (D5) | — |
+| 11.12 | Post-closing obligations | Partial: server record live (D6-1); register UI pending (D6-3) | transaction self-test checks 18, 20, 21 |
 | 11.13 | Lint, type-check, unit, integration, build each increment | Every increment | §8, §9 |
 
 ### D4 (owner's decisions of 13–14 October): professional CIM and evidence-based intake
