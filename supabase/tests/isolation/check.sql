@@ -22,3 +22,6 @@ select 'B docs after signed NDA', count(*) from exitos_documents;
 reset role;
 select 'listing rows with profile', count(*) from exitos_listings where data ? 'profile' or data->'publicView' ? 'revenueUsd';
 select id, data->'publicView' from exitos_listings order by id;
+-- a listing written after the migration, profile and all, is stored without them
+insert into exitos_listings (id, data, owner_account_id) values ('lst-late', '{"id":"lst-late","code":"Project Orion","listedAt":"t","profile":{"name":"Late Secret Co"},"publicView":{"sector":"AI","region":"Europe","revenueUsd":120000000,"growthPct":-0.1,"ebitdaMarginPct":0.3}}', 'x');
+select 'late write', data::text like '%Late Secret%' as leaked, data->'publicView'->'revenueBand'->>'label', data->'publicView'->'growthBand'->>'label' from exitos_listings where id = 'lst-late';
