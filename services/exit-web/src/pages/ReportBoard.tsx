@@ -3,7 +3,7 @@ import { loadActiveCompany } from "../lib/active-company";
 import { buildBoardMemo, type BoardMemo } from "../lib/report-docs";
 import { ReportFrame, Cover, Contents, Section, Exhibit, BankTable, Lead, Note } from "../lib/report-ui";
 
-const SECTIONS = ["Recommendation", "Decision Summary", "Investment Highlights", "Risk Factors", "Approval"];
+const SECTIONS = ["Recommendation", "Background", "Decision Summary", "Investment Highlights", "Risk Factors", "Process and Timing", "Proposed Resolutions", "Approval", "Basis of Preparation"];
 
 const ReportBoard: React.FC = () => {
   const { company } = useMemo(() => loadActiveCompany(), []);
@@ -16,19 +16,23 @@ const ReportBoard: React.FC = () => {
 
       <Section n={1} title="Recommendation">
         <div className="rounded-sm border-l-4 border-[#0e7a4f] bg-[#f6faf8] p-5">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0e7a4f]">Resolved</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0e7a4f]">Proposed for the Board&apos;s decision</div>
           <p className="mt-2 text-[15px] font-medium leading-relaxed text-[#0b1220]">{r.recommendation}</p>
         </div>
         <Note>This memorandum is submitted for the Board's consideration and approval. Figures are derived from the ExitOS Valuation Framework and source-referenced market data.</Note>
       </Section>
 
-      <Section n={2} title="Decision Summary">
+      <Section n={2} title="Background">
+        <Lead>{r.background}</Lead>
+      </Section>
+
+      <Section n={3} title="Decision Summary">
         <Exhibit n="II-A" title="Transaction parameters">
           <BankTable columns={[{ key: "k", label: "Parameter" }, { key: "v", label: "Detail", align: "right" }]} rows={r.decision.map((d) => ({ k: d.k, v: d.v }))} />
         </Exhibit>
       </Section>
 
-      <Section n={3} title="Investment Highlights">
+      <Section n={4} title="Investment Highlights">
         <ol className="space-y-3">
           {r.highlights.map((h, i) => (
             <li key={i} className="flex gap-3 text-[13.5px] leading-relaxed text-[#2b3543]">
@@ -39,7 +43,7 @@ const ReportBoard: React.FC = () => {
         </ol>
       </Section>
 
-      <Section n={4} title="Risk Factors">
+      <Section n={5} title="Risk Factors">
         <Lead>The factors most likely to be probed in diligence, with the value at stake in each.</Lead>
         <BankTable
           columns={[{ key: "d", label: "Risk factor" }, { key: "i", label: "Value at stake", align: "right" }]}
@@ -47,7 +51,15 @@ const ReportBoard: React.FC = () => {
         />
       </Section>
 
-      <Section n={5} title="Approval">
+      <Section n={6} title="Process and Timing">
+        <ul className="space-y-1.5 text-[13.5px] leading-relaxed text-[#2b3543]">{r.process.map((p) => <li key={p}>{p}</li>)}</ul>
+      </Section>
+
+      <Section n={7} title="Proposed Resolutions">
+        <ol className="list-decimal space-y-2 pl-5 text-[13.5px] leading-relaxed text-[#2b3543]">{r.resolutions.map((x) => <li key={x}>{x}</li>)}</ol>
+      </Section>
+
+      <Section n={8} title="Approval">
         <Lead>The Board's approval is requested to proceed with the recommended process.</Lead>
         <div className="mt-8 grid grid-cols-2 gap-x-12 gap-y-12">
           {["Chair of the Board", "Chief Executive Officer", "Chief Financial Officer", "Lead Independent Director"].map((role) => (
@@ -58,6 +70,10 @@ const ReportBoard: React.FC = () => {
             </div>
           ))}
         </div>
+      </Section>
+
+      <Section n={9} title="Basis of Preparation">
+        <Note>{r.basis}</Note>
       </Section>
     </ReportFrame>
   );

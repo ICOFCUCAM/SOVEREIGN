@@ -154,6 +154,7 @@ h1,h2,h3,h4 { font-family:Helvetica,Arial,sans-serif; color:#0b1f3a; }
 nav.toc { page-break-after:always; } nav.toc h2 { font-size:16pt; border-bottom:1px solid #ccc; padding-bottom:2mm; }
 nav.toc ol { list-style:none; padding:0; } nav.toc li { margin:2mm 0; font-family:Helvetica,Arial,sans-serif; font-size:10.5pt; }
 h2.sec { font-size:15pt; margin-top:8mm; } h3.sec{font-size:13pt;} h4.sec{font-size:11.5pt;}
+h2.sec,h3.sec,h4.sec { break-after:avoid; page-break-after:avoid; } tr,li,blockquote { break-inside:avoid; page-break-inside:avoid; }
 .secnum { color:#6a7a90; margin-right:6px; } p.lead { font-size:12pt; color:#1a1a1a; } p.note{color:#555;font-style:italic;}
 table { width:100%; border-collapse:collapse; margin:4mm 0; font-family:Helvetica,Arial,sans-serif; font-size:10pt; }
 th,td { border:1px solid #bbb; padding:4px 8px; } thead th { background:#0b1f3a; color:#fff; } td.b{font-weight:700;}
@@ -181,13 +182,19 @@ body.tpl-court-judgment .cover h1, body.tpl-board-resolution .cover h1, body.tpl
 `;
 
 /** Render a Layout Model to a complete print-ready HTML document. */
+// A government scheme names itself on the banner ("UK_GOV OFFICIAL"); a corporate
+// or unschemed document shows its level alone ("STRICTLY CONFIDENTIAL").
+export function schemePrefix(scheme) {
+  return !scheme || scheme === "corporate" || scheme === "none" ? "" : `${scheme.toUpperCase()} `;
+}
+
 export function renderHtml(lm) {
   const warnings = [];
   const c = lm.cover;
   const lvl = lm.classification?.level || "";
   const sensitive = lvl && !/^(unclassified|none)$/i.test(lvl);
   const bannerText = sensitive && lm.renderHints.classificationBanner !== "none"
-    ? `${(lm.classification.scheme || "").toUpperCase()} ${lvl}`.trim() : "";
+    ? `${schemePrefix(lm.classification.scheme)}${lvl}`.trim() : "";
   const refCode = c.referenceCode ? `Ref: ${esc(c.referenceCode)}` : "";
 
   const metaLines = [];

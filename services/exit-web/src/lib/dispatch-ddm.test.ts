@@ -19,7 +19,7 @@ describe("ExitOS → Dispatch DDM mapper", () => {
   it("carries the engine's real content into the right blocks", () => {
     const memo = buildBoardMemo(company);
     const summary = ddm.sections.find((s) => s.role === "executive_summary")!;
-    expect((summary.blocks[0] as { text: string }).text).toBe(memo.recommendation);
+    expect((summary.blocks[0] as { text: string }).text).toBe(memo.summary);
     const kj = ddm.sections.find((s) => s.role === "key_judgements")!;
     expect((kj.blocks[0] as { items: unknown[] }).items.length).toBe(memo.highlights.length);
     const rec = ddm.sections.find((s) => s.role === "recommendation")!;

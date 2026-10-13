@@ -17,6 +17,8 @@ import {
   Table, TableRow, TableCell, WidthType, BorderStyle,
   Header, Footer, PageNumber, TableOfContents, Tab,
 } from "docx";
+// same banner rule as the HTML/Markdown renderers: no scheme name for corporate documents
+const schemePrefix = (scheme) => (!scheme || scheme === "corporate" || scheme === "none" ? "" : `${scheme.toUpperCase()} `);
 
 const HEADING = { 1: HeadingLevel.HEADING_1, 2: HeadingLevel.HEADING_2, 3: HeadingLevel.HEADING_3, 4: HeadingLevel.HEADING_4 };
 const ALIGN = { left: AlignmentType.LEFT, center: AlignmentType.CENTER, right: AlignmentType.RIGHT };
@@ -130,7 +132,7 @@ export async function renderDocx(lm, ctx = {}) {
   const lvl = lm.classification?.level || "";
   const sensitive = lvl && !/^(unclassified|none)$/i.test(lvl);
   const banner = sensitive && lm.renderHints.classificationBanner !== "none"
-    ? `${(lm.classification.scheme || "").toUpperCase()} ${lvl}`.trim() : "";
+    ? `${schemePrefix(lm.classification.scheme)}${lvl}`.trim() : "";
 
   // Cover
   const cover = [

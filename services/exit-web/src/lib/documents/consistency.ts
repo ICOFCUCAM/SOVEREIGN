@@ -41,7 +41,8 @@ export interface Truth {
 
 const pct = (x: number): number => Math.round(x * 100);
 const m1 = (usd: number): number => Math.round(usd / 100_000) / 10;   // $ millions, one decimal
-const numbers = (text: string, re: RegExp): number[] => [...text.matchAll(re)].map((m) => parseFloat((m.slice(1).find((g) => g !== undefined) ?? "").replace(/,/g, ""))).filter((n) => !Number.isNaN(n));
+// a figure and its label are on one line: "78%\nEBITDA margin" is two bullets, not one claim
+const numbers = (text: string, re: RegExp): number[] => text.split("\n").flatMap((line) => [...line.matchAll(re)]).map((m) => parseFloat((m.slice(1).find((g) => g !== undefined) ?? "").replace(/,/g, ""))).filter((n) => !Number.isNaN(n));
 
 // "<label> → milestone": the words ExitOS uses near a date for each milestone
 const MILESTONE_WORDS: ReadonlyArray<readonly [MilestoneId, RegExp]> = [
@@ -95,8 +96,9 @@ export function checkDocument(d: DocText, t: Truth): Finding[] {
   if (C.name !== SAMPLE_COMPANY.name && text.includes(SAMPLE_COMPANY.name)) add("sample_data", "high", "The demo company appears in this document", SAMPLE_COMPANY.name, C.name);
 
   // figures the document quotes against the company's own
+  // a money figure written without decimals ("$22M") is compared at that precision
   const figure = (what: string, found: number[], expected: number, tol: number, unit: string, check: Check = "figure"): void => {
-    for (const n of new Set(found)) if (Math.abs(n - expected) > tol) add(check, Math.abs(n - expected) / Math.max(1, Math.abs(expected)) >= 0.08 ? "high" : "medium", what, `${n}${unit}`, `${expected}${unit}`);
+    for (const n of new Set(found)) if (Math.abs(n - expected) > (unit === "M" && Number.isInteger(n) ? Math.max(tol, 0.5) : tol)) add(check, Math.abs(n - expected) / Math.max(1, Math.abs(expected)) >= 0.08 ? "high" : "medium", what, `${n}${unit}`, `${expected}${unit}`);
   };
   figure("ARR growth", numbers(text, /(\d{1,3})%\s*(?:YoY|year[- ]over[- ]year)|compounding at (\d{1,3})%|Revenue growth:\s*(\d{1,3})%/gi), pct(C.growth.arrGrowthYoyPct), 1, "%");
   figure("Gross margin", numbers(text, /(\d{1,3})%\s*gross margin|gross margin:?\s*(\d{1,3})%/gi), pct(C.revenue.grossMarginPct), 1, "%");
@@ -111,7 +113,9 @@ export function checkDocument(d: DocText, t: Truth): Finding[] {
     figure("Valuation midpoint", numbers(text, /enterprise value is \$(\d[\d,]*(?:\.\d+)?)M|midpoint \$(\d[\d,]*(?:\.\d+)?)M|Enterprise value \(mid\):?\s*\$(\d[\d,]*(?:\.\d+)?)M/gi), m1(v.mid), 0.1, "M", "valuation");
     for (const r of text.matchAll(/range \$(\d[\d,]*(?:\.\d+)?)M\s*[–-]\s*\$(\d[\d,]*(?:\.\d+)?)M/gi)) {
       const lo = parseFloat(r[1]), hi = parseFloat(r[2]);
-      if (Math.abs(lo - m1(v.low)) > 0.1 || Math.abs(hi - m1(v.high)) > 0.1) add("valuation", "high", "Valuation range", `$${lo}M – $${hi}M`, `$${m1(v.low)}M – $${m1(v.high)}M`);
+      // a figure stated to fewer decimals is compared at its own precision
+      const tol = (q: string): number => (q.includes(".") ? 0.1 : 0.5);
+      if (Math.abs(lo - m1(v.low)) > tol(r[1]) || Math.abs(hi - m1(v.high)) > tol(r[2])) add("valuation", "high", "Valuation range", `$${lo}M – $${hi}M`, `$${m1(v.low)}M – $${m1(v.high)}M`);
     }
   }
 

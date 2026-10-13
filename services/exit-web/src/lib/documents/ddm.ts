@@ -18,8 +18,11 @@ export interface ContentSection {
   readonly heading: string;
   readonly body?: string;
   readonly bullets?: readonly string[];
-  readonly table?: { readonly headers: readonly string[]; readonly rows: ReadonlyArray<readonly string[]> };
+  readonly table?: Table;
+  /** Engine memoranda carry their tables as a list (each with an optional caption). */
+  readonly tables?: readonly Table[];
 }
+interface Table { readonly headers: readonly string[]; readonly rows: ReadonlyArray<readonly string[]>; readonly caption?: string }
 
 export type Family = "memorandum" | "checklist" | "diligence";
 
@@ -74,10 +77,10 @@ function blocks(s: ContentSection, id: string): Array<Record<string, unknown>> {
   const out: Array<Record<string, unknown>> = [];
   if (s.body) out.push({ id: `${id}-p`, type: "paragraph", text: plain(s.body).slice(0, 5000) });
   if (s.bullets?.length) out.push({ id: `${id}-b`, type: "bullets", items: s.bullets.slice(0, 100).map((t) => ({ text: plain(t).slice(0, 2000) })) });
-  if (s.table) {
-    const cols = s.table.headers.map((h, i) => ({ key: `c${i}`, label: plain(h) || " " }));
-    out.push({ id: `${id}-t`, type: "table", columns: cols, rows: s.table.rows.map((r) => cols.map((_, i) => ({ text: plain(r[i] ?? "") }))) });
-  }
+  [...(s.table ? [s.table] : []), ...(s.tables ?? [])].forEach((t, k) => {
+    const cols = t.headers.map((h, i) => ({ key: `c${i}`, label: plain(h) || " " }));
+    out.push({ id: `${id}-t${k}`, type: "table", ...(t.caption ? { caption: plain(t.caption) } : {}), columns: cols, rows: t.rows.map((r) => cols.map((_, i) => ({ text: plain(r[i] ?? "") }))) });
+  });
   if (!out.length) out.push({ id: `${id}-p`, type: "paragraph", text: "—" });
   return out;
 }

@@ -30,6 +30,10 @@ export interface MemorandumInputs {
   readonly codeName?: string;
   // The process timeline every milestone is quoted from (the default plan when omitted).
   readonly timeline?: ProcessTimeline;
+  // Profile fields the company has not supplied, set to neutral values so the
+  // engines can run (paths such as 'team.headcount', 'cap', 'market.addressableMarketUsd').
+  // Documents never state them as facts about the company.
+  readonly assumed?: readonly string[];
 }
 
 export interface MemorandumDocument {

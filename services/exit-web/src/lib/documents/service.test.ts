@@ -37,6 +37,9 @@ async function memo(kind: "cim" | "buyer_teaser" | "executive_summary", typeId: 
     inputs: { intake: SAMPLE_INTAKE, kind }, ownerName: anonymize ? "Project Atlas" : co.name });
 }
 
+/** "3 Investment Highlights": a rendered heading with its section number. */
+const order_n = (text: string, heading: string): string => text.match(new RegExp(`## (\\d+ ${heading})`))?.[1] ?? heading;
+
 describe("document versions", () => {
   it("record what they were made from, and hash identically for identical content", async () => {
     const a = await memo("cim", "exitos.cim");
@@ -87,7 +90,12 @@ describe("Dispatch accepts and renders ExitOS documents (test configuration)", (
     const verdict = validator.validateDocument(v.ddm) as { valid: boolean; errors: unknown[] };
     expect(verdict.errors).toEqual([]);
     expect((v.ddm.classification as { level: string }).level).toBe("BOARD CONFIDENTIAL");
-    expect((v.ddm.metadata as { referenceCode: string }).referenceCode).toContain("exitos.board_memo_process v1");
+    expect((v.ddm.metadata as { referenceCode: string }).referenceCode).toMatch(/^exitos\.board_memo_process · [0-9a-f]{12}$/);
+    // rendered in the order written, not with Dispatch's profile roles pulled to the front
+    const { text } = md.renderMarkdown(engine.buildLayout(v.ddm, { date: "2026-10-13" })) as { text: string };
+    const order = ["Executive Summary", "Background", "Investment Highlights", "Transaction Parameters", "Process and Timing", "Proposed Resolutions", "Basis of Preparation"]
+      .map((h) => text.indexOf(`## ${order_n(text, h)}`));
+    expect(order.every((x, i) => x > 0 && (i === 0 || x > order[i - 1]))).toBe(true);
   });
 
   it("keeps the document's own section order and carries classification, version and reference into the render", async () => {

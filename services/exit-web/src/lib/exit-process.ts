@@ -22,6 +22,7 @@ import {
 } from "@exit/engines";
 import { SAMPLE_COMPANY } from "./profile";
 import { canonicalValuationFor } from "./canonical-valuation";
+import { memorandumInputs } from "./documents/memorandum-inputs";
 import { RESERVATION_LINES, SAMPLE_OFFERS } from "./engines";
 import { listDocuments } from "./data-room";
 import { emitRunStarted, emitRunStep, emitRunCompleted, flush } from "./telemetry";
@@ -209,16 +210,18 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
     const buyersPreliminary = runBuyerDiscovery(C, { limit: 12 });
     const diligence = runDueDiligence(C);
     run.artifacts.diligence = diligence;
+    // the same inputs as every other memorandum: code name, canonical valuation, timeline, assumed fields
+    const shared = memorandumInputs(C, C !== SAMPLE_COMPANY);
     const cim = await runStep("cim", () => memoGen.generate("cim", {
       company: C, valuation: valuation.strategic,
-      readiness: readiness.report, buyers: buyersPreliminary, diligence,
+      readiness: readiness.report, buyers: buyersPreliminary, diligence, ...shared,
     }), (m) => `${m.sections.length} sections · ${m.wordCount.toLocaleString()} words`);
     run.artifacts.cim = cim;
 
     // 5. Teaser
     const teaser = await runStep("teaser", () => memoGen.generate("buyer_teaser", {
       company: C, valuation: valuation.strategic,
-      readiness: readiness.report, buyers: buyersPreliminary, diligence,
+      readiness: readiness.report, buyers: buyersPreliminary, diligence, ...shared,
       anonymize: true,
     }), (m) => `Anonymized · ${m.wordCount.toLocaleString()} words · ${m.sections.length} sections`);
     run.artifacts.teaser = teaser;

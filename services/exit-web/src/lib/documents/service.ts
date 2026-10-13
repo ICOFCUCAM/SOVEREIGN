@@ -12,7 +12,7 @@ import { toDdm, CLASSIFICATION_LEVEL, CLASSIFICATION_HANDLING, type ContentSecti
 
 export type ReviewStatus = "draft" | "in_review" | "counsel_review" | "approved" | "superseded";
 /** Template version of the ExitOS → DDM mapping; bump when ddm.ts changes what a document contains. */
-export const TEMPLATE_VERSION = "ddm-map@1.0.0";
+export const TEMPLATE_VERSION = "ddm-map@1.1.0";
 
 export interface DocumentVersion {
   readonly id: string;
@@ -86,7 +86,7 @@ export async function generateVersion(g: GenerateInput): Promise<DocumentVersion
   const type = documentType(g.typeId);
   const family = FAMILY[g.typeId];
   if (!family && !(BESPOKE.has(g.typeId) && g.ddm)) throw new Error(`${g.typeId} has no document layout yet`);
-  const text = g.sections.map((s) => [s.heading, s.body ?? "", ...(s.bullets ?? []), ...(s.table?.rows.flat() ?? [])].join("\n")).join("\n") + `\n${g.title}\n${g.subtitle ?? ""}`;
+  const text = g.sections.map((s) => [s.heading, s.body ?? "", ...(s.bullets ?? []), ...(s.table?.rows.flat() ?? []), ...(s.tables ?? []).flatMap((t) => t.rows.flat())].join("\n")).join("\n") + `\n${g.title}\n${g.subtitle ?? ""}`;
   const gate = gateDocument(g.typeId, text, { company: g.company, unconfirmed: g.unconfirmed, ...(g.valuationMidUsd ? { valuationMidUsd: g.valuationMidUsd } : {}) });
   if (gate.blocked) throw new Error(`Withheld: ${gate.disclosure.map((d) => d.what).join(", ")} in a ${type.classification} document`);
   const now = g.now ?? new Date();
@@ -97,7 +97,7 @@ export async function generateVersion(g: GenerateInput): Promise<DocumentVersion
     ...(type.reviewRequired === "counsel" ? ["Requires review by qualified counsel; not a legal instrument."] : []),
   ];
   const version = g.version ?? 1;
-  const stamp = { version: `v${version}`, status: "draft" as const, referenceCode: `${g.typeId} v${version} · ${sourceHash.slice(0, 12)}`, date: now.toISOString().slice(0, 10) };
+  const stamp = { version: String(version), status: "draft" as const, referenceCode: `${g.typeId} · ${sourceHash.slice(0, 12)}`, date: now.toISOString().slice(0, 10) };
   const draftDdm: DdmDocument = !family ? {
     ...g.ddm!,
     metadata: { ...((g.ddm!.metadata as Record<string, unknown>) ?? {}), ...stamp, owningBody: g.ownerName, audience: type.audience },
@@ -105,8 +105,8 @@ export async function generateVersion(g: GenerateInput): Promise<DocumentVersion
   } : toDdm({
     family, typeId: g.typeId, title: g.title, ...(g.subtitle ? { subtitle: g.subtitle } : {}),
     classification: type.classification, date: now.toISOString().slice(0, 10),
-    version: `v${version}`, status: "draft", owningBody: g.ownerName, audience: type.audience,
-    referenceCode: `${g.typeId} v${version} · ${sourceHash.slice(0, 12)}`, sections: g.sections, notices,
+    version: String(version), status: "draft", owningBody: g.ownerName, audience: type.audience,
+    referenceCode: `${g.typeId} · ${sourceHash.slice(0, 12)}`, sections: g.sections, notices,
   });
   const contentHash = await sha256(canonicalJson(draftDdm));
   return {

@@ -78,7 +78,7 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
   if (sectorMult.arr && company.revenue.annualRecurringRevenueUsd > 0) {
     methodologies.push({
       name: 'ARR multiple',
-      basis: `${(company.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(2)}M ARR`,
+      basis: `$${(company.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(1)}M ARR`,
       multiple: sectorMult.arr.mid,
       band: bandFromMultiple(company.revenue.annualRecurringRevenueUsd, sectorMult.arr),
       weight: W['ARR multiple'],
@@ -89,7 +89,7 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
   if (sectorMult.revenue && company.revenue.trailingTwelveMonthsRevenueUsd > 0) {
     methodologies.push({
       name: 'Revenue multiple (TTM)',
-      basis: `${(company.revenue.trailingTwelveMonthsRevenueUsd / 1_000_000).toFixed(2)}M TTM revenue`,
+      basis: `$${(company.revenue.trailingTwelveMonthsRevenueUsd / 1_000_000).toFixed(1)}M TTM revenue`,
       multiple: sectorMult.revenue.mid,
       band: bandFromMultiple(company.revenue.trailingTwelveMonthsRevenueUsd, sectorMult.revenue),
       weight: W['Revenue multiple (TTM)'],
@@ -101,7 +101,7 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
     const ebitda = company.revenue.trailingTwelveMonthsRevenueUsd * company.revenue.ebitdaMarginPct;
     methodologies.push({
       name: 'EBITDA multiple',
-      basis: `${(ebitda / 1_000_000).toFixed(2)}M EBITDA (${(company.revenue.ebitdaMarginPct * 100).toFixed(1)}% margin)`,
+      basis: `$${(ebitda / 1_000_000).toFixed(1)}M EBITDA (${(company.revenue.ebitdaMarginPct * 100).toFixed(1)}% margin)`,
       multiple: sectorMult.ebitda.mid,
       band: bandFromMultiple(ebitda, sectorMult.ebitda),
       weight: W['EBITDA multiple'],
@@ -113,7 +113,7 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
     const gmv = company.revenue.grossMerchandiseValueUsd!;
     methodologies.push({
       name: 'GMV multiple',
-      basis: `${(gmv / 1_000_000).toFixed(2)}M GMV`,
+      basis: `$${(gmv / 1_000_000).toFixed(1)}M GMV`,
       multiple: sectorMult.gmv.mid,
       band: bandFromMultiple(gmv, sectorMult.gmv),
       weight: W['GMV multiple'],
@@ -179,7 +179,7 @@ export function runValuation(company: CompanyProfile, opts: RunOptions = {}): Va
     });
     methodologies.push({
       name: 'Opportunity cost (foregone revenue)',
-      basis: `${ar.arrOpportunityMultiple}× ARR (${(company.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(2)}M)`,
+      basis: `${ar.arrOpportunityMultiple}× ARR ($${(company.revenue.annualRecurringRevenueUsd / 1_000_000).toFixed(1)}M)`,
       band: { low: opportunityCost * ar.opportunityLowBand, mid: opportunityCost, high: opportunityCost * ar.opportunityHighBand, currency: 'USD' },
       weight: W['Opportunity cost (foregone revenue)'],
     });

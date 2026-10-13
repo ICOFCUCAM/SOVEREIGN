@@ -1,5 +1,5 @@
 import { DEFAULT_PROCESS_TIMELINE, milestone, weeksLabel, type MilestoneId, type ProcessTimeline } from "@exit/engines";
-import { structuredDoc } from "./deliverables";
+import { structuredDoc, type DocSection } from "./deliverables";
 import { closingWindow } from "./process-plan";
 
 // ── THE CLOSING CHECKLIST ───────────────────────────────────────────
@@ -43,14 +43,19 @@ export function closingRows(statuses: Record<string, ItemStatus>, t: ProcessTime
   return CLOSING_ITEMS.map((i) => ({ ...i, status: statuses[i.id] ?? "pending", timing: `by ${weeksLabel(milestone(t, i.by)).toLowerCase()}` }));
 }
 
-/** The exported checklist: the same rows the Closing page shows. */
-export function closingChecklistDoc(statuses: Record<string, ItemStatus> = loadClosingStatuses(), t: ProcessTimeline = DEFAULT_PROCESS_TIMELINE): string {
+/** The checklist's sections: the same rows the Closing page shows (the export and the stored version use these). */
+export function closingChecklistSections(statuses: Record<string, ItemStatus>, t: ProcessTimeline = DEFAULT_PROCESS_TIMELINE): DocSection[] {
   const rows = closingRows(statuses, t);
   const count = (s: ItemStatus): number => rows.filter((r) => r.status === s).length;
-  return structuredDoc("Closing Checklist", "Signature, escrow and filing items to the wire", [
+  return [
     { heading: "Status", body: `${count("done")} of ${rows.length} items marked done, ${count("in_progress")} in progress, ${count("blocked")} blocked. Statuses are tracking notes set in ExitOS, not evidence of execution.` },
     { heading: "Items", table: { headers: ["#", "Item", "Owner", "Timing", "Gate", "Status"], rows: rows.map((r, n) => [String(n + 1), r.title, r.owner, r.timing, r.gating ? "Yes" : "", STATUS_LABEL[r.status]]) } },
     { heading: "Timing", body: closingWindow(t) },
     { heading: "Terms", body: "Escrow, holdback, indemnity and break-fee terms are negotiated for the deal and set in the definitive agreement with counsel; this checklist states none." },
-  ]);
+  ];
+}
+
+/** The exported checklist: the same rows the Closing page shows. */
+export function closingChecklistDoc(statuses: Record<string, ItemStatus> = loadClosingStatuses(), t: ProcessTimeline = DEFAULT_PROCESS_TIMELINE): string {
+  return structuredDoc("Closing Checklist", "Signature, escrow and filing items to the wire", closingChecklistSections(statuses, t));
 }

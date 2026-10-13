@@ -1,5 +1,6 @@
 import { runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, DEFAULT_PROCESS_TIMELINE, type CompanyProfile, type MemorandumInputs } from "@exit/engines";
 import { canonicalValuationFor } from "../canonical-valuation";
+import { ASSUMED_PROFILE_FIELDS } from "../company-intake";
 import { codeNameFor } from "../listings";
 
 /** The one set of engine inputs every memorandum is generated from — the Document
@@ -11,7 +12,7 @@ export function memorandumInputs(company: CompanyProfile, fromIntake: boolean): 
   if (!fromIntake) return { codeName, timeline: DEFAULT_PROCESS_TIMELINE };
   const institutional = runInstitutionalValuation(company);
   return {
-    codeName, timeline: DEFAULT_PROCESS_TIMELINE, company,
+    codeName, timeline: DEFAULT_PROCESS_TIMELINE, company, assumed: ASSUMED_PROFILE_FIELDS,
     valuation: canonicalValuationFor(company, institutional),
     constitution: institutional,
     readiness: runReadiness(company),
