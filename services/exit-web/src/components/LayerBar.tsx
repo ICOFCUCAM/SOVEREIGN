@@ -1,5 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../lib/auth";
+import { canAccess, type Role } from "../lib/access";
 
 // ── THE FIVE COMMAND LAYERS ─────────────────────────────────────────
 // The institutional operating model: every console surface belongs to one of
@@ -31,16 +33,26 @@ export function activeLayer(path: string): string {
   return best;
 }
 
+/** The layers a role can open, each pointed at its first surface the role may see (a buyer is never sent to a
+ *  founder desk only to be bounced home). */
+export function layersFor(role: Role): Array<Layer & { href: string }> {
+  return LAYERS.flatMap((l) => {
+    const href = canAccess(l.to, role) ? l.to : l.match.find((m) => canAccess(m, role));
+    return href ? [{ ...l, href }] : [];
+  });
+}
+
 const LayerBar: React.FC = () => {
   const { pathname } = useLocation();
+  const { session } = useAuth();
   const active = activeLayer(pathname);
   return (
     <div className="flex items-stretch overflow-x-auto border-b border-white/10 bg-ink-950/80 backdrop-blur-sm">
       <span className="flex shrink-0 items-center border-r border-white/10 px-3 text-[8px] font-semibold uppercase tracking-[0.22em] text-white/60">Command Layers</span>
-      {LAYERS.map((l) => {
+      {layersFor(session?.role ?? "founder").map((l) => {
         const on = l.key === active;
         return (
-          <Link key={l.key} to={l.to}
+          <Link key={l.key} to={l.href} aria-current={on ? "true" : undefined}
             className={`group flex shrink-0 items-center gap-2 border-r border-white/[0.07] px-3.5 py-1.5 transition ${on ? "bg-deal-600/12" : "hover:bg-white/[0.03]"}`}>
             <span className={`font-mono text-[9px] font-bold ${on ? "text-deal-300" : "text-white/60"}`}>{l.roman}</span>
             <span className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${on ? "text-white" : "text-white/70 group-hover:text-white"}`}>{l.label}</span>
