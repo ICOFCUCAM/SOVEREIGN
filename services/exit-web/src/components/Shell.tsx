@@ -137,6 +137,9 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="flex h-full flex-col">
+      {/* the first Tab: straight past the sidebar and the three header bars to the page */}
+      <a href="#workspace" onClick={(e) => { e.preventDefault(); workspace.current?.focus(); }}
+        className="sr-only z-[60] rounded-md bg-deal-700 px-4 py-2.5 text-[13px] font-semibold text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-300">Skip to content</a>
       <div aria-hidden className="h-1 w-full bg-gradient-to-r from-deal-700 via-deal-500 to-loi-500" />
 
       {/* Mobile top bar */}
@@ -215,7 +218,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </aside>
 
-        <main ref={workspace} className="relative flex-1 overflow-y-auto">
+        <main ref={workspace} id="workspace" tabIndex={-1} className="relative flex-1 overflow-y-auto focus:outline-none">
           <div className="sticky top-0 z-30">
             <InstitutionalRibbon />
             <LayerBar />
