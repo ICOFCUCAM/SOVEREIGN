@@ -187,24 +187,37 @@ export function buyerVisibility(buyerId: string): "public_anonymized" | "private
 
 const memoGen = new TemplateMemorandumGenerator();
 
+/** The full engine inputs for a memorandum: the given ones over the demo defaults. */
+export const memorandumBase = (inputs?: Partial<MemorandumInputs>): MemorandumInputs => ({
+  company:      SAMPLE_COMPANY,
+  valuation:    VALUATION_CANONICAL,
+  constitution: VALUATION_INSTITUTIONAL,   // every memo inherits the framework
+  readiness:    READINESS,
+  buyers:       BUYERS,
+  diligence:    DILIGENCE,
+  ...inputs,
+});
+
 export function useMemorandum(kind: MemorandumKind, inputs?: Partial<MemorandumInputs>): MemorandumDocument | null {
   const [doc, setDoc] = useState<MemorandumDocument | null>(null);
   useEffect(() => {
     let alive = true;
-    memoGen
-      .generate(kind, {
-        company:      SAMPLE_COMPANY,
-        valuation:    VALUATION_CANONICAL,
-        constitution: VALUATION_INSTITUTIONAL,   // every memo inherits the framework
-        readiness:    READINESS,
-        buyers:       BUYERS,
-        diligence:    DILIGENCE,
-        ...inputs,
-      })
-      .then((d) => { if (alive) setDoc(d); });
+    memoGen.generate(kind, memorandumBase(inputs)).then((d) => { if (alive) setDoc(d); });
     return () => { alive = false; };
   }, [kind, inputs]);
   return doc;
+}
+
+/** Every memorandum kind from the same inputs — what the cross-document checks read. */
+export function useMemorandumSuite(kinds: readonly MemorandumKind[], inputs?: Partial<MemorandumInputs>): MemorandumDocument[] | null {
+  const [docs, setDocs] = useState<MemorandumDocument[] | null>(null);
+  useEffect(() => {
+    let alive = true;
+    const base = memorandumBase(inputs);
+    void Promise.all(kinds.map((k) => memoGen.generate(k, base))).then((d) => { if (alive) setDocs(d); });
+    return () => { alive = false; };
+  }, [kinds, inputs]);
+  return docs;
 }
 
 export function fmt(n?: number, opts: { compact?: boolean; currency?: string } = {}): string {

@@ -52,3 +52,15 @@ test('word counts are measured from the text, not estimated', async () => {
     assert.equal(doc.wordCount, manual, kind);
   }
 });
+
+test('named memoranda disclose customer concentration; the teaser does not quote it', async () => {
+  const company = { ...SAMPLE_SAAS, revenue: { ...SAMPLE_SAAS.revenue, customerConcentrationTop10Pct: 0.41 } };
+  const gen = new TemplateMemorandumGenerator();
+  const base = { company, valuation: runValuation(company), readiness: runReadiness(company), buyers: runBuyerDiscovery(company), diligence: runDueDiligence(company) };
+  for (const kind of ['cim', 'executive_summary']) {
+    const d = await gen.generate(kind, base);
+    assert.match(d.sections.map((s) => s.body).join(' '), /ten largest customers account for 41% of revenue — a concentration buyers will test/);
+  }
+  const t = await gen.generate('buyer_teaser', base);
+  assert.doesNotMatch(t.sections.map((s) => s.body).join(' '), /largest customers/);
+});

@@ -125,6 +125,13 @@ function valuationTable(i: MemorandumInputs): MemorandumTable {
 // The framework-governed valuation section every memorandum inherits.
 // Renders the ten mandatory outputs from the constitution — no document
 // states a valuation figure the framework didn't produce.
+/** Customer concentration, stated in every named memorandum's financial section: a material risk is disclosed, never left for diligence to find. */
+function concentrationSentence(r: { readonly customerConcentrationTop10Pct?: number }): string {
+  const c = r.customerConcentrationTop10Pct;
+  if (c == null) return ' Customer concentration has not been supplied.';
+  return ` The ten largest customers account for ${(c * 100).toFixed(0)}% of revenue${c >= 0.35 ? ' — a concentration buyers will test in diligence' : ''}.`;
+}
+
 function constitutionValuationSection(i: MemorandumInputs, heading: string): MemorandumSection | null {
   const c = i.constitution;
   if (!c) return null;
@@ -191,7 +198,7 @@ function cim(i: MemorandumInputs): MemorandumDocument {
     },
     {
       heading: '5. Financial performance',
-      body: `${name} reports ${money(r.trailingTwelveMonthsRevenueUsd, !!i.anonymize)} in trailing twelve-month revenue at ${(r.grossMarginPct * 100).toFixed(0)}% gross margin and ${(r.ebitdaMarginPct * 100).toFixed(0)}% EBITDA margin — profitable while compounding. The recurring-revenue base has expanded consistently at the reported growth rate.`,
+      body: `${name} reports ${money(r.trailingTwelveMonthsRevenueUsd, !!i.anonymize)} in trailing twelve-month revenue at ${(r.grossMarginPct * 100).toFixed(0)}% gross margin and ${(r.ebitdaMarginPct * 100).toFixed(0)}% EBITDA margin — profitable while compounding. The recurring-revenue base has expanded consistently at the reported growth rate.${concentrationSentence(r)}`,
       tables: [financialProfileTable(i), arrTrajectory(i), valuationTable(i)],
     },
     constitutionValuationSection(i, '6. Valuation') ?? {
@@ -235,7 +242,7 @@ function executiveSummary(i: MemorandumInputs): MemorandumDocument {
     },
     {
       heading: 'Financial profile',
-      body: `${name} reports ${money(c.revenue.trailingTwelveMonthsRevenueUsd, !!i.anonymize)} in trailing twelve-month revenue, anchored by ${money(c.revenue.annualRecurringRevenueUsd, !!i.anonymize)} of annual recurring revenue growing ${(c.growth.arrGrowthYoyPct * 100).toFixed(0)}% year over year.`,
+      body: `${name} reports ${money(c.revenue.trailingTwelveMonthsRevenueUsd, !!i.anonymize)} in trailing twelve-month revenue, anchored by ${money(c.revenue.annualRecurringRevenueUsd, !!i.anonymize)} of annual recurring revenue growing ${(c.growth.arrGrowthYoyPct * 100).toFixed(0)}% year over year.${concentrationSentence(c.revenue)}`,
       tables: [financialProfileTable(i), arrTrajectory(i)],
     },
     {

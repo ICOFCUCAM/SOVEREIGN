@@ -4,7 +4,7 @@ import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
 import { buildMarketTape } from "../lib/market-tape";
-import { useMemorandum, VALUATION_CANONICAL } from "../lib/engines";
+import { useMemorandum, useMemorandumSuite, memorandumBase, VALUATION_CANONICAL } from "../lib/engines";
 import type { CompanyProfile } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
 import { memorandumInputs } from "../lib/documents/memorandum-inputs";
@@ -14,65 +14,22 @@ import { DocumentVersions } from "../components/DocumentVersions";
 import { DEFAULT_PROCESS_TIMELINE } from "@exit/engines";
 import type { IntakeField } from "../lib/active-company";
 import { docToMarkdown } from "../lib/deliverables";
+import { checkSuite, type Finding } from "../lib/documents/consistency";
+import { closingChecklistDoc } from "../lib/closing-checklist";
 import { label, plural } from "../lib/labels";
 import type { MemorandumKind, MemorandumDocument } from "@exit/engines";
+
+const ALL_KINDS: readonly MemorandumKind[] = ["cim", "executive_summary", "investor_deck", "buyer_teaser", "dd_room_index"];
+const TYPE_TITLE: Record<string, string> = {
+  "exitos.cim": "CIM", "exitos.executive_summary": "Executive summary", "exitos.investor_deck": "Investor deck",
+  "exitos.teaser": "Teaser", "exitos.data_room_index": "Data room index", "exitos.closing_checklist": "Closing checklist",
+};
 
 // the registry type each generator kind produces
 const KIND_TYPE: Record<MemorandumKind, string> = {
   cim: "exitos.cim", executive_summary: "exitos.executive_summary", investor_deck: "exitos.investor_deck",
   buyer_teaser: "exitos.teaser", dd_room_index: "exitos.data_room_index",
 };
-
-// Consistency check (rule-based) — scans the generated text for growth, gross
-// margin and net-retention claims and compares each with the company profile;
-// also flags a missing concentration disclosure. Four checks, nothing more.
-interface RedFlag {
-  readonly metric: string;
-  readonly claimed: string;
-  readonly actual: string;
-  readonly severity: "high" | "medium" | "low";
-  readonly note: string;
-}
-function redTeam(doc: MemorandumDocument | null, C: CompanyProfile): RedFlag[] {
-  if (!doc) return [];
-  const text = doc.sections.map((s) => `${s.heading} ${s.body} ${(s.bullets ?? []).join(" ")}`).join(" ");
-  const flags: RedFlag[] = [];
-  // truth values
-  const truth = {
-    growth: Math.round(C.growth.arrGrowthYoyPct * 100),
-    gross: Math.round(C.revenue.grossMarginPct * 100),
-    ebitda: Math.round(C.revenue.ebitdaMarginPct * 100),
-    nrr: C.revenue.netRetentionPct != null ? Math.round(C.revenue.netRetentionPct * 100) : null,
-    arrM: Math.round(C.revenue.annualRecurringRevenueUsd / 1_000_000),
-    customers: C.users.totalCustomers,
-  };
-  const sev = (claimed: number, actual: number): RedFlag["severity"] => {
-    const d = Math.abs(claimed - actual) / Math.max(1, actual);
-    return d >= 0.2 ? "high" : d >= 0.08 ? "medium" : "low";
-  };
-  // helper: find a "<n>% <keyword>" or "<keyword> ... <n>%" claim
-  const findPct = (re: RegExp) => { const m = text.match(re); return m ? parseInt(m[1] ?? m[2], 10) : null; };
-
-  const growthClaim = findPct(/(\d{1,3})%\s*(?:yoy|growth|year[- ]over[- ]year)/i) ?? findPct(/grow\w*[^.]{0,40}?(\d{1,3})%/i);
-  if (growthClaim != null && growthClaim !== truth.growth && Math.abs(growthClaim - truth.growth) >= 3)
-    flags.push({ metric: "ARR growth", claimed: `${growthClaim}%`, actual: `${truth.growth}%`, severity: sev(growthClaim, truth.growth), note: "Growth narrative diverges from booked ARR growth — a buyer will reconcile against the financials." });
-
-  const grossClaim = findPct(/(\d{1,3})%\s*gross\s*margin/i) ?? findPct(/gross\s*margin[^.]{0,30}?(\d{1,3})%/i);
-  if (grossClaim != null && Math.abs(grossClaim - truth.gross) >= 3)
-    flags.push({ metric: "Gross margin", claimed: `${grossClaim}%`, actual: `${truth.gross}%`, severity: sev(grossClaim, truth.gross), note: "Margin claim doesn't match the P&L — expect a quality-of-earnings challenge." });
-
-  if (truth.nrr != null) {
-    const nrrClaim = findPct(/(\d{2,3})%\s*(?:net\s*retention|nrr|ndr)/i) ?? findPct(/(?:net\s*retention|nrr)[^.]{0,30}?(\d{2,3})%/i);
-    if (nrrClaim != null && Math.abs(nrrClaim - truth.nrr) >= 3)
-      flags.push({ metric: "Net retention", claimed: `${nrrClaim}%`, actual: `${truth.nrr}%`, severity: sev(nrrClaim, truth.nrr), note: "Retention claim above reported NRR — cohort data will be requested." });
-  }
-
-  // concentration: doc silent on a known high concentration is itself a flag
-  if ((C.revenue.customerConcentrationTop10Pct ?? 0) >= 0.35 && !/concentrat/i.test(text))
-    flags.push({ metric: "Customer concentration", claimed: "not disclosed", actual: `top-10 = ${Math.round((C.revenue.customerConcentrationTop10Pct ?? 0) * 100)}%`, severity: "high", note: "Document omits a material concentration risk a buyer will surface in diligence." });
-
-  return flags;
-}
 
 const Documents: React.FC = () => {
   const [kind, setKind] = useState<MemorandumKind>("cim");
@@ -82,10 +39,23 @@ const Documents: React.FC = () => {
   // the same engine inputs the CIM report page and the Banker use
   const inputs = useMemo(() => memorandumInputs(company, fromIntake), [company, fromIntake]);
   const doc = useMemorandum(kind, inputs);
-  const flags = useMemo(() => redTeam(doc, company), [doc, company]);
+  // every document for this company, checked against each other and the one valuation, timeline and checklist
+  const suite = useMemorandumSuite(ALL_KINDS, inputs);
+  const findings = useMemo<Finding[] | null>(() => {
+    if (!suite) return null;
+    const base = memorandumBase(inputs);
+    const h = base.valuation.headline;
+    return checkSuite(
+      suite.map((d) => ({ typeId: KIND_TYPE[d.kind], title: d.title, text: docToMarkdown(d), anonymized: d.anonymized })),
+      { company: base.company, codeName: codeNameFor(company, !fromIntake), valuation: { low: h.low, mid: h.mid, high: h.high }, ...(base.timeline ? { timeline: base.timeline } : {}) },
+      closingChecklistDoc(),
+    );
+  }, [suite, inputs, company, fromIntake]);
+  const flags = useMemo(() => (findings ?? []).filter((f) => f.typeId === KIND_TYPE[kind]), [findings, kind]);
+  const elsewhere = useMemo(() => (findings ?? []).filter((f) => f.typeId !== KIND_TYPE[kind]), [findings, kind]);
   const valueUsd = inputs?.valuation?.headline.mid ?? VALUATION_CANONICAL.headline.mid;
   return (
-    <DocumentsView kind={kind} setKind={setKind} doc={doc} flags={flags} company={company} fromIntake={fromIntake} valueUsd={valueUsd}
+    <DocumentsView kind={kind} setKind={setKind} doc={doc} flags={flags} elsewhere={elsewhere} checked={findings != null} company={company} fromIntake={fromIntake} valueUsd={valueUsd}
       companyId={companyId} unconfirmed={unconfirmed} engineInputs={inputs} />
   );
 };
@@ -94,14 +64,16 @@ const DocumentsView: React.FC<{
   kind: MemorandumKind;
   setKind: (k: MemorandumKind) => void;
   doc: MemorandumDocument | null;
-  flags: RedFlag[];
+  flags: Finding[];
+  elsewhere: Finding[];
+  checked: boolean;
   company: CompanyProfile;
   fromIntake: boolean;
   valueUsd: number;
   companyId: string | null;
   unconfirmed: readonly IntakeField[];
   engineInputs: Record<string, unknown> | undefined;
-}> = ({ kind, setKind, doc, flags, company, fromIntake, valueUsd, companyId, unconfirmed, engineInputs }) => {
+}> = ({ kind, setKind, doc, flags, elsewhere, checked, company, fromIntake, valueUsd, companyId, unconfirmed, engineInputs }) => {
   const gate = useDocumentGate(KIND_TYPE[kind], doc ? docToMarkdown(doc) : null, valueUsd);
   const codeName = useMemo(() => codeNameFor(company, !fromIntake), [company, fromIntake]);
 
@@ -123,7 +95,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
   return (
     <div data-page="documents" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Workspace · Documents · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Document Generator"
-        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Engine-composed · {flags.length > 0 ? plural(flags.length, "consistency flag") : "no conflicts in the four checks"}</span></>}
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Engine-composed · {!checked ? "checking consistency…" : flags.length + elsewhere.length > 0 ? plural(flags.length + elsewhere.length, "consistency finding") : "no contradictions found across the documents"}</span></>}
         actions={<>
           {/* one size for the four header actions: three outlined, the report filled */}
           <span className="text-[12px] text-xo-faint">Nothing is sent from ExitOS — download a draft to share it.</span>
@@ -140,7 +112,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
         <div className="bg-xo-panel"><Metric label="Templates" value={String(KINDS.length)} sub="document kinds" /></div>
         <div className="bg-xo-panel"><Metric label="Word count" value={doc ? String(doc.wordCount) : "—"} sub="current document" /></div>
         <div className="bg-xo-panel"><Metric label="Anonymized" value={doc?.anonymized ? "Yes" : "No"} sub={doc?.kind === "buyer_teaser" ? "teaser default" : "founder-named"} /></div>
-        <div className="bg-xo-panel"><Metric label="Consistency flags" emphasis value={<span className={flags.length === 0 ? "text-xo-verified" : "text-xo-caution"}>{flags.length}</span>} sub="four rule-based checks" /></div>
+        <div className="bg-xo-panel"><Metric label="Consistency findings" emphasis value={<span className={flags.length === 0 ? "text-xo-verified" : "text-xo-caution"}>{flags.length}</span>} sub="this document · rule-based" /></div>
       </section>
 
       <RegistryTape items={buildMarketTape()} asOf={DNA_AS_OF.slice(0, 10)} />
@@ -166,36 +138,37 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
 
       <Section title="Recommended action" eyebrow="Banker's take" className="border border-xo-line">
         <div className="px-4 py-3">
-          <p className="text-[14px] leading-relaxed">{flags.length > 0
-            ? <>Reconcile the <span className="font-semibold">{flags.length} consistency flag{flags.length === 1 ? "" : "s"}</span> before this document reaches a buyer.</>
-            : <>No conflicts found in the four consistency checks — review the full draft before it reaches a buyer.</>}</p>
+          <p className="text-[14px] leading-relaxed">{flags.length + elsewhere.length > 0
+            ? <>Reconcile the <span className="font-semibold">{plural(flags.length + elsewhere.length, "consistency finding")}</span> before any of these documents reaches a buyer.</>
+            : <>No contradictions found between the documents — the checks read figures, dates and names, not the argument, so review the full draft before it reaches a buyer.</>}</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
             <TakeCell k="At stake">A <span className="font-mono font-semibold text-xo-verified">{fmtMoney(valueUsd)}</span> outcome hinges on a narrative buyers can't pick apart.</TakeCell>
             <TakeCell k="If you wait">Every unreconciled claim is a retrade lever a buyer's analyst finds in diligence.</TakeCell>
             <TakeCell k="Buyer">The buyer's analyst reads this adversarially — close the gaps before they do.</TakeCell>
-            <TakeCell k="What ExitOS does">Generates each document from templates and the engines, then checks four figures (ARR growth, gross margin, net retention, a concentration disclosure) against the company profile.</TakeCell>
+            <TakeCell k="What ExitOS does">Generates each document from templates and the engines, then checks every document against the company's figures, the one valuation, the one process timeline and the one closing checklist.</TakeCell>
           </dl>
         </div>
       </Section>
 
       {doc && (
-        <Section title={`Consistency check · ${label(doc.kind)}`} eyebrow="Rule-based · four checks" className="border border-xo-line"
-          foot="Checks: ARR growth, gross margin and net retention claims in the text against the profile (3-point tolerance), and whether a top-10 customer concentration of 35% or more is mentioned. Other claims are not checked."
-          right={<span className="text-[12px] text-xo-muted">{flags.length} claim{flags.length === 1 ? "" : "s"} to reconcile before buyer review</span>}>
-          {flags.length === 0 ? (
-            <p className="px-4 py-3 text-[13px] text-xo-muted">No conflicts found in these four checks. Other claims in the draft are not checked — review it before use.</p>
+        <Section title={`Consistency check · ${label(doc.kind)}`} eyebrow="Rule-based · across every document" className="border border-xo-line"
+          foot="Checks: the figures each document quotes (ARR, revenue, growth, margins, net retention) against the company's; the valuation against the one canonical valuation; every dated milestone against the one process timeline; the closing checklist's items and timing; the company name or code name; the currency; and a material customer concentration left undisclosed. Figures in phrasings the checks do not recognise are not checked."
+          right={<span className="text-[12px] text-xo-muted">{checked ? `${plural(flags.length, "finding")} here · ${elsewhere.length} in other documents` : "checking…"}</span>}>
+          {!checked ? (
+            <p className="px-4 py-3 text-[13px] text-xo-muted">Checking the documents…</p>
+          ) : flags.length + elsewhere.length === 0 ? (
+            <p className="px-4 py-3 text-[13px] text-xo-muted">No contradictions found between the documents, the company's figures, the valuation, the timeline and the closing checklist. That is not a review of the argument — read the draft before use.</p>
           ) : (
             <ul className="divide-y divide-xo-line">
-              {flags.map((f) => (
-                <li key={f.metric} className="flex items-start gap-3 px-4 py-3">
-                  <span className={`mt-0.5 shrink-0 text-[11px] font-semibold uppercase ${f.severity === "high" ? "text-xo-risk" : f.severity === "medium" ? "text-xo-caution" : "text-xo-muted"}`}>{f.severity}</span>
+              {[...flags, ...elsewhere].map((f, n) => (
+                <li key={`${f.typeId}-${f.check}-${f.what}-${n}`} className="flex items-start gap-3 px-4 py-3">
+                  <span className={`mt-0.5 shrink-0 text-[11px] font-semibold uppercase ${f.severity === "high" ? "text-xo-risk" : "text-xo-caution"}`}>{f.severity}</span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-[13px] font-semibold">{f.metric}</h3>
+                    <h3 className="text-[13px] font-semibold">{f.what} <span className="font-normal text-xo-muted">· {TYPE_TITLE[f.typeId] ?? f.typeId}</span></h3>
                     <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-xo-muted">
-                      <span>Document claims <span className="font-mono font-semibold text-xo-risk">{f.claimed}</span></span>
-                      <span>Financials show <span className="font-mono font-semibold text-xo-verified">{f.actual}</span></span>
+                      <span>Document says <span className="font-mono font-semibold text-xo-risk">{f.found}</span></span>
+                      <span>Should say <span className="font-mono font-semibold text-xo-verified">{f.expected}</span></span>
                     </div>
-                    <p className="mt-1 text-[12px] leading-snug text-xo-muted">{f.note}</p>
                   </div>
                 </li>
               ))}
