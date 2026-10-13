@@ -1,0 +1,12 @@
+
+A reads own|1
+A revision after update|2
+
+psql:scenario.sql:13: ERROR:  a figure can be marked verified only through a verification process, not by its owner
+CONTEXT:  PL/pgSQL function exitos_company_stories_guard() line 4 at RAISE
+
+C reads A|0
+C updated rows (0 expected)|0
+psql:scenario.sql:19: ERROR:  new row violates row-level security policy for table "exitos_company_stories"
+psql:scenario.sql:22: ERROR:  permission denied for table exitos_company_stories
+A story intact|two analysts|2

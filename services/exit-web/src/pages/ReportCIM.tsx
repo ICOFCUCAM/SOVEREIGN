@@ -14,8 +14,8 @@ import { DEFAULT_PROCESS_TIMELINE, weeksLabel } from "@exit/engines";
 const heading = (h: string): string => h.replace(/^\d+[.)]\s+/, "");
 
 const ReportCIM: React.FC = () => {
-  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
-  const inputs = useMemo(() => memorandumInputs(company, fromIntake), [company, fromIntake]);
+  const { company, fromIntake, story } = useMemo(() => loadActiveCompany(), []);
+  const inputs = useMemo(() => memorandumInputs(company, fromIntake, story), [company, fromIntake, story]);
   const doc = useMemorandum("cim", inputs);
   const mk = useMemo(() => buildMarketReport(company), [company]);
   const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });

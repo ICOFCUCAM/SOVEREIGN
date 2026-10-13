@@ -46,7 +46,7 @@ const Banker: React.FC = () => {
   const [tab, setTab] = useState<Tab>("outreach");
   // The founder's saved intake when there is one; the demo company otherwise
   // (the same engine inputs the Documents page uses).
-  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
+  const { company, fromIntake, story } = useMemo(() => loadActiveCompany(), []);
   // documents name the company by its listing's code name before an NDA
   const PROJECT = useMemo(() => codeNameFor(company, !fromIntake), [company, fromIntake]);
   const own = useMemo(() => {
@@ -62,7 +62,7 @@ const Banker: React.FC = () => {
   const DILIGENCE = own?.diligence ?? DEMO_DILIGENCE;
   const VALUATION_CANONICAL = own?.canonical ?? DEMO_CANONICAL;
   // the same engine inputs the Document Generator and the CIM report page use
-  const memoInputs = useMemo(() => memorandumInputs(company, fromIntake), [company, fromIntake]);
+  const memoInputs = useMemo(() => memorandumInputs(company, fromIntake, story), [company, fromIntake, story]);
   const teaser  = useMemorandum("buyer_teaser", memoInputs);
   const summary = useMemorandum("executive_summary", memoInputs);
   const cim     = useMemorandum("cim", memoInputs);

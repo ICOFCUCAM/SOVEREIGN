@@ -35,9 +35,9 @@ const Documents: React.FC = () => {
   const [kind, setKind] = useState<MemorandumKind>("cim");
   // The founder's saved intake when there is one; the demo company otherwise
   // (its engine runs are the hook's defaults, so no inputs are passed).
-  const { company, fromIntake, companyId, unconfirmed } = useMemo(() => loadActiveCompany(), []);
+  const { company, fromIntake, companyId, unconfirmed, story } = useMemo(() => loadActiveCompany(), []);
   // the same engine inputs the CIM report page and the Banker use
-  const inputs = useMemo(() => memorandumInputs(company, fromIntake), [company, fromIntake]);
+  const inputs = useMemo(() => memorandumInputs(company, fromIntake, story), [company, fromIntake, story]);
   const doc = useMemorandum(kind, inputs);
   // every document for this company, checked against each other and the one valuation, timeline and checklist
   const suite = useMemorandumSuite(ALL_KINDS, inputs);

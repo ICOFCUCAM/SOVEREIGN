@@ -18,6 +18,9 @@ import { sectorTokensFor } from "./buyer-dna";
 const KEY = "exitos.intake.v2";
 const LEGACY_KEY = "exitos.intake.v1";
 
+import { EMPTY_STORY, type CompanyStory } from "@exit/engines";
+import { loadStory, profileWithStory } from "./company-story";
+
 export type IntakeField = keyof IntakeInputs;
 export const INTAKE_FIELDS = Object.keys(SAMPLE_INTAKE) as IntakeField[];
 
@@ -62,10 +65,17 @@ export function loadIntakeRecord(): IntakeRecord | null {
 /** The fields of a saved intake that still hold the demo company's values. */
 export const unconfirmedFields = (r: IntakeRecord): IntakeField[] => INTAKE_FIELDS.filter((k) => !r.provided.includes(k));
 
-export function loadActiveCompany(): { company: CompanyProfile; fromIntake: boolean; companyId: string | null; unconfirmed: IntakeField[] } {
+/** The one company context every page and generator uses: the founder's intake with
+ *  what their company story supplies (headcount, cap table, sourced market size …),
+ *  the story itself, and the profile fields that are still assumed for the engines. */
+export function loadActiveCompany(): { company: CompanyProfile; fromIntake: boolean; companyId: string | null; unconfirmed: IntakeField[]; story: CompanyStory; assumed: readonly string[] } {
   const r = loadIntakeRecord();
-  if (r) return { company: { ...buildProfile(r.inputs), id: r.id }, fromIntake: true, companyId: r.id, unconfirmed: unconfirmedFields(r) };
-  return { company: SAMPLE_COMPANY, fromIntake: false, companyId: null, unconfirmed: [] };
+  if (r) {
+    const story = loadStory(r.id);
+    const { profile, assumed } = profileWithStory({ ...buildProfile(r.inputs), id: r.id }, story);
+    return { company: profile, fromIntake: true, companyId: r.id, unconfirmed: unconfirmedFields(r), story, assumed };
+  }
+  return { company: SAMPLE_COMPANY, fromIntake: false, companyId: null, unconfirmed: [], story: EMPTY_STORY, assumed: [] };
 }
 
 /** Sector vocabulary for the active company — drives buyer-overlap ranking. */

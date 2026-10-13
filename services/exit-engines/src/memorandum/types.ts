@@ -1,3 +1,4 @@
+import type { CompanyStory } from '../story/story.js';
 import type { CompanyProfile } from '../types.js';
 import type { ValuationReport } from '../valuation/engine.js';
 import type { ValuationConstitution } from '../valuation/institutional.js';
@@ -34,6 +35,9 @@ export interface MemorandumInputs {
   // engines can run (paths such as 'team.headcount', 'cap', 'market.addressableMarketUsd').
   // Documents never state them as facts about the company.
   readonly assumed?: readonly string[];
+  // The company's story and evidence (history, products, customers, market, people,
+  // ownership, financial history, sources). Documents use only what it holds.
+  readonly story?: CompanyStory;
 }
 
 export interface MemorandumDocument {

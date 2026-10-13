@@ -14,6 +14,7 @@ export * as documents    from './documents/index.js';
 export * as marketdata   from './marketdata/index.js';
 export * as market       from './market/index.js';
 export * as process      from './process/index.js';
+export * from './story/index.js';
 export { DEFAULT_PROCESS_TIMELINE, milestone, weeksLabel, weeksPhrase, timelineLines, validateTimeline } from './process/index.js';
 export type { ProcessTimeline, Milestone, MilestoneId } from './process/index.js';
 

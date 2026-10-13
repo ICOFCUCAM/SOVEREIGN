@@ -23,6 +23,7 @@ import {
 import { SAMPLE_COMPANY } from "./profile";
 import { canonicalValuationFor } from "./canonical-valuation";
 import { memorandumInputs } from "./documents/memorandum-inputs";
+import type { CompanyStory } from "@exit/engines";
 import { RESERVATION_LINES, SAMPLE_OFFERS } from "./engines";
 import { listDocuments } from "./data-room";
 import { emitRunStarted, emitRunStep, emitRunCompleted, flush } from "./telemetry";
@@ -136,6 +137,8 @@ const STEP_DELAY_MS = 380;                   // visible-but-fast pacing
 export interface RunExitOptions {
   /** The company to run on; the demo company when omitted. */
   company?: CompanyProfile;
+  /** The company's story (the same one the Document Generator uses). */
+  story?: CompanyStory;
   readonly onStepChange?: (run: ExitRun) => void;
   readonly fastMode?: boolean;                // skip artificial pacing
 }
@@ -211,7 +214,7 @@ export async function runExitProcess(opts: RunExitOptions = {}): Promise<ExitRun
     const diligence = runDueDiligence(C);
     run.artifacts.diligence = diligence;
     // the same inputs as every other memorandum: code name, canonical valuation, timeline, assumed fields
-    const shared = memorandumInputs(C, C !== SAMPLE_COMPANY);
+    const shared = memorandumInputs(C, C !== SAMPLE_COMPANY, opts.story);
     const cim = await runStep("cim", () => memoGen.generate("cim", {
       company: C, valuation: valuation.strategic,
       readiness: readiness.report, buyers: buyersPreliminary, diligence, ...shared,

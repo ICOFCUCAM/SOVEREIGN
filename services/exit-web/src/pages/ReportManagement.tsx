@@ -15,8 +15,8 @@ import { ReportFrame, Cover, Contents, ListOfExhibits, Section, Exhibit, BankTab
 const title = (h: string): string => h.replace(/^Slide \d+ · /, "");
 
 const ReportManagement: React.FC = () => {
-  const { company, fromIntake } = useMemo(() => loadActiveCompany(), []);
-  const inputs = useMemo(() => memorandumInputs(company, fromIntake), [company, fromIntake]);
+  const { company, fromIntake, story } = useMemo(() => loadActiveCompany(), []);
+  const inputs = useMemo(() => memorandumInputs(company, fromIntake, story), [company, fromIntake, story]);
   const deck = useMemorandum("investor_deck", inputs);
   const mk = useMemo(() => buildMarketReport(company), [company]);
   const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });

@@ -40,8 +40,9 @@ const ExitProcessModal: React.FC<Props> = ({ open, onClose, onComplete }) => {
     startedRef.current = true;
     clearRun();
     let alive = true;
+    const active = loadActiveCompany();
     runExitProcess({
-      company: loadActiveCompany().company,
+      company: active.company, story: active.story,
       onStepChange: (r) => {
         if (!alive) return;
         // shallow clone to force re-render
