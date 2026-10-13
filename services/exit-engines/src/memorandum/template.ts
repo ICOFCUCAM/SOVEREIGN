@@ -3,6 +3,18 @@ import type {
   MemorandumSection, MemorandumTable,
 } from './types.js';
 
+// codes as prose: "a logistics business operating in logistics freight", "a modular monolith"
+const MODEL_PHRASE: Record<string, string> = {
+  saas: 'software-as-a-service business', marketplace: 'marketplace business', logistics: 'logistics business',
+  mobility: 'mobility business', ai_platform: 'AI platform business', fintech: 'financial-technology business',
+  commerce: 'commerce business', media: 'media business', services: 'services business', other: 'business',
+};
+/** With its article: "a logistics business", "an AI platform business". */
+const modelPhrase = (m: string): string => { const p = MODEL_PHRASE[m] ?? `${m.replace(/_/g, ' ')} business`; return `${/^[aeiouAEIOU]/.test(p) ? 'an' : 'a'} ${p}`; };
+const sectorWords = (s: string): string => s.replace(/_/g, ' ');
+const ARCH_PHRASE: Record<string, string> = { monolith: 'monolith', modular_monolith: 'modular monolith', microservices: 'microservices', unknown: 'not stated' };
+const archPhrase = (a: string): string => ARCH_PHRASE[a] ?? a.replace(/_/g, ' ');
+
 // Deterministic template generator. No LLM. Produces structurally
 // correct memoranda from the engine inputs — narrative is mechanical
 // but the document shape matches what counsel and bankers expect.
@@ -140,7 +152,7 @@ function cim(i: MemorandumInputs): MemorandumDocument {
   const sections: MemorandumSection[] = [
     {
       heading: '1. Executive overview',
-      body: `${name} is a ${i.company.businessModel} operating in ${i.company.sector.replace(/_/g, ' ')}. Founded ${i.company.foundedYear}, headquartered in ${i.anonymize ? '[redacted]' : i.company.jurisdiction}. The business operates ${money(r.annualRecurringRevenueUsd, !!i.anonymize)} of annual recurring revenue against a ${money(i.company.market.addressableMarketUsd, !!i.anonymize)} addressable market.`,
+      body: `${name} is ${modelPhrase(i.company.businessModel)} operating in ${sectorWords(i.company.sector)}. Founded ${i.company.foundedYear}, headquartered in ${i.anonymize ? '[redacted]' : i.company.jurisdiction}. The business operates ${money(r.annualRecurringRevenueUsd, !!i.anonymize)} of annual recurring revenue against a ${money(i.company.market.addressableMarketUsd, !!i.anonymize)} addressable market.`,
       bullets: [
         `Revenue (TTM): ${money(r.trailingTwelveMonthsRevenueUsd, !!i.anonymize)}`,
         `ARR: ${money(r.annualRecurringRevenueUsd, !!i.anonymize)} — ${(i.company.growth.arrGrowthYoyPct * 100).toFixed(0)}% YoY growth`,
@@ -165,7 +177,7 @@ function cim(i: MemorandumInputs): MemorandumDocument {
     },
     {
       heading: '4. Product & technology',
-      body: `Architecture: ${i.company.product.technicalArchitecture}. Defensibility: ${i.company.product.defensibility}. The platform serves ${i.anonymize ? '—' : i.company.users.totalCustomers.toLocaleString()} customers${i.company.users.activeMonthly ? ` with ${i.anonymize ? '—' : i.company.users.activeMonthly.toLocaleString()} monthly active users` : ''}.`,
+      body: `Architecture: ${archPhrase(i.company.product.technicalArchitecture)}. Defensibility: ${i.company.product.defensibility}. The platform serves ${i.anonymize ? '—' : i.company.users.totalCustomers.toLocaleString()} customers${i.company.users.activeMonthly ? ` with ${i.anonymize ? '—' : i.company.users.activeMonthly.toLocaleString()} monthly active users` : ''}.`,
     },
     {
       heading: '5. Financial performance',
@@ -214,7 +226,7 @@ function executiveSummary(i: MemorandumInputs): MemorandumDocument {
   const sections: MemorandumSection[] = [
     {
       heading: 'The opportunity',
-      body: `${name} is a ${c.businessModel} operating in ${c.sector.replace(/_/g, ' ')}, headquartered in ${i.anonymize ? 'a tier-one jurisdiction' : c.jurisdiction} and founded in ${c.foundedYear}. ${c.narrative ?? `The business combines ${c.product.differentiation} differentiation with ${c.product.defensibility} defensibility in a market growing ${(c.market.marketGrowthPct * 100).toFixed(0)}% per annum.`} The Company is being offered to a curated group of qualified strategic and financial acquirers through a structured, confidential process.`,
+      body: `${name} is ${modelPhrase(c.businessModel)} operating in ${sectorWords(c.sector)}, headquartered in ${i.anonymize ? 'a tier-one jurisdiction' : c.jurisdiction} and founded in ${c.foundedYear}. ${c.narrative ?? `The business combines ${c.product.differentiation} differentiation with ${c.product.defensibility} defensibility in a market growing ${(c.market.marketGrowthPct * 100).toFixed(0)}% per annum.`} The Company is being offered to a curated group of qualified strategic and financial acquirers through a structured, confidential process.`,
     },
     {
       heading: 'Financial profile',
