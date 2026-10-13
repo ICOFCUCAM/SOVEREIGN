@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -34,6 +32,33 @@ body {
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #243353; border-radius: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* the marketing site's own ground (home, platform, modules, pricing): the canvas behind an overscroll is
+   porcelain above and graphite below, as the page itself is; scrollbars and text selection in the palette */
+html:has(.ex-site) { background: linear-gradient(180deg, #F8F4EE 50%, #111310 50%); scrollbar-color: #B8AC9A transparent; }
+html:has(.ex-site) body { background: transparent; }
+html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px solid transparent; background-clip: padding-box; }
+/* in-page jumps (the chapter rail, "value my company", back to top) land below the sticky header, and glide
+   when motion is welcome */
+.ex-site [id^="ch-"] { scroll-margin-top: 72px; }
+@media (prefers-reduced-motion: no-preference) { html:has(.ex-site) { scroll-behavior: smooth; } }
+/* disclosures (questions, modules) open and close smoothly where the browser can animate to auto height;
+   elsewhere, and under reduced motion, they open at once as before */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (interpolate-size: allow-keywords) {
+    .ex-site { interpolate-size: allow-keywords; }
+    .ex-site details::details-content { block-size: 0; overflow-y: clip; transition: block-size .45s cubic-bezier(.2,.7,.2,1), content-visibility .45s allow-discrete; }
+    .ex-site details[open]::details-content { block-size: auto; }
+  }
+}
+/* paper: the porcelain chapters carry a fine, static grain, as printed stock does (no motion, under 4% ink) */
+.ex-site .bg-ex-paper { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .27 0 0 0 0 .2 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E"); }
+/* native controls (selects and their menus, search fields, scrollbars) follow the ground they sit on: light on
+   porcelain and white chapters, dark on ink */
+.ex-site { color-scheme: light; }
+.ex-site :where([data-ink], footer) { color-scheme: dark; }
+.ex-site ::selection { background: rgba(180,154,117,0.32); color: inherit; }
+.ex-site :where([data-ink], footer) ::selection { background: rgba(201,176,138,0.4); color: #fff; }
 
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }
@@ -90,3 +115,19 @@ body {
 main p.font-editorial, main blockquote { font-variant-numeric: oldstyle-nums proportional-nums; }
 main :is(h1, h2, h3) { font-variant-numeric: lining-nums proportional-nums; }
 main :is(table, dl, time, figcaption, [data-edition], .tabular-nums) { font-variant-numeric: lining-nums tabular-nums; }
+
+/* print: the homepage as a document — no fixed furniture (header, chapter rail, reading bar, phone bar), no
+   film or motion, figures and rows kept whole across pages, and the ink chapters printed as designed */
+@media print {
+  .ex-site header { position: static !important; backdrop-filter: none !important; }
+  .ex-site nav[aria-label="Chapters"], .ex-site video, .ex-site .fixed { display: none !important; }
+  .ex-site *, .ex-site *::before, .ex-site *::after { animation: none !important; transition: none !important; }
+  .ex-site [data-ink], .ex-site footer, .ex-site #ch-01 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ex-site :is(figure, table tr, details, dl > div) { break-inside: avoid; }
+  .ex-site h2, .ex-site h3 { break-after: avoid; }
+  /* what waits to be scrolled into view on screen is simply there on paper: chapter headings, and the board
+     with its power-on veil lifted */
+  .ex-site .rv-h { opacity: 1 !important; transform: none !important; }
+  .ex-site .pointer-events-none.absolute.inset-0.bg-\[\#02050a\] { display: none !important; }
+}
+

@@ -174,10 +174,19 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
   const { t } = useI18n();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const ink = useInkUnder() && !menuOpen;
+  // once the page has moved, the header lifts off it with a soft shadow (state changes only at the threshold)
+  const [raised, setRaised] = React.useState(false);
+  React.useEffect(() => {
+    const read = (): void => setRaised(scrollY > 8);
+    read(); addEventListener("scroll", read, { passive: true });
+    return () => removeEventListener("scroll", read);
+  }, []);
   const WRAP = "mx-auto w-full max-w-[1480px] px-5 sm:px-8 lg:px-12";
   return (
-    <div className="min-h-screen bg-[#F8F4EE] text-ink-900">
-      <header className={`sticky top-0 z-40 border-b backdrop-blur transition-colors duration-200 motion-reduce:transition-none ${ink ? "border-white/10 bg-ex-1/85 text-white" : "border-[#E7E1D7] bg-[#F7F4EF]/[0.94]"}`}>
+    <div className="ex-site min-h-screen bg-[#F8F4EE] text-ink-900">
+      {/* the first stop for a keyboard: straight past the header to the page */}
+      <a href="#main" className="sr-only z-50 bg-ink-900 px-4 py-3 text-[13px] font-semibold text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">{t("nav.skip")}</a>
+      <header className={`sticky top-0 z-40 border-b backdrop-blur transition-[color,background-color,border-color,box-shadow] duration-200 motion-reduce:transition-none ${ink ? "border-white/10 bg-ex-1/85 text-white" : "border-[#E7E1D7] bg-[#F7F4EF]/[0.94]"} ${raised ? (ink ? "shadow-[0_10px_30px_-18px_rgba(0,0,0,0.9)]" : "shadow-[0_10px_30px_-18px_rgba(36,37,34,0.45)]") : ""}`}>
         <div className={`${WRAP} grid min-h-[72px] grid-cols-[1fr_auto] items-center gap-5 lg:grid-cols-[1fr_auto_1fr]`}>
           <div className="flex items-center gap-5">
             <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={34} dark={ink} /></button>
@@ -220,7 +229,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
         )}
       </header>
 
-      <main>{children}</main>
+      <main id="main" tabIndex={-1} className="focus:outline-none">{children}</main>
 
       {/* the footer continues the close in the deepest ink (EE16) */}
       <footer data-ink className="ex-seam relative overflow-hidden bg-ex-0 text-white">
@@ -231,9 +240,9 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
               <p className="mt-5 max-w-sm font-editorial text-[17px] leading-snug text-white/85">{t("ft.tagline")}</p>
               {/* how the exchange works, stated — not status lights (EE20) */}
               <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[10.5px] uppercase tracking-[0.12em] text-[#E8E0D2]/75">
-                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-ex-done/70" />{t("ft.soc")}</li>
-                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-ex-done/70" />{t("ft.audit")}</li>
-                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-ex-done/70" />{t("ft.ndagated")}</li>
+                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-[#C9B08A]/80" />{t("ft.soc")}</li>
+                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-[#C9B08A]/80" />{t("ft.audit")}</li>
+                <li className="flex items-center gap-2"><span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-[#C9B08A]/80" />{t("ft.ndagated")}</li>
               </ul>
             </div>
             {([
@@ -268,9 +277,10 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
           </div>
         </div>
         {/* the sign-off: the page closes with the mark it opened with, across the foot of every page (EE17;
-            the homepage's own sign-off in chapter 09 moved here so there is one) */}
+            the homepage's own sign-off in chapter 09 moved here so there is one), in the hero signature's
+            ivory-to-bronze, fading into the floor */}
         <div aria-hidden className="pointer-events-none mx-auto -mb-[0.2em] max-w-[1480px] select-none overflow-hidden px-5 font-editorial sm:px-8 lg:px-12 font-semibold leading-[0.8] tracking-[-0.06em] text-transparent"
-          style={{ fontSize: "clamp(6rem, 23vw, 21rem)", backgroundImage: "linear-gradient(180deg, rgba(220,205,179,0.42) 0%, rgba(220,205,179,0.05) 85%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
+          style={{ fontSize: "clamp(6rem, 23vw, 21rem)", backgroundImage: "linear-gradient(180deg, rgba(242,233,218,0.5) 0%, rgba(220,205,179,0.32) 30%, rgba(179,158,126,0.12) 62%, rgba(179,158,126,0) 88%)", WebkitBackgroundClip: "text", backgroundClip: "text" }}>
           Exit<span className="italic">OS</span>
         </div>
       </footer>

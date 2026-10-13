@@ -23,7 +23,7 @@ const SOURCES: ReadonlyArray<{ n: SourceId; title: string; body: string }> = [
   { n: 1, title: "Market index", body: `${MARKET_INDEX_FMT.events} acquisition events by ${MARKET_INDEX_FMT.buyers} buyers, ingested from Wikipedia, Wikidata and SEC EDGAR; generated ${MARKET_INDEX_FMT.asOf}. A bundled snapshot — not a live feed.` },
   { n: 2, title: "Acquirer registry", body: `${MARKET_FMT.buyers} curated acquirer mandates (${MARKET_FMT.strategic} strategic, ${MARKET_FMT.privateEquity} private equity) across ${MARKET_FMT.geographies} jurisdictions and ${MARKET_FMT.sectors} sectors, with check sizes, focus sectors, appetite and activity scores as curated. Bundled with this build; mandates are curated, not independently verified.` },
   { n: 3, title: "Disclosed-deal history", body: `${HISTORY_FMT.events} recorded deals, ${LEDGER_PRICED} with a disclosed price (${HISTORY_FMT.disclosedValue} in total), each citing SEC 8-K / 10-K filings, Wikidata or press releases as listed in the ledger. Record tier: ${tiers} — not re-checked against the primary filing in this build.` },
-  { n: 4, title: "Deal medians", body: `Median premium over reference ${DEAL_INTEL_FMT.medianPremium} (from ${DEAL_INTEL.measuredPremiums} deals with a reference price) and median announce-to-close ${DEAL_INTEL_FMT.medianClose} (from ${DEAL_INTEL.measuredCloses} deals with both dates), computed over the deal history above.` },
+  { n: 4, title: "Deal medians", body: `Median premium over reference ${DEAL_INTEL_FMT.medianPremium} (from ${DEAL_INTEL.measuredPremiums} deals with a reference price) and median announce-to-close ${DEAL_INTEL_FMT.medianClose} (from ${DEAL_INTEL.measuredCloses} deals with both dates), computed over the deal history above; ${DEAL_INTEL_FMT.closedRate} of its ${HISTORY_FMT.events} recorded deals are marked closed.` },
   { n: 5, title: "Valuation", body: "The institutional valuation framework the console uses — deterministic: the same inputs always give the same answer. The homepage estimate fills every input other than sector, revenue and growth with typical values, listed beside the result." },
   { n: 6, title: "Typical timeline", body: "The weeks shown for each lifecycle stage are ExitOS's planning assumptions for a run process, not measurements." },
 ];
@@ -77,7 +77,11 @@ export const SourcesSection: React.FC<{ only?: readonly SourceId[]; collapsed?: 
             <h2 id="sources-h" className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-[#7A6344]">{t("src.title")} <span className="text-slate-600">· {list.length}</span></h2>
             <span aria-hidden className="font-mono text-[18px] leading-none text-ink-900 transition-transform group-open:rotate-45">+</span>
           </summary>
-          <div className="mt-4 lg:pl-[calc(27.5%+3vw)]">{items}</div>
+          {/* open: how the notes work, beside the notes */}
+          <div className="mt-4 grid gap-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-[6vw]">
+            <p className="max-w-[34ch] text-[13.5px] leading-relaxed text-slate-600">{t("src.intro")}</p>
+            {items}
+          </div>
         </details>
       </div>
     </section>

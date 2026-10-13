@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MarketingChrome, Mark, Arrow, BUTTON, Chapter, Editorial } from "../components/MarketingChrome";
-import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL_FMT, type BoardTx } from "../lib/market-stats";
+import { MARKET_FMT, MANDATE_ACTIVITY, DISCLOSED_TRANSACTIONS, BOARD_BUYERS, SECTOR_DEMAND, HISTORY_FMT, LEDGER_ROWS, LEDGER_TIERS, LEDGER_PRICED, DEAL_INTEL, DEAL_INTEL_FMT, type BoardTx } from "../lib/market-stats";
 import { useI18n } from "../lib/i18n";
 import QuickValue from "../components/QuickValue";
 import Instrument from "../components/Instrument";
@@ -89,7 +89,7 @@ const Landing: React.FC = () => {
                 </div>
               ))}
             </div>
-            <p data-edition className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-ex-done-ink" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</p>
+            <p data-edition className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600"><span aria-hidden className="h-1.5 w-1.5 shrink-0 rotate-45 border border-[#9A7E56]" />{t("hero.fresh", { d: MARKET_INDEX_FMT.asOf })}</p>
             <Link to="/platform" className="group ex-link mt-8 text-[13px]">{t("s2.link")} <Arrow /></Link>
           </div>
           {/* the right-hand box: the lifecycle graph alone (DD3), its caption beneath */}
@@ -169,9 +169,37 @@ const Landing: React.FC = () => {
           <Chapter n="05">{t("loss.eyebrow")}</Chapter>
           <h2 className="rv-h mt-6 max-w-[16ch] font-editorial text-[clamp(3rem,7.4vw,7.6rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink-900"><Editorial text={t("loss.h2")} /></h2>
           <div className="mt-12 grid gap-10 border-t-4 border-double border-ink-900 pt-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] lg:gap-[5vw]">
-            <p className="max-w-md text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-[#6A5539]">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
+            <div className="max-w-md">
+            <p className="text-[16px] leading-relaxed text-ink-800 first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-editorial first-letter:text-[4.2rem] first-letter:font-semibold first-letter:leading-[0.8] first-letter:text-[#6A5539]">{t("loss.body", { p: DEAL_INTEL_FMT.medianPremium, d: DEAL_INTEL_FMT.medianClose })}<Note n={4} first /></p>
+            {/* the record's own medians, set as figures, each with the sample it is drawn from (note 4) */}
+            <dl className="mt-9 grid grid-cols-3 border-t border-ink-900">
+              {([
+                [DEAL_INTEL_FMT.medianPremium, t("loss.f1"), t("loss.n", { n: DEAL_INTEL.measuredPremiums })],
+                [DEAL_INTEL.medianCloseDays != null ? String(Math.round(DEAL_INTEL.medianCloseDays)) : "—", t("loss.f2"), t("loss.n", { n: DEAL_INTEL.measuredCloses })],
+                [DEAL_INTEL_FMT.closedRate, t("loss.f3"), t("loss.rec", { n: HISTORY_FMT.events })],
+              ]).map(([v, l, n], i) => (
+                <div key={l} className={`flex flex-col pr-3 pt-4 ${i ? "border-l border-slate-300 pl-3 sm:pl-4" : ""}`}>
+                  <dt className="order-2 mt-2 text-[12px] leading-snug text-slate-600">{l}</dt>
+                  <dd className="order-1 font-editorial text-[clamp(1.7rem,2.6vw,2.4rem)] font-semibold leading-none tracking-[-0.03em] text-ink-900">{v}</dd>
+                  <dd className="order-3 mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">{n}</dd>
+                </div>
+              ))}
+            </dl>
+            </div>
             {/* comparison matrix, set as a broadsheet table */}
-            <div role="region" aria-label="Traditional sale compared with ExitOS" tabIndex={0} className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+            {/* phones: each dimension as its own entry, the two ways of selling one above the other */}
+            <dl className="border-t border-ink-900 sm:hidden">
+              {LOSSES.map((l) => (
+                <div key={l.problem} className="border-b border-slate-300 py-5 last:border-0">
+                  <dt className="font-editorial text-[19px] font-semibold text-ink-900">{l.dimension}</dt>
+                  <dd className="mt-3 grid grid-cols-[88px_1fr] gap-x-3 gap-y-2 text-[13.5px] leading-snug">
+                    <span className="pt-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-slate-600">Traditional</span><span className="text-slate-600">{l.problem}</span>
+                    <span className="pt-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#6A5539]">ExitOS</span><span className="font-medium text-ink-900">{l.fix}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <div role="region" aria-label="Traditional sale compared with ExitOS" tabIndex={0} className="hidden overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:block">
               <table className="w-full min-w-[620px] text-left">
                 <thead>
                   <tr className="border-b border-ink-900 font-mono text-[10.5px] uppercase tracking-[0.14em]">
@@ -184,7 +212,7 @@ const Landing: React.FC = () => {
                   {LOSSES.map((l) => (
                     <tr key={l.problem} className="border-b border-slate-300 last:border-0">
                       <th scope="row" className="py-4 pr-4 align-top font-editorial text-[19px] font-semibold text-ink-900">{l.dimension}</th>
-                      <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] text-slate-600"><span className="mr-1.5 text-red-600" aria-hidden>✕</span>{l.problem}</td>
+                      <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] text-slate-600"><span className="mr-1.5 text-slate-400" aria-hidden>—</span>{l.problem}</td>
                       <td className="border-l border-slate-300 px-4 py-4 align-top text-[13px] font-medium text-ink-900"><span className="mr-1.5 text-[#6A5539]" aria-hidden>✓</span>{l.fix}</td>
                     </tr>
                   ))}
@@ -227,9 +255,10 @@ const Landing: React.FC = () => {
                 </h3>
                 <div className="mt-5 font-editorial text-[clamp(2.4rem,4vw,3.4rem)] font-semibold leading-none tabular-nums text-white">{c.value}</div>
                 <div className="mt-2 text-[12px] text-[#E8E0D2]/70">Disclosed value</div>
-                <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-[11px]">
-                  <div><dt className="text-[#E8E0D2]/70">vs reference</dt><dd className="font-mono text-[14px] font-bold text-[#C9B08A]">{c.premium}</dd></div>
-                  <div><dt className="text-[#E8E0D2]/70">Status</dt><dd className={`font-mono text-[14px] font-bold ${c.status === "Closed" ? "text-ex-done" : c.status === "Terminated" ? "text-slate-300" : "text-amber-300"}`}>{c.status}</dd></div>
+                {/* the premium over reference is shown only where the record measures one (no empty dashes) */}
+                <dl className={`mt-5 grid gap-2 border-t border-white/10 pt-4 text-[11px] ${c.premium && c.premium !== "—" ? "grid-cols-3" : "grid-cols-2"}`}>
+                  {c.premium && c.premium !== "—" && <div><dt className="text-[#E8E0D2]/70">vs reference</dt><dd className="font-mono text-[14px] font-bold text-[#C9B08A]">{c.premium}</dd></div>}
+                  <div><dt className="text-[#E8E0D2]/70">Status</dt><dd className={`font-mono text-[14px] font-bold ${c.status === "Closed" ? "text-ex-done" : c.status === "Terminated" ? "text-slate-300" : "text-[#E2C38E]"}`}>{c.status}</dd></div>
                   <div><dt className="text-[#E8E0D2]/70">Source</dt><dd className="font-mono text-[12px] font-semibold text-white">{c.sources[0]?.kind ?? "—"}</dd></div>
                 </dl>
               </article>
@@ -284,9 +313,9 @@ const Landing: React.FC = () => {
           <div className="mt-12 border-t border-ink-900">
             {HOME_MODULES.map(([name, key, v], k) => (
               <details key={name} open={k === 0} className="group border-b border-slate-300">
-                <summary className="grid cursor-pointer list-none grid-cols-[28px_1fr_36px] items-center gap-x-3 gap-y-1.5 py-6 transition-colors hover:bg-[#F8F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:grid-cols-[58px_1fr_1fr_44px] sm:gap-x-5 sm:py-7 [&::-webkit-details-marker]:hidden">
+                <summary className="grid cursor-pointer list-none grid-cols-[28px_1fr_36px] items-center gap-x-3 gap-y-1.5 py-6 transition-colors hover:bg-[#F8F4EE] [&:hover_h3]:translate-x-1.5 [&:hover>span:last-child]:border-[#9A7E56] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:grid-cols-[58px_1fr_1fr_44px] sm:gap-x-5 sm:py-7 [&::-webkit-details-marker]:hidden">
                   <span className="font-mono text-[11px] text-[#7A6344]">0{k + 1}</span>
-                  <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em]">{name}</h3>
+                  <h3 className="font-editorial text-[clamp(1.4rem,2.5vw,2.2rem)] font-semibold tracking-[-0.03em] transition-transform duration-500 ease-out motion-reduce:transition-none">{name}</h3>
                   <div className="col-start-2 row-start-2 max-w-[440px] sm:col-start-3 sm:row-start-1">
                     <p className="text-[14px] leading-relaxed text-slate-600">{t(`mod.${key}`)}</p>
                     <p className="mt-1.5 font-mono text-[11.5px] tabular-nums text-ink-900">{t(`mod.${key}.st`, v)}</p>
@@ -318,15 +347,17 @@ const Landing: React.FC = () => {
                 <button onClick={() => nav("/pricing")} className={`${BUTTON.primaryInk} mt-5`}>{t("cta.brief")} <span aria-hidden>↗</span></button>
               </div>
             </div>
-            <div className="flex flex-col gap-3">
+            {/* the questions as a ruled list, set like the modules: a bronze rule marks the open answer */}
+            <div className="border-t-4 border-double border-ink-900">
               {[1, 2, 3, 4, 5, 6].map((k) => (
-                <details key={k} className="group rounded-ex-sm border border-slate-300 bg-white shadow-ex-1 transition-shadow open:border-[#9A7E56] open:shadow-ex-2">
-                  <summary className="flex cursor-pointer list-none items-center gap-5 rounded-ex-sm px-5 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:px-6 [&::-webkit-details-marker]:hidden">
-                    <span className="font-mono text-[12px] font-semibold tabular-nums text-[#7A6344]">0{k}</span>
-                    <span className="flex-1 font-editorial text-[clamp(1.15rem,1.7vw,1.45rem)] font-semibold">{t(`faq.q${k}`)}</span>
-                    <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-300 text-[18px] leading-none text-[#7A6344] transition group-open:rotate-45 group-open:border-[#9A7E56] group-open:bg-[#9A7E56] group-open:text-white">+</span>
+                <details key={k} className="group relative border-b border-slate-300">
+                  <span aria-hidden className="absolute -top-px left-0 h-px w-full origin-left scale-x-0 bg-[#9A7E56] transition-transform duration-500 group-open:scale-x-100 motion-reduce:transition-none" />
+                  <summary className="flex cursor-pointer list-none items-center gap-5 py-6 transition-colors hover:bg-[#F2ECE3]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 sm:gap-6 [&::-webkit-details-marker]:hidden">
+                    <span className="w-6 font-mono text-[11px] font-semibold tabular-nums text-[#7A6344]">0{k}</span>
+                    <span className="flex-1 font-editorial text-[clamp(1.2rem,1.8vw,1.55rem)] font-semibold tracking-[-0.01em]">{t(`faq.q${k}`)}</span>
+                    <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-slate-300 text-[18px] leading-none text-[#7A6344] transition group-open:rotate-45 group-open:border-[#9A7E56] group-open:bg-[#9A7E56] group-open:text-white motion-reduce:transition-none">+</span>
                   </summary>
-                  <p className="max-w-[62ch] border-t border-slate-200 px-5 pb-6 pt-4 text-[15.5px] leading-relaxed text-slate-700 sm:ml-[52px] sm:border-t-0 sm:px-6 sm:pt-0">{t(`faq.a${k}`)}</p>
+                  <p className="max-w-[62ch] pb-7 pl-11 pr-12 text-[15.5px] leading-relaxed text-slate-700 sm:pl-12">{t(`faq.a${k}`)}</p>
                 </details>
               ))}
             </div>
@@ -641,10 +672,12 @@ const BoardHeader: React.FC<{ title: string; right?: string }> = ({ title, right
 const DATA_AS_OF = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 // Data provenance — the pipeline every figure passes through, and the
 // confidence register applied to estimates (mirrors the engines' tiers).
+// Tier inks are drawn from the palette (a deep green, slate ink, bronze), each
+// above 5.5:1 on its own tint (AA for the 10 px badges).
 const CONFIDENCE_TIERS = [
-  { tier: "Verified", color: "#047857", basis: "Disclosed in a public filing", detail: "Headline value, dates and parties confirmed against the primary source." },
-  { tier: "Reported", color: "#1d4ed8", basis: "Multiple independent reports", detail: "Cross-referenced press and database coverage; primary filing not located." },
-  { tier: "Estimated", color: "#92400e", basis: "Modeled from the record", detail: "Benchmarked against the acquirer's completed-transaction history, with sample size shown." },
+  { tier: "Verified", color: "#2F6B4F", basis: "Disclosed in a public filing", detail: "Headline value, dates and parties confirmed against the primary source." },
+  { tier: "Reported", color: "#3D4A5C", basis: "Multiple independent reports", detail: "Cross-referenced press and database coverage; primary filing not located." },
+  { tier: "Estimated", color: "#7A5A2E", basis: "Modeled from the record", detail: "Benchmarked against the acquirer's completed-transaction history, with sample size shown." },
 ];
 // ===========================================================================
 // SMALL VISUAL HELPERS

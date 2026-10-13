@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
-import { polar } from "../lib/insignia";
 import { Arrow } from "./MarketingChrome";
+import { Dial, INSTRUMENT_CSS, OutcomeIndicator } from "./HeroInstrument";
 
 // 01 · THE HERO (owner brief HX1; final colour, signature and benchmark HX2).
 // Built to the owner's benchmark image: warm porcelain on the left falling
@@ -13,159 +13,9 @@ import { Arrow } from "./MarketingChrome";
 // ivory wordmark beneath it; a charcoal capability rail with bronze-ringed
 // icons. Geometry is measured from the benchmark (outer bezel = 245 units).
 // The orbs and points are decoration, not data. Phones stack the two halves.
-
-const C = 250; // the dial's centre in a 500-unit view box; bezel radius 245
-const P = (deg: number, r: number): [number, number] => polar(deg, r, C);
-const RING = "#C8B48F", BR = "#B49A75";
-
-const Orb: React.FC<{ at: [number, number]; s?: number }> = ({ at: [x, y], s = 1 }) => (
-  <g>
-    <circle cx={x} cy={y} r={21 * s} fill="url(#hx-orb)" />
-    <circle cx={x} cy={y} r={8 * s} stroke="#C9AE82" strokeOpacity=".75" strokeWidth="1" />
-    <circle cx={x} cy={y} r={4 * s} fill="#FFF8EC" />
-  </g>
-);
-// the five capability points on the dial, in strip order (01 discover … 05 execute): bearing, radius,
-// and whether the point is drawn as a bronze orb or an ivory point (as the benchmark places them)
-const CAPS: ReadonlyArray<readonly [number, number, "orb" | "dot", number]> = [[331, 224, "dot", 2.8], [270, 185, "orb", 0.85], [317, 110, "dot", 2.3], [206, 161, "orb", 1], [32, 160, "orb", 1]];
-
-const Dot: React.FC<{ at: [number, number]; r?: number }> = ({ at: [x, y], r = 2.5 }) => (
-  <g><circle cx={x} cy={y} r={r * 2.4} fill="url(#hx-pt)" /><circle cx={x} cy={y} r={r} fill="#FBF8F2" /></g>
-);
-
-const Dial: React.FC<{ active: number | null; onPoint: (i: number | null) => void; labels: string[] }> = ({ active, onPoint, labels }) => {
-  const [w1x, w1y] = P(28, 212), [w2x, w2y] = P(64, 212);
-  return (
-    <svg viewBox="0 0 500 500" className="hx-dial h-full w-full overflow-visible" fill="none" shapeRendering="geometricPrecision" aria-hidden>
-      <defs>
-        <radialGradient id="hx-orb"><stop offset="0" stopColor="#F8EAD0" stopOpacity="1" /><stop offset=".3" stopColor="#C9AE82" stopOpacity=".55" /><stop offset="1" stopColor={BR} stopOpacity="0" /></radialGradient>
-        <radialGradient id="hx-pt"><stop offset="0" stopColor="#F3E6CF" stopOpacity=".55" /><stop offset="1" stopColor="#F3E6CF" stopOpacity="0" /></radialGradient>
-        <radialGradient id="hx-halo"><stop offset="0" stopColor="#5C7383" stopOpacity=".8" /><stop offset=".75" stopColor="#47596A" stopOpacity=".55" /><stop offset="1" stopColor="#47596A" stopOpacity="0" /></radialGradient>
-        <radialGradient id="hx-glow"><stop offset="0" stopColor="#FFFFFF" stopOpacity=".7" /><stop offset="1" stopColor="#FFFFFF" stopOpacity="0" /></radialGradient>
-        <radialGradient id="hx-wedge" gradientUnits="userSpaceOnUse" cx={C} cy={C} r="212">
-          <stop offset="0" stopColor="#C7A97C" stopOpacity=".03" /><stop offset=".55" stopColor="#C7A97C" stopOpacity=".14" /><stop offset=".9" stopColor="#D2B68A" stopOpacity=".3" /><stop offset="1" stopColor="#D2B68A" stopOpacity=".16" />
-        </radialGradient>
-        <filter id="hx-bloom" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7" /></filter>
-        <linearGradient id="hx-axis" gradientUnits="userSpaceOnUse" x1="-560" y1="0" x2="1100" y2="0">
-          <stop offset="0" stopColor={RING} stopOpacity="0" /><stop offset=".3" stopColor={RING} stopOpacity=".42" /><stop offset="1" stopColor={RING} stopOpacity=".42" />
-        </linearGradient>
-        <linearGradient id="hx-v-up" gradientUnits="userSpaceOnUse" x1="-300" y1="268" x2="46" y2="92">
-          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0" /><stop offset=".25" stopColor="#F1E6D2" stopOpacity=".55" /><stop offset=".7" stopColor="#E3D3B6" stopOpacity=".4" /><stop offset="1" stopColor="#E3D3B6" stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="hx-v-low" gradientUnits="userSpaceOnUse" x1="-330" y1="392" x2="150" y2="640">
-          <stop offset="0" stopColor="#FFFFFF" stopOpacity="0" /><stop offset=".22" stopColor="#FFF6E6" stopOpacity=".9" /><stop offset=".68" stopColor="#F1DFC0" stopOpacity=".95" /><stop offset="1" stopColor="#E3D3B6" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-
-      <g className="hx-z" style={{ ["--z" as string]: 14 }}>
-      {/* far field, measured from the benchmark: two lines leave the white page and open in a V towards the
-          signature — the upper one faint, rising to the dial; the lower one a bright horizon curve with a flare,
-          running on under the wordmark — plus a faint ray from the flare to a small orb, a second faint
-          horizontal under the axis and a short ray beside the wordmark */}
-      <g className="hx-fade" style={{ ["--d" as string]: "1.25s" }}>
-      <path d="M-300 268 Q-190 232 -100 186 T 46 92" stroke="url(#hx-v-up)" strokeWidth="1" />
-      <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="2.5" strokeOpacity=".55" filter="url(#hx-bloom)" />
-      <path d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="url(#hx-v-low)" strokeWidth="1.25" />
-      {/* a glint that travels the horizon now and then */}
-      <path className="hx-glint" pathLength={1} d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="#FFF1D8" strokeWidth="5" strokeLinecap="round" filter="url(#hx-bloom)" />
-      <path className="hx-glint" pathLength={1} d="M-330 392 Q-120 470 -5 533 T 150 640" stroke="#FFF8EC" strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="-5" y1="533" x2="-103" y2="360" stroke="#E8D7B8" strokeOpacity=".24" strokeWidth="1" />
-      <line x1="-131" y1="326" x2="26" y2="326" stroke="#E8D7B8" strokeOpacity=".16" strokeWidth="1" />
-      <line x1="9" y1="512" x2="81" y2="430" stroke="#E8D7B8" strokeOpacity=".18" strokeWidth="1" />
-      <Orb at={[-5, 533]} s={0.55} />
-      <Orb at={[-103, 360]} s={0.45} />
-      </g>
-
-      </g>
-
-      <g className="hx-z" style={{ ["--z" as string]: 2 }}>
-      {/* axes across the field, brighter inside the dial */}
-      <g className="hx-fade" style={{ ["--d" as string]: ".3s" }}>
-      <line x1="-560" y1={C} x2="1100" y2={C} stroke="url(#hx-axis)" strokeWidth="1" />
-      <line x1={C} y1="-400" x2={C} y2="900" stroke={RING} strokeOpacity=".3" strokeWidth="1" />
-      <line x1={C - 207} y1={C} x2={C + 207} y2={C} stroke={RING} strokeOpacity=".55" strokeWidth="1" />
-      <line x1={C} y1={C - 207} x2={C} y2={C + 207} stroke={RING} strokeOpacity=".55" strokeWidth="1" />
-      <g stroke={RING} strokeOpacity=".12" strokeWidth="1">
-        {[45, 135, 225, 315].map((d) => { const [a, b] = P(d, 59), [c, e] = P(d, 207); return <line key={d} x1={a} y1={b} x2={c} y2={e} />; })}
-      </g>
-      </g>
-
-      </g>
-
-      <g className="hx-z" style={{ ["--z" as string]: 7 }}>
-      {/* bezel and graduated ring */}
-      <circle className="hx-fade" style={{ ["--d" as string]: "1s" }} cx={C} cy={C} r="266" stroke="#E2D6BF" strokeOpacity=".28" strokeWidth="1.1" strokeDasharray="0.1 6" strokeLinecap="round" />
-      <circle className="hx-fade" style={{ ["--d" as string]: ".95s" }} cx={C} cy={C} r="246" stroke="#E2D6BF" strokeOpacity=".5" strokeWidth="1.2" strokeDasharray="0.1 4.4" strokeLinecap="round" />
-      <circle className="hx-draw" style={{ ["--d" as string]: ".8s" }} pathLength={1} cx={C} cy={C} r="233" stroke={RING} strokeOpacity=".5" strokeWidth="1" />
-      <g className="hx-fade" style={{ ["--d" as string]: ".75s" }} stroke="#D9CCB4" strokeLinecap="round">
-        {Array.from({ length: 180 }, (_, i) => i * 2).map((d) => {
-          const major = d % 30 === 0 && d % 90 !== 0;
-          const [x1, y1] = P(d, major ? 210 : 216), [x2, y2] = P(d, major ? 228 : 223);
-          return <line key={d} x1={x1} y1={y1} x2={x2} y2={y2} strokeOpacity={major ? 0.8 : 0.26} strokeWidth={major ? 1.25 : 1} />;
-        })}
-      </g>
-
-      </g>
-
-      <g className="hx-z" style={{ ["--z" as string]: 4 }}>
-      {/* market rings */}
-      <circle className="hx-draw" style={{ ["--d" as string]: ".6s" }} pathLength={1} cx={C} cy={C} r="205" stroke={RING} strokeOpacity=".38" strokeWidth="1" />
-      <circle className="hx-draw" style={{ ["--d" as string]: ".45s" }} pathLength={1} cx={C} cy={C} r="160" stroke="#C9B08A" strokeOpacity=".85" strokeWidth="1.25" />
-      <circle className="hx-draw" style={{ ["--d" as string]: ".35s" }} pathLength={1} cx={C} cy={C} r="118" stroke={RING} strokeOpacity=".24" strokeWidth="1" />
-      <circle className="hx-fade" style={{ ["--d" as string]: ".25s" }} cx={C} cy={C} r="88" stroke={RING} strokeOpacity=".6" strokeWidth="1.3" strokeDasharray="0.1 4.4" strokeLinecap="round" />
-      <circle className="hx-draw" style={{ ["--d" as string]: ".1s" }} pathLength={1} cx={C} cy={C} r="60" stroke="#D2BA92" strokeOpacity=".9" strokeWidth="1.25" />
-
-      </g>
-
-      <g className="hx-z" style={{ ["--z" as string]: 3 }}>
-      {/* the aperture: a lit wedge, its leading edge bright; it sways a few degrees, slowly */}
-      <g className="hx-open" style={{ ["--d" as string]: "1.1s" }}>
-      <g className="hx-drift">
-      <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" filter="url(#hx-bloom)" />
-      <path d={`M${C} ${C} L${w1x} ${w1y} A212 212 0 0 1 ${w2x} ${w2y} Z`} fill="url(#hx-wedge)" />
-      <line x1={C} y1={C} x2={w1x} y2={w1y} stroke="#EFE2C9" strokeOpacity=".18" strokeWidth="1" />
-      <line x1={C} y1={C} x2={w2x} y2={w2y} stroke="#F4E8D2" strokeOpacity=".9" strokeWidth="1.5" />
-      </g>
-      </g>
-      </g>
-
-
-      <g className="hx-z" style={{ ["--z" as string]: 5 }}>
-      {/* registration marks on the axes */}
-      <g className="hx-fade" style={{ ["--d" as string]: "1.2s" }}>
-      {[0, 180].map((d) => { const [x, y] = P(d, 178); return <g key={d} fill="#F2EBDD" fillOpacity=".7"><circle cx={x - 4} cy={y} r="1.3" /><circle cx={x + 4} cy={y} r="1.3" /></g>; })}
-      <Dot at={P(90, 170)} r={2.2} /><Dot at={P(90, 181)} r={2.2} />
-      <Dot at={P(259, 59)} r={2.4} />
-      <circle cx={P(121, 160)[0]} cy={P(121, 160)[1]} r="2" fill="#E8D7B8" fillOpacity=".6" />
-      </g>
-
-      {/* the five capability points: each answers to its item in the strip below, and lights it in turn */}
-      {active !== null && (() => { const [x, y] = P(CAPS[active][0], CAPS[active][1]); return <line x1={C} y1={C} x2={x} y2={y} stroke="#E9D7B4" strokeOpacity=".55" strokeWidth="1" strokeDasharray="2 3" />; })()}
-      {CAPS.map(([d, r, kind, s], i) => {
-        const at = P(d, r), on = active === i;
-        const out = P(d, r + 26);
-        return (
-          <g key={d} className="hx-cap hx-fade" style={{ ["--d" as string]: `${1.35 + i * 0.09}s` }} onMouseEnter={() => onPoint(i)} onMouseLeave={() => onPoint(null)}>
-            <circle cx={at[0]} cy={at[1]} r="24" fill="transparent" />
-            {kind === "orb" ? <Orb at={at} s={s} /> : <Dot at={at} r={s} />}
-            <circle cx={at[0]} cy={at[1]} r="15" stroke="#E9D7B4" strokeWidth="1" className="transition-opacity duration-300" opacity={on ? 0.9 : 0} />
-            {on && <text x={out[0]} y={out[1] + 3} textAnchor={out[0] < C - 8 ? "end" : out[0] > C + 8 ? "start" : "middle"} fill="#F1E9DC" fontSize="11" letterSpacing="1.6" fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace" style={{ textTransform: "uppercase" }}>{labels[i]}</text>}
-          </g>
-        );
-      })}
-
-      </g>
-
-      {/* the transaction node: ice-white in a blue-grey halo; the still point the layers move around */}
-      <g className="hx-fade" style={{ ["--d" as string]: "0s" }}>
-      <circle cx={C} cy={C} r="32" fill="url(#hx-halo)" />
-      <circle cx={C} cy={C} r="13" fill="url(#hx-glow)" />
-      <circle cx={C} cy={C} r="14" stroke="#DCEAF3" strokeOpacity=".95" strokeWidth="1.25" />
-      <circle cx={C} cy={C} r="6.5" fill="#FFFFFF" />
-      </g>
-    </svg>
-  );
-};
+// HX6: the instrument (HeroInstrument.tsx) is composed at first paint and
+// moves only slowly — turning rings, a faint sweep, a signal sequence, the
+// outcome indicator and the polar map behind the signature.
 
 // line icons for the capability rail, drawn inside bronze rings (benchmark)
 const ICONS: ReadonlyArray<React.ReactNode> = [
@@ -201,6 +51,16 @@ const HeroExchange: React.FC = () => {
     raf.current = requestAnimationFrame(() => { el.style.setProperty("--px", px.toFixed(3)); el.style.setProperty("--py", py.toFixed(3)); });
   };
   const onLeave = (): void => { const el = hero.current; if (!el) return; cancelAnimationFrame(raf.current); el.style.setProperty("--px", "0"); el.style.setProperty("--py", "0"); };
+  // the instrument rests while the page is hidden or the hero is scrolled away (a data attribute, no re-render)
+  React.useEffect(() => {
+    const el = hero.current; if (!el) return;
+    let seen = true;
+    const sync = (): void => { if (document.hidden || !seen) el.setAttribute("data-hx-paused", ""); else el.removeAttribute("data-hx-paused"); };
+    const io = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(([e]) => { seen = e.isIntersecting; sync(); });
+    io?.observe(el);
+    document.addEventListener("visibilitychange", sync);
+    return () => { io?.disconnect(); document.removeEventListener("visibilitychange", sync); };
+  }, []);
   const labels = [1, 2, 3, 4, 5].map((k) => t(`hx.s${k}`));
   return (
     <section ref={hero} onPointerMove={onMove} onPointerLeave={onLeave} id="ch-01" aria-labelledby="hx-h" className="relative isolate flex flex-col overflow-hidden bg-[#F8F4EE]">
@@ -236,17 +96,20 @@ const HeroExchange: React.FC = () => {
         <div aria-hidden className="hx-sig relative flex flex-col items-center justify-center pb-12 pt-20 sm:pb-16 lg:pb-[3.5%] lg:pt-[1.5%]">
           <div className="relative flex flex-col items-center">
             <div className="h-[min(78vw,330px)] w-[min(78vw,330px)] sm:h-[420px] sm:w-[420px] lg:h-[min(29.4vw,540px)] lg:w-[min(29.4vw,540px)]"><Dial active={cap} onPoint={setCap} labels={labels} /></div>
-            <div className="hx-fade mt-[0.05em] font-editorial font-medium leading-none tracking-[-0.025em] text-transparent"
-              style={{ ["--d" as string]: "1.7s", fontSize: "clamp(3rem, 5.4vw, 6rem)", backgroundImage: "linear-gradient(180deg, #F2E9DA 0%, #DCCDB3 50%, #B39E7E 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", filter: "drop-shadow(0 0 22px rgba(232,220,200,0.14))" }}>
-              Exit<span className="italic">OS</span>
-            </div>
-            <div style={{ ["--d" as string]: "1.95s" }} className="hx-fade mt-3 flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.3em] text-[#ECE5D8] sm:text-[11px]">
-              <span className="h-px w-12 bg-[#E3DCCF]/55 sm:w-16" />The acquisition exchange<span className="h-px w-12 bg-[#E3DCCF]/55 sm:w-16" />
+            <div className="relative flex flex-col items-center" style={{ fontSize: "clamp(3rem, 5.4vw, 6rem)" }}>
+              <div className="relative mt-[0.05em] font-editorial font-medium leading-none tracking-[-0.025em] text-transparent"
+                style={{ backgroundImage: "linear-gradient(180deg, #F2E9DA 0%, #DCCDB3 50%, #B39E7E 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", filter: "drop-shadow(0 0 22px rgba(232,220,200,0.14))" }}>
+                Exit<span className="italic">OS</span>
+              </div>
+              <div className="relative mt-3 flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.3em] text-[#ECE5D8] sm:text-[11px]">
+                <span className="h-px w-12 bg-[#E3DCCF]/55 sm:w-16" />The acquisition exchange<span className="h-px w-12 bg-[#E3DCCF]/55 sm:w-16" />
+              </div>
             </div>
           </div>
 
-          {/* the vertical note */}
-          <div className="absolute bottom-[16%] right-[84px] hidden xl:block">
+          {/* the vertical note and the outcome indicator beside it */}
+          <div className="absolute bottom-[16%] right-[84px] hidden items-stretch gap-5 xl:flex">
+            <OutcomeIndicator />
             <span className="font-mono text-[10px] uppercase tracking-[0.34em] text-[#E3DCCF]/70" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>{t("hx.note")}</span>
           </div>
         </div>
@@ -277,34 +140,7 @@ const HeroExchange: React.FC = () => {
           .hx-grid{background:${HAZE}, ${FALL}}
           .hx-sig{background:none}
         }
-        /* every line a true hairline at any size: widths are screen pixels, not view-box units */
-        .hx-dial :is(line,path,circle){vector-effect:non-scaling-stroke}
-        /* the tracing rings measure their own length (pathLength), which needs view-box strokes; at this scale
-           one unit is about one pixel, so they stay hairlines */
-        .hx-dial .hx-draw{vector-effect:none}
-        /* the instrument draws itself in, once, from the centre outward: rings trace, the wedge opens, the
-           points light, the wordmark resolves. Only when motion is allowed; the still design is the default. */
-        .hx-cap{cursor:default}
-        .hx-glint{opacity:0;vector-effect:none}
-        /* depth (HX4): each layer moves by its own factor; the core does not move */
-        @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference){
-          .hx-z{transform:translate(calc(var(--px,0) * var(--z) * 1px), calc(var(--py,0) * var(--z) * 1px));transition:transform 1.1s cubic-bezier(.2,.7,.2,1)}
-        }
-        /* a slow sign of life (HX4): the wedge sways three degrees either way over 24 s; a glint runs the horizon every 9 s */
-        @media (prefers-reduced-motion: no-preference){
-          .hx-drift{transform-box:view-box;transform-origin:250px 250px;animation:hxDrift 24s ease-in-out 2.4s infinite}
-          .hx-glint{stroke-dasharray:.07 .93;stroke-dashoffset:1;animation:hxGlint 9s cubic-bezier(.45,0,.55,1) 3.2s infinite}
-        }
-        @keyframes hxDrift{0%,100%{transform:rotate(0)}25%{transform:rotate(3deg)}75%{transform:rotate(-3deg)}}
-        @keyframes hxGlint{0%{stroke-dashoffset:1;opacity:0}8%{opacity:.85}48%{opacity:.85}58%{stroke-dashoffset:.34;opacity:0}100%{stroke-dashoffset:.34;opacity:0}}
-        @media (prefers-reduced-motion: no-preference){
-          .hx-draw{stroke-dasharray:1;stroke-dashoffset:1;animation:hxDraw 1.25s cubic-bezier(.55,.05,.25,1) var(--d,0s) forwards}
-          .hx-fade{opacity:0;animation:hxFade .9s ease-out var(--d,0s) forwards}
-          .hx-open{opacity:0;transform-box:view-box;transform-origin:250px 250px;animation:hxOpen 1.1s cubic-bezier(.2,.7,.2,1) var(--d,0s) forwards}
-        }
-        @keyframes hxDraw{to{stroke-dashoffset:0}}
-        @keyframes hxFade{to{opacity:1}}
-        @keyframes hxOpen{from{opacity:0;transform:rotate(-14deg)}to{opacity:1;transform:none}}
+        ${INSTRUMENT_CSS}
       `}</style>
     </section>
   );

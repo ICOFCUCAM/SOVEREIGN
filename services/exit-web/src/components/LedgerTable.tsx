@@ -84,13 +84,13 @@ const LedgerTable: React.FC = () => {
           </caption>
           <thead>
             <tr className="border-y border-ink-900 font-mono text-[10px] uppercase tracking-[0.12em] text-slate-600">
-              {["Announced", "Target", "Acquirer", "Sector", "Value", "Status", "Source"].map((h) => <th key={h} scope="col" className={`py-2.5 pr-4 font-semibold ${h === "Value" ? "w-[150px] text-right" : ""}`}>{h}</th>)}
+              {["Announced", "Target", "Acquirer", "Sector", "Value", "Status", "Source"].map((h, i) => <th key={h} scope="col" className={`py-2.5 pr-4 font-semibold ${i ? "" : "pl-2"} ${h === "Value" ? "w-[150px] text-right" : ""}`}>{h}</th>)}
             </tr>
           </thead>
           <tbody>
             {shown.map((r) => (
-              <tr key={r.date + r.target} className="border-b border-slate-200 transition-colors hover:bg-[#F5F1E9]/60">
-                <td className="whitespace-nowrap py-2.5 pr-4 font-mono tabular-nums text-slate-600"><time dateTime={r.date}>{r.date}</time></td>
+              <tr key={r.date + r.target} className="border-b border-slate-200 transition-colors hover:bg-[#F5F1E9]/70 [&:hover>td:first-child]:shadow-[inset_2px_0_0_#9A7E56]">
+                <td className="whitespace-nowrap py-2.5 pl-2 pr-4 font-mono tabular-nums text-slate-600"><time dateTime={r.date}>{r.date}</time></td>
                 <th scope="row" className="py-2.5 pr-4 font-editorial text-[15px] font-semibold text-ink-900">{r.target}</th>
                 <td className="py-2.5 pr-4 text-ink-800">{r.buyer}</td>
                 <td className="py-2.5 pr-4 text-slate-600">{r.sector}</td>

@@ -25,7 +25,7 @@ const LifecycleBand: React.FC = () => {
         <span className="h-px w-24 bg-gradient-to-l from-transparent to-[#C9B08A]/40" />
       </div>
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.05]"
-        style={{ backgroundImage: "repeating-linear-gradient(90deg, #a0bee6 0 1px, transparent 1px 120px)", maskImage: "radial-gradient(ellipse 60% 80% at 50% 60%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse 60% 80% at 50% 60%, #000, transparent 75%)" }} />
+        style={{ backgroundImage: "repeating-linear-gradient(90deg, #DCCDB3 0 1px, transparent 1px 120px)", maskImage: "radial-gradient(ellipse 60% 80% at 50% 60%, #000, transparent 75%)", WebkitMaskImage: "radial-gradient(ellipse 60% 80% at 50% 60%, #000, transparent 75%)" }} />
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 55% 60% at 50% 72%, rgba(180,154,117,0.16), transparent 70%)" }} />
 
       <div className={`${WRAP} relative py-16 lg:py-20`}>
@@ -34,29 +34,30 @@ const LifecycleBand: React.FC = () => {
             <div className="flex items-center gap-3 font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-[#C9B08A]"><span aria-hidden className="h-px w-7 bg-[#C9B08A]/70" />{eyebrow}</div>
             <h2 id="lc-h" className="mt-4 font-editorial text-[clamp(1.9rem,3.4vw,3rem)] font-semibold leading-[1.02] tracking-[-0.03em] first-letter:uppercase">{heading || eyebrow}</h2>
           </div>
-          <p className="flex items-center gap-2 border border-white/10 bg-white/[0.03] px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
-            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(110,231,183,0.8)]" />{t("lifecycle.live")}<Note n={6} dark />
+          {/* a label for a typical timeline, not a status: no lamp */}
+          <p className="flex items-center gap-2.5 border border-[#C9B08A]/25 px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#DCCDB3]">
+            <span aria-hidden className="h-1.5 w-1.5 rotate-45 border border-[#C9B08A]/80" />{t("lifecycle.live")}<Note n={6} dark />
           </p>
         </div>
 
         <div className="relative mt-12 lg:mt-16">
           {/* the rail, from the first station's centre to the last */}
           <div aria-hidden className="absolute bottom-6 left-[17px] top-4 w-px lg:bottom-auto lg:left-[6.25%] lg:right-[6.25%] lg:top-[18px] lg:h-px lg:w-auto"
-            style={{ background: "linear-gradient(var(--lc-dir,180deg), rgba(201,176,138,0.15), rgba(201,176,138,0.6) 55%, rgba(110,231,183,0.7))" }} />
+            style={{ background: "linear-gradient(var(--lc-dir,180deg), rgba(201,176,138,0.15), rgba(201,176,138,0.6) 55%, rgba(232,220,200,0.8))" }} />
           <div aria-hidden className="pointer-events-none absolute left-[6.25%] right-[6.25%] top-[18px] hidden lg:block">
-            <span className="lc-travel absolute -top-px block h-[3px] w-20 -translate-x-full rounded-full" style={{ background: "linear-gradient(90deg, transparent, rgba(124,255,159,0.9))" }}>
-              <span className="absolute -right-1 -top-[3px] h-2.5 w-2.5 rounded-full" style={{ background: "#7CFF9F", boxShadow: "0 0 10px 3px rgba(124,255,159,.75)" }} />
+            <span className="lc-travel absolute -top-px block h-[3px] w-20 -translate-x-full rounded-full" style={{ background: "linear-gradient(90deg, transparent, rgba(240,226,200,0.85))" }}>
+              <span className="absolute -right-1 -top-[3px] h-2.5 w-2.5 rounded-full" style={{ background: "#F4E8D2", boxShadow: "0 0 10px 3px rgba(214,190,150,.55)" }} />
             </span>
           </div>
           <ol className="relative grid gap-7 lg:grid-cols-8 lg:gap-0">
             {LIFECYCLE.map(([s, w], i) => (
               <li key={s} className="group flex items-center gap-5 lg:flex-col lg:gap-0 lg:text-center">
-                <span aria-hidden className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-bold ring-1 transition duration-300 group-hover:scale-110 ${i === last ? "bg-[#06261f] text-emerald-200 ring-emerald-300/70 shadow-[0_0_0_6px_rgba(16,185,129,0.08),0_0_24px_rgba(52,211,153,0.35)]" : "bg-ex-1 text-[#E8E0D2] ring-blue-300/40 shadow-[0_0_0_6px_rgba(180,154,117,0.07)] group-hover:ring-blue-200"}`}>
+                <span aria-hidden className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-bold ring-1 transition duration-300 group-hover:scale-110 ${i === last ? "bg-[#2A251D] text-[#F4E8D2] ring-[#C9B08A]/80 shadow-[0_0_0_6px_rgba(180,154,117,0.1),0_0_24px_rgba(201,176,138,0.3)]" : "bg-ex-1 text-[#E8E0D2] ring-[#C9B08A]/35 shadow-[0_0_0_6px_rgba(180,154,117,0.07)] group-hover:ring-[#C9B08A]/70"}`}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="lg:mt-5 lg:px-2">
                   <span className="block font-editorial text-[16px] font-semibold leading-snug text-white lg:text-[15px]">{t(s)}</span>
-                  <span className={`mt-1 block font-mono text-[10px] uppercase tracking-[0.16em] ${i === last ? "text-emerald-300/85" : "text-[#C9B08A]/75"}`}>{w}</span>
+                  <span className={`mt-1 block font-mono text-[10px] uppercase tracking-[0.16em] ${i === last ? "text-[#DCCDB3]" : "text-[#C9B08A]/75"}`}>{w}</span>
                 </span>
               </li>
             ))}

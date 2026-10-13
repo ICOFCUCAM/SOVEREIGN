@@ -24,21 +24,21 @@ const TICKS = [0, 1, 2, 4, 6, 8, 10];
 const PAPER = {
   ground: "#ffffff",
   grid: "rgba(10,16,24,0.06)", axis: "rgba(10,16,24,0.28)",
-  link: "#9A7E56", node: "#9A7E56", end: "#059669", nodeEdge: "#ffffff",
+  link: "#9A7E56", node: "#9A7E56", end: "#15171A", nodeEdge: "#ffffff",
   ring: "#9A7E56", text: "#0a1018", sub: "#7A6344", halo: "#ffffff",
   routeA: "#7A6344", routeB: "#9A7E56",
 };
 const NAVY = {
   ground: "linear-gradient(180deg, var(--ex-0), var(--ex-1) 60%, var(--ex-0))",
   grid: "rgba(200,180,150,0.08)", axis: "rgba(200,180,150,0.26)",
-  link: "#DCCDB3", node: "#C9B08A", end: "#6ee7b7", nodeEdge: "#F3EEE6",
+  link: "#DCCDB3", node: "#C9B08A", end: "#F4E8D2", nodeEdge: "#F3EEE6",
   ring: "#DCCDB3", text: "#e8edf5", sub: "#DCCDB3", halo: "#161614",
   routeA: "#DCCDB3", routeB: "#C9B08A",
 };
 // class sets for the HTML parts of the figure
 const K = {
-  paper: { fig: "border border-ink-900", rule: "border-slate-300", li: "text-ink-900", n: "text-[#6A5539]", end: "text-emerald-700", wk: "text-slate-600", tag: "border-ink-900 bg-white text-ink-900", cap: "text-slate-600" },
-  navy: { fig: "border border-white/15", rule: "border-white/10", li: "text-white/85", n: "text-[#C9B08A]", end: "text-emerald-300", wk: "text-[#DCCDB3]/80", tag: "border-white/30 text-white/80", cap: "text-[#E8E0D2]/75" },
+  paper: { fig: "border border-ink-900", rule: "border-slate-300", li: "text-ink-900", n: "text-[#6A5539]", end: "text-ink-900", wk: "text-slate-600", tag: "border-ink-900 bg-white text-ink-900", cap: "text-slate-600" },
+  navy: { fig: "border border-white/15", rule: "border-white/10", li: "text-white/85", n: "text-[#C9B08A]", end: "text-[#F4E8D2]", wk: "text-[#DCCDB3]/80", tag: "border-white/30 text-white/80", cap: "text-[#E8E0D2]/75" },
 };
 
 // stage, typical window (as shown), the week it is placed at, lane (y), label side
@@ -174,7 +174,7 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean; compact?: b
             style={{ background: dark ? "linear-gradient(100deg, rgba(180,154,117,0.28) 0%, rgba(180,154,117,0.08) 45%, rgba(5,16,31,0) 80%)" : "linear-gradient(100deg, rgba(180,154,117,0.10), transparent 70%)" }}>
             <div aria-live="polite" className={`grid gap-6 ${compact ? "" : "lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-12"}`}>
               <div className="flex items-center gap-5">
-                <span className={`font-editorial text-[clamp(3.6rem,6vw,5.6rem)] font-semibold leading-none tabular-nums ${last ? "text-emerald-300" : "text-[#C9B08A]"}`}>{String(sel + 1).padStart(2, "0")}</span>
+                <span className={`font-editorial text-[clamp(3.6rem,6vw,5.6rem)] font-semibold leading-none tabular-nums ${last ? "text-[#F4E8D2]" : "text-[#C9B08A]"}`}>{String(sel + 1).padStart(2, "0")}</span>
                 <span>
                   <span className={`block font-mono text-[11px] uppercase tracking-[0.2em] ${k.wk}`}>{fmtWk(wk)}</span>
                   <span className={`mt-1 block font-editorial text-[clamp(1.6rem,2.6vw,2.4rem)] font-semibold leading-tight ${dark ? "text-white" : "text-ink-900"}`}>{t(key)}</span>
@@ -192,7 +192,7 @@ const ExchangeMap: React.FC<{ dark?: boolean; interactive?: boolean; compact?: b
             {/* the run so far */}
             <div aria-hidden className="mt-7 grid grid-cols-8 gap-1.5">
               {STAGES.map(([sk], i) => (
-                <span key={sk} className={`h-1.5 rounded-full transition-colors duration-300 ${i <= sel ? (i === n - 1 ? "bg-emerald-300" : "bg-[#C9B08A]") : dark ? "bg-white/15" : "bg-slate-200"}`} />
+                <span key={sk} className={`h-1.5 rounded-full transition-colors duration-300 ${i <= sel ? (i === n - 1 ? "bg-[#F4E8D2]" : "bg-[#C9B08A]") : dark ? "bg-white/15" : "bg-slate-200"}`} />
               ))}
             </div>
           </div>
