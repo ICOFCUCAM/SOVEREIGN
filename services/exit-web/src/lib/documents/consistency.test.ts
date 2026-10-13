@@ -56,8 +56,8 @@ describe("cross-document consistency — each check catches a contradiction", ()
 
   it("a valuation that is not the canonical one", async () => {
     const s = await suite(SAMPLE_COMPANY, false);
-    const mid = (Math.round(VALUATION_CANONICAL.headline.mid / 100_000) / 10).toFixed(1);
-    const f = checkSuite(replace(s, "exitos.cim", `enterprise value is $${mid}M`, "enterprise value is $140.0M"), s.truth);
+    // buyer documents state no valuation; a document that does must state the canonical one
+    const f = checkSuite(replace(s, "exitos.cim", "## ", "On a strategic-buyer basis the enterprise value is $140.0M.\n\n## "), s.truth);
     expect(f).toContainEqual(expect.objectContaining({ check: "valuation", typeId: "exitos.cim", found: "140M" }));
   });
 

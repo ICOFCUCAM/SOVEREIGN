@@ -14,9 +14,10 @@ _Northwind Analytics · 2026-10-13 · Ref: exitos.investor\_deck · 4a3574ef1b15
 - 5 Slide 5 · Customers
 - 6 Slide 6 · Financials
 - 7 Slide 7 · Team
-- 8 Slide 8 · Valuation
+- 8 Slide 8 · Investment highlights
 - 9 Slide 9 · Process
 - 10 Slide 10 · Contact
+- 11 Basis and limitations
 
 ---
 
@@ -72,15 +73,15 @@ Northwind Analytics has not yet supplied its headcount or management team; buyer
 
 - Management presentations to engaged buyers in the process
 
-## 8 Slide 8 · Valuation
+## 8 Slide 8 · Investment highlights
 
-$77.1M – $220.6M · midpoint $125.0M · confidence 78% (Framework v1.0.0)
+Why Northwind Analytics is worth a closer look.
 
-- Strategic premium +24% — in sector (n=1)
-- 4 comparable transactions
-- Buyer universe: 23 qualified / 31 scored / 31 registry
-
-> **[INFO] Basis** Prepared by ExitOS from the company's own figures.
+- Recurring revenue of $21.8M ARR, up 36% on the prior year
+- 78% gross margin; EBITDA-positive at a 14% margin
+- Rule of 40: 50 (ARR growth 36% plus EBITDA margin 14%), above the 40 that buyers of recurring-revenue businesses commonly use as a threshold
+- Net revenue retention of 117%: existing customers, taken together, spend more each year than the last
+- A diversified customer base: the ten largest customers are 22% of revenue
 
 ## 9 Slide 9 · Process
 
@@ -93,3 +94,7 @@ A targeted, confidential process. Indications due week 4; LOI targeted weeks 5�
 ## 10 Slide 10 · Contact
 
 All enquiries through the process coordinator. Please do not contact the Company, its staff or its customers directly.
+
+## 11 Basis and limitations
+
+> **[INFO] Basis** Prepared by ExitOS from the company's own figures.

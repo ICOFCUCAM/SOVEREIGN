@@ -12,9 +12,9 @@ _Northwind Analytics · 2026-10-13 · Ref: exitos.executive\_summary · cd0a6d67
 - 3 Investment highlights
 - 4 Market position
 - 5 Key considerations
-- 6 Indicative valuation
-- 7 Process & timeline
-- 8 Basis
+- 6 Process & timeline
+- 7 Basis
+- 8 Basis and limitations
 
 ---
 
@@ -64,29 +64,14 @@ Matters buyers are likely to examine closely, raised now so they can be prepared
 
 - Information not yet supplied (market size, headcount, leadership team, capitalisation table); buyers will ask for it early
 
-## 6 Indicative valuation
-
-On a strategic-buyer basis the enterprise value is $125.0M (range $77.1M – $220.6M), prepared under ExitOS Valuation Framework v1.0.0. The midpoint is the financial baseline uplifted by a strategic premium of +24% — in sector (n=1), taken from comparable sales; with only one such sale on record it is thinly evidenced, and buyers will discount it.
-
-**Table 3. Mandatory valuation outputs**
-| Output | Value |
-| --- | --- |
-| Enterprise value range | $77.1M – $220.6M |
-| Midpoint valuation | $125.0M |
-| Valuation confidence | 78% · High |
-| Methodology weighting | ARR multiple 71% · EBITDA multiple 29% |
-| Comparable transactions | 4 |
-| Strategic premium basis | +24% — in sector (n=1) |
-| Buyer universe | 23 qualified / 31 scored / 31 registry |
-| Time to close in comparable deals | 50–178 days (the plan for this process is in the timeline) |
-| Data provenance | Every figure traces to a stated source, confidence and date. Comparable evidence spans 2019-08-07 to 2024-02-26. |
-
-> **[INFO] Basis** Prepared by ExitOS from the company's own figures.
-
-## 7 Process & timeline
+## 6 Process & timeline
 
 Outreach is to qualified counterparties on a strictly confidential basis. Interested parties sign a mutual NDA, receive the confidential information memorandum and staged data-room access, and attend a management presentation in weeks 2–3 of the process. Indications of interest are due in week 4, with a signed letter of intent targeted in weeks 5–6. These dates are a planning assumption.
 
-## 8 Basis
+## 7 Basis
 
 Prepared from information supplied by the Company, unaudited, in US dollars. Market figures are company estimates. This summary is not an offer; any transaction is governed only by a definitive agreement.
+
+## 8 Basis and limitations
+
+> **[INFO] Basis** Prepared by ExitOS from the company's own figures.

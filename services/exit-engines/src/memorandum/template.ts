@@ -73,38 +73,6 @@ function financialProfileTable(i: MemorandumInputs): MemorandumTable {
   };
 }
 
-function valuationTable(i: MemorandumInputs): MemorandumTable {
-  // When the constitution is present, the methodology table inherits its
-  // normalized weights and per-method market evidence — the single source
-  // of valuation truth, not a per-document recomputation.
-  if (i.constitution) {
-    return {
-      caption: `Valuation methodology — ExitOS Framework v${i.constitution.frameworkVersion}`,
-      headers: ['Methodology', 'Basis', 'Low', 'Mid', 'High', 'Weight', 'Market evidence'],
-      rows: i.constitution.methodologies.map((m) => [
-        m.name, m.basis,
-        money(m.band.low, i.anonymize), money(m.band.mid, i.anonymize), money(m.band.high, i.anonymize),
-        `${m.weightPct}%`, m.evidence,
-      ]),
-    };
-  }
-  const v = i.valuation;
-  return {
-    caption: 'Valuation band',
-    headers: ['Methodology', 'Basis', 'Low', 'Mid', 'High', 'Weight'],
-    rows: v.methodologies.map((m) => [
-      m.name, m.basis,
-      money(m.band.low, i.anonymize),
-      money(m.band.mid, i.anonymize),
-      money(m.band.high, i.anonymize),
-      `${Math.round(m.weight * 100)}%`,
-    ]),
-  };
-}
-
-// The framework-governed valuation section every memorandum inherits.
-// Renders the ten mandatory outputs from the constitution — no document
-// states a valuation figure the framework didn't produce.
 /** Customer concentration, stated in every named memorandum's financial section: a material risk is disclosed, never left for diligence to find. */
 function concentrationSentence(r: { readonly customerConcentrationTop10Pct?: number }): string {
   const c = r.customerConcentrationTop10Pct;
@@ -112,36 +80,6 @@ function concentrationSentence(r: { readonly customerConcentrationTop10Pct?: num
   return ` The ten largest customers account for ${(c * 100).toFixed(0)}% of revenue${c >= 0.35 ? ' — a concentration buyers will test in diligence' : ''}.`;
 }
 
-function constitutionValuationSection(i: MemorandumInputs, heading: string): MemorandumSection | null {
-  const c = i.constitution;
-  if (!c) return null;
-  const m = c.mandatoryOutputs;
-  const anon = !!i.anonymize;
-  const body = anon
-    ? `Valuation prepared under ExitOS Valuation Framework v${c.frameworkVersion}. Absolute figures are disclosed on execution of a mutual NDA; the methodology, confidence (${m.confidence_score}) and the buyer universe (${m.buyer_universe_size}) are shared pre-NDA.`
-    : `On a strategic-buyer basis the enterprise value is ${m.midpoint_valuation} (range ${m.enterprise_value_range}), prepared under ExitOS Valuation Framework v${c.frameworkVersion}. The midpoint is the financial baseline uplifted by a strategic premium of ${m.strategic_premium_basis}, taken from comparable sales${c.premium.observedPremiums.length < 3 ? `; with only ${c.premium.observedPremiums.length === 1 ? 'one such sale' : `${c.premium.observedPremiums.length} such sales`} on record it is thinly evidenced, and buyers will discount it` : ''}.`;
-  return {
-    heading,
-    body,
-    tables: [
-      {
-        caption: 'Mandatory valuation outputs',
-        headers: ['Output', 'Value'],
-        rows: [
-          ['Enterprise value range', anon ? '— (under NDA)' : m.enterprise_value_range],
-          ['Midpoint valuation', anon ? '— (under NDA)' : m.midpoint_valuation],
-          ['Valuation confidence', m.confidence_score],
-          ['Methodology weighting', m.methodology_weighting],
-          ['Comparable transactions', m.comparable_transaction_count],
-          ['Strategic premium basis', m.strategic_premium_basis],
-          ['Buyer universe', m.buyer_universe_size],
-          ['Time to close in comparable deals', `${m.expected_time_to_close} (the plan for this process is in the timeline)`],
-          ['Data provenance', m.data_provenance_summary],
-        ],
-      },
-    ],
-  };
-}
 
 function investmentHighlights(i: MemorandumInputs): string[] {
   const c = i.company, r = c.revenue, anon = !!i.anonymize;
@@ -166,18 +104,16 @@ function investmentHighlights(i: MemorandumInputs): string[] {
 function importantNotice(name: string): MemorandumSection {
   return {
     heading: 'Important notice',
-    body: `This memorandum has been prepared from information supplied by ${name} (the "Company") to help recipients decide whether to pursue a transaction. It is provided under the confidentiality agreement the recipient has signed and must not be copied or passed on except as that agreement allows. The information has not been audited or independently verified. Projections and the indicative valuation are estimates that depend on assumptions stated in this document. Nothing in it is an offer, a recommendation or legal, tax or accounting advice; any transaction will be governed only by a definitive agreement. Recipients should make their own investigation and take their own advice.`,
+    body: `This memorandum has been prepared from information supplied by ${name} (the "Company") to help recipients decide whether to pursue a transaction. It is provided under the confidentiality agreement the recipient has signed and must not be copied or passed on except as that agreement allows. The information has not been audited or independently verified. Any forecasts are the Company's own estimates and depend on the assumptions stated with them. The memorandum does not state a price; if the shareholders give guidance on value, it is given separately, in writing, as part of the process. Nothing in it is an offer, a recommendation or legal, tax or accounting advice; any transaction will be governed only by a definitive agreement. Recipients should make their own investigation and take their own advice.`,
   };
 }
 
 /** Where every figure came from and what was assumed. */
 function basisOfPreparation(i: MemorandumInputs, name: string): MemorandumSection {
-  const c = i.constitution;
   return {
     heading: 'Basis of preparation',
     body: `Figures are as supplied by ${name} through ExitOS and are stated in US dollars. Revenue is trailing twelve months; ARR is the annualised value of recurring contracts at the date of preparation. Growth is measured against the same date a year earlier. The prior-year ARR in the ARR table is implied from current ARR and the reported growth rate, not taken from accounts.`,
     bullets: [
-      c ? `Valuation: ExitOS Valuation Framework v${c.frameworkVersion}, ${c.comparablesUsed} comparable transactions; ${c.mandatoryOutputs.data_provenance_summary}` : 'Valuation: ExitOS valuation engine (comparable transactions and fundamentals)',
       `Timeline: ${timelineOf(i).basis}`,
       'Market size and growth: company estimates, not independently sourced',
       'Product and team characteristics: as described by the Company',
@@ -291,12 +227,7 @@ function cim(i: MemorandumInputs): MemorandumDocument {
     {
       heading: `${n()} Financial performance`,
       body: `${name} reports ${money(r.trailingTwelveMonthsRevenueUsd, anon)} in trailing twelve-month revenue at ${pct(r.grossMarginPct)} gross margin and ${pct(r.ebitdaMarginPct)} EBITDA margin. ARR grew ${pct(c.growth.arrGrowthYoyPct)} over the year to ${money(r.annualRecurringRevenueUsd, anon)}. Its Rule of 40 score is ${rule40(c).text}. Buyers will expect monthly management accounts and statutory financial statements in the data room; the tables below summarise the figures supplied.`,
-      tables: [financialProfileTable(i), arrTrajectory(i), valuationTable(i)],
-    },
-    constitutionValuationSection(i, `${n()} Valuation`) ?? {
-      heading: `${n()} Valuation`,
-      body: `Headline valuation range: ${money(i.valuation.headline.low, anon)} – ${money(i.valuation.headline.mid, anon)} – ${money(i.valuation.headline.high, anon)}. Country adjustment for ${anon ? '[redacted]' : c.jurisdiction}: ${pct(i.valuation.countryAdjustment)}.`,
-      bullets: i.valuation.premiums.map((p) => `${p.name}: ${p.pct >= 0 ? '+' : ''}${pct(p.pct)} — ${p.reason}`),
+      tables: [financialProfileTable(i), arrTrajectory(i)],
     },
     {
       heading: `${n()} Management and organisation`,
@@ -319,7 +250,6 @@ function cim(i: MemorandumInputs): MemorandumDocument {
 function executiveSummary(i: MemorandumInputs): MemorandumDocument {
   const name = anonName(i.company.name, !!i.anonymize, i.codeName);
   const c = i.company, anon = !!i.anonymize;
-  const v = i.valuation;
   const sections: MemorandumSection[] = [
     {
       heading: 'The opportunity',
@@ -343,11 +273,6 @@ function executiveSummary(i: MemorandumInputs): MemorandumDocument {
       heading: 'Key considerations',
       body: 'Matters buyers are likely to examine closely, raised now so they can be prepared for:',
       bullets: [...(risksSection(i, '').bullets ?? [])].slice(0, 4),
-    },
-    constitutionValuationSection(i, 'Indicative valuation') ?? {
-      heading: 'Indicative valuation',
-      body: `Based on comparable-transaction and fundamental analysis, the indicative enterprise value range is ${money(v.headline.low, anon)} – ${money(v.headline.high, anon)}, with a midpoint of ${money(v.headline.mid, anon)} on a strategic-buyer basis.`,
-      bullets: v.premiums.map((p) => `${p.name}: ${p.pct >= 0 ? '+' : ''}${pct(p.pct)} — ${p.reason}`),
     },
     {
       heading: 'Process & timeline',
@@ -390,13 +315,7 @@ function investorDeck(i: MemorandumInputs): MemorandumDocument {
     slide('Slide 5 · Customers', `Revenue quality: what recurs, how it grows inside the base, and how concentrated it is.`, [...(customersSection(i, name, '').bullets ?? [])]),
     slide('Slide 6 · Financials', `${money(r.trailingTwelveMonthsRevenueUsd, anon)} TTM revenue; ${profitabilityPhrase(c)}.`, [`Rule of 40: ${rule40(c).score}`, `Gross margin ${pct(r.grossMarginPct)}`]),
     slide('Slide 7 · Team', managementSentence(i, name), ['Management presentations to engaged buyers in the process']),
-    slide('Slide 8 · Valuation',
-      i.constitution
-        ? `${money(i.constitution.headline.low, anon)} – ${money(i.constitution.headline.high, anon)} · midpoint ${money(i.constitution.headline.mid, anon)} · confidence ${i.constitution.confidence.score}% (Framework v${i.constitution.frameworkVersion})`
-        : `${money(i.valuation.headline.low, anon)} – ${money(i.valuation.headline.high, anon)} headline range.`,
-      i.constitution
-        ? [`Strategic premium ${i.constitution.mandatoryOutputs.strategic_premium_basis}`, `${i.constitution.comparablesUsed} comparable transactions`, `Buyer universe: ${i.constitution.mandatoryOutputs.buyer_universe_size}`]
-        : i.valuation.premiums.map((p) => `${p.name}: ${pct(p.pct)}`)),
+    slide('Slide 8 · Investment highlights', `Why ${name} is worth a closer look.`, investmentHighlights(i).slice(0, 5)),
     slide('Slide 9 · Process', `A targeted, confidential process. Indications due ${weeksPhrase(milestone(timelineOf(i), 'ioi'))}; LOI targeted ${weeksPhrase(milestone(timelineOf(i), 'loi'))} (planning assumption).`, [
       `NDA and CIM: ${weeksPhrase(milestone(timelineOf(i), 'nda'))}`,
       `Management presentations: ${weeksPhrase(milestone(timelineOf(i), 'management_presentations'))}`,
@@ -410,12 +329,10 @@ function investorDeck(i: MemorandumInputs): MemorandumDocument {
 function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
   const projectName = i.codeName ?? DEFAULT_CODE_NAME;
   const c = i.company;
-  const BUYER_TYPE: Record<string, string> = { strategic: 'strategic acquirers', pe: 'private-equity firms', vc: 'growth investors', family_office: 'family offices' };
-  const types = i.buyers ? Object.entries(i.buyers.byType).filter(([, k]) => k > 0).sort((a, b) => b[1] - a[1]).map(([t]) => BUYER_TYPE[t] ?? t.replace(/_/g, ' ')) : [];
   const sections: MemorandumSection[] = [
     {
       heading: 'The opportunity',
-      body: `${projectName} is ${modelPhrase(c.businessModel)} in ${sectorPhrase(c.sector)}. It has built a recurring-revenue business growing ${pct(c.growth.arrGrowthYoyPct)} year over year, and its shareholders are inviting a small group of qualified acquirers to consider a purchase through a structured, confidential process. The Company's identity, detailed financials and the indicative valuation are disclosed once a mutual NDA is signed.`,
+      body: `${projectName} is ${modelPhrase(c.businessModel)} in ${sectorPhrase(c.sector)}. It has built a recurring-revenue business growing ${pct(c.growth.arrGrowthYoyPct)} year over year, and its shareholders are inviting a small group of qualified acquirers to consider a purchase through a structured, confidential process. The Company's identity and detailed financials are disclosed once a mutual NDA is signed.`,
     },
     {
       heading: 'Selected metrics',
@@ -438,14 +355,6 @@ function buyerTeaser(i: MemorandumInputs): MemorandumDocument {
         ...(known(i, 'team.foundersStillActive') && c.team.foundersStillActive ? ['Founders active and available through a transition'] : []),
       ],
     },
-    ...(types.length ? [{
-      heading: 'Who it suits',
-      body: `ExitOS's buyer model expects the strongest interest from ${types.slice(0, 3).join(', ').replace(/, ([^,]*)$/, ' and $1')} looking to add ${sectorPhrase(c.sector)} capability or recurring revenue.`,
-    } as MemorandumSection] : []),
-    ...(i.constitution ? [{
-      heading: 'Valuation basis',
-      body: `The valuation is prepared under ExitOS Valuation Framework v${i.constitution.frameworkVersion}. The enterprise value range and midpoint are disclosed under NDA. Before an NDA we share the basis: confidence ${i.constitution.mandatoryOutputs.confidence_score}, ${i.constitution.comparablesUsed} comparable transactions and a strategic premium of ${i.constitution.mandatoryOutputs.strategic_premium_basis}.`,
-    } as MemorandumSection] : []),
     {
       heading: 'Process & next steps',
       body: `Interested parties should request the mutual NDA. Once it is signed they receive the confidential information memorandum and staged data-room access, and are offered a management presentation in ${weeksPhrase(milestone(timelineOf(i), 'management_presentations'))} of the process. Indications of interest are due in ${weeksPhrase(milestone(timelineOf(i), 'ioi'))} (planning assumption).`,

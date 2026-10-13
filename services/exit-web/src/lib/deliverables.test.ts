@@ -204,27 +204,18 @@ describe("all generated documents have content", () => {
     }
   });
 
-  it("memoranda INHERIT the Valuation Constitution when supplied", async () => {
+  it("buyer memoranda state no price, even when the valuation constitution is supplied", async () => {
     const gen = new TemplateMemorandumGenerator();
-    const fwVersion = VALUATION_INSTITUTIONAL.frameworkVersion;
-    // CIM, exec summary and deck must render the framework's governed figures
-    for (const kind of ["cim", "executive_summary", "investor_deck"] as const) {
+    for (const kind of ["cim", "executive_summary", "investor_deck", "buyer_teaser"] as const) {
       const doc = await gen.generate(kind, {
         company: SAMPLE_COMPANY, valuation: VALUATION_STRATEGIC,
         constitution: VALUATION_INSTITUTIONAL, buyers: BUYERS, diligence: DILIGENCE,
       });
       const md = docToMarkdown(doc);
-      expect(md, kind).toContain(`Framework v${fwVersion}`);
-      // the governed midpoint figure appears verbatim (no per-doc recomputation)
-      expect(md, kind).toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.midpoint_valuation);
+      expect(md, kind).not.toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.midpoint_valuation);
+      expect(md, kind).not.toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.enterprise_value_range);
+      expect(md, kind).not.toMatch(/Valuation Framework|strategic premium|buyer universe|probability of engagement/i);
     }
-    // the anonymized teaser inherits the basis without leaking absolute figures
-    const teaser = await gen.generate("buyer_teaser", {
-      company: SAMPLE_COMPANY, valuation: VALUATION_STRATEGIC, constitution: VALUATION_INSTITUTIONAL,
-    });
-    const tmd = docToMarkdown(teaser);
-    expect(tmd).toContain(`Framework v${fwVersion}`);
-    expect(tmd).not.toContain(VALUATION_INSTITUTIONAL.mandatoryOutputs.midpoint_valuation);
   });
 });
 

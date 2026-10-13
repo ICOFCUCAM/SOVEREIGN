@@ -9,10 +9,14 @@ import { documentType, type DocumentType } from "./registry";
 //     presented as the company's own;
 //  2. disclosure — a pre-NDA or public document may not contain the
 //     company's name or its exact figures (revenue, ARR, valuation). The check
-//     reads the rendered text, so it catches a leak whichever generator wrote it.
+//     reads the rendered text, so it catches a leak whichever generator wrote it;
+//  3. seller intelligence — no document addressed to buyers (pre- or post-NDA)
+//     may carry the seller's valuation, price guidance, buyer-targeting
+//     probabilities or private readiness advice. Those stay in the valuation
+//     report, the negotiation workspace and board materials.
 
 export interface DisclosureFinding {
-  readonly kind: "company_name" | "exact_figure";
+  readonly kind: "company_name" | "exact_figure" | "seller_intelligence";
   readonly term: string;
   readonly what: string;
 }
@@ -57,6 +61,22 @@ export function confidentialTerms(company: CompanyProfile, extra: { valuationMid
   return out;
 }
 
+/** Seller-only material, as ExitOS's generators phrase it. */
+const SELLER_ONLY: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\benterprise value (?:is|of|range)\b|\bvaluation range\b|\bmidpoint valuation\b|\bindicative (?:enterprise )?valuation\b|\bstrategic premium\b/i, "the seller's valuation"],
+  [/\bprice guidance\b|\breservation (?:price|line)\b|\bwalk-away\b/i, "price guidance"],
+  [/\bprobability of engagement\b|\bbuyer universe\b|\btarget buyer set\b|\bmost likely buyer\b/i, "buyer-targeting intelligence"],
+  [/\bexit readiness\b|\breadiness score\b|\bnot an auction\b/i, "private readiness advice"],
+];
+
+/** Seller-only material in a buyer-facing text, plus the valuation figure itself in any of its forms. */
+export function sellerIntelligenceFindings(text: string, valuationMidUsd?: number): DisclosureFinding[] {
+  const out: DisclosureFinding[] = [];
+  for (const [re, what] of SELLER_ONLY) { const m = text.match(re); if (m) out.push({ kind: "seller_intelligence", term: m[0], what }); }
+  for (const term of figureForms(valuationMidUsd ?? 0)) if (text.includes(term)) out.push({ kind: "seller_intelligence", term, what: "the seller's valuation" });
+  return out;
+}
+
 /** Confidential terms that appear in a text (case-insensitive for the name). */
 export function disclosureFindings(text: string, terms: readonly DisclosureFinding[]): DisclosureFinding[] {
   const lower = text.toLowerCase();
@@ -71,12 +91,17 @@ export function gateDocument(typeId: string, text: string, ctx: {
 }): GateResult {
   const type = documentType(typeId);
   const unconfirmed = type.inputs.filter((f) => ctx.unconfirmed.includes(f));
-  const disclosure = GATED.has(type.classification) ? disclosureFindings(text, confidentialTerms(ctx.company, ctx)) : [];
+  const disclosure = [
+    ...(GATED.has(type.classification) ? disclosureFindings(text, confidentialTerms(ctx.company, ctx)) : []),
+    ...(type.audience === "buyers" || type.audience === "buyer" ? sellerIntelligenceFindings(text, ctx.valuationMidUsd) : []),
+  ];
   return { type, unconfirmed, disclosure, blocked: disclosure.length > 0 };
 }
 
 /** One plain sentence for the person about to send or export. */
 export function gateMessage(g: GateResult, labels: Record<string, string>): string | null {
+  const seller = g.disclosure.filter((d) => d.kind === "seller_intelligence");
+  if (seller.length) return `Withheld: this buyer-facing document contains ${[...new Set(seller.map((d) => d.what))].join(" and ")}. Keep it in the valuation report, the negotiation workspace or board materials.`;
   if (g.disclosure.length) {
     const what = [...new Set(g.disclosure.map((d) => d.what))].join(" and ");
     return `Withheld: this ${g.type.classification === "public" ? "public" : "pre-NDA"} document contains ${what}, which may only be shared under an NDA.`;

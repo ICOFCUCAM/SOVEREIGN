@@ -15,7 +15,7 @@ export const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"
 const INK = "#0b1220", MUTE = "#5b6675", FAINT = "#9aa3b0", LINE = "#d8dee8", HAIR = "#eef1f5";
 const GREEN = "#0e7a4f", NAVY = "#16314f", GOLD = "#8a6d3b";
 
-export const ReportFrame: React.FC<{ docType: string; company: string; frameworkVersion: string; reference?: string; children: React.ReactNode }> = ({ docType, company, frameworkVersion, reference, children }) => {
+export const ReportFrame: React.FC<{ docType: string; company: string; /** omitted on documents that state no valuation */ frameworkVersion?: string; reference?: string; children: React.ReactNode }> = ({ docType, company, frameworkVersion, reference, children }) => {
   const nav = useNavigate();
   const ref = reference ?? docReference(docType, company, new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
   return (
@@ -28,7 +28,7 @@ export const ReportFrame: React.FC<{ docType: string; company: string; framework
       </div>
       <div className="rpt mx-auto text-[#0b1220]">
         <div className="rpt-fixed-header no-screen"><span className="flex items-center gap-1.5"><ExchangeMark size={11} tile={false} className="text-[#0e7a4f]" /> {company}</span><span>{docType}</span></div>
-        <div className="rpt-fixed-footer no-screen"><span>ExitOS Advisory · Strictly Private &amp; Confidential</span><span>{ref} · Framework v{frameworkVersion}</span></div>
+        <div className="rpt-fixed-footer no-screen"><span>ExitOS Advisory · Strictly Private &amp; Confidential</span><span>{ref}{frameworkVersion ? ` · Framework v${frameworkVersion}` : ""}</span></div>
         <div className="rpt-watermark no-screen">CONFIDENTIAL</div>
         {children}
       </div>
@@ -49,7 +49,7 @@ export const docReference = (docType: string, company: string, date: string): st
 
 /** Premium cover — institutional hairline geometry, no stock photography. */
 export const Cover: React.FC<{
-  docType: string; company: string; preparedFor: string; preparedBy: string; date: string; frameworkVersion: string; classification?: string; reference?: string;
+  docType: string; company: string; preparedFor: string; preparedBy: string; date: string; frameworkVersion?: string; classification?: string; reference?: string;
 }> = ({ docType, company, preparedFor, preparedBy, date, frameworkVersion, classification = "Strictly Private & Confidential", reference }) => (
   <section className="rpt-cover relative flex min-h-[1040px] flex-col overflow-hidden px-16 py-20">
     {/* subtle hairline geometry */}
@@ -69,7 +69,7 @@ export const Cover: React.FC<{
         <CoverField k="Prepared for" v={preparedFor} />
         <CoverField k="Prepared by" v={preparedBy} />
         <CoverField k="Date" v={date} />
-        <CoverField k="Framework" v={`ExitOS Valuation Framework v${frameworkVersion}`} />
+        {frameworkVersion && <CoverField k="Framework" v={`ExitOS Valuation Framework v${frameworkVersion}`} />}
       </div>
     </div>
     <div className="relative mt-auto flex items-end justify-between border-t border-[#d8dee8] pt-5">

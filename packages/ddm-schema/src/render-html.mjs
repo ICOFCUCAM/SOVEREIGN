@@ -87,7 +87,9 @@ function block(b, warnings) {
     }
     case "table": {
       const head = `<tr>${b.columns.map((c) => `<th style="text-align:${c.align || "left"}">${esc(c.label)}</th>`).join("")}</tr>`;
-      const rows = b.rows.map((r) => `<tr>${r.map((cell) => `<td style="text-align:${cell.align || "left"}"${cell.emphasis === "bold" ? ' class="b"' : ""}>${esc(cell.text)}</td>`).join("")}</tr>`).join("");
+      // a short value (a date, a status, an amount) is never broken across lines
+      const cls = (cell) => [cell.emphasis === "bold" ? "b" : "", String(cell.text ?? "").length <= 16 ? "nw" : ""].filter(Boolean).join(" ");
+      const rows = b.rows.map((r) => `<tr>${r.map((cell) => `<td style="text-align:${cell.align || "left"}"${cls(cell) ? ` class="${cls(cell)}"` : ""}>${esc(cell.text)}</td>`).join("")}</tr>`).join("");
       const cap = b.number || b.caption ? `<figcaption>${esc(b.number ? b.number + ". " : "")}${esc(b.caption || "")}</figcaption>` : "";
       const fn = b.footnotes?.length ? `<div class="tfn">${b.footnotes.map(esc).join("<br/>")}</div>` : "";
       return `<figure><table><thead>${head}</thead><tbody>${rows}</tbody></table>${cap}${fn}</figure>`;
@@ -156,6 +158,7 @@ nav.toc ol { list-style:none; padding:0; } nav.toc li { margin:2mm 0; font-famil
 h2.sec { font-size:15pt; margin-top:8mm; } h3.sec{font-size:13pt;} h4.sec{font-size:11.5pt;}
 h2.sec,h3.sec,h4.sec { break-after:avoid; page-break-after:avoid; } tr,li,blockquote { break-inside:avoid; page-break-inside:avoid; }
 .secnum { color:#6a7a90; margin-right:6px; } p.lead { font-size:12pt; color:#1a1a1a; } p.note{color:#555;font-style:italic;}
+td.nw, th { white-space:nowrap; }
 table { width:100%; border-collapse:collapse; margin:4mm 0; font-family:Helvetica,Arial,sans-serif; font-size:10pt; }
 th,td { border:1px solid #bbb; padding:4px 8px; } thead th { background:#0b1f3a; color:#fff; } td.b{font-weight:700;}
 figure { margin:4mm 0; } figcaption { font:italic 9pt Helvetica,Arial,sans-serif; color:#555; margin-top:2mm; }

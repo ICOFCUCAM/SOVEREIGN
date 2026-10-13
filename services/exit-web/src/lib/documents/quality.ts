@@ -130,6 +130,13 @@ export function reviewVersion(v: DocumentVersion, truth?: Truth, anonymized = fa
   return { typeId: v.typeId, title, words, score, pass: score >= PASS_SCORE && !f.some((x) => x.severity === "critical"), findings: f };
 }
 
+/** Add findings from the rendered outputs (rendered.ts) to a review and re-score it. */
+export function withFindings(r: QualityReport, extra: readonly QualityFinding[]): QualityReport {
+  const findings = [...r.findings, ...extra];
+  const score = Math.max(0, 100 - findings.reduce((s, x) => s + PENALTY[x.severity], 0));
+  return { ...r, findings, score, pass: score >= PASS_SCORE && !findings.some((x) => x.severity === "critical") };
+}
+
 /** The review as Markdown, for a person deciding what to fix next. */
 export function qualityReportMarkdown(reports: readonly QualityReport[], heading = "Document quality review"): string {
   const lines = [`# ${heading}`, "", `Pass: score ≥ ${PASS_SCORE} and no critical finding. Penalties: critical ${PENALTY.critical}, major ${PENALTY.major}, minor ${PENALTY.minor}.`,

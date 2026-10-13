@@ -14,18 +14,18 @@ _Northwind Analytics · 2026-10-13 · Ref: exitos.cim · 31b221f64c27 · v1 · d
 - 5 Product and technology
 - 6 Customers and revenue quality
 - 7 Financial performance
-- 8 Valuation
-- 9 Management and organisation
-- 10 Ownership
-- 11 Key considerations for diligence
-- 12 Process and timing
-- 13 Basis of preparation
+- 8 Management and organisation
+- 9 Ownership
+- 10 Key considerations for diligence
+- 11 Process and timing
+- 12 Basis of preparation
+- 13 Basis and limitations
 
 ---
 
 ## 1 Important notice
 
-This memorandum has been prepared from information supplied by Northwind Analytics (the "Company") to help recipients decide whether to pursue a transaction. It is provided under the confidentiality agreement the recipient has signed and must not be copied or passed on except as that agreement allows. The information has not been audited or independently verified. Projections and the indicative valuation are estimates that depend on assumptions stated in this document. Nothing in it is an offer, a recommendation or legal, tax or accounting advice; any transaction will be governed only by a definitive agreement. Recipients should make their own investigation and take their own advice.
+This memorandum has been prepared from information supplied by Northwind Analytics (the "Company") to help recipients decide whether to pursue a transaction. It is provided under the confidentiality agreement the recipient has signed and must not be copied or passed on except as that agreement allows. The information has not been audited or independently verified. Any forecasts are the Company's own estimates and depend on the assumptions stated with them. The memorandum does not state a price; if the shareholders give guidance on value, it is given separately, in writing, as part of the process. Nothing in it is an offer, a recommendation or legal, tax or accounting advice; any transaction will be governed only by a definitive agreement. Recipients should make their own investigation and take their own advice.
 
 ## 2 Executive overview
 
@@ -84,46 +84,21 @@ Northwind Analytics reports $24.6M in trailing twelve-month revenue at 78% gross
 | ARR | $16.0M | $21.8M |
 | YoY growth | — | 36% |
 
-**Table 3. Valuation methodology — ExitOS Framework v1.0.0**
-| Methodology | Basis | Low | Mid | High | Weight | Market evidence |
-| --- | --- | --- | --- | --- | --- | --- |
-| ARR multiple | $21.8M ARR | $65.4M | $109.0M | $196.2M | 71% | vertical saas sector band 3×–9× (mid 5×), trough-to-peak market conditions |
-| EBITDA multiple | $3.4M EBITDA (14.0% margin) | $34.4M | $48.2M | $75.8M | 29% | vertical saas sector band 10×–22× (mid 14×), trough-to-peak market conditions |
-
-## 8 Valuation
-
-On a strategic-buyer basis the enterprise value is $125.0M (range $77.1M – $220.6M), prepared under ExitOS Valuation Framework v1.0.0. The midpoint is the financial baseline uplifted by a strategic premium of +24% — in sector (n=1), taken from comparable sales; with only one such sale on record it is thinly evidenced, and buyers will discount it.
-
-**Table 4. Mandatory valuation outputs**
-| Output | Value |
-| --- | --- |
-| Enterprise value range | $77.1M – $220.6M |
-| Midpoint valuation | $125.0M |
-| Valuation confidence | 78% · High |
-| Methodology weighting | ARR multiple 71% · EBITDA multiple 29% |
-| Comparable transactions | 4 |
-| Strategic premium basis | +24% — in sector (n=1) |
-| Buyer universe | 23 qualified / 31 scored / 31 registry |
-| Time to close in comparable deals | 50–178 days (the plan for this process is in the timeline) |
-| Data provenance | Every figure traces to a stated source, confidence and date. Comparable evidence spans 2019-08-07 to 2024-02-26. |
-
-> **[INFO] Basis** Prepared by ExitOS from the company's own figures.
-
-## 9 Management and organisation
+## 8 Management and organisation
 
 Northwind Analytics has not yet supplied its headcount or management team; buyers will ask for an organisation chart and the leadership team's backgrounds. Management presentations to engaged buyers are part of the process; key-person and retention arrangements are a matter for the definitive agreement.
 
-## 10 Ownership
+## 9 Ownership
 
 The capitalisation table has not yet been supplied. Buyers will need fully diluted ownership, any liquidation preferences and the option arrangements to work out how the proceeds of a sale are shared.
 
-## 11 Key considerations for diligence
+## 10 Key considerations for diligence
 
 The matters a buyer's diligence is likely to focus on, stated here so they are addressed early rather than discovered late. They come from rule-based checks on the Company's own figures, not from a review of its documents.
 
 - Information not yet supplied (market size, headcount, leadership team, capitalisation table); buyers will ask for it early
 
-## 12 Process and timing
+## 11 Process and timing
 
 The Company is being offered through a targeted, confidential process: outreach to qualified candidates, then indications of interest, a letter of intent with exclusivity, confirmatory diligence and signing. All requests for information go through the process coordinator; recipients must not contact management, customers or employees directly. The dates below are a planning assumption, not a commitment; dates move with buyer response, diligence findings and conditions to closing.
 
@@ -134,12 +109,15 @@ The Company is being offered through a targeted, confidential process: outreach 
 - Weeks 6–9 · Confirmatory diligence — The preferred party completes its detailed review under exclusivity
 - Weeks 8–10 · Definitive agreement — Sale and purchase terms negotiated and signed
 
-## 13 Basis of preparation
+## 12 Basis of preparation
 
 Figures are as supplied by Northwind Analytics through ExitOS and are stated in US dollars. Revenue is trailing twelve months; ARR is the annualised value of recurring contracts at the date of preparation. Growth is measured against the same date a year earlier. The prior-year ARR in the ARR table is implied from current ARR and the reported growth rate, not taken from accounts.
 
-- Valuation: ExitOS Valuation Framework v1.0.0, 4 comparable transactions; Every figure traces to a stated source, confidence and date. Comparable evidence spans 2019-08-07 to 2024-02-26.
 - Timeline: ExitOS default process plan — a planning assumption, not a commitment; dates move with buyer response, diligence findings and conditions to closing
 - Market size and growth: company estimates, not independently sourced
 - Product and team characteristics: as described by the Company
 - Not yet supplied by the Company: market size, market growth, intensity of competition, regulatory exposure, competitive position, defensibility, technical architecture, headcount, founders' role, leadership team, capitalisation table, gross retention, customer growth. The valuation model used neutral values for these; this document does not state them
+
+## 13 Basis and limitations
+
+> **[INFO] Basis** Prepared by ExitOS from the company's own figures.
