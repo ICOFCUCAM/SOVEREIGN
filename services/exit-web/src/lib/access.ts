@@ -111,7 +111,8 @@ function entryFor(path: string, role: Role): NavItem | undefined {
 }
 
 // Routes always reachable regardless of policy.
-const OPEN_PATHS = new Set(["/console/upgrade"]);
+// /console/reviews: any signed-in account; the server decides who is an authorised reviewer
+const OPEN_PATHS = new Set(["/console/upgrade", "/console/reviews"]);
 
 export function canAccess(path: string, role: Role): boolean {
   if (role === "superadmin") return true;

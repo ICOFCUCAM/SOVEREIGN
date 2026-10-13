@@ -5,11 +5,12 @@ import { EMPTY_STORY, effectiveProvenance, usableMarketEstimate, usableForecast,
 const src = { id: 'src-1', title: 'FY2025 statutory accounts', kind: 'statutory_accounts', date: '2026-03-31', period: 'FY2025' };
 const story = { ...EMPTY_STORY, sources: [src] };
 
-test('a figure cannot claim a source that is not attached, or verification without a process', () => {
+test('a figure cannot claim a source that is not attached, or verification without an independent record', () => {
   assert.equal(effectiveProvenance({ provenance: 'source', sourceId: 'src-1' }, story).provenance, 'source');
   assert.deepEqual(effectiveProvenance({ provenance: 'source', sourceId: 'nope' }, story), { provenance: 'founder', issue: 'cites a source document that is not attached' });
   assert.equal(effectiveProvenance({ provenance: 'verified', sourceId: 'src-1' }, story).provenance, 'source');
-  assert.equal(effectiveProvenance({ provenance: 'verified', verification: { by: 'auditor', at: '2026-04-01', process: 'audit' } }, story).provenance, 'verified');
+  assert.equal(effectiveProvenance({ provenance: 'verified', verification: { id: 'v1', reviewer: 'A. Auditor', role: 'Registered auditor', at: '2026-04-01', scope: 'FY2025 revenue', evidence: ['FY2025 audited accounts'] } }, story).provenance, 'verified');
+  assert.equal(effectiveProvenance({ provenance: 'verified', verification: { id: 'v1', reviewer: 'A. Auditor', role: 'Registered auditor', at: '2026-04-01', scope: 'FY2025 revenue', evidence: [] } }, story).provenance, 'founder');
   assert.equal(effectiveProvenance({ provenance: 'estimated' }, story).provenance, 'missing');
   assert.equal(effectiveProvenance(undefined, story).provenance, 'founder');
 });
@@ -80,4 +81,49 @@ test('half-filled rows from a progressive intake never reach a document', () => 
 test('a section with typed but unusable work shows as started, not empty', () => {
   const s = { ...EMPTY_STORY, market: { geographies: [], estimates: [{ label: 'EU freight software', valueUsd: 4e9 }], competitors: [] } };
   assert.equal(storyStatus(s).find((x) => x.id === 'market').status, 'partial');
+});
+
+import { applyVerifications, verificationState, withoutSelfVerification, claimValue, claimCompetence } from '../dist/story/index.js';
+import { TemplateMemorandumGenerator as Gen } from '../dist/memorandum/index.js';
+
+const vstory = { ...EMPTY_STORY, sources: [src], figures: { arrUsd: 21800000 }, headline: { arrUsd: { provenance: 'source', sourceId: 'src-1' } },
+  financials: { annual: [{ period: 'FY2025', revenueUsd: 2.09e7, meta: { provenance: 'source', sourceId: 'src-1' } }], forecasts: [] } };
+const rec = (over = {}) => ({ id: 'ver-1', claim: 'figure:arrUsd', value: 21800000, reviewer: 'J. Moreau', role: 'Chartered accountant, Example LLP', competence: 'financial',
+  evidence: [{ description: 'Contract register reconciled to the September 2026 management accounts', sourceId: 'src-1' }], scope: 'ARR at 30 September 2026', verifiedAt: '2026-10-10T09:00:00Z', ...over });
+
+test('only a verification record confers "verified"; a story cannot verify itself', () => {
+  const forged = { ...vstory, headline: { arrUsd: { provenance: 'verified', verification: { id: 'x', reviewer: 'me', role: 'founder', at: '2026-01-01', scope: 'all', evidence: ['trust me'] } } } };
+  assert.equal(withoutSelfVerification(forged).headline.arrUsd.provenance, 'founder');
+  assert.equal(applyVerifications(forged, []).story.headline.arrUsd.provenance, 'founder');
+  const { story } = applyVerifications(vstory, [rec()]);
+  assert.equal(story.headline.arrUsd.provenance, 'verified');
+  assert.equal(story.headline.arrUsd.verification.reviewer, 'J. Moreau');
+});
+
+test('a verification stops counting when the figure changes, expires or is revoked', () => {
+  const now = new Date('2026-10-14T00:00:00Z');
+  assert.equal(verificationState(rec(), vstory, now), 'valid');
+  assert.equal(verificationState(rec(), { ...vstory, figures: { arrUsd: 23000000 } }, now), 'stale');
+  assert.equal(verificationState(rec({ expiresAt: '2026-10-13T00:00:00Z' }), vstory, now), 'expired');
+  assert.equal(verificationState(rec({ revokedAt: '2026-10-12T00:00:00Z' }), vstory, now), 'revoked');
+  assert.equal(verificationState(rec({ staleAt: '2026-10-12T00:00:00Z' }), vstory, now), 'stale');
+  const r = applyVerifications({ ...vstory, figures: { arrUsd: 23000000 } }, [rec()], now);
+  assert.equal(r.story.headline.arrUsd.provenance, 'source');
+  assert.equal(r.notCounted[0].state, 'stale');
+});
+
+test('claims resolve without their basis, and each has the competence that may verify it', () => {
+  assert.deepEqual(claimValue(vstory, 'annual:FY2025'), { period: 'FY2025', revenueUsd: 2.09e7 });
+  assert.deepEqual(claimCompetence('cap'), ['legal', 'financial']);
+  assert.deepEqual(claimCompetence('market:x'), ['commercial']);
+  assert.deepEqual(claimCompetence('figure:arrUsd'), ['financial']);
+});
+
+test('the CIM states who verified a figure, its evidence, scope and limitations', async () => {
+  const { story } = applyVerifications(vstory, [rec({ limitations: 'Contracts sampled, not all reviewed', expiresAt: '2027-04-01T00:00:00Z' })], new Date('2026-10-14'));
+  const doc = await new Gen().generate('cim', { company: SAMPLE_SAAS, valuation: { headline: { low: 1, mid: 2, high: 3 }, premiums: [], methodologies: [], countryAdjustment: 0 }, story });
+  const text = JSON.stringify(doc.sections);
+  assert.match(text, /verified by J\. Moreau \(Chartered accountant, Example LLP\), 2026-10-10; scope: ARR at 30 September 2026/);
+  assert.match(text, /Independent verifications/);
+  assert.match(text, /Contracts sampled, not all reviewed/);
 });

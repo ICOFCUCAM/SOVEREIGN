@@ -9,6 +9,7 @@ import { useMemorandum, useMemorandumSuite, memorandumBase, VALUATION_CANONICAL 
 import type { CompanyProfile } from "@exit/engines";
 import { loadActiveCompany } from "../lib/active-company";
 import { memorandumInputs } from "../lib/documents/memorandum-inputs";
+import { useVerifications } from "../lib/verifications";
 import { codeNameFor } from "../lib/listings";
 import { useDocumentGate, GateNotice } from "../components/DocumentGate";
 import { DocumentVersions } from "../components/DocumentVersions";
@@ -38,7 +39,8 @@ const Documents: React.FC = () => {
   // (its engine runs are the hook's defaults, so no inputs are passed).
   const { company, fromIntake, companyId, unconfirmed, story } = useMemo(() => loadActiveCompany(), []);
   // the same engine inputs the CIM report page and the Banker use
-  const inputs = useMemo(() => memorandumInputs(company, fromIntake, story), [company, fromIntake, story]);
+  const verifications = useVerifications(companyId);
+  const inputs = useMemo(() => memorandumInputs(company, fromIntake, story, verifications), [company, fromIntake, story, verifications]);
   const doc = useMemorandum(kind, inputs);
   // every document for this company, checked against each other and the one valuation, timeline and checklist
   const suite = useMemorandumSuite(ALL_KINDS, inputs);

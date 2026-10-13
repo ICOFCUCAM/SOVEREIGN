@@ -18,7 +18,7 @@ export type Provenance =
 export const PROVENANCE_LABEL: Record<Provenance, string> = {
   founder: 'supplied by the Company',
   source: 'supported by a source document',
-  verified: 'independently verified',
+  verified: 'independently verified by an authorised reviewer',
   estimated: 'estimate (method stated)',
   missing: 'not yet supplied',
 };
@@ -30,7 +30,8 @@ export interface FactMeta {
   readonly period?: string;            // the reporting period it covers, e.g. "FY2025", "TTM to 2026-09"
   readonly asOf?: string;              // ISO date the figure is stated at
   readonly method?: string;            // required for 'estimated'
-  readonly verification?: { readonly by: string; readonly at: string; readonly process: string };   // required for 'verified'
+  /** Set only from an independent verification record (exitos_verifications), never by the owner. */
+  readonly verification?: VerificationSummary;
 }
 
 export interface SourceDocument {
@@ -112,6 +113,8 @@ export interface CompanyStory {
   readonly sources: readonly SourceDocument[];
   /** Provenance of the headline intake figures (revenue, ARR, margins …), keyed by intake field. */
   readonly headline?: Readonly<Record<string, FactMeta>>;
+  /** The headline intake figures as saved with the story, so a reviewer verifies the value the documents use. */
+  readonly figures?: Readonly<Record<string, number | string | boolean>>;
 }
 
 export const EMPTY_STORY: CompanyStory = { version: 1, updatedAt: '1970-01-01T00:00:00.000Z', sources: [] };
@@ -123,7 +126,8 @@ const filled = (s: string | undefined | null): boolean => typeof s === 'string' 
 export function effectiveProvenance(m: FactMeta | undefined, story: Pick<CompanyStory, 'sources'>): { provenance: Provenance; issue?: string } {
   if (!m) return { provenance: 'founder' };
   if (m.provenance === 'verified') {
-    if (!m.verification?.process || !m.verification.by || !m.verification.at) return { provenance: m.sourceId ? 'source' : 'founder', issue: 'marked verified without a recorded verification' };
+    const v = m.verification;
+    if (!v?.id || !v.reviewer || !v.role || !v.at || !v.scope || !(v.evidence?.length)) return { provenance: m.sourceId ? 'source' : 'founder', issue: 'marked verified without a recorded independent verification' };
     return { provenance: 'verified' };
   }
   if (m.provenance === 'source') {
@@ -225,4 +229,115 @@ export function cleanStory(st: CompanyStory): CompanyStory {
   if (st.growth) out.growth = { opportunities: keep(st.growth.opportunities, (g) => txt(g.title) && txt(g.description)) };
   if (st.risks) out.risks = keep(st.risks, (r) => txt(r.title) && txt(r.description));
   return out;
+}
+
+// ── independent verification ──
+// A verification is a record made by an authorised professional reviewer whom the
+// company has engaged for that competence, about one claim, with the evidence they
+// reviewed, its scope, limitations and expiry. It is stored apart from the story
+// (exitos_verifications); the owner cannot create one. It holds a snapshot of the
+// claim's value: when the value changes, the verification is stale and no longer
+// counts. ExitOS's own format, calculation and consistency checks are not
+// verification, and counsel review of legal matters does not verify figures.
+
+export type Competence = 'financial' | 'legal' | 'commercial';
+/** A claim a reviewer can verify: a headline figure, an annual period, a market estimate, gross retention or the cap table. */
+export type ClaimKey = `figure:${string}` | `annual:${string}` | `market:${string}` | 'retention:gross' | 'cap';
+
+export interface Verification {
+  readonly id: string;
+  readonly claim: ClaimKey;
+  /** The claim's value when it was verified (meta stripped). */
+  readonly value: unknown;
+  readonly reviewer: string;              // reviewer's name
+  readonly role: string;                  // e.g. "Chartered accountant, Example LLP"
+  readonly competence: Competence;
+  readonly evidence: ReadonlyArray<{ readonly description: string; readonly sourceId?: string }>;
+  readonly scope: string;
+  readonly limitations?: string;
+  readonly verifiedAt: string;
+  readonly expiresAt?: string;
+  readonly revalidateWhen?: string;
+  readonly revokedAt?: string;
+  /** Set by the database when the story's value for the claim changed after verification. */
+  readonly staleAt?: string;
+}
+export interface VerificationSummary {
+  readonly id: string; readonly reviewer: string; readonly role: string; readonly at: string; readonly scope: string;
+  readonly evidence: readonly string[]; readonly expiresAt?: string; readonly limitations?: string;
+}
+
+/** Which competence may verify a claim. */
+export const claimCompetence = (claim: ClaimKey): readonly Competence[] =>
+  claim === 'cap' ? ['legal', 'financial'] : claim.startsWith('market:') ? ['commercial'] : ['financial'];
+
+const stripMeta = (v: unknown): unknown => {
+  if (v == null || typeof v !== 'object' || Array.isArray(v)) return v;
+  const { meta: _m, ...rest } = v as Record<string, unknown>;
+  return rest;
+};
+/** The claim's current value in a story (the same resolution the database uses). */
+export function claimValue(st: CompanyStory, claim: ClaimKey): unknown {
+  if (claim.startsWith('figure:')) return st.figures?.[claim.slice(7)];
+  if (claim.startsWith('annual:')) return stripMeta(st.financials?.annual.find((a) => a.period === claim.slice(7)));
+  if (claim.startsWith('market:')) return stripMeta(st.market?.estimates.find((e) => e.label === claim.slice(7)));
+  if (claim === 'retention:gross') return st.customers?.grossRetentionPct;
+  return st.capitalization?.holders;
+}
+
+const canon = (v: unknown): string => {
+  if (v === null || v === undefined) return 'null';
+  if (typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return `[${v.map(canon).join(',')}]`;
+  const o = v as Record<string, unknown>;
+  return `{${Object.keys(o).filter((k) => o[k] !== undefined).sort().map((k) => `${JSON.stringify(k)}:${canon(o[k])}`).join(',')}}`;
+};
+
+export type VerificationState = 'valid' | 'stale' | 'expired' | 'revoked';
+/** Whether a verification still counts for the story as it is now. */
+export function verificationState(v: Verification, st: CompanyStory, now = new Date()): VerificationState {
+  if (v.revokedAt) return 'revoked';
+  if (v.expiresAt && new Date(v.expiresAt) <= now) return 'expired';
+  if (v.staleAt || canon(claimValue(st, v.claim)) !== canon(v.value)) return 'stale';
+  return 'valid';
+}
+
+/** Remove any "verified" the story itself claims: only verification records confer it. */
+export function withoutSelfVerification(st: CompanyStory): CompanyStory {
+  const fix = (m: FactMeta | undefined): FactMeta | undefined => {
+    if (!m || m.provenance !== 'verified') return m;
+    const { verification: _v, ...rest } = m;
+    return { ...rest, provenance: m.sourceId ? 'source' : 'founder' };
+  };
+  const json = JSON.parse(JSON.stringify(st), (k, v) => (k === 'verification' ? undefined : v)) as CompanyStory;
+  const walk = (o: unknown): unknown => {
+    if (Array.isArray(o)) return o.map(walk);
+    if (o && typeof o === 'object') {
+      const r = o as Record<string, unknown>;
+      if (typeof r.provenance === 'string') return fix(r as unknown as FactMeta);
+      return Object.fromEntries(Object.entries(r).map(([k, v]) => [k, walk(v)]));
+    }
+    return o;
+  };
+  return walk(json) as CompanyStory;
+}
+
+/** The story with each validly verified claim marked "verified" (with its record), and why others do not count. */
+export function applyVerifications(raw: CompanyStory, records: readonly Verification[], now = new Date()): { story: CompanyStory; notCounted: Array<{ verification: Verification; state: VerificationState }> } {
+  let st = withoutSelfVerification(raw);
+  const notCounted: Array<{ verification: Verification; state: VerificationState }> = [];
+  for (const v of records) {
+    const state = verificationState(v, st, now);
+    if (state !== 'valid') { notCounted.push({ verification: v, state }); continue; }
+    const summary: VerificationSummary = { id: v.id, reviewer: v.reviewer, role: v.role, at: v.verifiedAt, scope: v.scope, evidence: v.evidence.map((e) => e.description),
+      ...(v.expiresAt ? { expiresAt: v.expiresAt } : {}), ...(v.limitations ? { limitations: v.limitations } : {}) };
+    const mark = (m: FactMeta | undefined): FactMeta => ({ ...(m ?? { provenance: 'founder' }), provenance: 'verified', verification: summary });
+    const c = v.claim;
+    if (c.startsWith('figure:')) st = { ...st, headline: { ...(st.headline ?? {}), [c.slice(7)]: mark(st.headline?.[c.slice(7)]) } };
+    else if (c.startsWith('annual:') && st.financials) st = { ...st, financials: { ...st.financials, annual: st.financials.annual.map((a) => (a.period === c.slice(7) ? { ...a, meta: mark(a.meta) } : a)) } };
+    else if (c.startsWith('market:') && st.market) st = { ...st, market: { ...st.market, estimates: st.market.estimates.map((e) => (e.label === c.slice(7) ? { ...e, meta: mark(e.meta) } : e)) } };
+    else if (c === 'retention:gross' && st.customers) st = { ...st, customers: { ...st.customers, grossRetentionMeta: mark(st.customers.grossRetentionMeta) } };
+    else if (c === 'cap' && st.capitalization) st = { ...st, capitalization: { ...st.capitalization, meta: mark(st.capitalization.meta) } };
+  }
+  return { story: st, notCounted };
 }

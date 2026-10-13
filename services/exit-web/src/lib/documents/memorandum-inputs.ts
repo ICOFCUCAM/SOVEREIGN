@@ -1,6 +1,6 @@
 import { runInstitutionalValuation, runReadiness, runBuyerDiscovery, runDueDiligence, DEFAULT_PROCESS_TIMELINE, type CompanyProfile, type MemorandumInputs } from "@exit/engines";
 import { canonicalValuationFor } from "../canonical-valuation";
-import { EMPTY_STORY, cleanStory, type CompanyStory } from "@exit/engines";
+import { EMPTY_STORY, applyVerifications, cleanStory, type CompanyStory, type Verification } from "@exit/engines";
 import { profileWithStory } from "../company-story";
 import { codeNameFor } from "../listings";
 
@@ -8,8 +8,9 @@ import { codeNameFor } from "../listings";
  *  Generator, the Banker and the CIM report page all call this, so the same company
  *  produces the same CIM wherever it is shown. Undefined fields fall back to the
  *  engine hook's demo defaults (demo mode only). */
-export function memorandumInputs(base: CompanyProfile, fromIntake: boolean, rawStory: CompanyStory = EMPTY_STORY): Partial<MemorandumInputs> {
-  const story = cleanStory(rawStory);   // documents are written from complete entries only
+export function memorandumInputs(base: CompanyProfile, fromIntake: boolean, rawStory: CompanyStory = EMPTY_STORY, verifications: readonly Verification[] = []): Partial<MemorandumInputs> {
+  // documents are written from complete entries only, and a figure is "verified" only through a current verification record
+  const story = applyVerifications(cleanStory(rawStory), verifications).story;
   const codeName = codeNameFor(base, !fromIntake);
   if (!fromIntake) return { codeName, timeline: DEFAULT_PROCESS_TIMELINE };
   // the story's facts replace the engines' neutral values; what it does not state stays assumed

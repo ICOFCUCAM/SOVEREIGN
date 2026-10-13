@@ -48,6 +48,7 @@ const OutcomeIntelligence = lazy(() => import("./pages/OutcomeIntelligence"));
 const Indexes      = lazy(() => import("./pages/Indexes"));
 const Intake       = lazy(() => import("./pages/Intake"));
 const CompanyStory = lazy(() => import("./pages/CompanyStory"));
+const Reviews      = lazy(() => import("./pages/Reviews"));
 const AcquisitionRadar = lazy(() => import("./pages/AcquisitionRadar"));
 const ProcessIntelligence = lazy(() => import("./pages/ProcessIntelligence"));
 const OutreachPlan = lazy(() => import("./pages/OutreachPlan"));
@@ -90,6 +91,7 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
   { path: "command",       policy: "/console",                el: <Dashboard /> },
   { path: "intake",        policy: "/console/intake",         el: <Intake /> },
   { path: "company-story", policy: "/console/company-story",  el: <CompanyStory /> },
+  { path: "reviews",       policy: "/console/reviews",        el: <Reviews /> },
   { path: "acquisition-radar", policy: "/console/acquisition-radar", el: <AcquisitionRadar /> },
   { path: "commander",     policy: "/console/commander",      el: <Commander /> },
   { path: "network",       policy: "/console/network",        el: <Network /> },

@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { storyStatus, storyCompleteness, provenanceIssues, SECTION_TITLE, PROVENANCE_LABEL, type CompanyStory, type FactMeta, type Provenance as Prov, type SectionId } from "@exit/engines";
-import { loadActiveCompany } from "../lib/active-company";
-import { loadStory, saveStory, fetchStory } from "../lib/company-story";
+import { storyStatus, storyCompleteness, provenanceIssues, verificationState, SECTION_TITLE, PROVENANCE_LABEL, type Competence, type CompanyStory, type FactMeta, type Provenance as Prov, type SectionId, type Verification } from "@exit/engines";
+import { loadActiveCompany, loadIntakeRecord } from "../lib/active-company";
+import { loadStory, saveStory, fetchStory, figuresOf } from "../lib/company-story";
+import { useVerifications, findReviewer, engageReviewer, listEngagements, revokeEngagement, type Engagement } from "../lib/verifications";
+import type { Remote } from "../lib/documents/store";
 import { useDocumentRemote } from "../lib/documents/remote";
 import { STORY_FORM, HEADLINE_FIGURES, newSourceId, type Field, type FormSection } from "../lib/story-form";
 import { PageHeader, Section } from "../components/xo";
@@ -25,7 +27,7 @@ const get = (o: unknown, k: string): unknown => (k ? (o as Obj | undefined)?.[k]
 /** Where a figure came from. "Independently verified" is never offered: it needs a verification process. */
 const MetaField: React.FC<{ value: FactMeta | undefined; onChange: (m: FactMeta) => void; story: CompanyStory; label: string; id: string }> = ({ value, onChange, story, label, id }) => {
   const m: FactMeta = value ?? { provenance: "founder" };
-  if (m.provenance === "verified") return <p className="text-[12px] text-xo-verified">{label}: independently verified ({m.verification?.process}, {m.verification?.at})</p>;
+  if (m.provenance === "verified") return <p className="text-[12px] text-xo-verified">{label}: independently verified by {m.verification?.reviewer} ({m.verification?.role}), {m.verification?.at.slice(0, 10)}</p>;
   return (
     <div className="grid gap-2 sm:grid-cols-3">
       <label className="block" htmlFor={`${id}-p`}><span className={LABEL}>{label}</span>
@@ -93,6 +95,69 @@ const EMPTY: Partial<Record<keyof CompanyStory, unknown>> = {
   team: { leaders: [], headcount: [] }, capitalization: { holders: [], instruments: [] }, financials: { annual: [], forecasts: [] }, growth: { opportunities: [] },
 };
 
+const STATE_LABEL: Record<string, string> = { valid: "counts", stale: "no longer counts: the figure changed after it was verified", expired: "no longer counts: it has expired", revoked: "withdrawn by the reviewer" };
+const CLAIM_LABEL = (c: string): string => c.replace(/^figure:/, "Headline figure: ").replace(/^annual:/, "Financials ").replace(/^market:/, "Market size: ").replace("retention:gross", "Gross retention").replace(/^cap$/, "Capitalisation table");
+
+/** Verifications recorded by authorised reviewers, and whether each still counts. */
+const VerificationList: React.FC<{ verifications: readonly Verification[]; story: CompanyStory }> = ({ verifications, story }) => (
+  <fieldset className="space-y-2 border-t border-xo-line pt-3">
+    <legend className="text-[13px] font-semibold">Independent verifications</legend>
+    {verifications.length === 0
+      ? <p className="text-[12px] text-xo-faint">None. A figure is shown as independently verified only when an authorised reviewer you have engaged records a verification, with the evidence they reviewed. You cannot verify your own figures, and ExitOS's own checks are not verification.</p>
+      : <ul className="space-y-1.5">{verifications.map((v) => {
+          const st = verificationState(v, story);
+          return (
+            <li key={v.id} className="text-[12px]">
+              <span className="font-medium text-xo-text">{CLAIM_LABEL(v.claim)}</span> — {v.reviewer} ({v.role}), {v.verifiedAt.slice(0, 10)}; scope: {v.scope}
+              {v.limitations ? `; limitations: ${v.limitations}` : ""}{v.expiresAt ? `; valid until ${v.expiresAt.slice(0, 10)}` : ""}.{" "}
+              <span className={st === "valid" ? "text-xo-verified" : "text-xo-caution"}>{STATE_LABEL[st]}</span>
+            </li>
+          );
+        })}</ul>}
+  </fieldset>
+);
+
+/** Engage an authorised reviewer for a competence, and end an engagement. */
+const ReviewersPanel: React.FC<{ remote: Remote | undefined; companyId: string }> = ({ remote, companyId }) => {
+  const [email, setEmail] = useState("");
+  const [competence, setCompetence] = useState<Competence>("financial");
+  const [msg, setMsg] = useState("");
+  const [list, setList] = useState<Engagement[]>([]);
+  const refresh = (): void => { if (remote) void listEngagements(remote).then((x) => setList(x.filter((e) => e.company_id === companyId && !e.revoked_at))).catch(() => setList([])); };
+  useEffect(refresh, [remote, companyId]);
+  return (
+    <Section title="Independent reviewers" eyebrow="Optional · needs a signed-in account" className="border border-xo-line">
+      <div className="space-y-2 px-4 py-3 text-[12px] text-xo-muted">
+        <p>An accountant can verify financial figures, a lawyer the capitalisation table, a commercial adviser a market estimate. Each is authorised by ExitOS for that competence; you choose whom to engage, and they see this company's story only while engaged. They cannot verify anything outside their competence, and you cannot verify your own figures.</p>
+        {!remote ? <p className="text-xo-faint">Sign in with your e-mail to engage a reviewer.</p> : (
+          <>
+            <div className="flex flex-wrap items-end gap-2">
+              <label className="block" htmlFor="rev-email"><span className={LABEL}>Reviewer's e-mail</span><input id="rev-email" className={INPUT} value={email} onChange={(e) => setEmail(e.target.value)} /></label>
+              <label className="block" htmlFor="rev-comp"><span className={LABEL}>Competence</span>
+                <select id="rev-comp" className={INPUT} value={competence} onChange={(e) => setCompetence(e.target.value as Competence)}>
+                  <option value="financial">Financial</option><option value="legal">Legal</option><option value="commercial">Commercial</option>
+                </select></label>
+              <button type="button" className={BTN} onClick={() => void (async () => {
+                try {
+                  const found = (await findReviewer(email, remote)).find((x) => x.competence === competence);
+                  if (!found) { setMsg(`No ${competence} reviewer authorised by ExitOS is registered under that address.`); return; }
+                  await engageReviewer(companyId, found.account_id, competence, remote);
+                  setMsg(`Engaged ${found.reviewer_name} (${found.reviewer_role}) for ${competence} review.`); setEmail(""); refresh();
+                } catch (e) { setMsg(e instanceof Error ? e.message : "That did not work"); }
+              })()}>Engage</button>
+            </div>
+            {msg && <p role="status">{msg}</p>}
+            {list.length > 0 && <ul className="space-y-1">{list.map((e) => (
+              <li key={e.id} className="flex items-center gap-2">{e.competence} review · engaged {e.granted_at.slice(0, 10)}
+                <button type="button" className={BTN} onClick={() => void revokeEngagement(e.id, remote).then(refresh)}>End engagement</button></li>
+            ))}</ul>}
+          </>
+        )}
+      </div>
+    </Section>
+  );
+};
+
 const CompanyStoryPage: React.FC = () => {
   const { company, companyId, fromIntake } = useMemo(() => loadActiveCompany(), []);
   const remote = useDocumentRemote();
@@ -114,7 +179,7 @@ const CompanyStoryPage: React.FC = () => {
     setSaveState("Saving…");
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
-      saveStory(companyId, next, remote)
+      saveStory(companyId, next, remote, figuresOf(loadIntakeRecord()?.inputs as unknown as Record<string, unknown> ?? {}))
         .then(() => setSaveState(remote ? "Saved to your account" : "Saved in this browser"))
         .catch((e: unknown) => setSaveState(`Not saved: ${e instanceof Error ? e.message : "error"} (kept in this browser)`));
     }, 600);
@@ -124,6 +189,7 @@ const CompanyStoryPage: React.FC = () => {
   const issues = useMemo(() => provenanceIssues(story), [story]);
   const done = Math.round(storyCompleteness(story) * 100);
   const section = STORY_FORM.find((s) => s.id === active)!;
+  const verifications = useVerifications(companyId);
 
   if (!fromIntake || !companyId) return (
     <div data-page="company-story" className="space-y-3 text-xo-text">
@@ -146,6 +212,8 @@ const CompanyStoryPage: React.FC = () => {
         badge={<span className="text-[12px] text-xo-muted">{done}% complete · {saveState || (remote ? "saved to your account as you go" : "saved in this browser as you go")}</span>}>
         <p className="mt-2 max-w-3xl text-[12px] leading-relaxed text-xo-muted">What a buyer's adviser expects a CIM to cover. Fill in what you have, in any order, and come back for the rest. ExitOS states only what is here, with its basis, and names what is missing. It never fills a gap with an estimate of its own.</p>
       </PageHeader>
+
+      <ReviewersPanel remote={remote} companyId={companyId} />
 
       {issues.length > 0 && (
         <Section title="Before these figures can be stated" eyebrow={`${issues.length} provenance issue${issues.length === 1 ? "" : "s"}`} className="border border-xo-caution/50">
@@ -177,6 +245,7 @@ const CompanyStoryPage: React.FC = () => {
             <FieldEditor key={f.key || f.label} f={f} id={`${active}-${f.key || "list"}`} story={story} isSources={active === "sources"}
               value={get(story[section.path] ?? EMPTY[section.path], f.key)} onChange={(v) => setSection(section, f.key, v)} />
           ))}
+          {active === "sources" && <VerificationList verifications={verifications} story={story} />}
           {active === "sources" && (
             <fieldset className="space-y-3 border-t border-xo-line pt-3">
               <legend className="text-[13px] font-semibold">Basis of your headline figures</legend>

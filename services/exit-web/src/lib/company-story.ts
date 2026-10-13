@@ -1,4 +1,4 @@
-import { EMPTY_STORY, cleanStory, usableMarketEstimate, type CompanyProfile, type CompanyStory } from "@exit/engines";
+import { EMPTY_STORY, cleanStory, usableMarketEstimate, withoutSelfVerification, type CompanyProfile, type CompanyStory } from "@exit/engines";
 import { ASSUMED_PROFILE_FIELDS } from "./company-intake";
 import type { Remote } from "./documents/store";
 
@@ -15,13 +15,15 @@ export function loadStory(companyId: string | null): CompanyStory {
   if (!companyId) return EMPTY_STORY;
   try {
     const raw = localStorage.getItem(key(companyId));
-    return raw ? { ...EMPTY_STORY, ...(JSON.parse(raw) as CompanyStory) } : EMPTY_STORY;
+    // a story never verifies itself: only server verification records confer "verified"
+    return raw ? withoutSelfVerification({ ...EMPTY_STORY, ...(JSON.parse(raw) as CompanyStory) }) : EMPTY_STORY;
   } catch { return EMPTY_STORY; }
 }
 
 /** Save the story as it stands (never blocked by missing information). */
-export async function saveStory(companyId: string, story: CompanyStory, remote?: Remote): Promise<CompanyStory> {
-  const saved: CompanyStory = { ...story, version: 1, updatedAt: new Date().toISOString() };
+export async function saveStory(companyId: string, story: CompanyStory, remote?: Remote, figures?: CompanyStory["figures"]): Promise<CompanyStory> {
+  // the headline figures travel with the story, so a reviewer verifies the value the documents use
+  const saved: CompanyStory = withoutSelfVerification({ ...story, ...(figures ? { figures } : {}), version: 1, updatedAt: new Date().toISOString() });
   try { localStorage.setItem(key(companyId), JSON.stringify(saved)); } catch { /* storage unavailable */ }
   if (remote) {
     const res = await (remote.fetchImpl ?? fetch)(`${remote.url}/rest/v1/exitos_company_stories?on_conflict=owner_account_id,company_id`, {
@@ -44,7 +46,7 @@ export async function fetchStory(companyId: string, remote: Remote): Promise<Com
   });
   if (!res.ok) return null;
   const rows = await res.json() as Array<{ data: CompanyStory & { version: unknown } }>;
-  return rows[0] ? { ...EMPTY_STORY, ...rows[0].data, version: 1 } : null;
+  return rows[0] ? withoutSelfVerification({ ...EMPTY_STORY, ...rows[0].data, version: 1 }) : null;
 }
 
 /** The engine profile with what the story supplies, and the profile fields that are still assumed.
@@ -82,3 +84,8 @@ export function profileWithStory(profile: CompanyProfile, raw: CompanyStory): { 
   }
   return { profile: { ...p, assumed: [...assumed] }, assumed: [...assumed] };
 }
+
+/** The headline intake figures a story carries (what reviewers verify and documents state). */
+export const figuresOf = (inputs: Record<string, unknown>): Record<string, number | string | boolean> =>
+  Object.fromEntries(["ttmRevenueUsd", "arrUsd", "growthPct", "grossMarginPct", "ebitdaMarginPct", "netRetentionPct", "customerConcentrationPct", "totalCustomers"]
+    .filter((k) => typeof inputs[k] === "number").map((k) => [k, inputs[k] as number]));

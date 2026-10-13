@@ -13,6 +13,10 @@ import { cimHelpers as h } from './template.js';
 // source notes. It states no valuation, price guidance or seller intelligence.
 
 const pct = (x: number): string => `${(x * 100).toFixed(0)}%`;
+const FIGURE_LABEL: Record<string, string> = {
+  ttmRevenueUsd: 'Revenue (TTM)', arrUsd: 'Annual recurring revenue', growthPct: 'ARR growth (YoY)', grossMarginPct: 'Gross margin',
+  ebitdaMarginPct: 'EBITDA margin', netRetentionPct: 'Net revenue retention', customerConcentrationPct: 'Top-ten customer share', totalCustomers: 'Customers',
+};
 const usd = (n: number): string => h.money(n);
 const sentence = (t: string): string => t.trim().replace(/\.?$/, '.');
 
@@ -22,9 +26,13 @@ const gap = (what: string, why: string, need: string): string => `Not yet suppli
 /** "supplied by the Company" / "FY2025 statutory accounts (31 Mar 2026)" / "estimate: <method>" */
 function basisOf(m: FactMeta | undefined, story: CompanyStory): string {
   const p = effectiveProvenance(m, story);
-  if ((p.provenance === 'source' || p.provenance === 'verified') && m?.sourceId) {
+  if (p.provenance === 'verified' && m?.verification) {
+    const v = m.verification;
+    return `verified by ${v.reviewer} (${v.role}), ${v.at.slice(0, 10)}; scope: ${v.scope.replace(/\.$/, '')}`;
+  }
+  if (p.provenance === 'source' && m?.sourceId) {
     const d = story.sources.find((s) => s.id === m.sourceId);
-    if (d) return `${p.provenance === 'verified' ? 'verified; ' : ''}${d.title} (${d.date})`;
+    if (d) return `${d.title} (${d.date})`;
   }
   if (p.provenance === 'estimated' && m?.method) return `estimate: ${m.method}`;
   return PROVENANCE_LABEL[p.provenance];
@@ -203,6 +211,15 @@ export function buildCim(i: MemorandumInputs): MemorandumDocument {
     `The Company is being offered through a targeted, confidential process: outreach to qualified candidates, then indications of interest, a letter of intent with exclusivity, confirmatory diligence and signing. All requests for information go through the process coordinator; recipients must not contact management, customers or employees directly. The dates below are ${h.timelineOf(i).basis.replace(/^ExitOS default process plan — /, '')}.`,
     'supported', { bullets: timelineLines(h.timelineOf(i), ['nda', 'management_presentations', 'ioi', 'loi', 'confirmatory_diligence', 'signing']) });
 
+  // Appendix · verifications (only records made by an authorised, engaged reviewer reach here)
+  const verified: Array<[string, NonNullable<FactMeta['verification']>]> = [];
+  const vcol = (what: string, m: FactMeta | undefined): void => { if (m?.provenance === 'verified' && m.verification && effectiveProvenance(m, s).provenance === 'verified') verified.push([what, m.verification]); };
+  for (const [k, m] of Object.entries(s.headline ?? {})) vcol(headRows.find((r) => r[0] && k && FIGURE_LABEL[k] === r[0])?.[0] ?? FIGURE_LABEL[k] ?? k, m);
+  for (const a of annual) vcol(`Financials ${a.period}`, a.meta);
+  for (const e of est) vcol(`Market size: ${e.label}`, e.meta);
+  vcol('Gross revenue retention', cu?.grossRetentionMeta);
+  vcol('Capitalisation table', cap?.meta);
+
   // Appendix · source notes
   const notes: string[][] = [
     ...headRows.map((row) => [row[0] ?? "", row[1] ?? "", row[2] ?? ""]),
@@ -212,9 +229,10 @@ export function buildCim(i: MemorandumInputs): MemorandumDocument {
     ...(cap?.holders.length ? [['Capitalisation table', `${cap.holders.length} holders`, basisOf(cap.meta, s)]] : []),
   ];
   add('Appendix: Source notes and basis of preparation',
-    `Figures are stated in US dollars. Revenue is trailing twelve months; ARR is the annualised value of recurring contracts at the date of preparation; growth is measured against the same date a year earlier. Each material figure is listed with its basis: supplied by the Company (not independently checked), supported by a named source document, independently verified (only where a verification was recorded), or an estimate with its method. The memorandum states no prior period the Company has not reported. Timeline: ${h.timelineOf(i).basis}.`,
+    `Figures are stated in US dollars. Revenue is trailing twelve months; ARR is the annualised value of recurring contracts at the date of preparation; growth is measured against the same date a year earlier. Each material figure is listed with its basis: supplied by the Company (not independently checked), supported by a named source document, independently verified (only where an authorised reviewer engaged by the Company recorded a verification, with its evidence and scope, listed below), or an estimate with its method. ExitOS's own format, calculation and consistency checks are not verification. The memorandum states no prior period the Company has not reported. Timeline: ${h.timelineOf(i).basis}.`,
     'supported', { tables: [
       { caption: 'Material figures and their basis', headers: ['Figure', 'Value', 'Basis'], rows: notes },
+      ...(verified.length ? [{ caption: 'Independent verifications', headers: ['Figure', 'Reviewer', 'Evidence reviewed', 'Limitations', 'Valid until'], rows: verified.map(([what, v]) => [what, `${v.reviewer} (${v.role}), ${v.at.slice(0, 10)}`, v.evidence.join('; '), v.limitations ?? '—', v.expiresAt ? v.expiresAt.slice(0, 10) : 'until the figure changes']) }] : []),
       ...(s.sources.length ? [{ caption: 'Source documents', headers: ['Document', 'Type', 'Date', 'Period'], rows: s.sources.map((d) => [d.title, d.kind.replace(/_/g, ' '), d.date, d.period ?? '—']) }] : []),
     ] });
 
