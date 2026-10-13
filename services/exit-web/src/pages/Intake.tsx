@@ -113,7 +113,7 @@ const Intake: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2">
           {listed && <Button variant="ghost" onClick={withdraw}>Withdraw listing</Button>}
           {(!listed || stale) && <Button onClick={() => setConfirming(true)} disabled={!saved} aria-expanded={confirming} aria-controls="listing-confirm" aria-describedby={saved ? undefined : "list-needs-data"}>{stale ? "Update listing" : "List on the exchange"}</Button>}
-          {!saved && !listed && <span id="list-needs-data" className="basis-full text-right text-[11px] text-xo-faint">Enter your figures to list — the demo company can't be listed.</span>}
+          {!saved && !listed && <span id="list-needs-data" className="basis-full text-[11px] text-xo-faint">Enter your figures to list — the demo company can't be listed.</span>}
           {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
         </div>
       </header>
