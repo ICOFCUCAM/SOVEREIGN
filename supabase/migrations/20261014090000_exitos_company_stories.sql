@@ -157,7 +157,6 @@ begin
   return new;
 end $$;
 revoke all on function public.exitos_company_stories_guard() from public, anon, authenticated;
-drop trigger if exists exitos_company_stories_guard on public.exitos_company_stories;
 create trigger exitos_company_stories_guard before insert or update on public.exitos_company_stories
   for each row execute function public.exitos_company_stories_guard();
 
@@ -175,7 +174,6 @@ begin
   return new;
 end $$;
 revoke all on function public.exitos_company_stories_staleness() from public, anon, authenticated;
-drop trigger if exists exitos_company_stories_staleness on public.exitos_company_stories;
 create trigger exitos_company_stories_staleness after update on public.exitos_company_stories
   for each row execute function public.exitos_company_stories_staleness();
 
