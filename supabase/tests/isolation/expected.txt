@@ -35,3 +35,22 @@ sees own grants|1
 
 C has approver|f
 C sees grants|0
+
+psql:check.sql:74: NOTICE:  buyer inserts signed NDA: denied
+psql:check.sql:74: NOTICE:  buyer requests NDA: ok
+psql:check.sql:74: NOTICE:  buyer signs own NDA: denied
+psql:check.sql:74: NOTICE:  buyer moves NDA to another listing: denied
+psql:check.sql:74: NOTICE:  buyer inserts accepted offer: denied
+psql:check.sql:74: NOTICE:  buyer accepts own offer: denied
+psql:check.sql:74: NOTICE:  buyer revises a submitted offer: ok
+
+C signs B's NDA (rows)|0
+
+psql:check.sql:88: NOTICE:  owner signs the NDA request: ok
+psql:check.sql:88: NOTICE:  owner reopens a resolved NDA: denied
+psql:check.sql:88: NOTICE:  owner rewrites an offer amount: denied
+psql:check.sql:88: NOTICE:  owner accepts an offer: ok
+
+psql:check.sql:95: NOTICE:  buyer revises an accepted offer: denied
+psql:check.sql:95: NOTICE:  buyer withdraws a submitted offer: ok
+psql:check.sql:100: NOTICE:  anon reads NDA requests: denied

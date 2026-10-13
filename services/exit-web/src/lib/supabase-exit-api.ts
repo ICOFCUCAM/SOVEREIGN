@@ -89,6 +89,14 @@ export class SupabaseExitApi implements ExitApiClient {
     await this.rq(table, { method: "POST", prefer: "resolution=merge-duplicates,return=minimal", body: JSON.stringify(rows) });
   }
 
+  /** UPDATE one row by id: only `data` changes. Status changes go through here, never through
+   *  an upsert, so the server's state rules (exitos_*_guard triggers) see an update. */
+  private async patch(table: string, id: string, data: object): Promise<void> {
+    const rows = await this.rq<unknown[]>(`${table}?id=eq.${enc(id)}&select=id`, { method: "PATCH", prefer: "return=representation", body: JSON.stringify({ data }) });
+    // RLS filters a row you may not change out of the update silently: treat that as a refusal
+    if (!rows || rows.length === 0) throw new Error(`${table} ${id}: not permitted`);
+  }
+
   // ── accounts ──
   async upsertAccount(a: Account): Promise<Account> { await this.upsert("exitos_accounts", [{ id: a.id, role: a.role, data: a }]); return a; }
   async getAccount(id: string): Promise<Account | null> { return (await this.rows<Account>("exitos_accounts", `id=eq.${enc(id)}`))[0] ?? null; }
@@ -134,7 +142,7 @@ export class SupabaseExitApi implements ExitApiClient {
     const cur = (await this.rows<NdaRequest>("exitos_nda_requests", `id=eq.${enc(id)}`))[0];
     if (!cur) throw new Error(`nda ${id} not found`);
     const next: NdaRequest = { ...cur, status: patch.status, resolvedAt: patch.status === "requested" ? null : nowIso() };
-    await this.upsert("exitos_nda_requests", [{ id: next.id, listing_id: next.listingId, buyer_account_id: next.buyerAccountId, data: next }]);
+    await this.patch("exitos_nda_requests", id, next);
     return next;
   }
 
@@ -152,7 +160,7 @@ export class SupabaseExitApi implements ExitApiClient {
     const cur = (await this.rows<Offer>("exitos_offers", `id=eq.${enc(id)}`))[0];
     if (!cur) throw new Error(`offer ${id} not found`);
     const next: Offer = { ...cur, ...patch };
-    await this.upsert("exitos_offers", [{ id: next.id, listing_id: next.listingId, buyer_account_id: next.buyerAccountId, data: next }]);
+    await this.patch("exitos_offers", id, next);
     return next;
   }
 

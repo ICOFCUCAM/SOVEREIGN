@@ -198,6 +198,12 @@ function fakeSupabaseFetch(): typeof fetch {
       for (const row of JSON.parse(String(init?.body ?? "[]")) as Record<string, unknown>[]) t.set(String(row.id), row);
       return new Response("", { status: 200 });
     }
+    if (method === "PATCH") {
+      const patch = JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>;
+      const hit = [...t.values()].filter(matches);
+      for (const row of hit) Object.assign(row, patch);
+      return new Response(JSON.stringify(hit.map((r) => ({ id: r.id }))), { status: 200 });
+    }
     if (method === "DELETE") {
       for (const [id, row] of [...t]) if (matches(row)) t.delete(id);
       return new Response("", { status: 200 });
@@ -272,5 +278,20 @@ describe("ownership hardening — owner-scoped listing writes", () => {
     const pool = await api.listListings();
     // …but only the user's own listing is sent (RLS would reject the rest)
     expect(pool.map((l) => l.id)).toEqual(["mine"]);
+  });
+});
+
+describe("SupabaseExitApi status changes are updates, and a refused update is an error", () => {
+  it("sends PATCH for an NDA resolution and throws when RLS leaves no row to update", async () => {
+    const calls: Array<{ method: string; url: string }> = [];
+    const f = (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+      const method = init?.method ?? "GET"; calls.push({ method, url: String(input) });
+      if (method === "GET") return new Response(JSON.stringify([{ data: { id: "nda-1", listingId: "l", buyerAccountId: "b", status: "requested", requestedAt: "t", resolvedAt: null } }]), { status: 200 });
+      return new Response("[]", { status: 200 });   // PATCH matched nothing: not permitted
+    }) as typeof fetch;
+    const api = new SupabaseExitApi({ url: "https://x.supabase.co", anonKey: "anon", fetchImpl: f });
+    await expect(api.updateNdaRequest("nda-1", { status: "signed" })).rejects.toThrow("not permitted");
+    expect(calls.some((c) => c.method === "PATCH" && c.url.includes("exitos_nda_requests?id=eq.nda-1"))).toBe(true);
+    expect(calls.some((c) => c.method === "POST")).toBe(false);
   });
 });

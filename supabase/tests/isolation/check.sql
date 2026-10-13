@@ -49,3 +49,53 @@ select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
 select 'C has approver', exitos_has_role('approver');
 select 'C sees grants', count(*) from exitos_role_grants;
 reset role;
+-- state integrity (20261014100000): a buyer cannot sign their own NDA request or accept their own offer
+set role authenticated; select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+do $$
+  declare n int;
+  procedure_note text;
+begin
+  begin insert into exitos_nda_requests values ('n-forged','lst-a','00000000-0000-0000-0000-00000000000b','{"status":"signed"}');
+        raise notice 'buyer inserts signed NDA: ALLOWED'; exception when others then raise notice 'buyer inserts signed NDA: denied'; end;
+  insert into exitos_nda_requests values ('n2','lst-a','00000000-0000-0000-0000-00000000000b','{"status":"requested"}');
+  raise notice 'buyer requests NDA: ok';
+  begin update exitos_nda_requests set data = '{"status":"signed"}' where id = 'n2';
+        raise notice 'buyer signs own NDA: ALLOWED'; exception when others then raise notice 'buyer signs own NDA: denied'; end;
+  begin update exitos_nda_requests set listing_id = 'lst-demo-helios' where id = 'n2';
+        raise notice 'buyer moves NDA to another listing: ALLOWED'; exception when others then raise notice 'buyer moves NDA to another listing: denied'; end;
+  begin insert into exitos_offers values ('o-forged','lst-a','00000000-0000-0000-0000-00000000000b','{"amountUsd":1,"status":"accepted"}');
+        raise notice 'buyer inserts accepted offer: ALLOWED'; exception when others then raise notice 'buyer inserts accepted offer: denied'; end;
+  insert into exitos_offers values ('o2','lst-a','00000000-0000-0000-0000-00000000000b','{"amountUsd":40000000,"status":"submitted"}');
+  insert into exitos_offers values ('o3','lst-a','00000000-0000-0000-0000-00000000000b','{"amountUsd":42000000,"status":"submitted"}');
+  begin update exitos_offers set data = data || '{"status":"accepted"}' where id = 'o2';
+        raise notice 'buyer accepts own offer: ALLOWED'; exception when others then raise notice 'buyer accepts own offer: denied'; end;
+  update exitos_offers set data = data || '{"amountUsd":41000000}' where id = 'o2';
+  raise notice 'buyer revises a submitted offer: ok';
+end $$;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000c');
+update exitos_nda_requests set data = '{"status":"signed"}' where id = 'n2';
+select 'C signs B''s NDA (rows)', count(*) from exitos_nda_requests where id = 'n2' and data->>'status' = 'signed';
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+do $$ begin
+  update exitos_nda_requests set data = '{"status":"signed"}' where id = 'n2';
+  raise notice 'owner signs the NDA request: ok';
+  begin update exitos_nda_requests set data = '{"status":"requested"}' where id = 'n2';
+        raise notice 'owner reopens a resolved NDA: ALLOWED'; exception when others then raise notice 'owner reopens a resolved NDA: denied'; end;
+  begin update exitos_offers set data = data || '{"amountUsd":1}' where id = 'o3';
+        raise notice 'owner rewrites an offer amount: ALLOWED'; exception when others then raise notice 'owner rewrites an offer amount: denied'; end;
+  update exitos_offers set data = data || '{"status":"accepted"}' where id = 'o2';
+  raise notice 'owner accepts an offer: ok';
+end $$;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+do $$ begin
+  begin update exitos_offers set data = data || '{"amountUsd":1}' where id = 'o2';
+        raise notice 'buyer revises an accepted offer: ALLOWED'; exception when others then raise notice 'buyer revises an accepted offer: denied'; end;
+  update exitos_offers set data = data || '{"status":"withdrawn"}' where id = 'o3';
+  raise notice 'buyer withdraws a submitted offer: ok';
+end $$;
+reset role;
+set role anon;
+do $$ begin
+  begin perform count(*) from exitos_nda_requests; raise notice 'anon reads NDA requests: ALLOWED'; exception when others then raise notice 'anon reads NDA requests: denied'; end;
+end $$;
+reset role;
