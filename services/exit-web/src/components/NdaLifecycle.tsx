@@ -24,7 +24,17 @@ const STATE_TEXT: Record<string, { text: string; cls: string }> = {
   expired: { text: "Expired · access closed", cls: "text-xo-faint" }, withdrawn: { text: "Withdrawn", cls: "text-xo-faint" },
   terminated: { text: "Terminated · access closed", cls: "text-xo-faint" }, revoked: { text: "Access revoked by the seller", cls: "text-xo-risk" },
 };
-const METHOD_TEXT: Record<SigningMethod, string> = { external_esign: "External e-signature", wet_ink_scan: "Wet-ink signature (scan)", in_app_typed: "Typed in ExitOS" };
+const METHOD_TEXT: Record<SigningMethod, string> = {
+  external_esign: "External e-signature (details entered by the party)",
+  wet_ink_scan: "Wet-ink signature (scan hashed, not stored)",
+  in_app_typed: "Typed name in ExitOS (weakest)",
+};
+// what each method does and does not establish, shown before a party signs
+const METHOD_LIMITS: Record<SigningMethod, string> = {
+  external_esign: "ExitOS is not connected to an e-signature provider: it records the provider, envelope id and signed-copy hash you enter, and the other party checks them against the provider's records. It does not receive the provider's certificate of completion.",
+  wet_ink_scan: "Your browser hashes the scanned signed copy; the scan is not uploaded or stored, so send it to the other party yourself. They verify the hash against the copy they receive.",
+  in_app_typed: "Records your typed name, your signed-in account and the time. There is no identity check beyond the e-mail sign-in, no certificate, and no check that you may sign for your organisation. Use an e-signature for a transaction of any size.",
+};
 
 interface Req { id: string; listing_id: string; buyer_account_id: string; data: { status?: string; requestedAt?: string } }
 
@@ -140,7 +150,7 @@ const Agreement: React.FC<{ a: NdaAgreement; me: string; sigs: NdaSignature[]; e
 };
 
 const SignForm: React.FC<{ a: NdaAgreement; party: Party; remote: Remote; run: (f: () => Promise<unknown>, done: string) => void }> = ({ a, party, remote, run }) => {
-  const [method, setMethod] = useState<SigningMethod>("in_app_typed");
+  const [method, setMethod] = useState<SigningMethod>("external_esign");
   const [f, setF] = useState({ name: "", title: "", email: "", typed: "", provider: "", envelope: "", copySha: "", read: false });
   const evidence = (): Record<string, unknown> => method === "in_app_typed" ? { typedName: f.typed } : method === "external_esign" ? { provider: f.provider, envelopeId: f.envelope, signedCopySha256: f.copySha } : { signedCopySha256: f.copySha };
   const hashFile = async (file: File | undefined): Promise<void> => { if (!file) return; const buf = await crypto.subtle.digest("SHA-256", await file.arrayBuffer()); setF((x) => ({ ...x, copySha: [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("") })); };
@@ -157,6 +167,7 @@ const SignForm: React.FC<{ a: NdaAgreement; party: Party; remote: Remote; run: (
             {(Object.keys(METHOD_TEXT) as SigningMethod[]).map((m) => <option key={m} value={m}>{METHOD_TEXT[m]}</option>)}
           </select></label>
       </div>
+      <p className="text-[11px] leading-relaxed text-xo-caution">{METHOD_LIMITS[method]}</p>
       {method === "in_app_typed" && <label className="block" htmlFor={`ty-${a.id}`}><span className={LABEL}>Type your name to sign the issued text</span><input id={`ty-${a.id}`} className={INPUT} value={f.typed} onChange={(e) => setF({ ...f, typed: e.target.value })} /></label>}
       {method === "external_esign" && (
         <div className="grid gap-2 sm:grid-cols-2">

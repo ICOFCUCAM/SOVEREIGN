@@ -29,7 +29,9 @@ export const DocumentVersions: React.FC<{
   valuationMidUsd?: number;
   /** The demo company is shown: every input is sample data. */
   sample?: boolean;
-}> = ({ typeId, doc, gate, company, companyId, unconfirmed, inputs, ownerName, codeName, valuationMidUsd, sample = false }) => {
+  /** The downloaded Markdown, when the memorandum layout does not fit (transaction documents). */
+  markdown?: string;
+}> = ({ typeId, doc, gate, company, companyId, unconfirmed, inputs, ownerName, codeName, valuationMidUsd, sample = false, markdown }) => {
   const { session } = useAuth();
   const remote = useDocumentRemote();
   const [versions, setVersions] = useState<StoredVersion[]>([]);
@@ -68,7 +70,7 @@ export const DocumentVersions: React.FC<{
   const download = (): Promise<void> => run(async () => {
     const s = await save();
     if (!s || !doc) return;
-    downloadDeliverable(docFilename(doc, codeName), docToMarkdown(doc));
+    downloadDeliverable(docFilename(doc, codeName), markdown ?? docToMarkdown(doc));
     await logEvent(s.version.id, "downloaded", remote);
   });
   const pdf = (s: StoredVersion): Promise<void> => run(async () => {

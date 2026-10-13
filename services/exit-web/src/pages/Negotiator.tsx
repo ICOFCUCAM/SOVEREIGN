@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { DemoExample } from "../components/DemoExample";
-import { Link } from "react-router-dom";
+import { TransactionWorkspace } from "../components/TransactionWorkspace";
 import { Button, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
 import { PageHeader, Section, Metric, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
@@ -399,12 +398,8 @@ const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
 // demo company's example only on request.
 const Negotiator: React.FC = () => {
   const { fromIntake } = useMemo(() => loadActiveCompany(), []);
-  return (
-    <DemoExample fromIntake={fromIntake} page={{ id: "bid-room", eyebrow: "◉ Founder · Negotiation desk", title: "Bid Room" }}
-      title="No offers recorded for your company" demo={<NegotiatorDemo />}>
-      <>Offers buyers submit on your listing arrive in your <Link to="/console/inbox" className="font-medium text-xo-action underline">Inbox</Link>. ExitOS does not yet hold full offer terms, so the Bid Room has nothing of yours to compare.</>
-    </DemoExample>
-  );
+  // a founder with an intake works on their own recorded proposals; the demo company's example stays separate
+  return fromIntake ? <TransactionWorkspace /> : <NegotiatorDemo />;
 };
 
 export default Negotiator;

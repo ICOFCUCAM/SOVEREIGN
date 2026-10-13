@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { IoiTermsFields, toTerms, EMPTY_IOI, type IoiDraft } from "../components/IoiTerms";
 import { Button, notify } from "../lib/ui";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
@@ -44,6 +45,8 @@ const AcquisitionRadar: React.FC = () => {
   const [requested, setRequested] = useState<Record<string, boolean>>({});
   const [offerInput, setOfferInput] = useState<Record<string, string>>({});
   const [offered, setOffered] = useState<Record<string, boolean>>({});
+  const [ioi, setIoi] = useState<Record<string, IoiDraft>>({});
+  const [showTerms, setShowTerms] = useState<Record<string, boolean>>({});
   const [watched, setWatched] = useState<Record<string, boolean>>({});
   const [savedMandate, setSavedMandate] = useState(false);
   const [publish, setPublish] = useState<Listing | null>(null);
@@ -252,7 +255,9 @@ const AcquisitionRadar: React.FC = () => {
                     className={`${SMALL_BTN} border-xo-line text-xo-text hover:bg-xo-raise`}
                     disabled={!!offered[l.id]}>{offered[l.id] ? "✓ Offer submitted" : "Submit offer"}</button>
                   <span id={`offer-${l.id}-msg`} role={offerError[l.id] ? "alert" : undefined} className="text-[11px] text-xo-risk">{offerError[l.id]}</span>
+                  {!offered[l.id] && <button type="button" className="text-[11px] font-semibold text-xo-action hover:underline" aria-expanded={!!showTerms[l.id]} onClick={() => setShowTerms((st) => ({ ...st, [l.id]: !st[l.id] }))}>{showTerms[l.id] ? "Hide terms" : "Add terms (structured IOI)"}</button>}
                 </div>
+                {showTerms[l.id] && !offered[l.id] && <IoiTermsFields id={`ioi-${l.id}`} value={ioi[l.id] ?? EMPTY_IOI} onChange={(d) => setIoi((st) => ({ ...st, [l.id]: d }))} />}
                 {pending[l.id] && (
                   <div id={`confirm-${l.id}`} role="group" aria-label="Confirm action" className="mt-3 border border-xo-caution/50 bg-xo-ink px-3 py-2 text-[12px]">
                     <p className="text-xo-text">{pending[l.id] === "nda"
@@ -276,7 +281,8 @@ const AcquisitionRadar: React.FC = () => {
                           } else {
                             const res = parseNumber(offerInput[l.id] ?? "", { min: 0.01, max: 1_000_000 });
                             if (!res.ok) return;
-                            const offer = await submitOffer(l.id, res.value * 1e6);
+                            const terms = toTerms(ioi[l.id] ?? EMPTY_IOI);
+                            const offer = await submitOffer(l.id, res.value * 1e6, undefined, Object.keys(terms).length ? terms : undefined);
                             if (!offer) { setActionMsg((st) => ({ ...st, [l.id]: NOT_SENT })); return; }
                             // open (or fetch) the deal and advance it to IOI — emits the loi telemetry
                             void startDeal(l.id).then((d) => { if (d) void advanceDeal(d, "ioi", "buyer", l.code); });

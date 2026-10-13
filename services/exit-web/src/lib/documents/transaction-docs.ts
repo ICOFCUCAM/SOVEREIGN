@@ -141,7 +141,7 @@ export function offerComparison(company: CompanyProfile, offers: readonly Record
     { heading: "Summary", body: `${ordered.length} live proposal${ordered.length === 1 ? "" : "s"} recorded for ${company.name}. The table restates the terms each bidder gave, in one place; "not stated" means the bidder did not give that term. No ranking is implied.` },
     { heading: "Terms compared", table: { headers: ["Term", ...ordered.map((o) => labels.get(o.id)!)], rows } },
     { heading: "Cash at completion", body: ordered.map((o) => { const c = cashAtCompletion(o); return `${labels.get(o.id)}: ${c != null ? `about ${usd(c)} at completion` : "cannot be worked out until the bidder states its cash share"}.`; }).join(" ") },
-    { heading: "Against your positions", ...(anyPositions ? { bullets: against } : { body: "Not yet supplied: you have not set any negotiating positions, so the proposals are not measured against them. Set them in the negotiation workspace; ExitOS proposes none." }) },
+    { heading: "Against your positions", ...(anyPositions ? { bullets: against } : { body: "Not yet supplied: you have not set any negotiating positions, so the proposals are not measured against them. Set them in the Bid Room; ExitOS proposes none." }) },
   ];
   return { title: "Offer Comparison", subtitle: company.name, sections,
     coverage: [

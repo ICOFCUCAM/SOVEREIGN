@@ -172,7 +172,7 @@ export const DOCUMENT_TYPES: readonly DocumentType[] = [
     source: "lib/documents/transaction-docs.ts:counterOffer", formats: ["screen", "md"], status: "built",
     note: "From one recorded offer and the seller's positions; unset positions are not proposed; non-binding." },
   { id: "exitos.loi", title: "Letter of intent / term sheet", stage: 6, audience: "parties", kind: "counsel", classification: "restricted_parties", inputs: [],
-    source: "lib/documents/transaction-docs.ts:termSheetDraft", formats: ["screen", "md"], status: "partial", reviewRequired: "counsel", executionRequired: true, defects: ["B-12"],
+    source: "lib/documents/transaction-docs.ts:termSheetDraft", formats: ["screen", "md"], status: "partial", reviewRequired: "counsel", executionRequired: true,
     note: "Draft heads of terms from the accepted offer and the seller's positions; binding provisions and governing law are left to counsel." },
   { id: "exitos.exclusivity", title: "Exclusivity agreement", stage: 6, audience: "parties", kind: "counsel", classification: "restricted_parties", inputs: [],
     source: "lib/documents/transaction-docs.ts:exclusivityDraft", formats: ["screen", "md"], status: "partial", reviewRequired: "counsel", executionRequired: true,
