@@ -75,6 +75,21 @@ export async function passwordSignIn(cfg: AuthConfig, email: string, password: s
   return { accessToken: r.access_token, refreshToken: r.refresh_token, expiresAt: Date.now() + r.expires_in * 1000, userId: u.id, email: u.email };
 }
 
+/** Create an account with e-mail and password (Supabase Auth sign-up). Returns the session when the
+ *  project signs new accounts in at once, or null when the address must be confirmed first. */
+export async function passwordSignUp(cfg: AuthConfig, email: string, password: string, redirectTo: string): Promise<VerifiedSession | null> {
+  const e = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) throw new Error("Enter a valid e-mail address.");
+  if (password.length < 8) throw new Error("Use at least 8 characters for the password.");
+  const res = await f(cfg)(`${cfg.url}/auth/v1/signup?redirect_to=${encodeURIComponent(redirectTo)}`, {
+    method: "POST", headers: { apikey: cfg.anonKey, "content-type": "application/json" }, body: JSON.stringify({ email: e, password }),
+  });
+  const r = (await expectOk(res, "Creating the account")) as { access_token?: string; refresh_token?: string; expires_in?: number };
+  if (!r.access_token || !r.refresh_token) return null;
+  const u = await verifyUser(cfg, r.access_token);
+  return { accessToken: r.access_token, refreshToken: r.refresh_token, expiresAt: Date.now() + (r.expires_in ?? 3600) * 1000, userId: u.id, email: u.email };
+}
+
 /** E-mail a password-reset link (Supabase Auth recover); it returns to `redirectTo` signed in. */
 export async function sendPasswordReset(cfg: AuthConfig, email: string, redirectTo: string): Promise<void> {
   const e = email.trim().toLowerCase();
