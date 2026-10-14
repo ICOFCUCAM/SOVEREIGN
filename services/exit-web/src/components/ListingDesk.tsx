@@ -4,12 +4,12 @@ import { ListingFactsForm, Icon, type IntakeContext } from "./ListingFacts";
 import { IdentityMethods, IdentityStatusCard, DevVerificationTools, type IdentityState, type SellerIdentity } from "./IdentityGate";
 import { CountrySelect } from "./CountrySelect";
 import { BTN_PRIMARY, BTN_SECONDARY, CARD, EYEBROW, H1, ACCENT_WORD, LEDE } from "./desk/ui";
-import earthSmall from "../assets/desk/earth-sunrise-720.webp";
+import earthSunrise from "../assets/desk/earth-sunrise-1672.webp";
 import { AdPanel, useAdSlides } from "./AdPanel";
 import type { Remote } from "../lib/documents/store";
 import waterfrontSkyline from "../assets/desk/waterfront-skyline-720.webp";
-import waterfrontCityscapeSmall from "../assets/desk/waterfront-cityscape-720.webp";
-import globalNetworkSmall from "../assets/desk/global-network-720.webp";
+import waterfrontCityscape from "../assets/desk/waterfront-cityscape-1672.webp";
+import globalNetwork from "../assets/desk/global-network-1672.webp";
 import { methodOptions, providerLabel } from "../lib/identity";
 import { missingFacts, missingIn, askingText, STAGE_LABEL, FOR_SALE_LABEL, MODEL_LABEL, PROFILE_SECTIONS, PROFILE_SECTION_LABEL, type ListingFacts, type ProfileSection } from "../lib/listing-facts";
 
@@ -93,10 +93,10 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
   // promotions for this stage; small screens get a compact card after the form, when the operator allows it
   const ads = useAdSlides(remote, (["identity", "profile", "review"] as const)[stage]);
   const mobileAds = ads.settings.mobile_enabled && ads.slides ? ads.slides.filter((x) => x.campaign.mobile) : [];
-  // one calm picture per stage, kept to a small plate beside the heading
-  const plate = stage === 0 ? { src: earthSmall, pos: "70% 45%" }
-    : stage === 1 ? { src: waterfrontCityscapeSmall, pos: section === "transaction" ? "85% 60%" : section === "financial" ? "35% 55%" : "62% 45%" }
-    : { src: globalNetworkSmall, pos: "80% 40%" };
+  // one picture per stage: a half banner in the top right, fading into the paper on its left and below
+  const banner = stage === 0 ? { src: earthSunrise, pos: "72% 42%" }
+    : stage === 1 ? { src: waterfrontCityscape, pos: section === "transaction" ? "85% 60%" : section === "financial" ? "35% 55%" : "62% 45%" }
+    : { src: globalNetwork, pos: "80% 40%" };
   const heading1 = stage === 0 ? <>Establish your <em className={ACCENT_WORD}>identity</em></>
     : stage === 2 ? <>Review and <em className={ACCENT_WORD}>publish</em></>
     : section === "overview" ? <>The company <em className={ACCENT_WORD}>profile</em></>
@@ -119,7 +119,11 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
 
       {/* ── the workspace ───────────────────────────────────────────── */}
       <div ref={scrollers[1]} className="relative flex min-w-0 flex-col overflow-x-hidden bg-desk-paper lg:h-full lg:overflow-y-auto">
-        <div className="flex items-center justify-between gap-4 px-6 pt-5 text-[12px] sm:px-10 lg:px-14 lg:pt-7">
+        <div aria-hidden className="pointer-events-none absolute right-0 top-0 hidden h-[380px] w-[54%] lg:block">
+          <img src={banner.src} alt="" className="h-full w-full object-cover saturate-[0.85] [mask-image:linear-gradient(90deg,transparent_0%,#000_42%)] [-webkit-mask-image:linear-gradient(90deg,transparent_0%,#000_42%)]" style={{ objectPosition: banner.pos }} />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-desk-paper via-desk-paper/70 to-transparent" />
+        </div>
+        <div className="relative z-10 flex items-center justify-between gap-4 px-6 pt-5 text-[12px] sm:px-10 lg:px-14 lg:pt-7">
           <span className={`inline-flex items-center gap-2 ${live ? "text-desk-ink" : "text-desk-muted"}`}>
             <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${live ? "bg-desk-success" : "border border-desk-muted"}`} />
             {live ? "Live exchange" : "This browser only · not connected to the live exchange"}
@@ -132,12 +136,12 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
               </button>
             )}
             <span id="draft-state" role="status" className="sr-only">{savedAt ? "Draft saved in this browser." : ""}</span>
-            <button type="button" onClick={onClose} className="hidden min-h-[36px] rounded-[10px] px-3 text-desk-muted transition hover:text-desk-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-desk-gold/60 lg:inline-flex lg:items-center lg:gap-1.5">Leave the desk <span aria-hidden>✕</span></button>
+            <button type="button" onClick={onClose} className="hidden min-h-[36px] rounded-[10px] bg-desk-surface/85 px-3 text-desk-text ring-1 ring-desk-line backdrop-blur transition hover:text-desk-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-desk-gold/60 lg:inline-flex lg:items-center lg:gap-1.5">Leave the desk <span aria-hidden>✕</span></button>
           </div>
         </div>
 
-        <main className="w-full max-w-[940px] flex-1 px-6 pb-16 pt-8 sm:px-10 lg:px-14 lg:pt-12">
-          {/* the heading, with the stage's picture as a small plate beside it */}
+        <main className="relative z-10 w-full max-w-[940px] flex-1 px-6 pb-16 pt-8 sm:px-10 lg:px-14 lg:pt-12">
+          {/* the heading; the stage's picture sits behind it as a half banner */}
           <div className="flex items-start justify-between gap-10">
             <div className="min-w-0">
               <div className="flex items-center gap-4">
@@ -157,9 +161,6 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
               <h1 id="desk-heading" ref={heading} tabIndex={-1} className={`mt-4 outline-none ${H1}`}>{heading1}</h1>
               <p className={`mt-5 max-w-[54ch] ${LEDE}`}>{lede}</p>
             </div>
-            <figure aria-hidden className="mt-2 hidden h-[152px] w-[216px] shrink-0 overflow-hidden rounded-[14px] ring-1 ring-black/5 xl:block">
-              <img src={plate.src} alt="" className="h-full w-full object-cover saturate-[0.82]" style={{ objectPosition: plate.pos }} />
-            </figure>
           </div>
 
           {stage === 0 && (
