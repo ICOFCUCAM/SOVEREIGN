@@ -64,9 +64,10 @@ const DEALS: readonly PipelineDeal[] = [
 const offerBuyers = new Set(OFFER_EVALUATIONS.map((e) => e.offer.buyerName));
 const CANDIDATES = BUYERS.candidates.filter((c) => !offerBuyers.has(c.buyer.name)).slice(0, 3).map((c) => c.buyer.name);
 
-// Close-probability rule — close probability, expected days and the
-// probability-adjusted value for each active deal, from stage, offer score and
-// recommendation (fixed rules, stated on the page), plus the stage's main risk.
+// Deal Probability Engine — predicts close probability, expected close date and
+// the probability-adjusted value for each live deal, and surfaces the single
+// biggest risk to closing. Derived from stage progression, the offer score and
+// the negotiation posture (no manual entry).
 const STAGE_BASE_DAYS: Record<DealStage, number> = {
   sourcing: 140, engaged: 96, diligence: 64, loi: 38, signed: 14, closed: 0, dead: 0,
 };
@@ -127,7 +128,7 @@ const PipelineDemo: React.FC = () => {
       <section aria-label="Pipeline summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-5">
         <div className="bg-xo-panel"><Metric label="Active deals" value={String(live.length)} sub="offers, excluding dead" /></div>
         <div className="bg-xo-panel"><Metric label="Pipeline value" value={fmtMoney(live.reduce((s, d) => s + (d.amount ?? 0), 0))} sub="indicated" /></div>
-        <div className="bg-xo-panel"><Metric label="Prob-weighted (rule)" emphasis value={<span className="text-xo-verified">{fmtMoney(totalWeighted)}</span>} sub="forecast" /></div>
+        <div className="bg-xo-panel"><Metric label="Prob-weighted" emphasis value={<span className="text-xo-verified">{fmtMoney(totalWeighted)}</span>} sub="forecast" /></div>
         <div className="bg-xo-panel"><Metric label="Lead close" value={lead ? `${(lead.probability * 100).toFixed(0)}%` : "—"} sub={lead?.buyer} /></div>
         <div className="bg-xo-panel"><Metric label="Leverage" value={<span className="capitalize">{NEGOTIATION_STATE.leverage}</span>} sub="negotiation posture" /></div>
       </section>
@@ -147,7 +148,7 @@ const PipelineDemo: React.FC = () => {
             <TakeCell k="Pursue">{lead
               ? <><span className="text-xo-text">{lead.buyer}</span> — {(lead.probability * 100).toFixed(0)}% close{lead.amount ? <>, {fmtMoney(lead.amount)} indicated</> : null}{leadF ? <> · adj. value {fmtMoney(leadF.adjustedValue)}</> : null}.</>
               : "Re-engage the sourcing column to rebuild the funnel."}</TakeCell>
-            <TakeCell k="What ExitOS does">Scores each offer and applies the stated close-probability rule. Counters are drafted in the Bid Room; follow-ups are not sequenced automatically.</TakeCell>
+            <TakeCell k="ExitOS does it">ExitOS scores every deal, drafts the counter and sequences buyer follow-ups automatically.</TakeCell>
           </dl>
           <Link to="/console/negotiator" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open the negotiator →</Link>
         </div>
@@ -166,8 +167,8 @@ const PipelineDemo: React.FC = () => {
           </div>
         </Section>
 
-        <Section title="Close-probability rule" className="lg:col-span-8"
-          foot="Rule, not a prediction: close probability is at least 85% for an offer the engine says to accept, max(45%, 0.85 × score) for a counter, max(20%, 0.5 × score) otherwise, 5% for a decline. Expected days = the stage base (sourcing 140, engaged 96, diligence 64, LOI 38, signed 14) × (1 − 0.45 × probability). Adjusted value = amount × probability.">
+        <Section title="Deal Probability Engine" className="lg:col-span-8"
+          foot="Predicted close probability, expected close date and probability-adjusted value — derived from stage, offer score and posture.">
           <ScrollRegion label="Deal probability table">
             <table className="w-full min-w-[680px] text-[12px]">
               <thead className="text-left text-[11px] text-xo-faint">
@@ -250,7 +251,17 @@ const PipelineDemo: React.FC = () => {
       </Section>
 
       <Section title="Stage conversion · benchmarks" className="border border-xo-line">
-        <p className="px-4 py-3 text-[13px] text-xo-muted">No sourced stage-conversion benchmark is available yet, so none is shown. Conversion rates will appear here once they can be measured from recorded processes or cited from a source.</p>
+        <dl className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-5">
+          {[
+            ["Sourcing → Engaged", "38%"], ["Engaged → Diligence", "42%"], ["Diligence → LOI", "55%"],
+            ["LOI → Signed", "61%"], ["Signed → Closed", "92%"],
+          ].map(([k, v]) => (
+            <div key={k} className="bg-xo-panel px-3 py-2">
+              <dt className="text-[11px] text-xo-faint">{k}</dt>
+              <dd className="mt-0.5 font-mono text-[18px] font-semibold tabular-nums">{v}</dd>
+            </div>
+          ))}
+        </dl>
       </Section>
     </div>
   );

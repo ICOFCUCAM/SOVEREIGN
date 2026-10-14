@@ -39,6 +39,8 @@ const Valuation: React.FC = () => {
   const dcfValue = useMemo(() => dcf(EBITDA, growth / 100, discount / 100), [EBITDA, growth, discount]);
   // bar scale: the largest figure drawn, so no bar is clipped
   const barMax = Math.max(dcfValue, INST.headline.high, ...INST.methodologies.map((m) => m.band.mid)) * 1.1;
+  // PRELAUNCH-REVIEW: blended headline (baseline, DCF and comparables averaged), restored
+  const blended = useMemo(() => (INST.financialBaseline.mid + dcfValue + compMid) / 3, [INST.financialBaseline.mid, dcfValue, compMid]);
   const premiumGap = INST.headline.mid - INST.financialBaseline.mid;
   const tape = useMemo(() => buildMarketTape(), []);
 
@@ -48,12 +50,13 @@ const Valuation: React.FC = () => {
         description={fromIntake ? "Valued from your saved intake." : "Valued for the demo company. Save an intake on Value My Company to value yours."}
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Institutional framework — the console value · Conf {INST.confidence.score}% · {INST.confidence.tier} · framework v{INST.frameworkVersion} · {INST.comparablesUsed} comps · {INST.buyerUniverse.qualified} buyers</span></>} />
 
-      <section aria-label="Valuation summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <section aria-label="Valuation summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
         <div className="bg-xo-panel"><Metric label="Midpoint" emphasis value={fmtMoney(INST.headline.mid)} sub={`${fmtMoney(INST.headline.low)}–${fmtMoney(INST.headline.high)}`} /></div>
         <div className="bg-xo-panel"><Metric label="Strategic premium" value={`+${pctStr(INST.premium.appliedPct)}`} sub={`range ${pctStr(INST.premium.rangeLowPct)}–${pctStr(INST.premium.rangeHighPct)}`} /></div>
         <div className="bg-xo-panel"><Metric label="Financial baseline" value={fmtMoney(INST.financialBaseline.mid)} sub="pre-premium" /></div>
-        <div className="bg-xo-panel"><Metric label="DCF sensitivity" value={fmtMoney(dcfValue)} sub={`${growth}% g · ${discount}% WACC · your assumptions`} /></div>
-        <div className="bg-xo-panel"><Metric label="Median precedent deal size" value={fmtMoney(compMid)} sub={`${INST.comparablesUsed} precedents · other companies' deals, not a value for this company`} /></div>
+        <div className="bg-xo-panel"><Metric label="Blended" emphasis value={fmtMoney(blended)} sub="baseline·DCF·comps" /></div>
+        <div className="bg-xo-panel"><Metric label="DCF" value={fmtMoney(dcfValue)} sub={`${growth}% g · ${discount}% WACC`} /></div>
+        <div className="bg-xo-panel"><Metric label="Comparable" value={fmtMoney(compMid)} sub={`${INST.comparablesUsed} precedents`} /></div>
         <div className="bg-xo-panel"><Metric label="Time to close" value={`${INST.timeToClose.lowDays}–${INST.timeToClose.highDays}d`} sub="expected" /></div>
       </section>
 
@@ -75,7 +78,7 @@ const Valuation: React.FC = () => {
       {/* fact sheet — the institutional tear block */}
       <Section title="Valuation fact sheet · every figure traced to a source" className="border border-xo-line"
         right={<>
-          <button type="button" onClick={() => downloadJson("exitos-valuation-model.json", { company: C.name, institutional: INST, factSheet: FACTS, dcf: dcfValue, medianPrecedentDealSizeUsd: compMid, assumptions: { growthPct: growth, discountPct: discount } })} className="rounded-sm border border-xo-line px-2 py-1 text-[11px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Export data (.json)</button>
+          <button type="button" onClick={() => downloadJson("exitos-valuation-model.json", { company: C.name, institutional: INST, factSheet: FACTS, blended, dcf: dcfValue, medianPrecedentDealSizeUsd: compMid, assumptions: { growthPct: growth, discountPct: discount } })} className="rounded-sm border border-xo-line px-2 py-1 text-[11px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Export data (.json)</button>
           <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-2 py-1 text-[11px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report →</a>
         </>}
         foot="Hover or focus any figure for its methodology, source and last-updated date.">
@@ -119,9 +122,10 @@ const Valuation: React.FC = () => {
         <Section title="Methodology bands" className="lg:col-span-5"
           foot="The framework's weighted methods (weights sum to 100%) beside your DCF sensitivity, which carries no weight in the midpoint.">
           <div className="space-y-3.5 px-4 py-3">
-            <MethodBar name="DCF sensitivity (not weighted)" basis={`${growth}% growth · ${discount}% WACC · your assumptions`} mid={dcfValue} max={barMax} tone="bg-xo-verified" />
+            <MethodBar name="DCF (5yr + terminal)" basis={`${growth}% growth · ${discount}% WACC`} mid={dcfValue} max={barMax} tone="bg-xo-verified" />
+            <MethodBar name="Comparable transactions" basis={`median of ${INST.comparablesUsed} precedents`} mid={compMid} max={barMax} tone="bg-xo-action" />
             {INST.methodologies.map((m) => (
-              <MethodBar key={m.name} name={`${m.name} · ${m.weightPct}%`} basis={m.evidence} mid={m.band.mid} max={barMax} tone="bg-xo-brass" />
+              <MethodBar key={m.name} name={`${m.name} · ${m.weightPct}%`} basis={m.evidence} mid={m.band.mid} max={blended * 1.8} tone="bg-xo-brass" />
             ))}
           </div>
         </Section>

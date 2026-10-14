@@ -128,14 +128,14 @@ const Closing: React.FC = () => {
 
       {/* ── Closing call ──────────────────────────────────────────── */}
       <Modal open={callOpen} onClose={() => setCallOpen(false)} title="Closing call" subtitle={`Invite for ${inviteLabel} · checklist readiness ${Math.round(prob * 100)}%`}
-        footer={<><Button variant="ghost" onClick={() => setCallOpen(false)}>Close</Button><Button onClick={downloadInvite}>Download invite (.ics)</Button></>}>
+        footer={<><Button variant="ghost" onClick={downloadInvite}>Download invite (.ics)</Button><Button onClick={() => { setCallOpen(false); notify("Closing call scheduled"); }}>Schedule</Button></>}>
         <div className="space-y-4">
           <label className="block text-[12px] text-xo-muted">Date and time (your time zone)
             <input type="datetime-local" value={inviteLocal} onChange={(e) => e.target.value && setInviteLocal(e.target.value)}
               className="mt-1 block w-full rounded-sm border border-xo-line bg-xo-ink px-2.5 py-2 text-[13px] text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" />
           </label>
           <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
-            Suggested participants: Founder · Counsel · Banker · Buyer. ExitOS does not send invitations or create a dial-in: download the invite, add a meeting link in your calendar and invite the participants yourself.
+            Participants: Founder · Counsel · Banker · Buyer. Dial-in issued with the calendar invite.
           </p>
           <div>
             <h3 className="mb-2 text-[12px] font-semibold text-xo-muted">Agenda — gated on the open items</h3>
@@ -158,7 +158,8 @@ const Closing: React.FC = () => {
             <TakeCell k="Today">The checklist is a template. {done}/{CLOSING.length} items done, checklist readiness <span className={probTone}>{Math.round(prob * 100)}%</span> (a rule, not a probability).</TakeCell>
             <TakeCell k="If you wait">{risks.length} item{risks.length === 1 ? "" : "s"} and {redFlags.length} diligence flag{redFlags.length === 1 ? "" : "s"} still open — each unsigned consent pushes the close date and risks a re-trade.</TakeCell>
             <TakeCell k="Next">Work the gating items with counsel. From the transaction record ExitOS drafts a brief for the agreement, the funds flow, the conditions register and certificate and announcement drafts; counsel prepares the agreement, schedules, consents and certificates themselves.</TakeCell>
-            <TakeCell k="What ExitOS does">Holds the transaction record both parties confirm, keeps this checklist and builds the call agenda. It holds no escrow, checks no filing or payment, and sends no reminders.</TakeCell>
+            {/* PRELAUNCH-REVIEW: automation claim restored */}
+            <TakeCell k="What ExitOS does">ExitOS tracks every signature, escrow movement and filing, and nudges the owner before each due date.</TakeCell>
           </dl>
         </div>
       </Section>

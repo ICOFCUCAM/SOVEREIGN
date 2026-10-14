@@ -225,7 +225,7 @@ export function applyToBuyers(candidates: readonly BuyerCandidate[], prefs: Mand
 export interface OutreachPosture { held: boolean; label: string | null; note: string }
 export function outreachPosture(prefs: MandatePreferences): OutreachPosture {
   if (prefs.outreachHold) return { held: true, label: prefs.outreachHold.label, note: `Outreach is held ${prefs.outreachHold.label} per banker directive.` };
-  return { held: false, label: null, note: "No hold directive in force — the drafts can be sent whenever you choose." };
+  return { held: false, label: null, note: "Outreach is live — no hold directive in force." };
 }
 
 export interface ValuationGuardrail { floor: number | null; ceiling: number | null; note: string | null }

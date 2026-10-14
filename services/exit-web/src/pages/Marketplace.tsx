@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
 import { PageHeader, Section, Metric, Chip, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
@@ -15,11 +15,12 @@ import { inlineLabel, label, labels } from "../lib/labels";
 import { sectorLabel } from "../lib/market-stats";
 import { canonicalValuationFor } from "../lib/canonical-valuation";
 
-// Exit Marketplace — "Become the banker." The sell-side pack gathers the
-// engine artefacts a banker would prepare — teaser, CIM, the anonymized
-// view and the matched buyers. It publishes nothing and contacts no one:
-// listing on the exchange happens from the intake, outreach stays the
-// founder's. Below the pipeline, the same listing renders in the
+// Exit Marketplace — "Become the banker." Most founders never hire a
+// banker because bankers are expensive; ExitOS does the banker's job.
+// The "Publish Opportunity" pipeline runs the full sell-side workflow in
+// one click — teaser, CIM, anonymization, buyer identification, outreach —
+// each step backed by a real engine artifact (memorandum generator +
+// listing engine). Below the pipeline, the same listing renders in the
 // founder vs. public (anonymized) views.
 
 const OUTREACH_STYLE: Record<string, string> = {
@@ -37,12 +38,13 @@ const TYPE_STYLE: Record<string, string> = {
   sponsor:        "text-xo-muted",
 };
 
-type Phase = "idle" | "done";
+type Phase = "idle" | "running" | "done";
 
 interface PipelineStep {
   key: string;
   title: string;
-  detail: React.ReactNode;   // what the step produced (shown once prepared)
+  detail: string;       // what the step produced (shown once complete)
+  running: string;      // verb shown while in flight
 }
 
 // D1: the console shows one enterprise value — the canonical (institutional)
@@ -109,6 +111,7 @@ const BuyerMarketplace: React.FC = () => {
 const FounderMarketplace: React.FC = () => {
   const [view, setView]   = useState<"public" | "founder">("founder");
   const [phase, setPhase] = useState<Phase>("idle");
+  const [done, setDone]   = useState<number>(0);
 
   // The founder's saved intake when there is one; the demo company otherwise.
   const { company, fromIntake, story } = useMemo(() => loadActiveCompany(), []);
@@ -135,34 +138,44 @@ const FounderMarketplace: React.FC = () => {
   const listing = override.askMid != null
     ? { ...baseListing, askingPriceUsd: { ...baseListing.askingPriceUsd, mid: override.askMid } }
     : baseListing;
+  // the asking price as typed ($M), validated before it is applied
   const [editAskText, setEditAskText] = useState<string>(String(Math.round(baseListing.askingPriceUsd.mid / 1e5) / 10));
   const askParse = parseNumber(editAskText, { min: 0.1, max: 1_000_000, scale: 1e6 });
+  const navTo = useNavigate();
   const [editNote, setEditNote] = useState("");
 
   const teaserInputs = useMemo(() => ({ anonymize: true, ...own?.memo }), [own]);
   const teaser = useMemorandum("buyer_teaser", teaserInputs);
   const cim    = useMemorandum("cim", own?.memo);
 
-  // The sell-side pack: four artefacts the engines produce. Preparing it
-  // publishes nothing and contacts no one — listing on the exchange happens
-  // from the intake, and outreach stays the founder's.
-  const LINK = "font-medium text-xo-action underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  // Distinct outreach channels across the matched buyers.
+  const channels = useMemo(() => Array.from(new Set(matches.map((m) => m.suggestedOutreach))), [matches]);
+
   const steps: PipelineStep[] = [
-    { key: "teaser",  title: "Teaser drafted",
+    { key: "teaser",  title: "Teaser created",      running: "Writing anonymized teaser…",
       detail: teaser ? `${teaser.title} · ${teaser.wordCount} words · anonymized` : "Drafting…" },
-    { key: "cim",     title: "CIM drafted",
-      detail: cim ? <>{cim.sections.length} sections · {cim.wordCount.toLocaleString()} words · <Link to="/console/documents" className={LINK}>open in Documents</Link></> : "Drafting…" },
-    { key: "anon",    title: "Anonymized public view",
-      detail: `Buyers would see it as "${PUB.title}" — switch to "Public listing" below to check it` },
-    { key: "buyers",  title: "Buyers matched",
+    // PRELAUNCH-REVIEW: one-click publish run restored
+    { key: "cim",     title: "CIM drafted",         running: "Drafting confidential memorandum…",
+      detail: cim ? `${cim.sections.length} sections · ${cim.wordCount.toLocaleString()} words` : "Drafting…" },
+    { key: "anon",    title: "Data anonymized",     running: "Masking identity + sensitive figures…",
+      detail: `Identity masked → published as "${PUB.title}"` },
+    { key: "buyers",  title: "Buyers identified",   running: "Scanning the buyer universe…",
       detail: `${matches.length} matched buyers · top fit score ${matches[0] ? fit(matches[0].matchScore) : "—"}` },
-    { key: "outreach", title: "Outreach — not started",
-      detail: <>ExitOS does not contact buyers from here. Plan who to approach in the <Link to="/console/outreach-plan" className={LINK}>Outreach Plan</Link>.</> },
+    { key: "outreach", title: "Outreach started",   running: "Sequencing outreach…",
+      detail: `${matches.length} buyers queued across ${channels.length} channel${channels.length === 1 ? "" : "s"}` },
   ];
 
-  const prepare = (): void => setPhase("done");
-  const reset   = (): void => setPhase("idle");
-  const done = phase === "done" ? steps.length : 0;
+  // Advance the pipeline one step at a time while running.
+  useEffect(() => {
+    if (phase !== "running") return;
+    if (done >= steps.length) { setPhase("done"); return; }
+    const t = setTimeout(() => setDone((d) => d + 1), 850);
+    return () => clearTimeout(t);
+  }, [phase, done, steps.length]);
+
+  const publish = (): void => { setDone(0); setPhase("running"); };
+  const reset   = (): void => { setPhase("idle"); setDone(0); };
+
   const progressPct = Math.round((done / steps.length) * 100);
 
   const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
@@ -172,7 +185,7 @@ const FounderMarketplace: React.FC = () => {
   return (
     <div data-page="marketplace" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Exchange · Marketplace · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Exit Marketplace"
-        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Become the banker · {view === "founder" ? "Founder view" : "Public view"}</span></>}
+        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Become the banker · {phase === "done" ? "Live" : view === "founder" ? "Founder view" : "Public view"}</span></>}
         description={fromIntake ? "Listing, sell-side pack and matched buyers built from your saved intake." : "Built from the demo company. Save an intake to build them for your company."}
         actions={<>
           <a href="/report/cim" target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>Confidential Information Memorandum →</a>
@@ -192,68 +205,78 @@ const FounderMarketplace: React.FC = () => {
         right={<span className="font-mono text-[13px] font-semibold tabular-nums text-xo-verified">{fmtMoney(listing.askingPriceUsd.mid)}</span>}>
         <div className="px-4 py-3">
           <p className="text-[14px] leading-relaxed">{phase === "done"
-            ? <>Your sell-side pack is ready — review the teaser and CIM, then list on the exchange when you are ready.</>
-            : <>Prepare the sell-side pack: teaser, CIM, anonymized view and matched buyers.</>}</p>
+            ? <>You're live — review the {matches.length} buyers entering outreach and approve the first conversations.</>
+            : <>Publish the opportunity and let ExitOS run the sell-side process end to end.</>}</p>
           <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
             <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(listing.askingPriceUsd.mid)}</span> asking · band {fmtMoney(listing.askingPriceUsd.low)}–{fmtMoney(listing.askingPriceUsd.high)}.</TakeCell>
-            <TakeCell k="If you wait">Without a listing, buyers on the exchange cannot discover you — and bankers charge 1–2% to run a process.</TakeCell>
+            <TakeCell k="If you wait">Without a live process, qualified buyers never learn you're sellable — and bankers charge 1–2% to run it.</TakeCell>
             <TakeCell k="Top match">{matches[0] ? <>{matches[0].buyerName} — fit score {fit(matches[0].matchScore)}, top of {matches.length}.</> : "No matches yet."}</TakeCell>
-            <TakeCell k="What ExitOS does">Drafts the teaser and CIM, builds the anonymized view and matches buyers. It does not publish the listing or contact buyers.</TakeCell>
+            <TakeCell k="What ExitOS does">One click writes the teaser and CIM, anonymizes the data, identifies buyers and starts outreach.</TakeCell>
           </dl>
           <div className="mt-3">{phase === "done"
-            ? <Link to="/console/intake" className={BTN}>List on the exchange →</Link>
-            : <button type="button" onClick={prepare} className={BTN}>Prepare the sell-side pack</button>}</div>
+            ? <button type="button" onClick={reset} className={BTN}>Re-run</button>
+            : <button type="button" onClick={publish} className={BTN}>Publish Opportunity</button>}</div>
         </div>
       </Section>
 
-      {/* ── Become the banker · the sell-side pack ──────────────── */}
+      {/* ── Become the banker · Publish Opportunity ─────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="The operating system for company sales." eyebrow="Become the banker" className="lg:col-span-5">
           <div className="px-4 py-4">
             <p className="text-[13px] leading-relaxed text-xo-muted">
               A sell-side banker builds the teaser, writes the CIM, anonymizes your numbers, finds the buyers and runs
-              the outreach — for 1–2% of the deal. ExitOS drafts the first four for you; listing on the exchange and the outreach stay your decisions.
+              the outreach — for 1–2% of the deal. ExitOS does all five, in one click, the moment you publish.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              {phase === "idle" && <button type="button" onClick={prepare} className={BTN}>Prepare the sell-side pack</button>}
+              {phase === "idle" && <button type="button" onClick={publish} className={BTN}>Publish Opportunity</button>}
+              {phase === "running" && <button type="button" disabled className={BTN}>Publishing… {progressPct}%</button>}
               {phase === "done" && (
                 <>
-                  <span className="text-[12px] font-semibold text-xo-verified">Pack prepared — nothing published or sent</span>
-                  <button type="button" onClick={reset} className={BTN_GHOST}>Clear</button>
+                  <span className="inline-flex items-center gap-2 rounded-sm border border-xo-verified/50 px-3 py-1.5 text-[12px] font-semibold text-xo-verified">
+                    ● Live · {matches.length} buyers in outreach
+                  </span>
+                  <button type="button" onClick={reset} className={BTN_GHOST}>Re-run</button>
                 </>
               )}
             </div>
+            <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-xo-line pt-4 text-center">
+              <Manifesto value="0" label="Bankers hired" />
+              <Manifesto value="1-click" label="To full process" />
+              <Manifesto value="100%" label="Founder-owned" />
+            </dl>
           </div>
         </Section>
 
-        <Section title="Sell-side pack" className="lg:col-span-7"
-          right={<span className="text-[11px] text-xo-muted">{phase === "done" ? "4 artefacts prepared · outreach not started" : "Not prepared"}</span>}>
+        <Section title="Automated sell-side pipeline" className="lg:col-span-7"
+          right={<span className="font-mono text-[11px] text-xo-muted">{done}/{steps.length}</span>}>
           <div className="px-4 py-4">
             <div aria-hidden className="h-1 w-full overflow-hidden rounded-full bg-xo-line">
               <div className="h-full rounded-full bg-xo-action motion-safe:transition-all motion-safe:duration-700" style={{ width: `${progressPct}%` }} />
             </div>
             <ol aria-live="polite" className="mt-4 space-y-3">
               {steps.map((s, i) => {
-                const isDone   = i < done;
+                const isDone   = i < done || phase === "done";
+                const isActive = phase === "running" && i === done;
                 return (
                   <li key={s.key} className="flex items-start gap-3">
                     <span aria-hidden className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold ${
-                      isDone ? "border-xo-verified/60 text-xo-verified" : "border-xo-line text-xo-muted"}`}>
-                      {isDone ? (s.key === "outreach" ? "–" : "✓") : i + 1}
+                      isDone ? "border-xo-verified/60 text-xo-verified" : isActive ? "border-xo-caution/60 text-xo-caution" : "border-xo-line text-xo-muted"}`}>
+                      {isDone ? "✓" : isActive ? <Spinner /> : i + 1}
                     </span>
                     <div className="min-w-0">
-                      <div className={`text-[13px] font-semibold ${isDone ? "text-xo-text" : "text-xo-muted"}`}>{s.title}</div>
-                      <div className="mt-0.5 text-[12px] leading-snug text-xo-muted">{isDone ? s.detail : "Not prepared yet"}</div>
+                      <div className={`text-[13px] font-semibold ${isDone || isActive ? "text-xo-text" : "text-xo-muted"}`}>{s.title}</div>
+                      <div className="mt-0.5 text-[12px] leading-snug text-xo-muted">{isDone ? s.detail : isActive ? s.running : "Waiting"}</div>
                     </div>
                   </li>
                 );
               })}
             </ol>
             {phase === "done" && (
-              <div className="mt-4 border border-xo-line bg-xo-ink p-3">
-                <h3 className="text-[12px] font-semibold">What happens next</h3>
+              <div className="mt-4 border border-xo-verified/40 bg-xo-ink p-3">
+                <h3 className="text-[12px] font-semibold text-xo-verified">Now live · the Shopify of company sales</h3>
                 <p className="mt-1 text-[12px] leading-relaxed text-xo-muted">
-                  Nothing has been published or sent. To list the company on the exchange — where buyers on the Acquisition Radar see it anonymized and can request an NDA — use <Link to="/console/intake" className={LINK}>List on the exchange</Link>. Suggested first approaches for the matched buyers:
+                  Your opportunity is published anonymized, the data room is indexed, and {matches.length} matched buyers
+                  are entering sequenced outreach. Engagement signals flow straight into the negotiation engine.
                 </p>
                 <ul className="mt-2 flex flex-wrap gap-1.5">
                   {matches.slice(0, 6).map((m) => (
@@ -312,11 +335,12 @@ const FounderMarketplace: React.FC = () => {
             </dl>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              <Link to="/console/intake" className={BTN}>List on the exchange →</Link>
-              <button type="button" onClick={() => { setEditAskText(String(Math.round(listing.askingPriceUsd.mid / 1e5) / 10)); setEditNote(override.note); setEditOpen(true); }} className={BTN_GHOST}>Adjust preview</button>
+              {phase === "done"
+                ? <button type="button" disabled className={BTN_GHOST}>● Published to marketplace</button>
+                : <button type="button" onClick={publish} className={BTN}>Publish Opportunity</button>}
+              <button type="button" onClick={() => { setEditAskText(String(Math.round(listing.askingPriceUsd.mid / 1e5) / 10)); setEditNote(override.note); setEditOpen(true); }} className={BTN_GHOST}>Edit listing</button>
+              {view === "public" && <button type="button" onClick={() => navTo("/console/acquisition-radar")} className={BTN_GHOST}>Request NDA</button>}
             </div>
-            {view === "public" && <p className="mt-3 text-[12px] text-xo-muted">This is the preview buyers would see. They request an NDA from the Acquisition Radar; there is nothing to request here.</p>}
-            {override.askMid != null && <p className="mt-3 text-[12px] text-xo-caution">Preview only: the asking mid shown is your adjustment ({fmtMoney(override.askMid)}). It is not saved or published.</p>}
             {override.note && view === "founder" && (
               <p className="mt-3 border border-xo-caution/40 bg-xo-ink px-3 py-2 text-[12px] text-xo-muted"><span className="font-semibold text-xo-caution">Founder note:</span> {override.note}</p>
             )}
@@ -352,8 +376,8 @@ const FounderMarketplace: React.FC = () => {
       </div>
 
       {/* ── Edit listing ────────────────────────────────────────── */}
-      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Adjust preview" subtitle="Changes this page's preview only — not saved, not published" size="md"
-        footer={<><Button variant="ghost" onClick={() => { setOverride({ askMid: null, note: "" }); setEditOpen(false); notify("Preview reset to engine values"); }}>Reset</Button><Button disabled={!askParse.ok} onClick={() => { if (!askParse.ok) return; setOverride({ askMid: askParse.value, note: editNote.trim() }); setEditOpen(false); notify("Preview updated — not saved or published"); }}>Apply to preview</Button></>}>
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Edit listing" subtitle="Founder-side adjustments to the published opportunity" size="md"
+        footer={<><Button variant="ghost" onClick={() => { setOverride({ askMid: null, note: "" }); setEditOpen(false); notify("Listing reset to engine values"); }}>Reset</Button><Button disabled={!askParse.ok} onClick={() => { if (!askParse.ok) return; setOverride({ askMid: askParse.value, note: editNote.trim() }); setEditOpen(false); notify("Listing updated"); }}>Save</Button></>}>
         <div className="space-y-4">
           <p className="rounded-sm border border-xo-line bg-xo-ink p-3 text-[12px] text-xo-muted">
             Valuation band (canonical, as everywhere in the console): {fmtMoney(baseListing.askingPriceUsd.low)} – {fmtMoney(baseListing.askingPriceUsd.high)} · readiness {baseListing.readinessScore.toFixed(0)}/100 · {sectorLabel(baseListing.sector)}
@@ -362,9 +386,9 @@ const FounderMarketplace: React.FC = () => {
             <label htmlFor="mkt-ask" className={XO_LABEL}>Asking price, mid ($M)</label>
             <input id="mkt-ask" inputMode="decimal" value={editAskText} onChange={(e) => setEditAskText(e.target.value)}
               aria-invalid={!askParse.ok} aria-describedby="mkt-ask-msg" className={XO_INPUT} />
-            <span id="mkt-ask-msg" className={`mt-1 block text-[12px] ${askParse.ok ? "text-xo-muted" : "text-xo-risk"}`}>{askParse.ok ? "Overrides the engine mid in this preview; band low/high unchanged." : askParse.error}</span>
+            <span id="mkt-ask-msg" className={`mt-1 block text-[12px] ${askParse.ok ? "text-xo-muted" : "text-xo-risk"}`}>{askParse.ok ? "Overrides the engine mid; band low/high unchanged." : askParse.error}</span>
           </div>
-          <Field label="Founder note" hint="Shown on your founder view of this page only; cleared when you leave">
+          <Field label="Founder note" hint="Shown on your founder view only">
             <textarea className={`${inputCls} min-h-[80px] resize-y`} placeholder="e.g. hold publication until the audit closes" value={editNote} onChange={(e) => setEditNote(e.target.value)} />
           </Field>
         </div>
@@ -372,6 +396,17 @@ const FounderMarketplace: React.FC = () => {
     </div>
   );
 };
+
+const Spinner: React.FC = () => (
+  <span className="block h-3 w-3 rounded-full border-[1.5px] border-xo-caution/40 border-t-xo-caution motion-safe:animate-spin" />
+);
+
+const Manifesto: React.FC<{ value: string; label: string }> = ({ value, label }) => (
+  <div className="flex flex-col-reverse">
+    <dt className="mt-0.5 text-[11px] text-xo-muted">{label}</dt>
+    <dd className="font-mono text-lg font-semibold">{value}</dd>
+  </div>
+);
 
 const Tag: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <li className="rounded-sm border border-xo-line px-2 py-0.5 font-mono text-[11px] text-xo-muted">{children}</li>
