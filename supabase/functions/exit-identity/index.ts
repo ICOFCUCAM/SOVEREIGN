@@ -1,7 +1,7 @@
 // ExitOS · identity verification before listing a company.
 //
-//   GET                                   which methods are switched on, and the caller's current verification
-//   POST { action: "start", provider, returnUrl }   begin: returns the provider's URL to send the founder to
+//   GET                                   each method: switched on, and where it is offered; the caller's current verification
+//   POST { action: "start", provider, returnUrl, country }   begin (country = of the identity document or eID); returns the provider URL
 //   POST { action: "complete", code, state }        finish an eID sign-in (OIDC authorization-code flow)
 //   POST { action: "refresh" }                      re-read the caller's latest Stripe Identity session
 //
@@ -40,6 +40,14 @@ const EIDS: Record<string, string> = {
   nl_idin: 'urn:grn:authn:nl:idin',
   de_eid: '', fr_franceconnect: '', ee_smartid: '',   // broker-specific: set IDENTITY_ACR_<ID>
 };
+// where each method is offered (ISO 3166-1 alpha-2); [] = worldwide. A national eID can only be held by
+// someone its scheme has enrolled; the provider enforces that, this list only keeps the offer honest.
+const ELIGIBLE: Record<string, string[]> = {
+  stripe_identity: [],
+  no_bankid: ['NO'], se_bankid: ['SE'], dk_mitid: ['DK'], fi_ftn: ['FI'], be_itsme: ['BE', 'NL', 'LU'],
+  nl_idin: ['NL'], de_eid: ['DE'], fr_franceconnect: ['FR'], ee_smartid: ['EE', 'LV', 'LT'],
+};
+const eligibleIn = (id: string, country: string): boolean => (ELIGIBLE[id] ?? []).length === 0 || (ELIGIBLE[id] ?? []).includes(country);
 const VALID_YEARS = 2;
 const PENDING_MINUTES = 30;
 const env = (k: string) => Deno.env.get(k) ?? '';
@@ -82,7 +90,10 @@ Deno.serve(async (req) => {
     return { status: 'verified', country, subject_hash: subjectHash, verified_at: now.toISOString(), expires_at: until.toISOString(), failure: null };
   };
 
-  if (req.method === 'GET') return json(200, { ok: true, providers: enabledProviders(), verification: await current() });
+  if (req.method === 'GET') {
+    const on = enabledProviders();
+    return json(200, { ok: true, providers: on, methods: Object.keys(ELIGIBLE).map((id) => ({ id, configured: !!on[id], countries: ELIGIBLE[id] })), verification: await current() });
+  }
   if (req.method !== 'POST') return json(405, { ok: false, error: 'method not allowed' });
 
   let body: Record<string, unknown>;
@@ -94,6 +105,9 @@ Deno.serve(async (req) => {
     const provider = String(body.provider ?? '');
     if (!(provider in enabled)) return json(400, { ok: false, error: 'unknown verification method' });
     if (!enabled[provider]) return json(409, { ok: false, error: 'this verification method is not available yet' });
+    const country = String(body.country ?? '').toUpperCase();
+    if (!/^[A-Z]{2}$/.test(country)) return json(400, { ok: false, error: 'the country of your identity document or eID is required' });
+    if (!eligibleIn(provider, country)) return json(409, { ok: false, error: 'this method is not offered for that country' });
     // the founder comes back to the page they started from, on the same site only
     let back: URL;
     try { back = new URL(String(body.returnUrl ?? '')); } catch { return json(400, { ok: false, error: 'returnUrl required' }); }

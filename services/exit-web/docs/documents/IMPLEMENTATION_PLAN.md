@@ -930,3 +930,17 @@ The product as a whole is not production-ready until:
 - Browser (development build): all three stages at 1440 px and 390 px (no horizontal overflow); publish disabled until identity and every required field are present; invalid asking price flagged with `aria-invalid`; focus moves to the stage heading on each change; every control tested shows a focus ring; the action bar's status line is a live region.
 
 **Honest state.** No verification method is operational yet (no provider credentials are configured). The development-only "mark verified for testing" facility exists only in builds without e-mail sign-in and without a server account; it changes nothing on the server, and the live exchange refuses a listing without a provider-confirmed identity.
+
+
+## 16. Increment report — listing desk refinement (identity country, method selection, stage validation)
+
+**Two countries, kept apart.** The listing's `basedIn` ("Country of operation", public listing data, stored as the country's English name as before) is unchanged in meaning. The country that decides which identity methods apply — the country of the founder's identity document or eID — is new, private, kept only in this browser (`exitos.identity-country.v1`), never written to the listing, and sent to `exit-identity` only when a verification starts. The picker starts at the United States.
+
+**Changes**
+- Countries: `src/lib/countries.ts` — every ISO 3166-1 country and territory with a flag (256 entries, English names from the browser's CLDR data), search by name, word, alias, accents and code; flags from `country-flag-icons` as separate SVG files fetched only when shown (`vite.config.ts` keeps them out of the bundle).
+- `src/components/CountrySelect.tsx`: a WAI-ARIA combobox — search field, flags, Arrow/Page/Home/End/Enter/Escape, selected and active states, visible focus, result count announced.
+- Identity: `methodOptions` derives each method's standing from the server (`configured`) and the identity-document country (`eligible`, from the server's list). Only configured and eligible methods are selectable (radio list with eligibility, requirements, next step and the action); everything else is a quiet line without a control. With nothing configured the page says so.
+- Development facility: compiled only into the Vite development server (`import.meta.env.DEV`); the production bundle contains none of it (checked: 0 occurrences).
+- Desk: buyer preview reduced to a compact secondary block with "Not set" / "Not confirmed" gaps; action bar shows Identity and Company profile as separate requirement groups; "Continue to review" and the review stage stay locked until identity is established and the profile is complete.
+
+**Results**: web 69 files, 420 tests; lint, typecheck, build clean. Browser (development server): country search, keyboard selection and Escape; nothing actionable while no method is configured; stage gating; validation (summary length, zero price); identity country absent from the listing draft; 390 px with no horizontal overflow; publish with the development test identity saves to this browser only.

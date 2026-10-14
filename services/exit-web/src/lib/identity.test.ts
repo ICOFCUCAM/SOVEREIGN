@@ -20,10 +20,10 @@ describe("identity verification (client)", () => {
   });
   it("calls the function with the caller's token and returns the provider URL", async () => {
     let seen: RequestInit | undefined;
-    const url = await startVerification(remote((u, init) => { seen = init; expect(u).toBe("https://x.supabase.co/functions/v1/exit-identity"); return { status: 200, body: { ok: true, url: "https://verify.stripe.com/s/1" } }; }), "stripe_identity", "https://app/console/intake");
+    const url = await startVerification(remote((u, init) => { seen = init; expect(u).toBe("https://x.supabase.co/functions/v1/exit-identity"); return { status: 200, body: { ok: true, url: "https://verify.stripe.com/s/1" } }; }), "stripe_identity", "https://app/console/intake", "NO");
     expect(url).toBe("https://verify.stripe.com/s/1");
     expect((seen?.headers as Record<string, string>).Authorization).toBe("Bearer tok");
-    expect(JSON.parse(String(seen?.body))).toEqual({ action: "start", provider: "stripe_identity", returnUrl: "https://app/console/intake" });
+    expect(JSON.parse(String(seen?.body))).toEqual({ action: "start", provider: "stripe_identity", returnUrl: "https://app/console/intake", country: "NO" });
   });
   it("surfaces the server's refusal", async () => {
     await expect(identityStatus(remote(() => ({ status: 401, body: { ok: false, error: "sign in to verify your identity" } })))).rejects.toThrow("sign in to verify your identity");

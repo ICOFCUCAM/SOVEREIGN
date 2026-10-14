@@ -439,6 +439,8 @@ Deployed 14 October 2026 to `qvjdivcdefuprnenedje`.
 - Not tested: a successful Stripe session or eID sign-in (needs the provider accounts), and an authenticated browser call from the deployed site (CORS preflight with JWT verification on).
 - The default `acr_values` are Criipto's; another broker needs `IDENTITY_ACR_<ID>` per eID. German eID, FranceConnect and Smart-ID have no default and stay unavailable until one is set.
 
+**exit-identity v2** (deployed 14 October 2026): GET also returns `methods` — each method with `configured` (its credentials are set) and the countries it is offered for (`[]` = worldwide). `start` now requires the country of the founder's identity document or eID (ISO code) and refuses a method not offered there (409). Live: an unauthenticated call still returns 401. No method is configured, so every method still reports `configured: false`.
+
 **Rollback**: see the header of `20261014160000_exitos_identity_verification.sql`; `drop function public.exitos_selftest_identity_gate();` removes the self-test.
 
 ## Rollback

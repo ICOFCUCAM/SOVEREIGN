@@ -5,6 +5,8 @@ import {
   SUMMARY_MIN, SUMMARY_MAX, REASON_MAX, missingFacts, splitList, askingText, type ListingFacts,
 } from "../lib/listing-facts";
 import { parseNumber } from "../lib/intake-fields";
+import { CountrySelect } from "./CountrySelect";
+import { findCountry, countryByCode } from "../lib/countries";
 
 // ── LISTING FACTS · the buyer's card and the founder's form ─────────
 // One set of questions, answered once by the founder and read by every buyer: what the business
@@ -185,10 +187,16 @@ export const ListingFactsForm: React.FC<{ value: Partial<ListingFacts>; onChange
               onChange={(e) => { setTexts((t) => ({ ...t, builtWith: e.target.value })); set("builtWith", splitList(e.target.value)); }} />
             <span id="lf-built-hint" className={`mt-1 block text-[11px] ${T.faint}`}>Separate with commas.</span>
           </div>
-          <div>
-            <label htmlFor="lf-based" className={T.label}>Country of operation</label>
-            <input id="lf-based" className={T.input} maxLength={60} value={v.basedIn ?? ""} onChange={(e) => set("basedIn", e.target.value)} placeholder="Norway" />
-          </div>
+          {porcelain ? (
+            // stored as the country's English name, as listings always have
+            <CountrySelect id="lf-based" label="Country of operation" value={findCountry(v.basedIn)?.code}
+              onChange={(code) => set("basedIn", countryByCode(code)?.name ?? code)} hint="Where the company operates or is incorporated. Shown to buyers." />
+          ) : (
+            <div>
+              <label htmlFor="lf-based" className={T.label}>Country of operation</label>
+              <input id="lf-based" className={T.input} maxLength={60} value={v.basedIn ?? ""} onChange={(e) => set("basedIn", e.target.value)} placeholder="Norway" />
+            </div>
+          )}
           {!context && (
             <div>
               <label htmlFor="lf-region" className={T.label}>Region</label>

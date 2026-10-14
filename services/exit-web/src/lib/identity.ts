@@ -1,4 +1,5 @@
 import type { Remote } from "./documents/store";
+import { findCountry } from "./countries";
 
 // ── IDENTITY VERIFICATION (client) ──────────────────────────────────
 // A founder proves who they are before listing a company. The flows run in the exit-identity
@@ -40,16 +41,8 @@ export const providerLabel = (id: string): string => {
   return p.countries.length === 1 && (p.id === "no_bankid" || p.id === "se_bankid") ? `${p.name} ${p.countries[0] === "NO" ? "Norway" : "Sweden"}` : p.name;
 };
 
-const COUNTRY_CODE: Record<string, string> = {
-  norway: "NO", norge: "NO", sweden: "SE", sverige: "SE", denmark: "DK", danmark: "DK", finland: "FI", suomi: "FI",
-  belgium: "BE", netherlands: "NL", "the netherlands": "NL", holland: "NL", luxembourg: "LU", germany: "DE", deutschland: "DE",
-  france: "FR", estonia: "EE", latvia: "LV", lithuania: "LT",
-};
-/** "Norway" or "NO" → "NO"; anything unrecognised → undefined. */
-export const countryCode = (country: string | undefined): string | undefined => {
-  const k = (country ?? "").trim().toLowerCase();
-  return k.length === 2 ? k.toUpperCase() : COUNTRY_CODE[k];
-};
+/** "Norway", "UK" or "NO" → the ISO code; anything unrecognised → undefined. */
+export const countryCode = (country: string | undefined): string | undefined => findCountry(country)?.code;
 
 /** The methods to show a founder based in `country`: their national eIDs first, then the rest, Stripe Identity always offered. */
 export function providersFor(country: string | undefined): { suggested: ProviderInfo[]; other: ProviderInfo[] } {
@@ -79,7 +72,28 @@ export function pathwayState(id: IdentityProvider, s: { hasServer: boolean; chec
 }
 
 export interface Verification { readonly provider: IdentityProvider; readonly status: string; readonly country: string | null; readonly verified_at: string; readonly expires_at: string }
-export interface IdentityStatus { readonly providers: Partial<Record<IdentityProvider, boolean>>; readonly verification: Verification | null }
+/** One method as the server reports it: switched on (credentials configured) and where it is offered ([] = worldwide). */
+export interface ServerMethod { readonly id: IdentityProvider; readonly configured: boolean; readonly countries: readonly string[] }
+export interface IdentityStatus { readonly providers: Partial<Record<IdentityProvider, boolean>>; readonly methods?: readonly ServerMethod[]; readonly verification: Verification | null }
+
+export interface MethodOption { readonly info: ProviderInfo; readonly configured: boolean; readonly eligible: boolean }
+
+/**
+ * Every method with its real standing for a seller whose identity document or eID is from `country`:
+ * configured comes only from the server (nothing is configured without one); eligibility from the
+ * server's own list when it sent one. Eligible methods first, national eIDs before the worldwide one.
+ */
+export function methodOptions(status: IdentityStatus | null, country: string | undefined): MethodOption[] {
+  const cc = countryCode(country);
+  const server = new Map((status?.methods ?? []).map((m) => [m.id, m]));
+  const opts = IDENTITY_PROVIDERS.map((info) => {
+    const m = server.get(info.id);
+    const where = m ? m.countries : info.countries;
+    return { info, configured: m ? m.configured : !!status?.providers[info.id], eligible: !!cc && (where.length === 0 || where.includes(cc)) };
+  });
+  const rank = (o: MethodOption): number => (o.eligible ? 0 : 2) + (o.info.countries.length === 0 ? 1 : 0);
+  return opts.sort((a, b) => rank(a) - rank(b));
+}
 
 const endpoint = (r: Remote): string => `${r.url}/functions/v1/exit-identity`;
 const h = (r: Remote): Record<string, string> => ({ apikey: r.anonKey, Authorization: `Bearer ${r.accessToken}`, "content-type": "application/json" });
@@ -103,8 +117,8 @@ export async function latestAttempt(r: Remote): Promise<Attempt | null> {
 export const identityStatus = (r: Remote): Promise<IdentityStatus> => call<IdentityStatus>(r, undefined, "Checking your verification");
 
 /** Start a verification; resolves to the provider URL the founder is sent to. */
-export async function startVerification(r: Remote, provider: IdentityProvider, returnUrl: string): Promise<string> {
-  const b = await call<{ url: string }>(r, { method: "POST", body: JSON.stringify({ action: "start", provider, returnUrl }) }, "Starting verification");
+export async function startVerification(r: Remote, provider: IdentityProvider, returnUrl: string, country: string): Promise<string> {
+  const b = await call<{ url: string }>(r, { method: "POST", body: JSON.stringify({ action: "start", provider, returnUrl, country }) }, "Starting verification");
   return b.url;
 }
 

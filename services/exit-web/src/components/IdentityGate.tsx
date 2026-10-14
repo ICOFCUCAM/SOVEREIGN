@@ -1,23 +1,25 @@
 import React, { useCallback, useEffect, useState } from "react";
 import type { Remote } from "../lib/documents/store";
 import {
-  identityStatus, startVerification, completeEid, refreshStripe, latestAttempt, providersFor, providerLabel, pathwayState,
-  type IdentityProvider, type IdentityStatus, type ProviderInfo, type Attempt, type PathwayState,
+  identityStatus, startVerification, completeEid, refreshStripe, latestAttempt, providerLabel, pathwayState, methodOptions, countryCode,
+  type IdentityProvider, type IdentityStatus, type ProviderInfo, type Attempt, type PathwayState, type MethodOption,
 } from "../lib/identity";
+import { countryByCode } from "../lib/countries";
+import { Flag } from "./CountrySelect";
 
 // ── SELLER IDENTITY ─────────────────────────────────────────────────
-// The founder chooses a verification pathway (their national eID first, Stripe Identity worldwide),
-// completes it with the provider and returns. Every state shown here comes from the server: which
-// methods are switched on (exit-identity), the current verification and the latest attempt (the
-// founder's own rows). Nothing on this page can mark anyone verified, and the database refuses a
-// listing without a verification it holds itself.
+// The founder states the country of their identity document or eID, and is offered the methods the
+// server reports as switched on and offered there. Every state shown comes from the server: which
+// methods are configured and where (exit-identity), the current verification, the latest attempt
+// (the founder's own rows). Nothing here can mark anyone verified; the database refuses a listing
+// without a verification it holds itself.
 //
-// A development build has no server. It keeps one isolated test facility — marking the session
-// verified locally so the listing flow can be tried — which only exists in builds without e-mail
-// sign-in and without a server account; a listing made that way stays in the browser.
+// The development test facility (marking a session verified locally, so the flow can be tried) is
+// compiled only into the Vite development server (import.meta.env.DEV) and only without a server
+// account. Production builds do not contain it.
 
-const DEV_BUILD = import.meta.env.VITE_EXITOS_AUTH !== "email_link";
-const DEV_KEY = "exitos.identity.dev.v1";
+// a compile-time constant: in a production build every branch guarded by it is removed from the bundle
+const DEV_TOOLS = import.meta.env.DEV;
 export const longDate = (iso: string): string => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
 /** Query parameters a provider sends the founder back with. */
@@ -30,15 +32,24 @@ export interface SellerIdentity { readonly provider: string; readonly verifiedAt
 
 export interface IdentityState {
   readonly identity: SellerIdentity | null;
-  readonly stateOf: (id: IdentityProvider) => PathwayState;
+  readonly options: (country: string | undefined) => MethodOption[];
+  readonly stateOf: (id: IdentityProvider, configured: boolean) => PathwayState;
   readonly latest: Attempt | null;
   readonly hasServer: boolean;
+  readonly checked: boolean;
   readonly busy: string | null;
   readonly error: string | null;
-  readonly start: (p: ProviderInfo) => void;
+  readonly start: (p: ProviderInfo, country: string) => void;
   readonly checkStripe: () => void;
   readonly devTools: { readonly mark: (provider: IdentityProvider) => void; readonly clear: () => void } | null;
 }
+
+// development server only: a test identity held in this tab; the production build replaces this with no-ops
+const devTestIdentity = DEV_TOOLS ? {
+  load: (): SellerIdentity | null => { try { return JSON.parse(sessionStorage.getItem("exitos.identity.dev.v1") ?? "null") as SellerIdentity | null; } catch { return null; } },
+  mark: (provider: IdentityProvider): SellerIdentity => { const d: SellerIdentity = { provider, verifiedAt: new Date().toISOString(), local: true }; try { sessionStorage.setItem("exitos.identity.dev.v1", JSON.stringify(d)); } catch { /* this visit only */ } return d; },
+  clear: (): void => { try { sessionStorage.removeItem("exitos.identity.dev.v1"); } catch { /* nothing stored */ } },
+} : { load: (): SellerIdentity | null => null, mark: (): SellerIdentity | null => null, clear: (): void => undefined };
 
 /** The founder's verification: loads it, finishes a flow they return from, and starts new ones. */
 export function useIdentity(remote: Remote | undefined): IdentityState {
@@ -47,9 +58,7 @@ export function useIdentity(remote: Remote | undefined): IdentityState {
   const [checked, setChecked] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [dev, setDev] = useState<SellerIdentity | null>(() => {
-    try { return DEV_BUILD && !remote ? JSON.parse(sessionStorage.getItem(DEV_KEY) ?? "null") as SellerIdentity | null : null; } catch { return null; }
-  });
+  const [dev, setDev] = useState<SellerIdentity | null>(() => (DEV_TOOLS && !remote ? devTestIdentity.load() : null));
 
   const reload = useCallback(async (r: Remote): Promise<void> => {
     const [s, a] = await Promise.all([identityStatus(r), latestAttempt(r)]);
@@ -85,22 +94,23 @@ export function useIdentity(remote: Remote | undefined): IdentityState {
   const v = status?.verification ?? null;
   return {
     identity: v ? { provider: v.provider, verifiedAt: v.verified_at, until: v.expires_at } : dev,
-    stateOf: (id) => pathwayState(id, { hasServer: !!remote, checked, available: !!status?.providers[id], current: v, latest }),
-    latest, hasServer: !!remote, busy, error,
-    start: (p) => {
+    options: (country) => methodOptions(status, country),
+    stateOf: (id, configured) => pathwayState(id, { hasServer: !!remote, checked, available: configured, current: v, latest }),
+    latest, hasServer: !!remote, checked: !remote || checked, busy, error,
+    start: (p, country) => {
       if (!remote) return;
       setError(null); setBusy(`Opening ${providerLabel(p.id)}…`);
       const back = new URL(window.location.href); back.search = "";
-      startVerification(remote, p.id, back.toString()).then((url) => window.location.assign(url), (e: Error) => { setError(e.message); setBusy(null); });
+      startVerification(remote, p.id, back.toString(), country).then((url) => window.location.assign(url), (e: Error) => { setError(e.message); setBusy(null); });
     },
     checkStripe: () => {
       if (!remote) return;
       setError(null); setBusy("Checking with Stripe…");
       refreshStripe(remote).then(() => reload(remote)).catch((e: Error) => setError(e.message)).finally(() => setBusy(null));
     },
-    devTools: DEV_BUILD && !remote ? {
-      mark: (provider) => { const d: SellerIdentity = { provider, verifiedAt: new Date().toISOString(), local: true }; try { sessionStorage.setItem(DEV_KEY, JSON.stringify(d)); } catch { /* this visit only */ } setDev(d); },
-      clear: () => { try { sessionStorage.removeItem(DEV_KEY); } catch { /* nothing stored */ } setDev(null); },
+    devTools: DEV_TOOLS && !remote ? {
+      mark: (provider) => setDev(devTestIdentity.mark(provider)),
+      clear: () => { devTestIdentity.clear(); setDev(null); },
     } : null,
   };
 }
@@ -108,138 +118,114 @@ export function useIdentity(remote: Remote | undefined): IdentityState {
 // ── presentation ────────────────────────────────────────────────────
 
 const MUTED = "text-[#8A8378]";
+const PRIMARY = "inline-flex items-center gap-2 rounded-ex-xs bg-ex-graphite px-5 py-3 text-[13.5px] font-semibold text-ex-ivory transition hover:bg-[#111310] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:opacity-50";
+const SECONDARY = "inline-flex items-center gap-2 rounded-ex-xs border border-ex-graphite/70 px-5 py-3 text-[13.5px] font-semibold text-ex-graphite transition hover:bg-ex-porcelain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze disabled:opacity-50";
 
-/** Norway's flag, drawn: a country marker for the Norwegian pathway (not a provider logo). */
-const NorwayFlag: React.FC = () => (
-  <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden className="shrink-0 rounded-[1px] ring-1 ring-black/10">
-    <rect width="22" height="16" fill="#BA0C2F" /><rect x="6" width="4" height="16" fill="#fff" /><rect y="6" width="22" height="4" fill="#fff" />
-    <rect x="7" width="2" height="16" fill="#00205B" /><rect y="7" width="22" height="2" fill="#00205B" />
-  </svg>
-);
-const CountryCode: React.FC<{ code: string }> = ({ code }) => (
-  <span aria-hidden className="grid h-4 min-w-[22px] place-items-center rounded-[1px] border border-[#CFC6B7] px-1 text-[9px] font-semibold tracking-[0.08em] text-ex-slate-ink">{code}</span>
-);
-/** Document and face, drawn: the document-and-selfie pathway. */
-const DocumentMark: React.FC<{ muted?: boolean }> = ({ muted }) => (
-  <svg width="56" height="40" viewBox="0 0 56 40" aria-hidden className={muted ? "opacity-50" : ""}>
-    <rect x="1" y="4" width="36" height="24" rx="2" fill="none" stroke="#242522" strokeWidth="1.2" />
-    <circle cx="11" cy="14" r="4" fill="none" stroke="#B49A75" strokeWidth="1.2" /><path d="M5 24c1.5-3.5 10.5-3.5 12 0" fill="none" stroke="#B49A75" strokeWidth="1.2" />
-    <path d="M21 12h11M21 16h11M21 20h7" stroke="#242522" strokeWidth="1" />
-    <circle cx="46" cy="22" r="8.5" fill="#F5F1E9" stroke="#242522" strokeWidth="1.2" /><circle cx="46" cy="20" r="2.6" fill="none" stroke="#242522" strokeWidth="1.1" />
-    <path d="M41.5 27c1.2-2.6 7.8-2.6 9 0" fill="none" stroke="#242522" strokeWidth="1.1" />
-  </svg>
+/** Where a method works, as the founder reads it: a flag for a single country, a globe-free word otherwise. */
+const Where: React.FC<{ p: ProviderInfo }> = ({ p }) => (
+  <span className={`inline-flex items-center gap-1.5 text-[11.5px] ${MUTED}`}>
+    {p.countries.length === 1 ? <Flag code={p.countries[0]!} /> : null}{p.region}
+  </span>
 );
 
-const STATE_TEXT: Record<PathwayState, string> = {
-  checking: "Checking availability", unavailable: "Not yet available", available: "Available",
-  in_progress: "In progress", verified: "Verified", failed: "Not completed", expired: "Expired",
-};
-const StatePill: React.FC<{ state: PathwayState }> = ({ state }) => {
-  const tone = state === "verified" ? "border-ex-graphite bg-ex-graphite text-ex-ivory"
-    : state === "available" || state === "in_progress" ? "border-ex-bronze/70 text-ex-bronze-ink"
-    : state === "failed" || state === "expired" ? "border-[#B9806F] text-[#8E3B28]"
-    : `border-[#D9D0C1] ${MUTED}`;
-  return (
-    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] ${tone}`}>
-      {state === "checking" && <span aria-hidden className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9C1B4]" />}
-      {state === "in_progress" && <span aria-hidden className="h-1.5 w-1.5 animate-pulse rounded-full bg-ex-bronze" />}
-      {state === "verified" && <span aria-hidden>✓</span>}
-      {STATE_TEXT[state]}
+/** One operational method, selectable. */
+const MethodOptionRow: React.FC<{ o: MethodOption; selected: boolean; onSelect: () => void; state: PathwayState; name: string }> = ({ o, selected, onSelect, state, name }) => (
+  <label className={`flex cursor-pointer items-start gap-4 border-b border-[#E6DFD3] px-5 py-4 transition last:border-0 focus-within:bg-ex-porcelain/60 ${selected ? "bg-ex-porcelain/70 shadow-[inset_2px_0_0_0_#242522]" : "hover:bg-ex-porcelain/40"}`}>
+    <input type="radio" name={name} checked={selected} onChange={onSelect} className="mt-1.5 h-4 w-4 accent-[#242522] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze" />
+    <span className="min-w-0 flex-1">
+      <span className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <span className="font-editorial text-[19px] leading-tight text-ex-graphite">{providerLabel(o.info.id)}</span>
+        <Where p={o.info} />
+      </span>
+      <span className="mt-1 block text-[13px] leading-snug text-ex-slate-ink">{o.info.verifies}</span>
+      {state !== "available" && <span className="mt-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-ex-bronze-ink">{state === "in_progress" ? "In progress" : state === "failed" ? "Last attempt not completed" : state === "expired" ? "Expired" : state === "verified" ? "Verified" : ""}</span>}
     </span>
-  );
-};
+  </label>
+);
 
-const PRIMARY = "inline-flex items-center gap-2 rounded-ex-xs bg-ex-graphite px-4 py-2.5 text-[13px] font-semibold text-ex-ivory transition hover:bg-[#111310] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze focus-visible:ring-offset-2 focus-visible:ring-offset-ex-porcelain disabled:opacity-50";
-const SECONDARY = "inline-flex items-center gap-2 rounded-ex-xs border border-ex-graphite/70 px-4 py-2.5 text-[13px] font-semibold text-ex-graphite transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze focus-visible:ring-offset-2 focus-visible:ring-offset-ex-porcelain disabled:opacity-50";
-
-/** One verification pathway: who the provider is, what it establishes, its real state, and the next step. */
-const Pathway: React.FC<{ p: ProviderInfo; id: IdentityState; prominent?: boolean }> = ({ p, id, prominent }) => {
-  const state = id.stateOf(p.id);
-  const active = state !== "unavailable" && state !== "checking";
-  const national = p.id !== "stripe_identity";
-  const attempt = id.latest?.provider === p.id ? id.latest : null;
+/** The chosen method in detail, with its action. Only ever rendered for an operational, eligible method. */
+const MethodDetail: React.FC<{ o: MethodOption; id: IdentityState; country: string; state: PathwayState }> = ({ o, id, country, state }) => {
+  const attempt = id.latest?.provider === o.info.id ? id.latest : null;
   return (
-    <article aria-labelledby={`pw-${p.id}`}
-      className={`relative border-t-2 pt-5 ${active ? "border-ex-graphite" : "border-[#D9D0C1]"} ${prominent ? "" : "pb-2"}`}>
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          {p.id === "no_bankid" ? <NorwayFlag /> : national ? <CountryCode code={p.countries[0] ?? ""} /> : null}
-          <span className={`text-[10.5px] font-semibold uppercase tracking-[0.18em] ${MUTED}`}>{national ? `National eID · ${p.region}` : "Document and selfie · Worldwide"}</span>
-        </div>
-        <StatePill state={state} />
-      </header>
-
-      <div className="mt-4 flex items-start justify-between gap-6">
-        <div className="min-w-0">
-          <h4 id={`pw-${p.id}`} className={`font-editorial leading-tight ${prominent ? "text-[28px]" : "text-[22px]"} ${active ? "text-ex-graphite" : "text-[#7D766B]"}`}>
-            {p.id === "no_bankid" ? <>BankID <span className="italic text-ex-bronze-ink">Norway</span></> : providerLabel(p.id)}
-          </h4>
-          <p className={`mt-2 max-w-[46ch] text-[13.5px] leading-relaxed ${active ? "text-ex-slate-ink" : MUTED}`}>{p.verifies}</p>
-        </div>
-        {!national && <DocumentMark muted={!active} />}
-      </div>
-
-      <dl className="mt-5 grid gap-x-6 gap-y-2 text-[12.5px] sm:grid-cols-[120px_minmax(0,1fr)]">
-        <dt className={MUTED}>You will need</dt><dd className={active ? "text-ex-graphite" : MUTED}>{p.need}</dd>
-        <dt className={MUTED}>What happens next</dt><dd className={active ? "text-ex-graphite" : MUTED}>{p.next}</dd>
+    <div className="border-t border-ex-graphite/80 bg-white px-5 py-5">
+      <dl className="grid gap-x-8 gap-y-3 text-[13px] sm:grid-cols-[140px_minmax(0,1fr)]">
+        <dt className={MUTED}>Eligibility</dt><dd className="text-ex-graphite">Offered for identity documents and eIDs from {countryByCode(country)?.name ?? country}.</dd>
+        <dt className={MUTED}>What is required</dt><dd className="text-ex-graphite">{o.info.need}</dd>
+        <dt className={MUTED}>What happens next</dt><dd className="text-ex-graphite">{o.info.next}</dd>
       </dl>
-
-      <div className="mt-5 min-h-[44px]" aria-live="polite">
-        {state === "available" && <button type="button" className={PRIMARY} disabled={!!id.busy} onClick={() => id.start(p)}>Begin with {providerLabel(p.id)} <span aria-hidden>→</span></button>}
-        {state === "in_progress" && (
-          <div className="flex flex-wrap items-center gap-3">
-            {p.id === "stripe_identity"
-              ? <button type="button" className={PRIMARY} disabled={!!id.busy} onClick={id.checkStripe}>Check my result</button>
-              : <button type="button" className={SECONDARY} disabled={!!id.busy} onClick={() => id.start(p)}>Begin again</button>}
-            <span className="text-[12.5px] text-ex-slate-ink">Started {attempt ? new Date(attempt.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "recently"}. {p.id === "stripe_identity" ? "Stripe may still be reviewing your document." : "Complete it with the provider to return here verified."}</span>
-          </div>
-        )}
-        {state === "failed" && (
-          <div className="flex flex-wrap items-center gap-3">
-            <button type="button" className={SECONDARY} disabled={!!id.busy} onClick={() => id.start(p)}>Try again</button>
-            <span className="text-[12.5px] text-[#8E3B28]">{attempt?.status === "canceled" ? "The last attempt was cancelled." : `The last attempt did not complete${attempt?.failure ? `: ${attempt.failure}` : "."}`}</span>
-          </div>
-        )}
-        {state === "expired" && <div className="flex flex-wrap items-center gap-3">{id.stateOf(p.id) === "expired" && <span className="text-[12.5px] text-[#8E3B28]">Your verification expired. Verify again to keep listing.</span>}</div>}
-        {state === "verified" && id.identity && <p className="text-[13px] text-ex-graphite">Confirmed {longDate(id.identity.verifiedAt)}{id.identity.until ? ` · valid until ${longDate(id.identity.until)}` : ""}.</p>}
-        {state === "unavailable" && <p className={`text-[12.5px] ${MUTED}`}>This method cannot be used yet: ExitOS has not completed its connection with the provider. It will open here once it is live.</p>}
-        {state === "checking" && <p className={`text-[12.5px] ${MUTED}`}>Confirming availability with the exchange…</p>}
+      <div className="mt-5 flex flex-wrap items-center gap-3" aria-live="polite">
+        {state === "available" && <button type="button" className={PRIMARY} disabled={!!id.busy} onClick={() => id.start(o.info, country)}>Continue with {providerLabel(o.info.id)} <span aria-hidden>→</span></button>}
+        {state === "in_progress" && (o.info.id === "stripe_identity"
+          ? <><button type="button" className={PRIMARY} disabled={!!id.busy} onClick={id.checkStripe}>Check my result</button><span className="text-[12.5px] text-ex-slate-ink">Stripe may still be reviewing your document.</span></>
+          : <><button type="button" className={SECONDARY} disabled={!!id.busy} onClick={() => id.start(o.info, country)}>Begin again</button><span className="text-[12.5px] text-ex-slate-ink">Started {attempt ? new Date(attempt.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "recently"}; complete it with the provider to return verified.</span></>)}
+        {(state === "failed" || state === "expired") && <><button type="button" className={SECONDARY} disabled={!!id.busy} onClick={() => id.start(o.info, country)}>{state === "expired" ? "Verify again" : "Try again"}</button>
+          <span className="text-[12.5px] text-[#8E3B28]">{state === "expired" ? "Your verification has expired." : attempt?.status === "canceled" ? "The last attempt was cancelled." : `The last attempt did not complete${attempt?.failure ? `: ${attempt.failure}` : "."}`}</span></>}
       </div>
-    </article>
+    </div>
   );
 };
 
-const COUNTRIES = ["Norway", "Sweden", "Denmark", "Finland", "Netherlands", "Belgium", "Germany", "France", "Estonia", "United Kingdom", "United States"] as const;
-const CHIP = (on: boolean): string => `rounded-full border px-3 py-1.5 text-[12.5px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze focus-visible:ring-offset-1 focus-visible:ring-offset-ex-porcelain ${on ? "border-ex-graphite bg-ex-graphite text-ex-ivory" : "border-[#D9D0C1] bg-white/70 text-ex-slate-ink hover:border-ex-bronze hover:text-ex-graphite"}`;
+/** A method that cannot be used: one quiet line, no control. */
+const UnavailableRow: React.FC<{ o: MethodOption; reason: string }> = ({ o, reason }) => (
+  <li className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-0.5 border-b border-[#E6DFD3] py-3 text-[13px] last:border-0">
+    <span className="text-[#6F695F]">{providerLabel(o.info.id)} <span className={`ml-2 text-[11.5px] ${MUTED}`}>{o.info.region}</span></span>
+    <span className={`text-[11.5px] ${MUTED}`}>{reason}</span>
+  </li>
+);
 
-/** The pathways for a founder based in `basedIn`: their national eID, the document pathway, then the rest. */
-export const VerificationPathways: React.FC<{ id: IdentityState; basedIn: string | undefined; onBasedIn?: (c: string) => void }> = ({ id, basedIn, onBasedIn }) => {
-  const [more, setMore] = useState(false);
-  const { suggested, other } = providersFor(basedIn);
-  const national = suggested.filter((p) => p.id !== "stripe_identity");
-  const stripe = suggested.find((p) => p.id === "stripe_identity")!;
+/**
+ * The identity-method selection for a seller whose identity document or eID is from `country`.
+ * Operational and eligible methods are selectable, with requirements, next steps and an action;
+ * everything else is listed quietly as not available, without a control.
+ */
+export const IdentityMethods: React.FC<{ id: IdentityState; country: string | undefined }> = ({ id, country }) => {
+  const cc = countryCode(country);
+  const opts = id.options(cc);
+  const usable = opts.filter((o) => o.eligible && o.configured);
+  const eligibleOff = opts.filter((o) => o.eligible && !o.configured);
+  const elsewhere = opts.filter((o) => !o.eligible);
+  const [chosen, setChosen] = useState<IdentityProvider | null>(null);
+  const [showOthers, setShowOthers] = useState(false);
+  const selected = usable.find((o) => o.info.id === chosen) ?? usable[0];
+  const countryName = countryByCode(cc)?.name;
+
+  if (!cc) return <p className="text-[13.5px] text-ex-slate-ink">Choose the country of your identity document or eID to see the methods offered there.</p>;
+  if (!id.checked) return <p role="status" className="text-[13.5px] text-ex-slate-ink">Confirming which methods are open on the exchange…</p>;
+
   return (
-    <div className="space-y-10">
-      {onBasedIn && (
-        <fieldset>
-          <legend className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ex-slate-ink">Where is the seller based?</legend>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {COUNTRIES.map((c) => { const on = (basedIn ?? "").toLowerCase() === c.toLowerCase(); return <button key={c} type="button" aria-pressed={on} onClick={() => onBasedIn(c)} className={CHIP(on)}>{c}</button>; })}
-          </div>
-          <p className={`mt-2 text-[12px] ${MUTED}`}>Your national eID is offered first. Stripe Identity works in every country.</p>
+    <div className="space-y-6">
+      {usable.length > 0 ? (
+        <fieldset className="overflow-hidden rounded-ex-xs border border-[#D9D0C1] bg-white">
+          <legend className="sr-only">Verification method</legend>
+          {usable.map((o) => <MethodOptionRow key={o.info.id} o={o} name="identity-method" selected={o === selected} onSelect={() => setChosen(o.info.id)} state={id.stateOf(o.info.id, true)} />)}
+          {selected && <MethodDetail o={selected} id={id} country={cc} state={id.stateOf(selected.info.id, true)} />}
         </fieldset>
+      ) : (
+        <div role="status" className="border-l-2 border-ex-bronze bg-white/60 px-5 py-4">
+          <p className="font-editorial text-[19px] text-ex-graphite">No verification method is open for {countryName} yet</p>
+          <p className="mt-1.5 max-w-[60ch] text-[13px] leading-relaxed text-ex-slate-ink">
+            {id.hasServer
+              ? "ExitOS has not yet completed its connection with the identity providers below, so none can be used today. You can prepare the company profile now; publishing waits until your identity is established."
+              : "This session has no server account, so no identity provider can be reached."}
+          </p>
+        </div>
       )}
-      <div className="grid gap-10 xl:grid-cols-2">
-        {national.map((p) => <Pathway key={p.id} p={p} id={id} prominent />)}
-        <Pathway p={stripe} id={id} prominent={national.length === 0} />
-      </div>
+
+      {eligibleOff.length > 0 && (
+        <section aria-labelledby="idm-off">
+          <h4 id="idm-off" className={`text-[10.5px] font-semibold uppercase tracking-[0.18em] ${MUTED}`}>Offered for {countryName} · not yet available</h4>
+          <ul className="mt-2">{eligibleOff.map((o) => <UnavailableRow key={o.info.id} o={o} reason="Not yet available" />)}</ul>
+        </section>
+      )}
+
       <div>
-        <button type="button" aria-expanded={more} aria-controls="other-eids" onClick={() => setMore((m) => !m)}
+        <button type="button" aria-expanded={showOthers} aria-controls="idm-elsewhere" onClick={() => setShowOthers((s) => !s)}
           className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ex-bronze-ink hover:text-ex-graphite focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze">
-          {more ? "Hide other national eIDs" : `Other national eIDs (${other.length})`}
+          {showOthers ? "Hide methods for other countries" : `Methods for other countries (${elsewhere.length})`}
         </button>
-        {more && <div id="other-eids" className="mt-6 grid gap-8 xl:grid-cols-2">{other.map((p) => <Pathway key={p.id} p={p} id={id} />)}</div>}
+        {showOthers && <ul id="idm-elsewhere" className="mt-2">{elsewhere.map((o) => <UnavailableRow key={o.info.id} o={o} reason={o.configured ? `Not offered for ${countryName}` : "Not yet available"} />)}</ul>}
       </div>
+
       <div aria-live="polite" className="space-y-2">
         {id.busy && <p role="status" className="text-[13px] text-ex-slate-ink">{id.busy}</p>}
         {id.error && <p role="alert" className="border-l-2 border-[#B4533C] pl-3 text-[13px] text-[#8E3B28]">{id.error}</p>}
@@ -248,32 +234,29 @@ export const VerificationPathways: React.FC<{ id: IdentityState; basedIn: string
   );
 };
 
-/** The seller's identity as a status block. */
+/** The seller's identity as a compact status line for the supporting column. */
 export const IdentityStatusCard: React.FC<{ identity: SellerIdentity | null }> = ({ identity }) => (
-  <section aria-label="Seller identity" className="border-t border-ex-graphite/80 pt-4">
+  <section aria-label="Seller identity" className="border-t border-ex-graphite/80 pt-3">
     <div className={`text-[10.5px] font-semibold uppercase tracking-[0.18em] ${MUTED}`}>Seller identity</div>
     {identity ? (
       <>
-        <p className="mt-1.5 font-editorial text-[20px] text-ex-graphite">{identity.local ? "Marked for testing" : "Verified"}</p>
-        <p className="mt-0.5 text-[12.5px] text-ex-slate-ink">{providerLabel(identity.provider)} · {longDate(identity.verifiedAt)}{identity.until ? ` · until ${longDate(identity.until)}` : ""}</p>
-        {identity.local && <p className="mt-1 text-[11.5px] text-ex-bronze-ink">Development build only. No provider was involved; the live exchange would refuse this listing.</p>}
+        <p className="mt-1 font-editorial text-[17px] text-ex-graphite">{identity.local ? "Marked for testing" : "Established"}</p>
+        <p className="mt-0.5 text-[12px] text-ex-slate-ink">{providerLabel(identity.provider)} · {longDate(identity.verifiedAt)}{identity.until ? ` · until ${longDate(identity.until)}` : ""}</p>
+        {identity.local && <p className="mt-1 text-[11.5px] text-ex-bronze-ink">Development server only. No provider was involved; the live exchange would refuse this listing.</p>}
       </>
     ) : (
-      <>
-        <p className="mt-1.5 font-editorial text-[20px] text-ex-graphite">Not yet established</p>
-        <p className="mt-0.5 text-[12.5px] text-ex-slate-ink">Required before the listing can be published.</p>
-      </>
+      <p className="mt-1 text-[13px] text-ex-slate-ink">Not yet established. Required before publishing.</p>
     )}
   </section>
 );
 
-/** Development builds only: an isolated test facility, never shown with a server account. */
-export const DevVerificationTools: React.FC<{ id: IdentityState; provider: IdentityProvider }> = ({ id, provider }) => !id.devTools ? null : (
+/** Development server only: an isolated test facility. In a production build this is an empty component. */
+export const DevVerificationTools: React.FC<{ id: IdentityState; provider: IdentityProvider }> = DEV_TOOLS ? ({ id, provider }) => !id.devTools ? null : (
   <aside aria-label="Development tools" className="border border-dashed border-[#C9A96B] bg-[#FBF6EC] px-4 py-3 text-[12px] text-[#6B5A3A]">
-    <span className="font-semibold uppercase tracking-[0.14em]">Development build</span> · this session has no server account, so no provider can be reached.
+    <span className="font-semibold uppercase tracking-[0.14em]">Development server</span> · no server account, so no provider can be reached.
     {" "}{id.identity?.local
       ? <button type="button" onClick={id.devTools.clear} className="font-semibold underline underline-offset-2">Clear the test identity</button>
       : <button type="button" onClick={() => id.devTools!.mark(provider)} className="font-semibold underline underline-offset-2">Mark this session verified for testing</button>}
     {" "}— listings made this way stay in this browser; the live exchange refuses any listing without a provider-confirmed identity.
   </aside>
-);
+) : () => null;
