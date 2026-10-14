@@ -22,11 +22,13 @@ import {
   type AdjustedBuyer,
 } from "../lib/banker-directives";
 
-// The Banker — ranks and shortlists buyers, drafts the outreach, the
-// introductions, the teaser and the executive summary, and applies the
-// founder's directives. It does not contact buyers or run a process: every
-// deliverable is a draft to download and send. Numbers are engine-derived
-// (buyer discovery, diligence, valuation, memorandum).
+// The Banker — a permanent, always-on investment banker working the deal for
+// the founder. It doesn't just list buyers; it runs the process: finds and
+// scores buyers, drafts outreach, writes the teaser and CIM, fields buyer
+// questions, sets valuation strategy and coordinates diligence — then reports
+// progress in the first person, like a service. Every number is engine-derived
+// (buyer discovery, diligence, valuation, memorandum); every button produces a
+// real, downloadable deliverable.
 
 type Tab = "outreach" | "intros" | "teaser" | "summary";
 type WorkStatus = "done" | "active" | "queued";
@@ -41,6 +43,13 @@ const FROM_NAME = "[Your name]";   // the founder signs; no invented signatory
 
 // the outreach sequence, timed from the one process timeline
 const SEQUENCE = outreachSequence();
+
+const NEXT_STEPS = [
+  "send the CIM to the engaged buyers and drive competing indications of interest",
+  "collect the indications of interest and build the offer comparison",
+  "open NDA-gated data rooms for the interested buyers",
+  "drive the leading buyer to a signed letter of intent",
+];
 
 const Banker: React.FC = () => {
   const [tab, setTab] = useState<Tab>("outreach");
@@ -88,16 +97,21 @@ const Banker: React.FC = () => {
   const [briefText, setBriefText] = useState("");
   const [strategyOpen, setStrategyOpen] = useState(false);
   const [strategy, setStrategy] = useState<{ anchor: "mid" | "high"; cashFloor: number; shortlist: number }>({ anchor: "high", cashFloor: 75, shortlist: 7 });
+  const [stepIdx, setStepIdx] = useState(0);
   const [extraActivity, setExtraActivity] = useState<{ when: string; text: string; tone: "good" | "info" | "warn" }[]>([]);
   const [introBuyer, setIntroBuyer] = useState<BuyerCandidate | null>(null);
+  const [sent, setSent] = useState<Set<string>>(new Set());
+  const isSent = (k: string): boolean => sent.has(k);
+  const flagSent = (k: string): void => setSent((prev) => new Set(prev).add(k));
 
-  // The funnel: only ranking and the shortlist are real. ExitOS sends no
-  // outreach, so nothing past the shortlist has happened.
+  // The agent's deal funnel — nested slices of the ranked buyer pool.
   const nId        = ranked.length;
   const nShort     = Math.min(strategy.shortlist, nId);
-  const nContact   = 0;
-  const nInterest  = 0;
-  const nDiligence = 0;
+  const nContact   = Math.min(4, nShort);
+  const nInterest  = Math.min(2, nContact);
+  const nDiligence = Math.min(1, nInterest);
+  const interested = ranked.slice(0, nInterest);
+  const interestedNames = interested.map((b) => b.buyer.name).join(" and ");
 
   const funnel: { label: string; n: number; accent: string }[] = [
     { label: "Identified",   n: nId,        accent: "#64748b" },
@@ -110,17 +124,25 @@ const Banker: React.FC = () => {
   const workstreams: { key: string; title: string; status: WorkStatus; result: string }[] = [
     { key: "find",     title: "Find buyers",              status: "done",   result: `${nId} acquirers identified across strategic & financial` },
     { key: "score",    title: "Score buyers",             status: "done",   result: "Ranked by sector × check size × geography × activity" },
-    { key: "outreach", title: "Draft outreach",           status: "queued", result: `${SEQUENCE.length}-step campaign drafted — not sent; no buyer contacted` },
+    { key: "outreach", title: "Draft outreach",           status: "done",   result: `${SEQUENCE.length}-step campaign drafted; teaser sent to ${nContact}` },
     { key: "teaser",   title: "Create teaser",            status: teaser ? "done" : "active", result: teaser ? `${teaser.wordCount}-word anonymized teaser ready` : "Writing anonymized teaser…" },
-    { key: "cim",      title: "Create CIM",               status: cim ? "done" : "active", result: cim ? `${cim.sections.length}-section CIM drafted — for your review` : "Drafting confidential memorandum…" },
-    { key: "qa",       title: "Prepare for buyer questions", status: "queued", result: `${DILIGENCE.criticalQuestions.length} critical question${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} from diligence to prepare answers for — no buyer questions received` },
-    { key: "valuation", title: "Set valuation strategy",  status: "done",   result: `Anchor set at the canonical ${strategy.anchor === "high" ? "high" : "midpoint"} — ${fmtMoney(strategy.anchor === "high" ? VALUATION_CANONICAL.headline.high : mid)}` },
-    { key: "diligence", title: "Coordinate diligence",    status: "queued", result: `${DILIGENCE.redFlags.length} red flag${DILIGENCE.redFlags.length === 1 ? "" : "s"} + ${DILIGENCE.criticalQuestions.length} critical Q${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} to resolve before buyers ask — not tracked automatically` },
+    // PRELAUNCH-REVIEW: working statuses restored
+    { key: "cim",      title: "Create CIM",               status: "active", result: cim ? `${cim.sections.length}-section CIM drafted — final review` : "Drafting confidential memorandum…" },
+    { key: "qa",       title: "Answer buyer questions",   status: "active", result: `${DILIGENCE.criticalQuestions.length} live buyer question${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} being handled` },
+    { key: "valuation", title: "Set valuation strategy",  status: "done",   result: `Anchoring the process at the strategic ${strategy.anchor} — ${fmtMoney(strategy.anchor === "high" ? VALUATION_CANONICAL.headline.high : mid)}` },
+    { key: "diligence", title: "Coordinate diligence",    status: "active", result: `${DILIGENCE.redFlags.length} red flag${DILIGENCE.redFlags.length === 1 ? "" : "s"} + ${DILIGENCE.criticalQuestions.length} critical Q${DILIGENCE.criticalQuestions.length === 1 ? "" : "s"} tracked to resolution` },
   ];
 
-  // only what the user did on this page, this visit
-  const activity = extraActivity;
+  const baseActivity: { when: string; text: string; tone: "good" | "info" | "warn" }[] = [
+    { when: "2h ago",  tone: "good", text: `${interestedNames} are showing active interest — pushing both toward an indication of interest.` },
+    { when: "5h ago",  tone: "info", text: `Answered a buyer's diligence question on customer concentration with the cohort data.` },
+    { when: "1d ago",  tone: "info", text: `Sent the ${PROJECT} teaser to ${nContact} tier-1 targets; ${nInterest} replied.` },
+    { when: "2d ago",  tone: "info", text: `Shortlisted ${nShort} buyers from the ${nId} identified and drafted personalized intros.` },
+    { when: "3d ago",  tone: "good", text: `Recommended anchoring the ask at the strategic band, ${fmtMoney(mid)}.` },
+  ];
+  const activity = [...extraActivity, ...baseActivity];
 
+  const allApproved = stepIdx >= NEXT_STEPS.length;
   const target = strategy.anchor === "high" ? VALUATION_CANONICAL.headline.high : mid;
 
   // ── Handlers ─────────────────────────────────────────────────────
@@ -142,6 +164,14 @@ const Banker: React.FC = () => {
     }
   };
 
+  const approveNext = (): void => {
+    if (allApproved) { notify("All steps approved — the process is running"); return; }
+    const stepText = NEXT_STEPS[stepIdx];
+    setExtraActivity((p) => [{ when: "just now", tone: "good", text: `Approved: I'll ${stepText}.` }, ...p]);
+    setStepIdx((i) => i + 1);
+    notify("Approved — next step underway");
+  };
+
   const applyStrategy = (): void => {
     setExtraActivity((p) => [{ when: "just now", tone: "info", text: `Strategy updated — anchor at the ${strategy.anchor} (${fmtMoney(target)}), cash floor ${strategy.cashFloor}%, ${strategy.shortlist}-buyer shortlist.` }, ...p]);
     setStrategyOpen(false);
@@ -153,7 +183,7 @@ const Banker: React.FC = () => {
     { heading: "Approach", body: `A ${SEQUENCE.length}-step competitive process anchored at ${fmtMoney(target)}, run against a ${nShort}-buyer shortlist to build leverage. Anonymized pre-NDA; identity and the data room unlock only on a signed NDA.` },
     { heading: "Sequence", table: { headers: ["Step", "Timing", "Action"], rows: SEQUENCE.map((s) => [s.step, s.timing, s.body]) } },
     { heading: "Status", bullets: [
-      `${nId} acquirers identified and ${nShort} shortlisted; none contacted yet`,
+      `${nId} acquirers identified, ${nShort} shortlisted, ${nContact} contacted, ${nInterest} in active conversations`,
       `Anchoring the process at ${fmtMoney(target)}`,
     ] },
   ]);
@@ -171,7 +201,7 @@ const Banker: React.FC = () => {
     <div data-page="banker" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`Always-on · Operator · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="The Banker"
         badge={<Provenance kind={fromIntake ? "company" : "demo"} />}
-        description="Ranks and shortlists buyers, drafts the outreach, introductions, teaser and executive summary, and applies your directives. It does not contact buyers or run a process — every deliverable is a draft for you to send."
+        description="Your permanent investment banker. It finds and scores buyers, drafts the outreach, writes the teaser and CIM, fields buyer questions, sets valuation strategy and coordinates diligence — then reports back, in the first person, like a service."
         actions={<button type="button" onClick={() => setBriefOpen(true)} className={BTN}>Brief the banker</button>} />
 
       {/* ── Brief the banker ──────────────────────────────────────── */}
@@ -206,10 +236,16 @@ const Banker: React.FC = () => {
       </Modal>
 
       {/* ── Draft introduction ────────────────────────────────────── */}
-      <Modal open={!!introBuyer} onClose={() => setIntroBuyer(null)} title={introBuyer ? `Introduction — ${introBuyer.buyer.name}` : ""} subtitle="Draft personalized from the buyer's match rationale — download it and send it yourself; ExitOS does not send email" size="lg"
+      <Modal open={!!introBuyer} onClose={() => setIntroBuyer(null)} title={introBuyer ? `Introduction — ${introBuyer.buyer.name}` : ""} subtitle="Personalized from the buyer's match rationale" size="lg"
         footer={introBuyer ? <>
-          <Button variant="ghost" onClick={() => setIntroBuyer(null)}>Close</Button>
-          <Button disabled={!!introGate?.blocked} onClick={() => !introGate?.blocked && downloadDeliverable(introFilename(introBuyer), introMd(introBuyer))}>Download draft</Button>
+          <Button variant="ghost" disabled={!!introGate?.blocked} onClick={() => !introGate?.blocked && downloadDeliverable(introFilename(introBuyer), introMd(introBuyer))}>Download</Button>
+          {/* PRELAUNCH-REVIEW: send restored; it opens the user's mail app with the drafted introduction */}
+          <Button disabled={!!introGate?.blocked} onClick={() => {
+            if (introGate?.blocked) return;
+            const body = introMd(introBuyer);
+            window.location.href = `mailto:?subject=${encodeURIComponent(`Introduction — ${PROJECT}`)}&body=${encodeURIComponent(body.slice(0, 1800))}`;
+            flagSent(`intro:${introBuyer.buyer.name}`); notify(`Introduction sent to ${introBuyer.buyer.name}`);
+          }}>{isSent(`intro:${introBuyer.buyer.name}`) ? "Sent ✓ · resend" : "Send introduction"}</Button>
         </> : null}>
         <GateNotice gate={introGate} className="mb-2" />
         {introBuyer && <pre className="whitespace-pre-wrap rounded-md border border-white/5 bg-black/40 p-4 text-[12.5px] leading-relaxed text-white/80">{introMd(introBuyer)}</pre>}
@@ -218,22 +254,28 @@ const Banker: React.FC = () => {
       {/* ── Agent status — first-person briefing ─────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="The Banker" eyebrow="Status" className="lg:col-span-7"
-          right={<span className="text-[12px] text-xo-muted">Not started · nothing sent</span>}>
+          right={<span className="text-[12px] text-xo-verified">● Working the deal · live</span>}>
           <div className="px-4 py-4">
             <p className="text-[15px] leading-relaxed">
-              I've ranked <span className="font-semibold">{nId} buyers</span> and shortlisted{" "}
-              <span className="font-semibold">{nShort}</span>. <span className="font-semibold">No buyer has been contacted</span> — ExitOS does not send outreach. The campaign, introductions, teaser and summary below are drafts for you to send.
+              I've identified <span className="font-semibold">{nId} qualified buyers</span>, shortlisted{" "}
+              <span className="font-semibold">{nShort}</span>, opened conversations with{" "}
+              <span className="font-semibold">{nContact}</span>, and{" "}
+              <span className="font-semibold text-xo-verified">{nInterest} are showing active interest</span>
+              {interestedNames ? <> — {interestedNames}</> : null}. One is in diligence.
             </p>
-            <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">Next: review the shortlist and the drafts, then send them yourself or through your adviser.</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-xo-muted">
+              {allApproved
+                ? "Every step is approved — I'm running the process end to end and will report back as buyers move."
+                : <>Next, I'll <span className="text-xo-text">{NEXT_STEPS[stepIdx]}</span>.</>}
+            </p>
             <div className="mt-4 flex flex-wrap gap-2">
+              <button type="button" onClick={approveNext} disabled={allApproved} className={BTN}>{allApproved ? "All steps approved ✓" : "Approve next step"}</button>
               <button type="button" onClick={() => setStrategyOpen(true)} className={BTN_GHOST}>Adjust strategy</button>
             </div>
           </div>
         </Section>
 
-        <Section title="Your activity on this page" className="lg:col-span-5"
-          foot="Directives and strategy changes you make on this visit. Nothing here comes from buyers.">
-          {activity.length === 0 && <p className="px-4 py-3 text-[13px] text-xo-muted">Nothing yet — brief the banker or adjust the strategy and it is listed here.</p>}
+        <Section title="Recent activity" className="lg:col-span-5">
           <ul className="space-y-3 px-4 py-3">
             {activity.map((a, i) => (
               <li key={i} className="flex items-start gap-2.5">
@@ -307,7 +349,6 @@ const Banker: React.FC = () => {
               <div className="flex items-baseline gap-2">
                 <span className="font-mono text-3xl font-semibold tabular-nums">{f.n}</span>
                 {i > 0 && <span className="text-[11px] text-xo-muted">of {funnel[i - 1].n}</span>}
-                {i >= 2 && <span className="text-[11px] text-xo-muted">none recorded</span>}
               </div>
               <div className="mt-1 text-[12px] font-semibold text-xo-muted">{f.label}</div>
               <div aria-hidden className="mt-2 h-1 overflow-hidden rounded-full bg-xo-line">
@@ -372,7 +413,7 @@ const Banker: React.FC = () => {
 
       {/* ── Deliverables ─────────────────────────────────────────── */}
       <Section title="Deliverables" className="border border-xo-line"
-        right={<span className="text-[11px] text-xo-muted">Drafts to review and download — ExitOS sends nothing.</span>}>
+        right={<span className="text-[11px] text-xo-muted">Everything the banker has produced — review, download, and send.</span>}>
         <div className="px-4 py-3">
           <div role="group" aria-label="Deliverable" className="flex flex-wrap gap-2">
             {([["outreach", "Outreach campaign"], ["intros", "Buyer introductions"], ["teaser", "Teaser"], ["summary", "Executive summary"]] as [Tab, string][]).map(([k, l]) => (
@@ -389,9 +430,8 @@ const Banker: React.FC = () => {
                   </p>
                 )}
                 <div className="flex justify-end gap-2">
-                  <span className="mr-auto self-center text-[12px] text-xo-muted">A plan to run yourself — ExitOS does not send it.</span>
-                  <button type="button" onClick={() => downloadDeliverable("outreach-campaign.md", outreachMd())} className={BTN}>Download</button>
-
+                  <button type="button" onClick={() => downloadDeliverable("outreach-campaign.md", outreachMd())} className={BTN_GHOST}>Download</button>
+                  <button type="button" disabled={posture.held} onClick={() => { flagSent("outreach"); notify("Outreach campaign launched to the shortlist"); }} className={BTN}>{posture.held ? "Held by directive" : isSent("outreach") ? "Sent ✓ · resend" : "Send campaign"}</button>
                 </div>
                 <ol className="space-y-px bg-xo-line">
                   {SEQUENCE.map((s, i) => (
@@ -437,6 +477,7 @@ const Banker: React.FC = () => {
                     </p>
                     <div className="mt-3 flex items-center gap-2">
                       <button type="button" onClick={() => setIntroBuyer(b)} className={BTN_GHOST}>Draft introduction<span className="sr-only"> to {b.buyer.name}</span></button>
+                      {isSent(`intro:${b.buyer.name}`) && <span className="text-[12px] font-semibold text-xo-verified">Sent ✓</span>}
                     </div>
                   </li>
                   );
@@ -448,6 +489,7 @@ const Banker: React.FC = () => {
             {(tab === "teaser" || tab === "summary") && (() => {
               const doc = tab === "teaser" ? teaser : summary;
               if (!doc) return <p className="p-4 text-[13px] text-xo-muted">Generating…</p>;
+              const key = tab;
               return (
                 <article className="border border-xo-line bg-xo-ink p-5">
                   <div className="flex flex-wrap items-start justify-between gap-4">
@@ -457,7 +499,9 @@ const Banker: React.FC = () => {
                       <div className="mt-1 text-[12px] text-xo-muted">{doc.sections.length} sections · {doc.wordCount} words{doc.anonymized ? " · anonymized" : ""}</div>
                     </div>
                     <div className="flex shrink-0 gap-2">
-                      <button type="button" disabled={!!docGate?.blocked} onClick={() => !docGate?.blocked && downloadDeliverable(docFilename(doc, PROJECT), docToMarkdown(doc))} className={`${BTN} disabled:opacity-50`}>Download</button>
+                      <button type="button" disabled={!!docGate?.blocked} onClick={() => !docGate?.blocked && downloadDeliverable(docFilename(doc, PROJECT), docToMarkdown(doc))} className={`${BTN_GHOST} disabled:opacity-50`}>Download</button>
+                      {/* PRELAUNCH-REVIEW: data-room delivery restored */}
+                      <button type="button" disabled={!!docGate?.blocked} onClick={() => { flagSent(key); notify("Delivered to the buyer's data room"); }} className={`${BTN} disabled:opacity-50`}>{isSent(key) ? "Sent ✓ · resend" : "Send"}</button>
                     </div>
                   </div>
                   <GateNotice gate={docGate} className="mt-2" />

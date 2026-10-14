@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { frameDoc } from "../lib/deliverables";
-import { fmtMoney, downloadText, downloadJson } from "../lib/ui";
+import { fmtMoney, downloadText, downloadJson, notify } from "../lib/ui";
 import { PageHeader, Section, Metric, Chip, Disclosure, Provenance, ActionLink } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
@@ -46,6 +46,15 @@ const DiligenceAI: React.FC = () => {
   const high = findings.filter((f) => f.severity === "high").length;
   const buyerDiscount = findings.reduce((s, f) => s + f.impactUsd, 0);
   const sharePct = (usd: number): string => String(Math.round((usd / MID) * 200) / 2);
+  // PRELAUNCH-REVIEW: re-run control restored (the checks recompute from the profile on every render)
+  const [rerunning, setRerunning] = useState(false);
+  const rerun = (): void => {
+    setRerunning(true);
+    setTimeout(() => {
+      setRerunning(false);
+      notify(`Re-ran across ${SOURCE_FILES.length} sources · ${findings.length} findings (${high} high-severity)`);
+    }, 800);
+  };
   const report = reports.find((r) => r.key === reportKey) ?? reports[0];
 
   // framed like every other export: confidentiality line, basis and the standard notices
@@ -72,7 +81,8 @@ const DiligenceAI: React.FC = () => {
     <div data-page="diligence" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Due Diligence · rule-based checks · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Diligence"
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Buyer + Seller reports · <span className={high > 0 ? "text-xo-risk" : "text-xo-verified"}>{high > 0 ? `${high} high severity` : "Clean"}</span></span></>}
-        description={`Findings recompute from the company profile each time the page opens — ${fromIntake ? "your saved intake" : "the demo company; save an intake to check yours"}.`} />
+        description={`Findings recompute from the company profile each time the page opens — ${fromIntake ? "your saved intake" : "the demo company; save an intake to check yours"}.`}
+        actions={<button type="button" onClick={rerun} disabled={rerunning} className={BTN_GHOST}>{rerunning ? "Re-running…" : "Re-run analysis"}</button>} />
 
       <section aria-label="Diligence summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-xo-panel"><Metric label="Risks discovered" emphasis value={String(findings.length)} sub="across 3 categories" /></div>

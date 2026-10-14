@@ -62,6 +62,34 @@ export async function sendSignInLink(cfg: AuthConfig, email: string, redirectTo:
   await expectOk(res, "Sending the sign-in link");
 }
 
+/** E-mail and password sign-in (Supabase Auth password grant). */
+export async function passwordSignIn(cfg: AuthConfig, email: string, password: string): Promise<VerifiedSession> {
+  const e = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) throw new Error("Enter a valid e-mail address.");
+  if (!password) throw new Error("Enter your password.");
+  const res = await f(cfg)(`${cfg.url}/auth/v1/token?grant_type=password`, {
+    method: "POST", headers: { apikey: cfg.anonKey, "content-type": "application/json" }, body: JSON.stringify({ email: e, password }),
+  });
+  const r = (await expectOk(res, "Signing in")) as { access_token: string; refresh_token: string; expires_in: number };
+  const u = await verifyUser(cfg, r.access_token);
+  return { accessToken: r.access_token, refreshToken: r.refresh_token, expiresAt: Date.now() + r.expires_in * 1000, userId: u.id, email: u.email };
+}
+
+/** E-mail a password-reset link (Supabase Auth recover); it returns to `redirectTo` signed in. */
+export async function sendPasswordReset(cfg: AuthConfig, email: string, redirectTo: string): Promise<void> {
+  const e = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) throw new Error("Enter a valid e-mail address.");
+  const res = await f(cfg)(`${cfg.url}/auth/v1/recover?redirect_to=${encodeURIComponent(redirectTo)}`, {
+    method: "POST", headers: { apikey: cfg.anonKey, "content-type": "application/json" }, body: JSON.stringify({ email: e }),
+  });
+  await expectOk(res, "Sending the reset link");
+}
+
+export type OAuthProvider = "google" | "apple" | "azure";
+/** The provider's sign-in page through Supabase Auth; it returns to `redirectTo` with the session in the URL fragment. */
+export const oauthUrl = (cfg: AuthConfig, provider: OAuthProvider, redirectTo: string): string =>
+  `${cfg.url}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}`;
+
 /** The tokens (or the error) Supabase puts in the URL fragment when a sign-in link is followed. */
 export function parseCallback(hash: string): { accessToken: string; refreshToken: string; expiresIn: number } | { error: string } | null {
   const h = new URLSearchParams(hash.replace(/^#/, ""));
