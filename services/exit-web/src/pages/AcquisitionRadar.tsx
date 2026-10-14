@@ -30,6 +30,29 @@ const SECTOR_OPTIONS = ACQ_INDEXES.indexes.map((i) => i.sector);
 const AS_OF = DNA_AS_OF.slice(0, 10);   // registry snapshot date (not a live feed)
 const SMALL_BTN = "rounded-sm border px-2.5 py-1 text-[12px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
 
+// line icons for the panel headers and the listing toolbar
+const ICON = {
+  target: <><circle cx="10" cy="10" r="7" /><circle cx="10" cy="10" r="3.5" /><path d="M10 10l5-5M13 5h2v2" /></>,
+  grid: <><rect x="3" y="3" width="5.5" height="5.5" rx="1" /><rect x="11.5" y="3" width="5.5" height="5.5" rx="1" /><rect x="3" y="11.5" width="5.5" height="5.5" rx="1" /><rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1" /></>,
+  list: <><path d="M7 5h10M7 10h10M7 15h10" /><circle cx="3.5" cy="5" r=".8" /><circle cx="3.5" cy="10" r=".8" /><circle cx="3.5" cy="15" r=".8" /></>,
+  filter: <><path d="M3 4h14l-5.5 6.5V16l-3 1.5v-7L3 4Z" /></>,
+  sort: <><path d="M6 3v14M6 3 3 6M6 3l3 3M14 17V3M14 17l-3-3M14 17l3-3" /></>,
+} as const;
+const Ico: React.FC<{ name: keyof typeof ICON; size?: number }> = ({ name, size = 18 }) => (
+  <svg aria-hidden width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">{ICON[name]}</svg>
+);
+
+type View = "list" | "grid";
+type SortKey = "match" | "newest" | "name";
+const SORT_LABEL: Record<SortKey, string> = { match: "Best match", newest: "Newest", name: "Name" };
+const FILTERS = [["qualified", "Qualified only"], ["founders", "From founders only"], ["hideDemo", "Hide the demo listing"]] as const;
+type FilterKey = (typeof FILTERS)[number][0];
+// the layout and sort are this viewer's preference, remembered in this browser
+const PREF_KEY = "exitos.radar-view.v1";
+const loadPref = (): { view: View; sort: SortKey } => {
+  try { const p = JSON.parse(localStorage.getItem(PREF_KEY) ?? "{}") as { view?: View; sort?: SortKey }; return { view: p.view === "grid" ? "grid" : "list", sort: p.sort && p.sort in SORT_LABEL ? p.sort : "match" }; } catch { return { view: "list", sort: "match" }; }
+};
+
 const AcquisitionRadar: React.FC = () => {
   const [sectors, setSectors] = useState<string[]>(["AI", "Software", "Developer Tools"]);
   const [minRevM, setMinRevM] = useState(5);
@@ -54,6 +77,12 @@ const AcquisitionRadar: React.FC = () => {
   const [watched, setWatched] = useState<Record<string, boolean>>({});
   const [savedMandate, setSavedMandate] = useState(false);
   const [publish, setPublish] = useState<Listing | null>(null);
+  const [view, setViewState] = useState<View>(() => loadPref().view);
+  const [sortBy, setSortState] = useState<SortKey>(() => loadPref().sort);
+  const savePref = (v: View, s: SortKey): void => { try { localStorage.setItem(PREF_KEY, JSON.stringify({ view: v, sort: s })); } catch { /* kept for this visit */ } };
+  const setView = (v: View): void => { setViewState(v); savePref(v, sortBy); };
+  const setSortBy = (s: SortKey): void => { setSortState(s); savePref(view, s); };
+  const [only, setOnly] = useState<Record<FilterKey, boolean>>({ qualified: false, founders: false, hideDemo: false });
 
   // hydrate the form from the buyer's persisted mandate, if one exists
   useEffect(() => {
@@ -88,6 +117,24 @@ const AcquisitionRadar: React.FC = () => {
     .map((l) => ({ listing: l, match: matchListingToCriteria(l.publicView, criteria) }))
     .sort((a, b) => b.match.score - a.match.score), [listings, criteria]);
   const qualified = scored.filter((s) => s.match.qualified);
+  // what the listing column shows: the buyer's filters and sort over the scored pool
+  const shown = useMemo(() => {
+    const xs = scored.filter((s) => (!only.qualified || s.match.qualified) && (!only.founders || listingOrigin(s.listing) === "founder") && (!only.hideDemo || listingOrigin(s.listing) !== "demo"));
+    if (sortBy === "newest") return [...xs].sort((a, b) => Date.parse(b.listing.listedAt) - Date.parse(a.listing.listedAt));
+    if (sortBy === "name") return [...xs].sort((a, b) => a.listing.code.localeCompare(b.listing.code));
+    return xs;
+  }, [scored, only, sortBy]);
+  const activeFilters = FILTERS.filter(([k]) => only[k]);
+  // menus close on a click elsewhere or on Escape, as menus do
+  useEffect(() => {
+    const close = (e: Event): void => {
+      document.querySelectorAll<HTMLDetailsElement>("details[data-autoclose][open]").forEach((d) => {
+        if (e.type === "keydown" ? (e as KeyboardEvent).key === "Escape" : !d.contains(e.target as Node)) d.open = false;
+      });
+    };
+    document.addEventListener("mousedown", close); document.addEventListener("keydown", close);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", close); };
+  }, []);
   const founderCount = listings.filter((l) => listingOrigin(l) === "founder").length;
   const seedCount = listings.length - founderCount;
 
@@ -145,7 +192,7 @@ const AcquisitionRadar: React.FC = () => {
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[360px_minmax(0,1fr)]">
         {/* ── mandate ──────────────────────────────────────────────── */}
         <div className="space-y-3 self-start">
-          <Section title="Acquisition mandate" eyebrow="Your criteria" className="border border-xo-line">
+          <Section title="Acquisition mandate" eyebrow="Your criteria" icon={<Ico name="target" size={20} />} className="border border-xo-line">
             <div className="space-y-4 px-4 py-4">
               <fieldset>
                 <legend className={XO_LABEL}>Sector preferences</legend>
@@ -188,11 +235,49 @@ const AcquisitionRadar: React.FC = () => {
         </div>
 
         {/* ── opportunities ────────────────────────────────────────── */}
-        <Section title="Opportunities · scored against your mandate" eyebrow={plural(listings.length, "listing")} className="min-w-0 self-start border border-xo-line"
+        <Section title="Opportunities · scored against your mandate" eyebrow={plural(listings.length, "listing")} icon={<Ico name="target" size={20} />} className="min-w-0 self-start border border-xo-line"
+          right={<div className="flex flex-wrap items-center gap-2">
+            <div role="group" aria-label="Layout" className="flex overflow-hidden rounded-[6px] border border-xo-line">
+              {(["grid", "list"] as const).map((v) => (
+                <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} title={v === "grid" ? "Grid" : "List"}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action ${view === v ? "bg-xo-raise text-xo-text" : "text-xo-muted hover:text-xo-text"}`}>
+                  <Ico name={v} size={15} />{v === "list" ? "List" : <span className="sr-only">Grid</span>}
+                </button>
+              ))}
+            </div>
+            <details data-autoclose className="relative">
+              <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-[6px] border border-xo-line px-2.5 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise [&::-webkit-details-marker]:hidden">
+                <Ico name="filter" size={15} />Filters{activeFilters.length > 0 && <span className="rounded-full bg-xo-action px-1.5 text-[10px] text-xo-panel">{activeFilters.length}</span>}
+              </summary>
+              <div className="absolute right-0 z-20 mt-1 w-60 space-y-2 rounded-[8px] border border-xo-line bg-xo-panel p-3 text-[12.5px] shadow-[0_16px_36px_-18px_rgba(40,30,15,0.45)]">
+                {FILTERS.map(([k, label]) => (
+                  <label key={k} className="flex items-center gap-2"><input type="checkbox" checked={only[k]} onChange={(e) => setOnly((o) => ({ ...o, [k]: e.target.checked }))} className="accent-[#7E5E2E]" />{label}</label>
+                ))}
+              </div>
+            </details>
+            <label className="flex items-center gap-1.5 rounded-[6px] border border-xo-line px-2.5 py-1 text-[12px] font-medium text-xo-text">
+              <Ico name="sort" size={15} /><span className="sr-only">Sort by</span>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value as SortKey)} className="bg-transparent py-0.5 focus-visible:outline-none">
+                {(Object.keys(SORT_LABEL) as SortKey[]).map((k) => <option key={k} value={k}>Sort: {SORT_LABEL[k]}</option>)}
+              </select>
+            </label>
+          </div>}
           foot={`Identities withheld until NDA — buyers see what each business does, its stage, what is for sale, its model, stack, markets and asking price, with revenue and growth as brackets. ${founderCount} of ${plural(listings.length, "listing")} come from founders; the rest are the bundled demo company and Sovereign product-catalog entries, labelled on each card.`}>
-          <ol className="divide-y divide-xo-line">
-            {scored.map(({ listing: l, match }) => (
-              <li key={l.id} className="px-4 py-4">
+          {/* what is on screen, and each active filter as a removable chip */}
+          <div className="flex flex-wrap items-center gap-2 border-b border-xo-line px-4 py-2 text-[12px] text-xo-muted" aria-live="polite">
+            <span>Showing <span className="font-mono text-xo-text">{shown.length}</span> of {plural(listings.length, "listing")} · {SORT_LABEL[sortBy].toLowerCase()}</span>
+            {activeFilters.map(([k, label]) => (
+              <button key={k} type="button" onClick={() => setOnly((o) => ({ ...o, [k]: false }))} aria-label={`Remove filter: ${label}`}
+                className="inline-flex items-center gap-1 rounded-full border border-xo-action/40 bg-xo-action/10 px-2 py-0.5 text-[11.5px] text-xo-text hover:border-xo-action">
+                {label} <span aria-hidden>✕</span>
+              </button>
+            ))}
+            {activeFilters.length > 1 && <button type="button" onClick={() => setOnly({ qualified: false, founders: false, hideDemo: false })} className="text-[11.5px] font-medium text-xo-action hover:underline">Clear all</button>}
+          </div>
+          {shown.length === 0 && <p role="status" className="px-4 py-8 text-center text-[13px] text-xo-muted">No listing matches these filters.</p>}
+          <ol className={view === "grid" ? "grid gap-px bg-xo-line sm:grid-cols-2" : "divide-y divide-xo-line"}>
+            {shown.map(({ listing: l, match }) => (
+              <li key={l.id} className="bg-xo-panel px-4 py-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h3 className="text-[16px] font-semibold">
                     {l.code} <span className="text-[12px] font-normal text-xo-muted">· {l.publicView.sector} · {l.publicView.region === "Other" && l.facts ? "Global" : l.publicView.region}</span>

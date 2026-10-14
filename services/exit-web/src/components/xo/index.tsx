@@ -45,16 +45,20 @@ export const Section: React.FC<{
   className?: string;
   tone?: "ink" | "paper";
   level?: 2 | 3;
-}> = ({ title, eyebrow, right, foot, children, className = "", tone = "ink", level = 2 }) => {
+  icon?: React.ReactNode;     // a line icon beside the heading
+}> = ({ title, eyebrow, right, foot, children, className = "", tone = "ink", level = 2, icon }) => {
   const id = useId();
   const H = level === 2 ? "h2" : "h3";
   const paper = tone === "paper";
   return (
     <section aria-labelledby={id} className={`flex min-w-0 flex-col ${paper ? "bg-xo-paper text-xo-paper-text" : "bg-xo-panel text-xo-text"} ${className}`}>
       <header className={`flex flex-wrap items-end justify-between gap-x-3 gap-y-1 border-b px-4 pb-2 pt-3 ${paper ? "border-xo-paper-line" : "border-xo-line"}`}>
-        <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
+          {icon && <span aria-hidden className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-xo-action/10 text-xo-action">{icon}</span>}
+          <div className="min-w-0">
           {eyebrow && <div className={`text-[10px] font-semibold uppercase tracking-[0.16em] ${paper ? "text-xo-paper-muted" : "text-xo-faint"}`}>{eyebrow}</div>}
           <H id={id} className={`text-[14px] font-semibold tracking-tight ${paper ? "text-xo-paper-text" : "text-xo-text"}`}>{title}</H>
+          </div>
         </div>
         {right && <div className="flex items-center gap-2 text-[11px]">{right}</div>}
       </header>
