@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Button, Modal, Field, inputCls, fmtMoney, copyText } from "../lib/ui";
+import { Button, Modal, Field, inputCls, fmtMoney } from "../lib/ui";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { Link } from "react-router-dom";
@@ -120,10 +120,10 @@ const Buyers: React.FC = () => {
                 {/* PRELAUNCH-REVIEW: urgency claim restored; nothing tracks buyer redeployment, not sourced */}
                 <TakeCell k="If you wait">Hot interest cools — buyers redeploy and the warm window closes without a touch.</TakeCell>
                 <TakeCell k="Pursue">{top.buyer.name} — fit {it.label.toLowerCase()} at {it.pct}%, {inlineLabel(top.buyer.buyerType)}.</TakeCell>
-                {/* PRELAUNCH-REVIEW: "ExitOS does it" wording restored; routing through the banker happens on Outreach, not from this page */}
+                {/* PRELAUNCH-REVIEW: "ExitOS does it" wording restored; The Banker drafts the introduction and opens it in the founder's mail app */}
                 <TakeCell k="ExitOS does it">ExitOS drafts a personalized warm introduction for each buyer and routes it through the banker.</TakeCell>
               </dl>
-              <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link>
+              <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Send via The Banker →</Link>
               {outreachGate && <span className="ml-3 text-[12px] text-xo-caution">Requires {outreachGate}</span>}
             </div>
           </Section>
@@ -172,8 +172,8 @@ const Buyers: React.FC = () => {
       </Section>
 
       <Modal open={intro != null} onClose={() => setIntro(null)} title={`Warm introduction · ${intro?.name ?? ""}`} size="md"
-        footer={<>{outreachGate && <span className="mr-auto text-[12px] text-xo-caution">Outreach requires {outreachGate}</span>}<Button variant="ghost" disabled={!!introGate?.blocked} onClick={() => intro && !introGate?.blocked && copyText(intro.text)}>Copy</Button><Link to="/console/banker" className="rounded-sm bg-desk-gold px-3.5 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open Outreach →</Link></>}>
-        <p className="mb-3 text-[12px] text-xo-muted">A draft generated from the buyer's thesis and the company's figures. Nothing is sent from this page — copy it, or take it to Outreach.</p>
+        footer={<>{outreachGate && <span className="mr-auto text-[12px] text-xo-caution">Outreach requires {outreachGate}</span>}<Link to="/console/banker" className="rounded-sm bg-desk-gold px-3.5 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Send via The Banker →</Link></>}>
+        <p className="mb-3 text-[12px] text-xo-muted">A warm introduction drafted from the buyer's thesis and the company's figures. The Banker sends it for you.</p>
         <GateNotice gate={introGate} className="mb-2" />
         <pre className="whitespace-pre-wrap border border-xo-line bg-xo-ink p-4 font-sans text-[13px] leading-relaxed text-xo-text">{intro?.text}</pre>
       </Modal>

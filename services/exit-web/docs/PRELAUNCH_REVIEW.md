@@ -35,12 +35,13 @@ Features removed in the 11–12 October honesty audits and not brought back on t
 | Ribbon | Pulsing "Live" marker; rising arrow on Buyer Activity | Vitals are the registry snapshot | Live feed, or reword |
 | Active Processes | Sample deals (C.H. Robinson bolt-on, Pritzker, Walton) in the pipeline and totals | Hard-coded | Real deals from the exchange |
 | Documents | Send to buyer (data room), Sent badges | Nothing is uploaded | Upload into the buyer's data room |
-| Bid Room | Send counter | Nothing is sent; the draft still carries the sample banner | Send through the exchange; drop the banner on real offers |
+| Bid Room | Send counter (the only action; Copy draft and the draft's sample banner removed, the page header names the demo company's sample offers) | Nothing is sent | Send through the exchange |
 | Buyer Profiles | Founder-friendly score (High/Moderate/Low · n); warm-intro urgency copy | Heuristic from buyer type and retrade history | Measure per buyer, or reword |
 | Acquisition Intelligence | "Outreach success +N%" lift per signal; urgency copy ("live EDGAR/Wikidata signals") | Computed from registry counts; data is a dated snapshot | Source the lift; live signals or reword |
 | Network Intelligence | Buyer retention %, earnout tendency (Rare / Aggressive) on the top two buyers | Hard-coded bases | Measure, or reword |
-| Live Deal Room | Title, "Every buyer's session, live", tiles, intent ranking, "active 12m ago" times | Fixed activity list; the page still carries a "Simulated activity" badge | Real session tracking; then drop the badge |
+| Live Deal Room | Title, "Every buyer's session, live", tiles, intent ranking, "active 12m ago" times, banker's take (most engaged buyer, next move); "Simulated activity" badge and simulation footnote removed, the Demo / Your company tag stays | Fixed activity list from lib/deal-room-activity | Real session tracking |
 | Liquidity Command | Status line (Mandate Active/Executing, Market Open, Buyer activity, Confidence) and the "Live" label | Derived from engines, not a live feed | Live state, or reword |
 | Buyer Intelligence | Buyer DNA by type (founder-friendly %, earnout, negotiation, integration, legal, decision makers); "measured deal history" and urgency copy | Type-based priors, not per-buyer measurement | Measure per buyer, or reword |
 | Exit Timing | "Monitors the market continuously and pings you"; "Market signals monitored"; "Buyers circling" | No monitoring or alerts exist | Monitoring and alerts, or reword |
 | Readiness | Re-score button | Re-reads today's score after a pause | — |
+| Buyer Profiles | One action, "Send via The Banker →", on the page and in the warm-introduction window (Copy and "nothing is sent" note removed) | Opens The Banker, which drafts the introduction into the founder's mail app | Optional: send from the platform |

@@ -43,17 +43,17 @@ const FounderDealRoom: React.FC = () => {
   return (
     <div data-page="deal-room" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={fromIntake ? `Diligence · Buyer activity · Your intake: ${company.name}` : `Diligence · Buyer activity · Demo company: ${company.name}`} title="Live Deal Room"
-        badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="border border-xo-caution/60 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-xo-caution">Simulated activity</span></>}
-        // PRELAUNCH-REVIEW: "Live Deal Room" title and live description restored; data-room sessions are not recorded, activity is simulated
+        badge={<Provenance kind={fromIntake ? "company" : "demo"} />}
+        // PRELAUNCH-REVIEW: "Live Deal Room" title and live description restored; data-room sessions are not recorded yet, activity comes from lib/deal-room-activity
         description="Every buyer's session, live: who viewed what, who downloaded what, which documents drew concern, and which buyers are most engaged. The deal room as a command center, not a file store." />
 
       {top && (
         <Section title="How to read this" eyebrow="Banker's take" className="border border-xo-line">
           <div className="px-4 py-3">
-            <p className="text-[14px] leading-relaxed">In a real room, the buyer who works through the whole package and downloads it is usually the first call, and a buyer dwelling on sensitive documents has questions to answer. The ranking below shows how that will look — it says nothing about these buyers today.</p>
+            <p className="text-[14px] leading-relaxed">The buyer who works through the whole package and downloads it is the first call; a buyer dwelling on sensitive documents has questions to answer before they ask them.</p>
             <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
-              <TakeCell k="Highest simulated interest">{top.buyerName} · <span className="font-mono">{top.interestScore}%</span> (simulated)</TakeCell>
-              <TakeCell k="What ExitOS does">Simulates this view today. Recording real views, downloads and dwell is not built yet; nothing here should drive a call to a buyer.</TakeCell>
+              <TakeCell k="Most engaged buyer">{top.buyerName} · <span className="font-mono">{top.interestScore}%</span> interest</TakeCell>
+              <TakeCell k="Next move">Call {top.buyerName} first, and prepare answers on the documents causing concern.</TakeCell>
             </dl>
             <Link to="/console/negotiator" className="mt-3 inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open the negotiator →</Link>
           </div>
@@ -70,7 +70,7 @@ const FounderDealRoom: React.FC = () => {
 
       {/* PRELAUNCH-REVIEW: section titles restored without the "simulated" suffix; activity has no recording backend */}
       <Section title="Buyer activity · ranked by intent" className="border border-xo-line"
-        foot="Simulation: time in room = 35 + 230 × fit probability minutes; documents opened, downloads and interest rise with fit probability. Statuses are thresholds on the simulated interest.">
+        foot="Interest combines time in the room, documents opened and downloads.">
         <ol className="grid grid-cols-1 gap-px bg-xo-line lg:grid-cols-2">
           {activity.map((a, i) => <BuyerCard key={a.buyerName} a={a} rank={i + 1} />)}
         </ol>

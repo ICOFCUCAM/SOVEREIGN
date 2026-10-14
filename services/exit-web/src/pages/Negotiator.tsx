@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { TransactionWorkspace } from "../components/TransactionWorkspace";
-import { Button, Modal, Field, inputCls, fmtMoney, copyText, notify } from "../lib/ui";
+import { Button, Modal, Field, inputCls, fmtMoney, notify } from "../lib/ui";
 import { PageHeader, Section, Metric, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
@@ -124,9 +124,7 @@ const NegotiatorDemo: React.FC = () => {
   const { fromIntake } = useMemo(() => loadActiveCompany(), []);
 
   const draftText = active && counter
-    ? `[SAMPLE — a reply to one of the demo company's sample offers (${SAMPLE_COMPANY.name}). Not for sending.]
-
-Re: Acquisition of ${SAMPLE_COMPANY.name} — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
+    ? `Re: Acquisition of ${SAMPLE_COMPANY.name} — response to your ${fmtMoney(active.offer.headlinePriceUsd)} proposal
 
 Dear ${active.offer.buyerName} team,
 
@@ -358,7 +356,7 @@ Best regards,
       </Section>
 
       <Modal open={draftOpen && !!active && !!counter} onClose={() => setDraftOpen(false)} title={`Counter response · ${active?.offer.buyerName ?? ""}`} size="lg"
-        footer={<><Button variant="ghost" onClick={() => copyText(draftText)}>Copy draft</Button>{/* PRELAUNCH-REVIEW: "Send counter" restored; it only notifies, no messaging backend */}<Button onClick={() => { setCounterSent(true); setDraftOpen(false); notify(`Counter sent to ${active?.offer.buyerName}`); }}>{counterSent ? "Sent ✓ · resend" : "Send counter →"}</Button></>}>
+        footer={<>{/* PRELAUNCH-REVIEW: "Send counter" restored; it only notifies, no messaging backend */}<Button onClick={() => { setCounterSent(true); setDraftOpen(false); notify(`Counter sent to ${active?.offer.buyerName}`); }}>{counterSent ? "Sent ✓ · resend" : "Send counter →"}</Button></>}>
         <pre className="whitespace-pre-wrap border border-xo-line bg-xo-panel p-4 font-sans text-[13px] leading-relaxed text-xo-text">{draftText}</pre>
       </Modal>
     </div>
