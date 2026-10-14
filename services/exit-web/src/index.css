@@ -171,3 +171,8 @@ main :is(table, dl, time, figcaption, [data-edition], .tabular-nums) { font-vari
   .ex-site .pointer-events-none.absolute.inset-0.bg-\[\#02050a\] { display: none !important; }
 }
 
+
+/* The listing desk: focus in the desk's own bronze, not the marketing blue; the stage heading takes
+   focus programmatically (for screen readers) and draws no outline. */
+[data-page="listing-desk"] :is(a, button, summary, select, input, textarea, [tabindex]):focus-visible { outline: 2px solid #B49A75; outline-offset: 2px; }
+[data-page="listing-desk"] [tabindex="-1"]:focus, [data-page="listing-desk"] [tabindex="-1"]:focus-visible { outline: none; }
