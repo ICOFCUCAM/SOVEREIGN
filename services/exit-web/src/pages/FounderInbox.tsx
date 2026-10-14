@@ -57,7 +57,7 @@ const Confirm: React.FC<{ text: React.ReactNode; confirm: string; onConfirm: () 
   <div role="group" aria-label="Confirm action" className="mt-2 w-full border border-xo-caution/50 bg-xo-ink px-3 py-2 text-[12px]">
     <p className="text-xo-text">{text}</p>
     <div className="mt-2 flex gap-2">
-      <button type="button" onClick={onConfirm} className="rounded-sm bg-deal-700 px-3 py-1 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{confirm}</button>
+      <button type="button" onClick={onConfirm} className="rounded-sm bg-desk-gold px-3 py-1 text-[12px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{confirm}</button>
       <button type="button" autoFocus onClick={onCancel} className="rounded-sm border border-xo-line px-3 py-1 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Cancel</button>
     </div>
   </div>
@@ -115,7 +115,7 @@ const FounderInbox: React.FC = () => {
     void resolveOffer(offer.id, status).then(refresh);
   };
 
-  const BTN = "rounded-sm bg-deal-700 px-3 py-1 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  const BTN = "rounded-sm bg-desk-gold px-3 py-1 text-[12px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const tape = useMemo(() => buildMarketTape(), []);
 

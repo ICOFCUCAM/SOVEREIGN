@@ -53,7 +53,7 @@ const Admin: React.FC = () => {
   const buyers = accounts.filter((a) => a.role === "buyer").length;
   const pro = accounts.filter((a) => a.plan === "pro").length;
 
-  const BTN = "rounded-sm bg-deal-700 px-3 py-2 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
+  const BTN = "rounded-sm bg-desk-gold px-3 py-2 text-[12px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
 
   return (
     <div data-page="admin" className="space-y-3 text-xo-text">

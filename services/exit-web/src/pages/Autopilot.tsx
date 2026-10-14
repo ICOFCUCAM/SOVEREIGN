@@ -50,16 +50,16 @@ interface AgentDef {
 
 const STATUS_STYLE: Record<AgentStatus, string> = {
   queued:   "bg-xo-raise text-xo-faint ring-xo-line",
-  working:  "bg-loi-500/15 text-loi-200 ring-loi-400/40",
-  awaiting: "bg-deal-600/20 text-deal-200 ring-deal-400/50",
-  done:     "bg-deal-600/25 text-deal-200 ring-deal-400/50",
+  working:  "bg-xo-caution/15 text-xo-caution ring-xo-caution/40",
+  awaiting: "bg-xo-verified/20 text-xo-verified ring-xo-action/50",
+  done:     "bg-xo-verified/25 text-xo-verified ring-xo-action/50",
 };
 const STATUS_LABEL: Record<AgentStatus, string> = {
   queued: "Queued", working: "Working", awaiting: "Needs approval", done: "Approved",
 };
 
 const Spinner: React.FC = () => (
-  <span className="block h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-loi-300/40 border-t-loi-200" />
+  <span className="block h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-xo-caution/40 border-t-loi-200" />
 );
 
 // Buyer row used in the Buyer Discovery work product — surfaces the engine's
@@ -88,11 +88,11 @@ const BuyerRow: React.FC<{ b: BuyerCandidate; n: number; excluded?: boolean; onT
           <div className="mt-1 truncate text-[10px] text-xo-faint">{b.buyer.sectorsActive.slice(0, 3).map((s) => sectorLabel(s)).join(" · ")} · {b.buyer.geographyPreferred.length ? b.buyer.geographyPreferred.slice(0, 4).join(" ") : "Global"}</div>
         </div>
         <div className="shrink-0 text-right">
-          <div className="font-mono text-[14px] font-bold text-deal-300">{Math.round(b.probability * 100)}%</div>
+          <div className="font-mono text-[14px] font-bold text-xo-verified">{Math.round(b.probability * 100)}%</div>
           <div className="text-[10px] text-xo-faint">fit</div>
         </div>
         {onToggle && (
-          <button onClick={onToggle} className={`shrink-0 self-center rounded-md px-2 py-1 text-[11px] font-semibold ring-1 transition ${excluded ? "text-xo-muted ring-xo-line hover:bg-xo-raise" : "text-deal-300 ring-deal-400/40 hover:bg-deal-600/10"}`}>
+          <button onClick={onToggle} className={`shrink-0 self-center rounded-md px-2 py-1 text-[11px] font-semibold ring-1 transition ${excluded ? "text-xo-muted ring-xo-line hover:bg-xo-raise" : "text-xo-verified ring-xo-action/40 hover:bg-xo-verified/10"}`}>
             {excluded ? "Add" : "Remove"}
           </button>
         )}
@@ -309,8 +309,8 @@ const Autopilot: React.FC = () => {
           : "A walkthrough of how the agents would run an exit on the figures ExitOS holds — value, buyers, data room, documents, outreach, negotiation, closing and wealth. Each step waits for your approval."}
       />
 
-      <div className="mt-2 flex items-start gap-2 rounded-sm border border-loi-400/30 bg-loi-500/[0.07] px-4 py-2.5 text-[12px] text-loi-100/90">
-        <span className="mt-0.5 shrink-0 rounded bg-loi-500/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-loi-200 ring-1 ring-loi-400/40">Simulated</span>
+      <div className="mt-2 flex items-start gap-2 rounded-sm border border-xo-caution/30 bg-loi-500/[0.07] px-4 py-2.5 text-[12px] text-xo-caution/90">
+        <span className="mt-0.5 shrink-0 rounded bg-xo-caution/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-xo-caution ring-1 ring-xo-caution/40">Simulated</span>
         <span>This is a guided walkthrough of the orchestration. Each step is illustrative and advances on your approval — no live outreach, escrow or wires are executed. The valuations, buyer lists and deliverables shown are real engine output.</span>
       </div>
 
@@ -318,7 +318,7 @@ const Autopilot: React.FC = () => {
       <Modal open={!!reviewAgent} onClose={() => setReviewIdx(null)} title={reviewAgent ? reviewAgent.name : ""} subtitle={reviewAgent?.role} size="lg"
         footer={reviewAgent ? <>
           {reviewAgent.reportPath
-            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-800">Open board-ready report →</a>
+            ? <a href={reviewAgent.reportPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-md bg-desk-gold px-4 py-2 text-sm font-semibold text-desk-ink transition hover:bg-[#AA8443]">Open board-ready report →</a>
             : <Button variant="ghost" onClick={() => downloadDeliverable(reviewAgent.deliverable.filename, reviewAgent.deliverable.build())}>Download draft (.md)</Button>}
           <Button onClick={() => { send(reviewAgent); }}>{sent.has(reviewAgent.id) ? "✓ Marked ready" : "Mark ready"}</Button>
         </> : null}>
@@ -333,8 +333,8 @@ const Autopilot: React.FC = () => {
                 </div>
               </div>
             ) : reviewAgent.detail}
-            <div className="rounded-md border border-deal-500/30 bg-deal-600/[0.07] p-3 text-[12px] text-xo-text">
-              Deliverable: <span className="font-mono text-deal-300">{reviewAgent.deliverable.filename}</span> — download to review, or mark it ready. Nothing is sent from this simulation.
+            <div className="rounded-md border border-xo-verified/30 bg-deal-600/[0.07] p-3 text-[12px] text-xo-text">
+              Deliverable: <span className="font-mono text-xo-verified">{reviewAgent.deliverable.filename}</span> — download to review, or mark it ready. Nothing is sent from this simulation.
             </div>
           </div>
         )}
@@ -344,7 +344,7 @@ const Autopilot: React.FC = () => {
       <Card className="overflow-hidden p-0">
         <div className="grid gap-0 lg:grid-cols-[1.4fr_1fr]">
           <div className="border-b border-xo-line p-7 lg:border-b-0 lg:border-r">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-deal-400">One instruction</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.24em] text-xo-verified">One instruction</div>
             <h2 className="mt-2 font-serif text-3xl font-bold leading-tight text-xo-text">"Sell my company."</h2>
             <p className="mt-3 text-[13.5px] leading-relaxed text-xo-muted">
               ExitOS lays out {AGENTS.length} agents — valuation, buyer discovery, outreach, data room, diligence,
@@ -354,12 +354,12 @@ const Autopilot: React.FC = () => {
             <div className="mt-6 flex flex-wrap items-center gap-3">
               {!started && <Button onClick={start}>Start Exit Process →</Button>}
               {started && !allDone && (
-                <span className="inline-flex items-center gap-2 rounded-md bg-loi-500/15 px-3 py-2 text-[12px] font-semibold text-loi-200 ring-1 ring-loi-400/40">
+                <span className="inline-flex items-center gap-2 rounded-md bg-xo-caution/15 px-3 py-2 text-[12px] font-semibold text-xo-caution ring-1 ring-xo-caution/40">
                   ● {starterGated ? "Buyers found · upgrade to continue" : `Running · ${awaitingIndex >= 0 ? `${AGENTS[awaitingIndex].name} needs you` : "agents working"}`}
                 </span>
               )}
               {allDone && (
-                <span className="inline-flex items-center gap-2 rounded-md bg-deal-600/20 px-3 py-2 text-[12px] font-semibold text-deal-200 ring-1 ring-deal-500/40">
+                <span className="inline-flex items-center gap-2 rounded-md bg-xo-verified/20 px-3 py-2 text-[12px] font-semibold text-xo-verified ring-1 ring-xo-action/40">
                   ✓ Simulation complete · you approved {AGENTS.length} decisions
                 </span>
               )}
@@ -370,16 +370,16 @@ const Autopilot: React.FC = () => {
               <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-xo-faint">Process progress</div>
               <div className="font-mono text-[11px] text-xo-faint">{doneCount}/{AGENTS.length}</div>
             </div>
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-xo-raise">
               <div className="h-full rounded-full bg-deal-500 transition-all duration-700" style={{ width: `${progressPct}%` }} />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-center">
               <div className="rounded-sm border border-xo-line bg-xo-ink p-3">
-                <div className="font-mono text-2xl font-bold text-deal-300">{started ? doneCount : "—"}</div>
+                <div className="font-mono text-2xl font-bold text-xo-verified">{started ? doneCount : "—"}</div>
                 <div className="mt-0.5 text-[10px] uppercase tracking-wide text-xo-faint">Decisions approved</div>
               </div>
               <div className="rounded-sm border border-xo-line bg-xo-ink p-3">
-                <div className="font-mono text-2xl font-bold text-loi-300">{started && !allDone ? (awaitingIndex >= 0 ? 1 : 0) : 0}</div>
+                <div className="font-mono text-2xl font-bold text-xo-caution">{started && !allDone ? (awaitingIndex >= 0 ? 1 : 0) : 0}</div>
                 <div className="mt-0.5 text-[10px] uppercase tracking-wide text-xo-faint">Awaiting you</div>
               </div>
             </div>
@@ -394,7 +394,7 @@ const Autopilot: React.FC = () => {
           const revealed = status !== "queued";
           const locked = isStarter && i > GATE;
           return (
-            <Card key={a.id} className={`p-5 transition ${status === "awaiting" ? "ring-1 ring-deal-400/40" : ""} ${locked ? "opacity-55" : ""}`}>
+            <Card key={a.id} className={`p-5 transition ${status === "awaiting" ? "ring-1 ring-xo-action/40" : ""} ${locked ? "opacity-55" : ""}`}>
               <div className="flex items-start gap-4">
                 <div className="flex flex-col items-center">
                   <span className={`flex h-9 w-9 items-center justify-center rounded-sm text-[13px] font-bold ring-1 ${STATUS_STYLE[status]}`}>
@@ -408,7 +408,7 @@ const Autopilot: React.FC = () => {
                       <span className="ml-2 text-[12px] text-xo-faint">{a.role}</span>
                     </div>
                     {locked
-                      ? <span className="rounded-full bg-loi-500/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-loi-300 ring-1 ring-loi-400/40">Requires {PLAN_LABEL.pro}</span>
+                      ? <span className="rounded-full bg-xo-caution/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-xo-caution ring-1 ring-xo-caution/40">Requires {PLAN_LABEL.pro}</span>
                       : <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ${STATUS_STYLE[status]}`}>
                           {status === "working" ? "Working…" : STATUS_LABEL[status]}
                         </span>}
@@ -417,7 +417,7 @@ const Autopilot: React.FC = () => {
                   {revealed && (
                     <div className="mt-2 text-[13px] leading-snug text-xo-text">{a.work}</div>
                   )}
-                  {revealed && a.detailNote && <div className="mt-1 text-[12px] text-loi-300">{a.detailNote}</div>}
+                  {revealed && a.detailNote && <div className="mt-1 text-[12px] text-xo-caution">{a.detailNote}</div>}
 
                   {/* Inline work product — show the buyer list right on the discovery row */}
                   {revealed && a.id === "discovery" && (
@@ -425,8 +425,8 @@ const Autopilot: React.FC = () => {
                   )}
 
                   {status === "awaiting" && (
-                    <div className="mt-3 rounded-sm border border-deal-500/30 bg-deal-600/[0.07] p-4">
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-deal-300">Your decision · simulated</div>
+                    <div className="mt-3 rounded-sm border border-xo-verified/30 bg-deal-600/[0.07] p-4">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-xo-verified">Your decision · simulated</div>
                       <p className="mt-1 text-[13.5px] text-xo-text">{a.decision}</p>
                       <div className="mt-3 flex flex-wrap gap-2.5">
                         <Button onClick={() => approve(i)}>{a.approveLabel}</Button>
@@ -437,13 +437,13 @@ const Autopilot: React.FC = () => {
 
                   {status === "done" && (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-wide text-deal-300">✓ Approved</span>
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-xo-verified">✓ Approved</span>
                       <span className="text-xo-faint">·</span>
                       <button className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" onClick={() => setReviewIdx(i)}>Review</button>
                       {a.reportPath
                         ? <a className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" href={a.reportPath} target="_blank" rel="noopener noreferrer">Report →</a>
                         : <button className="text-[11px] font-semibold uppercase tracking-wide text-xo-muted hover:text-xo-text" onClick={() => downloadDeliverable(a.deliverable.filename, a.deliverable.build())}>Download .md</button>}
-                      <button className="text-[11px] font-semibold uppercase tracking-wide text-deal-300 hover:text-deal-200" onClick={() => send(a)}>{sent.has(a.id) ? "✓ Ready" : "Mark ready"}</button>
+                      <button className="text-[11px] font-semibold uppercase tracking-wide text-xo-verified hover:text-xo-verified" onClick={() => send(a)}>{sent.has(a.id) ? "✓ Ready" : "Mark ready"}</button>
                     </div>
                   )}
                 </div>
@@ -455,11 +455,11 @@ const Autopilot: React.FC = () => {
 
       {/* ── Starter gate — buyers found, upgrade to continue ─────── */}
       {starterGated && (
-        <Card className="mt-8 overflow-hidden p-0 ring-1 ring-deal-400/40">
+        <Card className="mt-8 overflow-hidden p-0 ring-1 ring-xo-action/40">
           <div className="border-b border-xo-line bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Buyers found</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-xo-verified">Buyers found</div>
             <div className="mt-1 flex flex-wrap items-baseline gap-3">
-              <span className="font-mono text-2xl font-bold text-deal-300">{shortlist.length} matched acquirers</span>
+              <span className="font-mono text-2xl font-bold text-xo-verified">{shortlist.length} matched acquirers</span>
               <span className="text-[13px] text-xo-muted">are ready to engage your listing</span>
             </div>
           </div>
@@ -503,9 +503,9 @@ const Autopilot: React.FC = () => {
       {allDone && (
         <Card className="mt-8 overflow-hidden p-0">
           <div className="border-b border-xo-line bg-gradient-to-r from-deal-600/20 to-transparent px-6 py-5">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Simulation complete</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-xo-verified">Simulation complete</div>
             <div className="mt-1 flex flex-wrap items-baseline gap-3">
-              <span className="font-mono text-3xl font-bold text-deal-300">{fmtMoney(VALUATION_CANONICAL.headline.mid)}</span>
+              <span className="font-mono text-3xl font-bold text-xo-verified">{fmtMoney(VALUATION_CANONICAL.headline.mid)}</span>
               <span className="text-[13px] text-xo-muted">enterprise value used in this walkthrough — no money moves</span>
             </div>
           </div>
@@ -516,7 +516,7 @@ const Autopilot: React.FC = () => {
               and escrow; here each step was simulated on engine output. WealthOS covers what happens after a real close.
             </p>
             <div className="mt-4 flex flex-wrap gap-2.5">
-              <Link to="/console/wealth" className="rounded-md bg-deal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-deal-800">Open WealthOS →</Link>
+              <Link to="/console/wealth" className="rounded-md bg-desk-gold px-4 py-2 text-sm font-semibold text-desk-ink transition hover:bg-[#AA8443]">Open WealthOS →</Link>
               <Button variant="ghost" onClick={() => { setStarted(false); setStatuses(AGENTS.map(() => "queued")); setSent(new Set()); }}>Run again</Button>
             </div>
           </div>

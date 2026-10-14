@@ -114,11 +114,11 @@ const Banker: React.FC = () => {
   const interestedNames = interested.map((b) => b.buyer.name).join(" and ");
 
   const funnel: { label: string; n: number; accent: string }[] = [
-    { label: "Identified",   n: nId,        accent: "#64748b" },
+    { label: "Identified",   n: nId,        accent: "#8A8378" },
     { label: "Shortlisted",  n: nShort,     accent: "#a78bfa" },
-    { label: "Contacted",    n: nContact,   accent: "#60a5fa" },
-    { label: "Interested",   n: nInterest,  accent: "#fbbf24" },
-    { label: "In diligence", n: nDiligence, accent: "#34d399" },
+    { label: "Contacted",    n: nContact,   accent: "#9A7536" },
+    { label: "Interested",   n: nInterest,  accent: "#9A6A12" },
+    { label: "In diligence", n: nDiligence, accent: "#2F6B3F" },
   ];
 
   const workstreams: { key: string; title: string; status: WorkStatus; result: string }[] = [
@@ -193,7 +193,7 @@ const Banker: React.FC = () => {
   const tabDoc = tab === "teaser" ? teaser : tab === "summary" ? summary : null;
   const docGate = useDocumentGate(tab === "teaser" ? "exitos.teaser" : "exitos.executive_summary", tabDoc ? docToMarkdown(tabDoc) : null, VALUATION_CANONICAL.headline.mid);
 
-  const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
+  const BTN = "rounded-sm bg-desk-gold px-3 py-1.5 text-[12px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
   const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
   const FUNNEL_TONE = ["bg-xo-muted", "bg-xo-brass", "bg-xo-action", "bg-xo-caution", "bg-xo-verified"];
 
@@ -210,7 +210,7 @@ const Banker: React.FC = () => {
         <Field label="Your instruction" hint="e.g. prioritize strategic buyers · avoid private equity · target logistics consolidators · minimum valuation $100M · hold outreach until Q4">
           <textarea className={`${inputCls} min-h-[120px] resize-y`} value={briefText} onChange={(e) => setBriefText(e.target.value)} placeholder="Tell the banker what to do…" />
         </Field>
-        <p className="mt-2 text-[12px] leading-relaxed text-white/60">
+        <p className="mt-2 text-[12px] leading-relaxed text-xo-muted">
           Parsed by the deterministic directive engine — no language model is involved. The exact rules it extracts are shown
           as active directives and applied to the buyer pool, outreach posture and valuation guardrail.
         </p>
@@ -248,7 +248,7 @@ const Banker: React.FC = () => {
           }}>{isSent(`intro:${introBuyer.buyer.name}`) ? "Sent ✓ · resend" : "Send introduction"}</Button>
         </> : null}>
         <GateNotice gate={introGate} className="mb-2" />
-        {introBuyer && <pre className="whitespace-pre-wrap rounded-md border border-white/5 bg-black/40 p-4 text-[12.5px] leading-relaxed text-white/80">{introMd(introBuyer)}</pre>}
+        {introBuyer && <pre className="whitespace-pre-wrap rounded-md border border-xo-line bg-xo-raise p-4 text-[12.5px] leading-relaxed text-xo-text">{introMd(introBuyer)}</pre>}
       </Modal>
 
       {/* ── Agent status — first-person briefing ─────────────────── */}

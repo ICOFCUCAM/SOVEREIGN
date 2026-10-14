@@ -20,18 +20,18 @@ export const ReactorTelemetry: React.FC = () => {
   const busiest = [...DNA_PROFILES].filter((p) => p.events_indexed > 0).sort((a, b) => b.deals_12m - a.deals_12m)[0];
   const deepest = [...MARKET_INTEL.sectorHeat].sort((a, b) => b.disclosedUsd - a.disclosedUsd)[0];
   const rows: { k: string; v: string; tone?: string }[] = [
-    { k: "Hottest sector", v: hotSector ? `${hotSector.sector} ${hotSector.trendPct! >= 0 ? "+" : ""}${Math.round((hotSector.trendPct ?? 0) * 100)}%` : "—", tone: "text-deal-300" },
+    { k: "Hottest sector", v: hotSector ? `${hotSector.sector} ${hotSector.trendPct! >= 0 ? "+" : ""}${Math.round((hotSector.trendPct ?? 0) * 100)}%` : "—", tone: "text-xo-verified" },
     { k: "Busiest acquirer", v: busiest ? `${busiest.name} · ${busiest.deals_12m}/12m` : "—" },
     { k: "Deepest liquidity", v: deepest ? `${deepest.token} · ${fmtUsd(deepest.disclosedUsd)}` : "—", tone: "text-sky-300" },
     { k: "Total volume", v: ACQ_INDEXES.indexes.reduce((s, i) => s + i.volume, 0).toLocaleString() },
     { k: "Disclosed value", v: fmtUsd(MARKET_INTEL.totalDisclosedUsd) },
   ];
   return (
-    <div className="divide-y divide-white/5">
+    <div className="divide-y divide-xo-line">
       {rows.map((r) => (
         <div key={r.k} className="flex items-baseline justify-between gap-2 px-3 py-[7px] text-[11.5px]">
-          <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">{r.k}</span>
-          <span className={`font-mono tabular-nums ${r.tone ?? "text-white/80"}`}>{r.v}</span>
+          <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-xo-faint">{r.k}</span>
+          <span className={`font-mono tabular-nums ${r.tone ?? "text-xo-text"}`}>{r.v}</span>
         </div>
       ))}
     </div>
@@ -49,14 +49,14 @@ export const AcquisitionReactor: React.FC<{ height?: number }> = ({ height = 200
     <div className="relative" style={{ height }}>
       <svg viewBox="0 0 200 200" className="h-full w-full" role="img" aria-label="Acquisition reactor — sector volume">
         {/* grid rings */}
-        {[30, 50, 72].map((r) => <circle key={r} cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />)}
+        {[30, 50, 72].map((r) => <circle key={r} cx={cx} cy={cy} r={r} fill="none" stroke="rgba(60,45,20,0.10)" strokeWidth="0.5" />)}
         <g className="ex-rspin">
           {idx.map((s, i) => {
             const a = (i / idx.length) * TAU - Math.PI / 2;
             const [x, y] = polar(cx, cy, orbit, a);
             const r = 3 + Math.sqrt(s.volume / maxVol) * 9;
             const up = (s.trendPct ?? 0) >= 0;
-            const col = s.trendPct == null ? "#8aa0b8" : up ? "#45E38A" : "#f87171";
+            const col = s.trendPct == null ? "#8A8378" : up ? "#2F6B3F" : "#A23A2A";
             return (
               <g key={s.sector}>
                 <line x1={cx} y1={cy} x2={x} y2={y} stroke={col} strokeOpacity="0.18" strokeWidth="0.6" />
@@ -66,7 +66,7 @@ export const AcquisitionReactor: React.FC<{ height?: number }> = ({ height = 200
           })}
         </g>
         {/* core */}
-        <circle cx={cx} cy={cy} r="20" fill="rgba(56,130,246,0.08)" stroke="rgba(56,130,246,0.4)" strokeWidth="0.8" />
+        <circle cx={cx} cy={cy} r="20" fill="rgba(154,117,54,0.08)" stroke="rgba(154,117,54,0.45)" strokeWidth="0.8" />
         <text x={cx} y={cy - 1} textAnchor="middle" className="fill-white font-mono" style={{ fontSize: 13, fontWeight: 700 }}>{total.toLocaleString()}</text>
         <text x={cx} y={cy + 9} textAnchor="middle" className="fill-white/40" style={{ fontSize: 5.5, letterSpacing: 1 }}>ACQUISITIONS</text>
       </svg>
@@ -94,8 +94,8 @@ export const LiquidityReactor: React.FC<{ height?: number }> = ({ height = 200 }
             const large = arc > Math.PI ? 1 : 0;
             return (
               <g key={s.token}>
-                <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" />
-                <path d={`M ${sx} ${sy} A ${r} ${r} 0 ${large} 1 ${ex} ${ey}`} fill="none" stroke="#58C6FF" strokeOpacity={0.35 + frac * 0.5} strokeWidth="3" strokeLinecap="round" />
+                <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(60,45,20,0.07)" strokeWidth="3" />
+                <path d={`M ${sx} ${sy} A ${r} ${r} 0 ${large} 1 ${ex} ${ey}`} fill="none" stroke="#9A7536" strokeOpacity={0.35 + frac * 0.5} strokeWidth="3" strokeLinecap="round" />
               </g>
             );
           })}
@@ -123,7 +123,7 @@ export const BuyerNetworkReactor: React.FC<{ height?: number }> = ({ height = 20
             const [x, y] = polar(cx, cy, ringR, a);
             const r = 2.5 + (p.deals_12m / maxDeals) * 8;
             const hot = p.deals_12m >= 2;
-            const col = hot ? "#45E38A" : "#FFB14A";
+            const col = hot ? "#2F6B3F" : "#9A6A12";
             return (
               <g key={p.buyer_id}>
                 <line x1={cx} y1={cy} x2={x} y2={y} stroke={col} strokeOpacity="0.14" strokeWidth="0.5" />
@@ -132,7 +132,7 @@ export const BuyerNetworkReactor: React.FC<{ height?: number }> = ({ height = 20
             );
           })}
         </g>
-        <circle cx={cx} cy={cy} r="18" fill="rgba(69,227,138,0.07)" stroke="rgba(69,227,138,0.4)" strokeWidth="0.8" />
+        <circle cx={cx} cy={cy} r="18" fill="rgba(47,107,63,0.07)" stroke="rgba(47,107,63,0.4)" strokeWidth="0.8" />
         <text x={cx} y={cy - 1} textAnchor="middle" className="fill-white font-mono" style={{ fontSize: 13, fontWeight: 700 }}>{buyers.length}</text>
         <text x={cx} y={cy + 9} textAnchor="middle" className="fill-white/40" style={{ fontSize: 5.5, letterSpacing: 1 }}>ACQUIRERS</text>
       </svg>

@@ -18,7 +18,7 @@ import { DeskRail } from "./ListingDesk";
 // The server enforces every rule here (only operators write; founders see live campaigns only); this
 // page only makes the rules visible. Without a server, campaigns are kept in this browser.
 
-const BTN = "rounded-sm bg-deal-700 px-3 py-2 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
+const BTN = "rounded-sm bg-desk-gold px-3 py-2 text-[12px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-60";
 const GHOST = "rounded-sm border border-xo-line px-2.5 py-1.5 text-[12px] font-medium text-xo-text hover:border-xo-action focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-40";
 const STATE_STYLE: Record<AdState, string> = {
   Draft: "border-xo-line text-xo-muted", Scheduled: "border-xo-action/50 text-xo-action", Published: "border-xo-verified/50 text-xo-verified",
@@ -303,7 +303,7 @@ const Editor: React.FC<{
             <DeskRail stage={AD_STAGES.indexOf(stage) as 0 | 1 | 2} stageDone={[stage !== "identity", stage === "review", false]} canReview={stage === "review"} pagesDone={stage === "review" ? 3 : 1} onGo={() => undefined} onClose={() => undefined}>
               {d.stages.includes(stage)
                 ? <AdPanel preview slides={[{ campaign: previewCampaign, image: img }]} settings={settings} className="mt-6 flex flex-1" />
-                : <p className="m-5 mt-auto rounded-sm border border-white/10 p-3 text-[11.5px] text-ex-ivory/60">Not shown on this stage.</p>}
+                : <p className="m-5 mt-auto rounded-sm border border-xo-line p-3 text-[11.5px] text-ex-ivory/60">Not shown on this stage.</p>}
             </DeskRail>
           </div>
           <div aria-label="Phone preview" className="w-[300px] rounded-[18px] border border-xo-line bg-[#FBF8F2] p-3">

@@ -79,7 +79,7 @@ const Valuation: React.FC = () => {
       <Section title="Valuation fact sheet · every figure traced to a source" className="border border-xo-line"
         right={<>
           <button type="button" onClick={() => downloadJson("exitos-valuation-model.json", { company: C.name, institutional: INST, factSheet: FACTS, blended, dcf: dcfValue, medianPrecedentDealSizeUsd: compMid, assumptions: { growthPct: growth, discountPct: discount } })} className="rounded-sm border border-xo-line px-2 py-1 text-[11px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Export data (.json)</button>
-          <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-2 py-1 text-[11px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report →</a>
+          <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-desk-gold px-2 py-1 text-[11px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report →</a>
         </>}
         foot="Hover or focus any figure for its methodology, source and last-updated date.">
         <dl className="grid grid-cols-2 gap-px bg-xo-line sm:grid-cols-3 lg:grid-cols-5">

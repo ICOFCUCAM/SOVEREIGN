@@ -16,7 +16,7 @@ const RibbonSpark: React.FC = () => (
   <span className="hidden items-end gap-[1.5px] md:flex" title="Sector 12-month trend">
     {SPARK.map((s) => {
       const h = 3 + (Math.abs(s.t) / SPARK_MAX) * 11;
-      return <span key={s.sector} className={`w-[2px] rounded-sm ${s.t >= 0 ? "bg-deal-400/80" : "bg-red-400/70"}`} style={{ height: h }} />;
+      return <span key={s.sector} className={`w-[2px] rounded-sm ${s.t >= 0 ? "bg-[#7DC491]/80" : "bg-[#F08A75]/70"}`} style={{ height: h }} />;
     })}
   </span>
 );
@@ -37,17 +37,17 @@ const Clock: React.FC = () => {
 
 const InstitutionalRibbon: React.FC = () => (
   <div role="region" aria-label="Market vitals" tabIndex={0}
-    className="flex items-stretch ex-hscroll overflow-x-auto border-b border-white/10 bg-ink-950/92 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-deal-400">
+    className="flex items-stretch ex-hscroll overflow-x-auto border-b border-white/10 bg-ex-0 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ex-bronze">
     <div className="flex shrink-0 items-center gap-1.5 border-r border-white/10 px-3">
-      <span aria-hidden className="inline-flex h-1.5 w-1.5 rounded-full bg-deal-400" />
-      <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-deal-300">ExitOS</span>
+      <span aria-hidden className="inline-flex h-1.5 w-1.5 rounded-full bg-[#7DC491]" />
+      <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-desk-champagne">ExitOS</span>
       <span className="text-[8.5px] font-semibold uppercase tracking-[0.2em] text-white/60" title="Market vitals come from the bundled acquisition registry snapshot">Registry · {DNA_AS_OF.slice(0, 10)}</span>
     </div>
 
     {RIBBON.map((s) => (
       <div key={s.key} className="flex shrink-0 items-center gap-2 border-r border-white/[0.07] px-3 py-1">
         <span className="text-[8px] font-semibold uppercase tracking-[0.16em] text-white/60">{s.label}</span>
-        <span className={`font-mono text-[12px] font-bold tabular-nums ${s.dir === "up" ? "text-deal-300" : s.dir === "down" ? "text-red-300" : "text-white/90"}`}>
+        <span className={`font-mono text-[12px] font-bold tabular-nums ${s.dir === "up" ? "text-desk-champagne" : s.dir === "down" ? "text-[#F08A75]" : "text-white/90"}`}>
           {s.dir === "up" ? "▲" : s.dir === "down" ? "▼" : ""}{s.value}
         </span>
         {s.sub && <span className="hidden text-[9px] text-white/60 lg:inline">{s.sub}</span>}

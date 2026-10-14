@@ -109,7 +109,7 @@ const BuyerAccessRequests: React.FC = () => {
               </ul>
             )}
           <div className="mt-3 flex flex-wrap gap-2">
-            <Link to="/console/acquisition-radar" className="inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar →</Link>
+            <Link to="/console/acquisition-radar" className="inline-block rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Acquisition Radar →</Link>
             <Link to="/console/marketplace" className="inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Browse opportunities</Link>
             <Link to="/console/deal-room" className="inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Deal room</Link>
           </div>
@@ -209,21 +209,21 @@ const FounderNdaVault: React.FC = () => {
         footer={<Button onClick={() => { setTemplatesOpen(false); setIssueOpen(true); }}>Issue an NDA →</Button>}>
         <ul className="space-y-3">
           {STANDARD_TEMPLATES.map((t) => (
-            <li key={t.id} className="rounded-lg border border-white/10 bg-ink-900/40 p-4">
+            <li key={t.id} className="rounded-lg border border-xo-line bg-xo-panel p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-sm font-bold text-white">{t.name}</h3>
-                <span className="shrink-0 font-mono text-[11px] text-white/70">{label(t.shape)} · v{t.version}</span>
+                <h3 className="text-sm font-bold text-xo-text">{t.name}</h3>
+                <span className="shrink-0 font-mono text-[11px] text-xo-muted">{label(t.shape)} · v{t.version}</span>
               </div>
               <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1.5 text-[12px] sm:grid-cols-3">
-                <div><dt className="inline text-white/60">Clauses </dt><dd className="inline text-white/90">{t.clauseCount}</dd></div>
-                <div><dt className="inline text-white/60">Survival </dt><dd className="inline text-white/90">{t.defaultTerms.survivalMonths}mo</dd></div>
-                <div><dt className="inline text-white/60">Return/destroy </dt><dd className="inline text-white/90">{t.defaultTerms.returnOrDestroyDays}d</dd></div>
-                <div><dt className="inline text-white/60">Scope </dt><dd className="inline text-white/90">{t.defaultTerms.scope}</dd></div>
-                <div><dt className="inline text-white/60">Law </dt><dd className="inline text-white/90">{t.defaultTerms.governingLaw}</dd></div>
-                <div><dt className="inline text-white/60">Injunctive </dt><dd className="inline text-white/90">{t.defaultTerms.injunctiveRelief ? "yes" : "no"}</dd></div>
-                {t.defaultTerms.liquidatedDamagesUsd ? <div className="col-span-2"><dt className="inline text-white/60">Liquidated damages </dt><dd className="inline text-white/90">USD {t.defaultTerms.liquidatedDamagesUsd.toLocaleString()}</dd></div> : null}
+                <div><dt className="inline text-xo-muted">Clauses </dt><dd className="inline text-xo-text">{t.clauseCount}</dd></div>
+                <div><dt className="inline text-xo-muted">Survival </dt><dd className="inline text-xo-text">{t.defaultTerms.survivalMonths}mo</dd></div>
+                <div><dt className="inline text-xo-muted">Return/destroy </dt><dd className="inline text-xo-text">{t.defaultTerms.returnOrDestroyDays}d</dd></div>
+                <div><dt className="inline text-xo-muted">Scope </dt><dd className="inline text-xo-text">{t.defaultTerms.scope}</dd></div>
+                <div><dt className="inline text-xo-muted">Law </dt><dd className="inline text-xo-text">{t.defaultTerms.governingLaw}</dd></div>
+                <div><dt className="inline text-xo-muted">Injunctive </dt><dd className="inline text-xo-text">{t.defaultTerms.injunctiveRelief ? "yes" : "no"}</dd></div>
+                {t.defaultTerms.liquidatedDamagesUsd ? <div className="col-span-2"><dt className="inline text-xo-muted">Liquidated damages </dt><dd className="inline text-xo-text">USD {t.defaultTerms.liquidatedDamagesUsd.toLocaleString()}</dd></div> : null}
               </dl>
-              <p className="mt-3 text-[12px] text-white/65">Carve-outs: {t.defaultTerms.carveOuts.join(" · ")}</p>
+              <p className="mt-3 text-[12px] text-xo-muted">Carve-outs: {t.defaultTerms.carveOuts.join(" · ")}</p>
             </li>
           ))}
         </ul>
@@ -244,8 +244,8 @@ const FounderNdaVault: React.FC = () => {
             <input className={inputCls} placeholder="e.g. Jane Okonkwo, VP CorpDev" value={form.rep} onChange={(e) => setForm((f) => ({ ...f, rep: e.target.value }))} />
           </Field>
           {(() => { const t = templateById(form.templateId); return t ? (
-            <p className="rounded-lg border border-white/10 bg-ink-900/40 p-3 text-[12px] text-white/75">
-              Issues a <span className="text-white">{inlineLabel(t.shape)}</span> NDA — {t.defaultTerms.survivalMonths}mo survival, {t.defaultTerms.governingLaw} law, {t.clauseCount} clauses. State starts at <span className="text-loi-300">pending signature</span>.
+            <p className="rounded-lg border border-xo-line bg-xo-panel p-3 text-[12px] text-xo-muted">
+              Issues a <span className="text-xo-text">{inlineLabel(t.shape)}</span> NDA — {t.defaultTerms.survivalMonths}mo survival, {t.defaultTerms.governingLaw} law, {t.clauseCount} clauses. State starts at <span className="text-xo-caution">pending signature</span>.
             </p>
           ) : null; })()}
         </div>

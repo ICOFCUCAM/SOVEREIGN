@@ -47,25 +47,29 @@ export default {
         // untouched so pages not yet redesigned do not move. Text tokens
         // are contrast-checked (≥ 4.5:1) on xo-ink / xo-panel; paper-*
         // tokens are for light editorial reading surfaces.
+        // ── The console (`xo`) ─────────────────────────────────────────
+        // One palette for every console page, set as CSS variables in index.css so a region can switch
+        // ground: page content sits on warm ivory (the default), structural chrome (the ribbon and layer
+        // bars) on charcoal via data-xo="dark". Text steps are contrast-checked on both grounds (≥ 4.5:1).
         xo: {
-          ink: "#0b1220",        // command surface
-          panel: "#101a2b",      // raised panel on ink
-          raise: "#16233a",      // hover / selected row
-          line: "#22314b",       // hairline on dark
-          text: "#e8edf5",       // primary text on dark (14.8:1 on panel)
-          muted: "#a3b1c6",      // secondary text on dark (8.0:1)
-          faint: "#8796ad",      // labels / captions on dark (5.2:1 on raise)
-          paper: "#f6f4ef",      // editorial reading surface
-          "paper-line": "#ddd8cc",
-          "paper-text": "#1a2233", // on paper (14.5:1)
-          "paper-muted": "#4f5b6e", // on paper (6.3:1)
-          verified: "#34d399",   // verified / positive (emerald)
-          "verified-ink": "#047857", // emerald on paper
-          action: "#7cb2ff",     // semantic blue for actions on dark
-          "action-ink": "#1d4ed8", // action on paper
-          brass: "#c9a86a",      // restrained institutional accent
-          caution: "#fbbf24",    // assumption / prior / gated
-          risk: "#f87171",       // negative trend
+          "ink": "rgb(var(--xo-ink) / <alpha-value>)",
+          "panel": "rgb(var(--xo-panel) / <alpha-value>)",
+          "raise": "rgb(var(--xo-raise) / <alpha-value>)",
+          "line": "rgb(var(--xo-line) / <alpha-value>)",
+          "text": "rgb(var(--xo-text) / <alpha-value>)",
+          "muted": "rgb(var(--xo-muted) / <alpha-value>)",
+          "faint": "rgb(var(--xo-faint) / <alpha-value>)",
+          "paper": "rgb(var(--xo-paper) / <alpha-value>)",
+          "paper-line": "rgb(var(--xo-paper-line) / <alpha-value>)",
+          "paper-text": "rgb(var(--xo-paper-text) / <alpha-value>)",
+          "paper-muted": "rgb(var(--xo-paper-muted) / <alpha-value>)",
+          "verified": "rgb(var(--xo-verified) / <alpha-value>)",
+          "verified-ink": "rgb(var(--xo-verified-ink) / <alpha-value>)",
+          "action": "rgb(var(--xo-action) / <alpha-value>)",
+          "action-ink": "rgb(var(--xo-action-ink) / <alpha-value>)",
+          "brass": "rgb(var(--xo-brass) / <alpha-value>)",
+          "caution": "rgb(var(--xo-caution) / <alpha-value>)",
+          "risk": "rgb(var(--xo-risk) / <alpha-value>)",
         },
         // ── The exchange ink (homepage phase 13, EE1) ───────────────────
         // One deep blue ink for every dark marketing surface, one paper pair,

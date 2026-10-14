@@ -231,7 +231,7 @@ const Intake: React.FC = () => {
                 : `Showing the demo company (${SAMPLE_INTAKE.name}). Edit any field to value your own company; nothing is saved until you do.`}
             </p>
             {saved && unconfirmed.length > 0 && (
-              <div className="border border-loi-400/50 bg-loi-500/10 px-3 py-2.5 text-[12px] text-xo-text">
+              <div className="border border-xo-caution/50 bg-xo-caution/10 px-3 py-2.5 text-[12px] text-xo-text">
                 <p><span className="font-semibold">{unconfirmed.length} of {Object.keys(INTAKE_FIELD_LABEL).length} values are still the demo company's</span>, not yours: {unconfirmed.map((k) => INTAKE_FIELD_LABEL[k]).join(", ")}. Enter your own, or confirm them. Documents treat them as missing until you do.</p>
                 <Button variant="ghost" className="mt-2" onClick={confirmRest}>These values are mine</Button>
               </div>

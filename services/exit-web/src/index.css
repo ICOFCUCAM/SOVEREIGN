@@ -17,6 +17,49 @@
   --ex-seam: linear-gradient(90deg, transparent, rgba(180,154,117,0.5) 30%, rgba(180,154,117,0.5) 70%, transparent);
 }
 
+/* the console palette (`xo` in tailwind.config.ts): ivory for content, charcoal for chrome */
+:root {
+  --xo-ink: 244 239 230;
+  --xo-panel: 255 253 249;
+  --xo-raise: 242 235 223;
+  --xo-line: 228 218 202;
+  --xo-text: 26 25 22;
+  --xo-muted: 79 74 66;
+  --xo-faint: 102 95 85;
+  --xo-paper: 255 255 255;
+  --xo-paper-line: 228 218 202;
+  --xo-paper-text: 26 25 22;
+  --xo-paper-muted: 79 74 66;
+  --xo-verified: 47 107 63;
+  --xo-verified-ink: 47 107 63;
+  --xo-action: 126 94 46;
+  --xo-action-ink: 126 94 46;
+  --xo-brass: 132 99 43;
+  --xo-caution: 127 83 0;
+  --xo-risk: 162 58 42;
+}
+[data-xo="dark"] {
+  --xo-ink: 18 19 17;
+  --xo-panel: 27 28 26;
+  --xo-raise: 36 37 34;
+  --xo-line: 58 57 52;
+  --xo-text: 236 230 219;
+  --xo-muted: 196 188 175;
+  --xo-faint: 160 152 140;
+  --xo-paper: 248 244 238;
+  --xo-paper-line: 221 216 204;
+  --xo-paper-text: 26 25 22;
+  --xo-paper-muted: 79 74 66;
+  --xo-verified: 125 196 145;
+  --xo-verified-ink: 47 107 63;
+  --xo-action: 226 192 127;
+  --xo-action-ink: 126 94 46;
+  --xo-brass: 201 168 106;
+  --xo-caution: 232 180 74;
+  --xo-risk: 240 138 117;
+  color-scheme: dark;
+}
+
 html, body, #root { height: 100%; }
 body {
   margin: 0;
@@ -90,15 +133,17 @@ html:has(.ex-site)::-webkit-scrollbar-thumb { background: #B8AC9A; border: 2px s
 /* one focus mark across the console: controls without a focus style of their own (about 110 buttons set
    none) showed the browser's default outline, black or blue by platform; they now take the console's emerald.
    :where() keeps this at zero specificity, so controls that draw their own ring keep theirs */
-.ex-console :where(a, button, summary, select, input, textarea, [tabindex]:not([tabindex="-1"])):focus-visible { outline: 2px solid #34d399; outline-offset: 2px; }
+.ex-console :where(a, button, summary, select, input, textarea, [tabindex]:not([tabindex="-1"])):focus-visible { outline: 2px solid #9A7536; outline-offset: 2px; }
+.ex-console [data-xo="dark"] :where(a, button, summary, select, input, textarea, [tabindex]:not([tabindex="-1"])):focus-visible { outline-color: #E2C07F; }
 
 /* the console's own selection (an emerald wash, not the browser's blue) and a workspace scrollbar that sits
    back on the ink */
-.ex-console ::selection { background: rgba(52,211,153,0.28); color: #fff; }
-.ex-console main { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.14) transparent; }
+.ex-console ::selection { background: rgba(185,146,79,0.28); color: inherit; }
+.ex-console { color-scheme: light; }
+.ex-console main { scrollbar-width: thin; scrollbar-color: rgba(60,45,20,0.22) transparent; }
 .ex-console main::-webkit-scrollbar { width: 8px; }
-.ex-console main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
-.ex-console main::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,0.24); }
+.ex-console main::-webkit-scrollbar-thumb { background: rgba(60,45,20,0.22); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+.ex-console main::-webkit-scrollbar-thumb:hover { background-color: rgba(60,45,20,0.34); }
 
 /* Exchange Mark — orbital sweep for the brand loader (honest motion) */
 @keyframes exMarkOrbit { to { transform: rotate(360deg); } }

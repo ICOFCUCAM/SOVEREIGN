@@ -64,7 +64,7 @@ const Frame: React.FC<{ title: string; lede?: React.ReactNode; children: React.R
   const steps = [1, 2, 3, 4, 5].map((k) => t(`hx.s${k}`));
   const [cap, setCap] = useState<number | null>(null);
   return (
-    <div className="grid min-h-full bg-[#121311] lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
+    <div data-xo="dark" className="grid min-h-full bg-[#121311] lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)]">
       <style>{INSTRUMENT_CSS}</style>
       {/* the threshold: the exchange's instrument and the shape of an exit (decorative; no market data) */}
       <aside aria-label="ExitOS" className="relative hidden overflow-hidden border-r border-ex-hair bg-[#1a1b19] lg:flex lg:flex-col"

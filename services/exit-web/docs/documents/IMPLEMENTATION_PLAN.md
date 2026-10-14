@@ -978,3 +978,16 @@ Audit: the desk components carried about 80 one-off colour values (seven near-id
 - Not changed: the console (the `xo` graphite pages, 44 pages) keeps its own system; behaviour, validation, security and data contracts are untouched.
 
 **Results**: web 433 tests; lint, typecheck, build clean; the development test identity is absent from the production bundle. Browser (development server, 1440 and 390 wide): all three stages and three profile pages, operator campaign flow, founder slideshow, review and save; no horizontal overflow.
+
+## 20. Increment report — the console on the ExitOS palette
+
+Audit: the console's 44 pages draw almost all colour from the `xo` tokens (about 3,000 uses), which were a navy terminal with emerald and blue accents; the shell added a blue grid, glow and watermark behind every page; about 410 classes on content and 30 chart colours were hard-coded for a dark ground.
+
+- Tokens: `xo` colours are now CSS variables (`index.css`). Content sits on warm ivory by default; the structural chrome (sidebar, market ribbon, layer bars, phone header) sets `data-xo="dark"` and keeps a warm charcoal. Text steps are contrast-checked on both grounds (≥ 4.5:1: ink 15:1, muted 7.7:1, faint 5.3:1, accents 5.0–5.9:1 on ivory).
+- Accents: links and focus rings in bronze, positive in a muted green, caution in ochre, risk in brick; primary buttons in the desk's gold with ink text (was emerald with white).
+- Shell: the blue ambient layer is gone; chrome retoned from navy and emerald to graphite and bronze; console focus ring and text selection in bronze.
+- Shared kit (`lib/ui.tsx`, `lib/workstation.tsx`, `components/xo`): cards, buttons, dialogs, fields, toasts and chips on the tokens; sign-in keeps its own dark page.
+- Charts: heatfield, reactor, market heat tiles, radar and allocation colours moved from neon blue, cyan and green to bronze, green and brick; chart grid lines to faint warm ink.
+- Not changed: the marketing site (home, platform, modules, pricing), the report pages and the listing desk keep their own designs; no behaviour changed.
+
+**Results**: web 433 tests; lint, typecheck, build clean. Browser (development server): 30 console pages at 1440 wide checked for pale text on the ivory ground (none left) and screenshotted; three pages and the menu at 390 wide with no horizontal overflow; sign-in unchanged.

@@ -134,7 +134,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   // the mark leads home, as a reader expects of a product's logo
   const Brand = (
-    <Link to={homeFor(role)} aria-label={`ExitOS ${subtitle} — home`} className="flex items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
+    <Link to={homeFor(role)} aria-label={`ExitOS ${subtitle} — home`} className="flex items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze">
       <ExchangeMark size={folded ? 30 : 32} />
       {!folded && <div className="leading-tight">
         <div className="text-sm font-bold tracking-tight text-ex-ivory">ExitOS</div>
@@ -144,16 +144,16 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 
   return (
-    <div className="ex-console flex h-full flex-col">
+    <div className="ex-console flex h-full flex-col bg-xo-ink text-xo-text">
       {/* the first Tab: straight past the sidebar and the three header bars to the page */}
       <a href="#workspace" onClick={(e) => { e.preventDefault(); workspace.current?.focus(); }}
-        className="sr-only z-[60] rounded-md bg-deal-700 px-4 py-2.5 text-[13px] font-semibold text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-300">Skip to content</a>
+        className="sr-only z-[60] rounded-md bg-desk-gold px-4 py-2.5 text-[13px] font-semibold text-desk-ink focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze">Skip to content</a>
       <div aria-hidden className="h-px w-full bg-gradient-to-r from-ex-bronze/20 via-ex-bronze to-ex-bronze/20" />
 
       {/* Mobile top bar */}
-      <header className="flex items-center gap-3 border-b border-white/10 bg-ink-900/80 px-4 py-3 lg:hidden">
+      <header data-xo="dark" className="flex items-center gap-3 border-b border-white/10 bg-ex-0 px-4 py-3 lg:hidden">
         <button ref={menuButton} onClick={() => setNavOpen(true)} aria-label="Open navigation menu" aria-expanded={navOpen}
-          className="rounded-md p-2 text-white/80 ring-1 ring-white/15 transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
+          className="rounded-md p-2 text-white/80 ring-1 ring-white/15 transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M3 6h18M3 12h18M3 18h18" /></svg>
         </button>
         {Brand}
@@ -162,14 +162,14 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <div className="flex flex-1 overflow-hidden">
         {navOpen && <div className="fixed inset-0 z-30 bg-black/60 lg:hidden" aria-hidden onClick={() => setNavOpen(false)} />}
 
-        <aside ref={drawer}
+        <aside ref={drawer} data-xo="dark"
           className={`fixed inset-y-0 left-0 z-40 flex w-[264px] shrink-0 flex-col border-r border-ex-hair bg-[#121311] transition-[transform,width] duration-200 lg:static lg:z-auto lg:translate-x-0 ${folded ? "lg:w-[68px]" : ""} ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
           style={{ backgroundImage: "linear-gradient(180deg, rgba(180,154,117,0.06), transparent 160px), radial-gradient(120% 60% at 0% 100%, rgba(180,154,117,0.05), transparent 60%)" }}
           aria-label="Sidebar"
         >
           <div className={`flex items-center ${folded ? "flex-col gap-3 px-2 py-4" : "justify-between px-4 py-4"}`}>
             {Brand}
-            <button onClick={() => setNavOpen(false)} aria-label="Close navigation menu" className="rounded p-1 text-white/50 hover:text-white lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400"><CloseIcon /></button>
+            <button onClick={() => setNavOpen(false)} aria-label="Close navigation menu" className="rounded p-1 text-white/50 hover:text-white lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze"><CloseIcon /></button>
             <button type="button" onClick={toggleRail} aria-label={folded ? "Expand the menu" : "Collapse the menu to its spine"} aria-keyshortcuts="[" title={folded ? "Expand ( [ )" : "Collapse ( [ )"}
               className="hidden rounded-[3px] p-1.5 text-white/40 ring-1 ring-white/10 transition hover:text-ex-bronze hover:ring-ex-bronze/40 lg:block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">
               <svg aria-hidden width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M9 4v16" />{folded ? <path d="m13 10 2 2-2 2" /> : <path d="m16 10-2 2 2 2" />}</svg>
@@ -215,37 +215,17 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </aside>
 
         <main ref={workspace} id="workspace" tabIndex={-1} className="relative flex-1 overflow-y-auto focus:outline-none">
-          <div className="sticky top-0 z-30">
+          <div data-xo="dark" className="sticky top-0 z-30">
             <InstitutionalRibbon />
             <LayerBar />
             <LayerSubNav />
           </div>
-          {/* ambient reactor layer — the homepage exchange DNA, inside the
-              console: faint market grid, a top liquidity glow, and the
-              transaction-ring watermark. Ambient intelligence, not decoration. */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-            <div className="absolute inset-0 opacity-[0.05]"
-              style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(120,170,255,0.7) 0 1px, transparent 1px 110px), repeating-linear-gradient(0deg, rgba(120,170,255,0.5) 0 1px, transparent 1px 110px)", maskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 70%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 0%, #000, transparent 70%)" }} />
-            <div className="absolute -top-24 left-1/2 h-56 w-[70%] -translate-x-1/2 rounded-[50%] opacity-25 blur-[100px]"
-              style={{ background: "radial-gradient(ellipse at center, rgba(56,130,246,0.35), transparent 70%)" }} />
-            {/* ambient signal sweep — the desk scope refreshing */}
-            <div className="ex-sweep absolute inset-x-0 top-0 h-44" style={{ background: "linear-gradient(to bottom, transparent, rgba(56,130,246,0.05), transparent)" }} />
-            <svg className="absolute -right-32 top-24 h-[480px] w-[480px] opacity-[0.04]" viewBox="0 0 100 100" fill="none">
-              <circle cx="50" cy="50" r="33" stroke="#9CC2FF" strokeWidth="2" />
-              <circle cx="50" cy="50" r="22" stroke="#9CC2FF" strokeWidth="1" />
-              <g stroke="#9CC2FF" strokeWidth="2" strokeLinecap="round">
-                <line x1="50" y1="11" x2="50" y2="21" /><line x1="50" y1="79" x2="50" y2="89" />
-                <line x1="11" y1="50" x2="21" y2="50" /><line x1="79" y1="50" x2="89" y2="50" />
-              </g>
-              <circle cx="50" cy="50" r="6" fill="#9CC2FF" />
-            </svg>
-          </div>
           {showStarterNotice && (
-            <div className="border-b border-loi-400/30 bg-loi-500/10">
+            <div className="border-b border-xo-caution/25 bg-xo-caution/[0.07]">
               <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
-                <span className="flex items-center gap-2 text-[13px] text-loi-100"><svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-loi-300"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg><span><span className="font-semibold">Buyers are reviewing your listing.</span> Upgrade to Pro to open conversations, run outreach and continue with the agents.</span></span>
-                <Link to="/console/upgrade" className="ml-auto rounded-md bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-deal-800">Upgrade to Pro →</Link>
-                <button onClick={() => setNoticeDismissed(true)} aria-label="Dismiss" className="rounded p-1 text-white/45 hover:text-white"><CloseIcon size={12} /></button>
+                <span className="flex items-center gap-2 text-[13px] text-xo-text"><svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-xo-caution"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg><span><span className="font-semibold">Buyers are reviewing your listing.</span> Upgrade to Pro to open conversations, run outreach and continue with the agents.</span></span>
+                <Link to="/console/upgrade" className="ml-auto rounded-md bg-desk-gold px-3 py-1.5 text-[12px] font-semibold text-desk-ink transition hover:bg-[#AA8443]">Upgrade to Pro →</Link>
+                <button onClick={() => setNoticeDismissed(true)} aria-label="Dismiss" className="rounded p-1 text-xo-faint hover:text-xo-text"><CloseIcon size={12} /></button>
               </div>
             </div>
           )}

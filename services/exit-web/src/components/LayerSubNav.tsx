@@ -21,8 +21,8 @@ const LayerSubNav: React.FC = () => {
   if (items.length <= 1) return null;
 
   return (
-    <div className="flex items-stretch gap-px ex-hscroll overflow-x-auto border-b border-white/10 bg-ink-950/70 backdrop-blur-sm">
-      <span className="flex shrink-0 items-center border-r border-white/10 px-3 text-[8px] font-semibold uppercase tracking-[0.22em] text-deal-300">{layer.label}</span>
+    <div className="flex items-stretch gap-px ex-hscroll overflow-x-auto border-b border-white/10 bg-ex-0/70 backdrop-blur-sm">
+      <span className="flex shrink-0 items-center border-r border-white/10 px-3 text-[8px] font-semibold uppercase tracking-[0.22em] text-desk-champagne">{layer.label}</span>
       {items.map((i) => {
         const on = pathname === i.to;
         return (

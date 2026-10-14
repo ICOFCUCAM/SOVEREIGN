@@ -179,7 +179,7 @@ Best regards,
             <input type="range" min={0} max={30} step={1} value={reserve.premiumOverride == null ? 12 : Math.round(reserve.premiumOverride * 100)} onChange={(e) => setReserve((r) => ({ ...r, premiumOverride: Number(e.target.value) / 100 }))} className="w-full accent-deal-500" />
           </Field>
           {counter && active && (
-            <p className="border border-xo-line px-3 py-2 text-[13px] text-white/80">
+            <p className="border border-xo-line px-3 py-2 text-[13px] text-xo-text">
               Counter previews at <span className="font-mono font-semibold">{fmtMoney(counter.counterPrice)}</span> (+{counter.upliftPct.toFixed(0)}%) · {(counter.cashPct * 100).toFixed(0)}% cash / {(counter.earnoutPct * 100).toFixed(0)}% earnout.
             </p>
           )}
@@ -197,7 +197,7 @@ Best regards,
               <TakeCell k="Pursue">{leader ? <>Lead with <span className="text-xo-text">{leader.offer.buyerName}</span> — your strongest bid at {leader.score.toFixed(0)}/100.</> : null}{leader && leader.offer.offerId !== active.offer.offerId ? <> The counter shown is for {active.offer.buyerName}.</> : null}</TakeCell>
               <TakeCell k="What ExitOS does">Scores every offer and drafts a counter and a response from the stated rules. You review the draft and send it yourself.</TakeCell>
             </dl>
-            <button type="button" onClick={() => setDraftOpen(true)} className="mt-3 rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft the response →</button>
+            <button type="button" onClick={() => setDraftOpen(true)} className="mt-3 rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft the response →</button>
           </div>
         </Section>
       )}
@@ -356,8 +356,8 @@ Best regards,
       </Section>
 
       <Modal open={draftOpen && !!active && !!counter} onClose={() => setDraftOpen(false)} title={`Counter response · ${active?.offer.buyerName ?? ""}`} size="lg"
-        footer={<><span className="mr-auto text-[12px] text-white/70">Nothing is sent from ExitOS — copy the draft into your own email.</span><Button onClick={() => copyText(draftText)}>Copy draft</Button></>}>
-        <pre className="whitespace-pre-wrap border border-white/10 bg-ink-900/70 p-4 font-sans text-[13px] leading-relaxed text-white/85">{draftText}</pre>
+        footer={<><span className="mr-auto text-[12px] text-xo-muted">Nothing is sent from ExitOS — copy the draft into your own email.</span><Button onClick={() => copyText(draftText)}>Copy draft</Button></>}>
+        <pre className="whitespace-pre-wrap border border-xo-line bg-xo-panel p-4 font-sans text-[13px] leading-relaxed text-xo-text">{draftText}</pre>
       </Modal>
     </div>
   );

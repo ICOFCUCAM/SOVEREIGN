@@ -32,7 +32,7 @@ export const DemoExample: React.FC<{
       </section>
       {show && (
         <>
-          <p role="note" className="border border-loi-400/50 bg-loi-500/10 px-4 py-2.5 text-[12px] font-semibold text-xo-text">Example only — the demo company's sample records below are not yours.</p>
+          <p role="note" className="border border-xo-caution/50 bg-xo-caution/10 px-4 py-2.5 text-[12px] font-semibold text-xo-text">Example only — the demo company's sample records below are not yours.</p>
           {demo}
         </>
       )}

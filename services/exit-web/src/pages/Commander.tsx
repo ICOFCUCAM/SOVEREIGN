@@ -47,8 +47,8 @@ const AcquirerMixRadar: React.FC<{ data: { label: string; n: number }[] }> = ({ 
       {[0.25, 0.5, 0.75, 1].map((f) => <polygon key={f} points={ring(f)} fill="none" stroke="#22314b" strokeWidth="1" />)}
       <text x={cx} y={cy - R - 4} textAnchor="middle" fill="#8796ad" style={{ fontSize: 8, fontFamily: "ui-monospace, monospace" }}>{max}</text>
       {data.map((_, i) => { const [x, y] = pt(i, R); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#22314b" strokeWidth="1" />; })}
-      <polygon points={poly} fill="#34d399" fillOpacity="0.2" stroke="#34d399" strokeWidth="1.75" strokeLinejoin="round" />
-      {data.map((d, i) => { const [x, y] = pt(i, (d.n / max) * R); return <circle key={i} cx={x} cy={y} r="3" fill="#34d399" stroke="#0b1220" strokeWidth="1.5" />; })}
+      <polygon points={poly} fill="#2F6B3F" fillOpacity="0.2" stroke="#2F6B3F" strokeWidth="1.75" strokeLinejoin="round" />
+      {data.map((d, i) => { const [x, y] = pt(i, (d.n / max) * R); return <circle key={i} cx={x} cy={y} r="3" fill="#2F6B3F" stroke="#0b1220" strokeWidth="1.5" />; })}
       {data.map((d, i) => {
         const [lx, ly] = pt(i, R + 16);
         const c = Math.cos(ang(i));

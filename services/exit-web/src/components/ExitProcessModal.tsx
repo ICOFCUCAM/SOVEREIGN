@@ -7,10 +7,10 @@ import {
 import { loadActiveCompany } from "../lib/active-company";
 
 const STATUS_BADGE: Record<ExitStep["status"], string> = {
-  pending: "bg-white/5 text-white/40 ring-white/10",
-  running: "bg-loi-500/15 text-loi-300 ring-loi-400/40 animate-pulse",
-  done:    "bg-deal-600/20 text-deal-300 ring-deal-400/40",
-  error:   "bg-red-500/15 text-red-300 ring-red-400/40",
+  pending: "bg-xo-raise text-xo-faint ring-xo-line",
+  running: "bg-xo-caution/15 text-xo-caution ring-xo-caution/40 animate-pulse",
+  done:    "bg-xo-verified/20 text-xo-verified ring-xo-action/40",
+  error:   "bg-xo-risk/15 text-xo-risk ring-xo-risk/40",
 };
 
 const STATUS_LABEL: Record<ExitStep["status"], string> = {
@@ -66,11 +66,11 @@ const ExitProcessModal: React.FC<Props> = ({ open, onClose, onComplete }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
       <Card className="relative w-full max-w-2xl p-8">
         <div className="mb-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-deal-400">One-Click Exit</div>
-          <h2 className="mt-2 font-serif text-2xl font-bold text-white">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-xo-verified">One-Click Exit</div>
+          <h2 className="mt-2 font-serif text-2xl font-bold text-xo-text">
             {complete ? "Exit process initialized" : errored ? "Exit process halted" : "Running exit process"}
           </h2>
-          <p className="mt-2 text-sm text-white/55">
+          <p className="mt-2 text-sm text-xo-muted">
             {complete
               ? "All ten engines have run. Your valuation, CIM, teaser, NDAs, buyer list, and negotiator are live across the console."
               : errored
@@ -80,10 +80,10 @@ const ExitProcessModal: React.FC<Props> = ({ open, onClose, onComplete }) => {
         </div>
 
         <div className="mb-4 flex items-center justify-between text-[11px]">
-          <span className="text-white/45 uppercase tracking-[0.18em]">{doneCount} of {steps.length} steps</span>
-          <span className="font-mono text-white/70">{progressPct.toFixed(0)}%</span>
+          <span className="text-xo-faint uppercase tracking-[0.18em]">{doneCount} of {steps.length} steps</span>
+          <span className="font-mono text-xo-muted">{progressPct.toFixed(0)}%</span>
         </div>
-        <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-white/5">
+        <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-xo-raise">
           <div
             className="h-full rounded-full bg-gradient-to-r from-deal-700 to-deal-400 transition-all duration-300"
             style={{ width: `${Math.max(2, progressPct)}%` }}
@@ -94,11 +94,11 @@ const ExitProcessModal: React.FC<Props> = ({ open, onClose, onComplete }) => {
           {steps.map((s, i) => {
             const ms = durationMs(s);
             return (
-              <li key={s.id} className="rounded-md border border-white/5 bg-ink-900/40 p-3">
+              <li key={s.id} className="rounded-md border border-xo-line bg-xo-panel p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-baseline gap-3">
-                    <span className="font-mono text-[10px] text-white/35">{String(i + 1).padStart(2, "0")}</span>
-                    <span className={`font-medium ${s.status === "running" ? "text-white" : s.status === "done" ? "text-white/85" : s.status === "error" ? "text-red-300" : "text-white/50"}`}>
+                    <span className="font-mono text-[10px] text-xo-faint">{String(i + 1).padStart(2, "0")}</span>
+                    <span className={`font-medium ${s.status === "running" ? "text-xo-text" : s.status === "done" ? "text-xo-text" : s.status === "error" ? "text-xo-risk" : "text-xo-faint"}`}>
                       {s.label}
                     </span>
                   </div>
@@ -107,13 +107,13 @@ const ExitProcessModal: React.FC<Props> = ({ open, onClose, onComplete }) => {
                   </span>
                 </div>
                 {s.status === "running" && (
-                  <p className="ml-7 mt-1.5 text-[12px] text-white/55">{s.verb}…</p>
+                  <p className="ml-7 mt-1.5 text-[12px] text-xo-muted">{s.verb}…</p>
                 )}
                 {s.status === "done" && s.summary && (
-                  <p className="ml-7 mt-1.5 text-[12px] text-white/65">{s.summary}</p>
+                  <p className="ml-7 mt-1.5 text-[12px] text-xo-muted">{s.summary}</p>
                 )}
                 {s.status === "error" && s.error && (
-                  <p className="ml-7 mt-1.5 text-[12px] text-red-300">{s.error}</p>
+                  <p className="ml-7 mt-1.5 text-[12px] text-xo-risk">{s.error}</p>
                 )}
               </li>
             );

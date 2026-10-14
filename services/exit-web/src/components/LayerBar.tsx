@@ -47,16 +47,16 @@ const LayerBar: React.FC = () => {
   const { session } = useAuth();
   const active = activeLayer(pathname);
   return (
-    <div className="flex items-stretch overflow-x-auto border-b border-white/10 bg-ink-950/80 backdrop-blur-sm">
+    <div className="flex items-stretch overflow-x-auto border-b border-white/10 bg-ex-0/80 backdrop-blur-sm">
       <span className="flex shrink-0 items-center border-r border-white/10 px-3 text-[8px] font-semibold uppercase tracking-[0.22em] text-white/60">Command Layers</span>
       {layersFor(session?.role ?? "founder").map((l) => {
         const on = l.key === active;
         return (
           <Link key={l.key} to={l.href} aria-current={on ? "true" : undefined}
-            className={`group flex shrink-0 items-center gap-2 border-r border-white/[0.07] px-3.5 py-1.5 transition ${on ? "bg-deal-600/12" : "hover:bg-white/[0.03]"}`}>
-            <span className={`font-mono text-[9px] font-bold ${on ? "text-deal-300" : "text-white/60"}`}>{l.roman}</span>
+            className={`group flex shrink-0 items-center gap-2 border-r border-white/[0.07] px-3.5 py-1.5 transition ${on ? "bg-ex-bronze/12" : "hover:bg-white/[0.03]"}`}>
+            <span className={`font-mono text-[9px] font-bold ${on ? "text-desk-champagne" : "text-white/60"}`}>{l.roman}</span>
             <span className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${on ? "text-white" : "text-white/70 group-hover:text-white"}`}>{l.label}</span>
-            {on && <span className="h-1 w-1 rounded-full bg-deal-400" />}
+            {on && <span className="h-1 w-1 rounded-full bg-[#7DC491]" />}
           </Link>
         );
       })}
