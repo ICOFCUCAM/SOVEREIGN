@@ -74,7 +74,7 @@ const TONES = {
 type ToneSet = (typeof TONES)[Tone];
 
 // small line icons for the porcelain cards, drawn in the desk's gold
-const ICON_PATHS = {
+export const ICON_PATHS = {
   shield: <><path d="M10 2 3.5 4.5v5C3.5 13.6 6.3 16.8 10 18c3.7-1.2 6.5-4.4 6.5-8.5v-5L10 2Z" /><path d="m7 10 2.1 2.1L13.2 8" /></>,
   chart: <><path d="M3 17h14" /><path d="M5 14V9m4 5V5m4 9v-6m4 6V3" /></>,
   seal: <><path d="M4 3h9l3 3v11H4V3Z" /><path d="M7 8h6M7 11h6M7 14h3" /></>,
@@ -83,9 +83,15 @@ const ICON_PATHS = {
   stack: <><path d="m10 3 7 3.5-7 3.5-7-3.5L10 3Z" /><path d="m3 10 7 3.5 7-3.5M3 13.5 10 17l7-3.5" /></>,
   note: <><path d="M4 3h12v11l-3 3H4V3Z" /><path d="M13 17v-3h3M7 7h6M7 10h4" /></>,
   flag: <><path d="M4.5 17.5V3" /><path d="M4.5 3.5h10l-2 3.5 2 3.5h-10" /></>,
+  pin: <><path d="M10 17.5s5.5-5 5.5-9.5a5.5 5.5 0 0 0-11 0c0 4.5 5.5 9.5 5.5 9.5Z" /><circle cx="10" cy="8" r="2" /></>,
+  steps: <><path d="M3 16h4v-4h4V8h4V4h2" /></>,
+  tag: <><path d="M3 10.5V3.5h7l7 7-7 7-7-7Z" /><circle cx="7" cy="7" r="1.2" /></>,
+  box: <><path d="M3 6.5 10 3l7 3.5v7L10 17l-7-3.5v-7Z" /><path d="M3 6.5 10 10l7-3.5M10 10v7" /></>,
+  coins: <><ellipse cx="8" cy="6" rx="4.5" ry="2" /><path d="M3.5 6v3c0 1.1 2 2 4.5 2s4.5-.9 4.5-2V6" /><path d="M7.5 12.8c.6 1 2.4 1.7 4.5 1.7 2.5 0 4.5-.9 4.5-2v-3c0-1-1.6-1.8-3.8-2" /></>,
+  lock: <><rect x="4" y="9" width="12" height="8.5" rx="1.5" /><path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" /><path d="M10 12.5v2" /></>,
   globe: <><circle cx="10" cy="10" r="7" /><path d="M3 10h14M10 3c2 2.2 3 4.5 3 7s-1 4.8-3 7c-2-2.2-3-4.5-3-7s1-4.8 3-7Z" /></>,
 } as const;
-const Icon: React.FC<{ name: keyof typeof ICON_PATHS; className?: string }> = ({ name, className = "" }) => (
+export const Icon: React.FC<{ name: keyof typeof ICON_PATHS; className?: string }> = ({ name, className = "" }) => (
   <svg aria-hidden width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className={className}>{ICON_PATHS[name]}</svg>
 );
 

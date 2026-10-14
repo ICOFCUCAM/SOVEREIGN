@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ListingFactsForm, type IntakeContext } from "./ListingFacts";
+import { ListingFactsForm, Icon, type IntakeContext } from "./ListingFacts";
 import { IdentityMethods, IdentityStatusCard, DevVerificationTools, type IdentityState, type SellerIdentity } from "./IdentityGate";
 import { CountrySelect } from "./CountrySelect";
 import earthSunrise from "../assets/desk/earth-sunrise-1672.webp";
 import waterfrontSkyline from "../assets/desk/waterfront-skyline-720.webp";
 import waterfrontCityscape from "../assets/desk/waterfront-cityscape-1672.webp";
 import waterfrontCityscapeSmall from "../assets/desk/waterfront-cityscape-720.webp";
+import globalNetwork from "../assets/desk/global-network-1672.webp";
+import globalNetworkSmall from "../assets/desk/global-network-720.webp";
 import { methodOptions, providerLabel } from "../lib/identity";
 import { missingFacts, missingIn, askingText, STAGE_LABEL, FOR_SALE_LABEL, MODEL_LABEL, PROFILE_SECTIONS, PROFILE_SECTION_LABEL, type ListingFacts, type ProfileSection } from "../lib/listing-facts";
 
@@ -118,10 +120,12 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
                     className={`group flex w-full items-center gap-4 rounded-[14px] border px-3 py-2.5 text-left transition lg:px-4 lg:py-4 ${here
                       ? "border-[#C9A86A]/75 bg-[linear-gradient(135deg,rgba(201,168,106,0.18),rgba(201,168,106,0.03))] shadow-[0_0_0_1px_rgba(201,168,106,0.15),0_0_30px_-6px_rgba(214,176,104,0.6)]"
                       : "border-transparent hover:border-white/10 hover:bg-white/[0.03]"} ${locked ? "cursor-not-allowed" : ""}`}>
-                    <span className={`font-display text-[24px] leading-none lg:w-8 lg:text-[28px] ${here ? "text-[#E2C07F]" : done ? "text-[#C9A86A]/75" : "text-ex-ivory/35"}`}>{done && !here ? "✓" : `0${i + 1}`}</span>
+                    {done && !here
+                      ? <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#C9A86A]/45 bg-[#C9A86A]/10 text-[#E2C07F] lg:h-8 lg:w-8"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="m2.5 6.2 2.3 2.3 4.7-5" /></svg></span>
+                      : <span className={`font-display text-[24px] leading-none lg:w-8 lg:text-[28px] ${here ? "text-[#E2C07F]" : "text-ex-ivory/35"}`}>{`0${i + 1}`}</span>}
                     <span className={`min-w-0 ${here ? "" : "max-lg:hidden"}`}>
                       <span className={`block text-[14.5px] font-semibold ${here ? "text-white" : locked ? "text-ex-ivory/35" : "text-ex-ivory/80 group-hover:text-white"}`}>{t}</span>
-                      <span className={`mt-0.5 hidden text-[12px] lg:block ${here ? "text-ex-ivory/60" : "text-ex-ivory/35"}`}>{STAGE_NOTE[i]}</span>
+                      <span className={`mt-0.5 hidden text-[12px] lg:block ${here ? "text-ex-ivory/60" : "text-ex-ivory/35"}`}>{done && !here ? "Completed" : STAGE_NOTE[i]}</span>
                       {i === 1 && !done && (
                         <span className="mt-2 hidden items-center gap-2 lg:flex" aria-label={`${pagesDone} of 3 profile pages complete`}>
                           <span aria-hidden className="h-[3px] w-24 overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full bg-[linear-gradient(90deg,#A87F3F,#E2C07F)] transition-all" style={{ width: `${(pagesDone / 3) * 100}%` }} /></span>
@@ -160,6 +164,13 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
             <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#FBF8F2] via-[#FBF8F2]/60 to-transparent" />
           </div>
         )}
+        {/* review: the world at night, lit by the network the listing goes out on */}
+        {stage === 2 && (
+          <div aria-hidden className="pointer-events-none absolute right-0 top-0 hidden h-[420px] w-[60%] lg:block">
+            <img src={globalNetwork} alt="" className="h-full w-full object-cover object-[85%_40%] [mask-image:linear-gradient(90deg,transparent_0%,#000_45%)] [-webkit-mask-image:linear-gradient(90deg,transparent_0%,#000_45%)]" />
+            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#FBF8F2] via-[#FBF8F2]/60 to-transparent" />
+          </div>
+        )}
         <div className="relative z-10 flex items-center justify-between gap-4 px-6 pt-6 text-[12px] sm:px-10 lg:px-14 lg:pt-8">
           <span className={`inline-flex items-center gap-2 rounded-full bg-white/60 px-3 py-1 backdrop-blur ${live ? "text-ex-graphite" : "text-[#6E685E]"}`}>
             <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${live ? "bg-[#4E7A52]" : "border border-[#7A7469]"}`} />
@@ -180,6 +191,7 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
 
         {/* small screens: the picture as a banner */}
         {stage === 0 && <img src={earthSunrise} alt="" aria-hidden className="mt-5 h-40 w-full object-cover object-[80%_40%] lg:hidden" />}
+        {stage === 2 && <img src={globalNetworkSmall} alt="" aria-hidden className="mt-5 h-40 w-full object-cover object-[80%_45%] lg:hidden" />}
         {stage === 1 && <img src={waterfrontCityscapeSmall} alt="" aria-hidden className="mt-5 h-40 w-full object-cover object-[70%_55%] lg:hidden" />}
 
         <main className={`relative z-10 w-full flex-1 px-6 pb-16 pt-8 sm:px-10 lg:px-14 lg:pt-14 ${stage === 0 ? "max-w-[620px]" : "max-w-[880px]"}`}>
@@ -199,7 +211,7 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
             {stage === 1 && section === "overview" && <>The company<br /><em className={GOLD_WORD}>profile</em></>}
             {stage === 1 && section === "financial" && <>Financial profile</>}
             {stage === 1 && section === "transaction" && <>Transaction profile</>}
-            {stage === 2 && <>Review and<br /><em className={GOLD_WORD}>publish</em></>}
+            {stage === 2 && <>Review and <em className={GOLD_WORD}>publish</em></>}
           </h1>
 
           {stage === 0 && (
@@ -231,15 +243,25 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
 
           {stage === 2 && (
             <>
-              <p className="mt-6 max-w-[60ch] text-[16px] leading-[1.7] text-[#4F4A42]">
+              <p className="mt-6 max-w-[50ch] text-[16px] leading-[1.7] text-[#4F4A42]">
                 {live ? "Publishing places the anonymised listing on the live exchange, where buyers can request an NDA. You can withdraw it at any time." : "This build is not connected to the live exchange. Saving keeps the listing in this browser only; no buyer will see it."}
               </p>
-              <ProfileReview facts={facts as ListingFacts} context={context} />
+              <ProfileReview code={listing.code} facts={facts as ListingFacts} context={context} onEdit={(x) => go(1, x)} />
+              <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-4 rounded-[18px] border border-[#EFE6D6] bg-white/70 px-5 py-5 shadow-[0_20px_40px_-34px_rgba(90,65,25,0.45)] sm:px-7">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[radial-gradient(circle_at_30%_25%,#FFFDF8,#F7EEDB)] text-[#A8834A] ring-1 ring-[#E6D3AD]"><Icon name="lock" className="h-6 w-6" /></span>
+                <div className="min-w-0 flex-1 basis-[240px]">
+                  <p className="text-[16px] font-semibold text-ex-graphite">{updating ? "Ready to publish the update?" : "Ready to publish?"}</p>
+                  <p className="mt-0.5 text-[13px] leading-relaxed text-[#6E685E]">{live
+                    ? "Review your information and publish your listing to the ExitOS exchange. Buyers see it anonymised and request an NDA to learn more."
+                    : "Review your information and save the listing in this browser. Nothing reaches buyers until this build is connected to the live exchange."}</p>
+                </div>
+                <button type="button" className={`${PRIMARY} max-sm:w-full`} disabled={!canReview} onClick={onPublish}>{updating ? "Publish the update" : live ? "Save and publish" : "Save in this browser"} <span aria-hidden>→</span></button>
+              </div>
             </>
           )}
 
           {/* on small screens the rail's preview follows the stage */}
-          <div className="mt-14 lg:hidden"><ListingPreview code={listing.code} context={context} facts={facts} identity={id.identity} /></div>
+          <div className={`mt-14 lg:hidden ${stage === 2 ? "hidden" : ""}`}><ListingPreview code={listing.code} context={context} facts={facts} identity={id.identity} /></div>
         </main>
 
         {/* ── action bar: security note, what this stage still requires, the next action ── */}
@@ -263,7 +285,6 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
               {stage === 0 && <button type="button" className={PRIMARY} onClick={() => go(1)}>Continue <span aria-hidden>→</span></button>}
               {stage === 1 && sectionAt < 2 && <button type="button" className={PRIMARY} onClick={() => goSection(PROFILE_SECTIONS[sectionAt + 1]!)}>Continue <span aria-hidden>→</span></button>}
               {stage === 1 && sectionAt === 2 && <button type="button" className={PRIMARY} disabled={!canReview} onClick={() => go(2)} aria-describedby={canReview ? undefined : "why-locked"}>Continue to review <span aria-hidden>→</span></button>}
-              {stage === 2 && <button type="button" className={PRIMARY} disabled={!canReview} onClick={onPublish}>{updating ? "Publish the update" : live ? "Publish to the exchange" : "Save in this browser"}</button>}
             </div>
             {stage === 1 && sectionAt === 2 && !canReview && <p id="why-locked" className={`basis-full text-[11.5px] ${FAINT}`}>Review opens once {!verified && !profileDone ? "your identity is established and the profile is complete" : !verified ? "your identity is established" : "the profile is complete"}.</p>}
           </div>
@@ -320,25 +341,53 @@ const Req: React.FC<{ label: string; ok: boolean; active: boolean; text: string 
   </div>
 );
 
-/** The full listing for review, set as a buyer will read it. */
-const ProfileReview: React.FC<{ facts: ListingFacts; context: IntakeContext }> = ({ facts: f, context }) => (
-  <section aria-label="The listing" className="mt-10 border-t border-ex-graphite/80 pt-6">
-    <p className="max-w-[64ch] font-display text-[24px] leading-[1.45]">{f.summary}</p>
-    <dl className="mt-8 grid gap-x-10 gap-y-5 text-[13.5px] sm:grid-cols-2">
-      {([
-        ["Sector and region", `${context.sector} · ${f.region === "Other" ? "Global" : f.region}`],
-        ["Revenue and growth", context.unconfirmed ? "Not confirmed" : `${context.revenue} · ${context.growth}`],
-        ["Company stage", f.stage ? STAGE_LABEL[f.stage] : "—"],
-        ["Asking price", askingText(f)],
-        ["What is for sale", f.forSale.map((x) => FOR_SALE_LABEL[x]).join(" · ")],
-        ["How it makes money", f.models.map((x) => MODEL_LABEL[x]).join(" · ")],
-        ["Markets served", f.markets.join(" · ")],
-        ["Technology stack", f.builtWith.join(" · ")],
-        ["Country of operation", f.basedIn],
-        ...(f.reasonForSale ? [["Reason for sale", f.reasonForSale]] : []),
-      ] as Array<[string, string]>).map(([k, v]) => (
-        <div key={k} className="border-t border-[#E6DFD3] pt-2"><dt className={`text-[10.5px] font-semibold uppercase tracking-[0.14em] ${FAINT}`}>{k}</dt><dd className="mt-1">{v}</dd></div>
-      ))}
-    </dl>
-  </section>
-);
+/** The full listing for review, set as a buyer will read it after an NDA, with a way back to each page. */
+const ProfileReview: React.FC<{ code: string; facts: ListingFacts; context: IntakeContext; onEdit: (x: ProfileSection) => void }> = ({ code, facts: f, context, onEdit }) => {
+  type Row = [Parameters<typeof Icon>[0]["name"], string, string];
+  const left: Row[] = [
+    ["building", "Sector", context.sector],
+    ["globe", "Region", f.region === "Other" ? "Global" : f.region],
+    ["steps", "Company stage", f.stage ? STAGE_LABEL[f.stage] : "—"],
+    ["tag", "Asking price", askingText(f)],
+    ["box", "What is for sale", f.forSale.map((x) => FOR_SALE_LABEL[x]).join(" · ")],
+  ];
+  const right: Row[] = [
+    ["coins", "How it makes money", f.models.map((x) => MODEL_LABEL[x]).join(" · ")],
+    ["market", "Markets served", f.markets.join(" · ")],
+    ["stack", "Technology stack", f.builtWith.join(" · ")],
+    ["flag", "Country of operation", f.basedIn],
+    ["chart", "Revenue and growth", context.unconfirmed ? "Not confirmed" : `${context.revenue} · ${context.growth}`],
+  ];
+  const col = (rows: Row[]): React.ReactNode => (
+    <dl className="space-y-4">{rows.map(([icon, k, v]) => (
+      <div key={k} className="relative min-w-0 pl-8">
+        <dt className="text-[12px] text-[#8A8378]"><Icon name={icon} className="absolute left-0 top-0.5 text-[#A8834A]" />{k}</dt>
+        <dd className="mt-0.5 text-[14px] font-medium leading-snug text-ex-graphite">{v}</dd>
+      </div>
+    ))}</dl>
+  );
+  return (
+    <section aria-label="The listing" className="mt-10 rounded-[20px] border border-[#ECE2D0] bg-white/95 p-5 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_30px_60px_-40px_rgba(90,65,25,0.45)] sm:p-7">
+      <div className="grid gap-6 md:grid-cols-[200px_minmax(0,1fr)] md:gap-8">
+        <img src={waterfrontSkyline} alt="" aria-hidden className="h-[150px] w-full rounded-[12px] object-cover object-[45%_60%] md:h-[140px]" />
+        <div className="min-w-0">
+          <div className="flex items-start justify-between gap-4">
+            <h2 className="font-display text-[34px] font-medium leading-none text-ex-graphite">{code}</h2>
+            <details className="relative shrink-0">
+              <summary className="cursor-pointer list-none rounded-[9px] bg-[#F3EDE2] px-4 py-2 text-[13px] font-semibold text-ex-graphite ring-1 ring-[#E4DACA] transition hover:ring-[#C9A262] [&::-webkit-details-marker]:hidden">Edit</summary>
+              <div className="absolute right-0 z-20 mt-2 w-52 overflow-hidden rounded-[12px] border border-[#E2D3B5] bg-white py-1 shadow-[0_24px_48px_-24px_rgba(60,45,20,0.45)]">
+                {PROFILE_SECTIONS.map((x) => <button key={x} type="button" onClick={() => onEdit(x)} className="block w-full px-4 py-2 text-left text-[13px] text-ex-slate-ink hover:bg-[#FAF3E4] hover:text-ex-graphite">{PROFILE_SECTION_LABEL[x]}</button>)}
+              </div>
+            </details>
+          </div>
+          <div className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2">{col(left)}{col(right)}</div>
+        </div>
+      </div>
+      <div className="mt-7 border-t border-[#EFE6D6] pt-6">
+        <p className="text-[12px] text-[#8A8378]">What the business does</p>
+        <p className="mt-1.5 max-w-[70ch] font-display text-[20px] leading-[1.5] text-ex-graphite">{f.summary}</p>
+        {f.reasonForSale && <p className="mt-4 text-[13.5px] text-[#4F4A42]"><span className="text-[#8A8378]">Reason for sale · </span>{f.reasonForSale}</p>}
+      </div>
+    </section>
+  );
+};
