@@ -27,7 +27,7 @@ describe("guided journey", () => {
   });
 
   it("the current step is the first unfinished one, and the page's own step wins where two share a page", () => {
-    expect(currentStep(SELLER_JOURNEY, NO_SIGNALS)).toBe(0);
+    expect(SELLER_JOURNEY[currentStep(SELLER_JOURNEY, NO_SIGNALS)]!.id).toBe("value");
     const s = sig({ intakeSaved: true, visited: ["/console/readiness", "/console/valuation", "/console/buyers"] });
     expect(SELLER_JOURNEY[currentStep(SELLER_JOURNEY, s)]!.id).toBe("list");
     // the intake page holds both "value" and "list": once the figures are saved it is the listing step
@@ -48,5 +48,15 @@ describe("guided journey · shared pages", () => {
     expect(stepOnPage(BUYER_JOURNEY, "/console/acquisition-radar", NO_SIGNALS, req)).toBe(req);
     // an intended step that is not on this page is ignored
     expect(stepOnPage(BUYER_JOURNEY, "/console/marketplace", NO_SIGNALS, req)).toBe(1);
+  });
+});
+
+describe("guided journey · the banker and WealthOS", () => {
+  it("open with the investment banker and end with WealthOS, without holding the journey back", () => {
+    expect(SELLER_JOURNEY[0]!.to).toBe("/console/commander");
+    expect(SELLER_JOURNEY[SELLER_JOURNEY.length - 1]!.to).toBe("/console/wealth");
+    const all = sig({ intakeSaved: true, listed: true, ndaExecuted: true, offerAccepted: true, txnSigned: true, txnClosed: true,
+      visited: ["/console/readiness", "/console/valuation", "/console/buyers"] });
+    expect(finished(SELLER_JOURNEY, all)).toBe(true);
   });
 });

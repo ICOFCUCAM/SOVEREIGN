@@ -23,3 +23,24 @@ Code markers: `grep -rn PRELAUNCH-REVIEW services/exit-web/src`.
 | Listing desk | Identity verification (BankID and other national eIDs, Stripe Identity) | Real: `exit-identity` function and a database gate on listings, deployed and self-tested; every method shows "Not yet available" until its credentials are set | Set `STRIPE_SECRET_KEY`; sign a broker (Criipto or Signicat) and set its four `IDENTITY_*` settings; register the redirect URI; run one real verification end to end |
 | Sign-in | Continue with LinkedIn | Real: Supabase OAuth redirect (`linkedin_oidc`) | Create a LinkedIn app and turn on the provider in Supabase Auth |
 | Listing desk | "Mark this session verified for testing" | Development builds without a server account only; changes nothing on the server | — (never present with e-mail sign-in) |
+
+## Second restoration (14 October 2026)
+
+Features removed in the 11–12 October honesty audits and not brought back on the first pass, restored at the owner's instruction. Each is marked `PRELAUNCH-REVIEW` in code. Not restored: the client-side operator sign-in by hard-coded e-mail (e6900b6c) and the NDA "Mark executed" button (32470d7f), both security fixes; and the Prep-plan stop on Autonomous Exit (955c0c08), which is the plan's published scope, not a removed feature.
+
+| Page | Restored feature | Backend state today | To do before launch |
+|---|---|---|---|
+| Menu | Real names: Chief Investment Banker, Autonomous Exit, The Banker, WealthOS, Live Deal Room; banker pages and WealthOS in the founder's short menu | — | — |
+| Guided Journey | Founders start at the Chief Investment Banker and end at WealthOS (optional, Pro) | Real | — |
+| Ribbon | Pulsing "Live" marker; rising arrow on Buyer Activity | Vitals are the registry snapshot | Live feed, or reword |
+| Active Processes | Sample deals (C.H. Robinson bolt-on, Pritzker, Walton) in the pipeline and totals | Hard-coded | Real deals from the exchange |
+| Documents | Send to buyer (data room), Sent badges | Nothing is uploaded | Upload into the buyer's data room |
+| Bid Room | Send counter | Nothing is sent; the draft still carries the sample banner | Send through the exchange; drop the banner on real offers |
+| Buyer Profiles | Founder-friendly score (High/Moderate/Low · n); warm-intro urgency copy | Heuristic from buyer type and retrade history | Measure per buyer, or reword |
+| Acquisition Intelligence | "Outreach success +N%" lift per signal; urgency copy ("live EDGAR/Wikidata signals") | Computed from registry counts; data is a dated snapshot | Source the lift; live signals or reword |
+| Network Intelligence | Buyer retention %, earnout tendency (Rare / Aggressive) on the top two buyers | Hard-coded bases | Measure, or reword |
+| Live Deal Room | Title, "Every buyer's session, live", tiles, intent ranking, "active 12m ago" times | Fixed activity list; the page still carries a "Simulated activity" badge | Real session tracking; then drop the badge |
+| Liquidity Command | Status line (Mandate Active/Executing, Market Open, Buyer activity, Confidence) and the "Live" label | Derived from engines, not a live feed | Live state, or reword |
+| Buyer Intelligence | Buyer DNA by type (founder-friendly %, earnout, negotiation, integration, legal, decision makers); "measured deal history" and urgency copy | Type-based priors, not per-buyer measurement | Measure per buyer, or reword |
+| Exit Timing | "Monitors the market continuously and pings you"; "Market signals monitored"; "Buyers circling" | No monitoring or alerts exist | Monitoring and alerts, or reword |
+| Readiness | Re-score button | Re-reads today's score after a pause | — |

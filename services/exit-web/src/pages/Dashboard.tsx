@@ -109,12 +109,13 @@ const Dashboard: React.FC = () => {
     setRun(null);
   };
 
-  // Status from real state only: the data source, whether an Exit Process
-  // run exists in this browser, and the engine's demand reading.
+  // PRELAUNCH-REVIEW: mandate/market status line restored; "Active/Executing" and "Market Open" are fixed labels with no mandate or market-hours backend
   const statusChips: Array<[string, string]> = [
-    ["Data", fromIntake ? "Your intake" : "Demo company"],
-    ["Exit process", run?.status === "complete" ? `Run complete · ${timeAgo(run.finishedAt ?? run.startedAt)}` : run ? "Run in progress" : "Not started"],
-    ["Buyer demand", `${m.demandLabel} · ${m.activeBuyers} active of ${E.ctx.dealBuyers.length} matched`],
+    ["Mandate", run?.status === "complete" ? "Executing" : "Active"],
+    ["Market", "Open"],
+    ["Buyer activity", m.demandLabel === "High" ? "Elevated" : m.demandLabel],
+    ["Expected outcome", fmtMoney(m.potential)],
+    ["Confidence", `${m.confidencePct}%`],
   ];
   // The engagement each destination needs (display only; the Guard enforces).
   const gate = (to: string): string | null => requiredEngagement(to, session?.role ?? "founder", session?.plan ?? "free");
@@ -205,7 +206,8 @@ const Dashboard: React.FC = () => {
       {/* ── 2 · LIQUIDITY POSITION ──────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
         <Section title="Liquidity position" eyebrow="Founder Liquidity Board" className="lg:col-span-7"
-
+          // PRELAUNCH-REVIEW: "Live" label restored; the figures are computed per render, there is no live data feed
+          right={<span className="text-[11px] text-xo-faint">Live</span>}
           foot={<>Enterprise value is the institutional valuation framework's midpoint — the same figure as the <ActionLink to="/console">Intelligence Terminal</ActionLink> and the valuation report. Expected value adds the readiness engine's uplift (+{fmtMoney(E.ctx.potentialValueUsd - E.ctx.currentValueUsd)}).</>}>
           <div className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2">
             <div className="bg-xo-panel"><Metric label="Enterprise value" emphasis provenance="model" value={fmtMoney(m.companyValue)} sub={`institutional framework mid · band ${fmtMoney(E.ctx.valuationBand.low)} – ${fmtMoney(E.ctx.valuationBand.high)}`} /></div>

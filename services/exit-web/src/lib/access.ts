@@ -29,12 +29,12 @@ export const NAV: NavItem[] = [
   { to: "/console/journey",            label: "Guided Journey", name: "Step by step", group: "Mandate", roles: ["founder"] },
   { to: "/console/journey",            label: "Guided Journey", name: "Step by step", group: "Overview", roles: ["buyer"] },
   // ── Founder · Overview ─────────────────────────────────────────
-  { to: "/console/commander",          label: "Recommended Actions", name: "Chief Investment Banker", group: "Mandate", roles: ["founder"], pro: true },
+  { to: "/console/commander",          label: "Chief Investment Banker", name: "Recommended actions", group: "Mandate", roles: ["founder"], pro: true },
   { to: "/console",                    label: "Home", name: "Intelligence Terminal", group: "Mandate", roles: ["founder"] },
   { to: "/console/intake",             label: "Value My Company",     group: "Mandate", roles: ["founder"] },
   { to: "/console/company-story",      label: "Company Story",        group: "Mandate", roles: ["founder"] },
   { to: "/console/command",            label: "Exit Overview", name: "Liquidity Command",    group: "Mandate", roles: ["founder"] },
-  { to: "/console/autopilot",          label: "Simulate My Exit", name: "Autonomous Exit",      group: "Mandate", roles: ["founder"], pro: true, starter: true },
+  { to: "/console/autopilot",          label: "Autonomous Exit", name: "Simulate my exit",      group: "Mandate", roles: ["founder"], pro: true, starter: true },
   { to: "/console/buyer-graph",        label: "Search All Acquirers", name: "Buyer Graph",          group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/market-map",         label: "Explore the Market", name: "Market Map",           group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/knowledge-graph",    label: "Search Past Deals", name: "Knowledge Graph",      group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
@@ -63,14 +63,14 @@ export const NAV: NavItem[] = [
   { to: "/console/intelligence",       label: "Rank Buyers by Fit", name: "Acquisition Intelligence", group: "Market Intelligence", roles: ["founder"] },
 
   // ── Engage (founder) ───────────────────────────────────────────
-  { to: "/console/banker",             label: "Write to Buyers", name: "Outreach",             group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/banker",             label: "The Banker", name: "Write to buyers",             group: "Exchange", roles: ["founder"], pro: true },
   { to: "/console/nda",                label: "Manage NDAs", name: "NDA Vault",            group: "Exchange", roles: ["founder"], pro: true },
   { to: "/console/inbox",              label: "Inbox",                group: "Exchange", roles: ["founder"] },
   { to: "/console/pipeline",           label: "Track Deals", name: "Active Processes",     group: "Exchange", roles: ["founder"] },
   { to: "/console/activity",           label: "Review Activity", name: "Deal Activity",        group: "Exchange", roles: ["founder", "buyer"] },
   { to: "/console/outreach-plan",      label: "Plan Outreach", name: "Outreach Plan",        group: "Exchange", roles: ["founder"], pro: true, starter: true },
   { to: "/console/process-intel",      label: "Track the Buyer Funnel", name: "Process Intelligence", group: "Exchange", roles: ["founder"], pro: true },
-  { to: "/console/deal-room",          label: "Preview the Deal Room", name: "Deal Room",            group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/deal-room",          label: "Live Deal Room", name: "Preview the deal room"  /* PRELAUNCH-REVIEW: "Live" restored (7d78309a); the founder view is a preview */,            group: "Exchange", roles: ["founder"], pro: true },
 
   // ── Negotiate (founder) ────────────────────────────────────────
   { to: "/console/negotiator",         label: "Compare Offers", name: "Bid Room",             group: "Exchange", roles: ["founder"], pro: true },
@@ -84,7 +84,7 @@ export const NAV: NavItem[] = [
   { to: "/console/closing#escrow",     label: "Track Escrow", name: "Escrow",               group: "Exchange", roles: ["founder"], pro: true },
 
   // ── Wealth (founder) ───────────────────────────────────────────
-  { to: "/console/wealth",             label: "Plan After the Sale", name: "Liquidity & Transition", group: "Wealth", roles: ["founder"], pro: true },
+  { to: "/console/wealth",             label: "WealthOS", name: "Plan after the sale", group: "Wealth", roles: ["founder"], pro: true },
 
   // ── Buyer · Marketplace ────────────────────────────────────────
   { to: "/console/marketplace",        label: "Browse Opportunities", group: "Marketplace", roles: ["buyer"] },

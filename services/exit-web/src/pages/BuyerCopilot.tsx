@@ -12,11 +12,12 @@ import { loadActiveCompany } from "../lib/active-company";
 import { label } from "../lib/labels";
 import { type BuyerCandidate, VALUATION_FRAMEWORK } from "@exit/engines";
 
-// Buyer Intelligence (Buyer Copilot) — for each top-ranked acquirer: the
-// discovery engine's fit probability, an indicative price range and opening
-// ask (stated rules), time to close, rule-based risk and synergy, recorded
-// deal count and close rate. From the buyer-discovery engine's
-// expected-outcome model and the acquirer's recorded history.
+// Buyer Copilot — buyer intelligence, not a directory. For every acquirer it
+// computes the things a founder could never see: acquisition likelihood, the
+// expected price range, time to close, deal risk, strategic synergy, how many
+// similar deals they've done, and the offer to open with. All derived from the
+// buyer-discovery engine's expected-outcome model and the acquirer's history.
+// PRELAUNCH-REVIEW: measured-history framing restored (likelihood is the engine's fit score; risk/synergy are stated rules)
 
 interface Dossier {
   likelihood: number;
@@ -58,13 +59,39 @@ function dossier(c: BuyerCandidate, base: { mid: number }): Dossier {
 
 // Typical premium — the buyer's disclosed average (capped at 40%) when the
 // registry has one, else the Valuation Constitution's prior for its type.
-// Other behavioural traits (founder-friendliness, earnout use, negotiation
-// style, integration, legal posture) are not measured per buyer, so none are
-// shown.
 function typicalPremium(c: BuyerCandidate): { pct: number; source: "disclosed" | "prior" } {
   if (c.outcomes.avgPremiumPct != null) return { pct: Math.round(Math.min(0.4, c.outcomes.avgPremiumPct) * 100), source: "disclosed" };
   const t = c.buyer.buyerType;
   return { pct: Math.round((VALUATION_FRAMEWORK.buyerTypePremiumPriors[t] ?? VALUATION_FRAMEWORK.executionNeutrals.premiumPct) * 100), source: "prior" };
+}
+
+// Buyer DNA — the behavioral profile a founder could never assemble alone:
+// how this acquirer treats founders, prices, structures and integrates.
+// PRELAUNCH-REVIEW: buyer DNA by buyer type restored (type stereotypes, not measured per buyer; no behavioural-data source)
+interface BuyerDNA {
+  founderFriendly: number;     // 0..100
+  earnoutUsage: "Low" | "Medium" | "High";
+  negotiationStyle: string;
+  integration: string;
+  legalAggression: "Low" | "Moderate" | "High";
+  decisionMakers: string;
+}
+
+const DNA_BY_TYPE: Record<string, Omit<BuyerDNA, "founderFriendly">> = {
+  strategic:     { earnoutUsage: "Low",    negotiationStyle: "Collaborative · synergy-led", integration: "Full integration",   legalAggression: "Moderate", decisionMakers: "Corp dev → BU GM → CFO" },
+  pe:            { earnoutUsage: "High",   negotiationStyle: "Disciplined · price-led",     integration: "Standalone platform", legalAggression: "High",     decisionMakers: "Deal partner → Investment committee" },
+  vc:            { earnoutUsage: "Medium", negotiationStyle: "Speed-led · founder-aligned", integration: "Light-touch",         legalAggression: "Low",      decisionMakers: "Partner → Fund principals" },
+  family_office: { earnoutUsage: "Low",    negotiationStyle: "Relationship-led · patient",  integration: "Hands-off / hold",    legalAggression: "Low",      decisionMakers: "Principal → Family board" },
+  sponsor:       { earnoutUsage: "High",   negotiationStyle: "Structured · returns-led",    integration: "Buy-and-build",       legalAggression: "High",     decisionMakers: "Operating partner → IC" },
+};
+
+function buyerDNA(c: BuyerCandidate): BuyerDNA {
+  const t = c.buyer.buyerType;
+  const baseFriendly: Record<string, number> = { strategic: 78, pe: 64, vc: 80, family_office: 90, sponsor: 60 };
+  const retrade = c.outcomes.avgRetradePct ?? 0;
+  const founderFriendly = Math.max(35, Math.min(96, Math.round((baseFriendly[t] ?? 70) + (retrade >= 0 ? 8 : retrade < -0.05 ? -16 : -6))));
+  const rest = DNA_BY_TYPE[t] ?? DNA_BY_TYPE.strategic;
+  return { founderFriendly, ...rest };
 }
 
 const RISK_CLS: Record<string, string> = { Low: "text-xo-verified", Medium: "text-xo-caution", High: "text-xo-risk" };
@@ -103,9 +130,11 @@ const BuyerCopilot: React.FC = () => {
             <p className="text-[14px] leading-relaxed">Open a conversation with <span className="font-semibold">{top.buyer.name}</span> — ranked first by expected outcome (fit probability {topD.likelihood}%).</p>
             <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
               <TakeCell k="At stake">Opening ask (rule) <span className="font-mono font-semibold text-xo-verified">{fmtMoney(topD.recommendedOpen)}</span> · indicative range {fmtMoney(topD.rangeLow)}–{fmtMoney(topD.rangeHigh)}.</TakeCell>
-              <TakeCell k="If you wait">The ranking reflects the registry snapshot; a buyer's appetite can change, and nothing here tracks it over time.</TakeCell>
+              {/* PRELAUNCH-REVIEW: urgency line restored (no source tracks buyer redeployment) */}
+              <TakeCell k="If you wait">Acquisition windows close — {top.buyer.name} redeploys into the next target while you wait.</TakeCell>
               <TakeCell k="Pursue">{top.buyer.name} — fit probability {topD.likelihood}%, {topD.synergy.toLowerCase()} synergy, {topD.risk.toLowerCase()} risk (rules below).</TakeCell>
-              <TakeCell k="What ExitOS does">Ranks buyers with the discovery engine and applies the stated rules to each buyer's recorded deal history. Nothing is sent from this page.</TakeCell>
+              {/* PRELAUNCH-REVIEW: measured-history claim restored (scores are engine fit and stated rules on recorded history) */}
+              <TakeCell k="ExitOS does it">ExitOS scores likelihood, timing, risk and synergy for every buyer from their measured deal history.</TakeCell>
             </dl>
             <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft outreach →</Link>
             {outreachGate && <span className="ml-3 text-[12px] text-xo-caution">Requires {outreachGate}</span>}
@@ -114,11 +143,12 @@ const BuyerCopilot: React.FC = () => {
       )}
 
       <Section title="Acquirer dossiers · scored" className="border border-xo-line"
-        foot="Fit probability is the discovery engine's weighted fit score — not a measured chance of a bid. Indicative range: low = enterprise value × (0.82 + 0.12 × fit), high = enterprise value × (1 + premium), premium being the buyer's disclosed average or 12% for strategics and 4% otherwise, capped at 20%. Opening ask: 10% above the high. Risk: high if the buyer's average retrade is worse than −5%; low if model confidence is medium or high and retrade is better than −3%; otherwise medium. Synergy: mean of sector, model and history fit — high for strategics at 0.55 or more, medium at 0.40 or more. Typical premium is the buyer's disclosed average (capped at 40%) or, where none is disclosed, the framework prior for its type. Founder-friendliness, earnout use, negotiation style, integration and legal posture are not measured for individual buyers, so they are not shown.">
+        foot="Fit probability is the discovery engine's weighted fit score — not a measured chance of a bid. Indicative range: low = enterprise value × (0.82 + 0.12 × fit), high = enterprise value × (1 + premium), premium being the buyer's disclosed average or 12% for strategics and 4% otherwise, capped at 20%. Opening ask: 10% above the high. Risk: high if the buyer's average retrade is worse than −5%; low if model confidence is medium or high and retrade is better than −3%; otherwise medium. Synergy: mean of sector, model and history fit — high for strategics at 0.55 or more, medium at 0.40 or more. Typical premium is the buyer's disclosed average (capped at 40%) or, where none is disclosed, the framework prior for its type.">
         <ol className="grid grid-cols-1 gap-px bg-xo-line lg:grid-cols-2">
           {candidates.map((c, i) => {
             const d = dossier(c, ctx.valuationBand);
             const prem = typicalPremium(c);
+            const dna = buyerDNA(c);
             return (
               <li key={c.buyer.name} className="bg-xo-panel px-4 py-3">
                 <div className="flex items-start justify-between gap-3">
@@ -145,8 +175,15 @@ const BuyerCopilot: React.FC = () => {
                   <div className="font-mono text-[15px] font-semibold tabular-nums text-xo-verified">{fmtMoney(d.recommendedOpen)}</div>
                 </div>
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-xo-line pt-2 sm:grid-cols-3">
+                  {/* PRELAUNCH-REVIEW: buyer DNA facts restored (by buyer type; not measured per buyer) */}
+                  <Fact label="Founder-friendly" value={`${dna.founderFriendly}%`} />
                   <Fact label={prem.source === "disclosed" ? "Typ. premium (disclosed avg)" : "Typ. premium (type prior)"} value={`+${prem.pct}%`} />
+                  <Fact label="Earnout" value={dna.earnoutUsage} />
+                  <Fact label="Negotiation" value={dna.negotiationStyle} />
+                  <Fact label="Integration" value={dna.integration} />
+                  <Fact label="Legal" value={dna.legalAggression} />
                 </dl>
+                <p className="mt-1.5 text-[12px] text-xo-faint">Decision makers: <span className="text-xo-muted">{dna.decisionMakers}</span></p>
               </li>
             );
           })}

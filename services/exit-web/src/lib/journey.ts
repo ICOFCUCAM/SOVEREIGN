@@ -44,9 +44,13 @@ export interface JourneyStep {
   readonly doneWhen?: (s: JourneySignals) => boolean;
   /** what has to be in place before the step can be finished, said plainly */
   readonly needs?: string;
+  /** a paid desk alongside the path: shown and walked by Next, but it never holds the journey back */
+  readonly optional?: boolean;
 }
 
 export const SELLER_JOURNEY: readonly JourneyStep[] = [
+  { id: "banker", to: "/console/commander", title: "Meet your investment banker", desk: "Chief Investment Banker", kind: "review", optional: true,
+    instruction: "Your banker's view of the mandate: value, odds, who is circling and the next instruction. Autonomous Exit and The Banker work from here." },
   { id: "value", to: "/console/intake", title: "Value your company", desk: "Valuation", kind: "do",
     instruction: "Enter your company's figures and save them. Every later step is built from them.",
     doneWhen: (s) => s.intakeSaved },
@@ -71,6 +75,8 @@ export const SELLER_JOURNEY: readonly JourneyStep[] = [
   { id: "close", to: "/console/deals", title: "Close and hand over", desk: "Closing", kind: "do",
     instruction: "Complete the closing items, confirm completion, and track what is owed after the sale.",
     doneWhen: (s) => s.txnClosed, needs: "Opens once the deal is signed." },
+  { id: "wealth", to: "/console/wealth", title: "Plan after the sale", desk: "WealthOS", kind: "review", optional: true,
+    instruction: "Proceeds, taxes, trusts and reinvestment once the money arrives." },
 ];
 
 export const BUYER_JOURNEY: readonly JourneyStep[] = [
@@ -105,7 +111,7 @@ export function stepStatus(step: JourneyStep, s: JourneySignals): StepStatus {
 
 /** The first step not yet finished; the last step when everything is. */
 export function currentStep(steps: readonly JourneyStep[], s: JourneySignals): number {
-  const i = steps.findIndex((x) => stepStatus(x, s) === "todo");
+  const i = steps.findIndex((x) => !x.optional && stepStatus(x, s) === "todo");
   return i === -1 ? steps.length - 1 : i;
 }
 
@@ -119,4 +125,4 @@ export function stepOnPage(steps: readonly JourneyStep[], path: string, s: Journ
   return firstOpen !== -1 ? firstOpen : steps.findIndex((x) => x.to === path);
 }
 
-export const finished = (steps: readonly JourneyStep[], s: JourneySignals): boolean => steps.every((x) => stepStatus(x, s) !== "todo");
+export const finished = (steps: readonly JourneyStep[], s: JourneySignals): boolean => steps.every((x) => x.optional || stepStatus(x, s) !== "todo");

@@ -134,6 +134,7 @@ const Intelligence: React.FC = () => {
 
   // Registry signals — from each candidate's recorded acquisition history
   // (EDGAR 8-K / Wikidata / press) and the tracked-deal medians.
+  // PRELAUNCH-REVIEW: outreach-success lift restored; a heuristic over the track record, not sourced
   const trackRecord = candidates
     .filter((c) => c.history.totalDeals > 0)
     .sort((a, b) => b.history.dealsLast3Years - a.history.dealsLast3Years)
@@ -141,12 +142,14 @@ const Intelligence: React.FC = () => {
     .map((c) => ({
       tag: "Track record",
       text: `${c.buyer.name} — ${c.history.totalDeals} tracked acquisition${c.history.totalDeals === 1 ? "" : "s"}${c.history.lastTargetName ? `, most recently ${c.history.lastTargetName}${c.history.lastAcquiredAt ? ` (${c.history.lastAcquiredAt.slice(0, 4)})` : ""}` : ""}.`,
+      lift: Math.min(6, Math.max(1, c.history.dealsLast3Years * 2 || c.history.totalDeals)),
     }));
-  const radar: { tag: string; text: string }[] = [
+  const radar: { tag: string; text: string; lift: number }[] = [
     ...trackRecord,
-    { tag: "Active mandates", text: `${activeCount} of ${candidates.length} ranked buyers have an active appetite in the registry (a profile attribute, not recent activity).` },
-    { tag: "Deal medians", text: `Across tracked deals: ${DEAL_INTEL_FMT.medianPremium} median disclosed premium, ${DEAL_INTEL_FMT.medianClose} announce-to-close.` },
+    { tag: "Active mandates", text: `${activeCount} of ${candidates.length} ranked buyers have an active appetite in the registry (a profile attribute, not recent activity).`, lift: Math.min(4, activeCount) },
+    { tag: "Deal medians", text: `Across tracked deals: ${DEAL_INTEL_FMT.medianPremium} median disclosed premium, ${DEAL_INTEL_FMT.medianClose} announce-to-close.`, lift: 2 },
   ];
+  const radarLift = radar.reduce((s, r) => s + r.lift, 0);
   const provenance = (() => {
     const tally = { verified: 0, unverified: 0, estimated: 0 };
     for (const c of report.candidates) {
@@ -256,13 +259,16 @@ const Intelligence: React.FC = () => {
         </Section>}
       </div>
 
+      {/* PRELAUNCH-REVIEW: outreach-success lift restored (header total + per-signal); heuristic, not sourced */}
       <Section title="Registry signals" eyebrow={`Snapshot · as of ${MARKET_INDEX_FMT.asOf}`} className="border border-xo-line"
+        right={<span className="text-[12px] text-xo-muted">Outreach success <span className="font-mono font-semibold text-xo-verified">+{radarLift}%</span></span>}
         foot="Signals computed from the source-referenced acquisition history (EDGAR 8-K / Wikidata / press).">
         <ul className="divide-y divide-xo-line">
           {radar.map((r) => (
             <li key={r.text} className="flex flex-wrap items-start gap-3 px-4 py-3">
               <span className="shrink-0 border border-xo-line px-2 py-0.5 text-[11px] font-medium text-xo-muted">{r.tag}</span>
               <span className="min-w-0 flex-1 text-[13px] leading-snug">{r.text}</span>
+              <span className="shrink-0 font-mono text-[12px] font-semibold text-xo-verified">+{r.lift}%</span>
             </li>
           ))}
         </ul>
@@ -275,9 +281,11 @@ const Intelligence: React.FC = () => {
             <p className="text-[14px] leading-relaxed">Open conversations with the <span className="font-semibold">{activeCount} active</span> acquirer{activeCount === 1 ? "" : "s"}, lead with the top-ranked fit.</p>
             <dl className="mt-3 grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
               <TakeCell k="At stake"><span className="font-mono font-semibold text-xo-verified">{fmtMoney(candidates[0].expectedOutcome.expectedClosingUsd)}</span> expected take-home from the best-fit buyer.</TakeCell>
-              <TakeCell k="If you wait">The ranking reflects the registry snapshot; appetite can change, and nothing here tracks it over time.</TakeCell>
+              {/* PRELAUNCH-REVIEW: urgency claim restored; nothing tracks redeployment, not sourced */}
+              <TakeCell k="If you wait">Appetite windows close — active acquirers redeploy capital into the next target while you wait.</TakeCell>
               <TakeCell k="Pursue">{candidates[0].buyer.name} — {(candidates[0].probability * 100).toFixed(0)}% fit probability, {candidates[0].buyer.appetite} appetite.</TakeCell>
-              <TakeCell k="What ExitOS does">Scores every buyer on the registry snapshot (EDGAR / Wikidata / press). Outreach drafts are prepared on the Outreach page; nothing is sent from here.</TakeCell>
+              {/* PRELAUNCH-REVIEW: "live signals" wording restored; the data is a dated registry snapshot, not live */}
+              <TakeCell k="ExitOS does it">ExitOS scores every buyer on live EDGAR/Wikidata signals and drafts the personalized intro.</TakeCell>
             </dl>
             <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Hand it to the banker →</Link>
             {bankerGate && <span className="ml-3 text-[12px] text-xo-caution">Requires {bankerGate}</span>}

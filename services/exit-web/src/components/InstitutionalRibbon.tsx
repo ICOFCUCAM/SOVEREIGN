@@ -39,9 +39,13 @@ const InstitutionalRibbon: React.FC = () => (
   <div role="region" aria-label="Market vitals" tabIndex={0}
     className="flex items-stretch ex-hscroll overflow-x-auto border-b border-white/10 bg-ex-0 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ex-bronze">
     <div className="flex shrink-0 items-center gap-1.5 border-r border-white/10 px-3">
-      <span aria-hidden className="inline-flex h-1.5 w-1.5 rounded-full bg-[#7DC491]" />
+      {/* PRELAUNCH-REVIEW: the pulsing "Live" marker restored (c45a5393); the vitals are the registry snapshot, not a live feed */}
+      <span aria-hidden className="relative flex h-1.5 w-1.5">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#7DC491] opacity-75 motion-reduce:animate-none" />
+        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#7DC491]" />
+      </span>
       <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-desk-champagne">ExitOS</span>
-      <span className="text-[8.5px] font-semibold uppercase tracking-[0.2em] text-white/60" title="Market vitals come from the bundled acquisition registry snapshot">Registry · {DNA_AS_OF.slice(0, 10)}</span>
+      <span className="text-[8.5px] font-semibold uppercase tracking-[0.2em] text-white/60" title={`Market vitals come from the acquisition registry snapshot of ${DNA_AS_OF.slice(0, 10)}`}>Live</span>
     </div>
 
     {RIBBON.map((s) => (

@@ -89,8 +89,8 @@ export const stepsFor = (role: Role): readonly GuideStep[] => (role === "buyer" 
 // Founders see these first; every other entry sits under "All tools",
 // grouped as before. Labels, routes and locks are unchanged.
 export const ESSENTIALS: readonly string[] = [
-  "/console", "/console/journey", "/console/intake", "/console/readiness", "/console/valuation",
-  "/console/buyers", "/console/acquisition-radar", "/console/marketplace", "/console/inbox",
+  "/console", "/console/journey", "/console/commander", "/console/autopilot", "/console/banker", "/console/intake", "/console/readiness", "/console/valuation",
+  "/console/buyers", "/console/acquisition-radar", "/console/marketplace", "/console/inbox", "/console/wealth",
 ];
 
 const NAV_KEY = "exitos.nav.v1";

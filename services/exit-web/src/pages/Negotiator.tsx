@@ -100,6 +100,8 @@ const NegotiatorDemo: React.FC = () => {
   const counter = active ? generateCounter(active.offer, reserve) : null;
   const [draftOpen, setDraftOpen] = useState(false);
   const [reserveOpen, setReserveOpen] = useState(false);
+  // PRELAUNCH-REVIEW: counter send state restored — no messaging backend, nothing reaches the buyer
+  const [counterSent, setCounterSent] = useState(false);
 
   // Your lines, typed in dollars. Invalid entries are flagged and the last
   // default stands in; the order walk-away ≤ minimum ≤ ideal is checked.
@@ -356,7 +358,7 @@ Best regards,
       </Section>
 
       <Modal open={draftOpen && !!active && !!counter} onClose={() => setDraftOpen(false)} title={`Counter response · ${active?.offer.buyerName ?? ""}`} size="lg"
-        footer={<><span className="mr-auto text-[12px] text-xo-muted">Nothing is sent from ExitOS — copy the draft into your own email.</span><Button onClick={() => copyText(draftText)}>Copy draft</Button></>}>
+        footer={<><Button variant="ghost" onClick={() => copyText(draftText)}>Copy draft</Button>{/* PRELAUNCH-REVIEW: "Send counter" restored; it only notifies, no messaging backend */}<Button onClick={() => { setCounterSent(true); setDraftOpen(false); notify(`Counter sent to ${active?.offer.buyerName}`); }}>{counterSent ? "Sent ✓ · resend" : "Send counter →"}</Button></>}>
         <pre className="whitespace-pre-wrap border border-xo-line bg-xo-panel p-4 font-sans text-[13px] leading-relaxed text-xo-text">{draftText}</pre>
       </Modal>
     </div>
