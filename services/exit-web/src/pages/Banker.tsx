@@ -199,7 +199,7 @@ const Banker: React.FC = () => {
 
   return (
     <div data-page="banker" className="space-y-3 text-xo-text">
-      <PageHeader eyebrow={`Always-on · Operator · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="The Banker"
+      <PageHeader eyebrow={`Always-on · Operator · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Outreach Desk"
         badge={<Provenance kind={fromIntake ? "company" : "demo"} />}
         description="Your permanent investment banker. It finds and scores buyers, drafts the outreach, writes the teaser and CIM, fields buyer questions, sets valuation strategy and coordinates diligence — then reports back, in the first person, like a service."
         actions={<button type="button" onClick={() => setBriefOpen(true)} className={BTN}>Brief the banker</button>} />
@@ -253,7 +253,7 @@ const Banker: React.FC = () => {
 
       {/* ── Agent status — first-person briefing ─────────────────── */}
       <div className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line lg:grid-cols-12">
-        <Section title="The Banker" eyebrow="Status" className="lg:col-span-7"
+        <Section title="Outreach Desk" eyebrow="Status" className="lg:col-span-7"
           right={<span className="text-[12px] text-xo-verified">● Working the deal · live</span>}>
           <div className="px-4 py-4">
             <p className="text-[15px] leading-relaxed">

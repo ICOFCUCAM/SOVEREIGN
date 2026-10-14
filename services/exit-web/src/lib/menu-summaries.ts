@@ -30,7 +30,7 @@ const DESKS: Record<string, { what: string | { founder: string; buyer: string };
     what: "A rehearsal of the whole sale: eight specialists prepare valuation, buyers, outreach, data room, diligence, negotiation, closing and wealth, and you approve one decision at a time.",
     kind: "Simulation" },
   "/console/banker": {
-    what: "Your outreach desk: ranks buyers, drafts the teaser and warm introductions, and tracks who has been approached. Send introduction opens the draft in your e-mail app.",
+    what: "Ranks buyers, drafts the teaser and warm introductions, and tracks who has been approached. Send introduction opens the draft in your e-mail app.",
     kind: "Preview" },
   "/console/wealth": {
     what: "After the money arrives: proceeds after tax, trusts, family office and reinvesting.",

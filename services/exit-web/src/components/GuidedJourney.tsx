@@ -124,7 +124,7 @@ export const JourneyBar: React.FC = () => {
           </div>
           <p className="mt-0.5 text-[13px] text-xo-text">
             <span className="font-semibold">{done ? (role === "buyer" ? "Acquisition complete." : "Sale complete.") : step.title}</span>
-            {!done && <> — {onStep ? step.instruction : <>you are off the path. <Link to={step.to} state={{ journeyStep: at }} className="font-medium text-xo-action underline">Go to this step</Link></>}</>}
+            {!done && <> — {onStep ? step.instruction : <>this page isn't a journey step. <Link to={step.to} state={{ journeyStep: at }} className="font-medium text-xo-action underline">Go to step {at + 1} →</Link></>}</>}
             {!done && status === "todo" && step.needs && <span className="text-xo-muted"> {step.needs}</span>}
             {!done && gate && <span className="text-xo-caution"> Needs the {gate}.</span>}
           </p>

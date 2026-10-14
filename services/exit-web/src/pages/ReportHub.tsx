@@ -80,7 +80,7 @@ const ReportHub: React.FC = () => {
             <p className="mt-0.5 text-[12px] text-white/55">Submit the Board Memorandum into the Dispatch pipeline (Submit → Approve → Render → Publish) for a classified, audited institutional document.</p>
           </div>
           <button onClick={submitBoardToDispatch} disabled={dispatching}
-            className="shrink-0 rounded-md bg-deal-500 px-4 py-2 text-[12.5px] font-semibold text-ink-950 transition hover:bg-deal-400 disabled:opacity-60">
+            className="shrink-0 rounded-md bg-desk-gold px-4 py-2 text-[12.5px] font-semibold text-desk-ink transition hover:bg-[#AA8443] disabled:opacity-60">
             {dispatching ? "Preparing…" : "Board memo · render PDF via Dispatch →"}
           </button>
         </div>

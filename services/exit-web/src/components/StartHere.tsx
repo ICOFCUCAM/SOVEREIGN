@@ -1,81 +1,34 @@
-import React, { useEffect, useId, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../lib/auth";
-import { requiredEngagement, type Role, type Plan } from "../lib/access";
-import { loadSavedIntake } from "../lib/active-company";
-import { guideState, onGuideChange, setGuideHidden, setWelcomed, stepsFor } from "../lib/onboarding";
+import { useJourney } from "./GuidedJourney";
+import { journeyFor, currentStep, finished, stepStatus } from "../lib/journey";
 
-// The "Start here" guide: the few steps that matter, in order, with honest
-// progress (see lib/onboarding). Shown on the founder and buyer home pages;
-// hidden on request and brought back from the sidebar.
+// The home page's one line on where you are: the guided journey's next step, with Continue. It replaces
+// the earlier five-step "Start here" card, so there is one guide (the Guided Journey), not two.
 
 const StartHere: React.FC = () => {
-  const { session } = useAuth();
-  const role: Role = session?.role ?? "founder";
-  const plan: Plan = session?.plan ?? "free";
-  const [state, setState] = useState(guideState);
-  useEffect(() => onGuideChange(() => setState(guideState())), []);
-  const id = useId();
-  if (state.hidden) return null;
-
-  const steps = stepsFor(role);
-  const saved = loadSavedIntake() !== null;
-  const status = (s: (typeof steps)[number]): "done" | "opened" | "todo" =>
-    s.signal === "intake" ? (saved ? "done" : "todo") : state.visited.includes(s.to) ? "opened" : "todo";
-  const next = steps.find((s) => status(s) === "todo");
+  const { role, signals } = useJourney();
+  const steps = journeyFor(role);
+  const at = currentStep(steps, signals);
+  const step = steps[at]!;
+  const done = finished(steps, signals);
+  const count = steps.filter((s) => stepStatus(s, signals) !== "todo").length;
 
   return (
-    <section aria-labelledby={id} data-guide="start-here" className="border border-xo-line bg-xo-panel">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-xo-line px-4 pb-2 pt-3">
-        <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-xo-brass">Start here</div>
-          <h2 id={id} className="text-[14px] font-semibold tracking-tight text-xo-text">
-            {role === "buyer" ? "Four steps to your first deal" : "Five steps to prepare your exit"}
-          </h2>
+    <section aria-label="Guided journey" data-guide="start-here" className="flex flex-wrap items-center gap-x-5 gap-y-2 border border-[#E6D9BF] bg-[#FBF7EE] px-4 py-3">
+      <div className="min-w-0 flex-1">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8A6A2E]">
+          Guided journey · {done ? "complete" : `step ${at + 1} of ${steps.length}`}{count > 0 && !done ? ` · ${count} done` : ""}
         </div>
-        <button type="button" onClick={() => setGuideHidden(true)}
-          className="min-h-6 rounded-sm px-1.5 py-1 text-[11px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">
-          Hide guide
-        </button>
-      </header>
-      {!state.welcomed && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-xo-line bg-xo-ink px-4 py-2.5 text-[13px]">
-          <p className="min-w-0 flex-1 text-xo-text">
-            <span className="font-semibold">Welcome to ExitOS.</span> If you are new, follow these steps in order.
-            {role === "buyer" ? "" : " Start with step 1: your figures then replace the demo company on every page."}
-            {" "}Unfamiliar words? Open <span className="font-semibold">Plain-language terms</span> in the menu.
-          </p>
-          <button type="button" onClick={setWelcomed}
-            className="min-h-6 shrink-0 rounded-sm border border-xo-line px-2 py-1 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">
-            Got it
-          </button>
-        </div>
-      )}
-      <ol className={`grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 ${steps.length === 4 ? "lg:grid-cols-4" : "lg:grid-cols-5"}`}>
-        {steps.map((s, i) => {
-          const st = status(s);
-          const gate = requiredEngagement(s.to, role, plan);
-          const isNext = s === next;
-          return (
-            <li key={s.to} className={`flex flex-col gap-1 bg-xo-panel px-4 py-3 ${isNext ? "ring-1 ring-inset ring-xo-action/50" : ""}`}>
-              <div className="flex items-center justify-between gap-2 text-[11px]">
-                <span className="font-mono text-xo-faint">Step {i + 1}</span>
-                {st === "done" && <span className="font-semibold text-xo-verified">✓ Done</span>}
-                {st === "opened" && <span className="text-xo-muted">Opened</span>}
-                {st === "todo" && isNext && <span className="font-semibold text-xo-action">Next</span>}
-              </div>
-              <Link to={s.to} className="rounded-sm text-[13px] font-semibold text-xo-text hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">
-                {s.title} <span aria-hidden>→</span>
-              </Link>
-              <p className="text-[12px] leading-snug text-xo-muted">{s.why}</p>
-              {gate && <p className="text-[11px] text-xo-caution">Needs {gate}</p>}
-            </li>
-          );
-        })}
-      </ol>
-      <p className="border-t border-xo-line px-4 py-2 text-[11px] text-xo-faint">
-        {role === "buyer" ? "" : "“Done” means your figures are saved. "}“Opened” means you have opened that page in this browser. Progress is kept in this browser only.
-      </p>
+        <p className="mt-0.5 text-[14px] text-xo-text">
+          <span className="font-semibold">{done ? (role === "buyer" ? "The acquisition is complete." : "The sale is complete.") : step.title}</span>
+          {!done && <span className="text-xo-muted"> — {step.instruction}</span>}
+        </p>
+      </div>
+      <div className="flex items-center gap-3">
+        {!done && <Link to={step.to} state={{ journeyStep: at }} className="rounded-sm bg-[#B48737] px-4 py-2 text-[13px] font-semibold text-white hover:bg-[#9E7630] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">{count === 0 ? "Start" : "Continue"} →</Link>}
+        <Link to="/console/journey" className="text-[12px] font-medium text-xo-muted underline-offset-2 hover:text-xo-text hover:underline">All steps</Link>
+      </div>
     </section>
   );
 };

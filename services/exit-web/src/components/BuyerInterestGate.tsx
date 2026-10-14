@@ -66,7 +66,7 @@ const BuyerInterestGate: React.FC = () => {
         </div>
         <button
           onClick={() => nav("/console/upgrade")}
-          className="shrink-0 rounded-md bg-deal-500 px-5 py-2.5 text-[12.5px] font-semibold text-ink-950 transition hover:bg-deal-400"
+          className="shrink-0 rounded-md bg-desk-gold px-5 py-2.5 text-[12.5px] font-semibold text-desk-ink transition hover:bg-[#AA8443]"
         >
           {hasInterest ? "Unlock buyers →" : "See your matches →"}
         </button>

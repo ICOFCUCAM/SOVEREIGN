@@ -59,7 +59,7 @@ const MenuRow: React.FC<{ n: NavItem; inStage: boolean; active: boolean; locked:
           <span className={locked ? "text-white/40" : ""}>{n.label}</span>
           {active && sub && <span className="mt-0.5 block truncate font-mono text-[9.5px] uppercase tracking-[0.16em] text-ex-bronze/80">{sub}</span>}
         </span>
-        {locked && <span className="flex shrink-0 items-center gap-0.5 font-mono text-[8.5px] uppercase tracking-[0.18em] text-white/35"><LockIcon size={8} />Pro</span>}
+        {locked && <span className="flex shrink-0 items-center gap-0.5 font-mono text-[8.5px] uppercase tracking-[0.18em] text-white/35"><LockIcon size={8} />{n.starter ? "Prep" : "Pro"}</span>}
       </Link>
       {summary && <HintToggle hint={hint} label={n.label} />}
       {summary && <HintCard hint={hint} title={n.label} what={summary.what} kind={summary.kind} plan={summary.plan} />}

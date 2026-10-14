@@ -150,6 +150,7 @@ const Terminal: React.FC = () => {
             ? <>Figures use the company data you entered in Value My Company. </>
             : <>This is a sample company, not your data. <ActionLink to="/console/intake">Value My Company</ActionLink> to personalise every figure. </>}
           Market data is a registry snapshot as of <span className="font-mono tabular-nums text-xo-text">{asOf}</span>.
+          {role === "founder" && <> <ActionLink to="/console/command">Full exit overview</ActionLink></>}
         </p>
       </header>
 

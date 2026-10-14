@@ -30,7 +30,7 @@ Features removed in the 11–12 October honesty audits and not brought back on t
 
 | Page | Restored feature | Backend state today | To do before launch |
 |---|---|---|---|
-| Menu | Real names: Chief Investment Banker, Autonomous Exit, The Banker, WealthOS, Live Deal Room; banker pages and WealthOS in the founder's short menu | — | — |
+| Menu | Real names: Chief Investment Banker, Exit Rehearsal (was Autonomous Exit), Outreach Desk (was The Banker), WealthOS, Live Deal Room; banker pages and WealthOS in the founder's short menu | — | — |
 | Guided Journey | Founders start at the Chief Investment Banker and end at WealthOS (optional, Pro) | Real | — |
 | Ribbon | Pulsing "Live" marker; rising arrow on Buyer Activity | Vitals are the registry snapshot | Live feed, or reword |
 | Active Processes | Sample deals (C.H. Robinson bolt-on, Pritzker, Walton) in the pipeline and totals | Hard-coded | Real deals from the exchange |
