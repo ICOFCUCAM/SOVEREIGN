@@ -4,7 +4,8 @@ import { activateBackend, type AccountRole } from "./exit-api";
 import {
   authConfigFromEnv, sendSignInLink, parseCallback, verifyUser, refreshSession, signOutRemote,
   loadAccess, saveSide, consoleRole, storeRefresh, storedRefresh, rememberSide, takePendingSide,
-  type Side, type Grant, type VerifiedSession,
+  passwordSignIn, sendPasswordReset, oauthUrl,
+  type Side, type Grant, type VerifiedSession, type OAuthProvider,
 } from "./email-auth";
 
 // ── SESSIONS ────────────────────────────────────────────────────────
@@ -48,6 +49,12 @@ interface AuthCtx {
   signIn: (email: string, password: string, role?: Role, plan?: Plan) => Promise<void>;
   /** email_link mode: e-mail a sign-in link; the chosen side applies when the person returns */
   sendLink: (email: string, side: Side) => Promise<void>;
+  /** e-mail and password sign-in (development: a local session) */
+  passwordLogin: (email: string, password: string, side: Side) => Promise<void>;
+  /** e-mail a password-reset link */
+  resetPassword: (email: string) => Promise<void>;
+  /** continue with Google, Apple or Microsoft (development: a local session) */
+  oauth: (provider: OAuthProvider, side: Side) => void;
   /** email_link mode: the e-mail a link was just sent to */
   linkSentTo: string | null;
   /** email_link mode: a verified account that has not chosen founder or buyer yet */
@@ -181,6 +188,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally { setLoading(false); }
   }, [mode, cfg]);
 
+  const passwordLogin = useCallback(async (email: string, password: string, side: Side) => {
+    if (mode !== "email_link" || !cfg) { await signIn(email.trim(), password, side); return; }
+    setLoading(true); setError(null);
+    try {
+      rememberSide(side);
+      const v = await passwordSignIn(cfg, email, password);
+      storeRefresh(v.refreshToken);
+      setSession(await verifiedConsoleSession(cfg, v, "free"));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not sign in.");
+      throw e;
+    } finally { setLoading(false); }
+  }, [mode, cfg, signIn]);
+
+  const resetPassword = useCallback(async (email: string) => {
+    setError(null);
+    if (mode !== "email_link" || !cfg) return;      // development: nothing to reset
+    setLoading(true);
+    try { await sendPasswordReset(cfg, email, `${window.location.origin}/console`); }
+    catch (e) { setError(e instanceof Error ? e.message : "Could not send the reset link."); throw e; }
+    finally { setLoading(false); }
+  }, [mode, cfg]);
+
+  const oauth = useCallback((provider: OAuthProvider, side: Side) => {
+    if (mode !== "email_link" || !cfg) { void signIn(`${side}@${provider === "azure" ? "microsoft" : provider}.com`, "sso", side).catch(() => {}); return; }
+    rememberSide(side);
+    window.location.assign(oauthUrl(cfg, provider, `${window.location.origin}/console`));
+  }, [mode, cfg, signIn]);
+
   const chooseSide = useCallback(async (side: Side) => {
     if (!cfg || !session?.verified) return;
     await saveSide(cfg, session.verified, side);
@@ -226,8 +262,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const has = useCallback((scope: string) => !!session?.scopes.includes(scope), [session]);
 
-  const value = useMemo<AuthCtx>(() => ({ session, mode, signIn, sendLink, linkSentTo, chooseSide, signOut, upgrade, upgradeTo, has, loading, ready, error }),
-    [session, mode, signIn, sendLink, linkSentTo, chooseSide, signOut, upgrade, upgradeTo, has, loading, ready, error]);
+  const value = useMemo<AuthCtx>(() => ({ session, mode, signIn, sendLink, passwordLogin, resetPassword, oauth, linkSentTo, chooseSide, signOut, upgrade, upgradeTo, has, loading, ready, error }),
+    [session, mode, signIn, sendLink, passwordLogin, resetPassword, oauth, linkSentTo, chooseSide, signOut, upgrade, upgradeTo, has, loading, ready, error]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 

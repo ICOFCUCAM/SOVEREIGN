@@ -4,8 +4,7 @@ import { useAuth } from "../lib/auth";
 import { Field } from "../lib/ui";
 import { useI18n } from "../lib/i18n";
 import { Dial, INSTRUMENT_CSS } from "../components/HeroInstrument";
-import type { Role } from "../lib/access";
-import type { Side } from "../lib/email-auth";
+import type { Side, OAuthProvider } from "../lib/email-auth";
 import { ExchangeMark } from "../components/ExchangeMark";
 
 // Sign-in. Production builds sign in with a one-time e-mail link (Supabase
@@ -51,10 +50,7 @@ export const ChooseSide: React.FC = () => {
   );
 };
 
-const SignIn: React.FC = () => {
-  const { mode } = useAuth();
-  return mode === "email_link" ? <EmailLinkSignIn /> : <DevelopmentSignIn />;
-};
+const SignIn: React.FC = () => <AccessForm />;
 
 const Frame: React.FC<{ title: string; lede?: React.ReactNode; children: React.ReactNode }> = ({ title, lede, children }) => {
   // the tab says where the reader is; the site's title returns when they leave
@@ -128,67 +124,94 @@ const Frame: React.FC<{ title: string; lede?: React.ReactNode; children: React.R
   );
 };
 
-const EmailLinkSignIn: React.FC = () => {
-  const { sendLink, linkSentTo, loading, error } = useAuth();
-  const [email, setEmail] = useState("");
-  const [side, setSide] = useState<Side>("founder");
-  return (
-    <Frame title="Sign in to ExitOS">
-      <div>
-        {linkSentTo ? (
-          <div role="status" className="space-y-2 rounded-[3px] border border-ex-bronze/30 bg-ex-bronze/[0.06] p-4 text-[13px] text-white/75">
-            <p className="font-semibold text-ex-ivory">Check your inbox</p>
-            <p>We sent a sign-in link to <span className="font-semibold text-white">{linkSentTo}</span>. Open it on this device to sign in; it works once and expires within an hour.</p>
-          </div>
-        ) : (
-          <form onSubmit={(e) => { e.preventDefault(); void sendLink(email, side).catch(() => {}); }} className="space-y-5">
-            <SideChooser value={side} onChange={setSide} legend="I am" />
-            <Field label="Work e-mail">
-              <input className={INPUT} type="email" name="email" autoComplete="email" inputMode="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" />
-            </Field>
-            {error && <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</div>}
-            <button type="submit" disabled={loading || !email} className={PRIMARY}>{loading ? "Sending…" : <>E-mail me a sign-in link <span aria-hidden>→</span></>}</button>
-            <p className="flex items-center gap-2 text-[11.5px] text-white/40"><svg aria-hidden width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="11" width="16" height="10" rx="1" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>No password. The link proves you control this address.</p>
-          </form>
-        )}
-      </div>
-    </Frame>
-  );
-};
+// provider marks for the sign-in buttons
+const GoogleMark = () => (
+  <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.1-11.3-7.5l-6.5 5C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.6l6.2 5.2C39.9 36.2 44 30.7 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+);
+const AppleMark = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M16.4 12.8c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .7 1.1 1.6 2.3 2.7 2.2 1.1 0 1.5-.7 2.8-.7s1.6.7 2.8.7c1.2 0 1.9-1.1 2.6-2.1.8-1.2 1.2-2.4 1.2-2.4s-2.4-.9-2.4-3.9zM14.2 5.9c.6-.7 1-1.7.9-2.7-.9 0-2 .6-2.6 1.3-.6.6-1.1 1.6-.9 2.6 1 .1 2-.5 2.6-1.2z"/></svg>
+);
+const MicrosoftMark = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="13" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="13" width="10" height="10" fill="#00A4EF"/><rect x="13" y="13" width="10" height="10" fill="#FFB900"/></svg>
+);
+const PROVIDERS: ReadonlyArray<readonly [OAuthProvider, string, React.FC]> = [["google", "Google", GoogleMark], ["apple", "Apple", AppleMark], ["azure", "Microsoft", MicrosoftMark]];
+const SOCIAL = "flex w-full items-center justify-center gap-2.5 rounded-[3px] border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[13px] font-semibold text-ex-ivory transition hover:border-ex-bronze/40 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze";
+const TEXT_LINK = "rounded text-[12px] font-semibold text-ex-bronze transition hover:text-ex-ivory focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze";
 
-/** Development builds only: a local session in this browser, with no server identity. */
-const DevelopmentSignIn: React.FC = () => {
-  const { signIn, loading, error } = useAuth();
+// Sign-in: Google, Apple or Microsoft; e-mail and password with a reset; or a one-time e-mail link.
+// Production builds go through Supabase Auth (OAuth, password grant, recover, OTP link); development
+// builds open a local session.
+const AccessForm: React.FC = () => {
+  const { mode, oauth, passwordLogin, resetPassword, sendLink, linkSentTo, loading, error } = useAuth();
+  const [view, setView] = useState<"signin" | "reset">("signin");
+  const [side, setSide] = useState<Side>("founder");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [role, setRole] = useState<Role>("founder");
+  const [resetSent, setResetSent] = useState(false);
+  const live = mode === "email_link";
+
+  if (view === "reset") return (
+    <Frame title="Reset your password" lede="Enter the e-mail on your account and we'll send a link to sign you back in.">
+      {resetSent ? (
+        <div role="status" className="space-y-4">
+          <div className="rounded-[3px] border border-ex-bronze/30 bg-ex-bronze/[0.06] p-4 text-[13px] text-white/75">
+            <p className="font-semibold text-ex-ivory">Check your inbox</p>
+            <p className="mt-1">If an account exists for <span className="font-semibold text-ex-ivory">{email}</span>, a reset link is on its way.</p>
+          </div>
+          <button type="button" className={PRIMARY} onClick={() => { setView("signin"); setResetSent(false); }}>Back to sign in</button>
+        </div>
+      ) : (
+        <form onSubmit={(e) => { e.preventDefault(); void resetPassword(email).then(() => setResetSent(true)).catch(() => {}); }} className="space-y-5">
+          <Field label="Email"><input className={INPUT} type="email" name="email" autoComplete="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" /></Field>
+          {error && <div role="alert" className="rounded-[3px] border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</div>}
+          <button type="submit" disabled={loading || !email} className={PRIMARY}>{loading ? "Sending…" : <>Send reset link <span aria-hidden>→</span></>}</button>
+          <button type="button" onClick={() => setView("signin")} className={`${TEXT_LINK} block w-full text-center`}>Back to sign in</button>
+        </form>
+      )}
+    </Frame>
+  );
 
   return (
-    <Frame title="Sign in (development)">
-      <div className="space-y-5">
-        <p role="note" className="rounded-[3px] border border-loi-400/40 bg-loi-500/10 px-3 py-2 text-[12px] leading-snug text-loi-300">
-          Development build: credentials aren't checked. Any e-mail and password open a local session in this browser, with no server identity. Production builds sign in with an e-mail link.
-        </p>
-        <form onSubmit={(e) => { e.preventDefault(); signIn(email.trim(), password, role).catch(() => {}); }} className="space-y-5">
-          <SideChooser value={role === "buyer" ? "buyer" : "founder"} onChange={(s) => setRole(s)} legend="I am" />
-          <Field label="Email">
-            <input className={INPUT} type="email" name="email" autoComplete="username" inputMode="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" />
-          </Field>
-          {/* the reveal toggle sits outside the label, so the field's name stays "Password" */}
-          <div className="relative">
-            <Field label="Password">
-              <input className={`${INPUT} pr-16`} type={showPw ? "text" : "password"} name="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-            </Field>
-            <button type="button" onClick={() => setShowPw((v) => !v)} aria-pressed={showPw} aria-label={showPw ? "Hide password" : "Show password"}
-              className="absolute bottom-2 right-1.5 rounded px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45 hover:text-ex-bronze focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">{showPw ? "Hide" : "Show"}</button>
+    <Frame title="Access the Exchange">
+      {linkSentTo ? (
+        <div role="status" className="space-y-2 rounded-[3px] border border-ex-bronze/30 bg-ex-bronze/[0.06] p-4 text-[13px] text-white/75">
+          <p className="font-semibold text-ex-ivory">Check your inbox</p>
+          <p>We sent a sign-in link to <span className="font-semibold text-ex-ivory">{linkSentTo}</span>. Open it on this device to sign in; it works once and expires within an hour.</p>
+        </div>
+      ) : (
+        <div className="space-y-5">
+          <SideChooser value={side} onChange={setSide} legend="I am" />
+          <div className="space-y-2.5">
+            {PROVIDERS.map(([p, name, Mark]) => (
+              <button key={p} type="button" onClick={() => oauth(p, side)} className={SOCIAL}><Mark /> Continue with {name}</button>
+            ))}
           </div>
-          {error && <div role="alert" className="rounded-[3px] border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</div>}
-          <button type="submit" disabled={loading || !email || !password} className={PRIMARY}>
-            {loading ? "Authenticating…" : <>Sign in <span aria-hidden>→</span></>}
-          </button>
-        </form>
-      </div>
+          <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.24em] text-white/30"><span className="h-px flex-1 bg-white/10" />or<span className="h-px flex-1 bg-white/10" /></div>
+          <form onSubmit={(e) => { e.preventDefault(); void passwordLogin(email, password, side).catch(() => {}); }} className="space-y-4">
+            <Field label="Email">
+              <input className={INPUT} type="email" name="email" autoComplete="username" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" />
+            </Field>
+            {/* the reveal toggle sits outside the label, so the field's name stays "Password" */}
+            <div className="relative">
+              <Field label="Password">
+                <input className={`${INPUT} pr-16`} type={showPw ? "text" : "password"} name="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+              </Field>
+              <button type="button" onClick={() => setShowPw((v) => !v)} aria-pressed={showPw} aria-label={showPw ? "Hide password" : "Show password"}
+                className="absolute bottom-2 right-1.5 rounded px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45 hover:text-ex-bronze focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">{showPw ? "Hide" : "Show"}</button>
+            </div>
+            <div className="flex justify-end -mt-1"><button type="button" onClick={() => setView("reset")} className={TEXT_LINK}>Forgot password?</button></div>
+            {error && <div role="alert" className="rounded-[3px] border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</div>}
+            <button type="submit" disabled={loading || !email || !password} className={PRIMARY}>{loading ? "Signing in…" : <>Sign in <span aria-hidden>→</span></>}</button>
+          </form>
+          {live && (
+            <p className="text-center text-[12px] text-white/45">
+              Prefer no password?{" "}
+              <button type="button" disabled={loading || !email} onClick={() => { void sendLink(email, side).catch(() => {}); }} className={`${TEXT_LINK} disabled:opacity-40`}>E-mail me a sign-in link</button>
+            </p>
+          )}
+        </div>
+      )}
     </Frame>
   );
 };
