@@ -56,13 +56,17 @@ const DEALS: readonly PipelineDeal[] = [
     score: e.score,
     recommendation: e.recommendation,
   })),
+  // PRELAUNCH-REVIEW: sample sourcing/engaged deals restored — invented, no outreach engine or deal records behind them
+  { id: 'p-100', buyer: 'C.H. Robinson Bolt-on',     stage: 'engaged',   amount: 110_000_000, probability: 0.25, updatedAt: new Date(Date.now() - 12 * 86400_000).toISOString() },
+  { id: 'p-101', buyer: 'Pritzker Private Capital',  stage: 'sourcing',  probability: 0.05, updatedAt: new Date(Date.now() - 18 * 86400_000).toISOString() },
+  { id: 'p-102', buyer: 'Walton Enterprises',        stage: 'sourcing',  probability: 0.04, updatedAt: new Date(Date.now() - 22 * 86400_000).toISOString() },
 ];
 
-// Sourcing column: the top-ranked buyers from discovery that have not made an
-// offer. They are candidates only — not contacted, no amount, no probability,
+// Sourcing column: the top-ranked buyers from discovery not already in the
+// pipeline. They are candidates only — not contacted, no amount, no probability,
 // and not counted in any total.
-const offerBuyers = new Set(OFFER_EVALUATIONS.map((e) => e.offer.buyerName));
-const CANDIDATES = BUYERS.candidates.filter((c) => !offerBuyers.has(c.buyer.name)).slice(0, 3).map((c) => c.buyer.name);
+const dealBuyers = new Set(DEALS.map((d) => d.buyer));
+const CANDIDATES = BUYERS.candidates.filter((c) => !dealBuyers.has(c.buyer.name)).slice(0, 3).map((c) => c.buyer.name);
 
 // Deal Probability Engine — predicts close probability, expected close date and
 // the probability-adjusted value for each live deal, and surfaces the single
@@ -123,10 +127,10 @@ const PipelineDemo: React.FC = () => {
     <div data-page="active-processes" className="space-y-3 text-xo-text">
       <PageHeader eyebrow="◉ Exchange · Sourcing · Acquisition Pipeline" title="Active Processes"
         badge={<><Provenance kind="demo" /><span className="text-[12px] text-xo-muted">Six-stage process · Leverage {NEGOTIATION_STATE.leverage}</span></>}
-        description={`The demo company's sample offers (${SAMPLE_COMPANY.name}) and its top discovery candidates. Saved intakes hold no offers, so this page stays on demo data.`} />
+        description={`The demo company's sample offers and sample sourcing deals (${SAMPLE_COMPANY.name}) and its top discovery candidates. Saved intakes hold no offers, so this page stays on demo data.`} />
 
       <section aria-label="Pipeline summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-3 xl:grid-cols-5">
-        <div className="bg-xo-panel"><Metric label="Active deals" value={String(live.length)} sub="offers, excluding dead" /></div>
+        <div className="bg-xo-panel"><Metric label="Active deals" value={String(live.length)} sub="excluding dead" /></div>
         <div className="bg-xo-panel"><Metric label="Pipeline value" value={fmtMoney(live.reduce((s, d) => s + (d.amount ?? 0), 0))} sub="indicated" /></div>
         <div className="bg-xo-panel"><Metric label="Prob-weighted" emphasis value={<span className="text-xo-verified">{fmtMoney(totalWeighted)}</span>} sub="forecast" /></div>
         <div className="bg-xo-panel"><Metric label="Lead close" value={lead ? `${(lead.probability * 100).toFixed(0)}%` : "—"} sub={lead?.buyer} /></div>

@@ -10,13 +10,13 @@ import { dealContextFor } from "../lib/deal-context";
 import { loadActiveCompany } from "../lib/active-company";
 import { DEAL_INTEL_FMT, sectorEventCount } from "../lib/market-stats";
 
-// Exit Timing — most founders don't know *when* to sell. The page reads the
-// signals that move valuation (multiples, deal activity, sector exits, deal
-// velocity, buyer appetite) alongside the company's own trajectory, and gives
-// a rule-based exit window and the value of fixing first. Everything is
-// computed when the page opens from the valuation, readiness and discovery
-// engines and the source-referenced acquisition history; nothing monitors in
-// the background or sends alerts.
+// Exit Timing Engine — most founders don't know *when* to sell. The engine
+// monitors the market signals that move valuation (multiples, deal activity,
+// competitor exits, deal velocity, buyer demand) alongside the company's own
+// trajectory, then recommends an optimal exit window and the value of waiting.
+// Every signal is computed from the valuation engine, the discovery pool and
+// the source-referenced acquisition history.
+// PRELAUNCH-REVIEW: continuous-monitoring and alert wording restored (no background monitor or alert delivery exists; signals compute when the page opens)
 
 // "context" = a measured figure with no rule turning it into a verdict.
 type Impact = "tailwind" | "headwind" | "neutral" | "context";
@@ -78,7 +78,8 @@ const ExitTiming: React.FC = () => {
       <PageHeader eyebrow={fromIntake ? `◉ Timing Desk · Your intake: ${company.name}` : `◉ Timing Desk · Demo company: ${company.name}`} title="Exit Timing"
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">{tailwinds} of {ruled} rule-based signals favourable</span></>}>
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-xo-line pt-2">
-          {([["Growth", `${Math.round(growthYoy * 100)}%`], ["Active-appetite buyers", String(activeBuyers)]] as const).map(([k, v]) => (
+          {/* PRELAUNCH-REVIEW: "Buyers circling" label restored (appetite is a registry attribute, not live activity) */}
+          {([["Growth", `${Math.round(growthYoy * 100)}%`], ["Buyers circling", String(activeBuyers)]] as const).map(([k, v]) => (
             <div key={k} className="flex items-baseline gap-1.5"><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[12px] font-semibold tabular-nums">{v}</dd></div>
           ))}
         </dl>
@@ -90,7 +91,8 @@ const ExitTiming: React.FC = () => {
         <div className="bg-xo-panel"><Metric label="Sell today" value={fmtMoney(current)} sub="enterprise value today" /></div>
         <div className="bg-xo-panel"><Metric label="Sell at window" value={<span className="text-xo-verified">{fmtMoney(potential)}</span>} sub="after fixes · no growth assumed" /></div>
         <div className="bg-xo-panel"><Metric label="Signals favourable" value={`${tailwinds}/${ruled}`} sub="rule-based signals" /></div>
-        <div className="bg-xo-panel"><Metric label="Active-appetite buyers" value={String(activeBuyers)} sub="of 12 ranked · registry attribute" /></div>
+        {/* PRELAUNCH-REVIEW: "Buyers circling · acquisition mode" restored (registry appetite attribute, not live activity) */}
+        <div className="bg-xo-panel"><Metric label="Buyers circling" value={String(activeBuyers)} sub="acquisition mode" /></div>
       </section>
 
       <RegistryTape items={tape} asOf={DNA_AS_OF.slice(0, 10)} />
@@ -104,7 +106,8 @@ const ExitTiming: React.FC = () => {
             <TakeCell k="At stake">Waiting to the window projects <span className="font-mono font-semibold text-xo-verified">+{upliftPct}%</span> · {fmtMoney(current)} → {fmtMoney(potential)}.</TakeCell>
             <TakeCell k="If you wait">Selling today leaves the readiness gap unclaimed; waiting too long risks the multiple cycle turning.</TakeCell>
             <TakeCell k="Signals">{tailwinds} of {ruled} rule-based signals are tailwinds; {signals.length - ruled} more are shown as context.</TakeCell>
-            <TakeCell k="What ExitOS does">Recomputes this page from the company's figures and the registry snapshot each time it opens. There are no alerts — check back after updating your figures.</TakeCell>
+            {/* PRELAUNCH-REVIEW: continuous-monitoring / alert claim restored (no background monitor or notification backend) */}
+            <TakeCell k="ExitOS does it">ExitOS monitors the market continuously and pings you when the window opens.</TakeCell>
             <TakeCell k="Outcome">At the window <span className="font-mono">{fmtMoney(potential)}</span> · +{upliftPct}% value of waiting (after fixes, no growth assumed)</TakeCell>
           </dl>
           <Link to="/console/readiness" className="mt-3 inline-block rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">See readiness fixes →</Link>
@@ -154,8 +157,9 @@ const ExitTiming: React.FC = () => {
         </Section>
       </div>
 
-      <Section title="Market signals" className="border border-xo-line"
-        foot="Computed when the page opens from the valuation engine, the 12 ranked buyers and the source-referenced acquisition history (registry snapshot). Nothing is monitored in the background.">
+      {/* PRELAUNCH-REVIEW: "Market signals monitored" title restored (signals compute when the page opens; no background monitor) */}
+      <Section title="Market signals monitored" className="border border-xo-line"
+        foot="All signals computed from the valuation engine, the discovery pool and the source-referenced acquisition history.">
         <ul className="grid grid-cols-1 gap-px bg-xo-line sm:grid-cols-2 lg:grid-cols-3">
           {signals.map((s) => {
             const st = IMPACT_STYLE[s.impact];

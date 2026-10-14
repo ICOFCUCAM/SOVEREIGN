@@ -28,6 +28,15 @@ function buyerFacts(c: Candidate, company: CompanyProfile, valueMid: number) {
   return { name: c.buyer.name, days: c.expectedOutcome.expectedDaysToCash, premium, disclosed, multiple, probability: Math.round(c.probability * 100) };
 }
 
+// PRELAUNCH-REVIEW: buyer retention % and earnout tendency restored; retention is a hard-coded base nudged by retrade history and earnout is typed in — no retention or earnout source exists
+const BUYER_DNA_EXTRAS: Array<{ retentionBase: number; earnout: string }> = [
+  { retentionBase: 80, earnout: "Rare" },
+  { retentionBase: 60, earnout: "Aggressive" },
+];
+function buyerRetention(c: Candidate, retentionBase: number): number {
+  return Math.min(95, Math.max(45, Math.round(retentionBase + ((c.outcomes.avgRetradePct ?? 0) >= 0 ? 6 : -8))));
+}
+
 const Stat: React.FC<{ value: string; label: string }> = ({ value, label }) => (
   <div className="bg-xo-panel px-4 py-3">
     <div className="font-mono text-[20px] font-semibold tabular-nums text-xo-text">{value}</div>
@@ -51,7 +60,11 @@ const Network: React.FC = () => {
     valueMid: canonicalValuationFor(company).headline.mid,
   }), [company]);
   // the two top-ranked buyers for this company (no hand-picked names)
-  const topTwo = BUYERS.candidates.slice(0, 2).map((c) => buyerFacts(c, company, valueMid));
+  const topTwo = BUYERS.candidates.slice(0, 2).map((c, i) => ({
+    ...buyerFacts(c, company, valueMid),
+    retention: buyerRetention(c, BUYER_DNA_EXTRAS[i].retentionBase),
+    earnout: BUYER_DNA_EXTRAS[i].earnout,
+  }));
   const buyerDnaCount = BUYERS.candidates.length;
   const tape = useMemo(() => buildMarketTape(), []);
 
@@ -96,12 +109,16 @@ const Network: React.FC = () => {
             <li key={b.name} className="bg-xo-panel px-4 py-3">
               <div className="text-[11px] text-xo-faint">Ranked #{i + 1} for this company · {b.probability}% probability</div>
               <h3 className="text-[14px] font-semibold">{b.name}</h3>
-              <dl className="mt-2 grid grid-cols-3 gap-2">
+              <dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <div><dt className="text-[11px] text-xo-faint">Days to cash</dt><dd className="font-mono text-[15px] font-semibold tabular-nums">{b.days}d</dd></div>
                 <div><dt className="text-[11px] text-xo-faint">Premium {b.disclosed ? "(disclosed avg)" : "(prior)"}</dt><dd className="font-mono text-[15px] font-semibold tabular-nums">+{Math.round(b.premium * 100)}%</dd></div>
                 <div><dt className="text-[11px] text-xo-faint">What-if ARR multiple</dt><dd className="font-mono text-[15px] font-semibold tabular-nums text-xo-verified">{b.multiple ?? "—"}{b.multiple && "×"}</dd></div>
+                {/* PRELAUNCH-REVIEW: retention figure restored; no measured retention source */}
+                <div><dt className="text-[11px] text-xo-faint">Retention</dt><dd className="font-mono text-[15px] font-semibold tabular-nums">{b.retention}%</dd></div>
               </dl>
-              <p className="mt-2 text-[11px] text-xo-faint">What-if: the company's value × (1 + this premium) ÷ its ARR. Retention and earnout behaviour are not measured, so they are not shown.</p>
+              {/* PRELAUNCH-REVIEW: earnout tendency restored; typed-in, no earnout data source */}
+              <p className="mt-2 text-[12px] text-xo-muted">Earnout tendency: <span className="text-xo-text">{b.earnout}</span></p>
+              <p className="mt-1 text-[11px] text-xo-faint">What-if: the company's value × (1 + this premium) ÷ its ARR.</p>
             </li>
           ))}
         </ul>

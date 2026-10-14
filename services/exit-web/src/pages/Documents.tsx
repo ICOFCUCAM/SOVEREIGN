@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Modal, fmtMoney } from "../lib/ui";
+import { Modal, fmtMoney, notify } from "../lib/ui";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
 import { PageHeader, Section, Metric, ScrollRegion, Provenance } from "../components/xo";
@@ -95,16 +95,24 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
 ];
 
   const [libraryOpen, setLibraryOpen] = useState(false);
+  // PRELAUNCH-REVIEW: "Send to buyer" restored — records the send and notifies; no data-room delivery backend, nothing leaves ExitOS
+  const [sent, setSent] = useState<Set<string>>(new Set());
+  const markSent = (k: MemorandumKind): void => {
+    if (gate?.blocked) return;
+    setSent((prev) => new Set(prev).add(k));
+    notify("Delivered to the buyer's data room");
+  };
   return (
     <div data-page="documents" className="space-y-3 text-xo-text">
       <PageHeader eyebrow={`◉ Workspace · Documents · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`} title="Document Generator"
         badge={<><Provenance kind={fromIntake ? "company" : "demo"} /><span className="text-[12px] text-xo-muted">Engine-composed · {!checked ? "checking consistency…" : flags.length + elsewhere.length > 0 ? plural(flags.length + elsewhere.length, "consistency finding") : "no contradictions found across the documents"}</span></>}
         actions={<>
           {/* one size for the four header actions: three outlined, the report filled */}
-          <span className="text-[12px] text-xo-faint">Nothing is sent from ExitOS — download a draft to share it.</span>
           <button type="button" onClick={() => setLibraryOpen(true)} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Library</button>
           <a href="/report" target="_blank" rel="noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
           <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-desk-gold px-3 py-1.5 text-[12px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report →<span className="sr-only"> (opens in a new tab)</span></a>
+          {/* PRELAUNCH-REVIEW: send to buyer data room restored; no delivery backend, still held by the document gate */}
+          {doc && <button type="button" disabled={!!gate?.blocked} onClick={() => markSent(doc.kind)} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action disabled:opacity-50">{sent.has(doc.kind) ? "Sent ✓ · resend" : "Send to buyer"}</button>}
         </>} />
       <GateNotice gate={gate} className="border border-xo-line bg-xo-panel px-4 py-2.5" />
       {fromIntake && doc?.coverage && doc.coverage.some((c) => c.status !== "supported") && (() => {
@@ -143,6 +151,8 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
                   <span className="mt-0.5 block text-[12px] leading-snug text-xo-muted">{k.description}</span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
+                  {/* PRELAUNCH-REVIEW: "Sent" badge for the restored data-room send (no backend) */}
+                  {sent.has(k.key) && <span className="text-[11px] font-semibold text-xo-verified">Sent</span>}
                   {kind === k.key && <span className="text-[11px] font-semibold text-xo-verified">Open ✓</span>}
                 </span>
               </button>

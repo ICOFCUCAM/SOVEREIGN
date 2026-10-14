@@ -9,16 +9,16 @@ import type { Role } from "./access";
 const KEY = "exitos.guide.v1";
 const EVENT = "exitos:guide";
 
-interface GuideState { visited: string[]; hidden: boolean; tipsHidden: boolean; welcomed: boolean }
+interface GuideState { visited: string[]; hidden: boolean; tipsHidden: boolean; welcomed: boolean; journeyHidden: boolean }
 
-const EMPTY: GuideState = { visited: [], hidden: false, tipsHidden: false, welcomed: false };
+const EMPTY: GuideState = { visited: [], hidden: false, tipsHidden: false, welcomed: false, journeyHidden: false };
 
 function read(): GuideState {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return EMPTY;
     const s = JSON.parse(raw) as Partial<GuideState>;
-    return { visited: Array.isArray(s.visited) ? s.visited.filter((v) => typeof v === "string") : [], hidden: s.hidden === true, tipsHidden: s.tipsHidden === true, welcomed: s.welcomed === true };
+    return { visited: Array.isArray(s.visited) ? s.visited.filter((v) => typeof v === "string") : [], hidden: s.hidden === true, tipsHidden: s.tipsHidden === true, welcomed: s.welcomed === true, journeyHidden: s.journeyHidden === true };
   } catch { return EMPTY; }
 }
 
@@ -43,6 +43,11 @@ export function setGuideHidden(hidden: boolean): void {
 /** The first-visit welcome line has been dismissed. */
 export function setWelcomed(): void {
   write({ ...read(), welcomed: true });
+}
+
+/** The guided journey's bar at the foot of each page is switched off (the journey page stays). */
+export function setJourneyHidden(journeyHidden: boolean): void {
+  write({ ...read(), journeyHidden });
 }
 
 export function setTipsHidden(tipsHidden: boolean): void {
@@ -84,8 +89,8 @@ export const stepsFor = (role: Role): readonly GuideStep[] => (role === "buyer" 
 // Founders see these first; every other entry sits under "All tools",
 // grouped as before. Labels, routes and locks are unchanged.
 export const ESSENTIALS: readonly string[] = [
-  "/console", "/console/intake", "/console/readiness", "/console/valuation",
-  "/console/buyers", "/console/acquisition-radar", "/console/marketplace", "/console/inbox",
+  "/console", "/console/journey", "/console/commander", "/console/autopilot", "/console/banker", "/console/intake", "/console/readiness", "/console/valuation",
+  "/console/buyers", "/console/acquisition-radar", "/console/marketplace", "/console/inbox", "/console/wealth",
 ];
 
 const NAV_KEY = "exitos.nav.v1";
