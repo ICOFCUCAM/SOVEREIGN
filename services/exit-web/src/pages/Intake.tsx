@@ -7,6 +7,8 @@ import {
 } from "../lib/company-intake";
 import { listCompany, listingFromCompany, unlistCompany, findOwnListing } from "../lib/listings";
 import { listingDestination } from "../lib/exit-api";
+import { missingFacts, normalizeFacts, type ListingFacts } from "../lib/listing-facts";
+import { ListingFactsForm, ListingFactsView } from "../components/ListingFacts";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
 import { loadSavedIntake, saveIntake, clearIntake, loadIntakeRecord, unconfirmedFields, confirmIntakeFields, type IntakeField } from "../lib/active-company";
@@ -52,6 +54,11 @@ const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
   { to: "/report", label: "Reports" },
 ];
 
+// the founder's listing details, kept in this browser until the listing is published with them
+const FACTS_DRAFT_KEY = "exitos.listing-facts.v1";
+const loadFactsDraft = (): Partial<ListingFacts> => { try { return JSON.parse(localStorage.getItem(FACTS_DRAFT_KEY) ?? "{}") as Partial<ListingFacts>; } catch { return {}; } };
+const saveFactsDraft = (f: Partial<ListingFacts>): void => { try { localStorage.setItem(FACTS_DRAFT_KEY, JSON.stringify(f)); } catch { /* storage unavailable: kept for this visit */ } };
+
 const Intake: React.FC = () => {
   const { session } = useAuth();
   // Saved only when the founder edits a field — opening the page saves nothing.
@@ -66,14 +73,19 @@ const Intake: React.FC = () => {
 
   const report = useMemo(() => runInstitutionalValuation(buildProfile(inp)), [inp]);
   // Listing: preview exactly what buyers will see, confirm, and allow withdrawal.
-  const preview = useMemo(() => listingFromCompany(buildProfile(inp)), [inp]);
   const [, setListingVersion] = useState(0);   // re-render after list / withdraw
   const stored = findOwnListing(buildProfile(inp));
+  // what buyers read on the card, answered by the founder; a draft is kept in this browser until listed
+  const [facts, setFactsState] = useState<Partial<ListingFacts>>(() => stored?.facts ?? loadFactsDraft());
+  const setFacts = (f: Partial<ListingFacts>): void => { setFactsState(f); saveFactsDraft(f); };
+  const factsReady = missingFacts(facts).length === 0;
+  const cleanFacts = useMemo(() => (factsReady ? normalizeFacts(facts) : undefined), [facts, factsReady]);
+  const preview = useMemo(() => listingFromCompany(buildProfile(inp), undefined, cleanFacts), [inp, cleanFacts]);
   const listed = !!stored;
-  const stale = !!stored && JSON.stringify(stored.publicView) !== JSON.stringify(preview.publicView);
+  const stale = !!stored && (JSON.stringify(stored.publicView) !== JSON.stringify(preview.publicView) || (!!cleanFacts && JSON.stringify(stored.facts ?? null) !== JSON.stringify(cleanFacts)));
   const [confirming, setConfirming] = useState(false);
   const destination = listingDestination();
-  const confirmListing = (): void => { listCompany(buildProfile(inp)); setConfirming(false); setListingVersion((v) => v + 1); };
+  const confirmListing = (): void => { if (!cleanFacts) return; listCompany(buildProfile(inp), cleanFacts); setConfirming(false); setListingVersion((v) => v + 1); };
   const withdraw = (): void => { unlistCompany(stored?.id ?? preview.id); setConfirming(false); setListingVersion((v) => v + 1); };
   // fields still holding the demo company's values (re-read after every save)
   const [unconfirmed, setUnconfirmed] = useState<IntakeField[]>(() => { const r = loadIntakeRecord(); return r ? unconfirmedFields(r) : []; });
@@ -119,6 +131,7 @@ const Intake: React.FC = () => {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {listed && <Button variant="ghost" onClick={withdraw}>Withdraw listing</Button>}
+          {listed && !stale && !confirming && <Button variant="ghost" onClick={() => setConfirming(true)}>Edit listing details</Button>}
           {(!listed || stale) && <Button onClick={() => setConfirming(true)} disabled={!saved} aria-expanded={confirming} aria-controls="listing-confirm" aria-describedby={saved ? undefined : "list-needs-data"}>{stale ? "Update listing" : "List on the exchange"}</Button>}
           {!saved && !listed && <span id="list-needs-data" className="basis-full text-[11px] text-xo-faint">Enter your figures to list — the demo company can't be listed.</span>}
           {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
@@ -158,10 +171,18 @@ const Intake: React.FC = () => {
               <div key={k}><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[13px] tabular-nums capitalize">{String(v).replace(/_/g, " ")}</dd></div>
             ))}
           </dl>
-          {listed && stale && !confirming && <p className="mt-2 text-[12px] text-xo-caution">Your figures changed since you listed. The listing still shows the earlier figures until you update it.</p>}
+          {listed && stale && !confirming && <p className="mt-2 text-[12px] text-xo-caution">Your figures or listing details changed since you listed. The listing still shows the earlier version until you update it.</p>}
+          {listed && !confirming && stored?.facts && <ListingFactsView facts={stored.facts} className="mt-3 border-t border-xo-line pt-3" />}
+          {confirming && (
+            <div className="mt-3 border-t border-xo-line pt-3">
+              <h3 className="text-[13px] font-semibold">Listing details buyers read</h3>
+              <p className="mt-0.5 mb-3 text-[12px] text-xo-muted">Buyers decide whether to ask for an NDA from these. Every field except the reason for sale is required.</p>
+              <ListingFactsForm value={facts} onChange={setFacts} />
+            </div>
+          )}
           {confirming && (
             <div className="mt-3 flex flex-wrap gap-2">
-              <Button onClick={confirmListing}>{listed ? "Confirm update" : "Confirm listing"}</Button>
+              <Button onClick={confirmListing} disabled={!factsReady}>{listed ? "Confirm update" : "Confirm listing"}</Button>
               <Button variant="ghost" onClick={() => setConfirming(false)}>Cancel</Button>
             </div>
           )}

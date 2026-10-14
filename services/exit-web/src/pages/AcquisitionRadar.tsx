@@ -11,6 +11,7 @@ import { allListings, subscribeListings, listingOrigin, type Listing } from "../
 import { captureDealEvent } from "../lib/deal-events";
 import { requestNda, submitOffer, startDeal, advanceDeal, saveMandate, myMandate } from "../lib/exit-api";
 import PublishComposer from "../components/PublishComposer";
+import { ListingFactsView } from "../components/ListingFacts";
 import type { Region } from "@exit/engines";
 import { parseNumber } from "../lib/intake-fields";
 import { plural } from "../lib/labels";
@@ -185,13 +186,13 @@ const AcquisitionRadar: React.FC = () => {
 
         {/* ── opportunities ────────────────────────────────────────── */}
         <Section title="Opportunities · scored against your mandate" eyebrow={plural(listings.length, "listing")} className="min-w-0 self-start border border-xo-line"
-          foot={`Identities withheld until NDA — buyers see sector, region, revenue and growth. ${founderCount} of ${plural(listings.length, "listing")} come from founders; the rest are the bundled demo company and Sovereign product-catalog entries, labelled on each card.`}>
+          foot={`Identities withheld until NDA — buyers see what each business does, its stage, what is for sale, its model, stack, markets and asking price, with revenue and growth as brackets. ${founderCount} of ${plural(listings.length, "listing")} come from founders; the rest are the bundled demo company and Sovereign product-catalog entries, labelled on each card.`}>
           <ol className="divide-y divide-xo-line">
             {scored.map(({ listing: l, match }) => (
               <li key={l.id} className="px-4 py-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h3 className="text-[16px] font-semibold">
-                    {l.code} <span className="text-[12px] font-normal text-xo-muted">· {l.publicView.sector} · {l.publicView.region}</span>
+                    {l.code} <span className="text-[12px] font-normal text-xo-muted">· {l.publicView.sector} · {l.publicView.region === "Other" && l.facts ? "Global" : l.publicView.region}</span>
                     {l.productMeta && <span className="ml-2 border border-xo-line px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-muted">{l.productMeta.category}</span>}
                     {listingOrigin(l) === "demo" && <Provenance kind="demo" className="ml-2">Demo listing</Provenance>}
                     {listingOrigin(l) === "catalog" && <Provenance kind="registry" className="ml-2">Product catalog</Provenance>}
@@ -199,10 +200,11 @@ const AcquisitionRadar: React.FC = () => {
                   </h3>
                   <span className="font-mono text-[22px] font-semibold tabular-nums text-xo-verified">{match.score}%<span className="sr-only"> match</span></span>
                 </div>
+                {l.facts && <ListingFactsView facts={l.facts} className="mt-2" />}
                 {l.productMeta && (
                   <>
-                    <p className="mt-2 max-w-[75ch] text-[13px] leading-snug text-xo-muted">{l.productMeta.capability}</p>
-                    {l.productMeta.coverage && l.productMeta.coverage.length > 0 && <p className="mt-1 text-[12px] text-xo-faint">Coverage · {l.productMeta.coverage.join(" · ")}</p>}
+                    {!l.facts && <p className="mt-2 max-w-[75ch] text-[13px] leading-snug text-xo-muted">{l.productMeta.capability}</p>}
+                    {!l.facts && l.productMeta.coverage && l.productMeta.coverage.length > 0 && <p className="mt-1 text-[12px] text-xo-faint">Coverage · {l.productMeta.coverage.join(" · ")}</p>}
                     {l.productMeta.tags && l.productMeta.tags.length > 0 && (
                       <ul className="mt-1.5 flex flex-wrap gap-1.5">{l.productMeta.tags.map((t) => <li key={t} className="border border-xo-line px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.06em] text-xo-muted">{t}</li>)}</ul>
                     )}
