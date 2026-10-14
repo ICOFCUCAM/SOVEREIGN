@@ -77,14 +77,18 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
   const sectionMissing = missingIn(section, facts);
   const pagesDone = PROFILE_SECTIONS.filter((x) => missingIn(x, facts).length === 0).length;
 
-  // a sheet of its own: no page scroll beneath it; Escape returns to the console unless a control used it
+  // a sheet of its own: no page scroll beneath it; Escape returns to the console unless a control used it.
+  // Runs once, when the desk opens: the parent hands a new onClose on every render (every keystroke), and
+  // re-running this would pull focus from the field being typed in back to the stage heading.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   useEffect(() => {
     const prev = document.body.style.overflow; document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent): void => { if (e.key === "Escape" && !e.defaultPrevented) onClose(); };
+    const onKey = (e: KeyboardEvent): void => { if (e.key === "Escape" && !e.defaultPrevented) closeRef.current(); };
     window.addEventListener("keydown", onKey);
     heading.current?.focus();
     return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
-  }, [onClose]);
+  }, []);
 
   // a test identity for the development server: the first method offered for the chosen country
   const devProvider = methodOptions(null, idCountry).find((o) => o.eligible)?.info.id ?? "stripe_identity";
