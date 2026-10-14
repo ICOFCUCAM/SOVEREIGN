@@ -91,6 +91,30 @@ export default {
           ivory: "#E8E0D2",      // warm ivory: lettering and highlights on graphite
           "slate-ink": "#55504A", // secondary text on porcelain (7.0:1)
         },
+        // ── The listing desk (O-22) ─────────────────────────────────────
+        // One palette for the founder's listing journey: warm paper, white surfaces, two hairlines,
+        // four text steps, one gold used sparingly (accents, the primary action), champagne only on the
+        // dark rail. Text steps are checked on desk-paper: ink 16:1, text 8.6:1, muted 5.4:1, faint 3.6:1
+        // (faint is for hints and placeholders beside a label, never for content on its own).
+        desk: {
+          paper: "#FBF8F2",          // the workspace
+          surface: "#FFFFFF",        // cards and fields
+          tint: "#F6F1E7",           // fixed values, quiet fills
+          line: "#E8DFCF",           // hairlines and field borders
+          "line-strong": "#D3C3A5",  // hover and emphasis borders
+          ink: "#1A1916",            // headings, values, the selected state
+          text: "#4F4A42",           // body copy
+          muted: "#6E685E",          // secondary copy
+          faint: "#8A8378",          // hints, placeholders
+          gold: "#B9924F",           // the accent and the primary action
+          "gold-ink": "#866433",     // gold as text on paper (5.1:1)
+          "gold-tint": "#F7EEDB",    // gold wash for icons and notes
+          rail: "#100E0B",           // the dark rail
+          champagne: "#E2C07F",      // accent on the rail
+          ivory: "#F3EBDD",          // lettering on the rail
+          error: "#9A3B2A",
+          success: "#3F6B45",
+        },
         // Deal-stage bands for pipeline visualization
         stage: {
           sourcing:  "#475569",

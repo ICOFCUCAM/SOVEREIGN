@@ -964,3 +964,17 @@ The listing desk's sidebar keeps the brand and the three stages; everything belo
 - Admin console: Advertising manager: create, edit, start from a portfolio product (its catalogue words only, never a price), image upload with focal point and alt text, preview in the real sidebar and on a phone, reorder, schedule, priority, stages, publish, pause, archive, restore, slideshow settings, 30-day counts.
 - Desk: crossfading slideshow (default 7 s), pause on hover or focus, pause/play, previous/next, position indicators, reduced motion (no fade, no autoplay), impressions only when at least half on screen, "Promotion" label, links open in a new tab with `noopener noreferrer sponsored`. No live campaign → the desk's own panel (no claims). Phones: a compact card after the form, only if allowed. A failing campaign service shows no promotion and never blocks the desk.
 - Without a server, campaigns are kept in this browser so the manager and desk work end to end.
+
+## 19. Increment report — listing desk design refinement
+
+Audit: the desk components carried about 80 one-off colour values (seven near-identical hairlines, three golds, a gold gradient on the main button and on headline words, glows on the active stage), two pill styles, three field styles and full-height photographs behind every stage that competed with the promotions panel.
+
+- Tokens: `desk` colours in `tailwind.config.ts` (paper, surface, tint, two hairlines, four text steps, one gold with its text shade and tint, rail, champagne, ivory, error, success). Shared styles in `src/components/desk/ui.ts`: primary and secondary buttons (44 px, focus ring, disabled), label, hint, error, field, pill, card, eyebrow, heading, lede.
+- Pictures: each stage's photograph is a small plate beside the heading (216×152, slightly desaturated), shown on wide screens only; no picture above the form on phones. Promotions imagery is slightly desaturated too.
+- One primary action per screen: on Identity, until a method is open the footer's "Continue to the profile" is secondary; the method's own button is the primary.
+- Profile pages: all three are one card each; one pill style (selected = ink); one field style; the transaction page's mixed boxes and icon cards became plain fields. The buyer preview is a light card under the form.
+- Rail and promotions: no glows or gradients; promotions say "Promotion" before the eyebrow; the call to action is an outline, not a gold button.
+- Identity: quieter method cards and seals; an established identity is a card with a green check, a test identity is marked in gold.
+- Not changed: the console (the `xo` graphite pages, 44 pages) keeps its own system; behaviour, validation, security and data contracts are untouched.
+
+**Results**: web 433 tests; lint, typecheck, build clean; the development test identity is absent from the production bundle. Browser (development server, 1440 and 390 wide): all three stages and three profile pages, operator campaign flow, founder slideshow, review and save; no horizontal overflow.

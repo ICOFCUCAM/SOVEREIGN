@@ -3,13 +3,12 @@ import { createPortal } from "react-dom";
 import { ListingFactsForm, Icon, type IntakeContext } from "./ListingFacts";
 import { IdentityMethods, IdentityStatusCard, DevVerificationTools, type IdentityState, type SellerIdentity } from "./IdentityGate";
 import { CountrySelect } from "./CountrySelect";
+import { BTN_PRIMARY, BTN_SECONDARY, CARD, EYEBROW, H1, ACCENT_WORD, LEDE } from "./desk/ui";
+import earthSmall from "../assets/desk/earth-sunrise-720.webp";
 import { AdPanel, useAdSlides } from "./AdPanel";
 import type { Remote } from "../lib/documents/store";
-import earthSunrise from "../assets/desk/earth-sunrise-1672.webp";
 import waterfrontSkyline from "../assets/desk/waterfront-skyline-720.webp";
-import waterfrontCityscape from "../assets/desk/waterfront-cityscape-1672.webp";
 import waterfrontCityscapeSmall from "../assets/desk/waterfront-cityscape-720.webp";
-import globalNetwork from "../assets/desk/global-network-1672.webp";
 import globalNetworkSmall from "../assets/desk/global-network-720.webp";
 import { methodOptions, providerLabel } from "../lib/identity";
 import { missingFacts, missingIn, askingText, STAGE_LABEL, FOR_SALE_LABEL, MODEL_LABEL, PROFILE_SECTIONS, PROFILE_SECTION_LABEL, type ListingFacts, type ProfileSection } from "../lib/listing-facts";
@@ -48,14 +47,11 @@ const DEFAULT_ID_COUNTRY = "US";
 const loadIdCountry = (): string => { try { return localStorage.getItem(ID_COUNTRY_KEY) ?? DEFAULT_ID_COUNTRY; } catch { return DEFAULT_ID_COUNTRY; } };
 const saveIdCountry = (c: string): void => { try { localStorage.setItem(ID_COUNTRY_KEY, c); } catch { /* kept for this visit */ } };
 
-const PRIMARY = "inline-flex items-center justify-center gap-2 rounded-[10px] border border-[#B9924F] bg-[linear-gradient(180deg,#E3C182_0%,#C9A262_48%,#A9813F_100%)] px-6 py-3 text-[13.5px] font-semibold text-[#1E1A12] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_10px_24px_-12px_rgba(140,100,40,0.8)] transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A8834A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FBF8F2] disabled:cursor-not-allowed disabled:border-[#D8CFC0] disabled:bg-none disabled:bg-[#E3DBCD] disabled:text-[#9A9387] disabled:shadow-none";
-const BACK = "inline-flex items-center justify-center gap-2 rounded-[10px] bg-white px-5 py-3 text-[13.5px] font-semibold text-ex-graphite shadow-[0_6px_16px_-10px_rgba(60,45,20,0.45)] ring-1 ring-[#E4DACA] transition hover:ring-[#C9A262] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A8834A]";
 const SECTION_LEDE: Record<ProfileSection, string> = {
   overview: "What prospective buyers read before they request an NDA. Your draft is kept in this browser as you type.",
   financial: "How the business performs and what you are asking for it. Buyers see revenue and growth as ranges only.",
   transaction: "What transfers to the buyer, how the business earns money, where it sells and what it is built on.",
 };
-const FAINT = "text-[#8A8378]";
 
 export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts, setFacts, id, onPublish, updating, live, remote }) => {
   const missing = missingFacts(facts);
@@ -97,96 +93,80 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
   // promotions for this stage; small screens get a compact card after the form, when the operator allows it
   const ads = useAdSlides(remote, (["identity", "profile", "review"] as const)[stage]);
   const mobileAds = ads.settings.mobile_enabled && ads.slides ? ads.slides.filter((x) => x.campaign.mobile) : [];
-  const GOLD_WORD = "bg-gradient-to-r from-[#A87F3F] via-[#C9A262] to-[#9A7236] bg-clip-text italic text-transparent";
+  // one calm picture per stage, kept to a small plate beside the heading
+  const plate = stage === 0 ? { src: earthSmall, pos: "70% 45%" }
+    : stage === 1 ? { src: waterfrontCityscapeSmall, pos: section === "transaction" ? "85% 60%" : section === "financial" ? "35% 55%" : "62% 45%" }
+    : { src: globalNetworkSmall, pos: "80% 40%" };
+  const heading1 = stage === 0 ? <>Establish your <em className={ACCENT_WORD}>identity</em></>
+    : stage === 2 ? <>Review and <em className={ACCENT_WORD}>publish</em></>
+    : section === "overview" ? <>The company <em className={ACCENT_WORD}>profile</em></>
+    : section === "financial" ? <>Financial <em className={ACCENT_WORD}>profile</em></> : <>Transaction <em className={ACCENT_WORD}>profile</em></>;
+  const lede = stage === 0
+    ? "Identity verification protects the integrity of the exchange. Your identity stays undisclosed to buyers until the NDA and disclosure conditions are met."
+    : stage === 2
+      ? (live ? "Publishing places the anonymised listing on the live exchange, where buyers can request an NDA. You can withdraw it at any time." : "This build is not connected to the live exchange. Saving keeps the listing in this browser only; no buyer will see it.")
+      : SECTION_LEDE[section];
 
   return createPortal(
     <div ref={scrollers[0]} role="dialog" aria-modal="true" aria-labelledby="desk-heading" data-page="listing-desk"
-      className="fixed inset-0 z-[200] overflow-y-auto bg-[radial-gradient(1200px_700px_at_80%_0%,#FFFFFF_0%,#F3EDE2_45%,#E6DDCD_100%)] text-ex-graphite lg:overflow-hidden lg:p-6">
-      <div className="lg:grid lg:h-full lg:grid-cols-[320px_minmax(0,1fr)] lg:overflow-hidden lg:rounded-[22px] lg:border lg:border-[#C9A86A]/55 lg:shadow-[0_40px_90px_-40px_rgba(36,30,20,0.6),0_0_0_6px_rgba(255,255,255,0.4)]">
+      className="fixed inset-0 z-[200] overflow-y-auto bg-[#EFE8DC] text-desk-ink lg:overflow-hidden lg:p-5">
+      <div className="lg:grid lg:h-full lg:grid-cols-[300px_minmax(0,1fr)] lg:overflow-hidden lg:rounded-[20px] lg:shadow-[0_30px_70px_-40px_rgba(36,30,20,0.55)] lg:ring-1 lg:ring-black/5">
 
       {/* ── the rail: brand, the three stages, and the promotions canvas below them ── */}
       <DeskRail stage={stage} stageDone={stageDone} canReview={canReview} pagesDone={pagesDone} onGo={(i) => go(i)} onClose={onClose}>
-        <AdPanel slides={ads.slides} settings={ads.settings} remote={remote} className="mt-8 hidden flex-1 lg:flex" />
+        <AdPanel slides={ads.slides} settings={ads.settings} remote={remote} className="mt-6 hidden flex-1 lg:flex" />
       </DeskRail>
 
       {/* ── the workspace ───────────────────────────────────────────── */}
-      <div ref={scrollers[1]} className="relative flex min-w-0 flex-col overflow-x-hidden bg-[#FBF8F2] lg:h-full lg:overflow-y-auto">
-        {/* stage one: the earth at sunrise, fading into the paper on the left */}
-        {stage === 0 && (
-          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[64%] lg:block">
-            <img src={earthSunrise} alt="" className="h-full w-full object-cover object-[78%_center] [mask-image:linear-gradient(90deg,transparent_0%,#000_40%)] [-webkit-mask-image:linear-gradient(90deg,transparent_0%,#000_40%)]" />
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,#FBF8F2_0%,rgba(251,248,242,0.92)_22%,rgba(251,248,242,0.35)_55%,rgba(251,248,242,0)_80%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#FBF8F2]/80 to-transparent" />
-          </div>
-        )}
-        {/* the profile pages: the waterfront city, top right, fading into the paper */}
-        {stage === 1 && (
-          <div aria-hidden className="pointer-events-none absolute right-0 top-0 hidden h-[440px] w-[62%] lg:block">
-            <img src={waterfrontCityscape} alt="" className={`h-full w-full object-cover [mask-image:linear-gradient(90deg,transparent_0%,#000_40%)] [-webkit-mask-image:linear-gradient(90deg,transparent_0%,#000_40%)] ${section === "transaction" ? "object-[88%_60%]" : section === "financial" ? "object-[30%_55%]" : "object-[62%_45%]"}`} />
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,#FBF8F2_0%,rgba(251,248,242,0.85)_20%,rgba(251,248,242,0.2)_52%,rgba(251,248,242,0)_75%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#FBF8F2] via-[#FBF8F2]/60 to-transparent" />
-          </div>
-        )}
-        {/* review: the world at night, lit by the network the listing goes out on */}
-        {stage === 2 && (
-          <div aria-hidden className="pointer-events-none absolute right-0 top-0 hidden h-[420px] w-[60%] lg:block">
-            <img src={globalNetwork} alt="" className="h-full w-full object-cover object-[85%_40%] [mask-image:linear-gradient(90deg,transparent_0%,#000_45%)] [-webkit-mask-image:linear-gradient(90deg,transparent_0%,#000_45%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#FBF8F2] via-[#FBF8F2]/60 to-transparent" />
-          </div>
-        )}
-        <div className="relative z-10 flex items-center justify-between gap-4 px-6 pt-6 text-[12px] sm:px-10 lg:px-14 lg:pt-8">
-          <span className={`inline-flex items-center gap-2 rounded-full bg-white/60 px-3 py-1 backdrop-blur ${live ? "text-ex-graphite" : "text-[#6E685E]"}`}>
-            <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${live ? "bg-[#4E7A52]" : "border border-[#7A7469]"}`} />
+      <div ref={scrollers[1]} className="relative flex min-w-0 flex-col overflow-x-hidden bg-desk-paper lg:h-full lg:overflow-y-auto">
+        <div className="flex items-center justify-between gap-4 px-6 pt-5 text-[12px] sm:px-10 lg:px-14 lg:pt-7">
+          <span className={`inline-flex items-center gap-2 ${live ? "text-desk-ink" : "text-desk-muted"}`}>
+            <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${live ? "bg-desk-success" : "border border-desk-muted"}`} />
             {live ? "Live exchange" : "This browser only · not connected to the live exchange"}
           </span>
           <div className="flex items-center gap-2">
-          {stage === 1 && (
-            <button type="button" onClick={saveDraft} aria-describedby="draft-state"
-              className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-white px-4 py-2 font-semibold text-ex-graphite shadow-[0_8px_20px_-12px_rgba(60,45,20,0.5)] ring-1 ring-[#E4DACA] transition hover:ring-[#C9A262]">
-              <svg aria-hidden width="16" height="14" viewBox="0 0 16 14" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-[#A8834A]"><path d="M4.2 11.5H3.6A2.6 2.6 0 0 1 3.4 6.3 4.2 4.2 0 0 1 11.6 5a3.3 3.3 0 0 1 .7 6.5h-.5" />{savedAt ? <path d="m5.8 9.6 1.7 1.7 3-3" /> : <path d="M8 12.5V7.8m-1.8 1.8L8 7.8l1.8 1.8" />}</svg>
-              {savedAt ? "Draft saved" : "Save draft"}
-            </button>
-          )}
-          <span id="draft-state" role="status" className="sr-only">{savedAt ? "Draft saved in this browser." : ""}</span>
-          <button type="button" onClick={onClose} className="hidden rounded-full bg-white/75 px-3.5 py-1.5 text-[#4F4A42] shadow-sm ring-1 ring-black/5 backdrop-blur hover:text-ex-graphite lg:inline">Leave the desk <span aria-hidden>✕</span></button>
+            {stage === 1 && (
+              <button type="button" onClick={saveDraft} aria-describedby="draft-state" className={`${BTN_SECONDARY} min-h-[36px] whitespace-nowrap px-3.5 text-[12.5px]`}>
+                <svg aria-hidden width="16" height="14" viewBox="0 0 16 14" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-desk-gold-ink"><path d="M4.2 11.5H3.6A2.6 2.6 0 0 1 3.4 6.3 4.2 4.2 0 0 1 11.6 5a3.3 3.3 0 0 1 .7 6.5h-.5" />{savedAt ? <path d="m5.8 9.6 1.7 1.7 3-3" /> : <path d="M8 12.5V7.8m-1.8 1.8L8 7.8l1.8 1.8" />}</svg>
+                {savedAt ? "Draft saved" : "Save draft"}
+              </button>
+            )}
+            <span id="draft-state" role="status" className="sr-only">{savedAt ? "Draft saved in this browser." : ""}</span>
+            <button type="button" onClick={onClose} className="hidden min-h-[36px] rounded-[10px] px-3 text-desk-muted transition hover:text-desk-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-desk-gold/60 lg:inline-flex lg:items-center lg:gap-1.5">Leave the desk <span aria-hidden>✕</span></button>
           </div>
         </div>
 
-        {/* small screens: the picture as a banner */}
-        {stage === 0 && <img src={earthSunrise} alt="" aria-hidden className="mt-5 h-40 w-full object-cover object-[80%_40%] lg:hidden" />}
-        {stage === 2 && <img src={globalNetworkSmall} alt="" aria-hidden className="mt-5 h-40 w-full object-cover object-[80%_45%] lg:hidden" />}
-        {stage === 1 && <img src={waterfrontCityscapeSmall} alt="" aria-hidden className="mt-5 h-40 w-full object-cover object-[70%_55%] lg:hidden" />}
-
-        <main className={`relative z-10 w-full flex-1 px-6 pb-16 pt-8 sm:px-10 lg:px-14 lg:pt-14 ${stage === 0 ? "max-w-[620px]" : "max-w-[880px]"}`}>
-          <div className="flex items-center gap-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#A8834A]">Step {stage + 1} of 3</p>
-            {stage === 1 && (
-              <ol aria-label="Company profile pages" className="flex items-center gap-1.5">
-                {PROFILE_SECTIONS.map((x, i) => (
-                  <li key={x}><button type="button" onClick={() => goSection(x)} aria-current={x === section ? "page" : undefined} title={PROFILE_SECTION_LABEL[x]}
-                    className={`block h-1.5 rounded-full transition-all ${x === section ? "w-7 bg-[#B9924F]" : i < sectionAt ? "w-3.5 bg-[#B9924F]/55" : "w-3.5 bg-[#D9CEBB]"}`}><span className="sr-only">{PROFILE_SECTION_LABEL[x]}{missingIn(x, facts).length ? "" : " (complete)"}</span></button></li>
-                ))}
-              </ol>
-            )}
+        <main className="w-full max-w-[940px] flex-1 px-6 pb-16 pt-8 sm:px-10 lg:px-14 lg:pt-12">
+          {/* the heading, with the stage's picture as a small plate beside it */}
+          <div className="flex items-start justify-between gap-10">
+            <div className="min-w-0">
+              <div className="flex items-center gap-4">
+                <p className={EYEBROW}>Step {stage + 1} of 3</p>
+                {stage === 1 && (
+                  <ol aria-label="Company profile pages" className="flex items-center gap-1.5">
+                    {PROFILE_SECTIONS.map((x, i) => (
+                      <li key={x}><button type="button" onClick={() => goSection(x)} aria-current={x === section ? "page" : undefined} title={PROFILE_SECTION_LABEL[x]}
+                        className="grid h-6 place-items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-desk-gold/60">
+                        <span aria-hidden className={`block h-1 rounded-full transition-all ${x === section ? "w-7 bg-desk-gold" : i < sectionAt ? "w-3.5 bg-desk-gold/50" : "w-3.5 bg-desk-line-strong/70"}`} />
+                        <span className="sr-only">{PROFILE_SECTION_LABEL[x]}{missingIn(x, facts).length ? "" : " (complete)"}</span>
+                      </button></li>
+                    ))}
+                  </ol>
+                )}
+              </div>
+              <h1 id="desk-heading" ref={heading} tabIndex={-1} className={`mt-4 outline-none ${H1}`}>{heading1}</h1>
+              <p className={`mt-5 max-w-[54ch] ${LEDE}`}>{lede}</p>
+            </div>
+            <figure aria-hidden className="mt-2 hidden h-[152px] w-[216px] shrink-0 overflow-hidden rounded-[14px] ring-1 ring-black/5 xl:block">
+              <img src={plate.src} alt="" className="h-full w-full object-cover saturate-[0.82]" style={{ objectPosition: plate.pos }} />
+            </figure>
           </div>
-          <h1 id="desk-heading" ref={heading} tabIndex={-1} className="mt-4 font-display text-[48px] font-medium leading-[0.98] tracking-[-0.01em] text-[#1A1916] outline-none sm:text-[64px] lg:text-[74px]">
-            {stage === 0 && <>Establish your<br /><em className={GOLD_WORD}>identity</em></>}
-            {stage === 1 && section === "overview" && <>The company<br /><em className={GOLD_WORD}>profile</em></>}
-            {stage === 1 && section === "financial" && <>Financial profile</>}
-            {stage === 1 && section === "transaction" && <>Transaction profile</>}
-            {stage === 2 && <>Review and <em className={GOLD_WORD}>publish</em></>}
-          </h1>
 
           {stage === 0 && (
-            <>
-              <p className="mt-6 max-w-[50ch] text-[16px] leading-[1.7] text-[#4F4A42]">
-                Identity verification helps protect the integrity of the ExitOS acquisition exchange. Your identity remains undisclosed to prospective buyers until the applicable NDA and disclosure conditions are satisfied.
-              </p>
-              {verified ? (
-                <div className="mt-10"><IdentityStatusCard identity={id.identity} /></div>
-              ) : (
+            <div className="mt-12">
+              {verified ? <IdentityStatusCard identity={id.identity} /> : (
                 <>
-                  <div className="mt-10 max-w-[440px]">
+                  <div className="max-w-[440px]">
                     <CountrySelect id="id-country" label="Country of your identity document or eID" value={idCountry} onChange={setIdCountry}
                       hint="Used only to offer the verification methods that work for you. Never shown to buyers." />
                   </div>
@@ -194,68 +174,61 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
                 </>
               )}
               {id.devTools && <div className="mt-8"><DevVerificationTools id={id} provider={devProvider} /></div>}
-            </>
+            </div>
           )}
 
           {stage === 1 && (
             <>
-              <p className="mt-6 max-w-[52ch] text-[16px] leading-[1.7] text-[#4F4A42]">{SECTION_LEDE[section]}</p>
               <div className="mt-12"><ListingFactsForm key={section} value={facts} onChange={editFacts} tone="porcelain" context={context} showStatus={false} section={section} /></div>
+              <div className="mt-14 border-t border-desk-line pt-8">
+                <p className={`mb-4 ${EYEBROW}`}>As buyers see it</p>
+                <div className="max-w-[360px]"><ListingPreview code={listing.code} context={context} facts={facts} identity={id.identity} /></div>
+              </div>
             </>
           )}
 
           {stage === 2 && (
             <>
-              <p className="mt-6 max-w-[50ch] text-[16px] leading-[1.7] text-[#4F4A42]">
-                {live ? "Publishing places the anonymised listing on the live exchange, where buyers can request an NDA. You can withdraw it at any time." : "This build is not connected to the live exchange. Saving keeps the listing in this browser only; no buyer will see it."}
-              </p>
               <ProfileReview code={listing.code} facts={facts as ListingFacts} context={context} onEdit={(x) => go(1, x)} />
-              <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-4 rounded-[18px] border border-[#EFE6D6] bg-white/70 px-5 py-5 shadow-[0_20px_40px_-34px_rgba(90,65,25,0.45)] sm:px-7">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[radial-gradient(circle_at_30%_25%,#FFFDF8,#F7EEDB)] text-[#A8834A] ring-1 ring-[#E6D3AD]"><Icon name="lock" className="h-6 w-6" /></span>
+              <div className={`mt-6 flex flex-wrap items-center gap-x-5 gap-y-4 px-5 py-5 sm:px-7 ${CARD}`}>
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-desk-gold-tint text-desk-gold-ink"><Icon name="lock" className="h-5 w-5" /></span>
                 <div className="min-w-0 flex-1 basis-[240px]">
-                  <p className="text-[16px] font-semibold text-ex-graphite">{updating ? "Ready to publish the update?" : "Ready to publish?"}</p>
-                  <p className="mt-0.5 text-[13px] leading-relaxed text-[#6E685E]">{live
-                    ? "Review your information and publish your listing to the ExitOS exchange. Buyers see it anonymised and request an NDA to learn more."
-                    : "Review your information and save the listing in this browser. Nothing reaches buyers until this build is connected to the live exchange."}</p>
+                  <p className="text-[15.5px] font-semibold text-desk-ink">{updating ? "Ready to publish the update?" : "Ready to publish?"}</p>
+                  <p className="mt-0.5 text-[13px] leading-relaxed text-desk-muted">{live
+                    ? "Buyers see the listing anonymised and request an NDA to learn more."
+                    : "Nothing reaches buyers until this build is connected to the live exchange."}</p>
                 </div>
-                <button type="button" className={`${PRIMARY} max-sm:w-full`} disabled={!canReview} onClick={onPublish}>{updating ? "Publish the update" : live ? "Save and publish" : "Save in this browser"} <span aria-hidden>→</span></button>
+                <button type="button" className={`${BTN_PRIMARY} max-sm:w-full`} disabled={!canReview} onClick={onPublish}>{updating ? "Publish the update" : live ? "Save and publish" : "Save in this browser"} <span aria-hidden>→</span></button>
               </div>
             </>
           )}
 
-          {/* on small screens the rail's preview follows the stage */}
-          {stage === 1 && (
-            <div className="mt-14">
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#A8834A]">As buyers see it</p>
-              <div className="max-w-[380px]"><ListingPreview code={listing.code} context={context} facts={facts} identity={id.identity} /></div>
-            </div>
-          )}
           {mobileAds.length > 0 && <AdPanel variant="compact" slides={mobileAds} settings={ads.settings} remote={remote} className="mt-12 lg:hidden" />}
         </main>
 
-        {/* ── action bar: security note, what this stage still requires, the next action ── */}
-        <footer className="sticky bottom-0 z-20 border-t border-[#E7DECF] bg-[#FBF8F2]/90 backdrop-blur">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-6 py-4 sm:px-10 lg:px-14">
-            <div className="min-w-0 flex-1 basis-full space-y-1 sm:basis-auto">
-              <p className="flex items-center gap-2 text-[12px] text-[#6E685E]">
-                <svg aria-hidden width="14" height="16" viewBox="0 0 14 16" className="shrink-0 text-[#A8834A]"><path d="M7 1 1.5 3v4.5C1.5 11 4 13.8 7 15c3-1.2 5.5-4 5.5-7.5V3L7 1Z" fill="none" stroke="currentColor" strokeWidth="1.2" /><path d="m4.6 8 1.7 1.7L9.6 6.4" fill="none" stroke="currentColor" strokeWidth="1.2" /></svg>
-                Encrypted in transit · your identity is never shown to buyers
-              </p>
-              <dl className="grid gap-0.5 text-[12px]" aria-live="polite">
+        {/* ── action bar: what this stage still requires, and the next action ── */}
+        <footer className="sticky bottom-0 z-20 border-t border-desk-line bg-desk-paper/95 backdrop-blur">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3.5 sm:px-10 lg:px-14">
+            <div className="min-w-0 flex-1 basis-full sm:basis-auto">
+              <dl className="grid gap-0.5 text-[12.5px]" aria-live="polite">
                 <Req label="Identity" ok={verified} active={stage === 0 || stage === 2}
                   text={verified ? `Established${id.identity?.local ? " (test, development server)" : ""}` : identityNeeds.join(" · ")} />
                 <Req label="Company profile" ok={profileDone} active={stage === 1 || stage === 2}
                   text={profileDone ? "Complete" : stage === 1 ? (sectionMissing.length ? `This page: ${sectionMissing.join(" · ")}` : `This page is complete · ${missing.length} elsewhere in the profile`) : `${missing.length} item${missing.length === 1 ? "" : "s"} to complete`} />
               </dl>
+              <p className="mt-1 flex items-center gap-1.5 text-[11.5px] text-desk-faint">
+                <svg aria-hidden width="11" height="13" viewBox="0 0 14 16" className="shrink-0"><path d="M7 1 1.5 3v4.5C1.5 11 4 13.8 7 15c3-1.2 5.5-4 5.5-7.5V3L7 1Z" fill="none" stroke="currentColor" strokeWidth="1.3" /></svg>
+                Encrypted in transit · your identity is never shown to buyers
+              </p>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {stage === 1 && <button type="button" className={BACK} onClick={() => (sectionAt === 0 ? go(0) : goSection(PROFILE_SECTIONS[sectionAt - 1]!))}><span aria-hidden>←</span> Back</button>}
-              {stage === 2 && <button type="button" className={BACK} onClick={() => go(1, "transaction")}><span aria-hidden>←</span> Back</button>}
-              {stage === 0 && <button type="button" className={PRIMARY} onClick={() => go(1)}>Continue <span aria-hidden>→</span></button>}
-              {stage === 1 && sectionAt < 2 && <button type="button" className={PRIMARY} onClick={() => goSection(PROFILE_SECTIONS[sectionAt + 1]!)}>Continue <span aria-hidden>→</span></button>}
-              {stage === 1 && sectionAt === 2 && <button type="button" className={PRIMARY} disabled={!canReview} onClick={() => go(2)} aria-describedby={canReview ? undefined : "why-locked"}>Continue to review <span aria-hidden>→</span></button>}
+            <div className="flex shrink-0 items-center gap-2 max-sm:w-full max-sm:[&>*]:flex-1">
+              {stage === 1 && <button type="button" className={BTN_SECONDARY} onClick={() => (sectionAt === 0 ? go(0) : goSection(PROFILE_SECTIONS[sectionAt - 1]!))}><span aria-hidden>←</span> Back</button>}
+              {stage === 2 && <button type="button" className={BTN_SECONDARY} onClick={() => go(1, "transaction")}><span aria-hidden>←</span> Back</button>}
+              {stage === 0 && <button type="button" className={verified ? BTN_PRIMARY : BTN_SECONDARY} onClick={() => go(1)}>{verified ? "Continue" : "Continue to the profile"} <span aria-hidden>→</span></button>}
+              {stage === 1 && sectionAt < 2 && <button type="button" className={BTN_PRIMARY} onClick={() => goSection(PROFILE_SECTIONS[sectionAt + 1]!)}>Continue <span aria-hidden>→</span></button>}
+              {stage === 1 && sectionAt === 2 && <button type="button" className={BTN_PRIMARY} disabled={!canReview} onClick={() => go(2)} aria-describedby={canReview ? undefined : "why-locked"}>Continue to review <span aria-hidden>→</span></button>}
             </div>
-            {stage === 1 && sectionAt === 2 && !canReview && <p id="why-locked" className={`basis-full text-[11.5px] ${FAINT}`}>Review opens once {!verified && !profileDone ? "your identity is established and the profile is complete" : !verified ? "your identity is established" : "the profile is complete"}.</p>}
+            {stage === 1 && sectionAt === 2 && !canReview && <p id="why-locked" className="basis-full text-[12px] text-desk-muted">Review opens once {!verified && !profileDone ? "your identity is established and the profile is complete" : !verified ? "your identity is established" : "the profile is complete"}.</p>}
           </div>
         </footer>
       </div>
@@ -267,37 +240,35 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
 
 /** The desk's rail: brand, the three stages, and whatever fills the space below them (the promotions canvas). */
 export const DeskRail: React.FC<{ stage: Stage; stageDone: readonly boolean[]; canReview: boolean; pagesDone: number; onGo: (s: Stage) => void; onClose: () => void; children?: React.ReactNode }> = ({ stage, stageDone, canReview, pagesDone, onGo, onClose, children }) => (
-  <aside className="relative flex flex-col bg-[linear-gradient(180deg,#17150F_0%,#0B0A08_100%)] text-ex-ivory lg:h-full lg:overflow-y-auto">
-    <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-px bg-gradient-to-b from-[#C9A86A]/10 via-[#C9A86A]/55 to-[#C9A86A]/10 lg:block" />
-    <div className="flex items-center justify-between px-6 pb-5 pt-6 lg:block lg:px-7 lg:pb-0 lg:pt-9">
+  <aside className="relative flex flex-col bg-desk-rail text-desk-ivory lg:h-full lg:overflow-y-auto">
+    <div className="flex items-center justify-between px-6 pb-4 pt-5 lg:block lg:px-7 lg:pb-0 lg:pt-8">
       <div>
-        <div className="font-display text-[30px] font-semibold leading-none text-[#F5ECDA]">ExitOS</div>
-        <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.32em] text-[#C9A86A]/75">Listing desk</div>
+        <div className="font-display text-[28px] font-semibold leading-none text-desk-ivory">ExitOS</div>
+        <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.3em] text-desk-champagne/70">Listing desk</div>
       </div>
-      <button type="button" onClick={onClose} className="text-[12.5px] text-ex-ivory/60 underline-offset-4 hover:text-ex-ivory hover:underline lg:hidden">Leave</button>
+      <button type="button" onClick={onClose} className="min-h-[36px] px-1 text-[12.5px] text-desk-ivory/60 underline-offset-4 hover:text-desk-ivory hover:underline lg:hidden">Leave</button>
     </div>
 
-    <nav aria-label="Listing stages" className="px-4 pb-4 lg:mt-10 lg:px-5 lg:pb-0">
-      <ol className="flex gap-2 lg:flex-col lg:gap-2.5">
+    <nav aria-label="Listing stages" className="px-4 pb-4 lg:mt-9 lg:px-4 lg:pb-0">
+      <ol className="flex gap-2 lg:flex-col lg:gap-1">
         {STAGES.map((t, i) => {
           const done = stageDone[i]!, locked = i === 2 && !canReview, here = stage === i;
           return (
             <li key={t} className={here ? "min-w-0 flex-[2] lg:flex-none" : "min-w-0 flex-1 lg:flex-none"}>
               <button type="button" onClick={() => onGo(i as Stage)} aria-current={here ? "step" : undefined} aria-disabled={locked || undefined}
                 title={locked ? "Opens once your identity is established and the company profile is complete" : undefined}
-                className={`group flex w-full items-center gap-4 rounded-[14px] border px-3 py-2.5 text-left transition lg:px-4 lg:py-4 ${here
-                  ? "border-[#C9A86A]/75 bg-[linear-gradient(135deg,rgba(201,168,106,0.18),rgba(201,168,106,0.03))] shadow-[0_0_0_1px_rgba(201,168,106,0.15),0_0_30px_-6px_rgba(214,176,104,0.6)]"
-                  : "border-transparent hover:border-white/10 hover:bg-white/[0.03]"} ${locked ? "cursor-not-allowed" : ""}`}>
+                className={`group flex w-full items-center gap-3.5 rounded-[12px] border px-3 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-desk-champagne/60 lg:px-3.5 lg:py-3 ${here
+                  ? "border-white/10 bg-white/[0.06]" : "border-transparent hover:bg-white/[0.03]"} ${locked ? "cursor-not-allowed" : ""}`}>
                 {done && !here
-                  ? <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#C9A86A]/45 bg-[#C9A86A]/10 text-[#E2C07F] lg:h-8 lg:w-8"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="m2.5 6.2 2.3 2.3 4.7-5" /></svg></span>
-                  : <span className={`font-display text-[24px] leading-none lg:w-8 lg:text-[28px] ${here ? "text-[#E2C07F]" : "text-ex-ivory/35"}`}>{`0${i + 1}`}</span>}
+                  ? <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-desk-champagne/40 text-desk-champagne"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="m2.5 6.2 2.3 2.3 4.7-5" /></svg></span>
+                  : <span className={`w-7 shrink-0 text-center font-display text-[22px] leading-none ${here ? "text-desk-champagne" : "text-desk-ivory/35"}`}>{`0${i + 1}`}</span>}
                 <span className={`min-w-0 ${here ? "" : "max-lg:hidden"}`}>
-                  <span className={`block text-[14.5px] font-semibold ${here ? "text-white" : locked ? "text-ex-ivory/35" : "text-ex-ivory/80 group-hover:text-white"}`}>{t}</span>
-                  <span className={`mt-0.5 hidden text-[12px] lg:block ${here ? "text-ex-ivory/60" : "text-ex-ivory/35"}`}>{done && !here ? "Completed" : STAGE_NOTE[i]}</span>
+                  <span className={`block text-[14px] font-semibold ${here ? "text-desk-ivory" : locked ? "text-desk-ivory/35" : "text-desk-ivory/75 group-hover:text-desk-ivory"}`}>{t}</span>
+                  <span className={`mt-0.5 hidden text-[12px] lg:block ${here ? "text-desk-ivory/55" : "text-desk-ivory/35"}`}>{done && !here ? "Completed" : STAGE_NOTE[i]}</span>
                   {i === 1 && !done && (
                     <span className="mt-2 hidden items-center gap-2 lg:flex" aria-label={`${pagesDone} of 3 profile pages complete`}>
-                      <span aria-hidden className="h-[3px] w-24 overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full bg-[linear-gradient(90deg,#A87F3F,#E2C07F)] transition-all" style={{ width: `${(pagesDone / 3) * 100}%` }} /></span>
-                      <span aria-hidden className="text-[10.5px] text-ex-ivory/45">{pagesDone}/3 pages</span>
+                      <span aria-hidden className="h-[2px] w-20 overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full bg-desk-champagne/80 transition-all" style={{ width: `${(pagesDone / 3) * 100}%` }} /></span>
+                      <span aria-hidden className="text-[10.5px] text-desk-ivory/40">{pagesDone}/3 pages</span>
                     </span>
                   )}
                 </span>
@@ -313,7 +284,7 @@ export const DeskRail: React.FC<{ stage: Stage; stageDone: readonly boolean[]; c
   </aside>
 );
 
-/** The listing preview: a picture, the code name and the saved values only, with honest gaps. */
+/** The listing preview: the code name and the saved values only, with honest gaps. */
 const ListingPreview: React.FC<{ code: string; context: IntakeContext; facts: Partial<ListingFacts>; identity: SellerIdentity | null }> = ({ code, context, facts, identity }) => {
   const region = facts.region ? (facts.region === "Other" ? "Global" : facts.region) : null;
   const rows: Array<[string, string | null]> = [
@@ -323,26 +294,25 @@ const ListingPreview: React.FC<{ code: string; context: IntakeContext; facts: Pa
     ["Asking", facts.askingMode ? askingText(facts as ListingFacts) : null],
   ];
   return (
-    <section aria-label="Listing preview, as buyers see it before an NDA" className="overflow-hidden rounded-[14px] border border-[#C9A86A]/50 bg-[#13110D] text-ex-ivory shadow-[0_20px_40px_-24px_rgba(0,0,0,0.8)]">
-      <div className="flex items-center justify-between px-4 pb-2.5 pt-3.5 text-[10.5px] font-semibold uppercase tracking-[0.2em]">
-        <span className="text-[#D9B676]">Listing preview</span><span className="text-ex-ivory/35">Pre-NDA</span>
+    <section aria-label="Listing preview, as buyers see it before an NDA" className={`overflow-hidden ${CARD}`}>
+      <div className="relative">
+        <img src={waterfrontSkyline} alt="" aria-hidden className="block h-[92px] w-full object-cover object-[45%_60%] saturate-[0.82]" />
+        <span className="absolute right-3 top-3 rounded-full bg-desk-surface/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-desk-muted">Pre-NDA</span>
       </div>
-      <div className="relative mx-3 overflow-hidden rounded-[10px]">
-        <img src={waterfrontSkyline} alt="" aria-hidden className="block h-[112px] w-full object-cover object-[45%_60%]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
-        <span className="absolute bottom-2 left-3 font-display text-[22px] leading-none text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">{code}</span>
+      <div className="px-4 pb-3 pt-3.5">
+        <p className="font-display text-[22px] leading-none text-desk-ink">{code}</p>
+        <dl className="mt-3 text-[13px]">
+          {rows.map(([k, v]) => (
+            <div key={k} className="flex items-baseline justify-between gap-3 border-t border-desk-line py-1.5">
+              <dt className="text-desk-muted">{k}</dt>
+              <dd className={v ? "text-right text-desk-ink" : "text-right italic text-desk-faint"}>{v ?? "Not set"}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
-      <dl className="px-4 pb-3 pt-2 text-[12.5px]">
-        {rows.map(([k, v]) => (
-          <div key={k} className="flex items-baseline justify-between gap-3 border-b border-white/[0.06] py-1.5 last:border-0">
-            <dt className="text-ex-ivory/45">{k}</dt>
-            <dd className={v ? "text-right text-ex-ivory" : "text-right italic text-ex-ivory/35"}>{v ?? "Not set"}</dd>
-          </div>
-        ))}
-      </dl>
-      <div className="flex items-center gap-2 border-t border-white/[0.06] px-4 py-2.5 text-[11.5px]">
-        <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${identity ? "bg-[#D9B676]" : "border border-ex-ivory/40"}`} />
-        <span className="text-ex-ivory/60">{identity ? `${identity.local ? "Seller marked for testing" : "Verified seller"} · ${providerLabel(identity.provider)}` : "Seller identity not yet established"}</span>
+      <div className="flex items-center gap-2 border-t border-desk-line bg-desk-tint px-4 py-2.5 text-[12px] text-desk-muted">
+        <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${identity ? "bg-desk-success" : "border border-desk-faint"}`} />
+        {identity ? `${identity.local ? "Seller marked for testing" : "Verified seller"} · ${providerLabel(identity.provider)}` : "Seller identity not yet established"}
       </div>
     </section>
   );
@@ -350,11 +320,11 @@ const ListingPreview: React.FC<{ code: string; context: IntakeContext; facts: Pa
 
 /** One requirement group in the action bar. */
 const Req: React.FC<{ label: string; ok: boolean; active: boolean; text: string }> = ({ label, ok, active, text }) => (
-  <div className={`flex min-w-0 items-baseline gap-2 ${active ? "" : "opacity-70"}`}>
-    <dt className="flex shrink-0 items-baseline gap-1.5 font-semibold text-ex-graphite">
-      <span aria-hidden className={ok ? "text-ex-graphite" : "text-[#B9B2A6]"}>{ok ? "✓" : "○"}</span>{label}<span className="sr-only">{ok ? ": done" : ": outstanding"}</span>
+  <div className={`flex min-w-0 items-baseline gap-2 ${active ? "" : "opacity-60"}`}>
+    <dt className="flex shrink-0 items-baseline gap-1.5 font-semibold text-desk-ink">
+      <span aria-hidden className={ok ? "text-desk-success" : "text-desk-faint"}>{ok ? "✓" : "○"}</span>{label}<span className="sr-only">{ok ? ": done" : ": outstanding"}</span>
     </dt>
-    <dd className="min-w-0 truncate text-ex-slate-ink" title={text}>{text}</dd>
+    <dd className="min-w-0 truncate text-desk-muted" title={text}>{text}</dd>
   </div>
 );
 
@@ -378,32 +348,33 @@ const ProfileReview: React.FC<{ code: string; facts: ListingFacts; context: Inta
   const col = (rows: Row[]): React.ReactNode => (
     <dl className="space-y-4">{rows.map(([icon, k, v]) => (
       <div key={k} className="relative min-w-0 pl-8">
-        <dt className="text-[12px] text-[#8A8378]"><Icon name={icon} className="absolute left-0 top-0.5 text-[#A8834A]" />{k}</dt>
-        <dd className="mt-0.5 text-[14px] font-medium leading-snug text-ex-graphite">{v}</dd>
+        <dt className="text-[12px] text-desk-muted"><Icon name={icon} className="absolute left-0 top-0.5 text-desk-faint" />{k}</dt>
+        <dd className="mt-0.5 text-[14px] font-medium leading-snug text-desk-ink">{v}</dd>
       </div>
     ))}</dl>
   );
   return (
-    <section aria-label="The listing" className="mt-10 rounded-[20px] border border-[#ECE2D0] bg-white/95 p-5 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_30px_60px_-40px_rgba(90,65,25,0.45)] sm:p-7">
-      <div className="grid gap-6 md:grid-cols-[200px_minmax(0,1fr)] md:gap-8">
-        <img src={waterfrontSkyline} alt="" aria-hidden className="h-[150px] w-full rounded-[12px] object-cover object-[45%_60%] md:h-[140px]" />
-        <div className="min-w-0">
-          <div className="flex items-start justify-between gap-4">
-            <h2 className="font-display text-[34px] font-medium leading-none text-ex-graphite">{code}</h2>
-            <details className="relative shrink-0">
-              <summary className="cursor-pointer list-none rounded-[9px] bg-[#F3EDE2] px-4 py-2 text-[13px] font-semibold text-ex-graphite ring-1 ring-[#E4DACA] transition hover:ring-[#C9A262] [&::-webkit-details-marker]:hidden">Edit</summary>
-              <div className="absolute right-0 z-20 mt-2 w-52 overflow-hidden rounded-[12px] border border-[#E2D3B5] bg-white py-1 shadow-[0_24px_48px_-24px_rgba(60,45,20,0.45)]">
-                {PROFILE_SECTIONS.map((x) => <button key={x} type="button" onClick={() => onEdit(x)} className="block w-full px-4 py-2 text-left text-[13px] text-ex-slate-ink hover:bg-[#FAF3E4] hover:text-ex-graphite">{PROFILE_SECTION_LABEL[x]}</button>)}
-              </div>
-            </details>
+    <section aria-label="The listing" className={`mt-12 p-5 sm:p-7 ${CARD}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-4">
+          <img src={waterfrontSkyline} alt="" aria-hidden className="hidden h-14 w-20 shrink-0 rounded-[10px] object-cover object-[45%_60%] saturate-[0.82] sm:block" />
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-desk-muted">Listing</p>
+            <h2 className="mt-1 font-display text-[30px] font-medium leading-none text-desk-ink">{code}</h2>
           </div>
-          <div className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2">{col(left)}{col(right)}</div>
         </div>
+        <details className="relative shrink-0">
+          <summary className={`${BTN_SECONDARY} min-h-[36px] cursor-pointer list-none px-4 text-[12.5px] [&::-webkit-details-marker]:hidden`}>Edit</summary>
+          <div className="absolute right-0 z-20 mt-2 w-52 overflow-hidden rounded-[12px] border border-desk-line bg-desk-surface py-1 shadow-[0_16px_40px_-20px_rgba(60,45,20,0.4)]">
+            {PROFILE_SECTIONS.map((x) => <button key={x} type="button" onClick={() => onEdit(x)} className="block w-full px-4 py-2.5 text-left text-[13px] text-desk-text hover:bg-desk-tint hover:text-desk-ink focus-visible:bg-desk-tint focus-visible:outline-none">{PROFILE_SECTION_LABEL[x]}</button>)}
+          </div>
+        </details>
       </div>
-      <div className="mt-7 border-t border-[#EFE6D6] pt-6">
-        <p className="text-[12px] text-[#8A8378]">What the business does</p>
-        <p className="mt-1.5 max-w-[70ch] font-display text-[20px] leading-[1.5] text-ex-graphite">{f.summary}</p>
-        {f.reasonForSale && <p className="mt-4 text-[13.5px] text-[#4F4A42]"><span className="text-[#8A8378]">Reason for sale · </span>{f.reasonForSale}</p>}
+      <div className="mt-7 grid gap-x-10 gap-y-4 border-t border-desk-line pt-6 sm:grid-cols-2">{col(left)}{col(right)}</div>
+      <div className="mt-7 border-t border-desk-line pt-6">
+        <p className="text-[12px] text-desk-muted">What the business does</p>
+        <p className="mt-1.5 max-w-[68ch] font-display text-[19px] leading-[1.55] text-desk-ink">{f.summary}</p>
+        {f.reasonForSale && <p className="mt-4 text-[13.5px] text-desk-text"><span className="text-desk-muted">Reason for sale · </span>{f.reasonForSale}</p>}
       </div>
     </section>
   );

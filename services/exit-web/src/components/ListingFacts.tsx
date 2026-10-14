@@ -6,6 +6,7 @@ import {
 } from "../lib/listing-facts";
 import { parseNumber } from "../lib/intake-fields";
 import { CountrySelect } from "./CountrySelect";
+import { FIELD, LABEL, HINT, ERROR, CARD, pill } from "./desk/ui";
 import { findCountry, countryByCode } from "../lib/countries";
 
 // ── LISTING FACTS · the buyer's card and the founder's form ─────────
@@ -63,11 +64,8 @@ const TONES = {
     todo: "border-xo-caution/50 text-xo-muted", done: "border-xo-verified/50 text-xo-verified", todoHead: "text-xo-caution",
   },
   porcelain: {
-    input: "w-full rounded-[11px] border border-[#E0D3BA] bg-white px-4 py-3.5 text-[14.5px] text-ex-graphite placeholder:text-[#A39C90] focus-visible:border-ex-bronze focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze/30",
-    label: "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-ex-slate-ink",
-    faint: "text-[#8A8378]", warn: "text-ex-bronze-ink",
-    chip: (on: boolean) => `rounded-full border px-3 py-1.5 text-[12.5px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze/40 ${on ? "border-ex-graphite bg-ex-graphite text-ex-ivory" : "border-[#D9D0C1] bg-white/60 text-ex-slate-ink hover:border-ex-bronze hover:text-ex-graphite"}`,
-    todo: "border-[#D9D0C1] bg-white/50 text-ex-slate-ink", done: "border-ex-bronze/60 bg-ex-bronze/10 text-ex-bronze-ink", todoHead: "text-ex-bronze-ink",
+    input: FIELD, label: LABEL, faint: "text-desk-faint", warn: "text-desk-error", chip: pill,
+    todo: "border-desk-line bg-desk-surface text-desk-text", done: "border-desk-success/40 bg-desk-surface text-desk-success", todoHead: "text-desk-ink",
   },
 } as const;
 
@@ -95,16 +93,13 @@ export const Icon: React.FC<{ name: keyof typeof ICON_PATHS; className?: string 
   <svg aria-hidden width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className={className}>{ICON_PATHS[name]}</svg>
 );
 
-const Group: React.FC<{ letter: string; title: string; note: string; icon: keyof typeof ICON_PATHS; porcelain: boolean; T: ToneSet; children: React.ReactNode }> = ({ letter, title, note, icon, porcelain, T, children }) => porcelain ? (
-  <section aria-labelledby={`grp-${letter}`} className="rounded-[20px] border border-[#ECE2D0] bg-white p-6 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_30px_60px_-40px_rgba(90,65,25,0.45)] sm:p-8 lg:p-9">
-    <header className="flex items-start gap-4">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[#E6D3AD] bg-[radial-gradient(circle_at_30%_25%,#FFFDF8,#F7EEDB)] text-[#A8834A]"><Icon name={icon} /></span>
-      <div className="min-w-0">
-        <h3 id={`grp-${letter}`} className="font-display text-[28px] font-medium leading-tight text-ex-graphite">{title}</h3>
-        <p className="mt-1 max-w-[62ch] text-[13.5px] leading-relaxed text-[#6E685E]">{note}</p>
-      </div>
+const Group: React.FC<{ letter: string; title: string; note: string; icon?: keyof typeof ICON_PATHS; porcelain: boolean; T: ToneSet; children: React.ReactNode }> = ({ letter, title, note, porcelain, T, children }) => porcelain ? (
+  <section aria-labelledby={`grp-${letter}`} className={`p-6 sm:p-8 ${CARD}`}>
+    <header>
+      <h2 id={`grp-${letter}`} className="font-display text-[26px] font-medium leading-tight text-desk-ink">{title}</h2>
+      <p className="mt-1 max-w-[62ch] text-[13.5px] leading-relaxed text-desk-muted">{note}</p>
     </header>
-    <div className="mt-7 min-w-0 space-y-7">{children}</div>
+    <div className="mt-7 min-w-0 space-y-8">{children}</div>
   </section>
 ) : (
   <section aria-labelledby={`grp-${letter}`} className="space-y-4 border-t border-xo-line pt-4">
@@ -116,42 +111,27 @@ const Group: React.FC<{ letter: string; title: string; note: string; icon: keyof
     <div className="min-w-0 space-y-6">{children}</div>
   </section>
 );
-const Fixed: React.FC<{ k: string; v: string; hint?: string; porcelain: boolean; T: ToneSet; icon?: keyof typeof ICON_PATHS }> = ({ k, v, hint, porcelain, T, icon }) => (
+const Fixed: React.FC<{ k: string; v: string; hint?: string; porcelain: boolean; T: ToneSet; icon?: keyof typeof ICON_PATHS }> = ({ k, v, hint, porcelain, T }) => (
   <div>
     <div className={T.label}>{k}</div>
     {porcelain ? (
-      <div className="flex items-center gap-3 rounded-[11px] border border-[#EAE0CE] bg-[#FBF8F2] px-4 py-3.5 text-[14.5px] text-ex-graphite">
-        {icon && <Icon name={icon} className="shrink-0 text-[#A8834A]" />}<span className="min-w-0 flex-1 truncate">{v}</span>
-        <span className="shrink-0 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[#A39C90]">Fixed</span>
+      <div className="flex items-center gap-3 rounded-[10px] border border-desk-line bg-desk-tint px-4 py-3 text-[14.5px] text-desk-ink">
+        <span className="min-w-0 flex-1 truncate">{v}</span>
+        <span className="shrink-0 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-desk-faint">Fixed</span>
       </div>
     ) : <div className="font-mono text-[13px]">{v}</div>}
-    {hint && <span className={`mt-1 block text-[11px] ${T.faint}`}>{hint}</span>}
+    {hint && <span className={porcelain ? HINT : `mt-1 block text-[11px] ${T.faint}`}>{hint}</span>}
   </div>
 );
 
-// pills: gold-tinted for single choices, dark bronze for the transaction checklists
-const goldPill = (on: boolean): string => `rounded-full border px-4 py-2 text-[13px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A262]/50 ${on
-  ? "border-[#C9A262] bg-[linear-gradient(180deg,#FDF6E7,#F6E8C9)] font-semibold text-[#5A4318] shadow-[0_6px_16px_-10px_rgba(160,115,40,0.7)]"
-  : "border-[#E4DACA] bg-white text-[#4F4A42] hover:border-[#C9A262] hover:text-ex-graphite"}`;
-const darkPill = (on: boolean): string => `rounded-full border px-4 py-2 text-[13px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A262]/50 ${on
-  ? "border-[#2B1F0E] bg-[linear-gradient(180deg,#5A4220,#2E2210)] text-[#F7ECD4] shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_8px_18px_-10px_rgba(60,40,10,0.9)]"
-  : "border-[#E4DACA] bg-white text-[#3F3A33] shadow-[0_2px_6px_-4px_rgba(60,45,20,0.3)] hover:border-[#C9A262]"}`;
-const Letter: React.FC<{ children: string }> = ({ children }) => (
-  <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-[7px] bg-[#FBF1DC] font-display text-[22px] font-semibold leading-none text-[#B48737]">{children}</span>
-);
 const Chevron: React.FC = () => (
-  <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ex-slate-ink"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.3" /></svg>
+  <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-desk-muted"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.3" /></svg>
 );
-const CARD_INPUT = "mt-1 w-full rounded-[8px] border border-transparent bg-transparent px-0 py-1 text-[15px] text-ex-graphite placeholder:text-[#A39C90] hover:border-b-[#E4DACA] focus:border-b-[#C9A262] focus:outline-none";
-const AnswerCard: React.FC<{ id: string; icon: keyof typeof ICON_PATHS; label: string; hint: string; optional?: boolean; children: React.ReactNode }> = ({ id, icon, label, hint, optional, children }) => (
-  <div className="flex items-start gap-4 rounded-[16px] border border-[#EFE6D6] bg-white/85 px-5 py-5 shadow-[0_20px_40px_-34px_rgba(90,65,25,0.45)]">
-    <Icon name={icon} className="mt-0.5 h-8 w-8 shrink-0 text-[#2B2620]" />
-    <div className="min-w-0 flex-1">
-      <label htmlFor={id} className="block text-[15px] font-semibold text-ex-graphite">{label}{optional && <span className="ml-1.5 text-[12px] font-normal text-[#8A8378]">optional</span>}</label>
-      {children}
-      <span id={`${id}-hint`} className="mt-1 block text-[11.5px] text-[#8A8378]">{hint}</span>
-    </div>
-  </div>
+const Choices: React.FC<{ legend: string; hint?: string; children: React.ReactNode }> = ({ legend, hint, children }) => (
+  <fieldset>
+    <legend className={LABEL}>{legend}{hint && <span className="ml-2 font-normal normal-case tracking-normal text-desk-faint">{hint}</span>}</legend>
+    <div className="flex flex-wrap gap-2">{children}</div>
+  </fieldset>
 );
 
 /** Figures that come from the founder's saved intake (read-only here; edited on Value my company). */
@@ -180,110 +160,93 @@ export const ListingFactsForm: React.FC<{ value: Partial<ListingFacts>; onChange
 
   // the listing desk shows one page of the profile at a time, each set as its own sheet
   if (porcelain) {
-    const regionSelect = (
-      <div>
-        <label htmlFor="lf-region" className={T.label}>Region</label>
-        <div className="relative">
-          <Icon name="globe" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#A8834A]" />
-          <select id="lf-region" className={`${T.input} appearance-none pl-12 pr-10`} value={v.region ?? ""} onChange={(e) => set("region", (e.target.value || undefined) as ListingFacts["region"] | undefined)} aria-describedby="lf-region-hint">
-            <option value="">Choose a region</option>
-            {REGIONS.map((r) => <option key={r} value={r}>{r === "Other" ? "Global / other" : r}</option>)}
-          </select>
-          <Chevron />
-        </div>
-        <span id="lf-region-hint" className={`mt-1.5 block text-[11.5px] ${T.faint}`}>Where the business is based, as buyers filter by it.</span>
-      </div>
-    );
-
     if (section === "overview") return (
-      <Group letter="A" icon="shield" porcelain T={T} title="Business overview" note="What a buyer reads first — the sector, region, what the business does, and how far along it is.">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
+      <Group letter="A" porcelain T={T} title="Business overview" note="What a buyer reads first: the sector, the region, what the business does and how far along it is.">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <div className="flex flex-col">
-            <label htmlFor="lf-summary" className={T.label}>What the business does</label>
-            <div className="relative flex-1">
-              <textarea id="lf-summary" className={`${T.input} h-full min-h-[214px] resize-y pb-8 leading-relaxed`} maxLength={SUMMARY_MAX} value={v.summary ?? ""} onChange={(e) => set("summary", e.target.value)} aria-describedby="lf-summary-hint"
-                placeholder="Describe your business — the problem it solves, who uses it, what makes it different, and what a buyer takes over. Leave out the company name: buyers learn it after the NDA." />
-              <span aria-hidden className="pointer-events-none absolute bottom-3 right-4 font-mono text-[11px] text-[#A39C90]">{summaryLen}/{SUMMARY_MAX}</span>
-            </div>
-            <span id="lf-summary-hint" className={`mt-1.5 block text-[11.5px] ${summaryLen && summaryLen < SUMMARY_MIN ? T.warn : T.faint}`}>{summaryLen} of {SUMMARY_MAX} characters · at least {SUMMARY_MIN}</span>
+            <label htmlFor="lf-summary" className={LABEL}>What the business does</label>
+            <textarea id="lf-summary" className={`${FIELD} min-h-[196px] flex-1 resize-y leading-relaxed`} maxLength={SUMMARY_MAX} value={v.summary ?? ""} onChange={(e) => set("summary", e.target.value)} aria-describedby="lf-summary-hint"
+              placeholder="The problem it solves, who uses it, what makes it different, and what a buyer takes over. Leave out the company name: buyers learn it after the NDA." />
+            <span id="lf-summary-hint" className={`${HINT} flex justify-between gap-3`}>
+              <span className={summaryLen && summaryLen < SUMMARY_MIN ? "text-desk-error" : ""}>At least {SUMMARY_MIN} characters</span>
+              <span className="font-mono">{summaryLen}/{SUMMARY_MAX}</span>
+            </span>
           </div>
           <div className="space-y-6">
-            {context && <Fixed porcelain T={T} icon="building" k="Sector" v={context.sector} hint="From your saved figures on Value my company." />}
-            {regionSelect}
+            {context && <Fixed porcelain T={T} k="Sector" v={context.sector} hint="From your saved figures on Value my company." />}
+            <div>
+              <label htmlFor="lf-region" className={LABEL}>Region</label>
+              <div className="relative">
+                <select id="lf-region" className={`${FIELD} appearance-none pr-10`} value={v.region ?? ""} onChange={(e) => set("region", (e.target.value || undefined) as ListingFacts["region"] | undefined)} aria-describedby="lf-region-hint">
+                  <option value="">Choose a region</option>
+                  {REGIONS.map((r) => <option key={r} value={r}>{r === "Other" ? "Global / other" : r}</option>)}
+                </select>
+                <Chevron />
+              </div>
+              <span id="lf-region-hint" className={HINT}>Where the business is based; buyers filter by it.</span>
+            </div>
           </div>
         </div>
-        <fieldset>
-          <legend className={T.label}>Company stage</legend>
-          <div className="flex flex-wrap gap-2.5">{STAGES.map((s) => <button key={s} type="button" aria-pressed={v.stage === s} onClick={() => set("stage", s)} className={goldPill(v.stage === s)}>{STAGE_LABEL[s]}</button>)}</div>
-        </fieldset>
+        <Choices legend="Company stage">{STAGES.map((s) => <button key={s} type="button" aria-pressed={v.stage === s} onClick={() => set("stage", s)} className={pill(v.stage === s)}>{STAGE_LABEL[s]}</button>)}</Choices>
       </Group>
     );
 
     if (section === "financial") return (
-      <Group letter="B" icon="chart" porcelain T={T} title="Performance and asking price" note="Revenue and growth are shown to buyers as ranges, never exact figures. The asking price is yours to state.">
+      <Group letter="B" porcelain T={T} title="Performance and asking price" note="Revenue and growth are shown to buyers as ranges, never exact figures. The asking price is yours to state.">
         {context && <div className="grid gap-6 sm:grid-cols-2">
-          <Fixed porcelain T={T} icon="chart" k="TTM revenue" v={context.unconfirmed ? "Not confirmed" : context.revenue} hint={fromIntake} />
-          <Fixed porcelain T={T} icon="chart" k="Growth" v={context.unconfirmed ? "Not confirmed" : context.growth} hint={fromIntake} />
+          <Fixed porcelain T={T} k="TTM revenue" v={context.unconfirmed ? "Not confirmed" : context.revenue} hint={fromIntake} />
+          <Fixed porcelain T={T} k="Growth" v={context.unconfirmed ? "Not confirmed" : context.growth} hint={fromIntake} />
         </div>}
-        <fieldset>
-          <legend className={T.label}>Asking price structure</legend>
-          <div className="flex flex-wrap gap-2.5">{ASKING_MODES.map((s) => <button key={s} type="button" aria-pressed={v.askingMode === s} onClick={() => set("askingMode", s)} className={goldPill(v.askingMode === s)}>{ASKING_LABEL[s]}</button>)}</div>
+        <div>
+          <Choices legend="Asking price structure">{ASKING_MODES.map((s) => <button key={s} type="button" aria-pressed={v.askingMode === s} onClick={() => set("askingMode", s)} className={pill(v.askingMode === s)}>{ASKING_LABEL[s]}</button>)}</Choices>
           {(v.askingMode === "price" || v.askingMode === "range") && (
-            <div className="mt-5 grid max-w-md grid-cols-2 gap-4">
+            <div className="mt-6 grid max-w-md grid-cols-2 gap-4">
               <div>
-                <label htmlFor="lf-ask-low" className={T.label}>{v.askingMode === "range" ? "From ($M)" : "Price ($M)"}</label>
-                <input id="lf-ask-low" inputMode="decimal" className={`${T.input} font-mono`} value={ask.low} onChange={(e) => typeAsk("low", e.target.value)} aria-invalid={ask.low !== "" && !askLow.ok} aria-describedby="lf-ask-low-msg" />
-                {ask.low !== "" && !askLow.ok && <span id="lf-ask-low-msg" className={`mt-1 block text-[11px] ${T.warn}`}>{askLow.error}</span>}
+                <label htmlFor="lf-ask-low" className={LABEL}>{v.askingMode === "range" ? "From ($M)" : "Price ($M)"}</label>
+                <input id="lf-ask-low" inputMode="decimal" className={`${FIELD} font-mono`} value={ask.low} onChange={(e) => typeAsk("low", e.target.value)} aria-invalid={ask.low !== "" && !askLow.ok} aria-describedby="lf-ask-low-msg" />
+                {ask.low !== "" && !askLow.ok && <span id="lf-ask-low-msg" className={ERROR}>{askLow.error}</span>}
               </div>
               {v.askingMode === "range" && (
                 <div>
-                  <label htmlFor="lf-ask-high" className={T.label}>To ($M)</label>
-                  <input id="lf-ask-high" inputMode="decimal" className={`${T.input} font-mono`} value={ask.high} onChange={(e) => typeAsk("high", e.target.value)} aria-invalid={ask.high !== "" && !askHigh.ok} aria-describedby="lf-ask-high-msg" />
-                  {ask.high !== "" && !askHigh.ok && <span id="lf-ask-high-msg" className={`mt-1 block text-[11px] ${T.warn}`}>{askHigh.error}</span>}
+                  <label htmlFor="lf-ask-high" className={LABEL}>To ($M)</label>
+                  <input id="lf-ask-high" inputMode="decimal" className={`${FIELD} font-mono`} value={ask.high} onChange={(e) => typeAsk("high", e.target.value)} aria-invalid={ask.high !== "" && !askHigh.ok} aria-describedby="lf-ask-high-msg" />
+                  {ask.high !== "" && !askHigh.ok && <span id="lf-ask-high-msg" className={ERROR}>{askHigh.error}</span>}
                 </div>
               )}
             </div>
           )}
-        </fieldset>
+        </div>
       </Group>
     );
 
-    // transaction: two questions answered with pills, then the four short answers as cards
+    // transaction: the same card as the other pages; two checklists, then four short answers
     return (
-      <div className="space-y-5">
-        <fieldset className="px-1">
-          <legend className="flex items-center gap-3"><Letter>A</Letter><span className="text-[16.5px] font-semibold text-ex-graphite">What is for sale?</span></legend>
-          <p className={`ml-11 mt-0.5 text-[12px] ${T.faint}`}>Choose all that apply.</p>
-          <div className="ml-11 mt-4 flex flex-wrap gap-2.5">{FOR_SALE.map((s) => { const on = (v.forSale ?? []).includes(s); return <button key={s} type="button" aria-pressed={on} onClick={() => set("forSale", toggle(v.forSale, s))} className={darkPill(on)}>{FOR_SALE_LABEL[s]}</button>; })}</div>
-        </fieldset>
-        <fieldset className="rounded-[18px] border border-[#EFE6D6] bg-white/75 px-5 py-6 shadow-[0_24px_48px_-36px_rgba(90,65,25,0.45)] sm:px-6">
-          <legend className="sr-only">How the business makes money?</legend>
-          <div aria-hidden className="flex items-center gap-3"><Letter>B</Letter><span className="text-[16.5px] font-semibold text-ex-graphite">How the business makes money?</span></div>
-          <p className={`ml-11 mt-0.5 text-[12px] ${T.faint}`}>Choose all that apply.</p>
-          <div className="ml-11 mt-4 flex flex-wrap gap-2.5">{MODELS.map((s) => { const on = (v.models ?? []).includes(s); return <button key={s} type="button" aria-pressed={on} onClick={() => set("models", toggle(v.models, s))} className={darkPill(on)}>{MODEL_LABEL[s]}</button>; })}</div>
-        </fieldset>
-        <div className="grid gap-5 sm:grid-cols-2">
-          <AnswerCard id="lf-markets" icon="market" label="Markets served" hint="Countries or customer groups, separated with commas.">
-            <input id="lf-markets" className={CARD_INPUT} value={texts.markets} placeholder="United States, Canada, Retail" aria-describedby="lf-markets-hint"
+      <Group letter="C" porcelain T={T} title="What transfers, and how it earns" note="What the buyer takes over, how the business makes money, where it sells and what it is built on.">
+        <Choices legend="What is for sale" hint="Choose all that apply">{FOR_SALE.map((s) => { const on = (v.forSale ?? []).includes(s); return <button key={s} type="button" aria-pressed={on} onClick={() => set("forSale", toggle(v.forSale, s))} className={pill(on)}>{FOR_SALE_LABEL[s]}</button>; })}</Choices>
+        <Choices legend="How the business makes money" hint="Choose all that apply">{MODELS.map((s) => { const on = (v.models ?? []).includes(s); return <button key={s} type="button" aria-pressed={on} onClick={() => set("models", toggle(v.models, s))} className={pill(on)}>{MODEL_LABEL[s]}</button>; })}</Choices>
+        <div className="grid gap-x-6 gap-y-6 border-t border-desk-line pt-8 sm:grid-cols-2">
+          <div>
+            <label htmlFor="lf-markets" className={LABEL}>Markets served</label>
+            <input id="lf-markets" className={FIELD} value={texts.markets} placeholder="United States, Canada, retail" aria-describedby="lf-markets-hint"
               onChange={(e) => { setTexts((t) => ({ ...t, markets: e.target.value })); set("markets", splitList(e.target.value)); }} />
-          </AnswerCard>
-          <AnswerCard id="lf-built" icon="stack" label="Technology stack" hint="Separate with commas.">
-            <input id="lf-built" className={CARD_INPUT} value={texts.builtWith} placeholder="React, Python, PostgreSQL" aria-describedby="lf-built-hint"
-              onChange={(e) => { setTexts((t) => ({ ...t, builtWith: e.target.value })); set("builtWith", splitList(e.target.value)); }} />
-          </AnswerCard>
-          <div className="flex items-start gap-4 rounded-[16px] border border-[#EFE6D6] bg-white/85 px-5 py-5 shadow-[0_20px_40px_-34px_rgba(90,65,25,0.45)]">
-            <Icon name="flag" className="mt-0.5 h-8 w-8 shrink-0 text-[#2B2620]" />
-            <div className="min-w-0 flex-1">
-              {/* stored as the country's English name, as listings always have */}
-              <CountrySelect id="lf-based" label="Country of operation" labelClassName="mb-2 block text-[15px] font-semibold text-ex-graphite" value={findCountry(v.basedIn)?.code}
-                onChange={(code) => set("basedIn", countryByCode(code)?.name ?? code)} hint="Where the company operates or is incorporated. Shown to buyers." />
-            </div>
+            <span id="lf-markets-hint" className={HINT}>Countries or customer groups, separated with commas.</span>
           </div>
-          <AnswerCard id="lf-reason" icon="note" label="Reason for sale" optional hint="A sentence buyers will read; leave it empty if you prefer.">
-            <input id="lf-reason" className={CARD_INPUT} maxLength={REASON_MAX} value={v.reasonForSale ?? ""} onChange={(e) => set("reasonForSale", e.target.value)} placeholder="e.g. focusing on another venture" aria-describedby="lf-reason-hint" />
-          </AnswerCard>
+          <div>
+            <label htmlFor="lf-built" className={LABEL}>Technology stack</label>
+            <input id="lf-built" className={FIELD} value={texts.builtWith} placeholder="React, Python, PostgreSQL" aria-describedby="lf-built-hint"
+              onChange={(e) => { setTexts((t) => ({ ...t, builtWith: e.target.value })); set("builtWith", splitList(e.target.value)); }} />
+            <span id="lf-built-hint" className={HINT}>Separate with commas.</span>
+          </div>
+          {/* stored as the country's English name, as listings always have */}
+          <CountrySelect id="lf-based" label="Country of operation" value={findCountry(v.basedIn)?.code}
+            onChange={(code) => set("basedIn", countryByCode(code)?.name ?? code)} hint="Where the company operates or is incorporated. Shown to buyers." />
+          <div>
+            <label htmlFor="lf-reason" className={LABEL}>Reason for sale <span className="font-normal normal-case tracking-normal text-desk-faint">optional</span></label>
+            <input id="lf-reason" className={FIELD} maxLength={REASON_MAX} value={v.reasonForSale ?? ""} onChange={(e) => set("reasonForSale", e.target.value)} placeholder="e.g. focusing on another venture" aria-describedby="lf-reason-hint" />
+            <span id="lf-reason-hint" className={HINT}>One sentence buyers will read; leave it empty if you prefer.</span>
+          </div>
         </div>
-      </div>
+      </Group>
     );
   }
 
