@@ -1,16 +1,21 @@
 import type { Remote } from "./documents/store";
 
-// ── LISTING-DESK PROMOTIONS ─────────────────────────────────────────
-// Campaigns the operator runs in the listing desk's sidebar: their own products first (Sovereign
+// ── PROMOTIONS ──────────────────────────────────────────────────────
+// Campaigns the operator runs in the listing desk's sidebar, and in two quiet places elsewhere (the foot
+// of the console sidebar, and the Report hub) — never where a decision is made: their own products first (Sovereign
 // Dispatch and the rest of the portfolio), approved partners later. The server decides who sees
 // what (a founder only ever receives a published campaign inside its schedule; images are signed
 // only for those); this module validates what an operator enters, picks what to show for a stage,
 // and talks to Supabase. Without a server (development, or a build not connected to the exchange)
 // campaigns are kept in this browser so the desk and the manager still work end to end.
 
-export type AdStage = "identity" | "profile" | "review";
-export const AD_STAGES: readonly AdStage[] = ["identity", "profile", "review"];
-export const AD_STAGE_LABEL: Record<AdStage, string> = { identity: "Identity", profile: "Company profile", review: "Review and publish" };
+export type DeskStage = "identity" | "profile" | "review";
+export type AdStage = DeskStage | "sidebar" | "reports";
+/** The listing desk's three stages, where a new campaign runs by default. */
+export const DESK_STAGES: readonly DeskStage[] = ["identity", "profile", "review"];
+export const AD_STAGES: readonly AdStage[] = [...DESK_STAGES, "sidebar", "reports"];
+export const AD_STAGE_LABEL: Record<AdStage, string> = { identity: "Identity", profile: "Company profile", review: "Review and publish", sidebar: "Console sidebar", reports: "Report hub" };
+export const isDeskStage = (s: AdStage): s is DeskStage => (DESK_STAGES as readonly string[]).includes(s);
 
 export type AdStatus = "draft" | "published" | "paused" | "archived";
 /** What an operator sees: the stored status, with schedule applied to published campaigns. */
@@ -41,8 +46,8 @@ export interface Campaign {
 }
 export type CampaignDraft = Omit<Campaign, "id" | "updated_at"> & { readonly id?: string };
 
-export interface AdSettings { readonly rotation_seconds: number; readonly mobile_enabled: boolean }
-export const DEFAULT_SETTINGS: AdSettings = { rotation_seconds: 7, mobile_enabled: true };
+export interface AdSettings { readonly rotation_seconds: number; readonly mobile_enabled: boolean; readonly off_placements?: readonly AdStage[] }
+export const DEFAULT_SETTINGS: AdSettings = { rotation_seconds: 7, mobile_enabled: true, off_placements: [] };
 
 /** A campaign ready to show: the record plus a URL for its image (signed, or a local data URL). */
 export interface Slide { readonly campaign: Campaign; readonly image: string | null; readonly video?: string | null }
@@ -55,7 +60,7 @@ export const VIDEO_MAX_BYTES = 25 * 1024 * 1024;
 
 export const emptyDraft = (position = 0): CampaignDraft => ({
   name: "", eyebrow: null, headline: "", body: null, cta_label: null, cta_url: null, attribution: null,
-  image_path: null, video_path: null, image_alt: null, focal_x: 50, focal_y: 50, stages: [...AD_STAGES], mobile: true,
+  image_path: null, video_path: null, image_alt: null, focal_x: 50, focal_y: 50, stages: [...DESK_STAGES], mobile: true,
   priority: 0, position, status: "draft", starts_at: null, ends_at: null,
 });
 
@@ -99,7 +104,7 @@ export function validateCampaign(d: CampaignDraft, forPublish = false): Partial<
   (["name", "eyebrow", "headline", "body", "cta_label", "attribution", "image_alt"] as const).forEach((k) => len(k, d[k]));
   if (d.cta_label && !d.cta_url) e.cta_url = "A call to action needs a destination.";
   if (d.cta_url) { const m = checkUrl(d.cta_url); if (m) e.cta_url = m; else if (!d.cta_label?.trim()) e.cta_label = "Name the call to action, e.g. “Explore Dispatch”."; }
-  if (!d.stages.length) e.stages = "Choose at least one stage.";
+  if (!d.stages.length) e.stages = "Choose at least one place to show it.";
   if (d.starts_at && d.ends_at && Date.parse(d.ends_at) <= Date.parse(d.starts_at)) e.schedule = "The end must be after the start.";
   if (d.image_path && !d.image_alt?.trim()) e.image_alt = "Describe the image for people who cannot see it.";
   if (forPublish && !d.image_path) e.image_path = d.video_path ? "Add a cover image for the video (shown while it loads and to visitors who prefer less motion)." : "Add an image before publishing.";
@@ -148,12 +153,12 @@ export const loadCampaigns = async (r: Remote): Promise<Campaign[]> =>
   json<Campaign[]>(await f(r)(`${r.url}/rest/v1/exitos_ad_campaigns?select=*&order=position.asc`, { headers: h(r) }), "Reading campaigns");
 
 export async function loadSettings(r: Remote): Promise<AdSettings> {
-  const rows = await json<AdSettings[]>(await f(r)(`${r.url}/rest/v1/exitos_ad_settings?select=rotation_seconds,mobile_enabled`, { headers: h(r) }), "Reading settings");
+  const rows = await json<AdSettings[]>(await f(r)(`${r.url}/rest/v1/exitos_ad_settings?select=rotation_seconds,mobile_enabled,off_placements`, { headers: h(r) }), "Reading settings");
   return rows[0] ?? DEFAULT_SETTINGS;
 }
 
 export async function saveSettings(r: Remote, s: AdSettings): Promise<void> {
-  const res = await f(r)(`${r.url}/rest/v1/exitos_ad_settings?id=eq.true`, { method: "PATCH", headers: h(r, { Prefer: "return=representation" }), body: JSON.stringify({ rotation_seconds: s.rotation_seconds, mobile_enabled: s.mobile_enabled, updated_at: new Date().toISOString() }) });
+  const res = await f(r)(`${r.url}/rest/v1/exitos_ad_settings?id=eq.true`, { method: "PATCH", headers: h(r, { Prefer: "return=representation" }), body: JSON.stringify({ rotation_seconds: s.rotation_seconds, mobile_enabled: s.mobile_enabled, off_placements: s.off_placements ?? [], updated_at: new Date().toISOString() }) });
   const rows = await json<unknown[]>(res, "Saving settings");
   if (!rows.length) throw new Error("Saving settings: only an operator can change them");
 }
@@ -248,10 +253,12 @@ export async function loadSlides(remote: Remote | undefined, stage: AdStage, mob
   try {
     if (!remote) {
       const settings = local.settings();
+      if (settings.off_placements?.includes(stage)) return { slides: [], settings };
       const list = selectCampaigns(local.campaigns(), stage, { mobile });
       return { settings, slides: list.map((c) => ({ campaign: c, image: local.image(c.image_path), video: local.image(c.video_path ?? null) })) };
     }
     const [all, settings] = await Promise.all([loadCampaigns(remote), loadSettings(remote).catch(() => DEFAULT_SETTINGS)]);
+    if (settings.off_placements?.includes(stage)) return { slides: [], settings };
     const list = selectCampaigns(all, stage, { mobile });
     const urls = await signImages(remote, list.flatMap((c) => [c.image_path, c.video_path].filter((x): x is string => !!x))).catch(() => ({} as Record<string, string>));
     return { settings, slides: list.map((c) => ({ campaign: c, image: c.image_path ? urls[c.image_path] ?? null : null, video: c.video_path ? urls[c.video_path] ?? null : null })) };

@@ -3,7 +3,7 @@ import { Section, Provenance, XO_INPUT, XO_LABEL } from "./xo";
 import { notify } from "../lib/ui";
 import type { Remote } from "../lib/documents/store";
 import {
-  AD_STAGES, AD_STAGE_LABEL, DEFAULT_SETTINGS, LIMITS, IMAGE_TYPES, VIDEO_TYPES, campaignState, emptyDraft, validateCampaign, checkImage, checkVideo,
+  AD_STAGES, AD_STAGE_LABEL, DESK_STAGES, isDeskStage, DEFAULT_SETTINGS, LIMITS, IMAGE_TYPES, VIDEO_TYPES, campaignState, emptyDraft, validateCampaign, checkImage, checkVideo,
   loadCampaigns, loadSettings, loadStats, saveCampaign, saveSettings, signImages, uploadImage, local,
   type AdSettings, type AdStage, type AdState, type AdStats, type Campaign, type CampaignDraft,
 } from "../lib/ads";
@@ -179,13 +179,18 @@ export const AdManager: React.FC<{ remote?: Remote }> = ({ remote }) => {
 const SettingsBar: React.FC<{ settings: AdSettings; disabled: boolean; onSave: (s: AdSettings) => void }> = ({ settings, disabled, onSave }) => {
   const [s, setS] = useState(settings);
   useEffect(() => setS(settings), [settings]);
-  const changed = s.rotation_seconds !== settings.rotation_seconds || s.mobile_enabled !== settings.mobile_enabled;
+  const off = s.off_placements ?? [];
+  const changed = s.rotation_seconds !== settings.rotation_seconds || s.mobile_enabled !== settings.mobile_enabled || off.join() !== (settings.off_placements ?? []).join();
+  const toggle = (p: AdStage, on: boolean): void => setS({ ...s, off_placements: on ? off.filter((x) => x !== p) : [...off, p] });
   return (
     <div className="flex flex-wrap items-end gap-4 border border-xo-line px-3 py-2.5">
       <label className="text-[12px]"><span className={XO_LABEL}>Seconds per slide</span>
         <input type="number" min={4} max={30} className={`${XO_INPUT} w-24`} value={s.rotation_seconds} onChange={(e) => setS({ ...s, rotation_seconds: Math.min(30, Math.max(4, Number(e.target.value) || 7)) })} />
       </label>
       <label className="flex items-center gap-2 pb-2 text-[12px] text-xo-text"><input type="checkbox" checked={s.mobile_enabled} onChange={(e) => setS({ ...s, mobile_enabled: e.target.checked })} /> Show a compact card on phones (after the form, never above it)</label>
+      {(["sidebar", "reports"] as const).map((p) => (
+        <label key={p} className="flex items-center gap-2 pb-2 text-[12px] text-xo-text"><input type="checkbox" checked={!off.includes(p)} onChange={(e) => toggle(p, e.target.checked)} /> {p === "sidebar" ? "Show in the console sidebar" : "Show on the Report hub"}</label>
+      ))}
       <button type="button" className={GHOST} disabled={disabled || !changed} onClick={() => onSave(s)}>Save slideshow settings</button>
     </div>
   );
@@ -284,7 +289,7 @@ const Editor: React.FC<{
           </div>
         </fieldset>
 
-        <fieldset><legend className={XO_LABEL}>Show on these stages</legend>
+        <fieldset><legend className={XO_LABEL}>Where it shows</legend>
           <div className="flex flex-wrap gap-3 text-[12px]">
             {AD_STAGES.map((s) => <label key={s} className="flex items-center gap-1.5"><input type="checkbox" checked={d.stages.includes(s)} onChange={(e) => set("stages", e.target.checked ? AD_STAGES.filter((x) => x === s || d.stages.includes(x)) : d.stages.filter((x) => x !== s))} />{AD_STAGE_LABEL[s]}</label>)}
             <label className="flex items-center gap-1.5"><input type="checkbox" checked={d.mobile} onChange={(e) => set("mobile", e.target.checked)} />Also on phones</label>
@@ -314,11 +319,20 @@ const Editor: React.FC<{
         </div>
         <div className="flex flex-wrap items-start gap-4">
           <div aria-label="Desktop sidebar preview" className="flex h-[860px] w-[300px] flex-col overflow-hidden rounded-[14px] border border-[#C9A86A]/50">
-            <DeskRail stage={AD_STAGES.indexOf(stage) as 0 | 1 | 2} stageDone={[stage !== "identity", stage === "review", false]} canReview={stage === "review"} pagesDone={stage === "review" ? 3 : 1} onGo={() => undefined} onClose={() => undefined}>
-              {d.stages.includes(stage)
-                ? <AdPanel preview slides={[{ campaign: previewCampaign, image: img, video: vid }]} settings={settings} className="mt-6 flex flex-1" />
-                : <p className="m-5 mt-auto rounded-sm border border-xo-line p-3 text-[11.5px] text-ex-ivory/60">Not shown on this stage.</p>}
-            </DeskRail>
+            {isDeskStage(stage) ? (
+              <DeskRail stage={DESK_STAGES.indexOf(stage) as 0 | 1 | 2} stageDone={[stage !== "identity", stage === "review", false]} canReview={stage === "review"} pagesDone={stage === "review" ? 3 : 1} onGo={() => undefined} onClose={() => undefined}>
+                {d.stages.includes(stage)
+                  ? <AdPanel preview slides={[{ campaign: previewCampaign, image: img, video: vid }]} settings={settings} className="mt-6 flex flex-1" />
+                  : <p className="m-5 mt-auto rounded-sm border border-xo-line p-3 text-[11.5px] text-ex-ivory/60">Not shown on this stage.</p>}
+              </DeskRail>
+            ) : (
+              <div className="flex flex-1 flex-col justify-end bg-[#14161A] p-3">
+                <p className="mb-2 text-[10.5px] text-white/45">{stage === "sidebar" ? "Foot of the console sidebar · large screens" : "Report hub · after the documents"}</p>
+                {!d.stages.includes(stage) ? <p className="rounded-sm border border-white/10 p-3 text-[11.5px] text-white/55">Not shown here.</p>
+                  : settings.off_placements?.includes(stage) ? <p className="rounded-sm border border-white/10 p-3 text-[11.5px] text-white/55">This placement is switched off in the settings.</p>
+                  : <AdPanel preview variant={stage === "sidebar" ? "sidebar" : "strip"} slides={[{ campaign: previewCampaign, image: img, video: vid }]} settings={settings} />}
+              </div>
+            )}
           </div>
           <div aria-label="Phone preview" className="w-[300px] rounded-[18px] border border-xo-line bg-[#FBF8F2] p-3">
             <p className="mb-2 text-[10.5px] text-[#8A8378]">Phone · after the form</p>

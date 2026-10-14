@@ -9,6 +9,7 @@ import { useDocumentRemote } from "../lib/documents/remote";
 import { generateVersion } from "../lib/documents/service";
 import { saveVersion } from "../lib/documents/store";
 import { notify } from "../lib/ui";
+import { AdPanel, useAdSlides } from "../components/AdPanel";
 
 // ── PUBLISHING CENTER ───────────────────────────────────────────────
 // The index of every board-ready document ExitOS publishes for the active
@@ -35,6 +36,8 @@ const ReportHub: React.FC = () => {
   const { session } = useAuth();
   const remote = useDocumentRemote();
   const [dispatching, setDispatching] = useState(false);
+  const ads = useAdSlides(remote, "reports");
+  const [adHidden, setAdHidden] = useState(false);
 
   // the board memorandum becomes a saved, hashed version, which Dispatch renders by id
   const submitBoardToDispatch = async (): Promise<void> => {
@@ -111,6 +114,9 @@ const ReportHub: React.FC = () => {
             );
           })}
         </div>
+
+        {/* a sponsored card after the documents, never between them */}
+        {!adHidden && <AdPanel variant="strip" slides={ads.slides} settings={ads.settings} remote={remote} onHide={() => setAdHidden(true)} className="mt-6" />}
 
         <p className="mt-6 text-[11px] leading-relaxed text-white/35">
           Documents open in a new tab. “Print…” in the document toolbar opens your browser's print dialog, which can also save the

@@ -142,3 +142,29 @@ describe("the promotions panel", () => {
     expect(renderToStaticMarkup(createElement(AdPanel, { slides: [], settings: DEFAULT_SETTINGS, variant: "compact" }))).toBe("");
   });
 });
+
+describe("placements beyond the listing desk", () => {
+  const slide = (over: Partial<Campaign>) => ({ campaign: c({ headline: "Official records", cta_label: "Explore", cta_url: "https://example.com/x", stages: ["sidebar", "reports"], ...over }), image: null });
+  it("a new campaign runs on the listing desk only, until the operator ticks another place", () => {
+    expect(emptyDraft().stages).toEqual(["identity", "profile", "review"]);
+    const list = [c({ id: "desk" }), c({ id: "side", stages: ["sidebar"] }), c({ id: "both", stages: ["sidebar", "reports"] })];
+    expect(selectCampaigns(list, "sidebar", { now: NOW }).map((x) => x.id)).toEqual(["side", "both"]);
+    expect(selectCampaigns(list, "reports", { now: NOW }).map((x) => x.id)).toEqual(["both"]);
+  });
+  it("a placement switched off shows nothing", async () => {
+    const remote = { url: "https://db.example", anonKey: "k", accessToken: "t", fetchImpl: (async (u: string) => {
+      const body = String(u).includes("exitos_ad_settings") ? [{ rotation_seconds: 7, mobile_enabled: true, off_placements: ["sidebar"] }] : [c({ stages: ["sidebar", "reports"] })];
+      return new Response(JSON.stringify(String(u).includes("/sign/") ? [] : body), { status: 200 });
+    }) as typeof fetch };
+    expect((await loadSlides(remote, "sidebar")).slides).toHaveLength(0);
+    expect((await loadSlides(remote, "reports")).slides).toHaveLength(1);
+  });
+  it("the sidebar and Report hub cards read Sponsored, link out as sponsored, and render nothing without a live campaign", () => {
+    for (const variant of ["sidebar", "strip"] as const) {
+      const html = renderToStaticMarkup(createElement(AdPanel, { slides: [slide({})], settings: DEFAULT_SETTINGS, variant, preview: true }));
+      expect(html).toContain("Sponsored");
+      expect(html).toContain('rel="noopener noreferrer sponsored"');
+      expect(renderToStaticMarkup(createElement(AdPanel, { slides: [], settings: DEFAULT_SETTINGS, variant }))).toBe("");
+    }
+  });
+});

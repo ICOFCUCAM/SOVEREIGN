@@ -13,6 +13,8 @@ import { JourneyBar } from "./GuidedJourney";
 import CommandPalette, { noteRecent } from "./CommandPalette";
 import { guideState, markVisited, onGuideChange, setTipsHidden, ESSENTIALS } from "../lib/onboarding";
 import { DealSpine } from "./DealSpine";
+import { AdPanel, useAdSlides } from "./AdPanel";
+import { useDocumentRemote } from "../lib/documents/remote";
 
 // Role-aware console rail. The navigation is driven by the access policy:
 // founders, buyers, admins and superadmins see different command centers, and
@@ -50,6 +52,11 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Pages opened in this browser — the "Opened" marks in the Start-here guide.
   // A plan-gated page shows the upgrade screen instead, so it is not marked.
   useEffect(() => { if (!needsUpgrade(loc.pathname, role, plan)) { markVisited(loc.pathname); noteRecent(loc.pathname); } }, [loc.pathname, role, plan]);
+  // a quiet sponsored card at the foot of the sidebar (large screens only); hidden for the visit on request
+  const remote = useDocumentRemote();
+  const sidebarAds = useAdSlides(remote, "sidebar");
+  const [adHidden, setAdHidden] = useState(() => { try { return sessionStorage.getItem("exitos.ads.sidebar.hidden") === "1"; } catch { return false; } });
+  const hideAd = (): void => { setAdHidden(true); try { sessionStorage.setItem("exitos.ads.sidebar.hidden", "1"); } catch { /* this view only */ } };
   const [tipsHidden, setTipsHiddenState] = useState(() => guideState().tipsHidden);
   useEffect(() => onGuideChange(() => setTipsHiddenState(guideState().tipsHidden)), []);
   // A signed-in founder or buyer may move their own account to the other side; the database accepts only
@@ -199,6 +206,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <DealSpine items={rest} pinned={folded ? [] : pinned} isActive={isActive} isLocked={(to) => needsUpgrade(basePath(to), role, plan)}
               collapsed={folded} onNavigate={() => setNavOpen(false)} pathname={loc.pathname} role={role} />
           </nav>
+          {!folded && !adHidden && <AdPanel variant="sidebar" slides={sidebarAds.slides} settings={sidebarAds.settings} remote={remote} onHide={hideAd} className="mx-3 mb-3 hidden lg:block" />}
           <div className={`border-t border-ex-hair ${folded ? "flex justify-center py-3" : "px-4 py-3"}`}>
             {/* the account: initials in a bronze ring beside the address, then role and plan */}
             <div className="flex items-center gap-2.5" title={folded ? `${session?.email ?? ""} · ${ROLE_LABEL[role]} · ${plan}` : undefined}>
