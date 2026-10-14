@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
-import { CloseIcon, LockIcon, Toast } from "../lib/ui";
-import { homeFor, navForRole, needsUpgrade, GROUP_ORDER, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
+import { CloseIcon, Toast } from "../lib/ui";
+import { homeFor, navForRole, needsUpgrade, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
 import { ExchangeMark } from "./ExchangeMark";
 import InstitutionalRibbon from "./InstitutionalRibbon";
 import LayerBar from "./LayerBar";
@@ -10,7 +10,8 @@ import LayerSubNav from "./LayerSubNav";
 import TermsDialog from "./TermsDialog";
 import PageTip from "./PageTip";
 import CommandPalette, { noteRecent } from "./CommandPalette";
-import { guideState, markVisited, onGuideChange, setGuideHidden, setTipsHidden, ESSENTIALS, loadAllToolsOpen, saveAllToolsOpen } from "../lib/onboarding";
+import { guideState, markVisited, onGuideChange, setGuideHidden, setTipsHidden, ESSENTIALS } from "../lib/onboarding";
+import { DealSpine } from "./DealSpine";
 
 // Role-aware console rail. The navigation is driven by the access policy:
 // founders, buyers, admins and superadmins see different command centers, and
@@ -97,15 +98,25 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return loc.pathname === to && loc.hash === "";
   };
 
-  // Founders get a short Essentials list first; the rest sits under "All
-  // tools". Operators and buyers keep the full list (it is already short).
+  // Founders keep a short "Start here" list pinned above the stages; every other tool hangs on the exit
+  // spine, grouped by stage (DealSpine). Operators and buyers have no pinned list.
   const shortMenu = role === "founder";
-  const essentials = shortMenu ? ESSENTIALS.map((to) => items.find((n) => n.to === to)).filter((n): n is NavItem => !!n) : [];
+  const pinned = shortMenu ? ESSENTIALS.map((to) => items.find((n) => n.to === to)).filter((n): n is NavItem => !!n) : [];
   const rest = shortMenu ? items.filter((n) => !ESSENTIALS.includes(n.to)) : items;
-  const [toolsOpen, setToolsOpen] = useState(loadAllToolsOpen);
-  // The current page is always visible in the menu.
-  const currentInRest = shortMenu && rest.some((n) => basePath(n.to) === loc.pathname) && !ESSENTIALS.includes(loc.pathname);
-  useEffect(() => { if (currentInRest) setToolsOpen(true); }, [currentInRest]);
+
+  // the rail folds to its spine (button, or "[" anywhere outside a text field); remembered in this browser
+  const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem("exitos.rail.collapsed.v1") === "1"; } catch { return false; } });
+  const toggleRail = React.useCallback(() => setCollapsed((c) => { try { localStorage.setItem("exitos.rail.collapsed.v1", c ? "0" : "1"); } catch { /* not remembered */ } return !c; }), []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      const t = e.target as HTMLElement | null;
+      if (e.key !== "[" || e.metaKey || e.ctrlKey || e.altKey || (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) return;
+      e.preventDefault(); toggleRail();
+    };
+    addEventListener("keydown", onKey); return () => removeEventListener("keydown", onKey);
+  }, [toggleRail]);
+  const folded = collapsed && !navOpen;   // the phone drawer always opens in full
+
   // the menu keeps the current page in sight: its entry scrolls into the menu's view (not the page's) when the
   // page changes, so a page opened from the palette or a link is marked where the reader can see it
   const menu = React.useRef<HTMLElement>(null);
@@ -115,50 +126,20 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       if (!nav || !cur) return;
       const n = nav.getBoundingClientRect(), c = cur.getBoundingClientRect();
       if (c.top < n.top + 12 || c.bottom > n.bottom - 40) nav.scrollTop += c.top - n.top - n.height / 3; // clear of the faded edges
-    }, 80);
+    }, 120);
     return () => clearTimeout(t);
-  }, [loc.pathname, toolsOpen]);
-
-  const toggleTools = (): void => { const v = !toolsOpen; setToolsOpen(v); saveAllToolsOpen(v); };
-  const toolsId = "console-all-tools";
-
-  const groups = rest.reduce<Record<string, NavItem[]>>((acc, item) => {
-    (acc[item.group] = acc[item.group] ?? []).push(item);
-    return acc;
-  }, {});
-
-  const renderItem = (n: NavItem): React.ReactNode => {
-    const active = isActive(n.to);
-    const locked = needsUpgrade(basePath(n.to), role, plan);
-    return (
-      <Link
-        key={`${n.to}-${n.group}`}
-        to={locked ? "/console/upgrade" : n.to}
-        aria-current={active ? "page" : undefined}
-        onClick={() => setNavOpen(false)}
-        className={`flex items-center justify-between rounded-md px-3 py-2 text-[13px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 ${active
-          ? "bg-deal-600/20 text-white ring-1 ring-deal-400/40"
-          : "text-white/70 hover:bg-white/5 hover:text-white"}`}
-      >
-        <span className="min-w-0">
-          <span className={`block ${locked ? "text-white/45" : ""}`}>{n.label}</span>
-          {n.name && !n.label.toLowerCase().includes(n.name.toLowerCase()) && <span className={`block text-[10.5px] font-normal ${locked ? "text-white/35" : "text-white/50"}`}>{n.name}</span>}
-        </span>
-        {locked && <span title="Upgrade to Pro" className="flex shrink-0 items-center gap-1 rounded-sm px-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40 ring-1 ring-white/10"><LockIcon size={9} />Pro</span>}
-      </Link>
-    );
-  };
+  }, [loc.pathname]);
 
   const subtitle = role === "buyer" ? "Buyer Access" : role === "admin" || role === "superadmin" ? "Operator Console" : "Founder Acquisition Suite";
 
   // the mark leads home, as a reader expects of a product's logo
   const Brand = (
     <Link to={homeFor(role)} aria-label={`ExitOS ${subtitle} — home`} className="flex items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
-      <ExchangeMark size={32} />
-      <div className="leading-tight">
-        <div className="text-sm font-bold tracking-tight text-white">ExitOS</div>
-        <div className="text-[10px] uppercase tracking-[0.22em] text-white/55">{subtitle}</div>
-      </div>
+      <ExchangeMark size={folded ? 30 : 32} />
+      {!folded && <div className="leading-tight">
+        <div className="text-sm font-bold tracking-tight text-ex-ivory">ExitOS</div>
+        <div className="font-mono text-[8.5px] uppercase tracking-[0.24em] text-ex-bronze/80">{role === "buyer" ? "Buyer Access" : role === "admin" || role === "superadmin" ? "Operator Console" : "Founder Suite"}</div>
+      </div>}
     </Link>
   );
 
@@ -167,7 +148,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {/* the first Tab: straight past the sidebar and the three header bars to the page */}
       <a href="#workspace" onClick={(e) => { e.preventDefault(); workspace.current?.focus(); }}
         className="sr-only z-[60] rounded-md bg-deal-700 px-4 py-2.5 text-[13px] font-semibold text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-300">Skip to content</a>
-      <div aria-hidden className="h-1 w-full bg-gradient-to-r from-deal-700 via-deal-500 to-loi-500" />
+      <div aria-hidden className="h-px w-full bg-gradient-to-r from-ex-bronze/20 via-ex-bronze to-ex-bronze/20" />
 
       {/* Mobile top bar */}
       <header className="flex items-center gap-3 border-b border-white/10 bg-ink-900/80 px-4 py-3 lg:hidden">
@@ -182,73 +163,54 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {navOpen && <div className="fixed inset-0 z-30 bg-black/60 lg:hidden" aria-hidden onClick={() => setNavOpen(false)} />}
 
         <aside ref={drawer}
-          className={`fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-white/10 bg-ink-900/95 transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 lg:bg-ink-900/70 ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
+          className={`fixed inset-y-0 left-0 z-40 flex w-[264px] shrink-0 flex-col border-r border-ex-hair bg-[#121311] transition-[transform,width] duration-200 lg:static lg:z-auto lg:translate-x-0 ${folded ? "lg:w-[68px]" : ""} ${navOpen ? "translate-x-0" : "-translate-x-full"}`}
+          style={{ backgroundImage: "linear-gradient(180deg, rgba(180,154,117,0.06), transparent 160px), radial-gradient(120% 60% at 0% 100%, rgba(180,154,117,0.05), transparent 60%)" }}
           aria-label="Sidebar"
         >
-          <div className="flex items-center justify-between px-5 py-5">
+          <div className={`flex items-center ${folded ? "flex-col gap-3 px-2 py-4" : "justify-between px-4 py-4"}`}>
             {Brand}
             <button onClick={() => setNavOpen(false)} aria-label="Close navigation menu" className="rounded p-1 text-white/50 hover:text-white lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400"><CloseIcon /></button>
+            <button type="button" onClick={toggleRail} aria-label={folded ? "Expand the menu" : "Collapse the menu to its spine"} aria-keyshortcuts="[" title={folded ? "Expand ( [ )" : "Collapse ( [ )"}
+              className="hidden rounded-[3px] p-1.5 text-white/40 ring-1 ring-white/10 transition hover:text-ex-bronze hover:ring-ex-bronze/40 lg:block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">
+              <svg aria-hidden width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="1" /><path d="M9 4v16" />{folded ? <path d="m13 10 2 2-2 2" /> : <path d="m16 10-2 2 2 2" />}</svg>
+            </button>
           </div>
           {/* go to any page by name: the command palette (⌘K / Ctrl+K) */}
-          <div className="px-3 pb-2">
-            <button type="button" onClick={() => setPaletteOpen(true)} aria-keyshortcuts="Meta+K Control+K"
-              className="flex w-full items-center gap-2.5 rounded-md bg-white/[0.04] px-3 py-2 text-left text-[12.5px] text-white/55 ring-1 ring-white/10 transition hover:bg-white/[0.07] hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
-              <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-              <span className="flex-1">Go to a page</span>
-              <kbd className="rounded border border-white/15 px-1.5 font-mono text-[10px] text-white/45">{typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd>
+          <div className={folded ? "flex justify-center pb-2" : "px-3 pb-3"}>
+            <button type="button" onClick={() => setPaletteOpen(true)} aria-keyshortcuts="Meta+K Control+K" aria-label={folded ? "Go to a page" : undefined} title={folded ? "Go to a page (⌘K)" : undefined}
+              className={`flex items-center gap-2.5 rounded-[3px] bg-black/30 text-left text-[12px] text-white/50 ring-1 ring-white/[0.08] transition hover:text-white/80 hover:ring-ex-bronze/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze ${folded ? "p-2" : "w-full px-3 py-2"}`}>
+              <svg aria-hidden width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+              {!folded && <><span className="flex-1">Go to a page</span>
+              <kbd className="rounded-[2px] border border-white/10 px-1.5 font-mono text-[9.5px] text-white/40">{typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd></>}
             </button>
           </div>
           {/* the menu fades at its scrolling edges instead of cutting an item in half; a hairline scrollbar */}
-          <nav ref={menu} aria-label="Console" className="ex-navscroll flex-1 overflow-y-auto px-3 py-2">
-            {shortMenu && (
-              <div className="mb-4">
-                <div className="px-3 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/55">Essentials</div>
-                <div className="space-y-1">{essentials.map(renderItem)}</div>
-                <button type="button" onClick={toggleTools} aria-expanded={toolsOpen} aria-controls={toolsId}
-                  className="mt-3 flex w-full items-center justify-between rounded-md px-3 py-2 text-[12px] font-semibold text-white/70 ring-1 ring-white/10 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">
-                  <span>All tools ({rest.length})</span>
-                  <span aria-hidden className={`inline-block transition-transform ${toolsOpen ? "rotate-180" : ""}`}>▾</span>
-                </button>
-              </div>
-            )}
-            <div id={toolsId} hidden={shortMenu && !toolsOpen}>
-            {GROUP_ORDER.filter((g) => groups[g]).map((group) => (
-              <div key={group} className="mb-4">
-                <div className="px-3 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-white/55">{group}</div>
-                <div className="space-y-1">
-                  {groups[group]!.map(renderItem)}
-                </div>
-              </div>
-            ))}
-            </div>
+          <nav ref={menu} aria-label="Console" className={`ex-navscroll flex-1 overflow-y-auto py-2 ${folded ? "px-1" : "px-3"}`}>
+            <DealSpine items={rest} pinned={folded ? [] : pinned} isActive={isActive} isLocked={(to) => needsUpgrade(basePath(to), role, plan)}
+              collapsed={folded} onNavigate={() => setNavOpen(false)} pathname={loc.pathname} />
           </nav>
-          <div className="border-t border-white/10 px-4 py-3">
-            {/* the account: initials in a ring beside the address */}
-            <div className="flex items-center gap-2.5">
-              <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-deal-600/20 font-mono text-[10px] font-semibold uppercase text-deal-200 ring-1 ring-deal-400/40">
+          <div className={`border-t border-ex-hair ${folded ? "flex justify-center py-3" : "px-4 py-3"}`}>
+            {/* the account: initials in a bronze ring beside the address, then role and plan */}
+            <div className="flex items-center gap-2.5" title={folded ? `${session?.email ?? ""} · ${ROLE_LABEL[role]} · ${plan}` : undefined}>
+              <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ex-bronze/10 font-mono text-[10px] font-semibold uppercase text-ex-ivory ring-1 ring-ex-bronze/50">
                 {(session?.email ?? "?").split("@")[0].split(/[._-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("") || "?"}
               </span>
-              <div className="min-w-0 truncate text-xs font-medium text-white/80">{session?.email}</div>
+              {!folded && <div className="min-w-0">
+                <div className="truncate text-xs font-medium text-white/80">{session?.email}</div>
+                <div className="mt-0.5 flex items-center gap-1.5 font-mono text-[8.5px] uppercase tracking-[0.18em]">
+                  <span className="text-white/45">{ROLE_LABEL[role]}</span><span aria-hidden className="text-white/20">·</span>
+                  <span className={plan === "pro" ? "text-ex-bronze" : plan === "starter" ? "text-loi-300" : "text-white/45"}>{plan}</span>
+                </div>
+              </div>}
             </div>
-            <div className="mb-2 mt-2 flex items-center gap-1.5 text-[10px] text-white/50">
-              <span className="rounded bg-white/10 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-white/70">{ROLE_LABEL[role]}</span>
-              <span className={`rounded px-1.5 py-0.5 font-semibold uppercase tracking-wide ${plan === "pro" ? "bg-deal-600/25 text-deal-300" : plan === "starter" ? "bg-loi-500/20 text-loi-300" : "bg-white/10 text-white/55"}`}>{plan}</span>
-            </div>
-            <button type="button" onClick={() => setTermsOpen(true)}
-              className="mb-2 block rounded text-xs font-semibold text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">Plain-language terms</button>
-            {tipsHidden && (
-              <button type="button" onClick={() => setTipsHidden(false)}
-                className="mb-2 block rounded text-xs font-semibold text-white/70 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">Show page tips</button>
-            )}
-            {showGuideLink && (
-              <Link to={role === "buyer" ? "/console/buyer-portal" : "/console"} onClick={() => setGuideHidden(false)}
-                className="mb-2 block text-xs font-semibold text-white/70 hover:text-white">Show the Start-here guide</Link>
-            )}
-            {plan !== "pro" && (role === "founder" || role === "buyer") && (
-              <Link to="/console/upgrade" className="mb-2 block text-xs font-semibold text-deal-300 hover:text-deal-200">Upgrade to Pro →</Link>
-            )}
-            <button onClick={() => { signOut(); nav("/"); }} className="rounded text-xs font-semibold text-white/60 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400">Sign out</button>
-            <a href="/" className="ml-3 text-xs font-semibold text-white/45 hover:text-white/70">Home</a>
+            {!folded && <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium">
+              <button type="button" onClick={() => setTermsOpen(true)} className="rounded text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">Terms</button>
+              {tipsHidden && <button type="button" onClick={() => setTipsHidden(false)} className="rounded text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">Page tips</button>}
+              {showGuideLink && <Link to={role === "buyer" ? "/console/buyer-portal" : "/console"} onClick={() => setGuideHidden(false)} className="text-white/55 hover:text-white">Start-here guide</Link>}
+              {plan !== "pro" && (role === "founder" || role === "buyer") && <Link to="/console/upgrade" className="text-ex-bronze hover:text-ex-ivory">Upgrade →</Link>}
+              <button onClick={() => { signOut(); nav("/"); }} className="rounded text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">Sign out</button>
+              <a href="/" className="text-white/35 hover:text-white/70">Home</a>
+            </div>}
           </div>
         </aside>
 

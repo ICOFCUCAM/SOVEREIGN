@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ExchangeLockup } from "./ExchangeMark";
 import { useI18n, LOCALES } from "../lib/i18n";
 
@@ -171,6 +171,16 @@ const useInkUnder = (): boolean => {
 
 export const MarketingChrome: React.FC<{ active?: string; children: React.ReactNode }> = ({ active, children }) => {
   const nav = useNavigate();
+  const loc = useLocation();
+  // the mark always lands on the hero: from elsewhere on the homepage it scrolls back to the top (smoothly,
+  // unless the reader asked for reduced motion), and from another page it opens the homepage at its top
+  const goHome = (): void => {
+    const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (loc.pathname === "/") {
+      if (loc.hash) nav("/", { replace: true });
+      scrollTo({ top: 0, behavior: smooth ? "smooth" : "auto" });
+    } else { nav("/"); requestAnimationFrame(() => scrollTo({ top: 0 })); }
+  };
   const { t } = useI18n();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const ink = useInkUnder() && !menuOpen;
@@ -189,7 +199,7 @@ export const MarketingChrome: React.FC<{ active?: string; children: React.ReactN
       <header className={`sticky top-0 z-40 border-b backdrop-blur transition-[color,background-color,border-color,box-shadow] duration-200 motion-reduce:transition-none ${ink ? "border-white/10 bg-ex-1/85 text-white" : "border-[#E7E1D7] bg-[#F7F4EF]/[0.94]"} ${raised ? (ink ? "shadow-[0_10px_30px_-18px_rgba(0,0,0,0.9)]" : "shadow-[0_10px_30px_-18px_rgba(36,37,34,0.45)]") : ""}`}>
         <div className={`${WRAP} grid min-h-[72px] grid-cols-[1fr_auto] items-center gap-5 lg:grid-cols-[1fr_auto_1fr]`}>
           <div className="flex items-center gap-5">
-            <button onClick={() => nav("/")} aria-label="ExitOS — home"><ExchangeLockup size={34} dark={ink} /></button>
+            <button onClick={goHome} aria-label="ExitOS — home"><ExchangeLockup size={34} dark={ink} /></button>
             <span className={`hidden border-l pl-5 font-mono text-[10px] uppercase tracking-[0.3em] xl:inline ${ink ? "border-white/15 text-[#E8E0D2]/60" : "border-slate-300 text-slate-600"}`}>A Sovereign Infrastructure</span>
           </div>
           <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
