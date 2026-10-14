@@ -62,6 +62,8 @@ const VIEWS_KEY = "exitos.radar-saved-views.v1";
 const SHORTLIST_KEY = "exitos.radar-shortlist.v1";
 const readJson = <T,>(key: string, fallback: T): T => { try { return (JSON.parse(localStorage.getItem(key) ?? "null") as T | null) ?? fallback; } catch { return fallback; } };
 const writeJson = (key: string, v: unknown): void => { try { localStorage.setItem(key, JSON.stringify(v)); } catch { /* kept for this visit */ } };
+// a score's colour by tier: strong green, middling bronze, weak grey
+const scoreTone = (n: number): string => n >= 70 ? "text-[#2F6B3F] decoration-[#2F6B3F]/40" : n >= 40 ? "text-[#9A6A12] decoration-[#9A6A12]/40" : "text-[#756E63] decoration-[#756E63]/40";
 const COMPARE_MAX = 3;
 
 const AcquisitionRadar: React.FC = () => {
@@ -239,10 +241,10 @@ const AcquisitionRadar: React.FC = () => {
       </PageHeader>
 
       <section aria-label="Mandate summary" className="grid grid-cols-1 gap-px border border-xo-line bg-xo-line sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-xo-panel"><Metric label="Target sectors" value={String(sectors.length)} sub="in your mandate" /></div>
-        <div className="bg-xo-panel"><Metric label="Sector deal volume" value={watchVolume.toLocaleString()} sub="indexed acquisitions" /></div>
-        <div className="bg-xo-panel"><Metric label="Active acquirers" value={String(maxActiveBuyers)} sub="competition · your space" /></div>
-        <div className="bg-xo-panel"><Metric label="Qualified opportunities" value={String(qualified.length)} sub={`of ${plural(listings.length, "listing")} · ${founderCount} from founders, ${seedCount} demo/catalog`} /></div>
+        <div className="xo-tile bg-xo-panel"><Metric label="Target sectors" value={String(sectors.length)} sub="in your mandate" /></div>
+        <div className="xo-tile bg-xo-panel"><Metric label="Sector deal volume" value={watchVolume.toLocaleString()} sub="indexed acquisitions" /></div>
+        <div className="xo-tile bg-xo-panel"><Metric label="Active acquirers" value={String(maxActiveBuyers)} sub="competition · your space" /></div>
+        <div className="xo-tile bg-xo-panel"><Metric label="Qualified opportunities" value={String(qualified.length)} sub={`of ${plural(listings.length, "listing")} · ${founderCount} from founders, ${seedCount} demo/catalog`} /></div>
       </section>
 
       <RegistryTape items={tape} asOf={AS_OF} />
@@ -378,7 +380,7 @@ const AcquisitionRadar: React.FC = () => {
           {shown.length === 0 && <p role="status" className="px-4 py-8 text-center text-[13px] text-xo-muted">{tab === "shortlist" && shortlistCount === 0 ? "Your shortlist is empty. Follow a listing to keep it here, with your own notes." : "No listing matches these filters."}</p>}
           <ol className={view === "grid" ? "grid gap-px bg-xo-line sm:grid-cols-2" : "divide-y divide-xo-line"}>
             {shown.map(({ listing: l, match }) => (
-              <li key={l.id} className="bg-xo-panel px-4 py-4">
+              <li key={l.id} className="bg-xo-panel px-4 py-4 transition-colors hover:bg-[#FBF6EC]">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h3 className="text-[16px] font-semibold">
                     {l.code} <span className="text-[12px] font-normal text-xo-muted">· {l.publicView.sector} · {l.publicView.region === "Other" && l.facts ? "Global" : l.publicView.region}</span>
@@ -389,7 +391,7 @@ const AcquisitionRadar: React.FC = () => {
                     {match.qualified && <span className="ml-2 border border-xo-verified/50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-verified">Qualified</span>}
                   </h3>
                   <span className="group/score relative">
-                    <button type="button" aria-describedby={`why-${l.id}`} className="rounded font-mono text-[22px] font-semibold tabular-nums text-xo-verified underline decoration-dotted decoration-xo-verified/40 underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">
+                    <button type="button" aria-describedby={`why-${l.id}`} className={`rounded font-mono text-[22px] font-semibold tabular-nums underline decoration-dotted underline-offset-4 ${scoreTone(match.score)} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action`}>
                       {match.score}%<span className="sr-only"> match</span>
                     </button>
                     <span id={`why-${l.id}`} role="tooltip" className="pointer-events-none absolute right-0 top-full z-20 mt-1 hidden w-72 rounded-[8px] border border-xo-line bg-xo-panel p-3 text-left text-[12px] shadow-[0_16px_36px_-18px_rgba(40,30,15,0.45)] group-hover/score:block group-focus-within/score:block">
@@ -539,7 +541,7 @@ const AcquisitionRadar: React.FC = () => {
             </tr></thead>
             <tbody>
               {([
-                ["Match", (x) => <span className="font-mono font-semibold text-xo-verified">{x.match.score}%</span>],
+                ["Match", (x) => <span className={`font-mono font-semibold ${scoreTone(x.match.score).split(" ")[0]}`}>{x.match.score}%</span>],
                 ["Criteria met", (x) => `${x.match.reasons.filter((r) => r.ok).length} of ${x.match.reasons.length}`],
                 ["Sector · region", (x) => `${x.listing.publicView.sector} · ${x.listing.publicView.region === "Other" && x.listing.facts ? "Global" : x.listing.publicView.region}`],
                 ["Stage", (x) => (x.listing.facts?.stage ? STAGE_LABEL[x.listing.facts.stage] : "—")],
