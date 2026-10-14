@@ -134,7 +134,7 @@ const MethodOptionRow: React.FC<{ o: MethodOption; selected: boolean; onSelect: 
     <input type="radio" name={name} checked={selected} onChange={onSelect} className="mt-1.5 h-4 w-4 accent-[#242522] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze" />
     <span className="min-w-0 flex-1">
       <span className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <span className="font-editorial text-[19px] leading-tight text-ex-graphite">{providerLabel(o.info.id)}</span>
+        <span className="font-display text-[24px] font-medium leading-tight text-ex-graphite">{providerLabel(o.info.id)}</span>
         <Where p={o.info} />
       </span>
       <span className="mt-1 block text-[13px] leading-snug text-ex-slate-ink">{o.info.verifies}</span>
@@ -164,6 +164,29 @@ const MethodDetail: React.FC<{ o: MethodOption; id: IdentityState; country: stri
     </div>
   );
 };
+
+/** A provider's seal: a typeset monogram in a fine bronze ring, not a borrowed logo. */
+const Seal: React.FC<{ p: ProviderInfo }> = ({ p }) => {
+  const mark = p.id === "stripe_identity" ? "S" : p.id === "fi_ftn" ? "FTN" : p.id === "fr_franceconnect" ? "FC" : p.id === "de_eid" ? "eID" : p.name.slice(0, p.name.length > 6 ? 2 : 1);
+  return (
+    <span aria-hidden className="relative grid h-14 w-14 shrink-0 place-items-center rounded-full border border-[#C9A86A]/70 text-[#7A6344]">
+      <span className="absolute inset-[4px] rounded-full border border-[#C9A86A]/25" />
+      <span className="font-display text-[22px] font-medium">{mark}</span>
+    </span>
+  );
+};
+
+/** A method offered for the country but not yet switched on: shown as a card, with no control. */
+const UnavailableCard: React.FC<{ o: MethodOption }> = ({ o }) => (
+  <li className="flex flex-wrap items-center gap-x-6 gap-y-3 border border-[#E2D9CA] bg-white/70 px-6 py-5 sm:flex-nowrap">
+    <Seal p={o.info} />
+    <div className="min-w-0 flex-1">
+      <div className="font-display text-[26px] font-medium leading-tight text-[#6F695F]">{providerLabel(o.info.id)}</div>
+      <p className="mt-1 text-[13px] leading-snug text-[#8A8378]">{o.info.verifies} · {o.info.region}</p>
+    </div>
+    <span className="shrink-0 rounded-full border border-[#D6CCBB] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8A8378]">Not yet available</span>
+  </li>
+);
 
 /** A method that cannot be used: one quiet line, no control. */
 const UnavailableRow: React.FC<{ o: MethodOption; reason: string }> = ({ o, reason }) => (
@@ -201,8 +224,8 @@ export const IdentityMethods: React.FC<{ id: IdentityState; country: string | un
           {selected && <MethodDetail o={selected} id={id} country={cc} state={id.stateOf(selected.info.id, true)} />}
         </fieldset>
       ) : (
-        <div role="status" className="border-l-2 border-ex-bronze bg-white/60 px-5 py-4">
-          <p className="font-editorial text-[19px] text-ex-graphite">No verification method is open for {countryName} yet</p>
+        <div role="status" className="border-l-2 border-[#C9A86A] bg-white/60 px-6 py-5">
+          <p className="font-display text-[24px] font-medium text-ex-graphite">No verification method is open for {countryName} yet</p>
           <p className="mt-1.5 max-w-[60ch] text-[13px] leading-relaxed text-ex-slate-ink">
             {id.hasServer
               ? "ExitOS has not yet completed its connection with the identity providers below, so none can be used today. You can prepare the company profile now; publishing waits until your identity is established."
@@ -214,7 +237,7 @@ export const IdentityMethods: React.FC<{ id: IdentityState; country: string | un
       {eligibleOff.length > 0 && (
         <section aria-labelledby="idm-off">
           <h4 id="idm-off" className={`text-[10.5px] font-semibold uppercase tracking-[0.18em] ${MUTED}`}>Offered for {countryName} · not yet available</h4>
-          <ul className="mt-2">{eligibleOff.map((o) => <UnavailableRow key={o.info.id} o={o} reason="Not yet available" />)}</ul>
+          <ul className="mt-3 space-y-3">{eligibleOff.map((o) => <UnavailableCard key={o.info.id} o={o} />)}</ul>
         </section>
       )}
 
@@ -240,7 +263,7 @@ export const IdentityStatusCard: React.FC<{ identity: SellerIdentity | null }> =
     <div className={`text-[10.5px] font-semibold uppercase tracking-[0.18em] ${MUTED}`}>Seller identity</div>
     {identity ? (
       <>
-        <p className="mt-1 font-editorial text-[17px] text-ex-graphite">{identity.local ? "Marked for testing" : "Established"}</p>
+        <p className="mt-1 font-display text-[22px] font-medium text-ex-graphite">{identity.local ? "Marked for testing" : "Established"}</p>
         <p className="mt-0.5 text-[12px] text-ex-slate-ink">{providerLabel(identity.provider)} · {longDate(identity.verifiedAt)}{identity.until ? ` · until ${longDate(identity.until)}` : ""}</p>
         {identity.local && <p className="mt-1 text-[11.5px] text-ex-bronze-ink">Development server only. No provider was involved; the live exchange would refuse this listing.</p>}
       </>

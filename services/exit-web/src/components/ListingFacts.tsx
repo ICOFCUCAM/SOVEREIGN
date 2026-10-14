@@ -75,8 +75,8 @@ type ToneSet = (typeof TONES)[Tone];
 const Group: React.FC<{ letter: string; title: string; note: string; porcelain: boolean; T: ToneSet; children: React.ReactNode }> = ({ letter, title, note, porcelain, T, children }) => (
   <section aria-labelledby={`grp-${letter}`} className={porcelain ? "grid gap-6 border-t border-[#D9D0C1] pt-8 lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10" : "space-y-4 border-t border-xo-line pt-4"}>
     <header>
-      <div aria-hidden className={porcelain ? "font-editorial text-[15px] italic text-ex-bronze-ink" : "text-[11px] text-xo-faint"}>{letter}</div>
-      <h3 id={`grp-${letter}`} className={porcelain ? "mt-1 font-editorial text-[22px] leading-tight text-ex-graphite" : "text-[13px] font-semibold"}>{title}</h3>
+      <div aria-hidden className={porcelain ? "font-display text-[18px] italic text-ex-bronze-ink" : "text-[11px] text-xo-faint"}>{letter}</div>
+      <h3 id={`grp-${letter}`} className={porcelain ? "mt-1 font-display text-[27px] font-medium leading-tight text-ex-graphite" : "text-[13px] font-semibold"}>{title}</h3>
       <p className={`mt-1.5 text-[12.5px] leading-relaxed ${T.faint}`}>{note}</p>
     </header>
     <div className="min-w-0 space-y-6">{children}</div>
@@ -85,7 +85,7 @@ const Group: React.FC<{ letter: string; title: string; note: string; porcelain: 
 const Fixed: React.FC<{ k: string; v: string; hint?: string; porcelain: boolean; T: ToneSet }> = ({ k, v, hint, porcelain, T }) => (
   <div>
     <div className={T.label}>{k}</div>
-    <div className={porcelain ? "border-b border-[#D9D0C1] pb-2 font-editorial text-[18px] text-ex-graphite" : "font-mono text-[13px]"}>{v}</div>
+    <div className={porcelain ? "border-b border-[#D9D0C1] pb-2 font-display text-[22px] font-medium text-ex-graphite" : "font-mono text-[13px]"}>{v}</div>
     {hint && <span className={`mt-1 block text-[11px] ${T.faint}`}>{hint}</span>}
   </div>
 );

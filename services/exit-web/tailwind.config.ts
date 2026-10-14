@@ -119,6 +119,8 @@ export default {
         // the editorial serif already loaded in index.css (Source Serif 4) —
         // the marketing site's display headlines.
         editorial: ['"Source Serif 4"', "Georgia", "serif"],
+        // the listing desk's display face: a classical serif for headlines and names
+        display: ['"Cormorant Garamond"', '"Source Serif 4"', "Georgia", "serif"],
       },
     },
   },
