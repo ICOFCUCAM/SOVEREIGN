@@ -137,8 +137,8 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <Link to={homeFor(role)} aria-label={`ExitOS ${subtitle} — home`} className="flex items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze">
       <ExchangeMark size={folded ? 30 : 32} />
       {!folded && <div className="leading-tight">
-        <div className="text-sm font-bold tracking-tight text-ex-ivory">ExitOS</div>
-        <div className="font-mono text-[8.5px] uppercase tracking-[0.24em] text-ex-bronze/80">{role === "buyer" ? "Buyer Access" : role === "admin" || role === "superadmin" ? "Operator Console" : "Founder Suite"}</div>
+        <div className="font-display text-[22px] font-semibold leading-none tracking-tight text-ex-ivory">ExitOS</div>
+        <div className="mt-1 font-mono text-[8.5px] uppercase tracking-[0.24em] text-ex-bronze/80">{role === "buyer" ? "Buyer Access" : role === "admin" || role === "superadmin" ? "Operator Console" : "Founder Suite"}</div>
       </div>}
     </Link>
   );

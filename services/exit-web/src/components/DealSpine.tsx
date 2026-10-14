@@ -75,9 +75,9 @@ export const DealSpine: React.FC<Props> = ({ items, pinned, isActive, isLocked, 
       <li key={`${n.to}-${n.group}`} className="relative">
         {inStage && <span aria-hidden className={`absolute left-[-13px] top-1/2 h-px w-[9px] transition-colors ${active ? "bg-ex-bronze" : "bg-transparent"}`} />}
         <Link to={locked ? "/console/upgrade" : n.to} aria-current={active ? "page" : undefined} onClick={onNavigate} title={sub ?? undefined}
-          className={`group/row flex items-center gap-2 rounded-[3px] px-2.5 py-[7px] text-[12.5px] leading-tight transition focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze ${active
-            ? "bg-gradient-to-r from-ex-bronze/[0.16] to-transparent text-ex-ivory shadow-[inset_2px_0_0_0_#B49A75]"
-            : "text-white/60 hover:bg-white/[0.035] hover:text-white/90"}`}>
+          className={`group/row flex items-center gap-2 rounded-[8px] border px-2.5 py-[7px] text-[12.5px] leading-tight transition focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze ${active
+            ? "border-ex-bronze/60 bg-gradient-to-r from-ex-bronze/[0.18] to-ex-bronze/[0.04] text-ex-ivory"
+            : "border-transparent text-white/60 hover:bg-white/[0.035] hover:text-white/90"}`}>
           <span className="min-w-0 flex-1 truncate">
             <span className={locked ? "text-white/40" : ""}>{n.label}</span>
             {active && sub && <span className="mt-0.5 block truncate font-mono text-[9.5px] uppercase tracking-[0.16em] text-ex-bronze/80">{sub}</span>}

@@ -45,16 +45,20 @@ export const Section: React.FC<{
   className?: string;
   tone?: "ink" | "paper";
   level?: 2 | 3;
-}> = ({ title, eyebrow, right, foot, children, className = "", tone = "ink", level = 2 }) => {
+  icon?: React.ReactNode;     // a line icon beside the heading
+}> = ({ title, eyebrow, right, foot, children, className = "", tone = "ink", level = 2, icon }) => {
   const id = useId();
   const H = level === 2 ? "h2" : "h3";
   const paper = tone === "paper";
   return (
     <section aria-labelledby={id} className={`flex min-w-0 flex-col ${paper ? "bg-xo-paper text-xo-paper-text" : "bg-xo-panel text-xo-text"} ${className}`}>
       <header className={`flex flex-wrap items-end justify-between gap-x-3 gap-y-1 border-b px-4 pb-2 pt-3 ${paper ? "border-xo-paper-line" : "border-xo-line"}`}>
-        <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
+          {icon && <span aria-hidden className="shrink-0 text-xo-action">{icon}</span>}
+          <div className="min-w-0">
           {eyebrow && <div className={`text-[10px] font-semibold uppercase tracking-[0.16em] ${paper ? "text-xo-paper-muted" : "text-xo-faint"}`}>{eyebrow}</div>}
           <H id={id} className={`text-[14px] font-semibold tracking-tight ${paper ? "text-xo-paper-text" : "text-xo-text"}`}>{title}</H>
+          </div>
         </div>
         {right && <div className="flex items-center gap-2 text-[11px]">{right}</div>}
       </header>
@@ -139,13 +143,14 @@ export const PageHeader: React.FC<{
   description?: React.ReactNode;
   actions?: React.ReactNode;
   children?: React.ReactNode;
-}> = ({ eyebrow, title, badge, description, actions, children }) => (
+  serif?: boolean;            // the editorial display face for the title
+}> = ({ eyebrow, title, badge, description, actions, children, serif }) => (
   <header className="border border-xo-line bg-xo-ink px-4 py-3">
     <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
       <div className="min-w-0 max-w-[75ch]">
         <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-xo-brass">{eyebrow}</div>
         <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <h1 className="font-serif text-[24px] font-semibold tracking-tight text-xo-text">{title}</h1>
+          <h1 className={serif ? "font-display text-[34px] font-semibold leading-tight tracking-tight text-xo-text" : "font-serif text-[24px] font-semibold tracking-tight text-xo-text"}>{title}</h1>
           {badge}
         </div>
         {description && <p className="mt-1 text-[13px] text-xo-muted">{description}</p>}
