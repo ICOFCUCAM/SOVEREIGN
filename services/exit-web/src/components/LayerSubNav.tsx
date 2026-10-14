@@ -21,18 +21,18 @@ const LayerSubNav: React.FC = () => {
   if (items.length <= 1) return null;
 
   return (
-    <nav aria-label={`${layer.label} pages`} className="flex items-stretch ex-hscroll overflow-x-auto border-b border-white/10 bg-ex-1">
-      <span className="flex shrink-0 items-center border-r border-white/10 px-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-desk-champagne">{layer.label}</span>
+    <div className="flex items-stretch gap-px ex-hscroll overflow-x-auto border-b border-white/10 bg-ex-0/70 backdrop-blur-sm">
+      <span className="flex shrink-0 items-center border-r border-white/10 px-3 text-[8px] font-semibold uppercase tracking-[0.22em] text-desk-champagne">{layer.label}</span>
       {items.map((i) => {
         const on = pathname === i.to;
         return (
-          <Link key={i.to} to={i.to} aria-current={on ? "page" : undefined}
-            className={`shrink-0 border-r border-white/10 px-4 py-2.5 text-[12.5px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ex-bronze ${on ? "text-white shadow-[inset_0_-2px_0_0_#E2C07F]" : "text-white/70 hover:text-white"}`}>
+          <Link key={i.to} to={i.to}
+            className={`shrink-0 px-3 py-1 text-[10.5px] font-medium transition ${on ? "bg-white/[0.05] text-white" : "text-white/70 hover:text-white"}`}>
             {i.label}
           </Link>
         );
       })}
-    </nav>
+    </div>
   );
 };
 

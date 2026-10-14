@@ -17,6 +17,10 @@ import type { Region } from "@exit/engines";
 import { parseNumber } from "../lib/intake-fields";
 import { plural } from "../lib/labels";
 import { PageHeader, Section, ScrollRegion, ActionLink, Chip, Provenance, XO_INPUT, XO_LABEL } from "../components/xo";
+import coverEarth from "../assets/desk/earth-sunrise-720.webp";
+import coverCity from "../assets/desk/waterfront-cityscape-720.webp";
+import coverNetwork from "../assets/desk/global-network-720.webp";
+import coverSkyline from "../assets/desk/waterfront-skyline-720.webp";
 
 // ── ACQUISITION RADAR · BUYER COMMAND CENTER ────────────────────────
 // Page 04 of the ExitOS institutional redesign (docs/redesign/PAGE-04-
@@ -54,9 +58,9 @@ const MiniBars: React.FC<{ values: readonly number[]; title: string }> = ({ valu
   const max = Math.max(1, ...values);
   if (!values.length) return null;
   return (
-    <span title={title} className="flex h-14 shrink-0 items-end gap-[4px]">
+    <span title={title} className="flex h-12 shrink-0 items-end gap-[3px]">
       <span className="sr-only">{title}</span>
-      {values.slice(0, 10).map((v, i) => <span key={i} aria-hidden className={`${values.length < 5 ? "w-[8px]" : "w-[6px]"} rounded-t-[2px] bg-gradient-to-t from-[#9A7536] to-[#E2C07F]`} style={{ height: `${Math.max(10, (v / max) * 100)}%` }} />)}
+      {values.slice(0, 10).map((v, i) => <span key={i} aria-hidden className="w-[5px] rounded-t-[1px] bg-xo-action/70" style={{ height: `${Math.max(8, (v / max) * 100)}%` }} />)}
     </span>
   );
 };
@@ -73,6 +77,11 @@ const KpiTile: React.FC<{ icon: keyof typeof ICON; label: string; value: string;
     <MiniBars values={bars} title={barsTitle} />
   </div>
 );
+
+// listing cover art: one of the desk's pictures, chosen steadily by the listing id. Illustrative only: buyers
+// never see a company's own imagery before the NDA.
+const COVERS = [coverCity, coverSkyline, coverNetwork, coverEarth];
+const coverFor = (id: string): string => COVERS[[...id].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) % COVERS.length]!;
 
 type View = "list" | "grid";
 type SortKey = "match" | "newest" | "name";
@@ -286,12 +295,8 @@ const AcquisitionRadar: React.FC = () => {
           <ol className={view === "grid" ? "grid gap-px bg-xo-line sm:grid-cols-2" : "divide-y divide-xo-line"}>
             {shown.map(({ listing: l, match }) => (
               <li key={l.id} className={`bg-xo-panel px-4 py-4 ${view === "grid" ? "" : "sm:flex sm:gap-4"}`}>
-                {/* the product's own logo when it has one; anonymous founder listings never show one */}
-                {l.productMeta?.logoUrl && (
-                  <span className={`mb-3 grid shrink-0 place-items-center overflow-hidden rounded-[8px] border border-xo-line bg-white p-2 sm:mb-0 ${view === "grid" ? "h-16 w-16" : "h-[72px] w-[72px]"}`}>
-                    <img src={l.productMeta.logoUrl} alt={`${l.productMeta.productLine} logo`} loading="lazy" className="max-h-full max-w-full object-contain" />
-                  </span>
-                )}
+                <img src={coverFor(l.id)} alt="" aria-hidden title="Illustrative cover image" loading="lazy"
+                  className={view === "grid" ? "mb-3 h-32 w-full rounded-[6px] object-cover saturate-[0.85]" : "mb-3 hidden h-[88px] w-[124px] shrink-0 rounded-[6px] object-cover saturate-[0.85] sm:mb-0 sm:block"} />
                 <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h3 className="text-[16px] font-semibold">

@@ -5,6 +5,7 @@ import { CloseIcon, Toast } from "../lib/ui";
 import { homeFor, navForRole, needsUpgrade, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
 import { ExchangeMark } from "./ExchangeMark";
 import InstitutionalRibbon from "./InstitutionalRibbon";
+import LayerBar from "./LayerBar";
 import LayerSubNav from "./LayerSubNav";
 import TermsDialog from "./TermsDialog";
 import PageTip from "./PageTip";
@@ -134,7 +135,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // the mark leads home, as a reader expects of a product's logo
   const Brand = (
     <Link to={homeFor(role)} aria-label={`ExitOS ${subtitle} — home`} className="flex items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze">
-      <ExchangeMark tile={false} size={folded ? 30 : 34} className="text-desk-champagne" />
+      <ExchangeMark size={folded ? 30 : 32} />
       {!folded && <div className="leading-tight">
         <div className="font-display text-[22px] font-semibold leading-none tracking-tight text-ex-ivory">ExitOS</div>
         <div className="mt-1 font-mono text-[8.5px] uppercase tracking-[0.24em] text-ex-bronze/80">{role === "buyer" ? "Buyer Access" : role === "admin" || role === "superadmin" ? "Operator Console" : "Founder Suite"}</div>
@@ -216,6 +217,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <main ref={workspace} id="workspace" tabIndex={-1} className="relative flex-1 overflow-y-auto focus:outline-none">
           <div data-xo="dark" className="sticky top-0 z-30">
             <InstitutionalRibbon />
+            <LayerBar />
             <LayerSubNav />
           </div>
           {showStarterNotice && (
