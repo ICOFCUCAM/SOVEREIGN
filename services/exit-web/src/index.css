@@ -221,3 +221,14 @@ main :is(table, dl, time, figcaption, [data-edition], .tabular-nums) { font-vari
    focus programmatically (for screen readers) and draws no outline. */
 [data-page="listing-desk"] :is(a, button, summary, select, input, textarea, [tabindex]):focus-visible { outline: 2px solid #B49A75; outline-offset: 2px; }
 [data-page="listing-desk"] [tabindex="-1"]:focus, [data-page="listing-desk"] [tabindex="-1"]:focus-visible { outline: none; }
+
+/* The Acquisition Command Center's warm accents (look 6): champagne panel headers, gold-selected
+   chips, a gold rule and mark on the four mandate figures. Scores are tinted by tier in the page. */
+[data-page="acquisition-radar"] section > header { background: #F7F0E2; border-bottom-color: #E6D9BF; }
+[data-page="acquisition-radar"] fieldset button[aria-pressed="true"] { background: #FBF1DC; border-color: #B48737; color: #5A4318; }
+[data-page="acquisition-radar"] fieldset button[aria-pressed="true"] > span[aria-hidden] { color: #B48737; }
+[data-page="acquisition-radar"] .xo-tile { box-shadow: inset 0 2px 0 #C9A262; background: linear-gradient(180deg, #FFFBF2 0%, #FFFDF9 60%); }
+[data-page="acquisition-radar"] .xo-tile > div > div:first-child > span:first-child::before {
+  content: ""; display: inline-block; width: 22px; height: 22px; margin-right: 8px; vertical-align: -6px; border-radius: 999px;
+  background: radial-gradient(circle at 35% 30%, #FFF8E8, #F2E1BC); box-shadow: inset 0 0 0 1px #E2C98F;
+}
