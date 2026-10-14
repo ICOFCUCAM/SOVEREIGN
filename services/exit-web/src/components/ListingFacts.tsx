@@ -15,11 +15,31 @@ const Fact: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children 
   <div className="min-w-0"><dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-xo-faint">{k}</dt><dd className="mt-0.5 text-[12.5px] leading-snug text-xo-text">{children}</dd></div>
 );
 
+/** The key facts in one line, for a folded card: stage, asking price, model and base. */
+export const ListingFactsStrip: React.FC<{ facts: ListingFacts; className?: string }> = ({ facts: f, className = "" }) => {
+  const items: Array<[string, string]> = [
+    ...(f.stage ? [["Stage", STAGE_LABEL[f.stage]] as [string, string]] : []),
+    ["Asking", askingText(f)],
+    ...(f.models[0] ? [["Model", MODEL_LABEL[f.models[0]] + (f.models.length > 1 ? ` +${f.models.length - 1}` : "")] as [string, string]] : []),
+    ["Based in", f.basedIn || (f.region === "Other" ? "Global" : f.region)],
+  ];
+  return (
+    <dl className={`flex flex-wrap gap-x-5 gap-y-1 text-[12px] ${className}`}>
+      {items.map(([k, v]) => (
+        <div key={k} className="flex items-baseline gap-1.5">
+          <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-xo-faint">{k}</dt>
+          <dd className={k === "Asking" ? "font-mono font-semibold text-xo-text" : "text-xo-text"}>{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+};
+
 /** The facts a buyer reads on a listing card. */
-export const ListingFactsView: React.FC<{ facts: ListingFacts; className?: string }> = ({ facts: f, className = "" }) => (
+export const ListingFactsView: React.FC<{ facts: ListingFacts; className?: string; showSummary?: boolean }> = ({ facts: f, className = "", showSummary = true }) => (
   <div className={className}>
-    <p className="max-w-[80ch] text-[13px] leading-relaxed text-xo-muted">{f.summary}</p>
-    <dl className="mt-2.5 grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3 xl:grid-cols-4">
+    {showSummary && <p className="max-w-[80ch] text-[13px] leading-relaxed text-xo-muted">{f.summary}</p>}
+    <dl className={`${showSummary ? "mt-2.5 " : ""}grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3 xl:grid-cols-4`}>
       {f.stage && <Fact k="Stage">{STAGE_LABEL[f.stage]}</Fact>}
       {f.forSale.length > 0 && <Fact k="For sale">{f.forSale.map((x) => FOR_SALE_LABEL[x]).join(" · ")}</Fact>}
       {f.models.length > 0 && <Fact k="Business model">{f.models.map((x) => MODEL_LABEL[x]).join(" · ")}</Fact>}
