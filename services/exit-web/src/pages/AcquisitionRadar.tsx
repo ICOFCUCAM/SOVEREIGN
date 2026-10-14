@@ -12,6 +12,7 @@ import { captureDealEvent } from "../lib/deal-events";
 import { requestNda, submitOffer, startDeal, advanceDeal, saveMandate, myMandate } from "../lib/exit-api";
 import PublishComposer from "../components/PublishComposer";
 import { ListingFactsView, ListingFactsStrip } from "../components/ListingFacts";
+import { providerLabel } from "../lib/identity";
 import type { Region } from "@exit/engines";
 import { parseNumber } from "../lib/intake-fields";
 import { plural } from "../lib/labels";
@@ -198,6 +199,7 @@ const AcquisitionRadar: React.FC = () => {
                     {l.productMeta && <span className="ml-2 border border-xo-line px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-muted">{l.productMeta.category}</span>}
                     {listingOrigin(l) === "demo" && <Provenance kind="demo" className="ml-2">Demo listing</Provenance>}
                     {listingOrigin(l) === "catalog" && <Provenance kind="registry" className="ml-2">Product catalog</Provenance>}
+                    {l.verification && <span title={`Owner's identity verified with ${providerLabel(l.verification.provider)} on ${new Date(l.verification.verifiedAt).toLocaleDateString()}`} className="ml-2 border border-xo-verified/50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-verified">✓ Verified seller · {providerLabel(l.verification.provider)}</span>}
                     {match.qualified && <span className="ml-2 border border-xo-verified/50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-verified">Qualified</span>}
                   </h3>
                   <span className="font-mono text-[22px] font-semibold tabular-nums text-xo-verified">{match.score}%<span className="sr-only"> match</span></span>

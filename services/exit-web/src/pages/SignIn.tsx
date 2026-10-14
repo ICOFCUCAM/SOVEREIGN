@@ -134,11 +134,14 @@ const AppleMark = () => (
 const MicrosoftMark = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="13" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="13" width="10" height="10" fill="#00A4EF"/><rect x="13" y="13" width="10" height="10" fill="#FFB900"/></svg>
 );
-const PROVIDERS: ReadonlyArray<readonly [OAuthProvider, string, React.FC]> = [["google", "Google", GoogleMark], ["apple", "Apple", AppleMark], ["azure", "Microsoft", MicrosoftMark]];
+const LinkedInMark = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden><rect width="24" height="24" rx="3" fill="#0A66C2"/><path fill="#fff" d="M7.1 9.5h-2.8V19h2.8V9.5ZM5.7 5a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm13.6 8.7c0-2.6-1.4-4.4-3.9-4.4-1.3 0-2.2.7-2.6 1.4V9.5h-2.7V19h2.8v-4.7c0-1.2.3-2.4 1.8-2.4s1.6 1.4 1.6 2.5V19h2.8l.2-5.3Z"/></svg>
+);
+const PROVIDERS: ReadonlyArray<readonly [OAuthProvider, string, React.FC]> = [["linkedin_oidc", "LinkedIn", LinkedInMark], ["google", "Google", GoogleMark], ["azure", "Microsoft", MicrosoftMark], ["apple", "Apple", AppleMark]];
 const SOCIAL = "flex w-full items-center justify-center gap-2.5 rounded-[3px] border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[13px] font-semibold text-ex-ivory transition hover:border-ex-bronze/40 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze";
 const TEXT_LINK = "rounded text-[12px] font-semibold text-ex-bronze transition hover:text-ex-ivory focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze";
 
-// Sign-in: Google, Apple or Microsoft; e-mail and password with a reset; or a one-time e-mail link.
+// Sign-in: LinkedIn, Google, Microsoft or Apple; e-mail and password with a reset; or a one-time e-mail link.
 // Production builds go through Supabase Auth (OAuth, password grant, recover, OTP link); development
 // builds open a local session.
 const AccessForm: React.FC = () => {

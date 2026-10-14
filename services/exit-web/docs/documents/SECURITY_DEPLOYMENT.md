@@ -419,6 +419,28 @@ No storage object was created.
 - O-18: `net._http_response` is readable by API roles at the privilege level, but not exposed through the API.
 - O-19: non-party denials are written into another deal's audit trail, and there is no rate limit.
 
+## Seller identity before listing (Stripe Identity, national eIDs)
+
+Deployed 14 October 2026 to `qvjdivcdefuprnenedje`.
+
+**What is enforced, and where**
+- `exitos_identity_verifications` (migration `20261014160000`): one row per attempt. Clients read their own rows, and only the result columns (provider, status, country, failure, dates); the flow references (Stripe session id, OIDC state and nonce) are not granted to them. No client role may insert, update or delete.
+- Trigger `exitos_listings_identity_gate`: an insert or update of a listing by a signed-in account is refused unless that account holds a current verification (status `verified`, not expired). The server stamps `data.verification` with the method and date, overwriting anything a client sent. Withdrawing (delete) is never gated; server-side writes (no `auth.uid()`) are not gated.
+- Edge function `exit-identity` v1 (JWT verification on): reports which methods are switched on, starts a Stripe Identity session or a national-eID sign-in through an OIDC broker, completes the eID code exchange (issuer, audience, nonce, expiry checked) and re-reads Stripe sessions (metadata must name the caller). Writes use the service role. Secrets stay in the function environment.
+- ExitOS stores no document image, personal number or birth date: for eIDs only `sha256(issuer | subject)`.
+
+**Verified live**
+- `select public.exitos_selftest_identity_gate()` → **SELFTEST PASS (0 failed of 12)**: unverified, pending and expired accounts cannot list; nobody can record or upgrade their own verification; own rows only; flow references unreadable; the server stamp overrides a forged one on insert and update; delete and server writes ungated.
+- The existing live suites re-run after deployment: NDA lifecycle 32/32, exchange state 16/16, transactions 25/25, deal end-to-end 20/20.
+- HTTP: an unauthenticated call to `exit-identity` returns 401.
+
+**Not yet operational (configuration, not code)**
+- No method is switched on: `STRIPE_SECRET_KEY` and the broker settings (`IDENTITY_BROKER_ISSUER`, `IDENTITY_BROKER_CLIENT_ID`, `IDENTITY_BROKER_CLIENT_SECRET`, `IDENTITY_REDIRECT_URI`) are not set, so the function reports every method unavailable and the page shows each as "Not yet available". Consequence today: **no account can create a live listing** until a method is switched on and the founder verifies.
+- Not tested: a successful Stripe session or eID sign-in (needs the provider accounts), and an authenticated browser call from the deployed site (CORS preflight with JWT verification on).
+- The default `acr_values` are Criipto's; another broker needs `IDENTITY_ACR_<ID>` per eID. German eID, FranceConnect and Smart-ID have no default and stay unavailable until one is set.
+
+**Rollback**: see the header of `20261014160000_exitos_identity_verification.sql`; `drop function public.exitos_selftest_identity_gate();` removes the self-test.
+
 ## Rollback
 - **End-to-end self-test (deliverable 6):** `drop function public.exitos_selftest_deal_end_to_end();`
 - **Transactions (deliverable 6):** the ordered statements in the header of `20261014140000_exitos_transactions.sql`. Restore the two buyer functions first, then drop the transaction objects. Any transaction data is lost; export it first if any exists.

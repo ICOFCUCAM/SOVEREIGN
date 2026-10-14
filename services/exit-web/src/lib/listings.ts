@@ -38,8 +38,12 @@ export interface Listing {
   readonly ownerAccountId?: string;      // the founder who listed it — drives owner-scoped write RLS (never shown publicly)
   readonly productMeta?: ListingProductMeta; // present for named-product (catalog) listings
   readonly facts?: ListingFacts;         // what buyers read on the card: stage, what is for sale, model, stack, markets, asking price
+  readonly verification?: ListingVerification; // stamped by the server from the owner's identity verification; never set by a client
   readonly publicView: ListingPublicView;
 }
+
+/** How the owner proved their identity, as the database stamps it on the listing. */
+export interface ListingVerification { readonly provider: string; readonly verifiedAt: string }
 
 export interface ListingPublicView {
   readonly sector: string;               // ExitOS sector
@@ -73,6 +77,10 @@ export function normalizeListing(raw: unknown): Listing {
     ...(r.ownerAccountId ? { ownerAccountId: String(r.ownerAccountId) } : {}),
     ...(r.productMeta ? { productMeta: r.productMeta as ListingProductMeta } : {}),
     ...((): { facts?: ListingFacts } => { const f = normalizeFacts(r.facts); return f ? { facts: f } : {}; })(),
+    ...((): { verification?: ListingVerification } => {
+      const v = r.verification as { provider?: unknown; verifiedAt?: unknown } | undefined;
+      return v && typeof v.provider === "string" && typeof v.verifiedAt === "string" ? { verification: { provider: v.provider, verifiedAt: v.verifiedAt } } : {};
+    })(),
     publicView: {
       sector: String(pv.sector ?? "Other"), region: pv.region as Region,
       ...(revenueBandV ? { revenueBand: revenueBandV } : {}),

@@ -27,11 +27,12 @@ for f in $M/0001_exitos_backend.sql $M/0002_exitos_ownership.sql $M/0003_exitos_
          $M/20261014120000_exitos_nda_lifecycle.sql $M/20261014120100_exitos_nda_lifecycle_selftest.sql \
          $M/20261014100100_exitos_exchange_state_selftest.sql $M/20261014110100_exit_data_room_selftest.sql \
          $M/20261014130000_exitos_offer_terms_guard.sql $M/20261014140000_exitos_transactions.sql $M/20261014140100_exitos_transactions_selftest.sql \
-         $M/20261014150000_exitos_deal_end_to_end_selftest.sql; do
+         $M/20261014150000_exitos_deal_end_to_end_selftest.sql \
+         $M/20261014160000_exitos_identity_verification.sql $M/20261014160100_exitos_identity_verification_selftest.sql; do
   $Q -d $DB -f "$f" >/dev/null 2>/tmp/nda-mig.err || { echo "migration failed: $f"; cat /tmp/nda-mig.err; exit 1; }
 done
 status=0
-for fn in exitos_selftest_nda_lifecycle exitos_selftest_exchange_state exit_selftest_data_room exitos_selftest_transaction_lifecycle exitos_selftest_deal_end_to_end; do
+for fn in exitos_selftest_nda_lifecycle exitos_selftest_exchange_state exit_selftest_data_room exitos_selftest_transaction_lifecycle exitos_selftest_deal_end_to_end exitos_selftest_identity_gate; do
   res=$(psql -d $DB -tA -c "select public.$fn()" 2>&1 || true)
   echo "$res" | sed 's/^ERROR: *//' | grep -v '^CONTEXT' | grep -E "^SELFTEST|^f " || echo "$fn did not complete: $(echo "$res" | head -3)"
   echo "$res" | grep -q "SELFTEST PASS" || status=1

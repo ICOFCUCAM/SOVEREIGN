@@ -912,3 +912,21 @@ The product as a whole is not production-ready until:
 - Dispatch is deployed for production PDFs (O-5);
 - counsel review exists for any legal instrument offered beyond a brief or draft (O-6).
 
+
+
+## 15. Increment report — seller identity and the listing desk
+
+**Scope.** Founders establish their identity before a company can be listed. The listing flow becomes a dedicated three-stage page (Identity, Company profile, Review and publish), and the exchange shows listing details and a verified-seller badge.
+
+**Files**
+- Database: `supabase/migrations/20261014160000_exitos_identity_verification.sql`, `…160100_…_selftest.sql`; `supabase/tests/nda/run.sh` runs the new self-test.
+- Server: `supabase/functions/exit-identity/index.ts`.
+- Web: `src/lib/identity.ts` (methods, `pathwayState`, client calls), `src/components/IdentityGate.tsx` (flow hook, pathways, status, development tools), `src/components/ListingDesk.tsx` (the desk), `src/components/ListingFacts.tsx` (grouped profile form, porcelain tone), `src/lib/listing-facts.ts`, `src/lib/listings.ts` (`verification` stamp), `src/pages/Intake.tsx`, `src/pages/AcquisitionRadar.tsx` (badge), `src/pages/SignIn.tsx` and `src/lib/email-auth.ts` (LinkedIn sign-in button).
+- Tests: `src/lib/identity.test.ts`, `src/components/IdentityGate.test.tsx`, `src/lib/listing-facts.test.ts`.
+
+**Results**
+- Local: web 68 files, 413 tests pass; lint, typecheck and build clean; database suites 6/6 pass (identity gate 12/12); isolation pass.
+- Live: identity self-test 12/12; existing suites unchanged (32, 16, 25, 20); unauthenticated function call 401.
+- Browser (development build): all three stages at 1440 px and 390 px (no horizontal overflow); publish disabled until identity and every required field are present; invalid asking price flagged with `aria-invalid`; focus moves to the stage heading on each change; every control tested shows a focus ring; the action bar's status line is a live region.
+
+**Honest state.** No verification method is operational yet (no provider credentials are configured). The development-only "mark verified for testing" facility exists only in builds without e-mail sign-in and without a server account; it changes nothing on the server, and the live exchange refuses a listing without a provider-confirmed identity.

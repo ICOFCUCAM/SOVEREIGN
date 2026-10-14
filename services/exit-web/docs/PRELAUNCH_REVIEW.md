@@ -20,3 +20,6 @@ Code markers: `grep -rn PRELAUNCH-REVIEW services/exit-web/src`.
 | Process Intelligence | Live market ticker | Registry snapshot, animated | Live feed |
 | Diligence | Re-run analysis | Re-renders the checks (they recompute from the profile) | — |
 | Inbox | Buyer-demand description | Copy | Review the wording |
+| Listing desk | Identity verification (BankID and other national eIDs, Stripe Identity) | Real: `exit-identity` function and a database gate on listings, deployed and self-tested; every method shows "Not yet available" until its credentials are set | Set `STRIPE_SECRET_KEY`; sign a broker (Criipto or Signicat) and set its four `IDENTITY_*` settings; register the redirect URI; run one real verification end to end |
+| Sign-in | Continue with LinkedIn | Real: Supabase OAuth redirect (`linkedin_oidc`) | Create a LinkedIn app and turn on the provider in Supabase Auth |
+| Listing desk | "Mark this session verified for testing" | Development builds without a server account only; changes nothing on the server | — (never present with e-mail sign-in) |

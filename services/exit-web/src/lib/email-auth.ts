@@ -100,7 +100,7 @@ export async function sendPasswordReset(cfg: AuthConfig, email: string, redirect
   await expectOk(res, "Sending the reset link");
 }
 
-export type OAuthProvider = "google" | "apple" | "azure";
+export type OAuthProvider = "linkedin_oidc" | "google" | "apple" | "azure";
 /** The provider's sign-in page through Supabase Auth; it returns to `redirectTo` with the session in the URL fragment. */
 export const oauthUrl = (cfg: AuthConfig, provider: OAuthProvider, redirectTo: string): string =>
   `${cfg.url}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}`;
