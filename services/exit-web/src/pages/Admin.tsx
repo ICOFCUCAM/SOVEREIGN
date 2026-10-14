@@ -5,6 +5,8 @@ import { useAuth } from "../lib/auth";
 import { ROLE_LABEL, type Role, type Plan } from "../lib/access";
 import { CHANNELS } from "../lib/social-publish";
 import { useEngineStatus, usePublishHistory, ENGINE_ENDPOINT } from "../lib/distribution-engine";
+import { AdManager } from "../components/AdManager";
+import { useDocumentRemote } from "../lib/documents/remote";
 
 // Admin console — the back office. A labelled sample roster, platform facts
 // and the distribution engine's real status. There is no account directory
@@ -29,6 +31,7 @@ const ROLE_STYLE: Record<Role, string> = {
 
 const Admin: React.FC = () => {
   const { session } = useAuth();
+  const remote = useDocumentRemote();
   const isSuper = session?.role === "superadmin";
   const [accounts, setAccounts] = useState<Account[]>(SEED);
   const [newName, setNewName] = useState("");
@@ -115,6 +118,8 @@ const Admin: React.FC = () => {
           ))}
         </dl>
       </Section>
+
+      <AdManager remote={remote} />
 
       <SocialDistribution />
     </div>

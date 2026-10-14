@@ -180,7 +180,7 @@ const Seal: React.FC<{ p: ProviderInfo }> = ({ p }) => {
 const UnavailableCard: React.FC<{ o: MethodOption }> = ({ o }) => (
   <li className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-[14px] border border-[#E6D8BC] bg-white/85 px-6 py-5 shadow-[0_14px_30px_-24px_rgba(90,65,25,0.5)] backdrop-blur sm:flex-nowrap">
     <Seal p={o.info} />
-    <div className="min-w-0 flex-1">
+    <div className="min-w-0 flex-1 basis-[200px]">
       <div className="font-display text-[26px] font-medium leading-tight text-[#6F695F]">{providerLabel(o.info.id)}</div>
       <p className="mt-1 text-[13px] leading-snug text-[#8A8378]">{o.info.verifies} · {o.info.region}</p>
     </div>

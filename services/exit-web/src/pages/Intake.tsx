@@ -177,7 +177,7 @@ const Intake: React.FC = () => {
         </section>
       )}
       {confirming && (
-        <ListingDesk onClose={() => setConfirming(false)} facts={facts} setFacts={setFacts} id={idv} onPublish={confirmListing}
+        <ListingDesk remote={remote} onClose={() => setConfirming(false)} facts={facts} setFacts={setFacts} id={idv} onPublish={confirmListing}
           updating={listed} live={destination === "exchange"}
           listing={{ code: preview.code }}
           context={{ sector: String(preview.publicView.sector).replace(/_/g, " "), revenue: preview.publicView.revenueBand?.label ?? "Under NDA", growth: preview.publicView.growthBand?.label ?? "Under NDA",

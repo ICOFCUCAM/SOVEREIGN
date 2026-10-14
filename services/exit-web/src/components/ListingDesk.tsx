@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { ListingFactsForm, Icon, type IntakeContext } from "./ListingFacts";
 import { IdentityMethods, IdentityStatusCard, DevVerificationTools, type IdentityState, type SellerIdentity } from "./IdentityGate";
 import { CountrySelect } from "./CountrySelect";
+import { AdPanel, useAdSlides } from "./AdPanel";
+import type { Remote } from "../lib/documents/store";
 import earthSunrise from "../assets/desk/earth-sunrise-1672.webp";
 import waterfrontSkyline from "../assets/desk/waterfront-skyline-720.webp";
 import waterfrontCityscape from "../assets/desk/waterfront-cityscape-1672.webp";
@@ -32,10 +34,12 @@ interface Props {
   readonly onPublish: () => void;
   readonly updating: boolean;            // the company is already listed: this publishes an update
   readonly live: boolean;                // the live exchange (else this browser only)
+  readonly remote?: Remote;              // where promotions are read and counted (else this browser)
 }
 
 const STAGES = ["Identity", "Company profile", "Review and publish"] as const;
-type Stage = 0 | 1 | 2;
+export type Stage = 0 | 1 | 2;
+const STAGE_NOTE = ["Verify who you are", "Build your business profile", "Go live on the exchange"];
 
 // the seller's identity-document country: private to this browser, never part of the listing
 const ID_COUNTRY_KEY = "exitos.identity-country.v1";
@@ -53,7 +57,7 @@ const SECTION_LEDE: Record<ProfileSection, string> = {
 };
 const FAINT = "text-[#8A8378]";
 
-export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts, setFacts, id, onPublish, updating, live }) => {
+export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts, setFacts, id, onPublish, updating, live, remote }) => {
   const missing = missingFacts(facts);
   const verified = !!id.identity;
   const [idCountry, setIdCountryState] = useState<string>(loadIdCountry);
@@ -90,7 +94,9 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
   const devProvider = methodOptions(null, idCountry).find((o) => o.eligible)?.info.id ?? "stripe_identity";
 
   const stageDone = [verified, profileDone, false];
-  const STAGE_NOTE = ["Verify who you are", "Build your business profile", "Go live on the exchange"];
+  // promotions for this stage; small screens get a compact card after the form, when the operator allows it
+  const ads = useAdSlides(remote, (["identity", "profile", "review"] as const)[stage]);
+  const mobileAds = ads.settings.mobile_enabled && ads.slides ? ads.slides.filter((x) => x.campaign.mobile) : [];
   const GOLD_WORD = "bg-gradient-to-r from-[#A87F3F] via-[#C9A262] to-[#9A7236] bg-clip-text italic text-transparent";
 
   return createPortal(
@@ -98,53 +104,10 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
       className="fixed inset-0 z-[200] overflow-y-auto bg-[radial-gradient(1200px_700px_at_80%_0%,#FFFFFF_0%,#F3EDE2_45%,#E6DDCD_100%)] text-ex-graphite lg:overflow-hidden lg:p-6">
       <div className="lg:grid lg:h-full lg:grid-cols-[320px_minmax(0,1fr)] lg:overflow-hidden lg:rounded-[22px] lg:border lg:border-[#C9A86A]/55 lg:shadow-[0_40px_90px_-40px_rgba(36,30,20,0.6),0_0_0_6px_rgba(255,255,255,0.4)]">
 
-      {/* ── the rail: brand, the three stages, the listing preview ───── */}
-      <aside className="relative flex flex-col bg-[linear-gradient(180deg,#17150F_0%,#0B0A08_100%)] text-ex-ivory lg:h-full lg:overflow-y-auto">
-        <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-px bg-gradient-to-b from-[#C9A86A]/10 via-[#C9A86A]/55 to-[#C9A86A]/10 lg:block" />
-        <div className="flex items-center justify-between px-6 pb-5 pt-6 lg:block lg:px-7 lg:pb-0 lg:pt-9">
-          <div>
-            <div className="font-display text-[30px] font-semibold leading-none text-[#F5ECDA]">ExitOS</div>
-            <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.32em] text-[#C9A86A]/75">Listing desk</div>
-          </div>
-          <button type="button" onClick={onClose} className="text-[12.5px] text-ex-ivory/60 underline-offset-4 hover:text-ex-ivory hover:underline lg:hidden">Leave</button>
-        </div>
-
-        <nav aria-label="Listing stages" className="px-4 pb-4 lg:mt-10 lg:px-5 lg:pb-0">
-          <ol className="flex gap-2 lg:flex-col lg:gap-2.5">
-            {STAGES.map((t, i) => {
-              const done = stageDone[i]!, locked = i === 2 && !canReview, here = stage === i;
-              return (
-                <li key={t} className={here ? "min-w-0 flex-[2] lg:flex-none" : "min-w-0 flex-1 lg:flex-none"}>
-                  <button type="button" onClick={() => go(i as Stage)} aria-current={here ? "step" : undefined} aria-disabled={locked || undefined}
-                    title={locked ? "Opens once your identity is established and the company profile is complete" : undefined}
-                    className={`group flex w-full items-center gap-4 rounded-[14px] border px-3 py-2.5 text-left transition lg:px-4 lg:py-4 ${here
-                      ? "border-[#C9A86A]/75 bg-[linear-gradient(135deg,rgba(201,168,106,0.18),rgba(201,168,106,0.03))] shadow-[0_0_0_1px_rgba(201,168,106,0.15),0_0_30px_-6px_rgba(214,176,104,0.6)]"
-                      : "border-transparent hover:border-white/10 hover:bg-white/[0.03]"} ${locked ? "cursor-not-allowed" : ""}`}>
-                    {done && !here
-                      ? <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#C9A86A]/45 bg-[#C9A86A]/10 text-[#E2C07F] lg:h-8 lg:w-8"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="m2.5 6.2 2.3 2.3 4.7-5" /></svg></span>
-                      : <span className={`font-display text-[24px] leading-none lg:w-8 lg:text-[28px] ${here ? "text-[#E2C07F]" : "text-ex-ivory/35"}`}>{`0${i + 1}`}</span>}
-                    <span className={`min-w-0 ${here ? "" : "max-lg:hidden"}`}>
-                      <span className={`block text-[14.5px] font-semibold ${here ? "text-white" : locked ? "text-ex-ivory/35" : "text-ex-ivory/80 group-hover:text-white"}`}>{t}</span>
-                      <span className={`mt-0.5 hidden text-[12px] lg:block ${here ? "text-ex-ivory/60" : "text-ex-ivory/35"}`}>{done && !here ? "Completed" : STAGE_NOTE[i]}</span>
-                      {i === 1 && !done && (
-                        <span className="mt-2 hidden items-center gap-2 lg:flex" aria-label={`${pagesDone} of 3 profile pages complete`}>
-                          <span aria-hidden className="h-[3px] w-24 overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full bg-[linear-gradient(90deg,#A87F3F,#E2C07F)] transition-all" style={{ width: `${(pagesDone / 3) * 100}%` }} /></span>
-                          <span aria-hidden className="text-[10.5px] text-ex-ivory/45">{pagesDone}/3 pages</span>
-                        </span>
-                      )}
-                    </span>
-                    <span className="sr-only">{done ? " (complete)" : locked ? " (not yet available)" : ""}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-        </nav>
-
-        <div className="mt-auto hidden px-5 pb-6 pt-8 lg:block">
-          <ListingPreview code={listing.code} context={context} facts={facts} identity={id.identity} />
-        </div>
-      </aside>
+      {/* ── the rail: brand, the three stages, and the promotions canvas below them ── */}
+      <DeskRail stage={stage} stageDone={stageDone} canReview={canReview} pagesDone={pagesDone} onGo={(i) => go(i)} onClose={onClose}>
+        <AdPanel slides={ads.slides} settings={ads.settings} remote={remote} className="mt-8 hidden flex-1 lg:flex" />
+      </DeskRail>
 
       {/* ── the workspace ───────────────────────────────────────────── */}
       <div ref={scrollers[1]} className="relative flex min-w-0 flex-col overflow-x-hidden bg-[#FBF8F2] lg:h-full lg:overflow-y-auto">
@@ -261,7 +224,13 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
           )}
 
           {/* on small screens the rail's preview follows the stage */}
-          <div className={`mt-14 lg:hidden ${stage === 2 ? "hidden" : ""}`}><ListingPreview code={listing.code} context={context} facts={facts} identity={id.identity} /></div>
+          {stage === 1 && (
+            <div className="mt-14">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#A8834A]">As buyers see it</p>
+              <div className="max-w-[380px]"><ListingPreview code={listing.code} context={context} facts={facts} identity={id.identity} /></div>
+            </div>
+          )}
+          {mobileAds.length > 0 && <AdPanel variant="compact" slides={mobileAds} settings={ads.settings} remote={remote} className="mt-12 lg:hidden" />}
         </main>
 
         {/* ── action bar: security note, what this stage still requires, the next action ── */}
@@ -295,6 +264,54 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
     document.body,
   );
 };
+
+/** The desk's rail: brand, the three stages, and whatever fills the space below them (the promotions canvas). */
+export const DeskRail: React.FC<{ stage: Stage; stageDone: readonly boolean[]; canReview: boolean; pagesDone: number; onGo: (s: Stage) => void; onClose: () => void; children?: React.ReactNode }> = ({ stage, stageDone, canReview, pagesDone, onGo, onClose, children }) => (
+  <aside className="relative flex flex-col bg-[linear-gradient(180deg,#17150F_0%,#0B0A08_100%)] text-ex-ivory lg:h-full lg:overflow-y-auto">
+    <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-px bg-gradient-to-b from-[#C9A86A]/10 via-[#C9A86A]/55 to-[#C9A86A]/10 lg:block" />
+    <div className="flex items-center justify-between px-6 pb-5 pt-6 lg:block lg:px-7 lg:pb-0 lg:pt-9">
+      <div>
+        <div className="font-display text-[30px] font-semibold leading-none text-[#F5ECDA]">ExitOS</div>
+        <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.32em] text-[#C9A86A]/75">Listing desk</div>
+      </div>
+      <button type="button" onClick={onClose} className="text-[12.5px] text-ex-ivory/60 underline-offset-4 hover:text-ex-ivory hover:underline lg:hidden">Leave</button>
+    </div>
+
+    <nav aria-label="Listing stages" className="px-4 pb-4 lg:mt-10 lg:px-5 lg:pb-0">
+      <ol className="flex gap-2 lg:flex-col lg:gap-2.5">
+        {STAGES.map((t, i) => {
+          const done = stageDone[i]!, locked = i === 2 && !canReview, here = stage === i;
+          return (
+            <li key={t} className={here ? "min-w-0 flex-[2] lg:flex-none" : "min-w-0 flex-1 lg:flex-none"}>
+              <button type="button" onClick={() => onGo(i as Stage)} aria-current={here ? "step" : undefined} aria-disabled={locked || undefined}
+                title={locked ? "Opens once your identity is established and the company profile is complete" : undefined}
+                className={`group flex w-full items-center gap-4 rounded-[14px] border px-3 py-2.5 text-left transition lg:px-4 lg:py-4 ${here
+                  ? "border-[#C9A86A]/75 bg-[linear-gradient(135deg,rgba(201,168,106,0.18),rgba(201,168,106,0.03))] shadow-[0_0_0_1px_rgba(201,168,106,0.15),0_0_30px_-6px_rgba(214,176,104,0.6)]"
+                  : "border-transparent hover:border-white/10 hover:bg-white/[0.03]"} ${locked ? "cursor-not-allowed" : ""}`}>
+                {done && !here
+                  ? <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#C9A86A]/45 bg-[#C9A86A]/10 text-[#E2C07F] lg:h-8 lg:w-8"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="m2.5 6.2 2.3 2.3 4.7-5" /></svg></span>
+                  : <span className={`font-display text-[24px] leading-none lg:w-8 lg:text-[28px] ${here ? "text-[#E2C07F]" : "text-ex-ivory/35"}`}>{`0${i + 1}`}</span>}
+                <span className={`min-w-0 ${here ? "" : "max-lg:hidden"}`}>
+                  <span className={`block text-[14.5px] font-semibold ${here ? "text-white" : locked ? "text-ex-ivory/35" : "text-ex-ivory/80 group-hover:text-white"}`}>{t}</span>
+                  <span className={`mt-0.5 hidden text-[12px] lg:block ${here ? "text-ex-ivory/60" : "text-ex-ivory/35"}`}>{done && !here ? "Completed" : STAGE_NOTE[i]}</span>
+                  {i === 1 && !done && (
+                    <span className="mt-2 hidden items-center gap-2 lg:flex" aria-label={`${pagesDone} of 3 profile pages complete`}>
+                      <span aria-hidden className="h-[3px] w-24 overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full bg-[linear-gradient(90deg,#A87F3F,#E2C07F)] transition-all" style={{ width: `${(pagesDone / 3) * 100}%` }} /></span>
+                      <span aria-hidden className="text-[10.5px] text-ex-ivory/45">{pagesDone}/3 pages</span>
+                    </span>
+                  )}
+                </span>
+                <span className="sr-only">{done ? " (complete)" : locked ? " (not yet available)" : ""}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+
+    {children}
+  </aside>
+);
 
 /** The listing preview: a picture, the code name and the saved values only, with honest gaps. */
 const ListingPreview: React.FC<{ code: string; context: IntakeContext; facts: Partial<ListingFacts>; identity: SellerIdentity | null }> = ({ code, context, facts, identity }) => {
