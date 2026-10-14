@@ -104,7 +104,7 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
           <span className="text-[12px] text-xo-faint">Nothing is sent from ExitOS — download a draft to share it.</span>
           <button type="button" onClick={() => setLibraryOpen(true)} className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Library</button>
           <a href="/report" target="_blank" rel="noreferrer" className="rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Publishing Center →<span className="sr-only"> (opens in a new tab)</span></a>
-          <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report →<span className="sr-only"> (opens in a new tab)</span></a>
+          <a href="/report/valuation" target="_blank" rel="noreferrer" className="rounded-sm bg-desk-gold px-3 py-1.5 text-[12px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Board-ready report →<span className="sr-only"> (opens in a new tab)</span></a>
         </>} />
       <GateNotice gate={gate} className="border border-xo-line bg-xo-panel px-4 py-2.5" />
       {fromIntake && doc?.coverage && doc.coverage.some((c) => c.status !== "supported") && (() => {
@@ -137,13 +137,13 @@ const KINDS: Array<{ key: MemorandumKind; label: string; description: string }> 
           {KINDS.map((k) => (
             <li key={k.key}>
               <button type="button" onClick={() => { setKind(k.key); setLibraryOpen(false); }}
-                className={`flex w-full items-center justify-between gap-3 rounded-lg border p-3.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${kind === k.key ? "border-deal-400/50 bg-deal-600/10" : "border-white/10 bg-ink-900/40 hover:border-white/20"}`}>
+                className={`flex w-full items-center justify-between gap-3 rounded-lg border p-3.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${kind === k.key ? "border-xo-verified/50 bg-xo-verified/10" : "border-xo-line bg-xo-panel hover:border-xo-line"}`}>
                 <span className="min-w-0">
-                  <span className="block text-sm font-medium text-white">{k.label}</span>
-                  <span className="mt-0.5 block text-[12px] leading-snug text-white/70">{k.description}</span>
+                  <span className="block text-sm font-medium text-xo-text">{k.label}</span>
+                  <span className="mt-0.5 block text-[12px] leading-snug text-xo-muted">{k.description}</span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
-                  {kind === k.key && <span className="text-[11px] font-semibold text-deal-300">Open ✓</span>}
+                  {kind === k.key && <span className="text-[11px] font-semibold text-xo-verified">Open ✓</span>}
                 </span>
               </button>
             </li>

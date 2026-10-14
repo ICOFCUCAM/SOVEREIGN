@@ -20,7 +20,7 @@ const MarketMap: React.FC = () => {
   const acquirerMax = Math.max(...m.topAcquirers.map((a) => a.deals), 1);
   // Heat ramp on the sector cells; the text colour flips to dark ink on the
   // brightest cells so the numbers keep contrast.
-  const heat = (frac: number): string => `rgba(56, 132, 255, ${(0.12 + frac * 0.78).toFixed(2)})`;
+  const heat = (frac: number): string => `rgba(154, 117, 54, ${(0.08 + frac * 0.5).toFixed(2)})`;
   const heatData = useMemo(() => [...ACQ_INDEXES.indexes].sort((a, b) => b.volume - a.volume).slice(0, 18), []);
   const [showHeatData, setShowHeatData] = useState(false);
 
@@ -78,9 +78,9 @@ const MarketMap: React.FC = () => {
               const f = s.deals / sectorMax;
               return (
                 <li key={s.token} className="min-w-0 p-2" style={{ background: heat(f) }} title={`${s.deals} deals · ${fmtUsd(s.disclosedUsd)} disclosed`}>
-                  <div className={`truncate text-[11px] font-semibold capitalize ${f > 0.6 ? "text-xo-ink" : "text-xo-text"}`}>{s.token}</div>
-                  <div className={`font-mono text-[12px] tabular-nums ${f > 0.6 ? "text-xo-ink" : "text-xo-text"}`}>{s.deals}<span className="sr-only"> deals</span></div>
-                  <div className={`truncate font-mono text-[11px] tabular-nums ${f > 0.6 ? "text-xo-ink" : "text-xo-muted"}`}>{fmtUsd(s.disclosedUsd)}<span className="sr-only"> disclosed</span></div>
+                  <div className={`truncate text-[11px] font-semibold capitalize text-xo-text`}>{s.token}</div>
+                  <div className={`font-mono text-[12px] tabular-nums text-xo-text`}>{s.deals}<span className="sr-only"> deals</span></div>
+                  <div className={`truncate font-mono text-[11px] tabular-nums text-xo-muted`}>{fmtUsd(s.disclosedUsd)}<span className="sr-only"> disclosed</span></div>
                 </li>
               );
             })}

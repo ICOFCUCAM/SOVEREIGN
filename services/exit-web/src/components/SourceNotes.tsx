@@ -13,7 +13,7 @@ export type SourceId = 1 | 2 | 3 | 4 | 5 | 6;
 export const Note: React.FC<{ n: SourceId; first?: boolean; dark?: boolean }> = ({ n, first, dark }) => (
   <sup className="ml-0.5 align-super text-[0.62em] font-semibold leading-none">
     <a href={`#source-${n}`} id={first ? `cite-${n}` : undefined} aria-label={`Source ${n}`}
-      className={`scroll-mt-28 rounded-sm px-0.5 underline decoration-dotted underline-offset-2 focus-visible:outline-none focus-visible:ring-2 ${dark ? "text-[#C9B08A] focus-visible:ring-blue-300" : "text-[#6A5539] focus-visible:ring-blue-600"}`}>{n}</a>
+      className={`scroll-mt-28 rounded-sm px-0.5 underline decoration-dotted underline-offset-2 focus-visible:outline-none focus-visible:ring-2 ${dark ? "text-[#C9B08A] focus-visible:ring-xo-action" : "text-[#6A5539] focus-visible:ring-xo-action"}`}>{n}</a>
   </sup>
 );
 
@@ -63,7 +63,7 @@ export const SourcesSection: React.FC<{ only?: readonly SourceId[]; collapsed?: 
           <div>
             <h3 className="font-editorial text-[18px] font-semibold text-ink-900">{s.title}</h3>
             <p className="mt-1 text-[13px] leading-relaxed text-slate-600">{s.body}</p>
-            <a href={`#cite-${s.n}`} className="mt-1 inline-block rounded-sm font-mono text-[11px] text-[#6A5539] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600" aria-label={`Back to where source ${s.n} is first cited`}>↩ back</a>
+            <a href={`#cite-${s.n}`} className="mt-1 inline-block rounded-sm font-mono text-[11px] text-[#6A5539] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" aria-label={`Back to where source ${s.n} is first cited`}>↩ back</a>
           </div>
         </li>
       ))}
@@ -73,7 +73,7 @@ export const SourcesSection: React.FC<{ only?: readonly SourceId[]; collapsed?: 
     <section aria-labelledby="sources-h" className="border-t border-slate-200 bg-white">
       <div className="mx-auto w-full max-w-[1480px] px-5 py-10 sm:px-8 lg:px-12">
         <details ref={det} className="group">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-sm py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-sm py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action [&::-webkit-details-marker]:hidden">
             <h2 id="sources-h" className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-[#7A6344]">{t("src.title")} <span className="text-slate-600">· {list.length}</span></h2>
             <span aria-hidden className="font-mono text-[18px] leading-none text-ink-900 transition-transform group-open:rotate-45">+</span>
           </summary>

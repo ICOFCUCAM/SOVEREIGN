@@ -107,7 +107,7 @@ const ExitTiming: React.FC = () => {
             <TakeCell k="What ExitOS does">Recomputes this page from the company's figures and the registry snapshot each time it opens. There are no alerts — check back after updating your figures.</TakeCell>
             <TakeCell k="Outcome">At the window <span className="font-mono">{fmtMoney(potential)}</span> · +{upliftPct}% value of waiting (after fixes, no growth assumed)</TakeCell>
           </dl>
-          <Link to="/console/readiness" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">See readiness fixes →</Link>
+          <Link to="/console/readiness" className="mt-3 inline-block rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">See readiness fixes →</Link>
         </div>
       </Section>
 

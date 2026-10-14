@@ -12,7 +12,7 @@ const MAX_ALL = Math.max(...LEDGER_ALL.map((r) => r.valueUsd));
 type Sort = "date" | "value";
 const STATUSES = ["Closed", "Announced", "Terminated"] as const;
 const SECTORS = [...new Set(LEDGER_ALL.map((r) => r.sector).filter(Boolean))].sort();
-const FIELD = "border border-slate-300 bg-white px-3 py-2 text-[13px] text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600";
+const FIELD = "border border-slate-300 bg-white px-3 py-2 text-[13px] text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
 
 const LedgerTable: React.FC = () => {
   const id = useId();
@@ -60,7 +60,7 @@ const LedgerTable: React.FC = () => {
         <div role="group" aria-label="Status" className="flex gap-1.5">
           {["", ...STATUSES].map((s) => (
             <button key={s || "all"} type="button" aria-pressed={status === s} onClick={() => { setStatus(s); setAll(false); }}
-              className={`border px-3 py-2 text-[12px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${status === s ? "border-ink-900 bg-ink-900 text-white" : "border-slate-300 bg-white text-ink-800 hover:border-ink-900"}`}>
+              className={`border px-3 py-2 text-[12px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action ${status === s ? "border-ink-900 bg-xo-panel text-xo-text" : "border-slate-300 bg-white text-ink-800 hover:border-ink-900"}`}>
               {s || "All"} <span className={`ml-1 font-mono text-[11px] tabular-nums ${status === s ? "text-[#DCCDB3]" : "text-slate-500"}`}>{count(s)}</span>
             </button>
           ))}
@@ -68,16 +68,16 @@ const LedgerTable: React.FC = () => {
       </div>
 
       {/* what the current view adds up to */}
-      <dl className="mt-4 grid grid-cols-3 overflow-hidden rounded-ex-sm text-white" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
+      <dl className="mt-4 grid grid-cols-3 overflow-hidden rounded-ex-sm text-xo-text" style={{ background: "linear-gradient(135deg, var(--ex-1) 0%, var(--ex-2) 100%)" }}>
         {([["Matching deals", String(rows.length), ""], ["Disclosed value", rows.length ? usd(total) : "—", ""], ["Largest", largest ? largest.value : "—", largest ? `${largest.target} · ${largest.buyer}` : ""]] as const).map(([k, v, sub], i) => (
-          <div key={k} className={`min-w-0 px-4 py-4 sm:px-6 ${i ? "border-l border-white/10" : ""}`}>
+          <div key={k} className={`min-w-0 px-4 py-4 sm:px-6 ${i ? "border-l border-xo-line" : ""}`}>
             <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#DCCDB3]/80">{k}</dt>
             <dd className="mt-1.5 font-editorial text-[clamp(1.2rem,2.2vw,1.9rem)] font-semibold tabular-nums">{v}</dd>
             {sub && <dd className="mt-0.5 truncate text-[12px] text-[#E8E0D2]/75">{sub}</dd>}
           </div>
         ))}
       </dl>
-      <div role="region" aria-label="Disclosed acquisitions" tabIndex={0} className="mt-4 min-w-0 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+      <div role="region" aria-label="Disclosed acquisitions" tabIndex={0} className="mt-4 min-w-0 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">
         <table className="w-full min-w-[820px] text-left text-[13px]">
           <caption className="pb-3 text-left text-[12.5px] text-slate-600" aria-live="polite">
             {rows.length ? `${shown.length} of ${rows.length} matching deals, ${sort === "value" ? "largest" : "newest"} first` : "No deals match these filters."}
@@ -108,7 +108,7 @@ const LedgerTable: React.FC = () => {
       </div>
       {rows.length > 10 && (
         <button type="button" onClick={() => setAll((v) => !v)} aria-expanded={all}
-          className="mt-4 inline-flex items-center gap-3 border border-ink-900 px-4 py-2.5 text-[12px] font-semibold text-ink-900 transition hover:bg-ink-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+          className="mt-4 inline-flex items-center gap-3 border border-ink-900 px-4 py-2.5 text-[12px] font-semibold text-ink-900 transition hover:bg-xo-panel hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">
           {all ? "Show the first ten" : `Show all ${rows.length}`} <span aria-hidden>{all ? "↑" : "↓"}</span>
         </button>
       )}

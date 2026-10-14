@@ -16,6 +16,9 @@ create table if not exists auth.users (id uuid primary key, email text);
 create table if not exists storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text);
 alter table storage.objects enable row level security;
 grant usage on schema storage to anon, authenticated; grant select on storage.objects to anon, authenticated;
+-- as on Supabase: signed-in clients may write objects wherever a storage policy allows; buckets carry upload limits
+grant insert, update, delete on storage.objects to authenticated;
+alter table storage.buckets add column if not exists file_size_limit bigint, add column if not exists allowed_mime_types text[];
 insert into storage.objects (bucket_id, name) values ('exit-data-room', 'seller/financial/1_accounts.pdf');
 alter default privileges in schema public grant all on tables to anon, authenticated;
 SQL
@@ -27,11 +30,14 @@ for f in $M/0001_exitos_backend.sql $M/0002_exitos_ownership.sql $M/0003_exitos_
          $M/20261014120000_exitos_nda_lifecycle.sql $M/20261014120100_exitos_nda_lifecycle_selftest.sql \
          $M/20261014100100_exitos_exchange_state_selftest.sql $M/20261014110100_exit_data_room_selftest.sql \
          $M/20261014130000_exitos_offer_terms_guard.sql $M/20261014140000_exitos_transactions.sql $M/20261014140100_exitos_transactions_selftest.sql \
-         $M/20261014150000_exitos_deal_end_to_end_selftest.sql; do
+         $M/20261014150000_exitos_deal_end_to_end_selftest.sql \
+         $M/20261014160000_exitos_identity_verification.sql $M/20261014160100_exitos_identity_verification_selftest.sql \
+         $M/20261014170000_exitos_ad_campaigns.sql $M/20261014170100_exitos_ad_campaigns_selftest.sql \
+         $M/20261014180000_exitos_ad_video.sql $M/20261014180100_exitos_ad_video_selftest.sql; do
   $Q -d $DB -f "$f" >/dev/null 2>/tmp/nda-mig.err || { echo "migration failed: $f"; cat /tmp/nda-mig.err; exit 1; }
 done
 status=0
-for fn in exitos_selftest_nda_lifecycle exitos_selftest_exchange_state exit_selftest_data_room exitos_selftest_transaction_lifecycle exitos_selftest_deal_end_to_end; do
+for fn in exitos_selftest_nda_lifecycle exitos_selftest_exchange_state exit_selftest_data_room exitos_selftest_transaction_lifecycle exitos_selftest_deal_end_to_end exitos_selftest_identity_gate exitos_selftest_ad_campaigns exitos_selftest_ad_video; do
   res=$(psql -d $DB -tA -c "select public.$fn()" 2>&1 || true)
   echo "$res" | sed 's/^ERROR: *//' | grep -v '^CONTEXT' | grep -E "^SELFTEST|^f " || echo "$fn did not complete: $(echo "$res" | head -3)"
   echo "$res" | grep -q "SELFTEST PASS" || status=1

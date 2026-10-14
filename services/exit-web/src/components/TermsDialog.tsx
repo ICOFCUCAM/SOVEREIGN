@@ -11,7 +11,7 @@ const TermsDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, o
     <Modal open={open} onClose={onClose} title="Plain-language terms" subtitle="What the deal and finance words on these pages mean" size="md">
       <label htmlFor={inputId} className="mb-1 block text-[12px] font-medium text-white/70">Find a term</label>
       <input id={inputId} type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="e.g. LOI, earn-out"
-        className="mb-4 w-full rounded-md border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-white placeholder-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" />
+        className="mb-4 w-full rounded-md border border-white/15 bg-ex-0/70 px-3 py-2 text-sm text-white placeholder-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action" />
       {list.length === 0
         ? <p className="text-[13px] text-white/70">No term matches “{q}”.</p>
         : <dl className="space-y-3">

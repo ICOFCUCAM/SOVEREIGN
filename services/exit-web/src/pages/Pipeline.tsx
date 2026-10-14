@@ -150,7 +150,7 @@ const PipelineDemo: React.FC = () => {
               : "Re-engage the sourcing column to rebuild the funnel."}</TakeCell>
             <TakeCell k="ExitOS does it">ExitOS scores every deal, drafts the counter and sequences buyer follow-ups automatically.</TakeCell>
           </dl>
-          <Link to="/console/negotiator" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open the negotiator →</Link>
+          <Link to="/console/negotiator" className="mt-3 inline-block rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open the negotiator →</Link>
         </div>
       </Section>
 

@@ -40,7 +40,7 @@ const Readiness: React.FC = () => {
   const topFix = fixes[0];
   const categories = [...ctx.readinessCategories].sort((a, b) => b.impactUsd - a.impactUsd);
 
-  const scoreColor = score >= 70 ? "#34d399" : score >= 50 ? "#fbbf24" : "#f87171";
+  const scoreColor = score >= 70 ? "#2F6B3F" : score >= 50 ? "#9A6A12" : "#A23A2A";
   const R = 52;
   const circ = 2 * Math.PI * R;
 
@@ -55,12 +55,12 @@ const Readiness: React.FC = () => {
   const growthStrong = growthYoy >= 0.3;
   const marketOpen = marketKnown && marketGrowth >= 0.05;
   const verdict = gapRatio > 0.25
-    ? { tone: "#fbbf24", label: "Prepare — don't list yet",
+    ? { tone: "#9A6A12", label: "Prepare — don't list yet",
         body: `${fmtMoney(left)} of upside is still fixable. Two to three quarters of prep lifts the headline before you ever run a process.` }
     : growthStrong && marketOpen
-      ? { tone: "#34d399", label: "Window open — go",
+      ? { tone: "#2F6B3F", label: "Window open — go",
           body: "ARR growth and the company's sourced market growth both clear the thresholds, and the value left is small enough — the rule says start the process now." }
-      : { tone: "#94a3b8", label: "Monitor — hold",
+      : { tone: "#8A8378", label: "Monitor — hold",
           body: marketKnown ? "Neither rule fires. Keep building and check this verdict again when your figures change." : "No market growth has been supplied, so the market-window rule cannot fire. Add a sourced market estimate to your company story." };
 
   const signals = [
@@ -175,7 +175,7 @@ const Readiness: React.FC = () => {
       </Section>
 
       <div className="flex flex-wrap gap-2 px-1">
-        <Link to="/console/valuation" className="rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">See the valuation model →</Link>
+        <Link to="/console/valuation" className="rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">See the valuation model →</Link>
         <Link to="/console/data-room" className="rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Close the gaps in the data room</Link>
       </div>
     </div>

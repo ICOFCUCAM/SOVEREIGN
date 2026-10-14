@@ -15,5 +15,9 @@ export default defineConfig({
       },
     },
   },
-  build: { outDir: "dist", sourcemap: false },
+  build: {
+    outDir: "dist", sourcemap: false,
+    // country flags are served as their own small files, fetched only when shown, never inlined into the bundle
+    assetsInlineLimit: (file: string) => (file.includes("country-flag-icons") ? false : undefined),
+  },
 });

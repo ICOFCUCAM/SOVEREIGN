@@ -107,7 +107,7 @@ const BuyerCopilot: React.FC = () => {
               <TakeCell k="Pursue">{top.buyer.name} — fit probability {topD.likelihood}%, {topD.synergy.toLowerCase()} synergy, {topD.risk.toLowerCase()} risk (rules below).</TakeCell>
               <TakeCell k="What ExitOS does">Ranks buyers with the discovery engine and applies the stated rules to each buyer's recorded deal history. Nothing is sent from this page.</TakeCell>
             </dl>
-            <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft outreach →</Link>
+            <Link to="/console/banker" className="mt-3 inline-block rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Draft outreach →</Link>
             {outreachGate && <span className="ml-3 text-[12px] text-xo-caution">Requires {outreachGate}</span>}
           </div>
         </Section>

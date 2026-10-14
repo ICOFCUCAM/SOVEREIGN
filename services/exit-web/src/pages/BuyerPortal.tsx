@@ -76,7 +76,7 @@ const BuyerPortal: React.FC = () => {
   const tape = useMemo(() => buildMarketTape(), []);
   const TABS: [Tab, string][] = [["dashboard", "Dashboard"], ["watchlist", "Watchlist"], ["opportunities", "Opportunities"], ["diligence", "Diligence"], ["negotiations", "Negotiations"]];
 
-  const BTN = "rounded-sm bg-deal-700 px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  const BTN = "rounded-sm bg-desk-gold px-2.5 py-1 text-[12px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const BTN_GHOST = "rounded-sm border border-xo-line px-2.5 py-1 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
 
   return (

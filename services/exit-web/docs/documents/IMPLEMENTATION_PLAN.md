@@ -912,3 +912,90 @@ The product as a whole is not production-ready until:
 - Dispatch is deployed for production PDFs (O-5);
 - counsel review exists for any legal instrument offered beyond a brief or draft (O-6).
 
+
+
+## 15. Increment report — seller identity and the listing desk
+
+**Scope.** Founders establish their identity before a company can be listed. The listing flow becomes a dedicated three-stage page (Identity, Company profile, Review and publish), and the exchange shows listing details and a verified-seller badge.
+
+**Files**
+- Database: `supabase/migrations/20261014160000_exitos_identity_verification.sql`, `…160100_…_selftest.sql`; `supabase/tests/nda/run.sh` runs the new self-test.
+- Server: `supabase/functions/exit-identity/index.ts`.
+- Web: `src/lib/identity.ts` (methods, `pathwayState`, client calls), `src/components/IdentityGate.tsx` (flow hook, pathways, status, development tools), `src/components/ListingDesk.tsx` (the desk), `src/components/ListingFacts.tsx` (grouped profile form, porcelain tone), `src/lib/listing-facts.ts`, `src/lib/listings.ts` (`verification` stamp), `src/pages/Intake.tsx`, `src/pages/AcquisitionRadar.tsx` (badge), `src/pages/SignIn.tsx` and `src/lib/email-auth.ts` (LinkedIn sign-in button).
+- Tests: `src/lib/identity.test.ts`, `src/components/IdentityGate.test.tsx`, `src/lib/listing-facts.test.ts`.
+
+**Results**
+- Local: web 68 files, 413 tests pass; lint, typecheck and build clean; database suites 6/6 pass (identity gate 12/12); isolation pass.
+- Live: identity self-test 12/12; existing suites unchanged (32, 16, 25, 20); unauthenticated function call 401.
+- Browser (development build): all three stages at 1440 px and 390 px (no horizontal overflow); publish disabled until identity and every required field are present; invalid asking price flagged with `aria-invalid`; focus moves to the stage heading on each change; every control tested shows a focus ring; the action bar's status line is a live region.
+
+**Honest state.** No verification method is operational yet (no provider credentials are configured). The development-only "mark verified for testing" facility exists only in builds without e-mail sign-in and without a server account; it changes nothing on the server, and the live exchange refuses a listing without a provider-confirmed identity.
+
+
+## 16. Increment report — listing desk refinement (identity country, method selection, stage validation)
+
+**Two countries, kept apart.** The listing's `basedIn` ("Country of operation", public listing data, stored as the country's English name as before) is unchanged in meaning. The country that decides which identity methods apply — the country of the founder's identity document or eID — is new, private, kept only in this browser (`exitos.identity-country.v1`), never written to the listing, and sent to `exit-identity` only when a verification starts. The picker starts at the United States.
+
+**Changes**
+- Countries: `src/lib/countries.ts` — every ISO 3166-1 country and territory with a flag (256 entries, English names from the browser's CLDR data), search by name, word, alias, accents and code; flags from `country-flag-icons` as separate SVG files fetched only when shown (`vite.config.ts` keeps them out of the bundle).
+- `src/components/CountrySelect.tsx`: a WAI-ARIA combobox — search field, flags, Arrow/Page/Home/End/Enter/Escape, selected and active states, visible focus, result count announced.
+- Identity: `methodOptions` derives each method's standing from the server (`configured`) and the identity-document country (`eligible`, from the server's list). Only configured and eligible methods are selectable (radio list with eligibility, requirements, next step and the action); everything else is a quiet line without a control. With nothing configured the page says so.
+- Development facility: compiled only into the Vite development server (`import.meta.env.DEV`); the production bundle contains none of it (checked: 0 occurrences).
+- Desk: buyer preview reduced to a compact secondary block with "Not set" / "Not confirmed" gaps; action bar shows Identity and Company profile as separate requirement groups; "Continue to review" and the review stage stay locked until identity is established and the profile is complete.
+
+**Results**: web 69 files, 420 tests; lint, typecheck, build clean. Browser (development server): country search, keyboard selection and Escape; nothing actionable while no method is configured; stage gating; validation (summary length, zero price); identity country absent from the listing draft; 390 px with no horizontal overflow; publish with the development test identity saves to this browser only.
+
+## 17. Increment report — listing desk to the founder's benchmark pages
+
+The desk follows the four reference images the founder supplied (`public/*.png`, served as WebP derivatives from `src/assets/desk/`).
+
+- Page 1, Identity: framed desk, black stage rail, earth-at-sunrise hero, gold-edged country field and dropdown, gold Continue. Behaviour unchanged (server-derived methods, nothing actionable while unconfigured).
+- Page 2, Company profile, now three pages under step 2: Business overview (white card: description with counter, fixed Sector, Region, stage pills), Financial profile (fixed revenue and growth, asking-price structure), Transaction profile (what is for sale and how it earns as pill checklists; markets, stack, country of operation and reason for sale as cards). `missingTagged`/`missingIn` assign every gap to its page; the action bar names this page's gaps; the rail shows pages complete. Continue moves between pages freely; review stays locked until identity and the whole profile are complete.
+- Save draft: the draft is already written to this browser on every edit; the button writes it again and confirms ("Draft saved"). It saves nothing to a server.
+- Page 3, Review and publish: global-network hero; the listing as one card (picture, code name, ten facts with icons, the description, reason for sale) with an Edit menu that returns to any of the three profile pages; a "Ready to publish?" panel holding the action. The action names what really happens: "Save and publish" on the live exchange, "Publish the update" for a listed company, "Save in this browser" when the build is not connected. Completed stages show a check and "Completed" in the rail.
+- Unchanged: the database identity gate, server-stamped verification, RLS, autosave, the development-only test identity (absent from the production bundle).
+
+## 18. Increment report — listing-desk promotions (O-23)
+
+The listing desk's sidebar keeps the brand and the three stages; everything below them is a promotions canvas the operator manages from the admin console (the owner's own products first, e.g. Sovereign Dispatch). The buyer preview moved into the company-profile pages ("As buyers see it").
+
+- Database (`20261014170000_exitos_ad_campaigns.sql`): `exitos_ad_campaigns` (plain-text fields with length limits, https-only destination, generated image path, focal point, stages, phone flag, priority, order, status draft/published/paused/archived, schedule; author and times stamped by the server; no delete), `exitos_ad_settings` (seconds per slide 4–30, phone placement), `exitos_ad_stats` (impressions and clicks per campaign per day, no account), `exitos_ad_record()` (counts only for live campaigns). Founders read live campaigns only; operators (`exitos_has_role('operator')`) read and write everything. Images: private bucket `exitos-ads` (WebP/JPEG/PNG/AVIF, 5 MB); a signed link is issued only for an image a live campaign uses, or to an operator; only operators upload, and only into the generated path pattern.
+- Self-test (`…170100_…_selftest.sql`): 23 checks, run locally (`supabase/tests/nda/run.sh`) and on the live project: PASS 23/23.
+- Admin console: Advertising manager: create, edit, start from a portfolio product (its catalogue words only, never a price), image upload with focal point and alt text, preview in the real sidebar and on a phone, reorder, schedule, priority, stages, publish, pause, archive, restore, slideshow settings, 30-day counts.
+- Desk: crossfading slideshow (default 7 s), pause on hover or focus, pause/play, previous/next, position indicators, reduced motion (no fade, no autoplay), impressions only when at least half on screen, "Promotion" label, links open in a new tab with `noopener noreferrer sponsored`. No live campaign → the desk's own panel (no claims). Phones: a compact card after the form, only if allowed. A failing campaign service shows no promotion and never blocks the desk.
+- Without a server, campaigns are kept in this browser so the manager and desk work end to end.
+
+## 19. Increment report — listing desk design refinement
+
+Audit: the desk components carried about 80 one-off colour values (seven near-identical hairlines, three golds, a gold gradient on the main button and on headline words, glows on the active stage), two pill styles, three field styles and full-height photographs behind every stage that competed with the promotions panel.
+
+- Tokens: `desk` colours in `tailwind.config.ts` (paper, surface, tint, two hairlines, four text steps, one gold with its text shade and tint, rail, champagne, ivory, error, success). Shared styles in `src/components/desk/ui.ts`: primary and secondary buttons (44 px, focus ring, disabled), label, hint, error, field, pill, card, eyebrow, heading, lede.
+- Pictures: each stage's photograph is a small plate beside the heading (216×152, slightly desaturated), shown on wide screens only; no picture above the form on phones. Promotions imagery is slightly desaturated too.
+- One primary action per screen: on Identity, until a method is open the footer's "Continue to the profile" is secondary; the method's own button is the primary.
+- Profile pages: all three are one card each; one pill style (selected = ink); one field style; the transaction page's mixed boxes and icon cards became plain fields. The buyer preview is a light card under the form.
+- Rail and promotions: no glows or gradients; promotions say "Promotion" before the eyebrow; the call to action is an outline, not a gold button.
+- Identity: quieter method cards and seals; an established identity is a card with a green check, a test identity is marked in gold.
+- Not changed: the console (the `xo` graphite pages, 44 pages) keeps its own system; behaviour, validation, security and data contracts are untouched.
+
+**Results**: web 433 tests; lint, typecheck, build clean; the development test identity is absent from the production bundle. Browser (development server, 1440 and 390 wide): all three stages and three profile pages, operator campaign flow, founder slideshow, review and save; no horizontal overflow.
+
+## 20. Increment report — the console on the ExitOS palette
+
+Audit: the console's 44 pages draw almost all colour from the `xo` tokens (about 3,000 uses), which were a navy terminal with emerald and blue accents; the shell added a blue grid, glow and watermark behind every page; about 410 classes on content and 30 chart colours were hard-coded for a dark ground.
+
+- Tokens: `xo` colours are now CSS variables (`index.css`). Content sits on warm ivory by default; the structural chrome (sidebar, market ribbon, layer bars, phone header) sets `data-xo="dark"` and keeps a warm charcoal. Text steps are contrast-checked on both grounds (≥ 4.5:1: ink 15:1, muted 7.7:1, faint 5.3:1, accents 5.0–5.9:1 on ivory).
+- Accents: links and focus rings in bronze, positive in a muted green, caution in ochre, risk in brick; primary buttons in the desk's gold with ink text (was emerald with white).
+- Shell: the blue ambient layer is gone; chrome retoned from navy and emerald to graphite and bronze; console focus ring and text selection in bronze.
+- Shared kit (`lib/ui.tsx`, `lib/workstation.tsx`, `components/xo`): cards, buttons, dialogs, fields, toasts and chips on the tokens; sign-in keeps its own dark page.
+- Charts: heatfield, reactor, market heat tiles, radar and allocation colours moved from neon blue, cyan and green to bronze, green and brick; chart grid lines to faint warm ink.
+- Not changed: the marketing site (home, platform, modules, pricing), the report pages and the listing desk keep their own designs; no behaviour changed.
+
+**Results**: web 433 tests; lint, typecheck, build clean. Browser (development server): 30 console pages at 1440 wide checked for pale text on the ivory ground (none left) and screenshotted; three pages and the menu at 390 wide with no horizontal overflow; sign-in unchanged.
+
+## 21. Increment report — video promotions
+
+- A campaign may carry a muted, looping video (MP4 or WebM, 25 MB at most) shown in place of its picture; the picture stays required as the cover frame and is what visitors who prefer reduced motion see. Only the slide on screen plays; the whole slide stays one link to the destination.
+- Database (`20261014180000_exitos_ad_video.sql`): `video_path` with the generated-path pattern; the bucket accepts video/mp4 and video/webm up to 25 MB; a signed link is given only for a live campaign's picture or video (or to an operator); operators upload only into the pattern. Self-test `exitos_selftest_ad_video()`: 6 checks, passing locally and on the live project; the campaign self-test still passes 23/23 live.
+- Manager: a video upload beside the picture, previewed in the sidebar and phone previews.
+
+**Results**: web 436 tests; lint, typecheck, build clean. Browser: a WebM uploaded through the manager plays muted and looping in the founder's sidebar and the click opens the destination.

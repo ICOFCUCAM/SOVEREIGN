@@ -134,7 +134,7 @@ const BuyerDealRoom: React.FC = () => (
         <p>No deal room has been opened for your account.</p>
         <p className="mt-2">A room opens when a founder approves your access request under an NDA. It holds the documents that founder chooses to share with you. You see only your own room — never other bidders or their activity.</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Link to="/console/nda" className="inline-block rounded-sm bg-deal-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Access requests →</Link>
+          <Link to="/console/nda" className="inline-block rounded-sm bg-desk-gold px-4 py-2 text-[13px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Access requests →</Link>
           <Link to="/console/marketplace" className="inline-block rounded-sm border border-xo-line px-4 py-2 text-[13px] font-semibold text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Browse opportunities</Link>
         </div>
       </div>

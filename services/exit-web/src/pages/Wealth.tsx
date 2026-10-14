@@ -19,10 +19,10 @@ import { OFFER_WATERFALLS, SAMPLE_OFFERS, OFFER_COMPARISON, CAPTABLE_ANALYSIS } 
 const TAX = 0.238; // blended LTCG + NIIT estimate — illustrative; the engine has no tax model
 
 const ALLOC: { label: string; pct: number; note: string; tint: string }[] = [
-  { label: "Diversified portfolio", pct: 0.55, note: "Out of a single illiquid position", tint: "#34d399" },
-  { label: "Next venture / angel",  pct: 0.20, note: "Reinvest the operator edge",        tint: "#60a5fa" },
+  { label: "Diversified portfolio", pct: 0.55, note: "Out of a single illiquid position", tint: "#2F6B3F" },
+  { label: "Next venture / angel",  pct: 0.20, note: "Reinvest the operator edge",        tint: "#9A7536" },
   { label: "Real assets",           pct: 0.15, note: "Property, inflation hedge",          tint: "#a78bfa" },
-  { label: "Giving / DAF",          pct: 0.10, note: "Donor-advised fund, tax-efficient",  tint: "#fbbf24" },
+  { label: "Giving / DAF",          pct: 0.10, note: "Donor-advised fund, tax-efficient",  tint: "#9A6A12" },
 ];
 
 const WealthDemo: React.FC = () => {

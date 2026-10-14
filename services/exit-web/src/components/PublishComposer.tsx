@@ -41,37 +41,37 @@ export const PublishComposer: React.FC<{ listing?: Listing; post?: SocialPost; o
 
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div className="max-h-[88vh] w-full max-w-xl overflow-auto rounded-xl border border-white/10 bg-ink-800/95 p-6" onClick={(e) => e.stopPropagation()}>
+      <div className="max-h-[88vh] w-full max-w-xl overflow-auto rounded-xl border border-xo-line bg-xo-panel p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-deal-300">Publish · ExitOS Distribution Engine</div>
-            <div className="mt-0.5 text-lg font-bold text-white">{post.title}</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-xo-verified">Publish · ExitOS Distribution Engine</div>
+            <div className="mt-0.5 text-lg font-bold text-xo-text">{post.title}</div>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="rounded p-1 text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400"><CloseIcon /></button>
+          <button type="button" onClick={onClose} aria-label="Close" className="rounded p-1 text-xo-muted hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action"><CloseIcon /></button>
         </div>
 
         <textarea value={text} onChange={(e) => setText(e.target.value)}
-          className="mt-4 min-h-[150px] w-full resize-y rounded-md border border-white/10 bg-ink-900/70 p-3 text-[13px] leading-relaxed text-white/85 focus:border-deal-400/50 focus:outline-none" />
+          className="mt-4 min-h-[150px] w-full resize-y rounded-md border border-xo-line bg-xo-panel p-3 text-[13px] leading-relaxed text-xo-text focus:border-xo-verified/50 focus:outline-none" />
 
         <div className="mt-3">
-          <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40">Channels</div>
+          <div className="text-[10px] font-semibold uppercase tracking-wide text-xo-faint">Channels</div>
           <div className="mt-2 flex flex-wrap gap-2">
             {CHANNELS.map((c) => {
               const isConn = connected[c.id];
               const res = resultFor(c.id);
               return (
                 <button key={c.id} onClick={() => toggle(c.id)}
-                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] font-semibold ring-1 transition ${sel.has(c.id) ? "bg-deal-600/20 text-deal-200 ring-deal-400/40" : "text-white/55 ring-white/15 hover:text-white"}`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${isConn ? "bg-deal-400" : "bg-white/25"}`} title={isConn ? "Connected" : "Not connected"} />
+                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] font-semibold ring-1 transition ${sel.has(c.id) ? "bg-xo-verified/20 text-xo-verified ring-xo-action/40" : "text-xo-muted ring-xo-line hover:text-xo-text"}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${isConn ? "bg-deal-400" : "bg-xo-raise"}`} title={isConn ? "Connected" : "Not connected"} />
                   {c.label}
-                  {res && <span className={res.status === "done" ? "text-deal-300" : "text-red-300"}>{res.status === "done" ? "✓" : "✗"}</span>}
+                  {res && <span className={res.status === "done" ? "text-xo-verified" : "text-xo-risk"}>{res.status === "done" ? "✓" : "✗"}</span>}
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div className={`mt-4 rounded-lg border p-3 text-[12px] ${anyConnected ? "border-deal-400/30 bg-deal-600/[0.07] text-white/75" : "border-loi-400/30 bg-loi-500/[0.07] text-loi-100/90"}`}>
+        <div className={`mt-4 rounded-lg border p-3 text-[12px] ${anyConnected ? "border-xo-verified/30 bg-deal-600/[0.07] text-xo-muted" : "border-xo-caution/30 bg-loi-500/[0.07] text-xo-caution/90"}`}>
           {loading ? "Checking engine connection…"
             : anyConnected ? `ExitOS Distribution Engine is live — ${Object.values(connected).filter(Boolean).length} channel(s) connected. One click posts to the connected accounts.`
             : "No channels are connected yet. Add platform tokens in Admin → ExitOS Distribution Engine. Until then, use the per-network composer buttons below (real share dialogs)."}
@@ -83,7 +83,7 @@ export const PublishComposer: React.FC<{ listing?: Listing; post?: SocialPost; o
           <div className="ml-auto flex flex-wrap gap-1.5">
             {chosen.map((c) => (
               <button key={c.id} onClick={() => shareIntent(c.id)}
-                className="rounded-md px-2.5 py-1 text-[11px] font-semibold text-white/70 ring-1 ring-white/15 transition hover:bg-white/5 hover:text-white">{c.label} ↗</button>
+                className="rounded-md px-2.5 py-1 text-[11px] font-semibold text-xo-muted ring-1 ring-xo-line transition hover:bg-xo-raise hover:text-xo-text">{c.label} ↗</button>
             ))}
           </div>
         </div>
@@ -92,11 +92,11 @@ export const PublishComposer: React.FC<{ listing?: Listing; post?: SocialPost; o
           <div className="mt-4 space-y-1.5">
             {results.map((r) => (
               <div key={r.channel} className="flex items-start gap-2 text-[12px]">
-                <span className={r.status === "done" ? "text-deal-300" : "text-red-300"}>{r.status === "done" ? "✓" : "✗"}</span>
-                <span className="font-semibold text-white/80 capitalize">{r.channel}</span>
+                <span className={r.status === "done" ? "text-xo-verified" : "text-xo-risk"}>{r.status === "done" ? "✓" : "✗"}</span>
+                <span className="font-semibold text-xo-text capitalize">{r.channel}</span>
                 {r.status === "done"
-                  ? (r.url ? <a href={r.url} target="_blank" rel="noopener noreferrer" className="text-deal-300 hover:underline">view post ↗</a> : <span className="text-white/50">posted</span>)
-                  : <span className="text-white/50">{r.error}</span>}
+                  ? (r.url ? <a href={r.url} target="_blank" rel="noopener noreferrer" className="text-xo-verified hover:underline">view post ↗</a> : <span className="text-xo-faint">posted</span>)
+                  : <span className="text-xo-faint">{r.error}</span>}
               </div>
             ))}
           </div>

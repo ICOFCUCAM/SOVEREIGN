@@ -11,6 +11,8 @@ import { allListings, subscribeListings, listingOrigin, type Listing } from "../
 import { captureDealEvent } from "../lib/deal-events";
 import { requestNda, submitOffer, startDeal, advanceDeal, saveMandate, myMandate } from "../lib/exit-api";
 import PublishComposer from "../components/PublishComposer";
+import { ListingFactsView, ListingFactsStrip } from "../components/ListingFacts";
+import { providerLabel } from "../lib/identity";
 import type { Region } from "@exit/engines";
 import { parseNumber } from "../lib/intake-fields";
 import { plural } from "../lib/labels";
@@ -47,6 +49,8 @@ const AcquisitionRadar: React.FC = () => {
   const [offered, setOffered] = useState<Record<string, boolean>>({});
   const [ioi, setIoi] = useState<Record<string, IoiDraft>>({});
   const [showTerms, setShowTerms] = useState<Record<string, boolean>>({});
+  // each card opens on demand: folded, it shows the essentials; open, the full profile and the offer form
+  const [open, setOpen] = useState<Record<string, boolean>>({});
   const [watched, setWatched] = useState<Record<string, boolean>>({});
   const [savedMandate, setSavedMandate] = useState(false);
   const [publish, setPublish] = useState<Listing | null>(null);
@@ -185,37 +189,45 @@ const AcquisitionRadar: React.FC = () => {
 
         {/* ── opportunities ────────────────────────────────────────── */}
         <Section title="Opportunities · scored against your mandate" eyebrow={plural(listings.length, "listing")} className="min-w-0 self-start border border-xo-line"
-          foot={`Identities withheld until NDA — buyers see sector, region, revenue and growth. ${founderCount} of ${plural(listings.length, "listing")} come from founders; the rest are the bundled demo company and Sovereign product-catalog entries, labelled on each card.`}>
+          foot={`Identities withheld until NDA — buyers see what each business does, its stage, what is for sale, its model, stack, markets and asking price, with revenue and growth as brackets. ${founderCount} of ${plural(listings.length, "listing")} come from founders; the rest are the bundled demo company and Sovereign product-catalog entries, labelled on each card.`}>
           <ol className="divide-y divide-xo-line">
             {scored.map(({ listing: l, match }) => (
               <li key={l.id} className="px-4 py-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h3 className="text-[16px] font-semibold">
-                    {l.code} <span className="text-[12px] font-normal text-xo-muted">· {l.publicView.sector} · {l.publicView.region}</span>
+                    {l.code} <span className="text-[12px] font-normal text-xo-muted">· {l.publicView.sector} · {l.publicView.region === "Other" && l.facts ? "Global" : l.publicView.region}</span>
                     {l.productMeta && <span className="ml-2 border border-xo-line px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-muted">{l.productMeta.category}</span>}
                     {listingOrigin(l) === "demo" && <Provenance kind="demo" className="ml-2">Demo listing</Provenance>}
                     {listingOrigin(l) === "catalog" && <Provenance kind="registry" className="ml-2">Product catalog</Provenance>}
+                    {l.verification && <span title={`Owner's identity verified with ${providerLabel(l.verification.provider)} on ${new Date(l.verification.verifiedAt).toLocaleDateString()}`} className="ml-2 border border-xo-verified/50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-verified">✓ Verified seller · {providerLabel(l.verification.provider)}</span>}
                     {match.qualified && <span className="ml-2 border border-xo-verified/50 px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.08em] text-xo-verified">Qualified</span>}
                   </h3>
                   <span className="font-mono text-[22px] font-semibold tabular-nums text-xo-verified">{match.score}%<span className="sr-only"> match</span></span>
                 </div>
-                {l.productMeta && (
-                  <>
-                    <p className="mt-2 max-w-[75ch] text-[13px] leading-snug text-xo-muted">{l.productMeta.capability}</p>
-                    {l.productMeta.coverage && l.productMeta.coverage.length > 0 && <p className="mt-1 text-[12px] text-xo-faint">Coverage · {l.productMeta.coverage.join(" · ")}</p>}
-                    {l.productMeta.tags && l.productMeta.tags.length > 0 && (
-                      <ul className="mt-1.5 flex flex-wrap gap-1.5">{l.productMeta.tags.map((t) => <li key={t} className="border border-xo-line px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.06em] text-xo-muted">{t}</li>)}</ul>
+                {(() => { const summary = l.facts?.summary ?? l.productMeta?.capability; return summary && (
+                  <p className={`mt-2 max-w-[80ch] text-[13px] leading-relaxed text-xo-muted ${open[l.id] ? "" : "line-clamp-2"}`}>{summary}</p>
+                ); })()}
+                {l.facts && !open[l.id] && <ListingFactsStrip facts={l.facts} className="mt-2" />}
+                {open[l.id] && (
+                  <div id={`details-${l.id}`} className="mt-3 space-y-3 border-l-2 border-xo-action/40 pl-3">
+                    {l.facts && <ListingFactsView facts={l.facts} showSummary={false} />}
+                    {!l.facts && l.productMeta?.coverage && l.productMeta.coverage.length > 0 && <p className="text-[12px] text-xo-faint">Coverage · {l.productMeta.coverage.join(" · ")}</p>}
+                    {l.productMeta?.tags && l.productMeta.tags.length > 0 && (
+                      <ul className="flex flex-wrap gap-1.5">{l.productMeta.tags.map((t) => <li key={t} className="border border-xo-line px-1.5 py-px text-[10px] font-semibold uppercase tracking-[0.06em] text-xo-muted">{t}</li>)}</ul>
                     )}
-                  </>
+                    <div>
+                      <h4 className="text-[10px] font-semibold uppercase tracking-[0.12em] text-xo-faint">Fit against your mandate</h4>
+                      <ul className="mt-1 grid gap-1.5 sm:grid-cols-2">
+                        {match.reasons.map((r) => (
+                          <li key={r.label} className="flex items-baseline gap-2 text-[12px]">
+                            <span aria-hidden className={r.ok ? "text-xo-verified" : "text-xo-faint"}>{r.ok ? "✓" : "✗"}</span>
+                            <span><span className="sr-only">{r.ok ? "Meets: " : "Does not meet: "}</span><span className="font-semibold text-xo-text">{r.label}.</span> <span className="text-xo-muted">{r.detail}</span></span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 )}
-                <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
-                  {match.reasons.map((r) => (
-                    <li key={r.label} className="flex items-baseline gap-2 text-[12px]">
-                      <span aria-hidden className={r.ok ? "text-xo-verified" : "text-xo-faint"}>{r.ok ? "✓" : "✗"}</span>
-                      <span><span className="sr-only">{r.ok ? "Meets: " : "Does not meet: "}</span><span className="font-semibold text-xo-text">{r.label}.</span> <span className="text-xo-muted">{r.detail}</span></span>
-                    </li>
-                  ))}
-                </ul>
                 <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-xo-muted">
                   {l.productMeta
                     ? <>
@@ -235,13 +247,15 @@ const AcquisitionRadar: React.FC = () => {
                     }}
                     className={`${SMALL_BTN} border-xo-line text-xo-muted hover:text-xo-text`}>{watched[l.id] ? "★ Following" : "☆ Follow"}</button>
                   <button type="button" onClick={() => setPublish(l)} className={`${SMALL_BTN} border-xo-action/50 text-xo-action`}>↗ Publish</button>
+                  <button type="button" aria-expanded={!!open[l.id]} aria-controls={`details-${l.id}`} onClick={() => setOpen((st) => ({ ...st, [l.id]: !st[l.id] }))}
+                    className={`${SMALL_BTN} border-xo-line text-xo-text hover:bg-xo-raise`}>{open[l.id] ? "Hide details ▴" : "View details ▾"}</button>
                   <button type="button" onClick={() => setPending((st) => ({ ...st, [l.id]: "nda" }))}
                     aria-expanded={pending[l.id] === "nda"} aria-controls={`confirm-${l.id}`}
                     className={`${SMALL_BTN} ml-auto border-xo-verified bg-xo-verified/90 text-ink-950 hover:bg-xo-verified`}
                     disabled={!!requested[l.id]}>{requested[l.id] ? "✓ NDA requested" : "Express interest (request NDA)"}</button>
                 </div>
-                {/* indicative offer — a first-class record the founder resolves */}
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px]">
+                {/* indicative offer — a first-class record the founder resolves (in the open card) */}
+                {(open[l.id] || offered[l.id]) && <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px]">
                   <label htmlFor={`offer-${l.id}`} className="text-xo-muted">Indicative offer ($M)</label>
                   <input id={`offer-${l.id}`} className={`${XO_INPUT} w-28 py-1 font-mono`} inputMode="decimal" placeholder="M"
                     value={offerInput[l.id] ?? ""} onChange={(e) => { setOfferInput((st) => ({ ...st, [l.id]: e.target.value })); setOfferError((st) => ({ ...st, [l.id]: "" })); }}
@@ -256,8 +270,8 @@ const AcquisitionRadar: React.FC = () => {
                     disabled={!!offered[l.id]}>{offered[l.id] ? "✓ Offer submitted" : "Submit offer"}</button>
                   <span id={`offer-${l.id}-msg`} role={offerError[l.id] ? "alert" : undefined} className="text-[11px] text-xo-risk">{offerError[l.id]}</span>
                   {!offered[l.id] && <button type="button" className="text-[11px] font-semibold text-xo-action hover:underline" aria-expanded={!!showTerms[l.id]} onClick={() => setShowTerms((st) => ({ ...st, [l.id]: !st[l.id] }))}>{showTerms[l.id] ? "Hide terms" : "Add terms (structured IOI)"}</button>}
-                </div>
-                {showTerms[l.id] && !offered[l.id] && <IoiTermsFields id={`ioi-${l.id}`} value={ioi[l.id] ?? EMPTY_IOI} onChange={(d) => setIoi((st) => ({ ...st, [l.id]: d }))} />}
+                </div>}
+                {open[l.id] && showTerms[l.id] && !offered[l.id] && <IoiTermsFields id={`ioi-${l.id}`} value={ioi[l.id] ?? EMPTY_IOI} onChange={(d) => setIoi((st) => ({ ...st, [l.id]: d }))} />}
                 {pending[l.id] && (
                   <div id={`confirm-${l.id}`} role="group" aria-label="Confirm action" className="mt-3 border border-xo-caution/50 bg-xo-ink px-3 py-2 text-[12px]">
                     <p className="text-xo-text">{pending[l.id] === "nda"

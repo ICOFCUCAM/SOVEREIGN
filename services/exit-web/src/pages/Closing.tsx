@@ -97,7 +97,7 @@ const Closing: React.FC = () => {
   };
 
   const probTone = prob >= 0.8 ? "text-xo-verified" : prob >= 0.6 ? "text-xo-caution" : "text-xo-risk";
-  const BTN = "rounded-sm bg-deal-700 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-deal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
+  const BTN = "rounded-sm bg-desk-gold px-3 py-1.5 text-[12px] font-semibold text-desk-ink hover:bg-[#AA8443] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const BTN_GHOST = "rounded-sm border border-xo-line px-3 py-1.5 text-[12px] font-medium text-xo-text hover:bg-xo-raise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
   const tape = useMemo(() => buildMarketTape(), []);
   const remote = useDocumentRemote();

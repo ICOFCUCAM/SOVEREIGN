@@ -82,7 +82,7 @@ const CommandPalette: React.FC<{ items: readonly NavItem[]; actions?: readonly P
 
   return (
     <div className="fixed inset-0 z-[95] flex items-start justify-center bg-black/60 px-4 pt-[14vh] backdrop-blur-sm" onClick={() => onOpenChange(false)}>
-      <div role="dialog" aria-modal="true" aria-label="Go to a page" className="w-full max-w-xl overflow-hidden rounded-xl border border-white/10 bg-ink-800 shadow-2xl shadow-black/60" onClick={(e) => e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label="Go to a page" className="w-full max-w-xl overflow-hidden rounded-xl border border-white/10 bg-ex-2 shadow-2xl shadow-black/60" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3 border-b border-white/10 px-4">
           <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-white/40"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
           <input ref={input} value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={onKey} placeholder="Go to a page…"
@@ -96,7 +96,7 @@ const CommandPalette: React.FC<{ items: readonly NavItem[]; actions?: readonly P
             return (
               <li key={`${n.to}-${n.group}`} id={`${id}-${i}`} role="option" aria-selected={i === at}
                 onMouseMove={() => setAt(i)} onClick={() => go(n)}
-                className={`flex cursor-pointer items-center justify-between gap-4 rounded-md px-3 py-2.5 ${i === at ? "bg-deal-600/20 ring-1 ring-deal-400/40" : ""}`}>
+                className={`flex cursor-pointer items-center justify-between gap-4 rounded-md px-3 py-2.5 ${i === at ? "bg-ex-bronze/20 ring-1 ring-ex-bronze/40" : ""}`}>
                 <span className="min-w-0">
                   <span className="block truncate text-[13.5px] font-medium text-white">{n.label}</span>
                   {n.name && n.name !== n.label && <span className="block truncate text-[11px] text-white/50">{n.name}</span>}
@@ -109,7 +109,7 @@ const CommandPalette: React.FC<{ items: readonly NavItem[]; actions?: readonly P
             const i = found.length + j;
             return (
               <li key={a.label} id={`${id}-${i}`} role="option" aria-selected={i === at} onMouseMove={() => setAt(i)} onClick={() => runAct(a)}
-                className={`flex cursor-pointer items-center justify-between gap-4 rounded-md px-3 py-2.5 ${i === at ? "bg-deal-600/20 ring-1 ring-deal-400/40" : ""}`}>
+                className={`flex cursor-pointer items-center justify-between gap-4 rounded-md px-3 py-2.5 ${i === at ? "bg-ex-bronze/20 ring-1 ring-ex-bronze/40" : ""}`}>
                 <span className="min-w-0 truncate text-[13.5px] font-medium text-white">{a.label}</span>
                 <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">Action</span>
               </li>

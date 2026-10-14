@@ -1,4 +1,6 @@
 import type { Sector } from "./company-intake";
+import type { ListingFacts, Stage, ForSale, Model, AskingMode } from "./listing-facts";
+import type { Region } from "@exit/engines";
 
 // ── SOVEREIGN — PRODUCT CATALOG ─────────────────────────────────────
 // The Sovereign product estate (sovereigndo.com), transcribed verbatim from
@@ -21,6 +23,7 @@ export interface SovereignProduct {
   readonly coverage?: readonly string[];
   readonly tags?: readonly string[];
   readonly acquisitionReadyText?: string; // featured acquisition-ready asking figure, e.g. "$5.9M"
+  readonly facts?: ListingFacts;          // the buyer-facing facts every listing card carries
 }
 
 export const SOVEREIGN_OWNER_ACCOUNT = "acct-admin-sovereign";
@@ -105,6 +108,27 @@ const CORE: SovereignProduct[] = [
   { id: "sovereign-dispatch", name: "Sovereign Dispatch", category: "Operations", label: "Institutional Trust Infrastructure", description: "Institutional trust infrastructure — governed, certified and permanently verifiable official records.", sector: "media_content", valueLabel: "Deployment value", valueText: "$6M–$15M" },
   { id: "deployment-engine", name: "Deployment Engine", category: "Operations", label: "Sovereign Deployment Infrastructure", description: "From acquisition to live, automatically.", sector: "developer_tools" },
 
+  // ── Strategic Intelligence Stack (restored) ──
+  // The 16 engines of the Emergency AI intelligence stack, from sovereign-os (apps/web/components/
+  // IntelligenceStack.tsx), as first listed on the exchange in June 2026: name, capability and the
+  // question each answers are the source's own words.
+  { id: "osint", name: "OSINT Engine", category: "Strategic Intelligence", label: "Tier 01 · Observe · Intelligence Acquisition Layer", description: "Continuous open-source acquisition across news, government, social, blogs, public databases, financial filings and competitor surfaces. It answers: What just changed in the world?", sector: "ai_infra" },
+  { id: "media-monitoring", name: "Media Monitoring Engine", category: "Strategic Intelligence", label: "Tier 01 · Observe · Intelligence Acquisition Layer", description: "Tracks mentions, narratives, sentiment, propagation velocity and influence campaigns across every relevant channel. It answers: Who is talking? What are they saying? How fast is it spreading?", sector: "media_content" },
+  { id: "stakeholder-monitoring", name: "Stakeholder Monitoring Engine", category: "Strategic Intelligence", label: "Tier 01 · Observe · Intelligence Acquisition Layer", description: "Tracks investors, regulators, partners, customers, journalists and ministers under one institutional view. It answers: Who matters? Who shifted position? Who became hostile?", sector: "ai_infra" },
+  { id: "narrative-intel", name: "Narrative Intelligence Engine", category: "Strategic Intelligence", label: "Tier 02 · Understand · Intelligence Processing Layer", description: "Builds narrative maps, influence maps and conversation clusters across the public record. It answers: Which narratives are growing? Which are dying? Who is driving them?", sector: "ai_infra" },
+  { id: "competitive-intel", name: "Competitive Intelligence Engine", category: "Strategic Intelligence", label: "Tier 02 · Understand · Intelligence Processing Layer", description: "Watches competitor products, acquisitions, hiring, patents and partnerships under one continuous feed. It answers: What are competitors doing? What is changing?", sector: "ai_infra" },
+  { id: "strategic-signal", name: "Strategic Signal Engine", category: "Strategic Intelligence", label: "Tier 02 · Understand · Intelligence Processing Layer", description: "Surfaces weak signals, emerging threats and emerging opportunities before they reach the institutional eye. It answers: What is forming that we have not yet noticed?", sector: "ai_infra" },
+  { id: "executive-briefing", name: "Executive Briefing Engine", category: "Strategic Intelligence", label: "Tier 03 · Advise · Executive Intelligence Layer", description: "Every morning: what happened, why it matters, what leadership should know. Produces CEO, minister and executive briefings on schedule. It answers: What does the principal need to know before the day begins?", sector: "enterprise_saas" },
+  { id: "risk-intel", name: "Risk Intelligence Engine", category: "Strategic Intelligence", label: "Tier 03 · Advise · Executive Intelligence Layer", description: "Continuous monitoring of operational, financial, political and reputational risk — with score, impact forecast and response options. It answers: Where is exposure changing? What is the impact? What are the response options?", sector: "enterprise_saas" },
+  { id: "decision-support", name: "Decision Support Engine", category: "Strategic Intelligence", label: "Tier 03 · Advise · Executive Intelligence Layer", description: "Leadership asks: should we do X? The system returns Option A · Option B · Option C — each carrying benefits, risks, probability and cost. It answers: Of the available options, which carries the institutional advantage?", sector: "enterprise_saas" },
+  { id: "scenario-planning", name: "Scenario Planning Engine", category: "Strategic Intelligence", label: "Tier 04 · Predict · Forecasting Layer", description: "What if oil rises 40%? What if a critical supplier fails? What if a cyber-attack lands tomorrow? Returns projected outcomes and mitigation plans. It answers: How does the institution behave under stress?", sector: "ai_infra" },
+  { id: "strategic-forecasting", name: "Strategic Forecasting Engine", category: "Strategic Intelligence", label: "Tier 04 · Predict · Forecasting Layer", description: "Forecasts markets, public sentiment, regulatory direction and operational impact across the institutional horizon. It answers: Where is the world heading and how does the institution position?", sector: "ai_infra" },
+  { id: "knowledge-graph", name: "Institutional Knowledge Graph", category: "Strategic Intelligence", label: "Tier 05 · Understand · Institutional Memory Layer", description: "Stores campaigns, crises, decisions and outcomes — every artefact addressable, every relationship preserved. It answers: What happened last time? What worked? What failed?", sector: "enterprise_saas" },
+  { id: "lessons-learned", name: "Lessons Learned Engine", category: "Strategic Intelligence", label: "Tier 05 · Understand · Institutional Memory Layer", description: "Automatically composes postmortems and recommendations; carries institutional memory forward into the next campaign. It answers: What lessons did the last cycle leave us with?", sector: "enterprise_saas" },
+  { id: "crisis-detection", name: "Crisis Detection Engine", category: "Strategic Intelligence", label: "Tier 06 · Coordinate · Crisis Command Layer", description: "Continuous detection of cyber attack, media attack, disinformation, operational incidents and reputational threats — each surfaced with provenance. It answers: What is happening to us right now, and how do we know?", sector: "enterprise_saas" },
+  { id: "crisis-response", name: "Crisis Response Engine", category: "Strategic Intelligence", label: "Tier 06 · Coordinate · Crisis Command Layer", description: "Automatically prepares the executive briefing, the press response, the stakeholder update and the action plan — every artefact under audit. It answers: What is the institutional response, and is it defensible?", sector: "enterprise_saas" },
+  { id: "mission-control", name: "Mission Control Dashboard", category: "Strategic Intelligence", label: "Tier 07 · Coordinate · Strategic Coordination Layer", description: "Leadership sees threats, opportunities, stakeholders, markets, operations and narratives in one defensible institutional view. It answers: What is the institutional posture, right now, across every relevant axis?", sector: "enterprise_saas" },
+
   // ── Portfolio companies ──
   // Further companies built by the owner, taken from each product's own repository (name and what it
   // does). No published value exists for these, so none is shown.
@@ -164,4 +188,129 @@ const CORE: SovereignProduct[] = [
     sector: "logistics_freight", coverage: ["United Kingdom"], tags: ["Man & van", "Home moves", "Goods transport"] },
 ];
 
-export const SOVEREIGN_PRODUCTS: readonly SovereignProduct[] = [...CORE, ...reloProducts];
+// ── Buyer-facing facts ──────────────────────────────────────────────
+// The same questions a founder answers when listing: what it is (a fuller description), stage,
+// what is for sale, how it makes money, what it is built with, where it sells, and the price.
+// Stage and stack are given only where the product's own repository shows them; otherwise the
+// card leaves them out rather than guess.
+
+interface FactsIn {
+  readonly summary?: string; readonly stage?: Stage; readonly forSale?: readonly ForSale[]; readonly models: readonly Model[];
+  readonly builtWith?: readonly string[]; readonly basedIn?: string; readonly region: Region; readonly markets: readonly string[];
+  readonly askingMode?: AskingMode; readonly askingLowUsd?: number;
+}
+const PRODUCT_SALE: readonly ForSale[] = ["source_code_ip", "brand_domain", "infrastructure"];
+const GOV: Omit<FactsIn, "summary"> = { models: ["government_contract", "licence"], region: "Other", markets: ["National governments", "Ministries & agencies", "Public institutions"] };
+const WEB_STACK = ["React", "TypeScript", "Supabase", "PostgreSQL"];
+// the intelligence engines sell with the Sovereign platform subscription (Operator $490/mo, Institutional $4,900/mo, published)
+const INTEL: FactsIn = { models: ["subscription", "licence"], region: "Other", markets: ["Governments", "Ministries", "Enterprises", "Executives"] };
+
+const FACTS: Readonly<Record<string, FactsIn>> = {
+  // ── Governance ──
+  civicos: { ...GOV, stage: "concept", builtWith: ["AI-native DPI blueprint (92 documents)"],
+    summary: "A deployable government operating system for the modern state: a national runtime that binds ministries, treasury, justice, health, emergency services and oversight into one AI-governed operating system. Delivered as sovereign state capability, with modules and tiers for ministries, agencies, councils and public administration, and a 30-year evolution path toward sovereign intelligence infrastructure." },
+  "national-shell": { ...GOV, summary: "The sovereign orchestration layer that binds a government into one runtime: identity, services, data exchange and policy enforcement shared across every ministry, so a state runs as one coordinated system rather than disconnected departments." },
+  "national-coordination-engine": { ...GOV, summary: "Cross-government dependency and institutional coordination. It maps which institutions depend on which, tracks shared programmes and deadlines, and surfaces conflicts and bottlenecks between ministries before they stall delivery." },
+  treasuryos: { ...GOV, markets: ["Ministries of finance", "National treasuries", "Central banks"], summary: "Sovereign financial orchestration for government treasuries: budget execution, cash management, payments to and from the state, and real-time visibility of public funds across ministries, with full audit trails." },
+  healthos: { ...GOV, markets: ["Ministries of health", "Public health agencies", "Hospital networks"], summary: "A national healthcare operational runtime: facility and workforce coordination, patient flow, supply chains and public-health reporting run on one system, giving a ministry a live view of national health capacity." },
+  justiceos: { ...GOV, markets: ["Ministries of justice", "Courts", "Prosecution services"], summary: "Judicial and constitutional operational infrastructure: case management, court scheduling, records and constitutional workflows on one runtime, cutting backlogs and making the justice system auditable end to end." },
+  educationos: { ...GOV, markets: ["Ministries of education", "School systems", "Universities"], summary: "National education coordination infrastructure: enrolment, staffing, curriculum delivery, examinations and outcomes reporting across a country's schools and institutions, in one operational system." },
+  transportos: { ...GOV, markets: ["Ministries of transport", "Transit authorities", "Road and rail agencies"], summary: "National transport and mobility orchestration: networks, fleets, licensing and infrastructure programmes coordinated in one runtime, with live operational data for planning and incident response." },
+  emergencyos: { ...GOV, markets: ["Emergency services", "Civil protection agencies", "Disaster management"], summary: "A national emergency-response and crisis-coordination runtime: incident intake, resource dispatch, inter-agency command and public alerting in one system, built for the moments when coordination decides outcomes." },
+  policeos: { ...GOV, markets: ["Police services", "Ministries of interior", "Public safety agencies"], summary: "National law-enforcement operational infrastructure: incident and case records, deployment, evidence handling and oversight on one platform, with accountability built into every action." },
+  "anti-corruption-intelligence-os": { ...GOV, models: ["government_contract", "licence"], markets: ["Anti-corruption agencies", "Audit institutions", "Regulators"], summary: "AI-native anti-corruption operational intelligence: it analyses procurement, payments, assets and relationships to flag risk patterns, prioritises cases for investigators and keeps a defensible evidence trail." },
+  "act-anti-corruption-tower": { ...GOV, markets: ["Anti-corruption agencies", "Governments", "Development partners"], summary: "Institutional integrity, instrumented: a command tower that gives integrity bodies one live view of risk indicators, investigations and reforms across institutions, so integrity becomes measurable and reportable." },
+  // ── Finance ──
+  "veritas-financial-sovereign-stack": { models: ["government_contract", "licence"], region: "Other", markets: ["Central banks", "Ministries of finance", "National banks"],
+    summary: "Treasury, monetary, settlement, banking and reserve infrastructure operated at civilisation scale. A sovereign financial stack for states and their institutions, with financial integrity end to end: from reserve management and settlement to national banking rails." },
+  "mobile-pay": { models: ["transaction_fees", "licence"], region: "Other", markets: ["Telecom operators", "Banks", "Emerging markets"],
+    summary: "A national mobile-money network in a box: wallets, agent networks, merchant payments, transfers and settlement, ready to launch for an operator, bank or state that wants financial inclusion at national scale." },
+  // ── Mobility ──
+  flytgo: { models: ["commission"], region: "Europe", markets: ["Movers & transport companies", "Households", "Businesses"],
+    summary: "The global logistics and transport marketplace: customers post moves and shipments, vetted transport providers quote and deliver, and the platform handles matching, booking and payment, earning a commission on every job." },
+  "flytgo-norway": { stage: "live", models: ["commission"], basedIn: "Norway", region: "Europe", markets: ["Norway"],
+    summary: "Norway's moving and transport marketplace: households and businesses book moves, van transport and deliveries from local providers across Oslo, Bergen, Trondheim, Stavanger and beyond, with quotes, booking and payment in one place." },
+  // ── Intelligence ──
+  "veritas-os": { models: ["licence", "subscription"], region: "Other", markets: ["Governments", "Enterprises", "Institutions"],
+    summary: "Knowledge and organisational intelligence infrastructure: organisational memory, institutional knowledge, search, reference and knowledge governance for institutions at any scale, so what an organisation knows survives staff changes and is findable when it matters." },
+  "emergency-ai": { models: ["subscription", "licence"], region: "Other", markets: ["Governments", "Security agencies", "Enterprises"],
+    summary: "Intelligence acquisition, strategic analysis and institutional intelligence generation: briefings, assessments, narrative and decision support for the principals who must decide, produced continuously from monitored sources." },
+  // ── Elections ──
+  elecpro: { ...GOV, markets: ["Electoral commissions", "Governments", "Election observers"],
+    summary: "Sovereign electoral infrastructure: voter registration, ballots, tabulation, observation and the whole electoral cycle operated under one runtime, under sovereign jurisdiction and continuous audit." },
+  // ── Education ──
+  edupro: { models: ["licence", "subscription"], region: "Other", markets: ["Ministries of education", "Schools", "Universities"],
+    summary: "A nation's learning backbone: learning delivery, credentials and progress records for schools and institutions, with verifiable certificates a country can trust." },
+  futech: { models: ["licence", "subscription"], region: "Other", markets: ["Universities", "Colleges"],
+    summary: "Transforming university administration: admissions, registration, student records, fees, timetabling and academic workflows on one platform, sold in tiers from $80K." },
+  // ── Commerce ──
+  "marketplace-infrastructure": { models: ["licence", "commission"], region: "Other", markets: ["Marketplace operators", "Retailers", "Enterprises"],
+    summary: "Multi-vendor commerce, ready to run: vendor onboarding, catalogue, orders, payments and payouts, so an operator can launch a marketplace without building the platform." },
+  // ── Operations ──
+  exitos: { stage: "beta", models: ["subscription", "commission"], builtWith: ["React", "TypeScript", "Supabase", "PostgreSQL", "Edge Functions"], region: "Other", markets: ["Founders", "Acquirers", "Advisers"],
+    summary: "The operating system founders use to run an exit, from sourcing to closed deal: valuation, readiness, data room, buyer matching, NDAs, offers, transactions and closing on one runtime, with subscriptions for founders and buyers and a success fee on closed deals." },
+  "veritas-operations": { models: ["subscription"], region: "Other", markets: ["Enterprises", "SMBs"],
+    summary: "Autonomous company operations: operational management, workflow orchestration, accounting intelligence and compliance as a digital operations layer for enterprises." },
+  "sovereign-dispatch": { models: ["subscription", "licence"], builtWith: ["Node.js", "TypeScript", "PostgreSQL"], region: "Other", markets: ["Governments", "Regulated enterprises", "Boards"],
+    summary: "Institutional publication infrastructure: PDF, DOCX and PPTX rendering for board reports, policy documents, regulatory submissions and briefing packages, with every artifact carrying chain-of-custody through one defensible audit log." },
+  "deployment-engine": { models: ["licence"], region: "Other", markets: ["Acquirers", "Enterprises"],
+    summary: "From acquisition to live, automatically: takes an acquired product and stands it up on the buyer's own infrastructure, with environments, domains and configuration provisioned for them." },
+  // ── Strategic Intelligence Stack ──
+  "osint": INTEL,
+  "media-monitoring": INTEL,
+  "stakeholder-monitoring": INTEL,
+  "narrative-intel": INTEL,
+  "competitive-intel": INTEL,
+  "strategic-signal": INTEL,
+  "executive-briefing": INTEL,
+  "risk-intel": INTEL,
+  "decision-support": INTEL,
+  "scenario-planning": INTEL,
+  "strategic-forecasting": INTEL,
+  "knowledge-graph": INTEL,
+  "lessons-learned": INTEL,
+  "crisis-detection": INTEL,
+  "crisis-response": INTEL,
+  "mission-control": INTEL,
+  // ── Portfolio companies ──
+  deploypro: { stage: "beta", models: ["subscription", "licence"], builtWith: ["Docker", "Traefik", "PostgreSQL", "Node.js"], region: "Other", markets: ["Developers", "Agencies", "SMBs"] },
+  cineforge: { stage: "live", models: ["subscription"], builtWith: ["TypeScript", "Supabase", "Stripe", "RunPod GPUs", "Wan 2.1 / Hunyuan Video", "FFmpeg"], region: "Other", markets: ["Creators", "Studios", "Educators", "Marketers"] },
+  balancevid: { stage: "prototype", models: ["subscription"], builtWith: ["Node.js", "FFmpeg"], region: "Other", markets: ["Creators", "Educators", "Media"] },
+  "website-visibility-platform": { stage: "live", models: ["subscription"], builtWith: ["TypeScript", "PostgreSQL", "Google APIs"], region: "Other", markets: ["SMBs", "Agencies", "Website owners"] },
+  docuforge: { models: ["subscription"], builtWith: WEB_STACK, region: "Other", markets: ["Job seekers", "Professionals", "Authors"] },
+  docuai: { models: ["subscription"], builtWith: WEB_STACK, region: "Other", markets: ["Job seekers", "Professionals", "Publishers"] },
+  "architect-os": { stage: "prototype", models: ["subscription"], builtWith: ["TypeScript", "OpenAI", "Claude"], region: "Other", markets: ["Founders", "Agencies", "Enterprises"] },
+  wankongos: { stage: "prototype", models: ["subscription"], builtWith: ["TypeScript", "Next.js", "Hono"], region: "Other", markets: ["SMBs", "Enterprises"] },
+  wankong: { models: ["commission", "subscription"], builtWith: WEB_STACK, region: "Other", markets: ["Authors", "Musicians", "Creators", "Readers & listeners"] },
+  smartkong: { models: ["commission"], builtWith: ["React", "TypeScript", "Express", "PostgreSQL"], region: "Other", markets: ["Online shoppers", "Global"] },
+  afrinkong: { models: ["commission"], basedIn: "Cameroon", region: "Africa", markets: ["Travellers to Africa", "Tour operators"] },
+  privacyos: { stage: "prototype", models: ["subscription"], builtWith: ["Next.js", "TypeScript", "Supabase", "Claude / OpenAI"], region: "Other", markets: ["Individuals", "Executives", "Families", "Organisations"] },
+  "flyttgo-real-estate": { stage: "prototype", models: ["subscription", "commission"], builtWith: ["Next.js", "TypeScript", "PostgreSQL / PostGIS", "Supabase"], basedIn: "Norway", region: "Europe", markets: ["Norway", "Sweden"] },
+  europedoor: { stage: "live", models: ["not_monetised"], builtWith: ["Python", "Static site", "Vercel"], region: "Europe", markets: ["Travellers to Europe"] },
+  "fast-man-and-van": { stage: "live", models: ["services", "commission"], builtWith: ["React", "TypeScript"], basedIn: "United Kingdom", region: "Europe", markets: ["United Kingdom"] },
+};
+
+const usdOf = (t?: string): number | undefined => { const m = t?.match(/^\$([\d.]+)M$/); return m ? +m[1] * 1e6 : undefined; };
+
+function factsFor(p: SovereignProduct): ListingFacts {
+  const f = FACTS[p.id];
+  const relo = p.id.endsWith("-relocation");
+  const country = relo ? p.name.replace(/ Relocation & Logistics Marketplace$/, "") : undefined;
+  const ack = usdOf(p.acquisitionReadyText);
+  return {
+    summary: f?.summary ?? (relo
+      ? `${p.description} Households, businesses and relocating employees book moves, van transport, storage and delivery from vetted local providers in ${p.coverage?.join(", ")}, with quotes, booking and payment on one platform. The operator earns a commission on every job, and the market is ready for a new owner to run.`
+      : p.description),
+    ...(f?.stage ?? (relo ? "live" : undefined) ? { stage: (f?.stage ?? "live") as Stage } : {}),
+    forSale: f?.forSale ?? PRODUCT_SALE,
+    models: f?.models ?? (relo ? ["commission"] : []),
+    builtWith: f?.builtWith ?? [],
+    basedIn: f?.basedIn ?? (relo && country ? (country === "USA" ? "United States" : country === "UK" ? "United Kingdom" : country) : ""),
+    region: f?.region ?? (country === "USA" || country === "Canada" ? "North America" : "Europe"),
+    markets: f?.markets ?? (relo && country ? [country, ...(p.coverage ?? [])] : []),
+    askingMode: ack ? "price" : "on_request",
+    ...(ack ? { askingLowUsd: ack } : {}),
+  };
+}
+
+export const SOVEREIGN_PRODUCTS: readonly SovereignProduct[] = [...CORE, ...reloProducts].map((p) => ({ ...p, facts: factsFor(p) }));

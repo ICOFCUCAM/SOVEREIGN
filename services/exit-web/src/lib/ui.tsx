@@ -44,14 +44,14 @@ export const CloseIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
 );
 
 export const Card: React.FC<{ children: React.ReactNode; className?: string; id?: string }> = ({ children, className = "", id }) => (
-  <div id={id} className={`rounded-lg border border-white/10 bg-ink-800/60 ${className}`}>{children}</div>
+  <div id={id} className={`rounded-lg border border-xo-line bg-xo-panel ${className}`}>{children}</div>
 );
 
 export const Kpi: React.FC<{ label: string; value: string; sub?: string; accent?: string }> = ({ label, value, sub, accent }) => (
   <Card className="p-5">
-    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">{label}</div>
+    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-xo-muted">{label}</div>
     <div className="mt-2 text-3xl font-bold tabular-nums" style={accent ? { color: accent } : undefined}>{value}</div>
-    {sub && <div className="mt-1 text-[11px] text-white/55">{sub}</div>}
+    {sub && <div className="mt-1 text-[11px] text-xo-muted">{sub}</div>}
   </Card>
 );
 
@@ -59,15 +59,15 @@ export const Button: React.FC<
   React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" | "ok" }
 > = ({ variant = "primary", className = "", ...p }) => {
   const v = {
-    primary: "bg-deal-700 hover:bg-deal-800 text-white",
-    ghost:   "bg-transparent hover:bg-white/5 text-white/80 ring-1 ring-white/15",
+    primary: "bg-desk-gold hover:bg-[#AA8443] text-desk-ink",
+    ghost:   "bg-transparent hover:bg-xo-raise text-xo-text ring-1 ring-xo-line",
     danger:  "bg-red-600 hover:bg-red-500 text-white",
-    ok:      "bg-deal-700 hover:bg-deal-800 text-white",
+    ok:      "bg-desk-gold hover:bg-[#AA8443] text-desk-ink",
   }[variant];
   return (
     <button
       {...p}
-      className={`inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition active:translate-y-px active:brightness-95 motion-reduce:active:translate-y-0 disabled:active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-deal-400 focus-visible:ring-offset-1 focus-visible:ring-offset-ink-900 disabled:opacity-40 disabled:cursor-not-allowed ${v} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition active:translate-y-px active:brightness-95 motion-reduce:active:translate-y-0 disabled:active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action focus-visible:ring-offset-1 focus-visible:ring-offset-xo-ink disabled:opacity-40 disabled:cursor-not-allowed ${v} ${className}`}
     />
   );
 };
@@ -135,8 +135,8 @@ export const Toast: React.FC = () => {
   return (
     <div role="status" aria-live="polite" className="pointer-events-none fixed bottom-6 right-6 z-[100]">
       {msg && (
-        <div key={n} className="ex-toast flex items-center gap-2.5 rounded-lg border border-deal-400/30 bg-ink-800/95 px-4 py-2.5 text-[13px] font-medium text-white shadow-xl shadow-black/40 backdrop-blur">
-          <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-deal-300"><path d="M20 6 9 17l-5-5" /></svg>
+        <div key={n} className="ex-toast flex items-center gap-2.5 rounded-lg border border-xo-verified/30 bg-xo-panel px-4 py-2.5 text-[13px] font-medium text-xo-text shadow-xl shadow-black/40 backdrop-blur">
+          <svg aria-hidden width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-xo-verified"><path d="M20 6 9 17l-5-5" /></svg>
           {msg}
         </div>
       )}
@@ -182,16 +182,16 @@ export const Modal: React.FC<{
     // the backdrop fades and the dialog settles into place (not under reduced motion); scrolling inside
     // never carries on into the page behind (overscroll-contain)
     <div className="ex-scrim fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto overscroll-contain bg-black/70 px-4 py-[6vh] backdrop-blur-sm" onClick={onClose}>
-      <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={`ex-dialog w-full ${maxW} rounded-xl border border-white/10 bg-ink-800 shadow-2xl shadow-black/60 focus:outline-none`} onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-4">
+      <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={`ex-dialog w-full ${maxW} rounded-xl border border-xo-line bg-xo-panel shadow-2xl shadow-black/60 focus:outline-none`} onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between gap-4 border-b border-xo-line px-6 py-4">
           <div className="min-w-0">
-            <h2 id={titleId} className="font-serif text-lg font-bold leading-tight text-white">{title}</h2>
-            {subtitle && <div className="mt-0.5 text-[12px] text-white/50">{subtitle}</div>}
+            <h2 id={titleId} className="font-serif text-lg font-bold leading-tight text-xo-text">{title}</h2>
+            {subtitle && <div className="mt-0.5 text-[12px] text-xo-faint">{subtitle}</div>}
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded-md p-1 text-white/50 transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action"><CloseIcon /></button>
+          <button type="button" onClick={onClose} aria-label="Close" className="shrink-0 rounded-md p-1 text-xo-faint transition hover:bg-xo-raise hover:text-xo-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action"><CloseIcon /></button>
         </div>
         <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-h-[64vh] overflow-y-auto overscroll-contain px-6 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-xo-action">{children}</div>
-        {footer && <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-white/10 px-6 py-4">{footer}</div>}
+        {footer && <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-xo-line px-6 py-4">{footer}</div>}
       </div>
     </div>
   );
@@ -199,21 +199,21 @@ export const Modal: React.FC<{
 
 export const Field: React.FC<{ label: string; children: React.ReactNode; hint?: string }> = ({ label, children, hint }) => (
   <label className="block">
-    <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-white/50">{label}</span>
+    <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-xo-faint">{label}</span>
     {children}
-    {hint && <span className="mt-1 block text-xs text-white/60">{hint}</span>}
+    {hint && <span className="mt-1 block text-xs text-xo-muted">{hint}</span>}
   </label>
 );
 
 export const inputCls =
-  "w-full rounded-md border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-white placeholder-white/30 outline-none focus:border-deal-400 focus:ring-1 focus:ring-deal-400/50";
+  "w-full rounded-md border border-xo-line bg-xo-panel px-3 py-2 text-sm text-xo-text placeholder:text-xo-faint outline-none focus:border-xo-verified focus:ring-1 focus:ring-xo-action/50";
 
 export const SectionHeader: React.FC<{ kicker: string; title: string; description?: string; actions?: React.ReactNode }> = ({ kicker, title, description, actions }) => (
   <div className="mb-8 flex items-end justify-between gap-6">
     <div>
-      <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-deal-400">{kicker}</div>
-      <h1 className="mt-3 font-serif text-3xl font-bold leading-tight text-white sm:text-4xl">{title}</h1>
-      {description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/55">{description}</p>}
+      <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-xo-verified">{kicker}</div>
+      <h1 className="mt-3 font-serif text-3xl font-bold leading-tight text-xo-text sm:text-4xl">{title}</h1>
+      {description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-xo-muted">{description}</p>}
     </div>
     {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
   </div>
@@ -239,10 +239,10 @@ export function fmtMoney(n?: number | null, currency = "USD"): string {
 // everywhere stats are quoted.
 type ConfidenceTier = "experimental" | "low" | "medium" | "high";
 const CONF_STYLE: Record<ConfidenceTier, string> = {
-  experimental: "bg-white/5 text-white/40 ring-white/10",
-  low:          "bg-loi-500/15 text-loi-300 ring-loi-400/30",
+  experimental: "bg-xo-raise text-xo-faint ring-xo-line",
+  low:          "bg-xo-caution/15 text-xo-caution ring-xo-caution/30",
   medium:       "bg-stage-engaged/15 text-stage-engaged ring-stage-engaged/30",
-  high:         "bg-deal-600/25 text-deal-200 ring-deal-500/40",
+  high:         "bg-xo-verified/25 text-xo-verified ring-xo-action/40",
 };
 const CONF_LABEL: Record<ConfidenceTier, string> = {
   experimental: "Exp.", low: "Low", medium: "Med.", high: "High",

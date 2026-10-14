@@ -55,7 +55,7 @@ interface AuthCtx {
   createAccount: (email: string, password: string, side: Side) => Promise<"signed_in" | "confirm">;
   /** e-mail a password-reset link */
   resetPassword: (email: string) => Promise<void>;
-  /** continue with Google, Apple or Microsoft (development: a local session) */
+  /** continue with LinkedIn, Google, Microsoft or Apple (development: a local session) */
   oauth: (provider: OAuthProvider, side: Side) => void;
   /** email_link mode: the e-mail a link was just sent to */
   linkSentTo: string | null;

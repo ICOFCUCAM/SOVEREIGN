@@ -5,6 +5,7 @@ import { exitosSectorOf } from "./acquirer";
 import { buildProfile } from "./company-intake";
 import { SOVEREIGN_PRODUCTS, SOVEREIGN_OWNER_ACCOUNT } from "./sovereign-intel";
 import { revenueBand, growthBand, type Band } from "./bands";
+import { normalizeFacts, type ListingFacts } from "./listing-facts";
 
 // ── LISTINGS REPOSITORY ─────────────────────────────────────────────
 // Real listings — the supply side of the exchange. A founder lists their
@@ -36,8 +37,13 @@ export interface Listing {
   readonly listedAt: string;
   readonly ownerAccountId?: string;      // the founder who listed it — drives owner-scoped write RLS (never shown publicly)
   readonly productMeta?: ListingProductMeta; // present for named-product (catalog) listings
+  readonly facts?: ListingFacts;         // what buyers read on the card: stage, what is for sale, model, stack, markets, asking price
+  readonly verification?: ListingVerification; // stamped by the server from the owner's identity verification; never set by a client
   readonly publicView: ListingPublicView;
 }
+
+/** How the owner proved their identity, as the database stamps it on the listing. */
+export interface ListingVerification { readonly provider: string; readonly verifiedAt: string }
 
 export interface ListingPublicView {
   readonly sector: string;               // ExitOS sector
@@ -70,6 +76,11 @@ export function normalizeListing(raw: unknown): Listing {
     id: String(r.id), code: String(r.code), listedAt: String(r.listedAt),
     ...(r.ownerAccountId ? { ownerAccountId: String(r.ownerAccountId) } : {}),
     ...(r.productMeta ? { productMeta: r.productMeta as ListingProductMeta } : {}),
+    ...((): { facts?: ListingFacts } => { const f = normalizeFacts(r.facts); return f ? { facts: f } : {}; })(),
+    ...((): { verification?: ListingVerification } => {
+      const v = r.verification as { provider?: unknown; verifiedAt?: unknown } | undefined;
+      return v && typeof v.provider === "string" && typeof v.verifiedAt === "string" ? { verification: { provider: v.provider, verifiedAt: v.verifiedAt } } : {};
+    })(),
     publicView: {
       sector: String(pv.sector ?? "Other"), region: pv.region as Region,
       ...(revenueBandV ? { revenueBand: revenueBandV } : {}),
@@ -88,7 +99,7 @@ const codeFor = (id: string): string => `Project ${CODES[Math.abs([...id].reduce
 let currentOwner: string | undefined;
 export function setListingOwner(id?: string): void { currentOwner = id; }
 
-export function listingFromCompany(profile: CompanyProfile, id?: string): Listing {
+export function listingFromCompany(profile: CompanyProfile, id?: string, facts?: ListingFacts): Listing {
   // one listing per owner account (or per company in a browser-only session)
   const lid = id ?? `lst-${shortHash(currentOwner ?? `local:${profile.name}`)}`;
   return {
@@ -96,9 +107,11 @@ export function listingFromCompany(profile: CompanyProfile, id?: string): Listin
     code: codeFor(lid),
     listedAt: new Date().toISOString(),
     ...(currentOwner ? { ownerAccountId: currentOwner } : {}),
+    ...(facts ? { facts } : {}),
     publicView: {
       sector: exitosSectorOf(profile),
-      region: regionOf(profile.jurisdiction),
+      // the founder's stated region wins over the one derived from the jurisdiction code
+      region: facts?.region ?? regionOf(profile.jurisdiction),
       revenueBand: revenueBand(profile.revenue.trailingTwelveMonthsRevenueUsd),
       growthBand: growthBand(profile.growth.arrGrowthYoyPct),
     },
@@ -129,8 +142,9 @@ function buildSovereignListings(): Listing[] {
         valueLabel: p.valueLabel, valueText: p.valueText, coverage: p.coverage, tags: p.tags,
         acquisitionReadyText: p.acquisitionReadyText,
       },
+      ...(p.facts ? { facts: p.facts } : {}),
       publicView: {
-        sector: exitosSectorOf(profile), region: regionOf(profile.jurisdiction),
+        sector: exitosSectorOf(profile), region: p.facts?.region ?? regionOf(profile.jurisdiction),
         // revenue/EBITDA not published; the real published figure is the
         // deployment/infrastructure VALUE, surfaced via productMeta.valueText.
         disclosed: false,
@@ -171,8 +185,8 @@ export function allListings(): readonly Listing[] { return load(); }
 export function subscribeListings(l: () => void): () => void { listeners.add(l); return () => void listeners.delete(l); }
 
 /** List (or update) a company — the supply side of the network. */
-export function listCompany(profile: CompanyProfile): Listing {
-  const l = listingFromCompany(profile);
+export function listCompany(profile: CompanyProfile, facts?: ListingFacts): Listing {
+  const l = listingFromCompany(profile, undefined, facts);
   // replaces this company's listing, including one stored under the old name-derived id
   const legacy = legacyListingId(profile);
   const rest = load().filter((x) => x.id !== l.id && x.id !== legacy);

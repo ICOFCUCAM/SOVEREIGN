@@ -7,6 +7,11 @@ import {
 } from "../lib/company-intake";
 import { listCompany, listingFromCompany, unlistCompany, findOwnListing } from "../lib/listings";
 import { listingDestination } from "../lib/exit-api";
+import { missingFacts, normalizeFacts, type ListingFacts } from "../lib/listing-facts";
+import { ListingFactsView } from "../components/ListingFacts";
+import { useIdentity, hasVerificationReturn } from "../components/IdentityGate";
+import { ListingDesk } from "../components/ListingDesk";
+import { useDocumentRemote } from "../lib/documents/remote";
 import { useAuth } from "../lib/auth";
 import { requiredEngagement } from "../lib/access";
 import { loadSavedIntake, saveIntake, clearIntake, loadIntakeRecord, unconfirmedFields, confirmIntakeFields, type IntakeField } from "../lib/active-company";
@@ -52,6 +57,11 @@ const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
   { to: "/report", label: "Reports" },
 ];
 
+// the founder's listing details, kept in this browser until the listing is published with them
+const FACTS_DRAFT_KEY = "exitos.listing-facts.v1";
+const loadFactsDraft = (): Partial<ListingFacts> => { try { return JSON.parse(localStorage.getItem(FACTS_DRAFT_KEY) ?? "{}") as Partial<ListingFacts>; } catch { return {}; } };
+const saveFactsDraft = (f: Partial<ListingFacts>): void => { try { localStorage.setItem(FACTS_DRAFT_KEY, JSON.stringify(f)); } catch { /* storage unavailable: kept for this visit */ } };
+
 const Intake: React.FC = () => {
   const { session } = useAuth();
   // Saved only when the founder edits a field — opening the page saves nothing.
@@ -66,14 +76,24 @@ const Intake: React.FC = () => {
 
   const report = useMemo(() => runInstitutionalValuation(buildProfile(inp)), [inp]);
   // Listing: preview exactly what buyers will see, confirm, and allow withdrawal.
-  const preview = useMemo(() => listingFromCompany(buildProfile(inp)), [inp]);
   const [, setListingVersion] = useState(0);   // re-render after list / withdraw
   const stored = findOwnListing(buildProfile(inp));
+  // what buyers read on the card, answered by the founder; a draft is kept in this browser until listed
+  const [facts, setFactsState] = useState<Partial<ListingFacts>>(() => stored?.facts ?? loadFactsDraft());
+  const setFacts = (f: Partial<ListingFacts>): void => { setFactsState(f); saveFactsDraft(f); };
+  const factsReady = missingFacts(facts).length === 0;
+  const cleanFacts = useMemo(() => (factsReady ? normalizeFacts(facts) : undefined), [facts, factsReady]);
+  const preview = useMemo(() => listingFromCompany(buildProfile(inp), undefined, cleanFacts), [inp, cleanFacts]);
   const listed = !!stored;
-  const stale = !!stored && JSON.stringify(stored.publicView) !== JSON.stringify(preview.publicView);
-  const [confirming, setConfirming] = useState(false);
+  const stale = !!stored && (JSON.stringify(stored.publicView) !== JSON.stringify(preview.publicView) || (!!cleanFacts && JSON.stringify(stored.facts ?? null) !== JSON.stringify(cleanFacts)));
+  // back from an identity provider: reopen the listing step where the founder left it
+  const [confirming, setConfirming] = useState(() => hasVerificationReturn(search));
   const destination = listingDestination();
-  const confirmListing = (): void => { listCompany(buildProfile(inp)); setConfirming(false); setListingVersion((v) => v + 1); };
+  const remote = useDocumentRemote();
+  // the founder's identity, verified with a provider and enforced on the server before any listing is written
+  const idv = useIdentity(remote);
+  const identity = idv.identity;
+  const confirmListing = (): void => { if (!cleanFacts || !identity) return; listCompany(buildProfile(inp), cleanFacts); setConfirming(false); setListingVersion((v) => v + 1); };
   const withdraw = (): void => { unlistCompany(stored?.id ?? preview.id); setConfirming(false); setListingVersion((v) => v + 1); };
   // fields still holding the demo company's values (re-read after every save)
   const [unconfirmed, setUnconfirmed] = useState<IntakeField[]>(() => { const r = loadIntakeRecord(); return r ? unconfirmedFields(r) : []; });
@@ -119,7 +139,8 @@ const Intake: React.FC = () => {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {listed && <Button variant="ghost" onClick={withdraw}>Withdraw listing</Button>}
-          {(!listed || stale) && <Button onClick={() => setConfirming(true)} disabled={!saved} aria-expanded={confirming} aria-controls="listing-confirm" aria-describedby={saved ? undefined : "list-needs-data"}>{stale ? "Update listing" : "List on the exchange"}</Button>}
+          {listed && !stale && !confirming && <Button variant="ghost" onClick={() => setConfirming(true)}>Edit listing details</Button>}
+          {(!listed || stale) && <Button onClick={() => setConfirming(true)} disabled={!saved} aria-expanded={confirming} aria-describedby={saved ? undefined : "list-needs-data"}>{stale ? "Update listing" : "List on the exchange"}</Button>}
           {!saved && !listed && <span id="list-needs-data" className="basis-full text-[11px] text-xo-faint">Enter your figures to list — the demo company can't be listed.</span>}
           {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
         </div>
@@ -139,33 +160,29 @@ const Intake: React.FC = () => {
         </section>
       )}
 
-      {(confirming || listed) && (
-        <section id="listing-confirm" aria-label="Exchange listing" className="border border-xo-caution/50 bg-xo-panel px-4 py-3">
-          {listed && !confirming ? (
-            <p role="status" className="text-[13px] text-xo-text">
-              {destination === "exchange"
-                ? <>Listed anonymously on the exchange as <span className="font-mono">{preview.code}</span>. Buyers see the figures below, not your company name.</>
-                : <>Saved as an anonymous listing <span className="font-mono">{preview.code}</span> <strong>in this browser only</strong> — this build is not connected to the live exchange, so no buyer can see it yet.</>}
-            </p>
-          ) : (
-            <>
-              <h2 className="text-[14px] font-semibold">Before you list: this is what buyers will see</h2>
-              <p className="mt-1 text-[12px] text-xo-muted">Your company name is withheld. {destination === "exchange" ? "The listing is published to the live exchange." : "This build is not connected to the live exchange: the listing is saved in this browser only."} You can withdraw it at any time.</p>
-            </>
-          )}
+      {listed && (
+        <section id="listing-status" aria-label="Exchange listing" className="border border-xo-caution/50 bg-xo-panel px-4 py-3">
+          <p role="status" className="text-[13px] text-xo-text">
+            {destination === "exchange"
+              ? <>Listed anonymously on the exchange as <span className="font-mono">{preview.code}</span>{stored?.verification ? " by a verified seller" : ""}. Buyers see the figures below, not your company name.</>
+              : <>Saved as an anonymous listing <span className="font-mono">{preview.code}</span> <strong>in this browser only</strong> — this build is not connected to the live exchange, so no buyer can see it yet.</>}
+          </p>
           <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-4">
-            {(() => { const pv = listed && !confirming && stored ? stored.publicView : preview.publicView; return ([["Sector", pv.sector], ["Region", pv.region], ["TTM revenue", pv.revenueBand?.label ?? "Under NDA"], ["Growth", pv.growthBand?.label ?? "Under NDA"]] as const); })().map(([k, v]) => (
+            {(() => { const pv = stored ? stored.publicView : preview.publicView; return ([["Sector", pv.sector], ["Region", pv.region], ["TTM revenue", pv.revenueBand?.label ?? "Under NDA"], ["Growth", pv.growthBand?.label ?? "Under NDA"]] as const); })().map(([k, v]) => (
               <div key={k}><dt className="text-[11px] text-xo-faint">{k}</dt><dd className="font-mono text-[13px] tabular-nums capitalize">{String(v).replace(/_/g, " ")}</dd></div>
             ))}
           </dl>
-          {listed && stale && !confirming && <p className="mt-2 text-[12px] text-xo-caution">Your figures changed since you listed. The listing still shows the earlier figures until you update it.</p>}
-          {confirming && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button onClick={confirmListing}>{listed ? "Confirm update" : "Confirm listing"}</Button>
-              <Button variant="ghost" onClick={() => setConfirming(false)}>Cancel</Button>
-            </div>
-          )}
+          {stale && <p className="mt-2 text-[12px] text-xo-caution">Your figures or listing details changed since you listed. The listing still shows the earlier version until you update it.</p>}
+          {stored?.facts && <ListingFactsView facts={stored.facts} className="mt-3 border-t border-xo-line pt-3" />}
         </section>
+      )}
+      {confirming && (
+        <ListingDesk remote={remote} onClose={() => setConfirming(false)} facts={facts} setFacts={setFacts} id={idv} onPublish={confirmListing}
+          updating={listed} live={destination === "exchange"}
+          listing={{ code: preview.code }}
+          context={{ sector: String(preview.publicView.sector).replace(/_/g, " "), revenue: preview.publicView.revenueBand?.label ?? "Under NDA", growth: preview.publicView.growthBand?.label ?? "Under NDA",
+            // figures still holding the demo company's values are not shown as this company's
+            unconfirmed: unconfirmed.some((f) => f === "ttmRevenueUsd" || f === "growthPct" || f === "sector") }} />
       )}
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[360px_minmax(0,1fr)]">
@@ -214,7 +231,7 @@ const Intake: React.FC = () => {
                 : `Showing the demo company (${SAMPLE_INTAKE.name}). Edit any field to value your own company; nothing is saved until you do.`}
             </p>
             {saved && unconfirmed.length > 0 && (
-              <div className="border border-loi-400/50 bg-loi-500/10 px-3 py-2.5 text-[12px] text-xo-text">
+              <div className="border border-xo-caution/50 bg-xo-caution/10 px-3 py-2.5 text-[12px] text-xo-text">
                 <p><span className="font-semibold">{unconfirmed.length} of {Object.keys(INTAKE_FIELD_LABEL).length} values are still the demo company's</span>, not yours: {unconfirmed.map((k) => INTAKE_FIELD_LABEL[k]).join(", ")}. Enter your own, or confirm them. Documents treat them as missing until you do.</p>
                 <Button variant="ghost" className="mt-2" onClick={confirmRest}>These values are mine</Button>
               </div>
