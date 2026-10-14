@@ -178,7 +178,7 @@ const Seal: React.FC<{ p: ProviderInfo }> = ({ p }) => {
 
 /** A method offered for the country but not yet switched on: shown as a card, with no control. */
 const UnavailableCard: React.FC<{ o: MethodOption }> = ({ o }) => (
-  <li className="flex flex-wrap items-center gap-x-6 gap-y-3 border border-[#E2D9CA] bg-white/70 px-6 py-5 sm:flex-nowrap">
+  <li className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-[14px] border border-[#E6D8BC] bg-white/85 px-6 py-5 shadow-[0_14px_30px_-24px_rgba(90,65,25,0.5)] backdrop-blur sm:flex-nowrap">
     <Seal p={o.info} />
     <div className="min-w-0 flex-1">
       <div className="font-display text-[26px] font-medium leading-tight text-[#6F695F]">{providerLabel(o.info.id)}</div>
@@ -218,13 +218,13 @@ export const IdentityMethods: React.FC<{ id: IdentityState; country: string | un
   return (
     <div className="space-y-6">
       {usable.length > 0 ? (
-        <fieldset className="overflow-hidden rounded-ex-xs border border-[#D9D0C1] bg-white">
+        <fieldset className="overflow-hidden rounded-[14px] border border-[#E6D8BC] bg-white/90 backdrop-blur">
           <legend className="sr-only">Verification method</legend>
           {usable.map((o) => <MethodOptionRow key={o.info.id} o={o} name="identity-method" selected={o === selected} onSelect={() => setChosen(o.info.id)} state={id.stateOf(o.info.id, true)} />)}
           {selected && <MethodDetail o={selected} id={id} country={cc} state={id.stateOf(selected.info.id, true)} />}
         </fieldset>
       ) : (
-        <div role="status" className="border-l-2 border-[#C9A86A] bg-white/60 px-6 py-5">
+        <div role="status" className="rounded-[14px] border border-[#E6D8BC] border-l-[3px] border-l-[#C9A262] bg-white/80 px-6 py-5 backdrop-blur">
           <p className="font-display text-[24px] font-medium text-ex-graphite">No verification method is open for {countryName} yet</p>
           <p className="mt-1.5 max-w-[60ch] text-[13px] leading-relaxed text-ex-slate-ink">
             {id.hasServer

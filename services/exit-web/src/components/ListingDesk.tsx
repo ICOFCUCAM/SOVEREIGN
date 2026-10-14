@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { ListingFactsForm, type IntakeContext } from "./ListingFacts";
 import { IdentityMethods, IdentityStatusCard, DevVerificationTools, type IdentityState, type SellerIdentity } from "./IdentityGate";
 import { CountrySelect } from "./CountrySelect";
+import earthSunrise from "../assets/desk/earth-sunrise-1672.webp";
+import waterfrontSkyline from "../assets/desk/waterfront-skyline-720.webp";
 import { methodOptions, providerLabel } from "../lib/identity";
 import { missingFacts, askingText, STAGE_LABEL, FOR_SALE_LABEL, MODEL_LABEL, type ListingFacts } from "../lib/listing-facts";
 
@@ -38,7 +40,7 @@ const DEFAULT_ID_COUNTRY = "US";
 const loadIdCountry = (): string => { try { return localStorage.getItem(ID_COUNTRY_KEY) ?? DEFAULT_ID_COUNTRY; } catch { return DEFAULT_ID_COUNTRY; } };
 const saveIdCountry = (c: string): void => { try { localStorage.setItem(ID_COUNTRY_KEY, c); } catch { /* kept for this visit */ } };
 
-const PRIMARY = "inline-flex items-center justify-center gap-2 rounded-[2px] bg-[#1B1C19] px-6 py-3.5 text-[13.5px] font-semibold tracking-[0.01em] text-[#F4EFE6] transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze focus-visible:ring-offset-2 focus-visible:ring-offset-[#F4EFE6] disabled:cursor-not-allowed disabled:bg-[#CFC7BA] disabled:text-white";
+const PRIMARY = "inline-flex items-center justify-center gap-2 rounded-[10px] border border-[#B9924F] bg-[linear-gradient(180deg,#E3C182_0%,#C9A262_48%,#A9813F_100%)] px-6 py-3 text-[13.5px] font-semibold text-[#1E1A12] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_10px_24px_-12px_rgba(140,100,40,0.8)] transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A8834A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FBF8F2] disabled:cursor-not-allowed disabled:border-[#D8CFC0] disabled:bg-none disabled:bg-[#E3DBCD] disabled:text-[#9A9387] disabled:shadow-none";
 const QUIET = "inline-flex items-center justify-center gap-2 rounded-ex-xs px-3 py-3 text-[13.5px] font-semibold text-ex-slate-ink transition hover:text-ex-graphite focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze";
 const FAINT = "text-[#8A8378]";
 
@@ -70,36 +72,40 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
   const devProvider = methodOptions(null, idCountry).find((o) => o.eligible)?.info.id ?? "stripe_identity";
 
   const stageDone = [verified, profileDone, false];
-  const STAGE_NOTE = ["Confirmed by a regulated provider", "What buyers read before an NDA", "Goes onto the exchange"];
+  const STAGE_NOTE = ["Verify who you are", "Build your business profile", "Go live on the exchange"];
+  const GOLD_WORD = "bg-gradient-to-r from-[#A87F3F] via-[#C9A262] to-[#9A7236] bg-clip-text italic text-transparent";
 
   return createPortal(
     <div ref={scrollers[0]} role="dialog" aria-modal="true" aria-labelledby="desk-heading" data-page="listing-desk"
-      className="fixed inset-0 z-[200] overflow-y-auto bg-[#F4EFE6] text-ex-graphite lg:grid lg:grid-cols-[400px_minmax(0,1fr)] lg:overflow-hidden">
+      className="fixed inset-0 z-[200] overflow-y-auto bg-[radial-gradient(1200px_700px_at_80%_0%,#FFFFFF_0%,#F3EDE2_45%,#E6DDCD_100%)] text-ex-graphite lg:overflow-hidden lg:p-6">
+      <div className="lg:grid lg:h-full lg:grid-cols-[320px_minmax(0,1fr)] lg:overflow-hidden lg:rounded-[22px] lg:border lg:border-[#C9A86A]/55 lg:shadow-[0_40px_90px_-40px_rgba(36,30,20,0.6),0_0_0_6px_rgba(255,255,255,0.4)]">
 
-      {/* ── the rail: brand, the three stages, the buyer preview ─────── */}
-      <aside className="relative flex flex-col bg-[#1B1C19] text-ex-ivory lg:h-full lg:overflow-y-auto">
-        <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-px bg-gradient-to-b from-transparent via-[#C9A86A]/30 to-transparent lg:block" />
-        <div className="flex items-center justify-between px-6 pb-5 pt-6 lg:block lg:px-12 lg:pb-0 lg:pt-12">
+      {/* ── the rail: brand, the three stages, the listing preview ───── */}
+      <aside className="relative flex flex-col bg-[linear-gradient(180deg,#17150F_0%,#0B0A08_100%)] text-ex-ivory lg:h-full lg:overflow-y-auto">
+        <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-px bg-gradient-to-b from-[#C9A86A]/10 via-[#C9A86A]/55 to-[#C9A86A]/10 lg:block" />
+        <div className="flex items-center justify-between px-6 pb-5 pt-6 lg:block lg:px-7 lg:pb-0 lg:pt-9">
           <div>
-            <div className="font-display text-[30px] font-semibold leading-none tracking-[0.01em] lg:text-[34px]">ExitOS</div>
-            <div className="mt-2 text-[10.5px] font-semibold uppercase tracking-[0.3em] text-ex-ivory/45">Listing desk</div>
+            <div className="font-display text-[30px] font-semibold leading-none text-[#F5ECDA]">ExitOS</div>
+            <div className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.32em] text-[#C9A86A]/75">Listing desk</div>
           </div>
           <button type="button" onClick={onClose} className="text-[12.5px] text-ex-ivory/60 underline-offset-4 hover:text-ex-ivory hover:underline lg:hidden">Leave</button>
         </div>
 
-        <nav aria-label="Listing stages" className="px-6 lg:mt-12 lg:px-12">
-          <ol className="flex gap-6 border-t border-white/10 pt-4 lg:block lg:pt-0">
+        <nav aria-label="Listing stages" className="px-4 pb-4 lg:mt-10 lg:px-5 lg:pb-0">
+          <ol className="flex gap-2 lg:flex-col lg:gap-2.5">
             {STAGES.map((t, i) => {
               const done = stageDone[i]!, locked = i === 2 && !canReview, here = stage === i;
               return (
-                <li key={t} className="lg:border-b lg:border-white/10">
+                <li key={t} className={here ? "min-w-0 flex-[2] lg:flex-none" : "min-w-0 flex-1 lg:flex-none"}>
                   <button type="button" onClick={() => go(i as Stage)} aria-current={here ? "step" : undefined} aria-disabled={locked || undefined}
                     title={locked ? "Opens once your identity is established and the company profile is complete" : undefined}
-                    className={`group flex w-full items-baseline gap-5 py-1 text-left transition lg:py-5 ${locked ? "cursor-not-allowed" : ""}`}>
-                    <span className={`font-display text-[22px] leading-none lg:w-9 lg:text-[28px] ${here ? "text-[#C9A86A]" : done ? "text-ex-ivory/70" : "text-ex-ivory/30"}`}>{done && !here ? "✓" : `0${i + 1}`}</span>
+                    className={`group flex w-full items-center gap-4 rounded-[14px] border px-3 py-2.5 text-left transition lg:px-4 lg:py-4 ${here
+                      ? "border-[#C9A86A]/75 bg-[linear-gradient(135deg,rgba(201,168,106,0.18),rgba(201,168,106,0.03))] shadow-[0_0_0_1px_rgba(201,168,106,0.15),0_0_30px_-6px_rgba(214,176,104,0.6)]"
+                      : "border-transparent hover:border-white/10 hover:bg-white/[0.03]"} ${locked ? "cursor-not-allowed" : ""}`}>
+                    <span className={`font-display text-[24px] leading-none lg:w-8 lg:text-[28px] ${here ? "text-[#E2C07F]" : done ? "text-[#C9A86A]/75" : "text-ex-ivory/35"}`}>{done && !here ? "✓" : `0${i + 1}`}</span>
                     <span className={`min-w-0 ${here ? "" : "max-lg:hidden"}`}>
-                      <span className={`block text-[14.5px] font-medium ${here ? "text-white" : locked ? "text-ex-ivory/35" : "text-ex-ivory/75 group-hover:text-white"}`}>{t}</span>
-                      <span className="mt-1 hidden text-[12.5px] leading-snug text-ex-ivory/40 lg:block">{STAGE_NOTE[i]}</span>
+                      <span className={`block text-[14.5px] font-semibold ${here ? "text-white" : locked ? "text-ex-ivory/35" : "text-ex-ivory/80 group-hover:text-white"}`}>{t}</span>
+                      <span className={`mt-0.5 hidden text-[12px] lg:block ${here ? "text-ex-ivory/60" : "text-ex-ivory/35"}`}>{STAGE_NOTE[i]}</span>
                     </span>
                     <span className="sr-only">{done ? " (complete)" : locked ? " (not yet available)" : ""}</span>
                   </button>
@@ -109,63 +115,70 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
           </ol>
         </nav>
 
-        <div className="mt-auto hidden space-y-5 px-12 pb-10 pt-10 lg:block">
-          <RailIdentity identity={id.identity} />
-          <BuyerPreview code={listing.code} context={context} facts={facts} />
+        <div className="mt-auto hidden px-5 pb-6 pt-8 lg:block">
+          <ListingPreview code={listing.code} context={context} facts={facts} identity={id.identity} />
         </div>
       </aside>
 
       {/* ── the workspace ───────────────────────────────────────────── */}
-      <div ref={scrollers[1]} className="relative flex min-w-0 flex-col lg:h-full lg:overflow-y-auto">
-        <div className="flex items-center justify-between gap-4 px-6 pt-6 text-[12.5px] sm:px-10 lg:px-20 lg:pt-12">
-          <span className={`inline-flex items-center gap-2 ${live ? "text-ex-graphite" : "text-[#7A7469]"}`}>
+      <div ref={scrollers[1]} className="relative flex min-w-0 flex-col overflow-x-hidden bg-[#FBF8F2] lg:h-full lg:overflow-y-auto">
+        {/* stage one: the earth at sunrise, fading into the paper on the left */}
+        {stage === 0 && (
+          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[64%] lg:block">
+            <img src={earthSunrise} alt="" className="h-full w-full object-cover object-[78%_center]" />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,#FBF8F2_0%,rgba(251,248,242,0.92)_22%,rgba(251,248,242,0.35)_55%,rgba(251,248,242,0)_80%)]" />
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#FBF8F2]/80 to-transparent" />
+          </div>
+        )}
+        <div className="relative z-10 flex items-center justify-between gap-4 px-6 pt-6 text-[12px] sm:px-10 lg:px-14 lg:pt-8">
+          <span className={`inline-flex items-center gap-2 rounded-full bg-white/60 px-3 py-1 backdrop-blur ${live ? "text-ex-graphite" : "text-[#6E685E]"}`}>
             <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${live ? "bg-[#4E7A52]" : "border border-[#7A7469]"}`} />
             {live ? "Live exchange" : "This browser only · not connected to the live exchange"}
           </span>
-          <button type="button" onClick={onClose} className="hidden text-[#7A7469] underline-offset-4 hover:text-ex-graphite hover:underline lg:inline">Leave the desk <span aria-hidden>✕</span></button>
+          <button type="button" onClick={onClose} className="hidden rounded-full bg-white/75 px-3.5 py-1.5 text-[#4F4A42] shadow-sm ring-1 ring-black/5 backdrop-blur hover:text-ex-graphite lg:inline">Leave the desk <span aria-hidden>✕</span></button>
         </div>
 
-        <main className="w-full max-w-[860px] flex-1 px-6 pb-16 pt-12 sm:px-10 lg:px-20 lg:pt-20">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[#8A6D44]">Stage {["one", "two", "three"][stage]} of three</p>
-          <h1 id="desk-heading" ref={heading} tabIndex={-1} className="mt-4 font-display text-[46px] font-medium leading-[1.02] tracking-[-0.01em] outline-none sm:text-[60px] lg:text-[68px]">
-            {stage === 0 && <>Establish your <em className="italic text-[#8A6D44]">identity</em></>}
-            {stage === 1 && <>The company <em className="italic text-[#8A6D44]">profile</em></>}
-            {stage === 2 && <>Review and <em className="italic text-[#8A6D44]">publish</em></>}
+        {/* small screens: the picture as a banner */}
+        {stage === 0 && <img src={earthSunrise} alt="" aria-hidden className="mt-5 h-40 w-full object-cover object-[80%_40%] lg:hidden" />}
+
+        <main className={`relative z-10 w-full flex-1 px-6 pb-16 pt-8 sm:px-10 lg:px-14 lg:pt-14 ${stage === 0 ? "max-w-[620px]" : "max-w-[880px]"}`}>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#A8834A]">Step {stage + 1} of 3</p>
+          <h1 id="desk-heading" ref={heading} tabIndex={-1} className="mt-4 font-display text-[48px] font-medium leading-[0.98] tracking-[-0.01em] text-[#1A1916] outline-none sm:text-[64px] lg:text-[74px]">
+            {stage === 0 && <>Establish your<br /><em className={GOLD_WORD}>identity</em></>}
+            {stage === 1 && <>The company<br /><em className={GOLD_WORD}>profile</em></>}
+            {stage === 2 && <>Review and<br /><em className={GOLD_WORD}>publish</em></>}
           </h1>
 
           {stage === 0 && (
             <>
-              <p className="mt-6 max-w-[60ch] text-[16.5px] leading-[1.7] text-[#5A554C]">
+              <p className="mt-6 max-w-[50ch] text-[16px] leading-[1.7] text-[#4F4A42]">
                 Identity verification helps protect the integrity of the ExitOS acquisition exchange. Your identity remains undisclosed to prospective buyers until the applicable NDA and disclosure conditions are satisfied.
               </p>
               {verified ? (
-                <div className="mt-12 max-w-xl"><IdentityStatusCard identity={id.identity} /></div>
+                <div className="mt-10"><IdentityStatusCard identity={id.identity} /></div>
               ) : (
                 <>
-                  <div className="mt-12 max-w-[480px]">
+                  <div className="mt-10 max-w-[440px]">
                     <CountrySelect id="id-country" label="Country of your identity document or eID" value={idCountry} onChange={setIdCountry}
-                      hint="Used only to offer the verification methods that work for you. Not part of the listing; never shown to buyers." />
+                      hint="Used only to offer the verification methods that work for you. Never shown to buyers." />
                   </div>
                   <div className="mt-10"><IdentityMethods id={id} country={idCountry} /></div>
                 </>
               )}
-              <p className="mt-14 max-w-[62ch] border-t border-[#DDD3C3] pt-6 text-[12.5px] leading-relaxed text-[#8A8378]">
-                You confirm with the provider on its own page or app; ExitOS never sees your credentials. ExitOS records the method, the date and the country the provider reports — never your documents or identity number — and your listing reads “Verified seller” with the method, never your name.
-              </p>
-              {id.devTools && <div className="mt-6"><DevVerificationTools id={id} provider={devProvider} /></div>}
+              {id.devTools && <div className="mt-8"><DevVerificationTools id={id} provider={devProvider} /></div>}
             </>
           )}
 
           {stage === 1 && (
             <>
-              <p className="mt-6 max-w-[60ch] text-[16.5px] leading-[1.7] text-[#5A554C]">What prospective buyers read before they request an NDA. Your draft is kept in this browser as you type.</p>
-              <div className="mt-14"><ListingFactsForm value={facts} onChange={editFacts} tone="porcelain" context={context} showStatus={false} /></div>
+              <p className="mt-6 max-w-[60ch] text-[16px] leading-[1.7] text-[#4F4A42]">What prospective buyers read before they request an NDA. Your draft is kept in this browser as you type.</p>
+              <div className="mt-12"><ListingFactsForm value={facts} onChange={editFacts} tone="porcelain" context={context} showStatus={false} /></div>
             </>
           )}
 
           {stage === 2 && (
             <>
-              <p className="mt-6 max-w-[60ch] text-[16.5px] leading-[1.7] text-[#5A554C]">
+              <p className="mt-6 max-w-[60ch] text-[16px] leading-[1.7] text-[#4F4A42]">
                 {live ? "Publishing places the anonymised listing on the live exchange, where buyers can request an NDA. You can withdraw it at any time." : "This build is not connected to the live exchange. Saving keeps the listing in this browser only; no buyer will see it."}
               </p>
               <ProfileReview facts={facts as ListingFacts} context={context} />
@@ -173,25 +186,28 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
           )}
 
           {/* on small screens the rail's preview follows the stage */}
-          <div className="mt-16 space-y-6 rounded-ex-xs bg-[#1B1C19] p-6 text-ex-ivory lg:hidden">
-            <RailIdentity identity={id.identity} />
-            <BuyerPreview code={listing.code} context={context} facts={facts} />
-          </div>
+          <div className="mt-14 lg:hidden"><ListingPreview code={listing.code} context={context} facts={facts} identity={id.identity} /></div>
         </main>
 
-        {/* ── action bar: what this stage still requires ────────────── */}
-        <footer className="sticky bottom-0 z-20 border-t border-[#DDD3C3] bg-[#F4EFE6]/95 backdrop-blur-sm">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-6 py-4 sm:px-10 lg:px-20">
-            <dl className="grid min-w-0 flex-1 basis-full gap-1 text-[12.5px] sm:basis-auto" aria-live="polite">
-              <Req label="Identity" ok={verified} active={stage === 0 || stage === 2}
-                text={verified ? `Established${id.identity?.local ? " (test, development server)" : ""}` : identityNeeds.join(" · ")} />
-              <Req label="Company profile" ok={profileDone} active={stage === 1 || stage === 2}
-                text={profileDone ? "Complete" : stage === 1 ? `${missing.length} to complete: ${missing.join(" · ")}` : `${missing.length} item${missing.length === 1 ? "" : "s"} to complete`} />
-            </dl>
+        {/* ── action bar: security note, what this stage still requires, the next action ── */}
+        <footer className="sticky bottom-0 z-20 border-t border-[#E7DECF] bg-[#FBF8F2]/90 backdrop-blur">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-6 py-4 sm:px-10 lg:px-14">
+            <div className="min-w-0 flex-1 basis-full space-y-1 sm:basis-auto">
+              <p className="flex items-center gap-2 text-[12px] text-[#6E685E]">
+                <svg aria-hidden width="14" height="16" viewBox="0 0 14 16" className="shrink-0 text-[#A8834A]"><path d="M7 1 1.5 3v4.5C1.5 11 4 13.8 7 15c3-1.2 5.5-4 5.5-7.5V3L7 1Z" fill="none" stroke="currentColor" strokeWidth="1.2" /><path d="m4.6 8 1.7 1.7L9.6 6.4" fill="none" stroke="currentColor" strokeWidth="1.2" /></svg>
+                Encrypted in transit · your identity is never shown to buyers
+              </p>
+              <dl className="grid gap-0.5 text-[12px]" aria-live="polite">
+                <Req label="Identity" ok={verified} active={stage === 0 || stage === 2}
+                  text={verified ? `Established${id.identity?.local ? " (test, development server)" : ""}` : identityNeeds.join(" · ")} />
+                <Req label="Company profile" ok={profileDone} active={stage === 1 || stage === 2}
+                  text={profileDone ? "Complete" : stage === 1 ? `${missing.length} to complete: ${missing.join(" · ")}` : `${missing.length} item${missing.length === 1 ? "" : "s"} to complete`} />
+              </dl>
+            </div>
             <div className="flex shrink-0 items-center gap-2">
               {stage === 1 && saved && <span className={`mr-2 hidden text-[11.5px] xl:inline ${FAINT}`}>Draft saved in this browser</span>}
               {stage > 0 && <button type="button" className={`${QUIET} max-sm:hidden`} onClick={() => go((stage - 1) as Stage)}><span aria-hidden>←</span> {STAGES[stage - 1]}</button>}
-              {stage === 0 && <button type="button" className={PRIMARY} onClick={() => go(1)}>{verified ? "Continue to the company profile" : "Prepare the company profile"} <span aria-hidden>→</span></button>}
+              {stage === 0 && <button type="button" className={PRIMARY} onClick={() => go(1)}>Continue <span aria-hidden>→</span></button>}
               {stage === 1 && <button type="button" className={PRIMARY} disabled={!canReview} onClick={() => go(2)} aria-describedby={canReview ? undefined : "why-locked"}>Continue to review <span aria-hidden>→</span></button>}
               {stage === 2 && <button type="button" className={PRIMARY} disabled={!canReview} onClick={onPublish}>{updating ? "Publish the update" : live ? "Publish to the exchange" : "Save in this browser"}</button>}
             </div>
@@ -199,21 +215,46 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
           </div>
         </footer>
       </div>
+      </div>
     </div>,
     document.body,
   );
 };
 
-/** The seller's identity, as the rail shows it. */
-const RailIdentity: React.FC<{ identity: SellerIdentity | null }> = ({ identity }) => (
-  <section aria-label="Seller identity">
-    <div className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ex-ivory/40">Seller identity</div>
-    <p className="mt-2 flex items-center gap-2 text-[13.5px]">
-      <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${identity ? "bg-[#C9A86A]" : "border border-ex-ivory/40"}`} />
-      {identity ? <>{identity.local ? "Marked for testing" : "Established"} · {providerLabel(identity.provider)}</> : <span className="text-ex-ivory/60">Not yet established</span>}
-    </p>
-  </section>
-);
+/** The listing preview: a picture, the code name and the saved values only, with honest gaps. */
+const ListingPreview: React.FC<{ code: string; context: IntakeContext; facts: Partial<ListingFacts>; identity: SellerIdentity | null }> = ({ code, context, facts, identity }) => {
+  const region = facts.region ? (facts.region === "Other" ? "Global" : facts.region) : null;
+  const rows: Array<[string, string | null]> = [
+    ["Sector", context.sector],
+    ["Region", region],
+    ["Stage", facts.stage ? STAGE_LABEL[facts.stage] : null],
+    ["Asking", facts.askingMode ? askingText(facts as ListingFacts) : null],
+  ];
+  return (
+    <section aria-label="Listing preview, as buyers see it before an NDA" className="overflow-hidden rounded-[14px] border border-[#C9A86A]/50 bg-[#13110D] text-ex-ivory shadow-[0_20px_40px_-24px_rgba(0,0,0,0.8)]">
+      <div className="flex items-center justify-between px-4 pb-2.5 pt-3.5 text-[10.5px] font-semibold uppercase tracking-[0.2em]">
+        <span className="text-[#D9B676]">Listing preview</span><span className="text-ex-ivory/35">Pre-NDA</span>
+      </div>
+      <div className="relative mx-3 overflow-hidden rounded-[10px]">
+        <img src={waterfrontSkyline} alt="" aria-hidden className="block h-[112px] w-full object-cover object-[45%_60%]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/5 to-transparent" />
+        <span className="absolute bottom-2 left-3 font-display text-[22px] leading-none text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">{code}</span>
+      </div>
+      <dl className="px-4 pb-3 pt-2 text-[12.5px]">
+        {rows.map(([k, v]) => (
+          <div key={k} className="flex items-baseline justify-between gap-3 border-b border-white/[0.06] py-1.5 last:border-0">
+            <dt className="text-ex-ivory/45">{k}</dt>
+            <dd className={v ? "text-right text-ex-ivory" : "text-right italic text-ex-ivory/35"}>{v ?? "Not set"}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="flex items-center gap-2 border-t border-white/[0.06] px-4 py-2.5 text-[11.5px]">
+        <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${identity ? "bg-[#D9B676]" : "border border-ex-ivory/40"}`} />
+        <span className="text-ex-ivory/60">{identity ? `${identity.local ? "Seller marked for testing" : "Verified seller"} · ${providerLabel(identity.provider)}` : "Seller identity not yet established"}</span>
+      </div>
+    </section>
+  );
+};
 
 /** One requirement group in the action bar. */
 const Req: React.FC<{ label: string; ok: boolean; active: boolean; text: string }> = ({ label, ok, active, text }) => (
@@ -224,34 +265,6 @@ const Req: React.FC<{ label: string; ok: boolean; active: boolean; text: string 
     <dd className="min-w-0 truncate text-ex-slate-ink" title={text}>{text}</dd>
   </div>
 );
-
-/** The buyer preview, set in the rail: the anonymised listing from the saved values only, with honest gaps. */
-const BuyerPreview: React.FC<{ code: string; context: IntakeContext; facts: Partial<ListingFacts> }> = ({ code, context, facts }) => {
-  const region = facts.region ? (facts.region === "Other" ? "Global" : facts.region) : null;
-  const rows: Array<[string, string | null]> = [
-    ["Sector", context.sector],
-    ["Region", region],
-    ["Revenue", context.unconfirmed ? null : context.revenue],
-    ["Growth", context.unconfirmed ? null : context.growth],
-    ["Stage", facts.stage ? STAGE_LABEL[facts.stage] : null],
-    ["Asking", facts.askingMode ? askingText(facts as ListingFacts) : null],
-  ];
-  return (
-    <section aria-label="Buyer preview" className="border border-[#C9A86A]/35 px-6 py-5">
-      <div className="flex items-baseline justify-between text-[10.5px] font-semibold uppercase tracking-[0.22em]"><span className="text-[#C9A86A]">Buyer preview</span><span className="text-ex-ivory/35">Pre-NDA</span></div>
-      <p className="mt-3 font-display text-[26px] leading-tight text-white">{code}</p>
-      <dl className="mt-4 text-[13px]">
-        {rows.map(([k, v]) => (
-          <div key={k} className="flex items-baseline justify-between gap-4 border-t border-white/[0.07] py-1.5">
-            <dt className="text-ex-ivory/45">{k}</dt>
-            <dd className={v ? "text-right text-ex-ivory" : "text-right italic text-ex-ivory/35"}>{v ?? (k === "Revenue" || k === "Growth" ? "Not confirmed" : "Not set")}</dd>
-          </div>
-        ))}
-      </dl>
-      <p className="mt-4 text-[11.5px] leading-relaxed text-ex-ivory/40">The company name, your identity, exact figures and the data room stay withheld until an NDA.</p>
-    </section>
-  );
-};
 
 /** The full listing for review, set as a buyer will read it. */
 const ProfileReview: React.FC<{ facts: ListingFacts; context: IntakeContext }> = ({ facts: f, context }) => (

@@ -88,13 +88,13 @@ export const CountrySelect: React.FC<Props> = ({ id, label, value, onChange, hin
         aria-describedby={hint ? `${base}-hint` : undefined} aria-invalid={invalid || undefined}
         onClick={() => (open ? close(false) : openList())}
         onKeyDown={(e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); openList(); } }}
-        className={`flex w-full items-center gap-3 rounded-ex-xs border bg-white px-3.5 py-3 text-left text-[14px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ex-bronze focus-visible:ring-offset-1 focus-visible:ring-offset-ex-porcelain ${open ? "border-ex-graphite" : invalid ? "border-[#B9806F]" : "border-[#D9D0C1] hover:border-ex-bronze"}`}>
+        className={`flex w-full items-center gap-3 rounded-[11px] border bg-white/95 px-4 py-3.5 text-left text-[14.5px] shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_10px_24px_-18px_rgba(120,90,40,0.5)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A86A]/50 ${open ? "border-[#B9924F]" : invalid ? "border-[#B9806F]" : "border-[#DCC9A2] hover:border-[#B9924F]"}`}>
         {selected ? <><Flag code={selected.code} /><span className="flex-1 truncate text-ex-graphite">{selected.name}</span></> : <span className="flex-1 text-[#8A8378]">{placeholder}</span>}
         <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" className={`shrink-0 text-ex-slate-ink transition-transform ${open ? "rotate-180" : ""}`}><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.3" /></svg>
       </button>
 
       {open && (
-        <div className="absolute inset-x-0 z-30 mt-1.5 overflow-hidden rounded-ex-xs border border-ex-graphite/80 bg-white shadow-[0_24px_48px_-24px_rgba(17,19,16,0.45)]">
+        <div className="absolute inset-x-0 z-30 mt-2 overflow-hidden rounded-[12px] border border-[#E2D3B5] bg-white shadow-[0_28px_56px_-24px_rgba(60,45,20,0.45)]">
           <div className="flex items-center gap-2 border-b border-[#E6DFD3] px-3.5">
             <svg aria-hidden width="14" height="14" viewBox="0 0 14 14" className="shrink-0 text-[#8A8378]"><circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.3" /><path d="m9.5 9.5 3 3" stroke="currentColor" strokeWidth="1.3" /></svg>
             <input ref={search} type="text" role="combobox" aria-expanded="true" aria-controls={`${base}-list`} aria-autocomplete="list"
@@ -109,7 +109,7 @@ export const CountrySelect: React.FC<Props> = ({ id, label, value, onChange, hin
               return (
                 <li key={c.code} id={optId(i)} data-i={i} role="option" aria-selected={isSel}
                   onMouseMove={(e) => hover(e, i)} onMouseDown={(e) => e.preventDefault()} onClick={() => choose(c)}
-                  className={`flex cursor-pointer items-center gap-3 px-3.5 py-2 text-[13.5px] ${isAct ? "bg-ex-porcelain shadow-[inset_2px_0_0_0_#B49A75]" : ""} ${isSel ? "font-semibold text-ex-graphite" : "text-ex-slate-ink"}`}>
+                  className={`flex cursor-pointer items-center gap-3 px-3.5 py-2 text-[13.5px] ${isAct ? "bg-[#FAF3E4] shadow-[inset_2px_0_0_0_#C9A262]" : ""} ${isSel ? "font-semibold text-ex-graphite" : "text-ex-slate-ink"}`}>
                   <Flag code={c.code} />
                   <span className="flex-1 truncate">{c.name}</span>
                   {isSel && <span aria-hidden className="text-ex-bronze-ink">✓</span>}
