@@ -119,9 +119,9 @@ export const ListingDesk: React.FC<Props> = ({ onClose, listing, context, facts,
 
       {/* ── the workspace ───────────────────────────────────────────── */}
       <div ref={scrollers[1]} className="relative flex min-w-0 flex-col overflow-x-hidden bg-desk-paper lg:h-full lg:overflow-y-auto">
-        <div aria-hidden className="pointer-events-none absolute right-0 top-0 hidden h-[380px] w-[54%] lg:block">
+        <div aria-hidden className="pointer-events-none absolute right-0 top-0 hidden h-[280px] w-[54%] lg:block">
           <img src={banner.src} alt="" className="h-full w-full object-cover saturate-[0.85] [mask-image:linear-gradient(90deg,transparent_0%,#000_42%)] [-webkit-mask-image:linear-gradient(90deg,transparent_0%,#000_42%)]" style={{ objectPosition: banner.pos }} />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-desk-paper via-desk-paper/70 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-desk-paper via-desk-paper/70 to-transparent" />
         </div>
         <div className="relative z-10 flex items-center justify-between gap-4 px-6 pt-5 text-[12px] sm:px-10 lg:px-14 lg:pt-7">
           <span className={`inline-flex items-center gap-2 ${live ? "text-desk-ink" : "text-desk-muted"}`}>
