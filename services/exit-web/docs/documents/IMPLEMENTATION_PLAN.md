@@ -944,3 +944,11 @@ The product as a whole is not production-ready until:
 - Desk: buyer preview reduced to a compact secondary block with "Not set" / "Not confirmed" gaps; action bar shows Identity and Company profile as separate requirement groups; "Continue to review" and the review stage stay locked until identity is established and the profile is complete.
 
 **Results**: web 69 files, 420 tests; lint, typecheck, build clean. Browser (development server): country search, keyboard selection and Escape; nothing actionable while no method is configured; stage gating; validation (summary length, zero price); identity country absent from the listing draft; 390 px with no horizontal overflow; publish with the development test identity saves to this browser only.
+
+## 17. Increment report — listing desk to the founder's benchmark pages
+
+The desk follows the four reference images the founder supplied (`public/*.png`, served as WebP derivatives from `src/assets/desk/`).
+
+- Page 1, Identity: framed desk, black stage rail, earth-at-sunrise hero, gold-edged country field and dropdown, gold Continue. Behaviour unchanged (server-derived methods, nothing actionable while unconfigured).
+- Page 2, Company profile, now three pages under step 2: Business overview (white card: description with counter, fixed Sector, Region, stage pills), Financial profile (fixed revenue and growth, asking-price structure), Transaction profile (what is for sale and how it earns as pill checklists; markets, stack, country of operation and reason for sale as cards). `missingTagged`/`missingIn` assign every gap to its page; the action bar names this page's gaps; the rail shows pages complete. Continue moves between pages freely; review stays locked until identity and the whole profile are complete.
+- Save draft: the draft is already written to this browser on every edit; the button writes it again and confirms ("Draft saved"). It saves nothing to a server.

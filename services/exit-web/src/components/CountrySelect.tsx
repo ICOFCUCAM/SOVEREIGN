@@ -22,9 +22,10 @@ interface Props {
   readonly hint?: string;
   readonly placeholder?: string;
   readonly invalid?: boolean;
+  readonly labelClassName?: string;
 }
 
-export const CountrySelect: React.FC<Props> = ({ id, label, value, onChange, hint, placeholder = "Choose a country or territory", invalid }) => {
+export const CountrySelect: React.FC<Props> = ({ id, label, value, onChange, hint, placeholder = "Choose a country or territory", invalid, labelClassName }) => {
   const uid = useId();
   const base = id ?? `country-${uid.replace(/:/g, "")}`;
   const [open, setOpen] = useState(false);
@@ -82,7 +83,7 @@ export const CountrySelect: React.FC<Props> = ({ id, label, value, onChange, hin
   const optId = (i: number): string => `${base}-opt-${i}`;
   return (
     <div ref={wrap}>
-      <div id={`${base}-label`} className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-ex-slate-ink">{label}</div>
+      <div id={`${base}-label`} className={labelClassName ?? "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-ex-slate-ink"}>{label}</div>
       <div className="relative">
       <button ref={trigger} id={base} type="button" aria-haspopup="listbox" aria-expanded={open} aria-labelledby={`${base}-label ${base}`}
         aria-describedby={hint ? `${base}-hint` : undefined} aria-invalid={invalid || undefined}

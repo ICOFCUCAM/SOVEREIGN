@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { missingFacts, normalizeFacts, askingText, splitList, type ListingFacts } from "./listing-facts";
+import { missingFacts, missingIn, missingTagged, PROFILE_SECTIONS, normalizeFacts, askingText, splitList, type ListingFacts } from "./listing-facts";
 import { normalizeListing } from "./listings";
 import { SOVEREIGN_PRODUCTS } from "./sovereign-intel";
 
@@ -11,6 +11,15 @@ const FULL: ListingFacts = {
 
 describe("listing facts", () => {
   it("a complete set is ready to list", () => expect(missingFacts(FULL)).toEqual([]));
+  it("each gap belongs to exactly one profile page, and the pages together cover them all", () => {
+    const empty = {};
+    expect(PROFILE_SECTIONS.flatMap((x) => missingIn(x, empty))).toEqual(expect.arrayContaining(missingFacts(empty)));
+    expect(PROFILE_SECTIONS.reduce((n, x) => n + missingIn(x, empty).length, 0)).toBe(missingTagged(empty).length);
+    expect(missingIn("overview", { ...FULL, stage: undefined })).toEqual(["The stage"]);
+    expect(missingIn("financial", { ...FULL, askingMode: undefined })).toEqual(["The asking price"]);
+    expect(missingIn("transaction", { ...FULL, basedIn: "" })).toEqual(["Where it is based"]);
+    for (const x of PROFILE_SECTIONS) expect(missingIn(x, FULL)).toEqual([]);
+  });
   it("names everything still needed", () => {
     const m = missingFacts({ summary: "too short" });
     expect(m).toEqual(expect.arrayContaining(["The stage", "What is for sale", "How it makes money", "Where it is based", "The asking price"]));

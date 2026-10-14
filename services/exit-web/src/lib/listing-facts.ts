@@ -57,25 +57,36 @@ export const REASON_MAX = 300;
 const LIST_MAX = 12;
 const ITEM_MAX = 60;
 
-/** What still has to be filled in before the listing can go on the exchange (empty = ready). */
-export function missingFacts(f: Partial<ListingFacts>): string[] {
-  const out: string[] = [];
+/** The three pages of the founder's company profile, in order. */
+export const PROFILE_SECTIONS = ["overview", "financial", "transaction"] as const;
+export type ProfileSection = (typeof PROFILE_SECTIONS)[number];
+export const PROFILE_SECTION_LABEL: Record<ProfileSection, string> = { overview: "Business overview", financial: "Financial profile", transaction: "Transaction profile" };
+
+/** Every gap, with the profile page it is filled in on. */
+export function missingTagged(f: Partial<ListingFacts>): Array<[ProfileSection, string]> {
+  const out: Array<[ProfileSection, string]> = [];
   const summary = (f.summary ?? "").trim();
-  if (summary.length < SUMMARY_MIN) out.push(`A description of at least ${SUMMARY_MIN} characters`);
-  if (summary.length > SUMMARY_MAX) out.push(`A description of at most ${SUMMARY_MAX} characters`);
-  if (!f.stage) out.push("The stage");
-  if (!f.forSale?.length) out.push("What is for sale");
-  if (!f.models?.length) out.push("How it makes money");
-  if (!f.builtWith?.length) out.push("What it is built with");
-  if (!(f.basedIn ?? "").trim()) out.push("Where it is based");
-  if (!f.region) out.push("The region");
-  if (!f.markets?.length) out.push("The markets it serves");
-  if (!f.askingMode) out.push("The asking price");
-  else if (f.askingMode === "price" && !(f.askingLowUsd && f.askingLowUsd > 0)) out.push("The price");
-  else if (f.askingMode === "range" && !(f.askingLowUsd && f.askingHighUsd && f.askingLowUsd > 0 && f.askingHighUsd > f.askingLowUsd)) out.push("A price range (low below high)");
-  if ((f.reasonForSale ?? "").length > REASON_MAX) out.push(`A reason for sale of at most ${REASON_MAX} characters`);
+  if (summary.length < SUMMARY_MIN) out.push(["overview", `A description of at least ${SUMMARY_MIN} characters`]);
+  if (summary.length > SUMMARY_MAX) out.push(["overview", `A description of at most ${SUMMARY_MAX} characters`]);
+  if (!f.stage) out.push(["overview", "The stage"]);
+  if (!f.forSale?.length) out.push(["transaction", "What is for sale"]);
+  if (!f.models?.length) out.push(["transaction", "How it makes money"]);
+  if (!f.builtWith?.length) out.push(["transaction", "What it is built with"]);
+  if (!(f.basedIn ?? "").trim()) out.push(["transaction", "Where it is based"]);
+  if (!f.region) out.push(["overview", "The region"]);
+  if (!f.markets?.length) out.push(["transaction", "The markets it serves"]);
+  if (!f.askingMode) out.push(["financial", "The asking price"]);
+  else if (f.askingMode === "price" && !(f.askingLowUsd && f.askingLowUsd > 0)) out.push(["financial", "The price"]);
+  else if (f.askingMode === "range" && !(f.askingLowUsd && f.askingHighUsd && f.askingLowUsd > 0 && f.askingHighUsd > f.askingLowUsd)) out.push(["financial", "A price range (low below high)"]);
+  if ((f.reasonForSale ?? "").length > REASON_MAX) out.push(["transaction", `A reason for sale of at most ${REASON_MAX} characters`]);
   return out;
 }
+
+/** What still has to be filled in before the listing can go on the exchange (empty = ready). */
+export const missingFacts = (f: Partial<ListingFacts>): string[] => missingTagged(f).map(([, m]) => m);
+
+/** What is still missing on one page of the profile. */
+export const missingIn = (section: ProfileSection, f: Partial<ListingFacts>): string[] => missingTagged(f).filter(([s]) => s === section).map(([, m]) => m);
 
 /** Comma- or line-separated text → a short, de-duplicated list. */
 export const splitList = (s: string): string[] =>
