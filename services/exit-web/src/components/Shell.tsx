@@ -33,7 +33,7 @@ const WORKSTATION_ROUTES = new Set([
 ]);
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { session, signOut } = useAuth();
+  const { session, signOut, chooseSide } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
   const [navOpen, setNavOpen] = useState(false);
@@ -53,6 +53,17 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tipsHidden, setTipsHiddenState] = useState(() => guideState().tipsHidden);
   useEffect(() => onGuideChange(() => { const g = guideState(); setGuideHiddenState(g.hidden); setTipsHiddenState(g.tipsHidden); }), []);
   const showGuideLink = guideHidden && (role === "founder" || role === "buyer");
+  // A signed-in founder or buyer may move their own account to the other side; the database accepts only
+  // founder or buyer for one's own account, and an operator's grant is unaffected.
+  const canSwitch = !!session?.verified && (role === "founder" || role === "buyer");
+  const [switching, setSwitching] = useState(false);
+  const [switchError, setSwitchError] = useState<string | null>(null);
+  const switchSide = async (): Promise<void> => {
+    setSwitching(true); setSwitchError(null);
+    try { await chooseSide(role === "buyer" ? "founder" : "buyer"); nav("/console"); }
+    catch (e) { setSwitchError(e instanceof Error ? e.message : "Could not switch sides."); }
+    finally { setSwitching(false); }
+  };
 
   // The phone drawer behaves as a dialog: focus moves into it when it opens, Escape closes it, and focus
   // returns to the menu button.
@@ -208,9 +219,11 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               {tipsHidden && <button type="button" onClick={() => setTipsHidden(false)} className="rounded text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">Page tips</button>}
               {showGuideLink && <Link to={role === "buyer" ? "/console/buyer-portal" : "/console"} onClick={() => setGuideHidden(false)} className="text-white/55 hover:text-white">Start-here guide</Link>}
               {plan !== "pro" && (role === "founder" || role === "buyer") && <Link to="/console/upgrade" className="text-ex-bronze hover:text-ex-ivory">Upgrade →</Link>}
+              {canSwitch && <button type="button" disabled={switching} onClick={() => void switchSide()} className="rounded text-white/55 hover:text-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">{switching ? "Switching…" : role === "buyer" ? "Switch to selling" : "Switch to buying"}</button>}
               <button onClick={() => { signOut(); nav("/"); }} className="rounded text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">Sign out</button>
               <a href="/" className="text-white/35 hover:text-white/70">Home</a>
             </div>}
+            {!folded && switchError && <p role="alert" className="mt-1.5 text-[11px] text-red-300">{switchError}</p>}
           </div>
         </aside>
 
