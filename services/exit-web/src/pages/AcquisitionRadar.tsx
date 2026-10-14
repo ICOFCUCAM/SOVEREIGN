@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { IoiTermsFields, toTerms, EMPTY_IOI, type IoiDraft } from "../components/IoiTerms";
 import { Button, Modal, notify } from "../lib/ui";
+import { useDocumentRemote } from "../lib/documents/remote";
+import * as ws from "../lib/buyer-workspace";
 import { STAGE_LABEL, FOR_SALE_LABEL, MODEL_LABEL, askingText } from "../lib/listing-facts";
 import { RegistryTape } from "../components/xo/RegistryTape";
 import { DNA_AS_OF } from "../lib/buyer-dna";
@@ -86,7 +88,45 @@ const AcquisitionRadar: React.FC = () => {
   // the shortlist: listings this buyer follows, each with an optional private note
   const [watched, setWatched] = useState<Record<string, boolean>>(() => readJson<{ watched?: Record<string, boolean> }>(SHORTLIST_KEY, {}).watched ?? {});
   const [notes, setNotes] = useState<Record<string, string>>(() => readJson<{ notes?: Record<string, string> }>(SHORTLIST_KEY, {}).notes ?? {});
-  useEffect(() => { writeJson(SHORTLIST_KEY, { watched, notes }); }, [watched, notes]);
+  // signed in to a server account: the shortlist and views live on the account (and follow the buyer
+  // across devices); otherwise they stay in this browser
+  const remote = useDocumentRemote();
+  const [synced, setSynced] = useState(false);
+  useEffect(() => { if (!remote) writeJson(SHORTLIST_KEY, { watched, notes }); }, [remote, watched, notes]);
+  useEffect(() => {
+    if (!remote) { setSynced(false); return; }
+    let live = true;
+    void (async () => {
+      try {
+        const server = await ws.loadWorkspace<Omit<SavedView, "name">>(remote);
+        // anything kept in this browser before the account existed moves up once, then is cleared here
+        const local = { ...readJson<{ watched?: Record<string, boolean>; notes?: Record<string, string> }>(SHORTLIST_KEY, {}), views: readJson<SavedView[]>(VIEWS_KEY, []) };
+        const up = ws.toUpload({ watched: local.watched ?? {}, notes: local.notes ?? {}, views: local.views }, server);
+        await Promise.all([...up.shortlist.map((x) => ws.saveNote(remote, x.listing_id, x.note)), ...up.views.map(({ name, ...config }) => ws.saveView(remote, name, config))]);
+        if (up.shortlist.length || up.views.length) { try { localStorage.removeItem(SHORTLIST_KEY); localStorage.removeItem(VIEWS_KEY); } catch { /* ignore */ } }
+        if (!live) return;
+        const all = [...server.shortlist, ...up.shortlist];
+        setWatched(Object.fromEntries(all.map((x) => [x.listing_id, true])));
+        setNotes(Object.fromEntries(all.filter((x) => x.note).map((x) => [x.listing_id, x.note])));
+        setViews([...server.views.map((v) => ({ ...(v.config as Omit<SavedView, "name">), name: v.name })), ...up.views]);
+        setSynced(true);
+      } catch (e) { notify((e as Error).message); }
+    })();
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per account
+  }, [remote?.accessToken]);
+  // a note is saved to the account a moment after typing stops
+  const noteTimers = React.useRef<Record<string, number>>({});
+  const editNote = (id: string, text: string): void => {
+    setNotes((n) => ({ ...n, [id]: text }));
+    if (!remote) return;
+    window.clearTimeout(noteTimers.current[id]);
+    noteTimers.current[id] = window.setTimeout(() => { void ws.saveNote(remote, id, text).catch((e: Error) => notify(e.message)); }, 600);
+  };
+  const toggleFollow = (id: string, on: boolean): void => {
+    setWatched((st) => ({ ...st, [id]: on }));
+    if (remote) void (on ? ws.follow(remote, id) : ws.unfollow(remote, id)).catch((e: Error) => { notify(e.message); setWatched((st) => ({ ...st, [id]: !on })); });
+  };
   const [tab, setTab] = useState<"all" | "shortlist">("all");
   const [compare, setCompare] = useState<string[]>([]);
   const [comparing, setComparing] = useState(false);
@@ -145,10 +185,15 @@ const AcquisitionRadar: React.FC = () => {
   const saveView = (): void => {
     const name = viewName.trim(); if (!name) return;
     const next = [...views.filter((v) => v.name !== name), { name, view, sort: sortBy, only, tab }];
-    setViews(next); writeJson(VIEWS_KEY, next); setViewName(""); notify(`View saved · ${name}`);
+    setViews(next); setViewName("");
+    if (remote) void ws.saveView(remote, name, { view, sort: sortBy, only, tab }).then(() => notify(`View saved to your account · ${name}`), (e: Error) => notify(e.message));
+    else { writeJson(VIEWS_KEY, next); notify(`View saved in this browser · ${name}`); }
   };
   const applyView = (v: SavedView): void => { setView(v.view); setSortBy(v.sort); setOnly(v.only); setTab(v.tab); notify(`View applied · ${v.name}`); };
-  const deleteView = (name: string): void => { const next = views.filter((v) => v.name !== name); setViews(next); writeJson(VIEWS_KEY, next); };
+  const deleteView = (name: string): void => {
+    const next = views.filter((v) => v.name !== name); setViews(next);
+    if (remote) void ws.deleteView(remote, name).catch((e: Error) => notify(e.message)); else writeJson(VIEWS_KEY, next);
+  };
   const toggleCompare = (id: string): void => setCompare((c) => (c.includes(id) ? c.filter((x) => x !== id) : c.length >= COMPARE_MAX ? c : [...c, id]));
   const compared = compare.map((id) => scored.find((s) => s.listing.id === id)).filter((x): x is (typeof scored)[number] => !!x);
   const activeFilters = FILTERS.filter(([k]) => only[k]);
@@ -285,7 +330,8 @@ const AcquisitionRadar: React.FC = () => {
                     </li>
                   ))}</ul>
                 )}
-                <form className="mt-3 flex gap-2 border-t border-xo-line pt-3" onSubmit={(e) => { e.preventDefault(); saveView(); }}>
+                <p className="mt-3 border-t border-xo-line pt-2 text-[11px] text-xo-faint">{remote ? (synced ? "Saved to your account · on every device you sign in on" : "Connecting to your account…") : "Kept in this browser · sign in with an account to use them on every device"}</p>
+                <form className="mt-2 flex gap-2" onSubmit={(e) => { e.preventDefault(); saveView(); }}>
                   <label className="sr-only" htmlFor="radar-view-name">Name this view</label>
                   <input id="radar-view-name" className={`${XO_INPUT} py-1`} placeholder="Name this view" maxLength={40} value={viewName} onChange={(e) => setViewName(e.target.value)} />
                   <button type="submit" disabled={!viewName.trim()} className={`${SMALL_BTN} border-xo-action/50 text-xo-action`}>Save</button>
@@ -396,7 +442,7 @@ const AcquisitionRadar: React.FC = () => {
                     onClick={() => {
                       // record the follow once, not again when unfollowing
                       if (!watched[l.id]) captureDealEvent({ actorRole: "buyer", kind: "added_to_outreach", subjectType: "listing", subjectId: l.id, subjectName: l.code });
-                      setWatched((st) => ({ ...st, [l.id]: !st[l.id] }));
+                      toggleFollow(l.id, !watched[l.id]);
                     }}
                     className={`${SMALL_BTN} border-xo-line text-xo-muted hover:text-xo-text`}>{watched[l.id] ? "★ Following" : "☆ Follow"}</button>
                   <button type="button" onClick={() => setPublish(l)} className={`${SMALL_BTN} border-xo-action/50 text-xo-action`}>↗ Publish</button>
@@ -466,8 +512,8 @@ const AcquisitionRadar: React.FC = () => {
                 )}
                 {tab === "shortlist" && watched[l.id] && (
                   <div className="mt-3">
-                    <label htmlFor={`note-${l.id}`} className="text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-faint">Your note · private, kept in this browser</label>
-                    <textarea id={`note-${l.id}`} rows={2} maxLength={600} value={notes[l.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [l.id]: e.target.value }))}
+                    <label htmlFor={`note-${l.id}`} className="text-[11px] font-semibold uppercase tracking-[0.12em] text-xo-faint">Your note · private, {remote ? "saved to your account" : "kept in this browser"}</label>
+                    <textarea id={`note-${l.id}`} rows={2} maxLength={600} value={notes[l.id] ?? ""} onChange={(e) => editNote(l.id, e.target.value)}
                       placeholder="Why it is on your shortlist, questions for the founder, next step…" className={`${XO_INPUT} mt-1 resize-y`} />
                   </div>
                 )}
