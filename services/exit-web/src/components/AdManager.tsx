@@ -243,8 +243,8 @@ const Editor: React.FC<{
           <textarea className={`${XO_INPUT} min-h-[72px]`} maxLength={LIMITS.body} value={d.body ?? ""} onChange={(e) => text("body", e.target.value)} />
         </label>
         <div className="grid gap-3 sm:grid-cols-2">
-          {field("cta_label", "Call to action · optional", "e.g. “Explore Dispatch”.")}
-          {field("cta_url", "Destination · https only")}
+          {field("cta_label", "Button text", "e.g. “Explore Dispatch”. Shown on the slide.")}
+          {field("cta_url", "Slide link · https", "Where the whole slide leads when clicked. Required to publish.")}
         </div>
         {field("attribution", "Attribution · optional", "e.g. “Sovereign portfolio”. Shown after “Promotion”.")}
 

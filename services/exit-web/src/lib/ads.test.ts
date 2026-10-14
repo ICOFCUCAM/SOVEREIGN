@@ -44,6 +44,8 @@ describe("what an operator enters is validated", () => {
     expect(validateCampaign({ ...d, cta_url: "https://example.com" }).cta_label).toBeTruthy();
     expect(validateCampaign({ ...d, image_path: "x" }).image_alt).toBeTruthy();
     expect(validateCampaign(d, true).image_path).toBeTruthy();
+    expect(validateCampaign(d, true).cta_url).toBeTruthy();
+    expect(validateCampaign({ ...d, image_path: "p", image_alt: "a", cta_url: "https://example.com", cta_label: "Explore" }, true)).toEqual({});
     expect(validateCampaign({ ...d, stages: [] }).stages).toBeTruthy();
     expect(validateCampaign({ ...d, starts_at: iso(2), ends_at: iso(1) }).schedule).toBeTruthy();
   });
@@ -101,6 +103,9 @@ describe("the promotions panel", () => {
     const one = renderToStaticMarkup(createElement(AdPanel, { slides: [slide({ headline: "<img src=x onerror=alert(1)>" })], settings: DEFAULT_SETTINGS, preview: true }));
     expect(one).toContain("&lt;img src=x");
     expect(one).toContain('rel="noopener noreferrer sponsored"');
+    // the whole slide is one link to the destination, with the headline as its name
+    expect(one).toMatch(/<a [^>]*href="https:\/\/example.com\/dispatch"[^>]*aria-label="&lt;img[^"]*Explore Dispatch \(promotion, opens in a new tab\)"/);
+    expect(one.match(/<a /g)?.length).toBe(1);
     expect(one).toContain("Promotion");
     expect(one).not.toContain("Pause the slideshow");
     const two = renderToStaticMarkup(createElement(AdPanel, { slides: [slide({ id: "a" }), slide({ id: "b" })], settings: DEFAULT_SETTINGS, preview: true }));

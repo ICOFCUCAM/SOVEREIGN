@@ -88,14 +88,14 @@ export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", r
     return (
       <section ref={box} aria-roledescription="carousel" aria-label="Promotions" {...hold}
         className={`overflow-hidden rounded-[16px] bg-desk-rail text-desk-ivory ${className}`}>
-        <div className="flex">
+        <LinkOrDiv c={c} onClick={() => click(c.id)} className="flex">
           {current.image && <img src={current.image} alt={c.image_alt ?? ""} className="h-auto w-[34%] shrink-0 object-cover saturate-[0.85]" style={{ objectPosition: `${c.focal_x}% ${c.focal_y}%` }} />}
           <div className="min-w-0 flex-1 px-4 py-3.5" aria-live={playing && !held ? "off" : "polite"}>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-desk-ivory/50">Promotion{c.eyebrow ? <span className="text-desk-champagne"> · {c.eyebrow}</span> : null}</p>
             <p className="mt-1 font-display text-[19px] leading-[1.15] text-desk-ivory">{c.headline}</p>
-            {c.cta_url && c.cta_label && <a href={c.cta_url} target="_blank" rel="noopener noreferrer sponsored" onClick={() => click(c.id)} className="mt-2 inline-flex min-h-[32px] items-center gap-1 text-[12.5px] font-semibold text-desk-champagne underline-offset-4 hover:underline">{c.cta_label} <span aria-hidden>↗</span><span className="sr-only"> (opens in a new tab)</span></a>}
+            {c.cta_url && c.cta_label && <span aria-hidden className="mt-2 inline-flex min-h-[28px] items-center gap-1 text-[12.5px] font-semibold text-desk-champagne">{c.cta_label} <span aria-hidden>↗</span></span>}
           </div>
-        </div>
+        </LinkOrDiv>
         {list.length > 1 && <Dots n={list.length} i={i} onPick={setAt} className="justify-end px-3 pb-2.5" />}
       </section>
     );
@@ -103,7 +103,7 @@ export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", r
 
   return (
     <section ref={box} aria-roledescription="carousel" aria-label={current ? "Promotions" : "About the listing desk"} {...hold}
-      className={`relative isolate flex min-h-[340px] flex-col justify-end overflow-hidden text-desk-ivory ${className}`}>
+      className={`group/ad relative isolate flex min-h-[340px] flex-col justify-end overflow-hidden text-desk-ivory ${className}`}>
       {/* the pictures, stacked; only the current one is visible and exposed */}
       {current ? list.map((s, k) => (
         <div key={s.campaign.id} aria-hidden={k !== i || undefined} className={`absolute inset-0 -z-10 [mask-image:linear-gradient(180deg,transparent_0%,#000_30%)] [-webkit-mask-image:linear-gradient(180deg,transparent_0%,#000_30%)] ${fade} ${k === i ? "opacity-100" : "opacity-0"}`}>
@@ -117,7 +117,13 @@ export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", r
       {/* legibility: the rail's black melts into the picture at the top; the words sit on a deep fade */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(16,14,11,0)_16%,rgba(16,14,11,0.6)_36%,rgba(16,14,11,0.9)_54%,#100E0B_100%)]" />
 
-      <div className="px-7 pb-6 pt-24">
+      {/* the whole slide is the link: picture and words open the campaign's destination */}
+      {current?.campaign.cta_url && (
+        <a key={current.campaign.id} href={current.campaign.cta_url} target="_blank" rel="noopener noreferrer sponsored" onClick={() => click(current.campaign.id)}
+          aria-label={`${current.campaign.headline}${current.campaign.cta_label ? ` · ${current.campaign.cta_label}` : ""} (promotion, opens in a new tab)`}
+          className="peer absolute inset-0 z-[1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-desk-champagne/70" />
+      )}
+      <div className="pointer-events-none relative z-[2] px-7 pb-6 pt-24">
         {current ? (
           <div className="grid">
             {list.map((s, k) => {
@@ -133,10 +139,9 @@ export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", r
                   <h2 className="mt-3 font-display text-[28px] font-medium leading-[1.1] text-desk-ivory [text-shadow:0_2px_18px_rgba(0,0,0,0.55)] [text-wrap:balance]">{c.headline}</h2>
                   {c.body && <p className="mt-3 text-[13px] leading-[1.6] text-desk-ivory/70">{c.body}</p>}
                   {c.cta_url && c.cta_label && (
-                    <a href={c.cta_url} target="_blank" rel="noopener noreferrer sponsored" onClick={() => click(c.id)} tabIndex={here ? undefined : -1}
-                      className="mt-5 inline-flex min-h-[38px] items-center gap-2 rounded-full border border-desk-ivory/25 px-4 text-[12.5px] font-semibold text-desk-ivory transition hover:border-desk-champagne/70 hover:text-desk-champagne focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-desk-champagne/70">
-                      {c.cta_label} <span aria-hidden>↗</span><span className="sr-only"> (opens in a new tab)</span>
-                    </a>
+                    <span aria-hidden className="mt-5 inline-flex min-h-[38px] items-center gap-2 rounded-full border border-desk-ivory/25 px-4 text-[12.5px] font-semibold text-desk-ivory transition peer-hover:border-desk-champagne/70 group-hover/ad:border-desk-champagne/70 group-hover/ad:text-desk-champagne">
+                      {c.cta_label} <span aria-hidden>↗</span>
+                    </span>
                   )}
                   {c.attribution && <p className="mt-4 text-[11px] text-desk-ivory/45">{c.attribution}</p>}
                 </div>
@@ -152,7 +157,7 @@ export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", r
         )}
 
         {list.length > 1 && (
-          <div className="mt-6 flex items-center gap-3">
+          <div className="pointer-events-auto mt-6 flex items-center gap-3">
             <Dots n={list.length} i={i} onPick={setAt} />
             <span className="ml-auto flex items-center gap-1">
               <Ctl label="Previous promotion" onClick={() => go(-1)}><path d="M7.5 2.5 4 6l3.5 3.5" /></Ctl>
@@ -168,6 +173,12 @@ export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", r
     </section>
   );
 };
+
+/** The compact card: one link for picture and words when the campaign has a destination. */
+const LinkOrDiv: React.FC<{ c: Slide["campaign"]; onClick: () => void; className: string; children: React.ReactNode }> = ({ c, onClick, className, children }) => c.cta_url
+  ? <a href={c.cta_url} target="_blank" rel="noopener noreferrer sponsored" onClick={onClick} aria-label={`${c.headline}${c.cta_label ? ` · ${c.cta_label}` : ""} (promotion, opens in a new tab)`}
+      className={`${className} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-desk-champagne/70`}>{children}</a>
+  : <div className={className}>{children}</div>;
 
 const Dots: React.FC<{ n: number; i: number; onPick: (k: number) => void; className?: string }> = ({ n, i, onPick, className = "" }) => (
   <span className={`flex items-center gap-1.5 ${className}`}>

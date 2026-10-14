@@ -100,6 +100,8 @@ export function validateCampaign(d: CampaignDraft, forPublish = false): Partial<
   if (d.starts_at && d.ends_at && Date.parse(d.ends_at) <= Date.parse(d.starts_at)) e.schedule = "The end must be after the start.";
   if (d.image_path && !d.image_alt?.trim()) e.image_alt = "Describe the image for people who cannot see it.";
   if (forPublish && !d.image_path) e.image_path = "Add an image before publishing.";
+  if (forPublish && !d.cta_url && !e.cta_url) e.cta_url = "Every slide links somewhere: add the destination before publishing.";
+  if (forPublish && d.cta_url && !d.cta_label?.trim() && !e.cta_label) e.cta_label = "Add the button text, e.g. “Explore Dispatch”.";
   return e;
 }
 
