@@ -9,6 +9,7 @@ import LayerBar from "./LayerBar";
 import LayerSubNav from "./LayerSubNav";
 import TermsDialog from "./TermsDialog";
 import PageTip from "./PageTip";
+import { JourneyBar } from "./GuidedJourney";
 import CommandPalette, { noteRecent } from "./CommandPalette";
 import { guideState, markVisited, onGuideChange, setGuideHidden, setTipsHidden, ESSENTIALS } from "../lib/onboarding";
 import { DealSpine } from "./DealSpine";
@@ -246,6 +247,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {WORKSTATION_ROUTES.has(loc.pathname)
             ? <div className="px-3 py-3 sm:px-4 lg:px-5 lg:py-4">{children}</div>   /* full-bleed command centers */
             : <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</div>}
+          <JourneyBar />
         </main>
       </div>
       <TermsDialog open={termsOpen} onClose={() => setTermsOpen(false)} />

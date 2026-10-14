@@ -12,6 +12,9 @@ interface Guide { purpose: ByRole; next?: ByRole }
 const G: Record<string, Guide> = {
   "/console": { purpose: "Your company at a glance: its value, likely buyers, readiness and the recommended next action.", next: "/console/intake" },
   "/console/command": { purpose: "Your exit position on one screen: value now and after fixes, how likely a sale is, interested buyers and the process stage.", next: "/console/readiness" },
+  "/console/journey": {
+    purpose: { founder: "Every step of selling your company, in order, with what is already done.", buyer: "Every step of buying a company, in order, with what is already done." },
+    next: { founder: "/console/intake", buyer: "/console/acquisition-radar" } },
   "/console/intake": { purpose: "Enter your company's figures. Every page then uses your company instead of the demo.", next: "/console/company-story" },
   "/console/company-story": { purpose: "Your company's history, products, customers, people, ownership and sources — what a CIM is written from, each figure with its basis.", next: "/console/documents" },
   "/console/acquisition-radar": {

@@ -25,6 +25,9 @@ export interface NavItem {
 }
 
 export const NAV: NavItem[] = [
+  // ── The guided journey (founder and buyer) ────────────────────
+  { to: "/console/journey",            label: "Guided Journey", name: "Step by step", group: "Mandate", roles: ["founder"] },
+  { to: "/console/journey",            label: "Guided Journey", name: "Step by step", group: "Overview", roles: ["buyer"] },
   // ── Founder · Overview ─────────────────────────────────────────
   { to: "/console/commander",          label: "Recommended Actions", name: "Chief Investment Banker", group: "Mandate", roles: ["founder"], pro: true },
   { to: "/console",                    label: "Home", name: "Intelligence Terminal", group: "Mandate", roles: ["founder"] },
