@@ -89,7 +89,7 @@ export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", r
       <section ref={box} aria-roledescription="carousel" aria-label="Promotions" {...hold}
         className={`overflow-hidden rounded-[16px] bg-desk-rail text-desk-ivory ${className}`}>
         <LinkOrDiv c={c} onClick={() => click(c.id)} className="flex">
-          {current.image && <img src={current.image} alt={c.image_alt ?? ""} className="h-auto w-[34%] shrink-0 object-cover saturate-[0.85]" style={{ objectPosition: `${c.focal_x}% ${c.focal_y}%` }} />}
+          {(current.image || current.video) && <div className="relative min-h-[104px] w-[34%] shrink-0"><SlideMedia slide={current} here still={reduced.current} /></div>}
           <div className="min-w-0 flex-1 px-4 py-3.5" aria-live={playing && !held ? "off" : "polite"}>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-desk-ivory/50">Promotion{c.eyebrow ? <span className="text-desk-champagne"> · {c.eyebrow}</span> : null}</p>
             <p className="mt-1 font-display text-[19px] leading-[1.15] text-desk-ivory">{c.headline}</p>
@@ -107,9 +107,7 @@ export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", r
       {/* the pictures, stacked; only the current one is visible and exposed */}
       {current ? list.map((s, k) => (
         <div key={s.campaign.id} aria-hidden={k !== i || undefined} className={`absolute inset-0 -z-10 [mask-image:linear-gradient(180deg,transparent_0%,#000_30%)] [-webkit-mask-image:linear-gradient(180deg,transparent_0%,#000_30%)] ${fade} ${k === i ? "opacity-100" : "opacity-0"}`}>
-          {s.image
-            ? <img src={s.image} alt={k === i ? s.campaign.image_alt ?? "" : ""} loading={k === i ? "eager" : "lazy"} decoding="async" className="h-full w-full object-cover saturate-[0.85]" style={{ objectPosition: `${s.campaign.focal_x}% ${s.campaign.focal_y}%` }} />
-            : <div className="h-full w-full bg-desk-rail" />}
+          <SlideMedia slide={s} here={k === i} still={reduced.current} />
         </div>
       )) : (
         <img src={waterfrontSkyline} alt="" aria-hidden className="absolute inset-0 -z-10 h-full w-full object-cover object-[40%_60%] [mask-image:linear-gradient(180deg,transparent_0%,#000_30%)] [-webkit-mask-image:linear-gradient(180deg,transparent_0%,#000_30%)]" />
@@ -172,6 +170,23 @@ export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", r
       </div>
     </section>
   );
+};
+
+/** A slide's picture, or its video: muted, looping, playing only while its slide is on screen, and never for
+ *  visitors who prefer reduced motion (they see the cover image). */
+const SlideMedia: React.FC<{ slide: Slide; here: boolean; still: boolean }> = ({ slide, here, still }) => {
+  const v = useRef<HTMLVideoElement>(null);
+  const c = slide.campaign, pos = { objectPosition: `${c.focal_x}% ${c.focal_y}%` };
+  useEffect(() => {
+    const el = v.current; if (!el) return;
+    if (here) void el.play().catch(() => undefined); else el.pause();
+  }, [here]);
+  if (slide.video && !still) return (
+    <video ref={v} src={slide.video} poster={slide.image ?? undefined} muted loop playsInline preload={here ? "auto" : "metadata"}
+      aria-label={here ? c.image_alt ?? undefined : undefined} className="absolute inset-0 h-full w-full object-cover saturate-[0.85]" style={pos} />
+  );
+  if (slide.image) return <img src={slide.image} alt={here ? c.image_alt ?? "" : ""} loading={here ? "eager" : "lazy"} decoding="async" className="absolute inset-0 h-full w-full object-cover saturate-[0.85]" style={pos} />;
+  return <div className="absolute inset-0 bg-desk-rail" />;
 };
 
 /** The compact card: one link for picture and words when the campaign has a destination. */

@@ -991,3 +991,11 @@ Audit: the console's 44 pages draw almost all colour from the `xo` tokens (about
 - Not changed: the marketing site (home, platform, modules, pricing), the report pages and the listing desk keep their own designs; no behaviour changed.
 
 **Results**: web 433 tests; lint, typecheck, build clean. Browser (development server): 30 console pages at 1440 wide checked for pale text on the ivory ground (none left) and screenshotted; three pages and the menu at 390 wide with no horizontal overflow; sign-in unchanged.
+
+## 21. Increment report — video promotions
+
+- A campaign may carry a muted, looping video (MP4 or WebM, 25 MB at most) shown in place of its picture; the picture stays required as the cover frame and is what visitors who prefer reduced motion see. Only the slide on screen plays; the whole slide stays one link to the destination.
+- Database (`20261014180000_exitos_ad_video.sql`): `video_path` with the generated-path pattern; the bucket accepts video/mp4 and video/webm up to 25 MB; a signed link is given only for a live campaign's picture or video (or to an operator); operators upload only into the pattern. Self-test `exitos_selftest_ad_video()`: 6 checks, passing locally and on the live project; the campaign self-test still passes 23/23 live.
+- Manager: a video upload beside the picture, previewed in the sidebar and phone previews.
+
+**Results**: web 436 tests; lint, typecheck, build clean. Browser: a WebM uploaded through the manager plays muted and looping in the founder's sidebar and the click opens the destination.

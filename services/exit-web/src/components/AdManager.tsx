@@ -3,7 +3,7 @@ import { Section, Provenance, XO_INPUT, XO_LABEL } from "./xo";
 import { notify } from "../lib/ui";
 import type { Remote } from "../lib/documents/store";
 import {
-  AD_STAGES, AD_STAGE_LABEL, DEFAULT_SETTINGS, LIMITS, IMAGE_TYPES, campaignState, emptyDraft, validateCampaign, checkImage,
+  AD_STAGES, AD_STAGE_LABEL, DEFAULT_SETTINGS, LIMITS, IMAGE_TYPES, VIDEO_TYPES, campaignState, emptyDraft, validateCampaign, checkImage, checkVideo,
   loadCampaigns, loadSettings, loadStats, saveCampaign, saveSettings, signImages, uploadImage, local,
   type AdSettings, type AdStage, type AdState, type AdStats, type Campaign, type CampaignDraft,
 } from "../lib/ads";
@@ -56,11 +56,11 @@ export const AdManager: React.FC<{ remote?: Remote }> = ({ remote }) => {
       if (!remote) {
         const list = local.campaigns();
         setCampaigns(list); setSettings(local.settings()); setStats(local.stats());
-        setImages(Object.fromEntries(list.flatMap((c) => { const u = local.image(c.image_path); return c.image_path && u ? [[c.image_path, u]] : []; })));
+        setImages(Object.fromEntries(list.flatMap((c) => [c.image_path, c.video_path ?? null].flatMap((p) => { const u = local.image(p); return p && u ? [[p, u]] : []; }))));
       } else {
         const [list, s, st] = await Promise.all([loadCampaigns(remote), loadSettings(remote), loadStats(remote).catch(() => ({}))]);
         setCampaigns(list); setSettings(s); setStats(st);
-        setImages(await signImages(remote, list.flatMap((c) => (c.image_path ? [c.image_path] : []))).catch(() => ({})));
+        setImages(await signImages(remote, list.flatMap((c) => [c.image_path, c.video_path].filter((x): x is string => !!x))).catch(() => ({})));
       }
     } catch (e) { setError((e as Error).message); }
     setLoading(false);
@@ -207,14 +207,15 @@ const Editor: React.FC<{
   const img = d.image_path ? images[d.image_path] ?? null : null;
   const previewCampaign = { ...d, id: d.id ?? "preview", headline: d.headline || "Your headline", status: "published" as const, starts_at: null, ends_at: null };
 
-  const pick = async (file: File | undefined): Promise<void> => {
+  const vid = d.video_path ? images[d.video_path] ?? null : null;
+  const pick = async (file: File | undefined, video = false): Promise<void> => {
     if (!file) return;
-    const bad = checkImage(file); if (bad) { setUploadError(bad); return; }
+    const bad = video ? checkVideo(file) : checkImage(file); if (bad) { setUploadError(bad); return; }
     setUploading(true); setUploadError(null);
     try {
-      const path = remote ? await uploadImage(remote, file) : await local.upload(file);
+      const path = remote ? await uploadImage(remote, file, video) : await local.upload(file, video);
       const url = remote ? (await signImages(remote, [path]))[path] ?? URL.createObjectURL(file) : local.image(path) ?? URL.createObjectURL(file);
-      onUploaded(path, url); set("image_path", path);
+      onUploaded(path, url); set(video ? "video_path" : "image_path", path);
     } catch (e) { setUploadError((e as Error).message); }
     setUploading(false);
   };
@@ -270,6 +271,19 @@ const Editor: React.FC<{
           {d.image_path && field("image_alt", "Image description", "For people who use a screen reader.")}
         </fieldset>
 
+        <fieldset className="space-y-2">
+          <legend className={XO_LABEL}>Video · optional · MP4 or WebM, 25 MB at most</legend>
+          <p className="text-[11px] text-xo-faint">Plays muted and looping in place of the picture; the picture above is its cover frame and what visitors who prefer less motion see. The same focal point applies.</p>
+          <div className="flex flex-wrap items-start gap-4">
+            {vid ? <video src={vid} poster={img ?? undefined} muted loop playsInline autoPlay className="h-28 w-56 rounded-sm border border-xo-line object-cover" style={{ objectPosition: `${d.focal_x}% ${d.focal_y}%` }} />
+              : <span className="grid h-28 w-56 place-items-center border border-dashed border-xo-line text-[11px] text-xo-faint">No video</span>}
+            <div className="space-y-2 text-[12px]">
+              <input type="file" accept={VIDEO_TYPES.join(",")} disabled={uploading} onChange={(e) => void pick(e.target.files?.[0], true)} className="block text-[12px]" aria-label="Upload a video" />
+              {vid && <button type="button" className={GHOST} onClick={() => set("video_path", null)}>Remove video</button>}
+            </div>
+          </div>
+        </fieldset>
+
         <fieldset><legend className={XO_LABEL}>Show on these stages</legend>
           <div className="flex flex-wrap gap-3 text-[12px]">
             {AD_STAGES.map((s) => <label key={s} className="flex items-center gap-1.5"><input type="checkbox" checked={d.stages.includes(s)} onChange={(e) => set("stages", e.target.checked ? AD_STAGES.filter((x) => x === s || d.stages.includes(x)) : d.stages.filter((x) => x !== s))} />{AD_STAGE_LABEL[s]}</label>)}
@@ -302,13 +316,13 @@ const Editor: React.FC<{
           <div aria-label="Desktop sidebar preview" className="flex h-[860px] w-[300px] flex-col overflow-hidden rounded-[14px] border border-[#C9A86A]/50">
             <DeskRail stage={AD_STAGES.indexOf(stage) as 0 | 1 | 2} stageDone={[stage !== "identity", stage === "review", false]} canReview={stage === "review"} pagesDone={stage === "review" ? 3 : 1} onGo={() => undefined} onClose={() => undefined}>
               {d.stages.includes(stage)
-                ? <AdPanel preview slides={[{ campaign: previewCampaign, image: img }]} settings={settings} className="mt-6 flex flex-1" />
+                ? <AdPanel preview slides={[{ campaign: previewCampaign, image: img, video: vid }]} settings={settings} className="mt-6 flex flex-1" />
                 : <p className="m-5 mt-auto rounded-sm border border-xo-line p-3 text-[11.5px] text-ex-ivory/60">Not shown on this stage.</p>}
             </DeskRail>
           </div>
           <div aria-label="Phone preview" className="w-[300px] rounded-[18px] border border-xo-line bg-[#FBF8F2] p-3">
             <p className="mb-2 text-[10.5px] text-[#8A8378]">Phone · after the form</p>
-            {d.mobile && settings.mobile_enabled ? <AdPanel preview variant="compact" slides={[{ campaign: previewCampaign, image: img }]} settings={settings} />
+            {d.mobile && settings.mobile_enabled ? <AdPanel preview variant="compact" slides={[{ campaign: previewCampaign, image: img, video: vid }]} settings={settings} />
               : <p className="text-[11.5px] text-[#8A8378]">{settings.mobile_enabled ? "This campaign is not shown on phones." : "Phone placement is switched off in the slideshow settings."}</p>}
           </div>
         </div>

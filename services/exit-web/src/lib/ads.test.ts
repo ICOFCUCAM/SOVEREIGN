@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import {
-  campaignState, selectCampaigns, checkUrl, validateCampaign, checkImage, imagePath, sumStats, emptyDraft,
+  campaignState, selectCampaigns, checkUrl, validateCampaign, checkImage, checkVideo, imagePath, sumStats, emptyDraft,
   loadSlides, saveCampaign, DEFAULT_SETTINGS, type Campaign,
 } from "./ads";
 import { AdPanel } from "../components/AdPanel";
@@ -55,6 +55,15 @@ describe("what an operator enters is validated", () => {
     expect(checkImage({ type: "image/png", size: 6 * 1024 * 1024 })).not.toBeNull();
     expect(imagePath("image/jpeg")).toMatch(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(webp|jpg|jpeg|png|avif)$/);
   });
+  it("accepts MP4 and WebM videos up to 25 MB, names them in the server's pattern, and still asks for a cover image", () => {
+    expect(checkVideo({ type: "video/mp4", size: 10e6 })).toBeNull();
+    expect(checkVideo({ type: "video/webm", size: 10e6 })).toBeNull();
+    expect(checkVideo({ type: "video/quicktime", size: 1e6 })).not.toBeNull();
+    expect(checkVideo({ type: "video/mp4", size: 30e6 })).not.toBeNull();
+    expect(imagePath("video/mp4")).toMatch(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(mp4|webm)$/);
+    const d = { ...emptyDraft(), name: "D", headline: "H", video_path: "v", cta_url: "https://example.com", cta_label: "Go" };
+    expect(validateCampaign(d, true).image_path).toMatch(/cover image/);
+  });
   it("adds up daily counts per campaign", () => {
     expect(sumStats([{ campaign_id: "a", impressions: 3, clicks: 1 }, { campaign_id: "a", impressions: 2, clicks: 0 }, { campaign_id: "b", impressions: 1, clicks: 1 }]))
       .toEqual({ a: { impressions: 5, clicks: 1 }, b: { impressions: 1, clicks: 1 } });
@@ -79,6 +88,17 @@ describe("talking to the server", () => {
     expect(slides[0]!.image).toBe("https://x.supabase.co/storage/v1/object/sign/exitos-ads/p/a.webp?token=t");
     expect(signed).toEqual([["p/a.webp"]]);
     expect(settings).toEqual({ rotation_seconds: 9, mobile_enabled: false });
+  });
+  it("signs a live campaign's video with its picture", async () => {
+    const r = remote((u, init) => {
+      if (u.includes("exitos_ad_campaigns")) return [c({ id: "v", image_path: "p/v.webp", video_path: "p/v.mp4" })];
+      if (u.includes("exitos_ad_settings")) return [];
+      if (u.includes("/object/sign/exitos-ads")) return (JSON.parse(String(init?.body)) as { paths: string[] }).paths.map((p) => ({ path: p, signedURL: `/object/sign/exitos-ads/${p}?token=t` }));
+      return [];
+    });
+    const { slides } = await loadSlides(r, "identity");
+    expect(slides[0]!.video).toBe("https://x.supabase.co/storage/v1/object/sign/exitos-ads/p/v.mp4?token=t");
+    expect(slides[0]!.image).toContain("p/v.webp");
   });
   it("a failing campaign service leaves the desk with no slides, not an error", async () => {
     expect(await loadSlides(remote(() => ({ message: "down" }), 500), "profile")).toEqual({ slides: [], settings: DEFAULT_SETTINGS });
@@ -111,6 +131,12 @@ describe("the promotions panel", () => {
     const two = renderToStaticMarkup(createElement(AdPanel, { slides: [slide({ id: "a" }), slide({ id: "b" })], settings: DEFAULT_SETTINGS, preview: true }));
     expect(two).toContain("Pause the slideshow");
     expect(two).toContain("Show promotion 2 of 2");
+  });
+  it("a video slide plays muted and looping, with its picture as the cover, inside the same link", () => {
+    const html = renderToStaticMarkup(createElement(AdPanel, { slides: [{ ...slide({}), image: "https://x/p.webp", video: "https://x/v.mp4" }], settings: DEFAULT_SETTINGS, preview: true }));
+    expect(html).toMatch(/<video[^>]*src="https:\/\/x\/v.mp4"[^>]*poster="https:\/\/x\/p.webp"[^>]*muted=""[^>]*loop=""[^>]*playsInline=""|<video[^>]*src="https:\/\/x\/v.mp4"/);
+    expect(html).toContain("muted");
+    expect(html.match(/<a /g)?.length).toBe(1);
   });
   it("the phone card shows nothing at all when there is no campaign", () => {
     expect(renderToStaticMarkup(createElement(AdPanel, { slides: [], settings: DEFAULT_SETTINGS, variant: "compact" }))).toBe("");

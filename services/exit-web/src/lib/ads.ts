@@ -26,6 +26,7 @@ export interface Campaign {
   readonly cta_url: string | null;
   readonly attribution: string | null;
   readonly image_path: string | null;
+  readonly video_path?: string | null;   // optional muted, looping video; the image is its cover frame
   readonly image_alt: string | null;
   readonly focal_x: number;
   readonly focal_y: number;
@@ -44,15 +45,17 @@ export interface AdSettings { readonly rotation_seconds: number; readonly mobile
 export const DEFAULT_SETTINGS: AdSettings = { rotation_seconds: 7, mobile_enabled: true };
 
 /** A campaign ready to show: the record plus a URL for its image (signed, or a local data URL). */
-export interface Slide { readonly campaign: Campaign; readonly image: string | null }
+export interface Slide { readonly campaign: Campaign; readonly image: string | null; readonly video?: string | null }
 
 export const LIMITS = { name: 120, eyebrow: 60, headline: 120, body: 280, cta_label: 40, cta_url: 500, attribution: 80, image_alt: 200 } as const;
 export const IMAGE_TYPES = ["image/webp", "image/jpeg", "image/png", "image/avif"] as const;
 export const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+export const VIDEO_TYPES = ["video/mp4", "video/webm"] as const;
+export const VIDEO_MAX_BYTES = 25 * 1024 * 1024;
 
 export const emptyDraft = (position = 0): CampaignDraft => ({
   name: "", eyebrow: null, headline: "", body: null, cta_label: null, cta_url: null, attribution: null,
-  image_path: null, image_alt: null, focal_x: 50, focal_y: 50, stages: [...AD_STAGES], mobile: true,
+  image_path: null, video_path: null, image_alt: null, focal_x: 50, focal_y: 50, stages: [...AD_STAGES], mobile: true,
   priority: 0, position, status: "draft", starts_at: null, ends_at: null,
 });
 
@@ -99,23 +102,29 @@ export function validateCampaign(d: CampaignDraft, forPublish = false): Partial<
   if (!d.stages.length) e.stages = "Choose at least one stage.";
   if (d.starts_at && d.ends_at && Date.parse(d.ends_at) <= Date.parse(d.starts_at)) e.schedule = "The end must be after the start.";
   if (d.image_path && !d.image_alt?.trim()) e.image_alt = "Describe the image for people who cannot see it.";
-  if (forPublish && !d.image_path) e.image_path = "Add an image before publishing.";
+  if (forPublish && !d.image_path) e.image_path = d.video_path ? "Add a cover image for the video (shown while it loads and to visitors who prefer less motion)." : "Add an image before publishing.";
   if (forPublish && !d.cta_url && !e.cta_url) e.cta_url = "Every slide links somewhere: add the destination before publishing.";
   if (forPublish && d.cta_url && !d.cta_label?.trim() && !e.cta_label) e.cta_label = "Add the button text, e.g. “Explore Dispatch”.";
   return e;
 }
 
 /** An image the operator picked, or the reason it cannot be used. */
+/** A video the operator picked, or the reason it cannot be used. */
+export function checkVideo(file: { type: string; size: number }): string | null {
+  if (!(VIDEO_TYPES as readonly string[]).includes(file.type)) return "Use an MP4 or WebM video.";
+  if (file.size > VIDEO_MAX_BYTES) return "The video must be 25 MB or smaller.";
+  return null;
+}
 export function checkImage(file: { type: string; size: number }): string | null {
   if (!(IMAGE_TYPES as readonly string[]).includes(file.type)) return "Use a WebP, JPEG, PNG or AVIF image.";
   if (file.size > IMAGE_MAX_BYTES) return "The image must be 5 MB or smaller.";
   return null;
 }
-const EXT: Record<string, string> = { "image/webp": "webp", "image/jpeg": "jpg", "image/png": "png", "image/avif": "avif" };
+const EXT: Record<string, string> = { "video/mp4": "mp4", "video/webm": "webm", "image/webp": "webp", "image/jpeg": "jpg", "image/png": "png", "image/avif": "avif" };
 export const imagePath = (type: string, uuid: () => string = () => crypto.randomUUID()): string => `${uuid()}/${uuid()}.${EXT[type] ?? "webp"}`;
 
 // only fields the table accepts are ever sent
-const FIELDS = ["name", "eyebrow", "headline", "body", "cta_label", "cta_url", "attribution", "image_path", "image_alt", "focal_x", "focal_y", "stages", "mobile", "priority", "position", "status", "starts_at", "ends_at"] as const;
+const FIELDS = ["name", "eyebrow", "headline", "body", "cta_label", "cta_url", "attribution", "image_path", "video_path", "image_alt", "focal_x", "focal_y", "stages", "mobile", "priority", "position", "status", "starts_at", "ends_at"] as const;
 const clean = (d: Partial<CampaignDraft>): Record<string, unknown> => {
   const o: Record<string, unknown> = {};
   for (const k of FIELDS) if (k in d) { const v = d[k]; o[k] = typeof v === "string" ? (v.trim() || null) : v; }
@@ -160,12 +169,12 @@ export async function saveCampaign(r: Remote, d: Partial<CampaignDraft> & { id?:
   return rows[0];
 }
 
-/** Upload an image to the private bucket; resolves to its path. */
-export async function uploadImage(r: Remote, file: File): Promise<string> {
-  const bad = checkImage(file); if (bad) throw new Error(bad);
+/** Upload an image (or, with `video`, a video) to the private bucket; resolves to its path. */
+export async function uploadImage(r: Remote, file: File, video = false): Promise<string> {
+  const bad = video ? checkVideo(file) : checkImage(file); if (bad) throw new Error(bad);
   const path = imagePath(file.type);
   const res = await f(r)(`${r.url}/storage/v1/object/${BUCKET}/${path}`, { method: "POST", headers: { apikey: r.anonKey, Authorization: `Bearer ${r.accessToken}`, "content-type": file.type, "x-upsert": "false" }, body: file });
-  await json<unknown>(res, "Uploading the image");
+  await json<unknown>(res, video ? "Uploading the video" : "Uploading the image");
   return path;
 }
 
@@ -223,9 +232,9 @@ export const local = {
     writeLocal(s); return c;
   },
   saveSettings(x: AdSettings): void { const s = readLocal(); s.settings = x; writeLocal(s); },
-  async upload(file: File): Promise<string> {
-    const bad = checkImage(file); if (bad) throw new Error(bad);
-    if (file.size > 1_500_000) throw new Error("Without a server, images are kept in this browser: use one of 1.5 MB or less.");
+  async upload(file: File, video = false): Promise<string> {
+    const bad = video ? checkVideo(file) : checkImage(file); if (bad) throw new Error(bad);
+    if (file.size > 1_500_000) throw new Error(`Without a server, files are kept in this browser: use ${video ? "a video" : "an image"} of 1.5 MB or less.`);
     const data = await new Promise<string>((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result)); fr.onerror = () => rej(new Error("The image could not be read.")); fr.readAsDataURL(file); });
     const path = imagePath(file.type); const s = readLocal(); s.images[path] = data; writeLocal(s); return path;
   },
@@ -240,12 +249,12 @@ export async function loadSlides(remote: Remote | undefined, stage: AdStage, mob
     if (!remote) {
       const settings = local.settings();
       const list = selectCampaigns(local.campaigns(), stage, { mobile });
-      return { settings, slides: list.map((c) => ({ campaign: c, image: local.image(c.image_path) })) };
+      return { settings, slides: list.map((c) => ({ campaign: c, image: local.image(c.image_path), video: local.image(c.video_path ?? null) })) };
     }
     const [all, settings] = await Promise.all([loadCampaigns(remote), loadSettings(remote).catch(() => DEFAULT_SETTINGS)]);
     const list = selectCampaigns(all, stage, { mobile });
-    const urls = await signImages(remote, list.flatMap((c) => (c.image_path ? [c.image_path] : []))).catch(() => ({} as Record<string, string>));
-    return { settings, slides: list.map((c) => ({ campaign: c, image: c.image_path ? urls[c.image_path] ?? null : null })) };
+    const urls = await signImages(remote, list.flatMap((c) => [c.image_path, c.video_path].filter((x): x is string => !!x))).catch(() => ({} as Record<string, string>));
+    return { settings, slides: list.map((c) => ({ campaign: c, image: c.image_path ? urls[c.image_path] ?? null : null, video: c.video_path ? urls[c.video_path] ?? null : null })) };
   } catch {
     return { slides: [], settings: DEFAULT_SETTINGS };
   }
