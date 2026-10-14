@@ -1,6 +1,6 @@
 {
- "as_of": "2026-10-11T12:09:15.115Z",
- "totalEvents": 3855,
+ "as_of": "2026-10-14T11:04:02.178Z",
+ "totalEvents": 3850,
  "disclosedEvents": 1137,
  "totalDisclosedUsd": 1152081542609,
  "sectorHeat": [
@@ -213,7 +213,7 @@
   },
   {
    "region": "Other",
-   "deals": 1545,
+   "deals": 1540,
    "disclosedUsd": 121729261158
   },
   {
@@ -251,19 +251,19 @@
   {
    "from": "North America",
    "to": "Other",
-   "deals": 124
+   "deals": 128
   },
   {
    "from": "Other",
    "to": "Other",
-   "deals": 13
+   "deals": 16
   }
  ],
  "topAcquirers": [
   {
    "buyer_id": "microsoft",
    "name": "Microsoft",
-   "deals": 394,
+   "deals": 385,
    "recentDeals": 6,
    "lastDate": "2026-04-18"
   },
@@ -319,7 +319,7 @@
   {
    "buyer_id": "oracle",
    "name": "Oracle",
-   "deals": 143,
+   "deals": 140,
    "recentDeals": 0,
    "lastDate": "2022-05-06"
   },
@@ -389,9 +389,9 @@
   {
    "buyer_id": "sap",
    "name": "SAP",
-   "deals": 71,
-   "recentDeals": 6,
-   "lastDate": "2026-05-01"
+   "deals": 72,
+   "recentDeals": 7,
+   "lastDate": "2026-07-31"
   },
   {
    "buyer_id": "twitter",
@@ -526,18 +526,18 @@
    "lastDate": "2024-01-01"
   },
   {
+   "buyer_id": "thoma-bravo",
+   "name": "Thoma Bravo",
+   "deals": 4,
+   "recentDeals": 0,
+   "lastDate": "2022-10-01"
+  },
+  {
    "buyer_id": "apax-partners",
    "name": "Apax Partners",
    "deals": 4,
    "recentDeals": 0,
    "lastDate": "2022-03-31"
-  },
-  {
-   "buyer_id": "hasbro",
-   "name": "Hasbro",
-   "deals": 4,
-   "recentDeals": 0,
-   "lastDate": "1991-01-01"
   }
  ],
  "source": "ExitOS Acquisition Registry (Wikipedia · Wikidata · SEC EDGAR)"
