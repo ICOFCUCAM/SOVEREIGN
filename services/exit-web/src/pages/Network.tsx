@@ -137,13 +137,13 @@ const Network: React.FC = () => {
         </p>
       </Moat>
 
-      <Moat n={4} title="Autonomous Agents" why="Competitors offer tools. ExitOS offers workers." to="/console/autopilot" cta="Autonomous Exit">
+      <Moat n={4} title="Autonomous Agents" why="Competitors offer tools. ExitOS offers workers." to="/console/autopilot" cta="Exit Rehearsal">
         <ul className="grid gap-px border border-xo-line bg-xo-line sm:grid-cols-2">
           <li className="bg-xo-panel px-4 py-3 text-[13px] text-xo-muted"><span className="text-xo-text">Buyer discovery</span> ranks {BUYERS.candidates.length} buyers from the curated registry for this company.</li>
           <li className="bg-xo-panel px-4 py-3 text-[13px] text-xo-muted"><span className="text-xo-text">Diligence checks</span> list {DILIGENCE.documents.length} document packages and flag {DILIGENCE.redFlags.length + DILIGENCE.criticalQuestions.length} open items.</li>
         </ul>
         <p className="mt-3 max-w-[75ch] text-[13px] leading-relaxed text-xo-muted">
-          Autonomous Exit lays this work out as agent steps you approve one by one. Nothing is sent to a buyer without your approval.
+          Exit Rehearsal lays this work out as agent steps you approve one by one. Nothing is sent to a buyer without your approval.
         </p>
       </Moat>
 

@@ -247,7 +247,7 @@ const Dashboard: React.FC = () => {
               <ActionLink to="/console/autopilot" className="text-[13px]">See the plan</ActionLink>
               {executeGate && <span className="text-[12px] font-medium text-xo-caution">Requires {executeGate}</span>}
             </div>
-            <p className="mt-3 text-[12px] text-xo-faint">Execute opens Autonomous Exit, where the agents' work is laid out step by step and each step waits for your approval. Nothing is sent from this page.</p>
+            <p className="mt-3 text-[12px] text-xo-faint">Execute opens Exit Rehearsal, where the agents' work is laid out step by step and each step waits for your approval. Nothing is sent from this page.</p>
           </div>
         </Section>
         <Section title="Briefing register" eyebrow="What the desk is watching" className="lg:col-span-5">

@@ -11,8 +11,10 @@ import TermsDialog from "./TermsDialog";
 import PageTip from "./PageTip";
 import { JourneyBar } from "./GuidedJourney";
 import CommandPalette, { noteRecent } from "./CommandPalette";
-import { guideState, markVisited, onGuideChange, setGuideHidden, setTipsHidden, ESSENTIALS } from "../lib/onboarding";
+import { guideState, markVisited, onGuideChange, setTipsHidden, ESSENTIALS } from "../lib/onboarding";
 import { DealSpine } from "./DealSpine";
+import { AdPanel, useAdSlides } from "./AdPanel";
+import { useDocumentRemote } from "../lib/documents/remote";
 
 // Role-aware console rail. The navigation is driven by the access policy:
 // founders, buyers, admins and superadmins see different command centers, and
@@ -50,10 +52,13 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Pages opened in this browser — the "Opened" marks in the Start-here guide.
   // A plan-gated page shows the upgrade screen instead, so it is not marked.
   useEffect(() => { if (!needsUpgrade(loc.pathname, role, plan)) { markVisited(loc.pathname); noteRecent(loc.pathname); } }, [loc.pathname, role, plan]);
-  const [guideHidden, setGuideHiddenState] = useState(() => guideState().hidden);
+  // a quiet sponsored card at the foot of the sidebar (large screens only); hidden for the visit on request
+  const remote = useDocumentRemote();
+  const sidebarAds = useAdSlides(remote, "sidebar");
+  const [adHidden, setAdHidden] = useState(() => { try { return sessionStorage.getItem("exitos.ads.sidebar.hidden") === "1"; } catch { return false; } });
+  const hideAd = (): void => { setAdHidden(true); try { sessionStorage.setItem("exitos.ads.sidebar.hidden", "1"); } catch { /* this view only */ } };
   const [tipsHidden, setTipsHiddenState] = useState(() => guideState().tipsHidden);
-  useEffect(() => onGuideChange(() => { const g = guideState(); setGuideHiddenState(g.hidden); setTipsHiddenState(g.tipsHidden); }), []);
-  const showGuideLink = guideHidden && (role === "founder" || role === "buyer");
+  useEffect(() => onGuideChange(() => setTipsHiddenState(guideState().tipsHidden)), []);
   // A signed-in founder or buyer may move their own account to the other side; the database accepts only
   // founder or buyer for one's own account, and an operator's grant is unaffected.
   const canSwitch = !!session?.verified && (role === "founder" || role === "buyer");
@@ -199,8 +204,9 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {/* the menu fades at its scrolling edges instead of cutting an item in half; a hairline scrollbar */}
           <nav ref={menu} aria-label="Console" className={`ex-navscroll flex-1 overflow-y-auto py-2 ${folded ? "px-1" : "px-3"}`}>
             <DealSpine items={rest} pinned={folded ? [] : pinned} isActive={isActive} isLocked={(to) => needsUpgrade(basePath(to), role, plan)}
-              collapsed={folded} onNavigate={() => setNavOpen(false)} pathname={loc.pathname} />
+              collapsed={folded} onNavigate={() => setNavOpen(false)} pathname={loc.pathname} role={role} />
           </nav>
+          {!folded && !adHidden && <AdPanel variant="sidebar" slides={sidebarAds.slides} settings={sidebarAds.settings} remote={remote} onHide={hideAd} className="mx-3 mb-3 hidden lg:block" />}
           <div className={`border-t border-ex-hair ${folded ? "flex justify-center py-3" : "px-4 py-3"}`}>
             {/* the account: initials in a bronze ring beside the address, then role and plan */}
             <div className="flex items-center gap-2.5" title={folded ? `${session?.email ?? ""} · ${ROLE_LABEL[role]} · ${plan}` : undefined}>
@@ -218,7 +224,6 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             {!folded && <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium">
               <button type="button" onClick={() => setTermsOpen(true)} className="rounded text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">Terms</button>
               {tipsHidden && <button type="button" onClick={() => setTipsHidden(false)} className="rounded text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">Page tips</button>}
-              {showGuideLink && <Link to={role === "buyer" ? "/console/buyer-portal" : "/console"} onClick={() => setGuideHidden(false)} className="text-white/55 hover:text-white">Start-here guide</Link>}
               {plan !== "pro" && (role === "founder" || role === "buyer") && <Link to="/console/upgrade" className="text-ex-bronze hover:text-ex-ivory">Upgrade →</Link>}
               {canSwitch && <button type="button" disabled={switching} onClick={() => void switchSide()} className="rounded text-white/55 hover:text-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">{switching ? "Switching…" : role === "buyer" ? "Switch to selling" : "Switch to buying"}</button>}
               <button onClick={() => { signOut(); nav("/"); }} className="rounded text-white/55 hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">Sign out</button>

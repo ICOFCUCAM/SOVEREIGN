@@ -303,7 +303,7 @@ const Autopilot: React.FC = () => {
     <div data-page="autonomous-exit" className="space-y-3 text-xo-text">
       <PageHeader
         eyebrow={`Phase 3 · Autonomous · Guided simulation · ${fromIntake ? "Your intake" : "Demo company"}: ${company.name}`}
-        title="Autonomous Exit"
+        title="Exit Rehearsal"
         description={isStarter
           ? `On ${PLAN_LABEL[session?.plan ?? "prep"]}, the agents take you through valuation and buyer discovery — and stop the moment buyers are found. An ${PLAN_LABEL.pro} runs outreach, negotiation, closing and wealth.`
           : "A walkthrough of how the agents would run an exit on the figures ExitOS holds — value, buyers, data room, documents, outreach, negotiation, closing and wealth. Each step waits for your approval."}

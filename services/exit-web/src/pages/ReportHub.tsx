@@ -9,6 +9,7 @@ import { useDocumentRemote } from "../lib/documents/remote";
 import { generateVersion } from "../lib/documents/service";
 import { saveVersion } from "../lib/documents/store";
 import { notify } from "../lib/ui";
+import { AdPanel, useAdSlides } from "../components/AdPanel";
 
 // ── PUBLISHING CENTER ───────────────────────────────────────────────
 // The index of every board-ready document ExitOS publishes for the active
@@ -35,6 +36,8 @@ const ReportHub: React.FC = () => {
   const { session } = useAuth();
   const remote = useDocumentRemote();
   const [dispatching, setDispatching] = useState(false);
+  const ads = useAdSlides(remote, "reports");
+  const [adHidden, setAdHidden] = useState(false);
 
   // the board memorandum becomes a saved, hashed version, which Dispatch renders by id
   const submitBoardToDispatch = async (): Promise<void> => {
@@ -80,7 +83,7 @@ const ReportHub: React.FC = () => {
             <p className="mt-0.5 text-[12px] text-white/55">Submit the Board Memorandum into the Dispatch pipeline (Submit → Approve → Render → Publish) for a classified, audited institutional document.</p>
           </div>
           <button onClick={submitBoardToDispatch} disabled={dispatching}
-            className="shrink-0 rounded-md bg-deal-500 px-4 py-2 text-[12.5px] font-semibold text-ink-950 transition hover:bg-deal-400 disabled:opacity-60">
+            className="shrink-0 rounded-md bg-desk-gold px-4 py-2 text-[12.5px] font-semibold text-desk-ink transition hover:bg-[#AA8443] disabled:opacity-60">
             {dispatching ? "Preparing…" : "Board memo · render PDF via Dispatch →"}
           </button>
         </div>
@@ -111,6 +114,9 @@ const ReportHub: React.FC = () => {
             );
           })}
         </div>
+
+        {/* a sponsored card after the documents, never between them */}
+        {!adHidden && <AdPanel variant="strip" slides={ads.slides} settings={ads.settings} remote={remote} onHide={() => setAdHidden(true)} className="mt-6" />}
 
         <p className="mt-6 text-[11px] leading-relaxed text-white/35">
           Documents open in a new tab. “Print…” in the document toolbar opens your browser's print dialog, which can also save the

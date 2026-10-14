@@ -10,7 +10,9 @@ import waterfrontSkyline from "../assets/desk/waterfront-skyline-720.webp";
 // an impression only when a slide is actually on screen. With no live campaign it shows the desk's
 // own quiet panel — never an empty box, never invented content.
 
-type Variant = "rail" | "compact";
+// rail: the listing desk's sidebar canvas; compact: the desk on phones; sidebar: a small card at the
+// foot of the console sidebar; strip: a wide card on the Report hub. The last two read "Sponsored".
+type Variant = "rail" | "compact" | "sidebar" | "strip";
 
 /** Live slides for a stage, loaded once; failures resolve to none. */
 export function useAdSlides(remote: Remote | undefined, stage: AdStage, mobile = false): { slides: Slide[] | null; settings: AdSettings } {
@@ -34,9 +36,10 @@ interface Props {
   readonly remote?: Remote;                   // where impressions and clicks are counted
   readonly preview?: boolean;                 // the admin preview: counts nothing
   readonly className?: string;
+  readonly onHide?: () => void;               // sidebar and strip: "hide for this visit"
 }
 
-export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", remote, preview = false, className = "" }) => {
+export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", remote, preview = false, className = "", onHide }) => {
   const list = slides ?? [];
   const [at, setAt] = useState(0);
   const reduced = useRef(prefersReducedMotion());
@@ -81,6 +84,30 @@ export const AdPanel: React.FC<Props> = ({ slides, settings, variant = "rail", r
     onFocus: () => setHeld(true), onBlur: (e: React.FocusEvent) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHeld(false); },
   };
   const fade = reduced.current ? "" : "transition-opacity duration-[1100ms] ease-out";
+
+  if (variant === "sidebar" || variant === "strip") {
+    if (!current) return null;   // no live campaign: nothing at all, never a placeholder
+    const c = current.campaign, strip = variant === "strip", media = !!(current.image || current.video);
+    return (
+      <section ref={box} aria-roledescription="carousel" aria-label="Sponsored" {...hold}
+        className={`group/ad relative overflow-hidden rounded-[6px] border border-white/10 bg-white/[0.03] text-white transition hover:border-ex-bronze/40 ${className}`}>
+        <LinkOrDiv c={c} onClick={() => click(c.id)} className={strip ? "flex flex-col sm:flex-row" : "block"}>
+          {media && <div className={`relative shrink-0 overflow-hidden ${strip ? "aspect-[16/9] sm:aspect-auto sm:w-[38%] sm:min-h-[132px]" : "aspect-[2/1] w-full"}`}><SlideMedia slide={current} here still={reduced.current} /></div>}
+          <div className={`min-w-0 flex-1 ${strip ? "px-5 py-4" : "px-3 py-2.5"}`} aria-live={playing && !held ? "off" : "polite"}>
+            <p className="font-mono text-[8.5px] font-semibold uppercase tracking-[0.2em] text-white/40">Sponsored{c.eyebrow ? <span className="text-ex-bronze/80"> · {c.eyebrow}</span> : null}</p>
+            <p className={`mt-1 font-semibold leading-snug text-white/90 ${strip ? "text-[16px]" : "text-[12.5px]"}`}>{c.headline}</p>
+            {strip && c.body && <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/55">{c.body}</p>}
+            {c.cta_url && c.cta_label && <span aria-hidden className={`mt-1.5 inline-flex items-center gap-1 font-semibold text-ex-bronze group-hover/ad:text-ex-ivory ${strip ? "text-[12.5px]" : "text-[11px]"}`}>{c.cta_label} <span aria-hidden>↗</span></span>}
+          </div>
+        </LinkOrDiv>
+        {list.length > 1 && <Dots n={list.length} i={i} onPick={setAt} className={strip ? "justify-end px-4 pb-2" : "px-3 pb-1.5"} />}
+        {onHide && (
+          <button type="button" onClick={onHide} aria-label="Hide this promotion for this visit" title="Hide for this visit"
+            className="absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-black/45 text-[11px] text-white/70 opacity-0 transition hover:text-white focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze group-hover/ad:opacity-100 [@media(hover:none)]:opacity-100">✕</button>
+        )}
+      </section>
+    );
+  }
 
   if (variant === "compact") {
     if (!current) return null;   // small screens: no house panel, nothing above or between the form

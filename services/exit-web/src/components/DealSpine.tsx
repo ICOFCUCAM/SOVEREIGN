@@ -1,7 +1,9 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { LockIcon } from "../lib/ui";
-import { GROUP_ORDER, type NavItem } from "../lib/access";
+import { GROUP_ORDER, type NavItem, type Role } from "../lib/access";
+import { menuSummary } from "../lib/menu-summaries";
+import { HintCard, HintToggle, useHint } from "./HintCard";
 
 // ── THE EXIT SPINE ──────────────────────────────────────────────────
 // The console menu drawn as the exit itself: the tool groups are the stages of a sale (prepare,
@@ -38,9 +40,34 @@ interface Props {
   readonly collapsed: boolean;
   readonly onNavigate: () => void;
   readonly pathname: string;
+  readonly role: Role;
 }
 
-export const DealSpine: React.FC<Props> = ({ items, pinned, isActive, isLocked, collapsed, onNavigate, pathname }) => {
+/** One tool in the menu, with its summary on hover, keyboard focus or (touch) its ⓘ. */
+const MenuRow: React.FC<{ n: NavItem; inStage: boolean; active: boolean; locked: boolean; role: Role; onNavigate: () => void }> = ({ n, inStage, active, locked, role, onNavigate }) => {
+  const sub = n.name && !n.label.toLowerCase().includes(n.name.toLowerCase()) ? n.name : null;
+  const hint = useHint();
+  const summary = menuSummary(n.to, role);
+  return (
+    <li className="relative flex items-center">
+      {inStage && <span aria-hidden className={`absolute left-[-13px] top-1/2 h-px w-[9px] transition-colors ${active ? "bg-ex-bronze" : "bg-transparent"}`} />}
+      <Link to={locked ? "/console/upgrade" : n.to} aria-current={active ? "page" : undefined} onClick={onNavigate} {...(summary ? hint.bind : {})}
+        className={`group/row flex min-w-0 flex-1 items-center gap-2 rounded-[3px] px-2.5 py-[7px] text-[12.5px] leading-tight transition focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze ${active
+          ? "bg-gradient-to-r from-ex-bronze/[0.16] to-transparent text-ex-ivory shadow-[inset_2px_0_0_0_#B49A75]"
+          : "text-white/60 hover:bg-white/[0.035] hover:text-white/90"}`}>
+        <span className="min-w-0 flex-1 truncate">
+          <span className={locked ? "text-white/40" : ""}>{n.label}</span>
+          {active && sub && <span className="mt-0.5 block truncate font-mono text-[9.5px] uppercase tracking-[0.16em] text-ex-bronze/80">{sub}</span>}
+        </span>
+        {locked && <span className="flex shrink-0 items-center gap-0.5 font-mono text-[8.5px] uppercase tracking-[0.18em] text-white/35"><LockIcon size={8} />{n.starter ? "Prep" : "Pro"}</span>}
+      </Link>
+      {summary && <HintToggle hint={hint} label={n.label} />}
+      {summary && <HintCard hint={hint} title={n.label} what={summary.what} kind={summary.kind} plan={summary.plan} />}
+    </li>
+  );
+};
+
+export const DealSpine: React.FC<Props> = ({ items, pinned, isActive, isLocked, collapsed, onNavigate, pathname, role }) => {
   const groups = GROUP_ORDER.filter((g) => items.some((n) => n.group === g)).map((g) => ({ group: g, stage: stageOf(g), tools: items.filter((n) => n.group === g) }));
   // the stage of the page you are on, whether it is a stage tool or a pinned "Start here" page
   const currentGroup = [...items, ...pinned].find((n) => isActive(n.to) && groups.some((g) => g.group === n.group))?.group ?? null;
@@ -68,25 +95,9 @@ export const DealSpine: React.FC<Props> = ({ items, pinned, isActive, isLocked, 
     return () => ro.disconnect();
   }, [currentGroup, open, collapsed, pathname]);
 
-  const row = (n: NavItem, inStage: boolean): React.ReactNode => {
-    const active = isActive(n.to), locked = isLocked(n.to);
-    const sub = n.name && !n.label.toLowerCase().includes(n.name.toLowerCase()) ? n.name : null;
-    return (
-      <li key={`${n.to}-${n.group}`} className="relative">
-        {inStage && <span aria-hidden className={`absolute left-[-13px] top-1/2 h-px w-[9px] transition-colors ${active ? "bg-ex-bronze" : "bg-transparent"}`} />}
-        <Link to={locked ? "/console/upgrade" : n.to} aria-current={active ? "page" : undefined} onClick={onNavigate} title={sub ?? undefined}
-          className={`group/row flex items-center gap-2 rounded-[3px] px-2.5 py-[7px] text-[12.5px] leading-tight transition focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze ${active
-            ? "bg-gradient-to-r from-ex-bronze/[0.16] to-transparent text-ex-ivory shadow-[inset_2px_0_0_0_#B49A75]"
-            : "text-white/60 hover:bg-white/[0.035] hover:text-white/90"}`}>
-          <span className="min-w-0 flex-1 truncate">
-            <span className={locked ? "text-white/40" : ""}>{n.label}</span>
-            {active && sub && <span className="mt-0.5 block truncate font-mono text-[9.5px] uppercase tracking-[0.16em] text-ex-bronze/80">{sub}</span>}
-          </span>
-          {locked && <span title="Upgrade to Pro" className="flex shrink-0 items-center gap-0.5 font-mono text-[8.5px] uppercase tracking-[0.18em] text-white/35"><LockIcon size={8} />Pro</span>}
-        </Link>
-      </li>
-    );
-  };
+  const row = (n: NavItem, inStage: boolean): React.ReactNode => (
+    <MenuRow key={`${n.to}-${n.group}`} n={n} inStage={inStage} active={isActive(n.to)} locked={isLocked(n.to)} role={role} onNavigate={onNavigate} />
+  );
 
   if (collapsed) {
     // the spine alone: one numbered node per stage, each leading to the stage's first tool

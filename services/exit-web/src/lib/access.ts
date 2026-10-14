@@ -33,8 +33,8 @@ export const NAV: NavItem[] = [
   { to: "/console",                    label: "Home", name: "Intelligence Terminal", group: "Mandate", roles: ["founder"] },
   { to: "/console/intake",             label: "Value My Company",     group: "Mandate", roles: ["founder"] },
   { to: "/console/company-story",      label: "Company Story",        group: "Mandate", roles: ["founder"] },
-  { to: "/console/command",            label: "Exit Overview", name: "Liquidity Command",    group: "Mandate", roles: ["founder"] },
-  { to: "/console/autopilot",          label: "Autonomous Exit", name: "Simulate my exit",      group: "Mandate", roles: ["founder"], pro: true, starter: true },
+  // Liquidity Command (/console/command) is reached from Home ("Full exit overview"), not a second home in the menu
+  { to: "/console/autopilot",          label: "Exit Rehearsal", name: "Simulate my exit",      group: "Mandate", roles: ["founder"], pro: true, starter: true },
   { to: "/console/buyer-graph",        label: "Search All Acquirers", name: "Buyer Graph",          group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/market-map",         label: "Explore the Market", name: "Market Map",           group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
   { to: "/console/knowledge-graph",    label: "Search Past Deals", name: "Knowledge Graph",      group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },
@@ -59,11 +59,11 @@ export const NAV: NavItem[] = [
   { to: "/console/buyers",             label: "Find Buyers", name: "Buyer Profiles",       group: "Market Intelligence", roles: ["founder"] },
   { to: "/console/marketplace",        label: "List My Company", name: "Anonymous Listings",   group: "Exchange", roles: ["founder"] },
   // a counterparty's own NDA and transaction actions are free on every plan (O-17); the server decides what each party may do
-  { to: "/console/deals",              label: "Your NDAs and Transactions", name: "Your Deals", group: "Exchange", roles: ["founder"] },
+  { to: "/console/deals",              label: "Deals", name: "Your NDAs and transactions", group: "Exchange", roles: ["founder"] },
   { to: "/console/intelligence",       label: "Rank Buyers by Fit", name: "Acquisition Intelligence", group: "Market Intelligence", roles: ["founder"] },
 
   // ── Engage (founder) ───────────────────────────────────────────
-  { to: "/console/banker",             label: "The Banker", name: "Write to buyers",             group: "Exchange", roles: ["founder"], pro: true },
+  { to: "/console/banker",             label: "Outreach Desk", name: "Write to buyers",             group: "Exchange", roles: ["founder"], pro: true },
   { to: "/console/nda",                label: "Manage NDAs", name: "NDA Vault",            group: "Exchange", roles: ["founder"], pro: true },
   { to: "/console/inbox",              label: "Inbox",                group: "Exchange", roles: ["founder"] },
   { to: "/console/pipeline",           label: "Track Deals", name: "Active Processes",     group: "Exchange", roles: ["founder"] },
@@ -90,7 +90,7 @@ export const NAV: NavItem[] = [
   { to: "/console/marketplace",        label: "Browse Opportunities", group: "Marketplace", roles: ["buyer"] },
   { to: "/console/intelligence",       label: "Research Acquirers", name: "Acquisition Intelligence", group: "Marketplace", roles: ["buyer"] },
   // ── Buyer · Deals ──────────────────────────────────────────────
-  { to: "/console/deals",              label: "Your NDAs and Transactions", name: "Your Deals", group: "Deals", roles: ["buyer"] },
+  { to: "/console/deals",              label: "Deals", name: "Your NDAs and transactions", group: "Deals", roles: ["buyer"] },
   { to: "/console/deal-room",          label: "Open the Deal Room", name: "Deal Room",            group: "Deals", roles: ["buyer"], pro: true },
   { to: "/console/nda",                label: "Track Access Requests", name: "Access Requests",      group: "Deals", roles: ["buyer"], pro: true },
 

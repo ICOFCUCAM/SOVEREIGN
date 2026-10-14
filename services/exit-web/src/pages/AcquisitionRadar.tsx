@@ -253,7 +253,7 @@ const AcquisitionRadar: React.FC = () => {
         {[
           { k: "Current state", body: <><span className="font-mono text-xo-text">{sectors.length}</span> target sectors · {plural(listings.length, "listing")} · {plural(regions.length, "region")}</> },
           { k: "Recent changes", body: <>{watchVolume.toLocaleString()} indexed acquisitions in your space · {maxActiveBuyers} competing acquirers</> },
-          { k: "Recommended action", body: qualified[0] ? <>Express interest in <span className="font-semibold text-xo-text">{qualified[0].listing.code}</span> — {qualified[0].match.score}% match</> : <>Widen the mandate — no qualified listings yet</> },
+          { k: "Recommended action", body: qualified[0] ? <>Request an NDA on <span className="font-semibold text-xo-text">{qualified[0].listing.code}</span> — {qualified[0].match.score}% match</> : <>Widen the mandate — no qualified listings yet</> },
           { k: "Expected outcome", body: <><span className="font-mono text-xo-text">{qualified.length}</span> qualified opportunities · identities reveal on NDA</> },
         ].map((c) => (
           <div key={c.k} className="bg-xo-panel px-4 py-3">
@@ -455,8 +455,8 @@ const AcquisitionRadar: React.FC = () => {
                   </label>
                   <button type="button" onClick={() => setPending((st) => ({ ...st, [l.id]: "nda" }))}
                     aria-expanded={pending[l.id] === "nda"} aria-controls={`confirm-${l.id}`}
-                    className={`${SMALL_BTN} ml-auto border-xo-verified bg-xo-verified/90 text-ink-950 hover:bg-xo-verified`}
-                    disabled={!!requested[l.id]}>{requested[l.id] ? "✓ NDA requested" : "Express interest (request NDA)"}</button>
+                    className={`${SMALL_BTN} ml-auto border-desk-gold bg-desk-gold text-desk-ink hover:bg-[#AA8443]`}
+                    disabled={!!requested[l.id]}>{requested[l.id] ? "✓ NDA requested" : "Request NDA"}</button>
                 </div>
                 {/* indicative offer — a first-class record the founder resolves (in the open card) */}
                 {(open[l.id] || offered[l.id]) && <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px]">
@@ -482,7 +482,7 @@ const AcquisitionRadar: React.FC = () => {
                       ? <>This sends an NDA request for <span className="font-mono">{l.code}</span> to its founder and opens a deal record they can see. ExitOS does not reveal the company's identity; the founder shares it once an NDA is in place.</>
                       : <>This records an indicative offer of <span className="font-mono">${offerInput[l.id]}M</span> on <span className="font-mono">{l.code}</span> and moves the deal to indication of interest. The founder sees it in their inbox; it is not a binding offer.</>}</p>
                     <div className="mt-2 flex gap-2">
-                      <button type="button" className={`${SMALL_BTN} border-xo-verified bg-xo-verified/90 text-ink-950`}
+                      <button type="button" className={`${SMALL_BTN} border-desk-gold bg-desk-gold text-desk-ink hover:bg-[#AA8443]`}
                         onClick={async () => {
                           const kind = pending[l.id];
                           setPending((st) => ({ ...st, [l.id]: undefined }));

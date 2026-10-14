@@ -35,7 +35,7 @@ export interface JourneyStep {
   readonly id: string;
   readonly to: string;
   readonly title: string;
-  /** the specialist whose work this is, as on Autonomous Exit */
+  /** the specialist whose work this is, as on Exit Rehearsal */
   readonly desk: string;
   /** one line: what to do on this page */
   readonly instruction: string;
@@ -50,7 +50,7 @@ export interface JourneyStep {
 
 export const SELLER_JOURNEY: readonly JourneyStep[] = [
   { id: "banker", to: "/console/commander", title: "Meet your investment banker", desk: "Chief Investment Banker", kind: "review", optional: true,
-    instruction: "Your banker's view of the mandate: value, odds, who is circling and the next instruction. Autonomous Exit and The Banker work from here." },
+    instruction: "Your banker's view of the mandate: value, odds, who is circling and the next instruction. Exit Rehearsal and the Outreach Desk work from here." },
   { id: "value", to: "/console/intake", title: "Value your company", desk: "Valuation", kind: "do",
     instruction: "Enter your company's figures and save them. Every later step is built from them.",
     doneWhen: (s) => s.intakeSaved },
@@ -86,7 +86,7 @@ export const BUYER_JOURNEY: readonly JourneyStep[] = [
   { id: "browse", to: "/console/marketplace", title: "Browse opportunities", desk: "Buyer discovery", kind: "review",
     instruction: "Companies listed for sale, shown anonymously. Follow the ones you like." },
   { id: "request", to: "/console/acquisition-radar", title: "Request an NDA", desk: "Data room", kind: "do",
-    instruction: "On a company you want to know more about, press “Express interest (request NDA)”.",
+    instruction: "On a company you want to know more about, press “Request NDA”.",
     doneWhen: (s) => s.ndaRequested },
   { id: "nda", to: "/console/deals", title: "Sign the NDA and read the files", desk: "Data room", kind: "do",
     instruction: "Sign the NDA the seller issues. The files it covers then open here.",

@@ -143,7 +143,7 @@ const Commander: React.FC = () => {
               <Button onClick={() => navigate("/console/autopilot")}>Execute →</Button>
               <ActionLink to="/console/autopilot" className="text-[13px]">See the plan</ActionLink>
             </div>
-            <p className="mt-3 text-[12px] text-xo-faint">Execute opens Autonomous Exit, where the agents' work is laid out step by step and each step waits for your approval. Nothing is sent from this page.</p>
+            <p className="mt-3 text-[12px] text-xo-faint">Execute opens Exit Rehearsal, where the agents' work is laid out step by step and each step waits for your approval. Nothing is sent from this page.</p>
           </div>
         </Section>
         <Section title="Briefing register" eyebrow="What the desk is watching" className="lg:col-span-5">
@@ -187,7 +187,7 @@ const Commander: React.FC = () => {
         </Section>
       </div>
 
-      <Section title="What Autonomous Exit prepares" eyebrow="Each step waits for your approval" className="border border-xo-line">
+      <Section title="What Exit Rehearsal prepares" eyebrow="Each step waits for your approval" className="border border-xo-line">
         <ol className="grid gap-2 px-4 py-3 sm:grid-cols-2 lg:grid-cols-3">
           {AUTOMATION.map((a, i) => <li key={a} className="flex items-center gap-2 border border-xo-line px-3 py-2 text-[13px]"><span className="font-mono text-[11px] text-xo-faint">{i + 1}</span>{a}</li>)}
         </ol>
