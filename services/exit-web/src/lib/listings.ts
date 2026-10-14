@@ -29,6 +29,9 @@ export interface ListingProductMeta {
   readonly coverage?: readonly string[];
   readonly tags?: readonly string[];
   readonly acquisitionReadyText?: string; // featured acquisition-ready ask
+  // the product's own logo or app icon (a path under /public or an https URL). Only named products carry one:
+  // a founder's listing stays anonymous until the NDA, so it never shows a logo.
+  readonly logoUrl?: string;
 }
 
 export interface Listing {
