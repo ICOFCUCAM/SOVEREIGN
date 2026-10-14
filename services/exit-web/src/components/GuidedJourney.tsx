@@ -11,7 +11,8 @@ import { loadNdas } from "../lib/nda-lifecycle";
 import { loadTransactions } from "../lib/transactions";
 import { useDocumentRemote } from "../lib/documents/remote";
 import { guideState, onGuideChange, setJourneyHidden } from "../lib/onboarding";
-import { journeyFor, stepStatus, currentStep, stepOnPage, finished, NO_SIGNALS, type JourneySignals, type StepStatus } from "../lib/journey";
+import { journeyFor, stepStatus, currentStep, stepOnPage, finished, NO_SIGNALS, type JourneySignals, type JourneyStep, type StepStatus } from "../lib/journey";
+import { HintCard, useHint } from "./HintCard";
 
 // The guided journey's bar at the foot of every founder and buyer page: which step of the sale (or the
 // acquisition) this is, what to do here, and Back / Next. Progress is read from the account's own records
@@ -74,6 +75,20 @@ export function useJourneySignals(role: Role): JourneySignals {
 const MARK: Record<StepStatus, string> = { done: "✓", reviewed: "✓", todo: "" };
 const STATUS_TEXT: Record<StepStatus, string> = { done: "Done", reviewed: "Reviewed", todo: "To do" };
 
+/** One step dot in the bar, with the step's summary on hover or keyboard focus. */
+const StepDot: React.FC<{ step: JourneyStep; i: number; current: boolean; status: StepStatus; plan: string }> = ({ step: s, i, current, status: st, plan }) => {
+  const hint = useHint();
+  return (
+    <li>
+      <Link to={s.to} state={{ journeyStep: i }} aria-label={`Step ${i + 1}: ${s.title} · ${STATUS_TEXT[st]}`} aria-current={current ? "step" : undefined} {...hint.bind}
+        className={`grid h-5 w-5 place-items-center rounded-full text-[9px] font-semibold ring-1 transition ${current ? "bg-[#B48737] text-white ring-[#B48737]" : st !== "todo" ? "bg-xo-verified/15 text-xo-verified ring-xo-verified/40" : "bg-white text-xo-faint ring-[#E2D3B5] hover:ring-[#B48737]"}`}>
+        {MARK[st] || i + 1}
+      </Link>
+      <HintCard hint={hint} side="top" title={`${i + 1}. ${s.title}`} what={s.instruction} plan={plan} />
+    </li>
+  );
+};
+
 /** The bar: shown on founder and buyer pages until switched off. */
 export const JourneyBar: React.FC = () => {
   const { session } = useAuth();
@@ -115,17 +130,7 @@ export const JourneyBar: React.FC = () => {
           </p>
         </div>
         <ol aria-label="Steps" className="hidden items-center gap-1 md:flex">
-          {steps.map((s, i) => {
-            const st = stepStatus(s, signals);
-            return (
-              <li key={s.id}>
-                <Link to={s.to} state={{ journeyStep: i }} aria-label={`Step ${i + 1}: ${s.title} · ${STATUS_TEXT[st]}`} aria-current={i === at ? "step" : undefined}
-                  className={`grid h-5 w-5 place-items-center rounded-full text-[9px] font-semibold ring-1 transition ${i === at ? "bg-[#B48737] text-white ring-[#B48737]" : st !== "todo" ? "bg-xo-verified/15 text-xo-verified ring-xo-verified/40" : "bg-white text-xo-faint ring-[#E2D3B5] hover:ring-[#B48737]"}`}>
-                  {MARK[st] || i + 1}
-                </Link>
-              </li>
-            );
-          })}
+          {steps.map((s, i) => <StepDot key={s.id} step={s} i={i} current={i === at} status={stepStatus(s, signals)} plan={requiredEngagement(s.to, role, "free") ?? "Free"} />)}
         </ol>
         <div className="flex items-center gap-2">
           <button type="button" className={`${BTN} border-[#E2D3B5] bg-white text-xo-text hover:border-[#B48737]`} disabled={at === 0} onClick={() => go(at - 1)}>← Back</button>

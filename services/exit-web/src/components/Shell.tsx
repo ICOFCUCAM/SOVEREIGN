@@ -199,7 +199,7 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           {/* the menu fades at its scrolling edges instead of cutting an item in half; a hairline scrollbar */}
           <nav ref={menu} aria-label="Console" className={`ex-navscroll flex-1 overflow-y-auto py-2 ${folded ? "px-1" : "px-3"}`}>
             <DealSpine items={rest} pinned={folded ? [] : pinned} isActive={isActive} isLocked={(to) => needsUpgrade(basePath(to), role, plan)}
-              collapsed={folded} onNavigate={() => setNavOpen(false)} pathname={loc.pathname} />
+              collapsed={folded} onNavigate={() => setNavOpen(false)} pathname={loc.pathname} role={role} />
           </nav>
           <div className={`border-t border-ex-hair ${folded ? "flex justify-center py-3" : "px-4 py-3"}`}>
             {/* the account: initials in a bronze ring beside the address, then role and plan */}
