@@ -4,7 +4,7 @@ import { activateBackend, type AccountRole } from "./exit-api";
 import {
   authConfigFromEnv, sendSignInLink, parseCallback, verifyUser, refreshSession, signOutRemote,
   loadAccess, saveSide, consoleRole, storeRefresh, storedRefresh, rememberSide, takePendingSide,
-  passwordSignIn, sendPasswordReset, oauthUrl,
+  passwordSignIn, passwordSignUp, sendPasswordReset, oauthUrl,
   type Side, type Grant, type VerifiedSession, type OAuthProvider,
 } from "./email-auth";
 
@@ -51,6 +51,8 @@ interface AuthCtx {
   sendLink: (email: string, side: Side) => Promise<void>;
   /** e-mail and password sign-in (development: a local session) */
   passwordLogin: (email: string, password: string, side: Side) => Promise<void>;
+  /** create an account with e-mail and password; resolves "confirm" when the address must be confirmed first */
+  createAccount: (email: string, password: string, side: Side) => Promise<"signed_in" | "confirm">;
   /** e-mail a password-reset link */
   resetPassword: (email: string) => Promise<void>;
   /** continue with Google, Apple or Microsoft (development: a local session) */
@@ -202,6 +204,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally { setLoading(false); }
   }, [mode, cfg, signIn]);
 
+  const createAccount = useCallback(async (email: string, password: string, side: Side): Promise<"signed_in" | "confirm"> => {
+    if (mode !== "email_link" || !cfg) { await signIn(email.trim(), password, side); return "signed_in"; }
+    setLoading(true); setError(null);
+    try {
+      rememberSide(side);
+      const v = await passwordSignUp(cfg, email, password, `${window.location.origin}/console`);
+      if (!v) return "confirm";
+      storeRefresh(v.refreshToken);
+      setSession(await verifiedConsoleSession(cfg, v, "free"));
+      return "signed_in";
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not create the account.");
+      throw e;
+    } finally { setLoading(false); }
+  }, [mode, cfg, signIn]);
+
   const resetPassword = useCallback(async (email: string) => {
     setError(null);
     if (mode !== "email_link" || !cfg) return;      // development: nothing to reset
@@ -262,8 +280,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const has = useCallback((scope: string) => !!session?.scopes.includes(scope), [session]);
 
-  const value = useMemo<AuthCtx>(() => ({ session, mode, signIn, sendLink, passwordLogin, resetPassword, oauth, linkSentTo, chooseSide, signOut, upgrade, upgradeTo, has, loading, ready, error }),
-    [session, mode, signIn, sendLink, passwordLogin, resetPassword, oauth, linkSentTo, chooseSide, signOut, upgrade, upgradeTo, has, loading, ready, error]);
+  const value = useMemo<AuthCtx>(() => ({ session, mode, signIn, sendLink, passwordLogin, createAccount, resetPassword, oauth, linkSentTo, chooseSide, signOut, upgrade, upgradeTo, has, loading, ready, error }),
+    [session, mode, signIn, sendLink, passwordLogin, createAccount, resetPassword, oauth, linkSentTo, chooseSide, signOut, upgrade, upgradeTo, has, loading, ready, error]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 

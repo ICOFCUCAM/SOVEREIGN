@@ -142,14 +142,26 @@ const TEXT_LINK = "rounded text-[12px] font-semibold text-ex-bronze transition h
 // Production builds go through Supabase Auth (OAuth, password grant, recover, OTP link); development
 // builds open a local session.
 const AccessForm: React.FC = () => {
-  const { mode, oauth, passwordLogin, resetPassword, sendLink, linkSentTo, loading, error } = useAuth();
-  const [view, setView] = useState<"signin" | "reset">("signin");
+  const { mode, oauth, passwordLogin, createAccount, resetPassword, sendLink, linkSentTo, loading, error } = useAuth();
+  const [view, setView] = useState<"signin" | "signup" | "reset">("signin");
+  const [confirm, setConfirm] = useState("");
+  const [confirmSentTo, setConfirmSentTo] = useState<string | null>(null);
   const [side, setSide] = useState<Side>("founder");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const live = mode === "email_link";
+  const signup = view === "signup";
+  const mismatch = signup && confirm.length > 0 && confirm !== password;
+  const tooShort = signup && password.length > 0 && password.length < 8;
+  const canSubmit = !!email && !!password && (!signup || (password.length >= 8 && confirm === password));
+  const submit = (e: React.FormEvent): void => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    if (signup) void createAccount(email, password, side).then((r) => { if (r === "confirm") setConfirmSentTo(email.trim()); }).catch(() => {});
+    else void passwordLogin(email, password, side).catch(() => {});
+  };
 
   if (view === "reset") return (
     <Frame title="Reset your password" lede="Enter the e-mail on your account and we'll send a link to sign you back in.">
@@ -173,8 +185,17 @@ const AccessForm: React.FC = () => {
   );
 
   return (
-    <Frame title="Access the Exchange">
-      {linkSentTo ? (
+    <Frame title={signup ? "Create your account" : "Access the Exchange"}
+      lede={signup ? "Join the exchange as a seller or a buyer. Your workspace is set up the moment you sign in." : undefined}>
+      {confirmSentTo ? (
+        <div role="status" className="space-y-4">
+          <div className="rounded-[3px] border border-ex-bronze/30 bg-ex-bronze/[0.06] p-4 text-[13px] text-white/75">
+            <p className="font-semibold text-ex-ivory">Confirm your e-mail</p>
+            <p className="mt-1">We sent a confirmation link to <span className="font-semibold text-ex-ivory">{confirmSentTo}</span>. Open it to activate your account; you'll be signed in straight away.</p>
+          </div>
+          <button type="button" className={PRIMARY} onClick={() => { setConfirmSentTo(null); setView("signin"); }}>Back to sign in</button>
+        </div>
+      ) : linkSentTo ? (
         <div role="status" className="space-y-2 rounded-[3px] border border-ex-bronze/30 bg-ex-bronze/[0.06] p-4 text-[13px] text-white/75">
           <p className="font-semibold text-ex-ivory">Check your inbox</p>
           <p>We sent a sign-in link to <span className="font-semibold text-ex-ivory">{linkSentTo}</span>. Open it on this device to sign in; it works once and expires within an hour.</p>
@@ -184,27 +205,41 @@ const AccessForm: React.FC = () => {
           <SideChooser value={side} onChange={setSide} legend="I am" />
           <div className="space-y-2.5">
             {PROVIDERS.map(([p, name, Mark]) => (
-              <button key={p} type="button" onClick={() => oauth(p, side)} className={SOCIAL}><Mark /> Continue with {name}</button>
+              <button key={p} type="button" onClick={() => oauth(p, side)} className={SOCIAL}><Mark /> {signup ? "Sign up" : "Continue"} with {name}</button>
             ))}
           </div>
           <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.24em] text-white/30"><span className="h-px flex-1 bg-white/10" />or<span className="h-px flex-1 bg-white/10" /></div>
-          <form onSubmit={(e) => { e.preventDefault(); void passwordLogin(email, password, side).catch(() => {}); }} className="space-y-4">
+          <form onSubmit={submit} className="space-y-4">
             <Field label="Email">
               <input className={INPUT} type="email" name="email" autoComplete="username" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" />
             </Field>
             {/* the reveal toggle sits outside the label, so the field's name stays "Password" */}
             <div className="relative">
               <Field label="Password">
-                <input className={`${INPUT} pr-16`} type={showPw ? "text" : "password"} name="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+                <input className={`${INPUT} pr-16`} type={showPw ? "text" : "password"} name="password" autoComplete={signup ? "new-password" : "current-password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={signup ? "At least 8 characters" : "••••••••"}
+                  aria-invalid={tooShort || undefined} aria-describedby={signup ? "pw-hint" : undefined} />
               </Field>
               <button type="button" onClick={() => setShowPw((v) => !v)} aria-pressed={showPw} aria-label={showPw ? "Hide password" : "Show password"}
                 className="absolute bottom-2 right-1.5 rounded px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45 hover:text-ex-bronze focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ex-bronze">{showPw ? "Hide" : "Show"}</button>
             </div>
-            <div className="flex justify-end -mt-1"><button type="button" onClick={() => setView("reset")} className={TEXT_LINK}>Forgot password?</button></div>
+            {signup ? (<>
+              <p id="pw-hint" className={`-mt-2 text-[11.5px] ${tooShort ? "text-red-300" : "text-white/40"}`}>At least 8 characters.</p>
+              <Field label="Confirm password">
+                <input className={INPUT} type={showPw ? "text" : "password"} name="confirm-password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat the password"
+                  aria-invalid={mismatch || undefined} aria-describedby="pw-match" />
+              </Field>
+              {mismatch && <p id="pw-match" className="-mt-2 text-[11.5px] text-red-300">The passwords don't match.</p>}
+            </>) : (
+              <div className="flex justify-end -mt-1"><button type="button" onClick={() => setView("reset")} className={TEXT_LINK}>Forgot password?</button></div>
+            )}
             {error && <div role="alert" className="rounded-[3px] border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</div>}
-            <button type="submit" disabled={loading || !email || !password} className={PRIMARY}>{loading ? "Signing in…" : <>Sign in <span aria-hidden>→</span></>}</button>
+            <button type="submit" disabled={loading || !canSubmit} className={PRIMARY}>{loading ? (signup ? "Creating your account…" : "Signing in…") : <>{signup ? "Create account" : "Sign in"} <span aria-hidden>→</span></>}</button>
           </form>
-          {live && (
+          <p className="text-center text-[12.5px] text-white/50">
+            {signup ? "Already have an account?" : "New to ExitOS?"}{" "}
+            <button type="button" onClick={() => { setView(signup ? "signin" : "signup"); setConfirm(""); }} className={TEXT_LINK}>{signup ? "Sign in" : "Create an account"}</button>
+          </p>
+          {live && !signup && (
             <p className="text-center text-[12px] text-white/45">
               Prefer no password?{" "}
               <button type="button" disabled={loading || !email} onClick={() => { void sendLink(email, side).catch(() => {}); }} className={`${TEXT_LINK} disabled:opacity-40`}>E-mail me a sign-in link</button>
