@@ -1,69 +1,195 @@
 {
- "detected_at": "2026-10-11T12:09:16.080Z",
- "count": 7,
+ "detected_at": "2026-10-14T11:04:03.306Z",
+ "count": 21,
  "deltas": [
   {
-   "buyer_id": "ibm",
-   "name": "IBM",
+   "buyer_id": "sap",
+   "name": "SAP",
    "kind": "new_acquisition",
-   "before": "198",
-   "after": "206",
-   "detail": "+8 indexed event(s) · latest: Confluent",
-   "detected_at": "2026-10-11T12:09:16.080Z"
+   "before": "71",
+   "after": "75",
+   "detail": "+4 indexed event(s) · latest: Prior Labs",
+   "detected_at": "2026-10-14T11:04:03.305Z"
   },
   {
    "buyer_id": "sap",
    "name": "SAP",
    "kind": "cadence_shift",
-   "before": "4/12m",
-   "after": "3/12m",
+   "before": "3/12m",
+   "after": "4/12m",
    "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-10-11T12:09:16.080Z"
+   "detected_at": "2026-10-14T11:04:03.305Z"
   },
   {
-   "buyer_id": "google",
-   "name": "Google",
+   "buyer_id": "coca-cola",
+   "name": "Coca-Cola",
    "kind": "appetite_change",
    "before": "no_events",
    "after": "low",
    "detail": "appetite no_events → low",
-   "detected_at": "2026-10-11T12:09:16.080Z"
+   "detected_at": "2026-10-14T11:04:03.305Z"
   },
   {
-   "buyer_id": "google",
-   "name": "Google",
+   "buyer_id": "coca-cola",
+   "name": "Coca-Cola",
    "kind": "new_acquisition",
    "before": "0",
-   "after": "33",
-   "detail": "+33 indexed event(s) · latest: Terra Bella",
-   "detected_at": "2026-10-11T12:09:16.080Z"
+   "after": "19",
+   "detail": "+19 indexed event(s) · latest: Monster Beverage",
+   "detected_at": "2026-10-14T11:04:03.305Z"
   },
   {
-   "buyer_id": "skydance-corporation",
-   "name": "Skydance Corporation",
+   "buyer_id": "intel",
+   "name": "Intel",
    "kind": "new_acquisition",
-   "before": "1",
-   "after": "9",
-   "detail": "+8 indexed event(s) · latest: CBS Entertainment Group",
-   "detected_at": "2026-10-11T12:09:16.080Z"
+   "before": "6",
+   "after": "7",
+   "detail": "+1 indexed event(s) · latest: Wind River Systems",
+   "detected_at": "2026-10-14T11:04:03.305Z"
   },
   {
-   "buyer_id": "skydance-corporation",
-   "name": "Skydance Corporation",
-   "kind": "cadence_shift",
-   "before": "1/12m",
-   "after": "0/12m",
-   "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-10-11T12:09:16.080Z"
-  },
-  {
-   "buyer_id": "avio",
-   "name": "Avio",
+   "buyer_id": "thoma-bravo",
+   "name": "Thoma Bravo",
    "kind": "new_acquisition",
-   "before": "2",
-   "after": "3",
+   "before": "5",
+   "after": "6",
+   "detail": "+1 indexed event(s) · latest: Ping Identity",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "mckesson",
+   "name": "McKesson",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "6 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "american-airlines-group",
+   "name": "American Airlines Group",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "american-airlines-group",
+   "name": "American Airlines Group",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "6",
+   "detail": "+6 indexed event(s) · latest: US Airways",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "albertsons",
+   "name": "Albertsons",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "albertsons",
+   "name": "Albertsons",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "2",
+   "detail": "+2 indexed event(s)",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "publix-super-markets",
+   "name": "Publix Super Markets",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "publix-super-markets",
+   "name": "Publix Super Markets",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "2",
+   "detail": "+2 indexed event(s)",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "merck",
+   "name": "Merck",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "merck",
+   "name": "Merck",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
    "detail": "+1 indexed event(s)",
-   "detected_at": "2026-10-11T12:09:16.080Z"
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "capital-one-financial",
+   "name": "Capital One Financial",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "capital-one-financial",
+   "name": "Capital One Financial",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "eli-lilly",
+   "name": "Eli Lilly",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "eli-lilly",
+   "name": "Eli Lilly",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s) · latest: Elizabeth Arden",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "legatum",
+   "name": "Legatum",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-14T11:04:03.305Z"
+  },
+  {
+   "buyer_id": "legatum",
+   "name": "Legatum",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-14T11:04:03.305Z"
   }
  ]
 }
