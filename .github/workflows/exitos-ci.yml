@@ -38,12 +38,17 @@ jobs:
       - name: Build the engines the website imports
         working-directory: services/exit-engines
         run: |
-          npm ci || npm install
+          npm install --no-audit --no-fund
           npm run build
 
+      - name: Install the document-schema package the document tests validate against
+        working-directory: packages/ddm-schema
+        run: npm ci --no-audit --no-fund
+
+      # services/ keeps no lockfiles (services/.gitignore); install as the Vercel build does
       - name: Install website dependencies
         working-directory: services/exit-web
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Typecheck
         working-directory: services/exit-web
