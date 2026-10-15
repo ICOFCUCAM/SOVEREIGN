@@ -90,3 +90,28 @@ describe("what the founder supplied vs the demo company's values", () => {
     expect(loadActiveCompany().company.id).toBe(a.company.id);   // migrated once, id kept
   });
 });
+
+describe("a founder's several companies", () => {
+  it("keeps each company separately and works on the selected one", async () => {
+    const m = await import("./active-company.js");
+    m.clearIntake();
+    m.saveIntake({ ...SAMPLE_COMPANY_INTAKE, name: "First Co" }, ["name"]);
+    const first = m.loadActiveCompany().companyId!;
+    m.selectCompany(null);
+    expect(m.loadActiveCompany().fromIntake).toBe(false);
+    m.saveIntake({ ...SAMPLE_COMPANY_INTAKE, name: "Second Co" }, ["name"]);
+    const second = m.loadActiveCompany().companyId!;
+    expect(second).not.toBe(first);
+    expect(m.listCompanies().map((c) => c.name)).toEqual(["First Co", "Second Co"]);
+    m.selectCompany(first);
+    expect(m.loadActiveCompany().company.name).toBe("First Co");
+    m.selectCompany(second);
+    expect(m.loadActiveCompany().company.name).toBe("Second Co");
+    // the first company keeps the unscoped browser keys; others get their own, and removing one hands nothing on
+    m.selectCompany(first!); expect(m.companyScopedKey("exitos.closing.v1")).toBe("exitos.closing.v1");
+    m.selectCompany(second!); expect(m.companyScopedKey("exitos.closing.v1")).toBe(`exitos.closing.v1@${second}`);
+    m.selectCompany(first!); m.clearIntake();
+    m.selectCompany(second!); expect(m.companyScopedKey("exitos.closing.v1")).toBe(`exitos.closing.v1@${second}`);
+    expect(m.listCompanies().map((c) => c.name)).toEqual(["Second Co"]);
+  });
+});

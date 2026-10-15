@@ -13,6 +13,7 @@ import { JourneyBar } from "./GuidedJourney";
 import CommandPalette, { noteRecent } from "./CommandPalette";
 import { guideState, markVisited, onGuideChange, setTipsHidden, ESSENTIALS } from "../lib/onboarding";
 import { DealSpine } from "./DealSpine";
+import { CompanySwitcher, useCompanies, useCompanySync } from "./CompanySwitcher";
 import { AdPanel, useAdSlides } from "./AdPanel";
 import { useDocumentRemote } from "../lib/documents/remote";
 
@@ -52,9 +53,11 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Pages opened in this browser — the "Opened" marks in the Start-here guide.
   // A plan-gated page shows the upgrade screen instead, so it is not marked.
   useEffect(() => { if (!needsUpgrade(loc.pathname, role, plan)) { markVisited(loc.pathname); noteRecent(loc.pathname); } }, [loc.pathname, role, plan]);
+  const companyKey = useCompanies().activeId ?? "demo";
   // a quiet sponsored card at the foot of the sidebar (large screens only); hidden for the visit on request
   const remote = useDocumentRemote();
   const sidebarAds = useAdSlides(remote, "sidebar");
+  useCompanySync(role === "founder" || role === "superadmin" ? remote : undefined);  // a founder's companies follow them across devices
   const [adHidden, setAdHidden] = useState(() => { try { return sessionStorage.getItem("exitos.ads.sidebar.hidden") === "1"; } catch { return false; } });
   const hideAd = (): void => { setAdHidden(true); try { sessionStorage.setItem("exitos.ads.sidebar.hidden", "1"); } catch { /* this view only */ } };
   const [tipsHidden, setTipsHiddenState] = useState(() => guideState().tipsHidden);
@@ -201,6 +204,8 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <kbd className="rounded-[2px] border border-white/10 px-1.5 font-mono text-[9.5px] text-white/40">{typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</kbd></>}
             </button>
           </div>
+          {/* a founder's companies: every page works on the one selected */}
+          {!folded && (role === "founder" || role === "superadmin") && <CompanySwitcher onNavigate={() => setNavOpen(false)} />}
           {/* the menu fades at its scrolling edges instead of cutting an item in half; a hairline scrollbar */}
           <nav ref={menu} aria-label="Console" className={`ex-navscroll flex-1 overflow-y-auto py-2 ${folded ? "px-1" : "px-3"}`}>
             <DealSpine items={rest} pinned={folded ? [] : pinned} isActive={isActive} isLocked={(to) => needsUpgrade(basePath(to), role, plan)}
@@ -249,9 +254,10 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </div>
           )}
           {!tipsHidden && <div className="relative"><PageTip onHide={() => setTipsHidden(true)} /></div>}
+          {/* keyed by the selected company: switching companies redraws every page from that company's records */}
           {WORKSTATION_ROUTES.has(loc.pathname)
-            ? <div className="px-3 py-3 sm:px-4 lg:px-5 lg:py-4">{children}</div>   /* full-bleed command centers */
-            : <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</div>}
+            ? <div key={companyKey} className="px-3 py-3 sm:px-4 lg:px-5 lg:py-4">{children}</div>   /* full-bleed command centers */
+            : <div key={companyKey} className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</div>}
           <JourneyBar />
         </main>
       </div>

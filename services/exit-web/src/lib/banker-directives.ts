@@ -1,5 +1,6 @@
 import React from "react";
 import type { BuyerCandidate } from "@exit/engines";
+import { companyScopedKey } from "./active-company";  // each company keeps its own directives
 
 // ── BANKER DIRECTIVE ENGINE ─────────────────────────────────────────
 // A real intelligence layer for the Chief Investment Banker. Founder briefs
@@ -263,11 +264,11 @@ const KEY = "exitos.mandate.directives.v1";
 const EVT = "exitos:directives";
 
 export function loadDirectives(): BankerDirective[] {
-  try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw) as BankerDirective[]; } catch { /* ignore */ }
+  try { const raw = localStorage.getItem(companyScopedKey(KEY)); if (raw) return JSON.parse(raw) as BankerDirective[]; } catch { /* ignore */ }
   return [];
 }
 function persist(list: BankerDirective[]): void {
-  try { localStorage.setItem(KEY, JSON.stringify(list)); } catch { /* ignore */ }
+  try { localStorage.setItem(companyScopedKey(KEY), JSON.stringify(list)); } catch { /* ignore */ }
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVT));
 }
 export function addDirective(raw: string): BankerDirective | null {

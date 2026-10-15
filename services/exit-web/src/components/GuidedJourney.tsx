@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import type { Role } from "../lib/access";
 import { requiredEngagement, type Plan } from "../lib/access";
-import { loadActiveCompany, loadSavedIntake } from "../lib/active-company";
+import { loadActiveCompany, loadSavedIntake, onCompanyChange } from "../lib/active-company";
 import { findOwnListing, subscribeListings } from "../lib/listings";
 import { currentAccountId, myMandate, myNdaRequests, ndaRequestsForListing, offersForListing } from "../lib/exit-api";
 import { subscribe as onDealEvent } from "../lib/deal-events";
@@ -34,6 +34,7 @@ export function useJourneySignals(role: Role): JourneySignals {
   useEffect(() => onGuideChange(() => setVisited(guideState().visited)), []);
   useEffect(() => subscribeListings(bump), [bump]);
   useEffect(() => onDealEvent(bump), [bump]);
+  useEffect(() => onCompanyChange(bump), [bump]);  // switching companies re-reads that company's progress
 
   useEffect(() => {
     let alive = true;

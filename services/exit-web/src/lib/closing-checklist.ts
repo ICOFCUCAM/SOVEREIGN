@@ -1,6 +1,7 @@
 import { DEFAULT_PROCESS_TIMELINE, milestone, weeksLabel, type MilestoneId, type ProcessTimeline } from "@exit/engines";
 import { structuredDoc, type DocSection } from "./deliverables";
 import { closingWindow } from "./process-plan";
+import { companyScopedKey } from "./active-company";  // each company keeps its own checklist
 
 // ── THE CLOSING CHECKLIST ───────────────────────────────────────────
 // One checklist: the Closing page shows it and the exported document renders
@@ -32,10 +33,10 @@ export const STATUS_LABEL: Record<ItemStatus, string> = { pending: "Not started"
 
 const KEY = "exitos.closing.v1";
 export const loadClosingStatuses = (): Record<string, ItemStatus> => {
-  try { return JSON.parse(globalThis.localStorage?.getItem(KEY) ?? "{}") as Record<string, ItemStatus>; } catch { return {}; }
+  try { return JSON.parse(globalThis.localStorage?.getItem(companyScopedKey(KEY)) ?? "{}") as Record<string, ItemStatus>; } catch { return {}; }
 };
 export const saveClosingStatuses = (s: Record<string, ItemStatus>): void => {
-  try { globalThis.localStorage?.setItem(KEY, JSON.stringify(s)); } catch { /* in-memory only */ }
+  try { globalThis.localStorage?.setItem(companyScopedKey(KEY), JSON.stringify(s)); } catch { /* in-memory only */ }
 };
 
 /** The checklist with statuses and the timeline's timing for each item. */

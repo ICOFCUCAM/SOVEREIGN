@@ -27,6 +27,7 @@ import type { CompanyStory } from "@exit/engines";
 import { RESERVATION_LINES, SAMPLE_OFFERS } from "./engines";
 import { listDocuments } from "./data-room";
 import { emitRunStarted, emitRunStep, emitRunCompleted, flush } from "./telemetry";
+import { companyScopedKey } from "./active-company";  // each company keeps its own run
 
 export type ExitStepId =
   | "profile" | "valuation" | "readiness" | "cim" | "teaser"
@@ -85,7 +86,7 @@ export const EXIT_STEPS: readonly Omit<ExitStep, "status">[] = [
 
 export function loadRun(): ExitRun | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(companyScopedKey(STORAGE_KEY));
     if (!raw) return null;
     return JSON.parse(raw) as ExitRun;
   } catch {
@@ -94,7 +95,7 @@ export function loadRun(): ExitRun | null {
 }
 
 export function clearRun(): void {
-  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(companyScopedKey(STORAGE_KEY));
 }
 
 function persist(run: ExitRun): void {
@@ -125,7 +126,7 @@ function persist(run: ExitRun): void {
       offerLeaderName: run.artifacts.offerLeaderName,
     },
   };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
+  localStorage.setItem(companyScopedKey(STORAGE_KEY), JSON.stringify(slim));
 }
 
 function sleep(ms: number): Promise<void> {

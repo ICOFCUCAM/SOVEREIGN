@@ -19,6 +19,7 @@ import { NUMERIC_FIELDS, INTAKE_FIELD_LABEL, parseField, textsFor, type NumericK
 import { fromQuery, quickIntake } from "../lib/quick-value";
 import { sectorLabel } from "../lib/market-stats";
 import { Section, Metric, Provenance, ScrollRegion, ActionLink, Bar } from "../components/xo";
+import { companyScopedKey } from "../lib/active-company";  // each company keeps its own listing-details draft
 
 // ── VALUE MY COMPANY ────────────────────────────────────────────────
 // Page 03 of the ExitOS institutional redesign (docs/redesign/PAGE-03-
@@ -59,8 +60,8 @@ const USES_YOUR_FIGURES: readonly { to: string; label: string }[] = [
 
 // the founder's listing details, kept in this browser until the listing is published with them
 const FACTS_DRAFT_KEY = "exitos.listing-facts.v1";
-const loadFactsDraft = (): Partial<ListingFacts> => { try { return JSON.parse(localStorage.getItem(FACTS_DRAFT_KEY) ?? "{}") as Partial<ListingFacts>; } catch { return {}; } };
-const saveFactsDraft = (f: Partial<ListingFacts>): void => { try { localStorage.setItem(FACTS_DRAFT_KEY, JSON.stringify(f)); } catch { /* storage unavailable: kept for this visit */ } };
+const loadFactsDraft = (): Partial<ListingFacts> => { try { return JSON.parse(localStorage.getItem(companyScopedKey(FACTS_DRAFT_KEY)) ?? "{}") as Partial<ListingFacts>; } catch { return {}; } };
+const saveFactsDraft = (f: Partial<ListingFacts>): void => { try { localStorage.setItem(companyScopedKey(FACTS_DRAFT_KEY), JSON.stringify(f)); } catch { /* storage unavailable: kept for this visit */ } };
 
 const Intake: React.FC = () => {
   const { session } = useAuth();
@@ -142,7 +143,7 @@ const Intake: React.FC = () => {
           {listed && !stale && !confirming && <Button variant="ghost" onClick={() => setConfirming(true)}>Edit listing details</Button>}
           {(!listed || stale) && <Button onClick={() => setConfirming(true)} disabled={!saved} aria-expanded={confirming} aria-describedby={saved ? undefined : "list-needs-data"}>{stale ? "Update listing" : "List on the exchange"}</Button>}
           {!saved && !listed && <span id="list-needs-data" className="basis-full text-[11px] text-xo-faint">Enter your figures to list — the demo company can't be listed.</span>}
-          {saved && <Button variant="ghost" onClick={clearMine}>Clear my data</Button>}
+          {saved && <Button variant="ghost" onClick={() => { if (window.confirm(`Remove ${inp.name || "this company"} from this browser? Its figures and drafts here are deleted; a published listing stays until you withdraw it.`)) clearMine(); }}>Remove this company</Button>}
         </div>
       </header>
 

@@ -1,4 +1,5 @@
 import { recordSignature, type CompanyProfile, type NdaInstance, type NdaParty } from "@exit/engines";
+import { companyScopedKey } from "./active-company";  // each company keeps its own NDA drafts
 
 // NDAs the founder drafts on the NDA desk: kept in this browser so they
 // survive a reload, and signed by recording each party's signature — the
@@ -8,10 +9,10 @@ import { recordSignature, type CompanyProfile, type NdaInstance, type NdaParty }
 const KEY = "exitos.ndas.issued.v1";
 
 export function loadIssuedNdas(): NdaInstance[] {
-  try { const v = JSON.parse(localStorage.getItem(KEY) ?? "[]"); return Array.isArray(v) ? (v as NdaInstance[]) : []; } catch { return []; }
+  try { const v = JSON.parse(localStorage.getItem(companyScopedKey(KEY)) ?? "[]"); return Array.isArray(v) ? (v as NdaInstance[]) : []; } catch { return []; }
 }
 export function saveIssuedNdas(ndas: readonly NdaInstance[]): void {
-  try { localStorage.setItem(KEY, JSON.stringify(ndas)); } catch { /* storage unavailable: kept for this session only */ }
+  try { localStorage.setItem(companyScopedKey(KEY), JSON.stringify(ndas)); } catch { /* storage unavailable: kept for this session only */ }
 }
 
 /** The disclosing party: the founder's own company, never the demo company's name. */

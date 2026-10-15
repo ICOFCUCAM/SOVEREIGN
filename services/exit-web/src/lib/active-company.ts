@@ -4,9 +4,9 @@ import { buildProfile, SAMPLE_INTAKE, type IntakeInputs } from "./company-intake
 import { sectorTokensFor } from "./buyer-dna";
 
 // ── ACTIVE COMPANY ──────────────────────────────────────────────────
-// The company the console personalizes to. If the founder has run the
-// intake (Value My Company), that profile is the active one; otherwise the
-// demo company.
+// The company the console personalizes to: the founder's selected company
+// (a founder may have several; see "The founder's companies" below), or the
+// demo company when none is selected.
 //
 // The intake form starts from the demo company's figures, so a saved intake
 // records WHICH fields the founder actually entered or confirmed. Every other
@@ -29,37 +29,115 @@ export interface IntakeRecord {
   readonly id: string;
   readonly inputs: IntakeInputs;
   readonly provided: readonly IntakeField[];
+  /** when it was last saved (this browser's clock, or the server's for a copy from the account) */
+  readonly updatedAt?: string;
 }
 
 const newCompanyId = (): string =>
   `co-${globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`}`;
 
-const store = (r: IntakeRecord): void => {
-  try { localStorage.setItem(KEY, JSON.stringify(r)); } catch { /* storage unavailable: nothing saved */ }
-};
+// ── The founder's companies ─────────────────────────────────────────
+// A founder may prepare and list several companies or products. Each is one saved intake with its own
+// id; one is selected at a time and every page works on it. The first company (or the one migrated from
+// the single-company store) keeps the browser's unscoped keys, so nothing saved before moves.
+const COMPANIES_KEY = "exitos.companies.v1";
+const EVENT = "exitos:company";
+interface Companies { active: string | null; primary: string | null; records: IntakeRecord[]; synced?: string[] }
 
-/** The saved intake record, or null. An intake saved by an earlier version (which
- *  stored the whole form) is migrated: a field counts as supplied only where it
- *  differs from the demo company's value. */
-export function loadIntakeRecord(): IntakeRecord | null {
+const clean = (r: IntakeRecord): IntakeRecord => ({ id: r.id, inputs: { ...SAMPLE_INTAKE, ...r.inputs }, provided: (r.provided ?? []).filter((k) => INTAKE_FIELDS.includes(k)), ...(r.updatedAt ? { updatedAt: r.updatedAt } : {}) });
+
+function readCompanies(): Companies {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(COMPANIES_KEY);
     if (raw) {
-      const r = JSON.parse(raw) as IntakeRecord;
-      const provided = r.provided.filter((k) => INTAKE_FIELDS.includes(k));
-      return { id: r.id, inputs: { ...SAMPLE_INTAKE, ...r.inputs }, provided };
+      const c = JSON.parse(raw) as Companies;
+      const records = Array.isArray(c.records) ? c.records.map(clean) : [];
+      const active = records.some((r) => r.id === c.active) ? c.active : null;
+      return { active, primary: c.primary ?? records[0]?.id ?? null, records, synced: Array.isArray(c.synced) ? c.synced : [] };
+    }
+    // the single-company store of earlier versions becomes the first company
+    const single = localStorage.getItem(KEY);
+    if (single) {
+      const r = clean(JSON.parse(single) as IntakeRecord);
+      const c: Companies = { active: r.id, primary: r.id, records: [r] };
+      writeCompanies(c, false); try { localStorage.removeItem(KEY); } catch { /* ignore */ }
+      return c;
     }
     const legacy = localStorage.getItem(LEGACY_KEY);
     if (legacy) {
       const old = JSON.parse(legacy) as Partial<IntakeInputs>;
       const provided = INTAKE_FIELDS.filter((k) => k in old && old[k] !== SAMPLE_INTAKE[k]);
-      const rec: IntakeRecord = { id: newCompanyId(), inputs: { ...SAMPLE_INTAKE, ...old }, provided };
-      store(rec);
-      try { localStorage.removeItem(LEGACY_KEY); } catch { /* ignore */ }
-      return rec;
+      const r: IntakeRecord = { id: newCompanyId(), inputs: { ...SAMPLE_INTAKE, ...old }, provided };
+      const c: Companies = { active: r.id, primary: r.id, records: [r] };
+      writeCompanies(c, false); try { localStorage.removeItem(LEGACY_KEY); } catch { /* ignore */ }
+      return c;
     }
   } catch { /* unreadable: treat as none */ }
-  return null;
+  return { active: null, primary: null, records: [] };
+}
+
+function writeCompanies(c: Companies, notify = true): void {
+  try { localStorage.setItem(COMPANIES_KEY, JSON.stringify(c)); } catch { /* storage unavailable: nothing saved */ }
+  if (notify) { try { window.dispatchEvent(new Event(EVENT)); } catch { /* no window (tests) */ } }
+}
+
+// where saved companies also go: the founder's account, when signed in (set by useCompanySync)
+interface CompanySink { save(r: IntakeRecord): void; remove(id: string): void }
+let sink: CompanySink | null = null;
+export function setCompanySink(s: CompanySink | null): void { sink = s; }
+
+const store = (rec: IntakeRecord): void => {
+  const r: IntakeRecord = { ...rec, updatedAt: new Date().toISOString() };
+  const c = readCompanies();
+  const records = c.records.some((x) => x.id === r.id) ? c.records.map((x) => (x.id === r.id ? r : x)) : [...c.records, r];
+  writeCompanies({ ...c, active: r.id, primary: c.primary ?? r.id, records });
+  sink?.save(r);
+};
+
+/** This browser's companies and which of them the account has had (for the merge in lib/company-sync). */
+export function localCompanies(): { records: IntakeRecord[]; synced: string[] } {
+  const c = readCompanies();
+  return { records: c.records, synced: c.synced ?? [] };
+}
+/** Replace this browser's companies with the merged list; the selection stays if that company remains. */
+export function replaceCompanies(records: IntakeRecord[], synced: string[]): void {
+  const c = readCompanies();
+  const clean_ = records.map(clean);
+  const active = clean_.some((r) => r.id === c.active) ? c.active : null;
+  writeCompanies({ active, primary: c.primary ?? clean_[0]?.id ?? null, records: clean_, synced });
+}
+
+/** The selected company's saved intake record, or null (no company selected: the demo company). */
+export function loadIntakeRecord(): IntakeRecord | null {
+  const c = readCompanies();
+  return c.records.find((r) => r.id === c.active) ?? null;
+}
+
+export interface CompanySummary { readonly id: string; readonly name: string; readonly active: boolean }
+/** The founder's companies, in the order they were added. */
+export function listCompanies(): CompanySummary[] {
+  const c = readCompanies();
+  return c.records.map((r) => ({ id: r.id, name: r.inputs.name?.trim() || "Untitled company", active: r.id === c.active }));
+}
+/** Each saved company's profile (for listing status and the like), without its story. */
+export function companyProfiles(): Array<{ id: string; profile: CompanyProfile }> {
+  return readCompanies().records.map((r) => ({ id: r.id, profile: { ...buildProfile(r.inputs), id: r.id } }));
+}
+/** Work on another of the founder's companies; null starts a new one (the demo company until saved). */
+export function selectCompany(id: string | null): void {
+  const c = readCompanies();
+  if (id !== null && !c.records.some((r) => r.id === id)) return;
+  writeCompanies({ ...c, active: id });
+}
+/** Re-render when the selected company or the list changes (in this tab). */
+export function onCompanyChange(fn: () => void): () => void {
+  window.addEventListener(EVENT, fn);
+  return () => window.removeEventListener(EVENT, fn);
+}
+/** The browser key for a per-company store: the first company keeps the unscoped key, others get their own. */
+export function companyScopedKey(base: string): string {
+  const c = readCompanies();
+  return !c.active || c.active === c.primary ? base : `${base}@${c.active}`;
 }
 
 /** The fields of a saved intake that still hold the demo company's values. */
@@ -104,6 +182,12 @@ export function confirmIntakeFields(fields: readonly IntakeField[]): void {
   if (cur) store({ ...cur, provided: [...new Set([...cur.provided, ...fields])] });
 }
 
+/** Remove the selected company from this browser; no company is then selected (the demo company). */
 export function clearIntake(): void {
+  const c = readCompanies();
+  const records = c.records.filter((r) => r.id !== c.active);
+  // the removed company's key slot is not handed on: another company never inherits its drafts
+  writeCompanies({ ...c, active: null, primary: c.primary, records, synced: (c.synced ?? []).filter((id) => id !== c.active) });
+  if (c.active) sink?.remove(c.active);
   try { localStorage.removeItem(KEY); localStorage.removeItem(LEGACY_KEY); } catch { /* ignore */ }
 }
