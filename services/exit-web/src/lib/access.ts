@@ -52,7 +52,7 @@ export const NAV: NavItem[] = [
   { to: "/console/readiness",          label: "Check Readiness", name: "Readiness",            group: "Mandate", roles: ["founder"] },
   { to: "/console/diligence-ai",       label: "Prepare for Diligence", name: "Diligence",            group: "Mandate", roles: ["founder"], pro: true, starter: true },
   { to: "/console/investors",          label: "Manage Cap Table", name: "Cap Table",            group: "Mandate", roles: ["founder"] },
-  { to: "/console/exit-timing",        label: "Choose When to Sell", name: "Exit Timing",          group: "Mandate", roles: ["founder"], pro: true },
+  { to: "/console/exit-timing",        label: "Choose When to Sell", name: "Exit Timing",          group: "Mandate", roles: ["founder"], pro: true, starter: true },  // exit-strategy planning is part of Preparation
 
   // ── Discover (founder) ─────────────────────────────────────────
   { to: "/console/buyer-copilot",      label: "Compare Top Buyers", name: "Buyer Intelligence",   group: "Market Intelligence", roles: ["founder"], pro: true, starter: true },

@@ -1,4 +1,4 @@
-import type { Role } from "./access";
+import { needsUpgrade, type Plan, type Role } from "./access";
 
 // ── THE GUIDED JOURNEY ──────────────────────────────────────────────
 // The whole sale, or the whole acquisition, as one path a newcomer can walk with Back and Next: from the
@@ -23,12 +23,18 @@ export interface JourneySignals {
   readonly offerAccepted: boolean;
   readonly txnSigned: boolean;
   readonly txnClosed: boolean;
+  /** Prepare for market: the company story saved; every required data-room document accepted; a CIM and a teaser generated and saved */
+  readonly storySaved: boolean;
+  readonly dataRoomComplete: boolean;
+  readonly cimSaved: boolean;
+  readonly teaserSaved: boolean;
   readonly visited: readonly string[];
 }
 
 export const NO_SIGNALS: JourneySignals = {
   intakeSaved: false, listed: false, mandateSaved: false, ndaRequested: false, ndaExecuted: false,
-  offerMade: false, offerAccepted: false, txnSigned: false, txnClosed: false, visited: [],
+  offerMade: false, offerAccepted: false, txnSigned: false, txnClosed: false,
+  storySaved: false, dataRoomComplete: false, cimSaved: false, teaserSaved: false, visited: [],
 };
 
 export interface JourneyStep {
@@ -46,7 +52,11 @@ export interface JourneyStep {
   readonly needs?: string;
   /** a paid desk alongside the path: shown and walked by Next, but it never holds the journey back */
   readonly optional?: boolean;
+  /** a heading the step sits under on the journey page */
+  readonly section?: string;
 }
+
+const PREP = "Prepare for market";
 
 export const SELLER_JOURNEY: readonly JourneyStep[] = [
   { id: "banker", to: "/console/commander", title: "Meet your investment banker", desk: "Chief Investment Banker", kind: "review", optional: true,
@@ -60,6 +70,23 @@ export const SELLER_JOURNEY: readonly JourneyStep[] = [
     instruction: "Your value range and how it is built, so you know your asking position." },
   { id: "buyers", to: "/console/buyers", title: "Meet your likely buyers", desk: "Buyer discovery", kind: "review",
     instruction: "The acquirers that fit your company, and why each one fits." },
+  { id: "story", to: "/console/company-story", title: "Tell your company's story", desk: "Company story", kind: "do", section: PREP,
+    instruction: "History, products, customers, people, ownership and sources: what the CIM is written from. Save it as you go; partial is fine.",
+    doneWhen: (s) => s.storySaved },
+  { id: "captable", to: "/console/investors", title: "Review your cap table", desk: "Cap table", kind: "review", section: PREP,
+    instruction: "Who owns what, and what each holder receives at your asking price." },
+  { id: "diligence", to: "/console/diligence-ai", title: "Prepare for diligence", desk: "Diligence", kind: "review", section: PREP,
+    instruction: "The findings a buyer's diligence would raise, and what to fix or document first." },
+  { id: "dataroom", to: "/console/data-room", title: "Build the data room", desk: "Data room", kind: "do", section: PREP,
+    instruction: "Upload each required document, tag it with what it satisfies, and have it accepted. Completeness is shown per package.",
+    doneWhen: (s) => s.dataRoomComplete, needs: "Done when every required document is accepted." },
+  { id: "documents", to: "/console/documents", title: "Generate your CIM and teaser", desk: "Documents", kind: "do", section: PREP,
+    instruction: "Generate the Confidential Information Memorandum and the anonymised buyer teaser, and save a version of each.",
+    doneWhen: (s) => s.cimSaved && s.teaserSaved },
+  { id: "market", to: "/console/market-map", title: "Position your company", desk: "Market positioning", kind: "review", section: PREP,
+    instruction: "Where your company sits in its market, and which acquirers are active around it." },
+  { id: "timing", to: "/console/exit-timing", title: "Choose when to sell", desk: "Exit strategy", kind: "review", section: PREP,
+    instruction: "The market signals for timing your exit, and the window they point to." },
   { id: "list", to: "/console/intake", title: "List on the exchange", desk: "Listing", kind: "do",
     instruction: "Open “List on the exchange”, complete the three listing steps and publish. Buyers see it anonymously.",
     doneWhen: (s) => s.listed, needs: "Publishing needs your identity verified with a provider." },
@@ -102,7 +129,12 @@ export const BUYER_JOURNEY: readonly JourneyStep[] = [
     doneWhen: (s) => s.txnClosed, needs: "Opens once the deal is signed." },
 ];
 
-export const journeyFor = (role: Role): readonly JourneyStep[] => (role === "buyer" ? BUYER_JOURNEY : SELLER_JOURNEY);
+/** The journey for a side. Given a plan, a step that plan does not open becomes optional: it is shown, with the
+ *  plan it needs, but never holds the journey back. */
+export function journeyFor(role: Role, plan?: Plan): readonly JourneyStep[] {
+  const steps = role === "buyer" ? BUYER_JOURNEY : SELLER_JOURNEY;
+  return plan ? steps.map((s) => (!s.optional && needsUpgrade(s.to, role, plan) ? { ...s, optional: true } : s)) : steps;
+}
 
 export function stepStatus(step: JourneyStep, s: JourneySignals): StepStatus {
   if (step.kind === "do") return step.doneWhen?.(s) ? "done" : "todo";

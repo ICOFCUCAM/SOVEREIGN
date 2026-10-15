@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { canAccess, NAV } from "./access.js";
-import { BUYER_JOURNEY, SELLER_JOURNEY, NO_SIGNALS, stepStatus, currentStep, stepOnPage, finished, type JourneySignals } from "./journey.js";
+import { BUYER_JOURNEY, SELLER_JOURNEY, NO_SIGNALS, journeyFor, stepStatus, currentStep, stepOnPage, finished, type JourneySignals } from "./journey.js";
 
 const sig = (s: Partial<JourneySignals>): JourneySignals => ({ ...NO_SIGNALS, ...s });
 
@@ -29,7 +29,7 @@ describe("guided journey", () => {
   it("the current step is the first unfinished one, and the page's own step wins where two share a page", () => {
     expect(SELLER_JOURNEY[currentStep(SELLER_JOURNEY, NO_SIGNALS)]!.id).toBe("value");
     const s = sig({ intakeSaved: true, visited: ["/console/readiness", "/console/valuation", "/console/buyers"] });
-    expect(SELLER_JOURNEY[currentStep(SELLER_JOURNEY, s)]!.id).toBe("list");
+    expect(SELLER_JOURNEY[currentStep(SELLER_JOURNEY, s)]!.id).toBe("story");
     // the intake page holds both "value" and "list": once the figures are saved it is the listing step
     expect(SELLER_JOURNEY[stepOnPage(SELLER_JOURNEY, "/console/intake", s)]!.id).toBe("list");
     expect(stepOnPage(SELLER_JOURNEY, "/console/somewhere-else", s)).toBe(-1);
@@ -56,7 +56,36 @@ describe("guided journey · the banker and WealthOS", () => {
     expect(SELLER_JOURNEY[0]!.to).toBe("/console/commander");
     expect(SELLER_JOURNEY[SELLER_JOURNEY.length - 1]!.to).toBe("/console/wealth");
     const all = sig({ intakeSaved: true, listed: true, ndaExecuted: true, offerAccepted: true, txnSigned: true, txnClosed: true,
-      visited: ["/console/readiness", "/console/valuation", "/console/buyers"] });
+      storySaved: true, dataRoomComplete: true, cimSaved: true, teaserSaved: true,
+      visited: ["/console/readiness", "/console/valuation", "/console/buyers", "/console/investors", "/console/diligence-ai", "/console/market-map", "/console/exit-timing"] });
     expect(finished(SELLER_JOURNEY, all)).toBe(true);
+  });
+});
+
+describe("guided journey · prepare for market", () => {
+  const ids = (xs: readonly { id: string }[]) => xs.map((x) => x.id);
+  it("sits between meeting buyers and listing, in order", () => {
+    const all = ids(SELLER_JOURNEY);
+    expect(all.slice(all.indexOf("buyers") + 1, all.indexOf("list"))).toEqual(["story", "captable", "diligence", "dataroom", "documents", "market", "timing"]);
+    expect(SELLER_JOURNEY.filter((s) => s.section === "Prepare for market")).toHaveLength(7);
+  });
+  it("each step is done only by its own record", () => {
+    const step = (id: string) => SELLER_JOURNEY.find((s) => s.id === id)!;
+    expect(stepStatus(step("story"), sig({ visited: ["/console/company-story"] }))).toBe("todo");
+    expect(stepStatus(step("story"), sig({ storySaved: true }))).toBe("done");
+    expect(stepStatus(step("documents"), sig({ cimSaved: true }))).toBe("todo");
+    expect(stepStatus(step("documents"), sig({ cimSaved: true, teaserSaved: true }))).toBe("done");
+    expect(stepStatus(step("dataroom"), sig({ visited: ["/console/data-room"] }))).toBe("todo");
+    expect(stepStatus(step("dataroom"), sig({ dataRoomComplete: true }))).toBe("done");
+  });
+  it("on the free plan the Preparation steps are optional and never hold the journey back; on Preparation they lead", () => {
+    const base = sig({ intakeSaved: true, storySaved: true, visited: ["/console/readiness", "/console/valuation", "/console/buyers", "/console/investors"] });
+    const free = journeyFor("founder", "free"), prep = journeyFor("founder", "prep");
+    expect(free.find((s) => s.id === "dataroom")!.optional).toBe(true);
+    expect(free[currentStep(free, base)]!.id).toBe("list");
+    expect(prep.find((s) => s.id === "dataroom")!.optional).toBeFalsy();
+    expect(prep[currentStep(prep, base)]!.id).toBe("diligence");
+    // Exit Timing is part of Preparation
+    expect(prep.find((s) => s.id === "timing")!.optional).toBeFalsy();
   });
 });

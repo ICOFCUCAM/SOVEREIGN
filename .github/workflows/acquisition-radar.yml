@@ -55,6 +55,17 @@ jobs:
         working-directory: services/exit-engines
         run: npm test
 
+      # A source that fails part-way returns less, not nothing: refuse a refresh that drops a sector index or
+      # shrinks the recorded acquisitions or acquirers by more than 10% in a day. Yesterday's data stays.
+      - name: Guard against a partial refresh
+        run: node .github/scripts/radar-guard.mjs
+
+      - name: Run the website's tests against the fresh data
+        working-directory: services/exit-web
+        run: |
+          npm ci || npm install
+          npx vitest run
+
       - name: Commit refreshed registries
         run: |
           git config user.name "exitos-radar[bot]"
