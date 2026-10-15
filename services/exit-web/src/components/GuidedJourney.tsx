@@ -10,6 +10,9 @@ import { subscribe as onDealEvent } from "../lib/deal-events";
 import { loadNdas } from "../lib/nda-lifecycle";
 import { loadTransactions } from "../lib/transactions";
 import { useDocumentRemote } from "../lib/documents/remote";
+import { listVersions } from "../lib/documents/store";
+import { listDocuments, toRoomFile } from "../lib/data-room";
+import { runDueDiligence, roomProgress } from "@exit/engines";
 import { guideState, onGuideChange, setJourneyHidden } from "../lib/onboarding";
 import { journeyFor, stepStatus, currentStep, stepOnPage, finished, NO_SIGNALS, type JourneySignals, type JourneyStep, type StepStatus } from "../lib/journey";
 import { HintCard, useHint } from "./HintCard";
@@ -58,8 +61,18 @@ export function useJourneySignals(role: Role): JourneySignals {
         };
       } else {
         const [reqs, offers] = own ? await Promise.all([settle(ndaRequestsForListing(own.id), []), settle(offersForListing(own.id), [])]) : [[], []];
+        // Prepare for market: the saved story, the generated documents, and the data room's accepted files
+        const { company, companyId, story } = loadActiveCompany();
+        const [cims, teasers, roomFiles] = await Promise.all([
+          settle(listVersions("exitos.cim", companyId, remote), []),
+          settle(listVersions("exitos.teaser", companyId, remote), []),
+          remote && companyId ? settle(listDocuments(), null) : Promise.resolve(null),
+        ]);
+        const room = roomFiles ? roomProgress(runDueDiligence(company).documents, roomFiles.map(toRoomFile), companyId) : null;
         next = {
           ...NO_SIGNALS, intakeSaved, listed: !!own,
+          storySaved: !!companyId && !!story.updatedAt, cimSaved: cims.length > 0, teaserSaved: teasers.length > 0,
+          dataRoomComplete: !!room && room.pct >= 100,
           ndaExecuted: reqs.some((r) => r.status === "signed") || agreements.some((a) => a.state === "executed" && a.owner_account_id === me),
           offerAccepted: offers.some((o) => o.status === "accepted"), txnSigned, txnClosed,
         };
@@ -101,7 +114,7 @@ export const JourneyBar: React.FC = () => {
   useEffect(() => onGuideChange(() => setHidden(guideState().journeyHidden)), []);
   if (hidden || (role !== "founder" && role !== "buyer") || loc.pathname === "/console/journey") return null;
 
-  const steps = journeyFor(role);
+  const steps = journeyFor(role, plan);
   const intended = (loc.state as { journeyStep?: unknown } | null)?.journeyStep;
   const here = stepOnPage(steps, loc.pathname, signals, typeof intended === "number" ? intended : undefined);
   const at = here === -1 ? currentStep(steps, signals) : here;

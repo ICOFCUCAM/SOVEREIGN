@@ -12,7 +12,7 @@ import { journeyFor, stepStatus, currentStep, finished } from "../lib/journey";
 
 const Journey: React.FC = () => {
   const { role, plan, signals } = useJourney();
-  const steps = journeyFor(role);
+  const steps = journeyFor(role, plan);
   const at = currentStep(steps, signals);
   const done = finished(steps, signals);
   const [barHidden, setBarHidden] = useState(() => guideState().journeyHidden);
@@ -50,8 +50,15 @@ const Journey: React.FC = () => {
           {steps.map((s, i) => {
             const st = stepStatus(s, signals);
             const gate = requiredEngagement(s.to, role, plan);
+            const opensSection = !!s.section && steps[i - 1]?.section !== s.section;
             return (
-              <li key={s.id} aria-current={i === at && !done ? "step" : undefined} className={`flex flex-wrap items-start gap-4 px-4 py-4 ${i === at && !done ? "bg-[#FBF6EC]" : ""}`}>
+              <React.Fragment key={s.id}>
+              {opensSection && (
+                <li className="bg-[#F7F0E2] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8A6A2E]">
+                  {s.section}{gate ? ` · needs the ${gate}` : ""}
+                </li>
+              )}
+              <li aria-current={i === at && !done ? "step" : undefined} className={`flex flex-wrap items-start gap-4 px-4 py-4 ${i === at && !done ? "bg-[#FBF6EC]" : ""}`}>
                 <span aria-hidden className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[12px] font-semibold ring-1 ${st !== "todo" ? "bg-xo-verified/15 text-xo-verified ring-xo-verified/40" : i === at ? "bg-[#B48737] text-white ring-[#B48737]" : "bg-white text-xo-faint ring-[#E2D3B5]"}`}>{st !== "todo" ? "✓" : i + 1}</span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-x-2">
@@ -67,6 +74,7 @@ const Journey: React.FC = () => {
                   <Link to={s.to} state={{ journeyStep: i }} className="rounded-sm border border-[#E2D3B5] bg-white px-3 py-1.5 text-[12px] font-semibold text-xo-text hover:border-[#B48737] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action">Open</Link>
                 </div>
               </li>
+              </React.Fragment>
             );
           })}
         </ol>

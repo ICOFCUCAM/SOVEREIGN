@@ -7,8 +7,8 @@ import { journeyFor, currentStep, finished, stepStatus } from "../lib/journey";
 // the earlier five-step "Start here" card, so there is one guide (the Guided Journey), not two.
 
 const StartHere: React.FC = () => {
-  const { role, signals } = useJourney();
-  const steps = journeyFor(role);
+  const { role, plan, signals } = useJourney();
+  const steps = journeyFor(role, plan);
   const at = currentStep(steps, signals);
   const step = steps[at]!;
   const done = finished(steps, signals);
