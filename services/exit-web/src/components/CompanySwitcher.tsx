@@ -6,7 +6,7 @@ import type { Remote } from "../lib/documents/store";
 import { findOwnListing, subscribeListings } from "../lib/listings";
 
 // The founder's companies, at the top of the sidebar: the one every page is working on, the others to
-// switch to (each with whether it is listed), and "Add a company", which opens Value My Company on a fresh
+// switch to (each with whether it is listed), "All my companies" (where each stands), and "Add a company", which opens Value My Company on a fresh
 // company. Each company keeps its own figures, story, documents, data room, listing and deals.
 
 /** Keep a signed-in founder's companies on their account: merge once on sign-in, then save each edit
@@ -81,6 +81,12 @@ export const CompanySwitcher: React.FC<{ onNavigate?: () => void }> = ({ onNavig
               {listed.has(c.id) && <span className="shrink-0 font-mono text-[8px] uppercase tracking-[0.14em] text-[#9FD8AE]">Listed</span>}
             </button>
           ))}
+          {companies.length > 0 && (
+            <button type="button" onClick={() => { setOpen(false); onNavigate?.(); nav("/console/companies"); }}
+              className="flex w-full items-center gap-2 border-t border-white/10 px-3 py-2 text-left text-[12px] text-white/70 transition hover:bg-white/[0.05] focus-visible:bg-white/[0.05] focus-visible:outline-none">
+              <span aria-hidden>▤</span> All my companies
+            </button>
+          )}
           <button type="button" onClick={() => pick(null)}
             className="flex w-full items-center gap-2 border-t border-white/10 px-3 py-2 text-left text-[12px] font-semibold text-ex-bronze transition hover:bg-white/[0.05] focus-visible:bg-white/[0.05] focus-visible:outline-none">
             <span aria-hidden>+</span> Add a company or product
