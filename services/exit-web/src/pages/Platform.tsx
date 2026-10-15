@@ -9,9 +9,9 @@ import { MARKET_FMT } from "../lib/market-stats";
 // one exchange, one record, end to end.
 
 const PILLARS = [
-  { icon: "globe", title: "Acquisition exchange", body: `${MARKET_FMT.buyers} curated acquirer mandates on one exchange — strategics, PE, family offices and corporate development, across ${MARKET_FMT.geographies} jurisdictions.` },
+  { icon: "globe", title: "Acquisition exchange", body: `An exchange for listing and acquiring companies, matched against ${MARKET_FMT.buyers} profiled acquirer mandates — strategics, PE, family offices and corporate development, across ${MARKET_FMT.geographies} jurisdictions.` },
   { icon: "chart", title: "Intelligence engines", body: "Valuation, readiness, buyer discovery and diligence run deterministically on your numbers — not slideware." },
-  { icon: "spark", title: "Autonomous execution", body: "Agents walk through sourcing, outreach, data room, negotiation and closing. Each step waits for your approval, and nothing is sent for you." },
+  { icon: "spark", title: "Exit Rehearsal", body: "Specialist agents rehearse the whole sale — sourcing, outreach, data room, negotiation and closing. Each step waits for your approval, and nothing is sent for you." },
   { icon: "lock", title: "Data rooms and records", body: "A document checklist with completeness per package, NDA-gated identity, and your deal actions recorded." },
 ];
 
