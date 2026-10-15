@@ -58,6 +58,12 @@ jobs:
         working-directory: services/exit-web
         run: npx eslint src
 
+      # the document quality gate renders real PDFs with headless Chrome and reads them back with pdftotext
+      - name: PDF tools for the document quality gate
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+          echo "CHROMIUM_BIN=$(command -v google-chrome || command -v chromium || command -v chromium-browser)" >> "$GITHUB_ENV"
+
       - name: Tests
         working-directory: services/exit-web
         run: npx vitest run
