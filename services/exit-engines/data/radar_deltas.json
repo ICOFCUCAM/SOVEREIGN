@@ -1,195 +1,600 @@
 {
- "detected_at": "2026-10-14T11:04:03.306Z",
- "count": 21,
+ "detected_at": "2026-10-15T10:37:11.183Z",
+ "count": 66,
  "deltas": [
+  {
+   "buyer_id": "microsoft",
+   "name": "Microsoft",
+   "kind": "new_acquisition",
+   "before": "385",
+   "after": "420",
+   "detail": "+35 indexed event(s) · latest: Fintool",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "blackrock",
+   "name": "BlackRock",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "medium",
+   "detail": "appetite no_events → medium",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "blackrock",
+   "name": "BlackRock",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "161",
+   "detail": "+161 indexed event(s) · latest: Global Infrastructure Partners",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "carnival-corporation",
+   "name": "Carnival Corporation",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "carnival-corporation",
+   "name": "Carnival Corporation",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "61",
+   "detail": "+61 indexed event(s) · latest: Azamara Pursuit",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "berkshire-hathaway",
+   "name": "Berkshire Hathaway",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "berkshire-hathaway",
+   "name": "Berkshire Hathaway",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "31",
+   "detail": "+31 indexed event(s) · latest: Precision Castparts Corp.",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "amazon",
+   "name": "Amazon",
+   "kind": "appetite_change",
+   "before": "high",
+   "after": "low",
+   "detail": "appetite high → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "amazon",
+   "name": "Amazon",
+   "kind": "cadence_shift",
+   "before": "4/12m",
+   "after": "0/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "take-two-interactive",
+   "name": "Take-Two Interactive",
+   "kind": "appetite_change",
+   "before": "medium",
+   "after": "low",
+   "detail": "appetite medium → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "alphabet",
+   "name": "Alphabet Inc.",
+   "kind": "appetite_change",
+   "before": "high",
+   "after": "low",
+   "detail": "appetite high → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "alphabet",
+   "name": "Alphabet Inc.",
+   "kind": "cadence_shift",
+   "before": "2/12m",
+   "after": "0/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "apple",
+   "name": "Apple",
+   "kind": "appetite_change",
+   "before": "high",
+   "after": "medium",
+   "detail": "appetite high → medium",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "apple",
+   "name": "Apple",
+   "kind": "cadence_shift",
+   "before": "3/12m",
+   "after": "0/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "vista-equity-partners",
+   "name": "Vista Equity Partners",
+   "kind": "new_acquisition",
+   "before": "9",
+   "after": "10",
+   "detail": "+1 indexed event(s) · latest: TripleLift",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "skydance-corporation",
+   "name": "Skydance Corporation",
+   "kind": "new_acquisition",
+   "before": "9",
+   "after": "10",
+   "detail": "+1 indexed event(s) · latest: CBS Entertainment Group",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "meta-platforms",
+   "name": "Meta Platforms",
+   "kind": "appetite_change",
+   "before": "high",
+   "after": "low",
+   "detail": "appetite high → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "meta-platforms",
+   "name": "Meta Platforms",
+   "kind": "cadence_shift",
+   "before": "5/12m",
+   "after": "0/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "boeing",
+   "name": "Boeing",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "boeing",
+   "name": "Boeing",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "9",
+   "detail": "+9 indexed event(s) · latest: de Havilland Canada",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "gen-digital",
+   "name": "Gen Digital",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "medium",
+   "detail": "appetite low → medium",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "bank-of-america",
+   "name": "Bank of America",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "bank-of-america",
+   "name": "Bank of America",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "6",
+   "detail": "+6 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "ebay-inc",
+   "name": "eBay Inc.",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "4 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "global-infrastructure-partners",
+   "name": "Global Infrastructure Partners",
+   "kind": "appetite_change",
+   "before": "low",
+   "after": "medium",
+   "detail": "appetite low → medium",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "global-infrastructure-partners",
+   "name": "Global Infrastructure Partners",
+   "kind": "new_acquisition",
+   "before": "3",
+   "after": "4",
+   "detail": "+1 indexed event(s) · latest: Aliança Geração de Energia",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "aes-corporation",
+   "name": "AES Corporation",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "aes-corporation",
+   "name": "AES Corporation",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "3",
+   "detail": "+3 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "bny-mellon",
+   "name": "BNY Mellon",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "bny-mellon",
+   "name": "BNY Mellon",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "3",
+   "detail": "+3 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "advanced-micro-devices",
+   "name": "Advanced Micro Devices",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "advanced-micro-devices",
+   "name": "Advanced Micro Devices",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "2",
+   "detail": "+2 indexed event(s) · latest: ATI Technologies",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "aflac",
+   "name": "Aflac",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "aflac",
+   "name": "Aflac",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "2",
+   "detail": "+2 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "best-buy",
+   "name": "Best Buy",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "best-buy",
+   "name": "Best Buy",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "2",
+   "detail": "+2 indexed event(s) · latest: Geek Squad",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "booking-holdings",
+   "name": "Booking Holdings",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "booking-holdings",
+   "name": "Booking Holdings",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "2",
+   "detail": "+2 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "agilent-technologies",
+   "name": "Agilent Technologies",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "agilent-technologies",
+   "name": "Agilent Technologies",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "akamai-technologies",
+   "name": "Akamai Technologies",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "akamai-technologies",
+   "name": "Akamai Technologies",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "altria",
+   "name": "Altria",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "altria",
+   "name": "Altria",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "amcor",
+   "name": "Amcor",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "amcor",
+   "name": "Amcor",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "american-express",
+   "name": "American Express",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "american-express",
+   "name": "American Express",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s) · latest: Loyalty Partner",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "american-international-group",
+   "name": "American International Group",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "american-international-group",
+   "name": "American International Group",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "american-tower",
+   "name": "American Tower",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "american-tower",
+   "name": "American Tower",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "ameriprise-financial",
+   "name": "Ameriprise Financial",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "ameriprise-financial",
+   "name": "Ameriprise Financial",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "brownforman",
+   "name": "Brown–Forman",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "brownforman",
+   "name": "Brown–Forman",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s)",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "cadence-design-systems",
+   "name": "Cadence Design Systems",
+   "kind": "appetite_change",
+   "before": "no_events",
+   "after": "low",
+   "detail": "appetite no_events → low",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "cadence-design-systems",
+   "name": "Cadence Design Systems",
+   "kind": "new_acquisition",
+   "before": "0",
+   "after": "1",
+   "detail": "+1 indexed event(s) · latest: AWR Corporation",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "dell-technologies",
+   "name": "Dell Technologies",
+   "kind": "new_buyer",
+   "before": "—",
+   "after": "1 events",
+   "detail": "buyer entered the index",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "ibm",
+   "name": "IBM",
+   "kind": "appetite_change",
+   "before": "high",
+   "after": "no_events",
+   "detail": "appetite high → no_events",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
+  {
+   "buyer_id": "ibm",
+   "name": "IBM",
+   "kind": "cadence_shift",
+   "before": "2/12m",
+   "after": "0/12m",
+   "detail": "trailing-12-month cadence moved",
+   "detected_at": "2026-10-15T10:37:11.182Z"
+  },
   {
    "buyer_id": "sap",
    "name": "SAP",
-   "kind": "new_acquisition",
-   "before": "71",
-   "after": "75",
-   "detail": "+4 indexed event(s) · latest: Prior Labs",
-   "detected_at": "2026-10-14T11:04:03.305Z"
+   "kind": "appetite_change",
+   "before": "high",
+   "after": "no_events",
+   "detail": "appetite high → no_events",
+   "detected_at": "2026-10-15T10:37:11.182Z"
   },
   {
    "buyer_id": "sap",
    "name": "SAP",
    "kind": "cadence_shift",
-   "before": "3/12m",
-   "after": "4/12m",
+   "before": "4/12m",
+   "after": "0/12m",
    "detail": "trailing-12-month cadence moved",
-   "detected_at": "2026-10-14T11:04:03.305Z"
+   "detected_at": "2026-10-15T10:37:11.182Z"
   },
   {
-   "buyer_id": "coca-cola",
-   "name": "Coca-Cola",
+   "buyer_id": "post-danmark",
+   "name": "Post Danmark",
    "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-10-14T11:04:03.305Z"
+   "before": "low",
+   "after": "no_events",
+   "detail": "appetite low → no_events",
+   "detected_at": "2026-10-15T10:37:11.182Z"
   },
   {
-   "buyer_id": "coca-cola",
-   "name": "Coca-Cola",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "19",
-   "detail": "+19 indexed event(s) · latest: Monster Beverage",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "intel",
-   "name": "Intel",
-   "kind": "new_acquisition",
-   "before": "6",
-   "after": "7",
-   "detail": "+1 indexed event(s) · latest: Wind River Systems",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "thoma-bravo",
-   "name": "Thoma Bravo",
-   "kind": "new_acquisition",
-   "before": "5",
-   "after": "6",
-   "detail": "+1 indexed event(s) · latest: Ping Identity",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "mckesson",
-   "name": "McKesson",
+   "buyer_id": "windward",
+   "name": "Windward",
    "kind": "new_buyer",
    "before": "—",
-   "after": "6 events",
+   "after": "0 events",
    "detail": "buyer entered the index",
-   "detected_at": "2026-10-14T11:04:03.305Z"
+   "detected_at": "2026-10-15T10:37:11.182Z"
   },
   {
-   "buyer_id": "american-airlines-group",
-   "name": "American Airlines Group",
+   "buyer_id": "electronic-arts",
+   "name": "Electronic Arts",
    "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "american-airlines-group",
-   "name": "American Airlines Group",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "6",
-   "detail": "+6 indexed event(s) · latest: US Airways",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "albertsons",
-   "name": "Albertsons",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "albertsons",
-   "name": "Albertsons",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "2",
-   "detail": "+2 indexed event(s)",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "publix-super-markets",
-   "name": "Publix Super Markets",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "publix-super-markets",
-   "name": "Publix Super Markets",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "2",
-   "detail": "+2 indexed event(s)",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "merck",
-   "name": "Merck",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "merck",
-   "name": "Merck",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s)",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "capital-one-financial",
-   "name": "Capital One Financial",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "capital-one-financial",
-   "name": "Capital One Financial",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s)",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "eli-lilly",
-   "name": "Eli Lilly",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "eli-lilly",
-   "name": "Eli Lilly",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s) · latest: Elizabeth Arden",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "legatum",
-   "name": "Legatum",
-   "kind": "appetite_change",
-   "before": "no_events",
-   "after": "low",
-   "detail": "appetite no_events → low",
-   "detected_at": "2026-10-14T11:04:03.305Z"
-  },
-  {
-   "buyer_id": "legatum",
-   "name": "Legatum",
-   "kind": "new_acquisition",
-   "before": "0",
-   "after": "1",
-   "detail": "+1 indexed event(s)",
-   "detected_at": "2026-10-14T11:04:03.305Z"
+   "before": "medium",
+   "after": "no_events",
+   "detail": "appetite medium → no_events",
+   "detected_at": "2026-10-15T10:37:11.182Z"
   }
  ]
 }
