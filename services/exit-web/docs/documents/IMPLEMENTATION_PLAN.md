@@ -999,3 +999,15 @@ Audit: the console's 44 pages draw almost all colour from the `xo` tokens (about
 - Manager: a video upload beside the picture, previewed in the sidebar and phone previews.
 
 **Results**: web 436 tests; lint, typecheck, build clean. Browser: a WebM uploaded through the manager plays muted and looping in the founder's sidebar and the click opens the destination.
+
+## 22. Increment report — guided journey, buyer workspace, promotions placements, CI
+
+- Buyer workspace (`20261014190000_exitos_buyer_workspace.sql`): the Acquisition Command Center's shortlist (with private notes) and saved views are kept on the buyer's account and follow them across devices; owner-only RLS and a trigger that makes the caller the owner. Self-test `exitos_selftest_buyer_workspace()`: 12 checks, passing locally, in CI and on the live project (run 15 October 2026 in the SQL editor: PASS 12/12).
+- Guided journey (`lib/journey.ts`, `components/GuidedJourney.tsx`, `/console/journey`): every step of the sale (18 for sellers, with a seven-step "Prepare for market" section) and of the acquisition (7 for buyers), with a step bar (Back / Next) at the foot of each page. A step is done only when its record says so (saved figures, saved story, accepted data-room documents, saved CIM and teaser, published listing, executed NDA, offer, signed or closed transaction); reading steps are "Reviewed" once opened; steps a plan does not open are optional and never hold the journey back. The home page's five-step card gave way to one journey banner.
+- Menu: real names (Chief Investment Banker, Exit Rehearsal, Outreach Desk, WealthOS, Live Deal Room, Deals); a summary card on hover, keyboard focus or (touch) ⓘ for every entry; lock badges name the plan that opens the page; Exit Timing opens on Preparation.
+- Restored features: those removed in the 11–12 October audits are back on the current design, each marked `PRELAUNCH-REVIEW` and listed in `docs/PRELAUNCH_REVIEW.md`; three pages reduced to one action each.
+- Promotions (`20261014200000_exitos_ad_placements.sql`): two quiet placements beyond the listing desk — the foot of the console sidebar and the Report hub — each with its own off switch; never in decision flows, among listings, beside valuations or on the public homepage. Self-test `exitos_selftest_ad_placements()`: 8 checks, passing locally, in CI and on the live project (PASS 8/8, 15 October 2026).
+- Registry: the 15 October automatic refresh lost about 40% of recorded acquisitions and four sector indexes and was reverted; `.github/scripts/radar-guard.mjs` now refuses a refresh that drops a sector index or shrinks acquisitions or acquirers by more than 10% in a day, and the website's tests run on fresh data before any commit.
+- CI (`.github/workflows/exitos-ci.yml`): every pull request and push to main touching the website, engines or migrations runs the website's typecheck, lint, tests (including the rendered-PDF quality gate) and build, and every database self-test against a scratch Postgres 16.
+
+**Results**: web 457 tests; lint, typecheck, build clean; exitos-ci green on #43 (web, database). Live: both new self-tests installed and passing.
