@@ -1,0 +1,97 @@
+# ExitOS — CI for the exchange website and its database rules.
+#
+# Runs on every pull request and push that touches the website, the engines it is built on, or the
+# Supabase migrations: typecheck, lint, the test suite and a production build of services/exit-web, and
+# every database self-test (RLS, NDA lifecycle, data room, transactions, identity, promotions, buyer
+# workspace) against a scratch Postgres with Supabase stand-ins. Independent of dispatch-ci.
+name: exitos-ci
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "services/exit-web/**"
+      - "services/exit-engines/**"
+      - "supabase/**"
+      - ".github/workflows/exitos-ci.yml"
+  pull_request:
+    paths:
+      - "services/exit-web/**"
+      - "services/exit-engines/**"
+      - "supabase/**"
+      - ".github/workflows/exitos-ci.yml"
+
+concurrency:
+  group: exitos-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build the engines the website imports
+        working-directory: services/exit-engines
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Install the document-schema package the document tests validate against
+        working-directory: packages/ddm-schema
+        run: npm ci --no-audit --no-fund
+
+      # services/ keeps no lockfiles (services/.gitignore); install as the Vercel build does
+      - name: Install website dependencies
+        working-directory: services/exit-web
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck
+        working-directory: services/exit-web
+        run: npx tsc --noEmit -p .
+
+      - name: Lint
+        working-directory: services/exit-web
+        run: npx eslint src
+
+      # the document quality gate renders real PDFs with headless Chrome and reads them back with pdftotext
+      - name: PDF tools for the document quality gate
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+          echo "CHROMIUM_BIN=$(command -v google-chrome || command -v chromium || command -v chromium-browser)" >> "$GITHUB_ENV"
+
+      - name: Tests
+        working-directory: services/exit-web
+        run: npx vitest run
+
+      - name: Production build
+        working-directory: services/exit-web
+        run: npx vite build
+
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Database self-tests (every migration applied in order, each self-test must pass)
+        run: bash supabase/tests/nda/run.sh
