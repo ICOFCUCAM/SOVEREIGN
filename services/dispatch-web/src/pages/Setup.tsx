@@ -104,9 +104,9 @@ const SetupHome: React.FC<Ctx> = ({ config, error, reload, name, states, essenti
         <span aria-hidden className="pointer-events-none absolute left-1/2 top-[-120px] h-[420px] w-[420px] -translate-x-1/2 rounded-full border border-sd-gold/[0.12]" />
         <span aria-hidden className="pointer-events-none absolute left-1/2 top-[-190px] h-[560px] w-[560px] -translate-x-1/2 rounded-full border border-sd-gold/[0.07]" />
         <Seal text={named ? initialsOf(name) : "SD"} size={92} className="mx-auto" />
-        <div className="mt-5 font-mono text-[10.5px] uppercase tracking-[0.22em] text-sd-gold">{essentialsDone ? "Established" : "Welcome to Sovereign Dispatch"}</div>
+        <div className="mt-5 font-mono text-[10.5px] uppercase tracking-[0.22em] text-sd-gold">{named ? name : "Welcome to Sovereign Dispatch"}</div>
         <h1 className="mx-auto mt-2.5 max-w-4xl font-serif text-[34px] font-semibold leading-tight tracking-[-0.015em] sm:text-[46px]">
-          {essentialsDone ? <>{named ? name : "Your institution"} is established</> : <>Let's establish {named ? `the ${name.replace(/^the\s+/i, "")}` : "your institution"}</>}
+          {essentialsDone ? "Your institution is established" : "Let's establish your institution"}
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-[15.5px] leading-relaxed text-sd-text2">
           {essentialsDone

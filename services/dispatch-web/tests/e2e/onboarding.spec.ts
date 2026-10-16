@@ -112,7 +112,8 @@ test.describe("sign-in and onboarding", () => {
     await mockApi(page, { respond: newInstitution().respond });
     await keySignIn(page);
     await expect(page).toHaveURL(/\/setup$/);
-    await expect(page.getByRole("heading", { name: "Let's establish the Ministry of Records" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Let's establish your institution" })).toBeVisible();
+    await expect(page.getByText("Ministry of Records", { exact: true })).toBeVisible();
     await expect(page.locator("#sd-rail")).toHaveCount(0);
     const cards = page.locator("ol > li");
     await expect(cards).toHaveCount(3);
@@ -152,7 +153,7 @@ test.describe("sign-in and onboarding", () => {
     await keySignIn(page);
     await expect(page).toHaveURL(/\/console$/);
     await go(page, "/setup");
-    await expect(page.getByRole("heading", { name: "Ministry of Records is established" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Your institution is established" })).toBeVisible();
     await page.getByRole("link", { name: /Open the console/ }).click();
     await expect(page.getByRole("heading", { name: "Institutional Posture" })).toBeVisible();
   });
