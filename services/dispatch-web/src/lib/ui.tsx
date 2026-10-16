@@ -1,5 +1,6 @@
 import React from "react";
 import type { Lifecycle } from "./api";
+import { GOLD, GOLD_FOCUS, PANEL, Hairline } from "../components/premium";
 
 // Classification banding — Dispatch is classification-forward: every document
 // row/card carries a visible marking. Maps free-text levels onto a colour band.
@@ -58,12 +59,12 @@ export const LifecycleBadge: React.FC<{ state: Lifecycle }> = ({ state }) => (
 );
 
 export const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
-  <div className={`rounded-xl border border-[#263548] bg-[#111a26] ${className}`}>{children}</div>
+  <div className={`relative rounded-xl border border-[#263548] ${PANEL} ${className}`}><Hairline />{children}</div>
 );
 
 export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" | "ok" }> = ({ variant = "primary", className = "", ...p }) => {
   const v = {
-    primary: "bg-[#d9e7f9] hover:bg-white text-[#15243a]",
+    primary: GOLD,
     ghost: "bg-transparent hover:bg-white/5 text-white/85 ring-1 ring-[#35465d]",
     danger: "bg-[#5c2328] hover:bg-[#6b2a30] text-white ring-1 ring-[#8a3a41]",
     ok: "bg-[#1f5c45] hover:bg-[#24694f] text-white ring-1 ring-[#2f7d5f]",
@@ -79,7 +80,7 @@ export const Field: React.FC<{ label: string; children: React.ReactNode; hint?: 
   </label>
 );
 
-export const inputCls = "w-full rounded-lg border border-[#263548] bg-[#0d1520] px-3 py-2 text-sm text-white placeholder-[#7f8ea3] outline-none focus:border-[#8dbbff] focus:ring-2 focus:ring-[#8dbbff]/25";
+export const inputCls = `w-full rounded-lg border border-[#263548] bg-[#0d1520] px-3 py-2 text-sm text-white placeholder-[#7f8ea3] transition ${GOLD_FOCUS}`;
 
 export function timeAgo(iso?: string): string {
   if (!iso) return "—";

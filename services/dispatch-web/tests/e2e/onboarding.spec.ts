@@ -87,7 +87,7 @@ test.describe("sign-in and onboarding", () => {
     } });
     await page.goto(`/invite#token=${TOKEN}`);
     await expect(page.getByRole("heading", { name: "Welcome, Amina Okafor" })).toBeVisible();
-    await expect(page.getByText("Ministry of Records")).toBeVisible();
+    await expect(page.getByText("Ministry of Records").first()).toBeVisible();
     expect(new URL(page.url()).hash).toBe("");
     const submit = page.getByRole("button", { name: "Set password and sign in" });
     await page.getByLabel("Choose a password").fill("short");

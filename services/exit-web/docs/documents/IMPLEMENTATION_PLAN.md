@@ -1085,3 +1085,9 @@ A new institution is now guided from its first sign-in, its people can sign in w
 **Results**: people sign-in e2e **29/29** (new in `dispatch-ci`). Backbone e2e 14, retry 3, provisioning 15, billing 18 and audit-read 8 pass on a scratch Postgres 16 with all migrations. Browser tests: 71 pass (console 61, onboarding 10 new; the browser mock answers as an established institution unless a test sets up a new one). Billing 18/18 with the institution's name. Typecheck and build are clean, and lint shows no new findings.
 
 **To go live**: apply `M27__person_invitations_and_passwords.sql` to the Dispatch schema; merge (the console deploys from `main`, the API through DeployPro). Dispatch does not send email: the administrator copies the invitation link and sends it.
+
+**Premium finish (same increment)**: one kit, `components/premium.tsx`, in two registers.
+- **Materials, everywhere:** gold hairlines, panel depth, the gold primary button, gold-focus fields, gilt emphasis in headings and the diamond rule. `lib/ui` and `components/console/ds` take their finish from the kit, so every console page that uses their panels, buttons and fields follows it.
+- **Ceremony, for moments:** the engraved seal and the slow guilloche rosette. They appear on sign-in, sign-up, the invitation page (`components/AuthFrame.tsx`) and the set-up. The record-sealed, verification and certificate pages come next.
+- **Results:** browser tests 71 pass, including the accessibility checks.
+

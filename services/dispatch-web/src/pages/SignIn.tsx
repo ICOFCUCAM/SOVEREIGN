@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { ssoStartUrl, signInMethod, passwordSignIn, humanError } from "../lib/api";
-import { Button, Field, inputCls } from "../lib/ui";
-import { DispatchMark, FilmGrain } from "../components/brand";
+import { AuthFrame, AuthCard, AUTH_LABEL } from "../components/AuthFrame";
+import { Gilt, Hairline, GOLD, FIELD, ACTION as BTN } from "../components/premium";
 import { Icon } from "../components/console/icons";
 
 // Sign-in — three doors, each named for who it is for, so nobody has to guess which form is theirs:
@@ -59,92 +59,87 @@ const SignIn: React.FC = () => {
     finally { setBusy(false); }
   };
 
+  const field = (id: string, label: string, input: React.ReactNode) => (
+    <div><label htmlFor={id} className={AUTH_LABEL}>{label}</label>{input}</div>
+  );
+  const alert = (text: string, tone: "warn" | "bad" = "warn") => (
+    <div role="alert" className={`rounded-[10px] border px-3.5 py-2.5 text-[12.5px] ${tone === "bad" ? "border-red-500/30 bg-red-500/10 text-red-200" : "border-sd-warn/30 bg-sd-warn/10 text-[#f3dcae]"}`}>{text}</div>
+  );
+
   return (
-    <div className="relative flex min-h-full items-center justify-center overflow-hidden px-4 py-12">
-      <FilmGrain />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_45%_at_50%_0%,rgba(233,200,120,0.07),transparent_70%)]" aria-hidden />
-      <div className="relative w-full max-w-md">
-        <div className="mb-7 text-center">
-          <a href="/" className="mb-4 inline-flex items-center justify-center gap-2.5">
-            <DispatchMark className="h-8 w-8 text-seal-light" />
-            <span className="text-lg font-bold tracking-tight text-white">SOVEREIGN <span className="text-seal-light">DISPATCH</span></span>
-          </a>
-          <p className="mt-1 text-sm text-white/50">From information to official record.</p>
-        </div>
+    <AuthFrame title={<>From information to <Gilt>official record</Gilt></>} lede="Sign in to your institution's Sovereign Dispatch."
+      below={<p className="text-[11px] text-sd-faint">Sessions are held in memory and expire automatically.</p>}>
+      {notice && <div className="mb-4">{alert(notice)}</div>}
 
-        {notice && <div role="status" className="mb-4 rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{notice}</div>}
-
-        {/* the three doors */}
-        <div role="tablist" aria-label="How you sign in" className="mb-3 grid gap-2">
-          {DOORS.map((d) => {
-            const on = door === d.id;
-            return (
-              <button key={d.id} role="tab" type="button" aria-selected={on} aria-controls={`door-${d.id}`} id={`tab-${d.id}`}
-                onClick={() => { setDoor(d.id); setMsg(null); }}
-                className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-seal-light/60 ${on ? "border-seal-light/45 bg-seal/15" : "border-white/10 bg-white/[0.025] hover:border-white/20 hover:bg-white/[0.045]"}`}>
-                <span aria-hidden className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ring-1 ${on ? "text-seal-light ring-seal-light/50" : "text-white/45 ring-white/15"}`}>
-                  {React.createElement(Icon[d.icon], { className: "h-4 w-4" })}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className={`block text-[13.5px] font-semibold ${on ? "text-white" : "text-white/75"}`}>{d.title}</span>
-                  <span className="block text-[12px] leading-snug text-white/45">{d.line}</span>
-                </span>
-                <span aria-hidden className={`h-3.5 w-3.5 shrink-0 rounded-full border ${on ? "border-seal-light bg-seal-light shadow-[inset_0_0_0_2px_#0b1220]" : "border-white/25"}`} />
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.045] to-white/[0.012] p-7 shadow-[0_30px_80px_-44px_rgba(0,0,0,0.9)]">
-          {door === "person" && (
-            <form id="door-person" role="tabpanel" aria-labelledby="tab-person" onSubmit={continueWithEmail} className="space-y-4">
-              <Field label="Work email">
-                <input className={inputCls} type="email" autoComplete="username" value={email} autoFocus
-                  onChange={(e) => { setEmail(e.target.value); if (step === "password") { setStep("email"); setPassword(""); } }} placeholder="name@institution.org" />
-              </Field>
-              {step === "password" && (
-                <Field label="Password">
-                  <input className={inputCls} type="password" autoComplete="current-password" value={password} autoFocus onChange={(e) => setPassword(e.target.value)} />
-                </Field>
-              )}
-              {msg && <div role="alert" className="rounded border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">{msg}</div>}
-              <Button type="submit" className="w-full" disabled={busy || (step === "password" && !password)}>
-                {busy ? "One moment…" : step === "password" ? "Sign in" : "Continue"}
-              </Button>
-              <p className="text-[11.5px] leading-snug text-white/40">
-                {step === "password"
-                  ? "Use the password you set from your invitation. Forgotten it? Ask your administrator for a new invitation link."
-                  : "If your institution has its own sign-in, you'll be taken there. Otherwise you'll enter the password you set from your invitation."}
-              </p>
-            </form>
-          )}
-
-          {door === "new" && (
-            <div id="door-new" role="tabpanel" aria-labelledby="tab-new" className="space-y-4">
-              <p className="text-[13px] leading-relaxed text-white/65">Create your institution's account in a minute. The <span className="text-white/85">Evaluation is free for 30 days and includes 10 official records</span>; no card is needed.</p>
-              <ol className="space-y-1.5 text-[12.5px] text-white/55">
-                <li><span className="mr-1.5 font-mono text-seal-light">1</span>Name your institution and receive its administrator key.</li>
-                <li><span className="mr-1.5 font-mono text-seal-light">2</span>A guided set-up establishes your offices, approval rules and people.</li>
-                <li><span className="mr-1.5 font-mono text-seal-light">3</span>Invite your people; they sign in with their work email.</li>
-              </ol>
-              <Link to="/signup" className="flex h-10 w-full items-center justify-center rounded-md bg-seal text-sm font-semibold text-white transition hover:bg-seal-light">Create your institution's account →</Link>
-            </div>
-          )}
-
-          {door === "key" && (
-            <form id="door-key" role="tabpanel" aria-labelledby="tab-key" onSubmit={(e) => { e.preventDefault(); signIn(clientId.trim(), secret).catch(() => {}); }} className="space-y-4">
-              <p className="-mt-1 text-[12px] leading-snug text-white/45">For the first administrator, using the key shown when the institution was created, and for systems and integrations. People should use their work email.</p>
-              <Field label="Client ID"><input className={inputCls} value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="svc_…" autoComplete="username" /></Field>
-              <Field label="Secret"><input className={inputCls} type="password" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder="sdk_…" autoComplete="current-password" /></Field>
-              {error && <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{error}</div>}
-              <Button type="submit" disabled={loading || !clientId || !secret} className="w-full">{loading ? "Signing in…" : "Sign in with key"}</Button>
-            </form>
-          )}
-        </div>
-
-        <p className="mt-4 text-center text-[11px] text-white/30">Sessions are held in memory and expire automatically.</p>
+      {/* the three doors */}
+      <div role="tablist" aria-label="How you sign in" className="mb-4 grid gap-2.5">
+        {DOORS.map((d) => {
+          const on = door === d.id;
+          return (
+            <button key={d.id} role="tab" type="button" aria-selected={on} aria-controls={`door-${d.id}`} id={`tab-${d.id}`}
+              onClick={() => { setDoor(d.id); setMsg(null); }}
+              className={`group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition duration-200 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-sd-gold/25 ${on
+                ? "border-sd-gold/50 bg-[linear-gradient(180deg,rgba(201,173,117,0.12),rgba(201,173,117,0.03))] shadow-[0_18px_44px_-30px_rgba(201,173,117,0.7)]"
+                : "border-sd-line bg-[linear-gradient(180deg,rgba(20,30,44,0.7),rgba(13,20,30,0.7))] hover:-translate-y-px hover:border-sd-gold/25"}`}>
+              {on && <Hairline tone="gold" />}
+              <span aria-hidden className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ring-1 transition ${on ? "bg-sd-gold/10 text-sd-gold ring-sd-gold/50" : "text-sd-text3 ring-white/[0.12] group-hover:text-sd-text2"}`}>
+                {React.createElement(Icon[d.icon], { className: "h-[18px] w-[18px]" })}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className={`block text-[14px] font-semibold ${on ? "text-sd-text" : "text-sd-text2"}`}>{d.title}</span>
+                <span className="block text-[12px] leading-snug text-sd-text3">{d.line}</span>
+              </span>
+              <span aria-hidden className={`grid h-4 w-4 shrink-0 place-items-center rounded-full border transition ${on ? "border-sd-gold" : "border-white/25"}`}>
+                {on && <span className="h-2 w-2 rounded-full bg-[linear-gradient(180deg,#ecd7a6,#b8975c)]" />}
+              </span>
+            </button>
+          );
+        })}
       </div>
-    </div>
+
+      <AuthCard>
+        {door === "person" && (
+          <form id="door-person" role="tabpanel" aria-labelledby="tab-person" onSubmit={continueWithEmail} className="space-y-4">
+            {field("si-email", "Work email", <input id="si-email" className={FIELD} type="email" autoComplete="username" value={email} autoFocus
+              onChange={(e) => { setEmail(e.target.value); if (step === "password") { setStep("email"); setPassword(""); } }} placeholder="name@institution.org" />)}
+            {step === "password" && field("si-password", "Password", <input id="si-password" className={FIELD} type="password" autoComplete="current-password" value={password} autoFocus onChange={(e) => setPassword(e.target.value)} />)}
+            {msg && alert(msg)}
+            <button type="submit" className={`${BTN} ${GOLD} w-full`} disabled={busy || (step === "password" && !password)}>
+              {busy ? "One moment…" : step === "password" ? "Sign in" : "Continue"} {!busy && <Icon.arrowRight className="h-4 w-4" />}
+            </button>
+            <p className="text-[12px] leading-relaxed text-sd-text3">
+              {step === "password"
+                ? "Use the password you set from your invitation. Forgotten it? Ask your administrator for a new invitation link."
+                : "If your institution has its own sign-in, you'll be taken there. Otherwise you'll enter the password you set from your invitation."}
+            </p>
+          </form>
+        )}
+
+        {door === "new" && (
+          <div id="door-new" role="tabpanel" aria-labelledby="tab-new" className="space-y-5">
+            <p className="text-[13.5px] leading-relaxed text-sd-text2">Create your institution's account in a minute. The <span className="text-sd-text">Evaluation is free for 30 days and includes 10 official records</span>; no card is needed.</p>
+            <ol className="space-y-2.5">
+              {["Name your institution and receive its administrator key.", "A guided set-up establishes your offices, approval rules and people.", "Invite your people; they sign in with their work email."].map((t, i) => (
+                <li key={t} className="flex items-start gap-3 text-[13px] text-sd-text2">
+                  <span aria-hidden className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-sd-gold/40 font-serif text-[11px] font-semibold text-sd-gold">{["I", "II", "III"][i]}</span>{t}
+                </li>
+              ))}
+            </ol>
+            <Link to="/signup" className={`${BTN} ${GOLD} w-full`}>Create your institution's account <Icon.arrowRight className="h-4 w-4" /></Link>
+          </div>
+        )}
+
+        {door === "key" && (
+          <form id="door-key" role="tabpanel" aria-labelledby="tab-key" onSubmit={(e) => { e.preventDefault(); signIn(clientId.trim(), secret).catch(() => {}); }} className="space-y-4">
+            <p className="text-[12.5px] leading-relaxed text-sd-text3">For the first administrator, using the key shown when the institution was created, and for systems and integrations. People should use their work email.</p>
+            {field("si-client", "Client ID", <input id="si-client" className={FIELD} value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="svc_…" autoComplete="username" />)}
+            {field("si-secret", "Secret", <input id="si-secret" className={FIELD} type="password" value={secret} onChange={(e) => setSecret(e.target.value)} placeholder="sdk_…" autoComplete="current-password" />)}
+            {error && alert(error, "bad")}
+            <button type="submit" disabled={loading || !clientId || !secret} className={`${BTN} ${GOLD} w-full`}>{loading ? "Signing in…" : "Sign in with key"}</button>
+          </form>
+        )}
+      </AuthCard>
+    </AuthFrame>
   );
 };
 

@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { invitationDetails, acceptInvitation, humanError, type InvitationDetails } from "../lib/api";
-import { Button, Field, inputCls } from "../lib/ui";
-import { DispatchMark, FilmGrain } from "../components/brand";
+import { AuthFrame, AuthCard, AUTH_LABEL } from "../components/AuthFrame";
+import { Gilt, GOLD, FIELD, ACTION as BTN } from "../components/premium";
+import { Icon } from "../components/console/icons";
 
 // /invite#token=… — a person accepts their institution's invitation and sets their password. The token is
 // read from the URL fragment (never sent to a server log) and scrubbed from the address bar at once. The
@@ -43,54 +44,41 @@ const AcceptInvitation: React.FC = () => {
     unknown: "This invitation link is not valid. Check that you opened the whole link, or ask your administrator for a new one.",
   };
 
+  const valid = details?.state === "valid";
+  const field = (id: string, label: string, input: React.ReactNode, hint?: string) => (
+    <div><label htmlFor={id} className={AUTH_LABEL}>{label}</label>{input}{hint && <span className="mt-1.5 block text-[12px] text-sd-text3">{hint}</span>}</div>
+  );
   return (
-    <div className="relative flex min-h-full items-center justify-center overflow-hidden px-4 py-12">
-      <FilmGrain />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_45%_at_50%_0%,rgba(233,200,120,0.07),transparent_70%)]" aria-hidden />
-      <div className="relative w-full max-w-md">
-        <div className="mb-7 text-center">
-          <a href="/" className="mb-4 inline-flex items-center justify-center gap-2.5">
-            <DispatchMark className="h-8 w-8 text-seal-light" />
-            <span className="text-lg font-bold tracking-tight text-white">SOVEREIGN <span className="text-seal-light">DISPATCH</span></span>
-          </a>
-        </div>
+    <AuthFrame eyebrow={valid && details?.institution ? details.institution : "Invitation"}
+      title={valid ? <>Welcome, <Gilt>{details!.fullName}</Gilt></> : details ? "Invitation not available" : "Your invitation"}
+      lede={valid ? <><span className="text-sd-text">{details!.institution}</span> has invited you to Sovereign Dispatch. Set a password to finish.</> : undefined}>
+      <AuthCard tone={details && !valid ? "faint" : "gold"}>
+        {!details && !err && <p className="text-sm text-sd-text3">Checking your invitation…</p>}
+        {err && !details && <div role="alert" className="rounded-[10px] border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-[12.5px] text-red-200">{err}</div>}
 
-        <div className="rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.045] to-white/[0.012] p-7 shadow-[0_30px_80px_-44px_rgba(0,0,0,0.9)]">
-          {!details && !err && <p className="text-sm text-white/50">Checking your invitation…</p>}
-          {err && !details && <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{err}</div>}
+        {details && !valid && (
+          <div className="space-y-5">
+            <p className="text-[13.5px] leading-relaxed text-sd-text2">{ended[details.state]}</p>
+            <Link to="/console" className={`${BTN} ${GOLD} w-full`}>Go to sign-in <Icon.arrowRight className="h-4 w-4" /></Link>
+          </div>
+        )}
 
-          {details && details.state !== "valid" && (
-            <div className="space-y-4">
-              <h1 className="font-serif text-xl font-bold text-white">Invitation not available</h1>
-              <p className="text-[13px] leading-relaxed text-white/60">{ended[details.state]}</p>
-              <Link to="/console" className="inline-flex text-[13px] font-semibold text-seal-light hover:text-white">Go to sign-in →</Link>
-            </div>
-          )}
-
-          {details?.state === "valid" && (
-            <form onSubmit={accept} className="space-y-4">
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-seal-light">Invitation</div>
-                <h1 className="mt-1.5 font-serif text-[1.45rem] font-bold leading-tight text-white">Welcome, {details.fullName}</h1>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-white/60"><span className="text-white/85">{details.institution}</span> has invited you to Sovereign Dispatch. Set a password to finish. You'll sign in with <span className="text-white/85">{details.email}</span> and this password.</p>
-              </div>
-              <input type="email" value={details.email ?? ""} autoComplete="username" readOnly hidden />
-              <Field label="Choose a password" hint={`At least ${MIN} characters. A short sentence is easy to remember and hard to guess.`}>
-                <input className={inputCls} type={show ? "text" : "password"} autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} autoFocus aria-invalid={tooShort || undefined} />
-              </Field>
-              <Field label="Repeat it">
-                <input className={inputCls} type={show ? "text" : "password"} autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} aria-invalid={mismatch || undefined} />
-              </Field>
-              <label className="flex items-center gap-2 text-[12px] text-white/50"><input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} /> Show password</label>
-              {(tooShort || mismatch) && <p role="alert" className="text-[12px] text-amber-300">{tooShort ? `Use at least ${MIN} characters.` : "The two passwords don't match."}</p>}
-              {err && <div role="alert" className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{err}</div>}
-              <Button type="submit" className="w-full" disabled={busy || pw.length < MIN || pw !== pw2}>{busy ? "Setting up…" : "Set password and sign in"}</Button>
-              {details.expiresAt && <p className="text-center text-[11px] text-white/35">This link works once, until {new Date(details.expiresAt).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}.</p>}
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
+        {valid && details && (
+          <form onSubmit={accept} className="space-y-4">
+            <p className="text-[13px] leading-relaxed text-sd-text2">You'll sign in with <span className="font-medium text-sd-text">{details.email}</span> and this password.</p>
+            <input type="email" value={details.email ?? ""} autoComplete="username" readOnly hidden />
+            {field("inv-pw", "Choose a password", <input id="inv-pw" className={FIELD} type={show ? "text" : "password"} autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} autoFocus aria-invalid={tooShort || undefined} />,
+              `At least ${MIN} characters. A short sentence is easy to remember and hard to guess.`)}
+            {field("inv-pw2", "Repeat it", <input id="inv-pw2" className={FIELD} type={show ? "text" : "password"} autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} aria-invalid={mismatch || undefined} />)}
+            <label className="flex items-center gap-2 text-[12.5px] text-sd-text3"><input type="checkbox" className="accent-[#c9ad75]" checked={show} onChange={(e) => setShow(e.target.checked)} /> Show password</label>
+            {(tooShort || mismatch) && <p role="alert" className="text-[12.5px] text-[#f3dcae]">{tooShort ? `Use at least ${MIN} characters.` : "The two passwords don't match."}</p>}
+            {err && <div role="alert" className="rounded-[10px] border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-[12.5px] text-red-200">{err}</div>}
+            <button type="submit" className={`${BTN} ${GOLD} w-full`} disabled={busy || pw.length < MIN || pw !== pw2}>{busy ? "Setting up…" : "Set password and sign in"}</button>
+            {details.expiresAt && <p className="text-center text-[11.5px] text-sd-faint">This link works once, until {new Date(details.expiresAt).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}.</p>}
+          </form>
+        )}
+      </AuthCard>
+    </AuthFrame>
   );
 };
 
