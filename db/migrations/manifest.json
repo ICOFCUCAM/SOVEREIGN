@@ -26,6 +26,7 @@
     "M23__record_verification.sql",
     "M24__verify_artifacts.sql",
     "M25__eval_namespace.sql",
-    "M26__evaluation_trial_and_tiers.sql"
+    "M26__evaluation_trial_and_tiers.sql",
+    "M27__person_invitations_and_passwords.sql"
   ]
 }

@@ -8,12 +8,14 @@ import { conceptLocales } from "./lib/translations";
 import { LocaleProvider, detectPreferredLocale } from "./lib/locale";
 import { FilmGrain } from "./components/brand";
 import { BillingProvider } from "./lib/upsell";
+import { loadInstitutionConfig, computeReadiness, isEstablished, markEstablished } from "./lib/readiness";
 
 // Eager — the homepage is the front door (no loading flash), and the auth pages
 // are the immediate fallback for every product guard.
 import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import Signup from "./pages/Signup";
+import AcceptInvitation from "./pages/AcceptInvitation";
 
 // Lazy — every other route is its own chunk. A marketing visitor never downloads
 // the console/admin product; an operator never downloads the marketing pages.
@@ -57,7 +59,7 @@ const Audit = lazy(() => import("./pages/Audit"));
 const Sovereignty = lazy(() => import("./pages/Sovereignty"));
 const Access = lazy(() => import("./pages/Access"));
 const AdminHome = lazy(() => import("./pages/AdminHome"));
-const InstitutionSetup = lazy(() => import("./pages/InstitutionSetup"));
+const Setup = lazy(() => import("./pages/Setup"));
 const GovernancePolicies = lazy(() => import("./pages/GovernancePolicies"));
 const AuthorityDirectory = lazy(() => import("./pages/AuthorityDirectory"));
 const GovernanceMonitor = lazy(() => import("./pages/GovernanceMonitor"));
@@ -79,10 +81,40 @@ const Polished = lazy(() => import("./pages/polished/Polished"));
 // Administration product additionally requires dispatch:admin, so an operator
 // is bounced back to Operations and never lands in an administrative surface.
 
+// The console stays closed to an administrator until the institution's essentials (structure, approval
+// rules, people in offices) are in place: until then every console page sends them to the full-screen
+// set-up. A configuration that cannot be read never locks anyone out. People who are not administrators
+// pass: they cannot set the institution up.
+const EssentialsGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { session, has } = useAuth();
+  const open = !session || !has("dispatch:admin") || isEstablished(session.token);
+  const [state, setState] = React.useState<"checking" | "open" | "setup">(open ? "open" : "checking");
+  React.useEffect(() => {
+    if (open || !session) { setState("open"); return; }
+    let live = true;
+    loadInstitutionConfig()
+      .then((c) => { if (!live) return; if (computeReadiness(c, false).essentialsDone) { markEstablished(session.token); setState("open"); } else setState("setup"); })
+      .catch(() => { if (live) setState("open"); });
+    return () => { live = false; };
+  }, [open, session]);
+  if (state === "checking") return null;
+  if (state === "setup") return <Navigate to="/setup" replace />;
+  return <>{children}</>;
+};
+
+// The set-up: full screen, outside both consoles, for administrators.
+const SetupRoute: React.FC = () => {
+  const { session, has } = useAuth();
+  if (!session) return <SignIn />;
+  if (!has("dispatch:admin")) return <Navigate to="/console" replace />;
+  return <BillingProvider><Setup /></BillingProvider>;
+};
+
 const Operations: React.FC = () => {
   const { session } = useAuth();
   if (!session) return <SignIn />;
   return (
+    <EssentialsGate>
     <BillingProvider>
       <ConsoleShell variant="operations">
         <Routes>
@@ -98,6 +130,7 @@ const Operations: React.FC = () => {
         </Routes>
       </ConsoleShell>
     </BillingProvider>
+    </EssentialsGate>
   );
 };
 
@@ -106,12 +139,13 @@ const Administration: React.FC = () => {
   if (!session) return <SignIn />;
   if (!has("dispatch:admin")) return <Navigate to="/console" replace />; // operators never see Administration
   return (
+    <EssentialsGate>
     <BillingProvider>
       <ConsoleShell variant="administration">
         <Routes>
           <Route path="/" element={<AdminHome />} />
           <Route path="publishing" element={<PublishingConsole />} />
-          <Route path="setup" element={<InstitutionSetup />} />
+          <Route path="setup" element={<Navigate to="/setup" replace />} />
           <Route path="authority" element={<AuthorityDirectory />} />
           <Route path="access" element={<Access />} />
           <Route path="governance" element={<GovernancePolicies />} />
@@ -129,6 +163,7 @@ const Administration: React.FC = () => {
         </Routes>
       </ConsoleShell>
     </BillingProvider>
+    </EssentialsGate>
   );
 };
 
@@ -291,10 +326,14 @@ const App: React.FC = () => (
     <Route path="/verify/:recordId" element={<Verify />} />
     {/* public self-serve signup (free plan) */}
     <Route path="/signup" element={<Signup />} />
+    {/* a person accepts their institution's invitation and sets a password */}
+    <Route path="/invite" element={<AcceptInvitation />} />
     {/* product 1 — institutional operations */}
     <Route path="/console/*" element={<Operations />} />
     {/* product 2 — platform administration */}
     <Route path="/admin/*" element={<Administration />} />
+    {/* a new institution's set-up, before the console opens */}
+    <Route path="/setup/*" element={<SetupRoute />} />
     {/* product 3 — executive evaluation (procurement / board) */}
     <Route path="/evaluate" element={<Evaluation />} />
     {/* product 4 — platform operations (platform operator; dispatch:platform) */}

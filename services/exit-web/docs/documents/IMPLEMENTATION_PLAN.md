@@ -1051,3 +1051,43 @@ ExitOS writes, versions, reviews and renders its documents; Dispatch certifies t
 **Results**: web 480 tests; lint, typecheck, build clean. Dispatch backbone on a scratch Postgres 16 with all migrations: e2e 14, retry 3, provisioning 15, billing 18, **ExitOS certification 14/14** (an ExitOS letter of intent certified as SD-2026-00000013, PRESERVED, title withheld), audit-read 8. Database self-tests: all pass, including the new 9/9.
 
 **To go live**: apply the migration and its self-test; deploy `exit-dispatch-submit`; in Dispatch, put the ExitOS institution on an active plan and issue its client (render, read, publish); set the function's `DISPATCH_API_URL`, `DISPATCH_CLIENT_ID`, `DISPATCH_CLIENT_SECRET` and `DISPATCH_VERIFY_URL`.
+
+**Live status (16 October)**: the certificates table and its self-test (9/9) are applied; `exit-dispatch-submit` is deployed with its four secrets; the ExitOS institution is on Enterprise and `svc-exitos` holds render, read and publish with a new secret that mints a token from the live API. No document has been certified live yet: certifiable documents follow an accepted proposal or a transaction, and none exists. The first real deal will be the first live certification.
+
+## 27. Increment report — Sovereign Dispatch: welcome, sign-in doors and people's sign-in
+
+A new institution is now guided from its first sign-in, its people can sign in without an identity provider of their own, and the console's menu matches ExitOS's.
+
+- Set-up (`pages/Setup.tsx`, `lib/readiness.ts`): a new institution's first experience, full screen and outside the console. It replaces the in-console Welcome and the earlier set-up wizard (`InstitutionSetup.tsx`); `/admin/setup` now leads here.
+  - The home page names the institution and shows the three essentials as a path: establishing the institution (departments and offices), approval rules, and people in their offices. Each essential shows its state ("Start here", "After step 1", "Done · 4 departments · 4 offices").
+  - Each essential is a split-screen step. On the left: the institution, a progress ring and the step list. On the right: one question with its form.
+  - The approval-rule step builds the chain of offices as boxes and states the rule in plain words. The people step adds people with their office, places existing people in offices, and imports a pasted list.
+  - Until the essentials are in place, every console page sends an administrator to the set-up (a configuration that cannot be read never locks anyone out). Afterwards the home page reads "… is established" and opens the console, where people's invitations, connected systems and the plan follow.
+  - Every count and tick is read from the live configuration. Billing now also returns the institution's name.
+- Sign-in (`pages/SignIn.tsx`): three named doors.
+  - "I work at an institution": a work email. Its domain alone decides between the institution's identity provider and a password, so the form never reveals whether an address has an account.
+  - "Set up a new institution": the Evaluation's terms, then sign-up.
+  - "Administrator or system key": the key from the institution's creation, or an integration's key.
+- Sign-up: now says 30 days and 10 records (it said 3), names the key it shows as the administrator key, and opens the set-up.
+- People's sign-in without an identity provider (`db/migrations/M27__person_invitations_and_passwords.sql`, `services/dispatch-api`):
+  - The administrator issues a single-use invitation link that expires after 7 days (`POST /v1/users/invite`). The person sets a password on `/invite` and is signed in. Later sign-ins use email and password (`POST /v1/auth/password`).
+  - Only the token's SHA-256 and a salted scrypt hash of the password are stored. The tables are reached only through security-definer functions, and the application role cannot read them.
+  - Five wrong passwords pause the account for 15 minutes. A wrong password and an unknown email get the same answer, in the same time.
+  - An email holds a password in one institution only. A domain with an enabled identity provider gets no invitation and no password.
+  - Removing a person deletes their password and revokes their links. Every step is audited.
+  - People & offices shows each person's sign-in state ("Signs in with a password", "Invited · link valid until …", "Not invited yet"), with Invite and New password link actions.
+- Menu (`components/Shell.tsx`): an icon on every item.
+  - Administration is regrouped as Your institution, Oversight, Connections and Assurance. All 17 pages remain; "Set up your institution" opens the full-screen set-up.
+  - The rail folds to its icons ("[" or the button, remembered per browser).
+  - "Go to a page" (Ctrl/⌘ K) searches both products by name or purpose.
+  - Other changes: a gold active marker, a brand gradient, and an account card saying who is signed in and how (person, administrator key, system key).
+
+**Results**: people sign-in e2e **29/29** (new in `dispatch-ci`). Backbone e2e 14, retry 3, provisioning 15, billing 18 and audit-read 8 pass on a scratch Postgres 16 with all migrations. Browser tests: 71 pass (console 61, onboarding 10 new; the browser mock answers as an established institution unless a test sets up a new one). Billing 18/18 with the institution's name. Typecheck and build are clean, and lint shows no new findings.
+
+**To go live**: apply `M27__person_invitations_and_passwords.sql` to the Dispatch schema; merge (the console deploys from `main`, the API through DeployPro). Dispatch does not send email: the administrator copies the invitation link and sends it.
+
+**Premium finish (same increment)**: one kit, `components/premium.tsx`, in two registers.
+- **Materials, everywhere:** gold hairlines, panel depth, the gold primary button, gold-focus fields, gilt emphasis in headings and the diamond rule. `lib/ui` and `components/console/ds` take their finish from the kit, so every console page that uses their panels, buttons and fields follows it.
+- **Ceremony, for moments:** the engraved seal and the slow guilloche rosette. They appear on sign-in, sign-up, the invitation page (`components/AuthFrame.tsx`) and the set-up. The record-sealed, verification and certificate pages come next.
+- **Results:** browser tests 71 pass, including the accessibility checks.
+

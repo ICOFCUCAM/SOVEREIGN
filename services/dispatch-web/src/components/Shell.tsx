@@ -34,30 +34,33 @@ const OPERATIONS_NAV: NavItem[] = [
 // stays the page title, which the breadcrumb and the page heading use.
 const taskName = (n: NavItem): string => PAGE_GUIDE[n.to]?.task ?? n.label.replace(/ ↗$/, "");
 const GUIDE_KEY = "sd.guide.hidden";
+const RAIL_KEY = "sd.rail.folded";
+const readFolded = (): boolean => { try { return localStorage.getItem(RAIL_KEY) === "1"; } catch { return false; } };
+const writeFolded = (v: boolean): void => { try { if (v) localStorage.setItem(RAIL_KEY, "1"); else localStorage.removeItem(RAIL_KEY); } catch { /* the choice lasts this visit */ } };
 const readGuideHidden = (): boolean => { try { return localStorage.getItem(GUIDE_KEY) === "1"; } catch { return false; } };
 const writeGuideHidden = (v: boolean): void => { try { if (v) localStorage.setItem(GUIDE_KEY, "1"); else localStorage.removeItem(GUIDE_KEY); } catch { /* unavailable: the choice lasts this visit */ } };
 
-// Administration is an institutional governance product organised by operational
-// domain — Identity (who holds authority), Governance (how records are governed),
-// Compliance (can we prove it) — not a flat list of database tables.
+// Administration is organised the way an institution is set up and run: the institution itself
+// (its set-up, people and offices, approval rules; the set-up opens full screen), oversight (is it working), connections (systems that use
+// Dispatch) and assurance (what you show an auditor) — not a flat list of database tables.
 const ADMIN_NAV: NavItem[] = [
   { to: "/admin", label: "Posture", end: true, icon: "shield" },
-  { to: "/admin/setup", label: "Establish Institution", scope: "dispatch:admin", group: "Identity" },
-  { to: "/admin/authority", label: "Authority Directory", scope: "dispatch:admin", group: "Identity" },
-  { to: "/admin/access", label: "API Access", scope: "dispatch:admin", group: "Platform" },
-  { to: "/admin/publishing", label: "Publishing Platform", scope: "dispatch:admin", group: "Platform" },
-  { to: "/admin/intake", label: "Direct DDM Intake", scope: "dispatch:render", group: "Platform" },
-  { to: "/admin/governance", label: "Policy", scope: "dispatch:admin", group: "Governance" },
-  { to: "/admin/monitor", label: "Oversight", scope: "dispatch:read", group: "Governance" },
-  { to: "/admin/compliance", label: "Audit & Compliance", scope: "dispatch:read", group: "Compliance" },
-  { to: "/admin/intelligence", label: "Intelligence", scope: "dispatch:read", group: "Compliance" },
-  { to: "/admin/trust", label: "Trust", scope: "dispatch:read", group: "Sovereignty" },
-  { to: "/admin/deployment", label: "Deployment", group: "Sovereignty" },
-  { to: "/admin/sovereignty", label: "Data Sovereignty", group: "Sovereignty" },
-  { to: "/admin/integrations", label: "Integrations", group: "Sovereignty" },
-  { to: "/admin/resilience", label: "Operational Resilience", group: "Sovereignty" },
-  { to: "/admin/evidence", label: "Evaluation Package", scope: "dispatch:read", group: "Sovereignty" },
-  { to: "/evaluate", label: "Executive Evaluation ↗", scope: "dispatch:read", group: "Sovereignty" },
+  { to: "/setup", label: "Establish Institution", scope: "dispatch:admin", group: "Your institution", icon: "building" },
+  { to: "/admin/authority", label: "Authority Directory", scope: "dispatch:admin", group: "Your institution", icon: "users" },
+  { to: "/admin/governance", label: "Policy", scope: "dispatch:admin", group: "Your institution", icon: "rules" },
+  { to: "/admin/monitor", label: "Oversight", scope: "dispatch:read", group: "Oversight", icon: "activity" },
+  { to: "/admin/compliance", label: "Audit & Compliance", scope: "dispatch:read", group: "Oversight", icon: "evidence" },
+  { to: "/admin/intelligence", label: "Intelligence", scope: "dispatch:read", group: "Oversight", icon: "chart" },
+  { to: "/admin/access", label: "API Access", scope: "dispatch:admin", group: "Connections", icon: "key" },
+  { to: "/admin/integrations", label: "Integrations", group: "Connections", icon: "plug" },
+  { to: "/admin/intake", label: "Direct DDM Intake", scope: "dispatch:render", group: "Connections", icon: "upload" },
+  { to: "/admin/publishing", label: "Publishing Platform", scope: "dispatch:admin", group: "Connections", icon: "globe" },
+  { to: "/admin/trust", label: "Trust", scope: "dispatch:read", group: "Assurance", icon: "seal" },
+  { to: "/admin/sovereignty", label: "Data Sovereignty", group: "Assurance", icon: "lock" },
+  { to: "/admin/deployment", label: "Deployment", group: "Assurance", icon: "server" },
+  { to: "/admin/resilience", label: "Operational Resilience", group: "Assurance", icon: "lifebuoy" },
+  { to: "/admin/evidence", label: "Evaluation Package", scope: "dispatch:read", group: "Assurance", icon: "package" },
+  { to: "/evaluate", label: "Executive Evaluation ↗", scope: "dispatch:read", group: "Assurance", icon: "external" },
 ];
 
 const PRODUCT: Record<ConsoleVariant, { label: string; tag: string; nav: NavItem[]; home: string }> = {
@@ -81,6 +84,53 @@ const useSessionClock = (expiresAt?: number): { label: string; minutes: number }
   return { label: m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`, minutes: m };
 };
 
+// "Go to a page" — every page the principal may open, in both products, found by its task name, its
+// page title or what it is for. Arrow keys move, Enter opens, Escape closes.
+type PaletteItem = NavItem & { product: string };
+const PagePalette: React.FC<{ pages: PaletteItem[]; onClose: () => void; onGo: (to: string) => void }> = ({ pages, onClose, onGo }) => {
+  const [q, setQ] = useState("");
+  const [at, setAt] = useState(0);
+  const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+  // pages whose name matches come first, then those whose description does
+  const named = (p: PaletteItem) => terms.every((t) => `${taskName(p)} ${p.label}`.toLowerCase().includes(t));
+  const hits = pages.filter((p) => { const hay = `${taskName(p)} ${p.label} ${PAGE_GUIDE[p.to]?.summary ?? ""} ${p.group ?? ""} ${p.product}`.toLowerCase(); return terms.every((t) => hay.includes(t)); })
+    .sort((a, b) => Number(named(b)) - Number(named(a)));
+  useEffect(() => setAt(0), [q]);
+  const key = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") { e.preventDefault(); onClose(); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); setAt((i) => Math.min(hits.length - 1, i + 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setAt((i) => Math.max(0, i - 1)); }
+    else if (e.key === "Enter" && hits[at]) { e.preventDefault(); onGo(hits[at].to); }
+  };
+  return (
+    <div className="fixed inset-0 z-[60] flex items-start justify-center bg-[#05080dcc] px-4 pt-[12vh]" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-label="Go to a page" className="w-full max-w-lg overflow-hidden rounded-xl border border-sd-line bg-[#0e1622] shadow-[0_40px_90px_-30px_rgba(0,0,0,0.9)]" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2.5 border-b border-sd-soft px-4">
+          <Icon.search className="h-4 w-4 text-sd-text3" />
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={key} placeholder="Go to a page…" aria-label="Page name"
+            role="combobox" aria-expanded="true" aria-controls="sd-palette-list" aria-activedescendant={hits[at] ? `sd-pal-${at}` : undefined}
+            className="h-12 flex-1 bg-transparent text-[14px] text-sd-text placeholder:text-sd-text3 focus:outline-none" />
+          <Kbd>Esc</Kbd>
+        </div>
+        <ul id="sd-palette-list" role="listbox" className="max-h-[50vh] overflow-y-auto py-1.5">
+          {hits.length === 0 && <li className="px-4 py-3 text-[13px] text-sd-text3">No page matches “{q}”.</li>}
+          {hits.map((p, i) => (
+            <li key={p.product + p.to} id={`sd-pal-${i}`} role="option" aria-selected={i === at} onMouseEnter={() => setAt(i)} onClick={() => onGo(p.to)}
+              className={cx("mx-1.5 flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2", i === at ? "bg-[#16263a]" : "")}>
+              {p.icon ? React.createElement(Icon[p.icon], { className: cx("h-4 w-4 shrink-0", i === at ? "text-sd-gold" : "text-sd-text3") }) : <span className="w-4" />}
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] font-medium text-sd-text">{taskName(p)}</span>
+                <span className="block truncate text-[11.5px] text-sd-text3">{PAGE_GUIDE[p.to]?.summary ?? p.label}</span>
+              </span>
+              <span className="shrink-0 font-mono text-[9.5px] uppercase tracking-[0.14em] text-sd-faint">{p.product}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
 const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVariant }> = ({ children, variant = "operations" }) => {
   const { session, signOut, has } = useAuth();
   const nav = useNavigate();
@@ -91,6 +141,12 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
   const [shortcuts, setShortcuts] = useState(false);
   const [guideHidden, setGuideHidden] = useState(readGuideHidden);
   const [tip, setTip] = useState<{ to: string; top: number } | null>(null);
+  // the rail folds to its icons on wide screens ("[" or the button); the drawer on small screens never folds
+  const [foldedPref, setFoldedPref] = useState(readFolded);
+  const [wide, setWide] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches);
+  const folded = foldedPref && wide;
+  const toggleFold = (): void => { setFoldedPref((f) => { writeFolded(!f); return !f; }); setTip(null); };
+  const [palette, setPalette] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const railRef = useRef<HTMLElement>(null);
@@ -105,6 +161,9 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
   const other = variant === "operations" ? "administration" : "operations";
   const showSwitch = other === "administration" ? canAdmin : true;
   const crumb = crumbFor(pathname, product.nav);
+  // every page this principal may open, in both products, for "Go to a page"
+  const reachable = [...items.map((n) => ({ ...n, product: product.label })),
+    ...(showSwitch ? PRODUCT[other].nav.filter((n) => !n.scope || has(n.scope)).map((n) => ({ ...n, product: PRODUCT[other].label })) : [])];
   const remaining = useSessionClock(session?.expiresAt);
   const guide = guideFor(pathname);
   const nextPage = guide?.next && (!guide.next.scope || has(guide.next.scope)) ? guide.next.to : null;
@@ -112,6 +171,10 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
   const showTip = (to: string, el: HTMLElement): void => {
     if (!window.matchMedia("(min-width: 1024px)").matches) return; // the drawer on small screens has no room beside it
     setTip({ to, top: el.getBoundingClientRect().top });
+  };
+  const roleLine = (): string => {
+    if (session?.kind === "person") return has("dispatch:admin") ? "Person · administrator" : has("dispatch:approve") ? "Person · office holder" : "Person";
+    return has("dispatch:admin") ? "Administrator key" : "System key";
   };
   const today = new Date().toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
 
@@ -149,6 +212,25 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
     return () => window.removeEventListener("keydown", h);
   }, [menuOpen]);
 
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const h = (): void => setWide(mq.matches);
+    mq.addEventListener("change", h);
+    return () => mq.removeEventListener("change", h);
+  }, []);
+
+  // In both products: Ctrl/⌘ K opens "Go to a page"; "[" folds or unfolds the rail.
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette((p) => !p); return; }
+      const t = e.target as HTMLElement | null;
+      if (e.metaKey || e.ctrlKey || e.altKey || (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) return;
+      if (e.key === "[" && window.matchMedia("(min-width: 1024px)").matches) { e.preventDefault(); setFoldedPref((f) => { writeFolded(!f); return !f; }); setTip(null); }
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, []);
+
   // "g" then a digit jumps between Operations surfaces; "?" lists shortcuts.
   useEffect(() => {
     if (variant !== "operations") return;
@@ -171,7 +253,9 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
     return () => window.removeEventListener("keydown", h);
   }, [variant, items, nav]);
 
-  const initials = (session?.subject ?? "?").replace(/^svc:/, "").slice(0, 2).toUpperCase();
+  const initials = session?.kind === "person"
+    ? (session.subject.split("@")[0].split(/[._-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("") || "?").toUpperCase()
+    : (session?.subject ?? "?").replace(/^svc[:_]/, "").slice(0, 2).toUpperCase();
 
   return (
     <div className="sd-console flex h-full flex-col">
@@ -195,51 +279,71 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
 
         {/* rail */}
         <aside id="sd-rail" ref={railRef} aria-label={`${product.label} navigation`}
-          className={cx("sd-noprint z-40 flex w-[248px] shrink-0 flex-col border-r border-sd-soft bg-[#0c131d]",
-            "fixed inset-y-0 left-0 top-8 transition-transform lg:static lg:translate-x-0", menuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full")}>
-          <div className="flex items-center gap-3 px-4 pb-4 pt-5">
-            <span aria-hidden className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full border border-sd-gold/45 font-serif text-[15px] font-semibold text-sd-text">
+          className={cx("sd-noprint z-40 flex shrink-0 flex-col border-r border-sd-soft bg-[#0b121b] transition-[transform,width] duration-200",
+            folded ? "w-[68px]" : "w-[256px]",
+            "fixed inset-y-0 left-0 top-8 lg:static lg:translate-x-0", menuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full")}
+          style={{ backgroundImage: "linear-gradient(180deg, rgba(214,178,106,0.07), transparent 170px), radial-gradient(120% 55% at 0% 100%, rgba(141,187,255,0.06), transparent 62%)" }}>
+          <div className={cx("flex items-center", folded ? "flex-col gap-3 px-2 pb-3 pt-5" : "gap-3 px-4 pb-4 pt-5")}>
+            <span aria-hidden className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full border border-sd-gold/50 bg-[radial-gradient(circle_at_30%_25%,rgba(214,178,106,0.18),transparent_65%)] font-serif text-[15px] font-semibold text-sd-text shadow-[0_0_24px_-8px_rgba(214,178,106,0.55)]">
               <span className="absolute inset-[3px] rounded-full border border-sd-gold/25" />SD
             </span>
-            <div className="min-w-0 leading-tight">
+            {!folded && <div className="min-w-0 leading-tight">
               <div className="text-[14.5px] font-semibold tracking-[-0.01em] text-sd-text">Sovereign <span className="font-normal text-sd-text2">Dispatch</span></div>
-              <div className="mt-0.5 text-[11px] text-sd-text3">{product.label} · {product.tag}</div>
-            </div>
+              <div className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-sd-gold/80">{product.label}</div>
+            </div>}
+            <button type="button" onClick={toggleFold} aria-label={folded ? "Expand the menu" : "Collapse the menu to its icons"} aria-keyshortcuts="[" title={folded ? "Expand ( [ )" : "Collapse ( [ )"}
+              className={cx("hidden rounded-md p-1.5 text-sd-text3 ring-1 ring-white/10 transition hover:text-sd-gold hover:ring-sd-gold/40 lg:block", !folded && "ml-auto")}>
+              <Icon.sidebar className="h-3.5 w-3.5" />
+            </button>
             <button className="ml-auto rounded-md p-1 text-sd-text3 hover:bg-sd-hover hover:text-sd-text lg:hidden" aria-label="Close navigation" onClick={() => setMenuOpen(false)}><Icon.close /></button>
           </div>
 
-          {/* tenant identity — the real tenant reference from the session */}
-          <div className="mx-3 mb-3 flex items-center gap-2.5 rounded-lg border border-sd-line bg-sd-panel px-3 py-2.5">
-            <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-md border border-sd-accent/35 text-sd-accent"><Icon.building className="h-4 w-4" /></span>
-            <div className="min-w-0">
-              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-sd-text3">Institution workspace</div>
-              <div className="truncate text-[12px] text-sd-text">Private to your institution</div>
-            </div>
+          {/* go to any page by name (Ctrl/⌘ K) */}
+          <div className={folded ? "flex justify-center pb-2" : "px-3 pb-3"}>
+            <button type="button" onClick={() => setPalette(true)} aria-keyshortcuts="Meta+K Control+K" aria-label={folded ? "Go to a page" : undefined} title={folded ? "Go to a page (Ctrl K)" : undefined}
+              className={cx("flex items-center gap-2.5 rounded-md bg-black/25 text-left text-[12.5px] text-sd-text3 ring-1 ring-white/[0.08] transition hover:text-sd-text2 hover:ring-sd-gold/35", folded ? "p-2" : "w-full px-3 py-2")}>
+              <Icon.search className="h-3.5 w-3.5" />
+              {!folded && <><span className="flex-1">Go to a page</span><Kbd>{typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</Kbd></>}
+            </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-2.5 pb-3">
+          {/* tenant identity */}
+          {!folded && (
+            <div className="mx-3 mb-2 flex items-center gap-2.5 rounded-lg border border-sd-line bg-sd-panel/70 px-3 py-2.5">
+              <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-md border border-sd-accent/35 text-sd-accent"><Icon.building className="h-4 w-4" /></span>
+              <div className="min-w-0">
+                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-sd-text3">Institution workspace</div>
+                <div className="truncate text-[12px] text-sd-text">Private to your institution</div>
+              </div>
+            </div>
+          )}
+
+          <nav className={cx("sd-navscroll flex-1 overflow-y-auto pb-3", folded ? "px-2" : "px-2.5")}>
             {items.map((n, i) => {
               // A record file belongs to the register: keep "Official records" lit.
               const inFile = n.to === "/console/library" && pathname.startsWith("/console/documents/");
+              const newGroup = n.group && n.group !== items[i - 1]?.group;
               return (
               <React.Fragment key={n.to}>
-                {n.group && n.group !== items[i - 1]?.group && (
-                  <div className="px-2.5 pb-1 pt-4 text-[10.5px] font-bold uppercase tracking-[0.16em] text-sd-faint">{n.group}</div>
-                )}
-                <NavLink to={n.to} end={n.end} aria-describedby={`sd-tip-${i}`}
+                {newGroup && (folded
+                  ? <div aria-hidden className="mx-3 my-2.5 h-px bg-white/[0.07]" />
+                  : <div className="flex items-center gap-2 px-2.5 pb-1.5 pt-4 font-mono text-[9.5px] font-semibold uppercase tracking-[0.2em] text-sd-faint"><span aria-hidden className="h-px w-3 bg-sd-gold/40" />{n.group}</div>)}
+                <NavLink to={n.to} end={n.end} aria-describedby={`sd-tip-${i}`} aria-label={folded ? taskName(n) : undefined}
                   onMouseEnter={(e) => showTip(n.to, e.currentTarget)} onMouseLeave={() => setTip(null)}
                   onFocus={(e) => showTip(n.to, e.currentTarget)} onBlur={() => setTip(null)}
-                  className={({ isActive: a }) => { const isActive = a || inFile; return cx("group flex items-center gap-2.5 rounded-lg border px-2.5 py-[7px] text-[13px] font-medium transition-colors",
-                    isActive ? "border-sd-accent/30 bg-[#16263a] text-sd-text" : "border-transparent text-sd-text2 hover:bg-sd-raised hover:text-sd-text"); }}>
+                  className={({ isActive: a }) => { const isActive = a || inFile; return cx("group relative flex items-center gap-2.5 rounded-lg border text-[13px] font-medium transition-colors",
+                    folded ? "justify-center px-0 py-2" : "px-2.5 py-[7px]",
+                    isActive ? "border-sd-gold/25 bg-[linear-gradient(90deg,rgba(214,178,106,0.13),rgba(22,38,58,0.9))] text-sd-text" : "border-transparent text-sd-text2 hover:bg-sd-raised hover:text-sd-text"); }}>
                   {({ isActive: a }) => { const isActive = a || inFile; return (
                     <>
-                      {n.icon ? React.createElement(Icon[n.icon], { className: cx("h-4 w-4 shrink-0", isActive ? "text-sd-accent" : "text-sd-text3 group-hover:text-sd-text2") }) : <span className="w-4" aria-hidden />}
-                      <span className="min-w-0 flex-1 leading-tight">
+                      {isActive && <span aria-hidden className="absolute -left-[9px] top-1.5 bottom-1.5 w-[3px] rounded-r bg-sd-gold" />}
+                      {n.icon ? React.createElement(Icon[n.icon], { className: cx("h-4 w-4 shrink-0", isActive ? "text-sd-gold" : "text-sd-text3 group-hover:text-sd-text2") }) : <span className="w-4" aria-hidden />}
+                      {!folded && <span className="min-w-0 flex-1 leading-tight">
                         <span className="block truncate">{taskName(n)}</span>
                         {taskName(n) !== n.label.replace(/ ↗$/, "") && <span className="block truncate text-[10.5px] font-normal text-sd-text3">{n.label}</span>}
-                      </span>
+                      </span>}
                       <span id={`sd-tip-${i}`} className="sr-only">{PAGE_GUIDE[n.to]?.summary}</span>
-                      {variant === "operations" && n.key && <span aria-hidden className="ml-auto hidden shrink-0 font-mono text-[10px] text-sd-faint xl:inline">g {n.key}</span>}
+                      {!folded && variant === "operations" && n.key && <span aria-hidden className="ml-auto hidden shrink-0 font-mono text-[10px] text-sd-faint xl:inline">g {n.key}</span>}
                     </>
                   ); }}
                 </NavLink>
@@ -248,7 +352,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
             })}
           </nav>
           {tip && PAGE_GUIDE[tip.to] && (
-            <div aria-hidden className="pointer-events-none fixed left-[256px] z-50 w-72 rounded-lg border border-sd-line bg-[#111a26] p-3 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.7)]" style={{ top: Math.min(tip.top, window.innerHeight - 140) }}>
+            <div aria-hidden className="pointer-events-none fixed z-50 w-72 rounded-lg border border-sd-line bg-[#111a26] p-3 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.7)]" style={{ left: folded ? 76 : 264, top: Math.min(tip.top, window.innerHeight - 140) }}>
               <div className="text-[12.5px] font-semibold text-sd-text">{PAGE_GUIDE[tip.to]!.task}</div>
               <p className="mt-1 text-[12px] leading-snug text-sd-text2">{PAGE_GUIDE[tip.to]!.summary}</p>
             </div>
@@ -256,14 +360,14 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
 
           {/* product switcher — only for principals with access to the other product */}
           {showSwitch && (
-            <button onClick={() => nav(PRODUCT[other].home)}
-              className="mx-3 mb-2 flex items-center gap-2.5 rounded-lg border border-sd-line bg-sd-panel px-3 py-2 text-left transition-colors hover:border-sd-accent/40">
+            <button onClick={() => nav(PRODUCT[other].home)} aria-label={folded ? `Switch to ${PRODUCT[other].label}` : undefined} title={folded ? `Switch to ${PRODUCT[other].label}` : undefined}
+              className={cx("mb-2 flex items-center gap-2.5 rounded-lg border border-sd-line bg-sd-panel/70 text-left transition-colors hover:border-sd-gold/40", folded ? "mx-2 justify-center py-2" : "mx-3 px-3 py-2")}>
               <Icon.swap className="h-4 w-4 shrink-0 text-sd-text3" />
-              <span className="min-w-0 leading-tight"><span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-sd-text3">Switch to</span><span className="block text-[12.5px] font-semibold text-sd-text">{PRODUCT[other].label}</span></span>
-              <Icon.arrowRight className="ml-auto h-3.5 w-3.5 text-sd-text3" />
+              {!folded && <><span className="min-w-0 leading-tight"><span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-sd-text3">Switch to</span><span className="block text-[12.5px] font-semibold text-sd-text">{PRODUCT[other].label}</span></span>
+              <Icon.arrowRight className="ml-auto h-3.5 w-3.5 text-sd-text3" /></>}
             </button>
           )}
-          {variant === "operations" && billing && (
+          {!folded && variant === "operations" && billing && (
             <div className="border-t border-sd-soft px-4 py-3">
               <QuotaMeter b={billing} />
               {!billing.canDownload && (
@@ -271,10 +375,13 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
               )}
             </div>
           )}
-          <div className="flex items-center gap-2.5 border-t border-sd-soft px-4 py-3">
-            <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sd-hover text-[11px] font-bold text-sd-text2">{initials}</span>
-            <div className="min-w-0 flex-1 leading-tight">
+          {/* the account: initials in a gold ring, who is signed in and how */}
+          <div className={cx("border-t border-sd-soft", folded ? "flex flex-col items-center gap-2 py-3" : "flex items-center gap-2.5 px-4 py-3")}>
+            <span aria-hidden title={folded ? `${session?.subject ?? ""} · ${roleLine()}` : undefined}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sd-gold/10 font-mono text-[10.5px] font-semibold text-sd-text ring-1 ring-sd-gold/50">{initials}</span>
+            {!folded && <div className="min-w-0 flex-1 leading-tight">
               <div className="truncate text-[12px] font-semibold text-sd-text" title={session?.subject}>{session?.subject}</div>
+              <div className="mt-0.5 truncate font-mono text-[9px] uppercase tracking-[0.14em] text-sd-gold/75">{roleLine()}</div>
               <details className="group text-[11px] text-sd-text3">
                 <summary className="cursor-pointer list-none hover:text-sd-text2">What you can do <span aria-hidden className="inline-block transition-transform group-open:rotate-90">›</span></summary>
                 <ul className="mt-1 space-y-0.5 text-[11px] text-sd-text2">{session?.scopes.map((sc) => <li key={sc}>{scopeMeaning(sc)}</li>)}</ul>
@@ -284,11 +391,12 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
                   <ul className="mt-0.5 font-mono text-[10px] text-sd-text3">{session?.scopes.map((sc) => <li key={sc}>{sc}</li>)}</ul>
                 </details>
               </details>
-            </div>
-            <Link to="/" aria-label="Sovereign Dispatch home" title="Home" className="rounded-md p-1.5 text-sd-text3 hover:bg-sd-hover hover:text-sd-text"><Icon.home /></Link>
+            </div>}
+            {!folded && <Link to="/" aria-label="Sovereign Dispatch home" title="Home" className="rounded-md p-1.5 text-sd-text3 hover:bg-sd-hover hover:text-sd-text"><Icon.home /></Link>}
             <button onClick={() => { signOut(); nav("/"); }} aria-label="Sign out" title="Sign out" className="rounded-md p-1.5 text-sd-text3 hover:bg-sd-hover hover:text-sd-text"><Icon.logout /></button>
           </div>
         </aside>
+        {palette && <PagePalette pages={reachable} onClose={() => setPalette(false)} onGo={(to) => { setPalette(false); nav(to); }} />}
 
         {/* main */}
         {/* While the mobile drawer is open the page behind it is inert (no stray focus). */}

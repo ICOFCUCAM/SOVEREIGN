@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { Lifecycle } from "../../lib/api";
 import { classBand } from "../../lib/ui";
 import { Icon } from "./icons";
+import { GOLD, GOLD_FOCUS, PANEL, Hairline } from "../premium";
 
 // ═══ Sovereign Dispatch — Operations console design system ═════════════════
 // One vocabulary for every Operations screen: page headers, sections, panels,
@@ -18,7 +19,7 @@ export const PageHeader: React.FC<{
   meta?: React.ReactNode; actions?: React.ReactNode; serif?: boolean;
 }> = ({ eyebrow, title, description, meta, actions, serif = true }) => (
   <header className="mb-6">
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-sd-line pb-3">
+    <div className="relative mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pb-3 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-[linear-gradient(90deg,rgba(201,173,117,0.45),rgba(38,53,72,0.9)_35%,rgba(38,53,72,0.6))]">
       <span className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-sd-text3">
         <span aria-hidden className="relative flex h-3.5 w-3.5 items-center justify-center rounded-full border border-sd-gold/60"><span className="h-1 w-1 rounded-full bg-sd-gold" /></span>
         {eyebrow}
@@ -40,7 +41,7 @@ export const Section: React.FC<{ title: string; aside?: React.ReactNode; childre
   return (
     <section className={cx("mt-8", className)} aria-labelledby={hid} id={id}>
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id={hid} className="text-[12px] font-bold uppercase tracking-[0.14em] text-sd-text2">{title}</h2>
+        <h2 id={hid} className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.14em] text-sd-text2"><span aria-hidden className="h-1 w-1 rotate-45 bg-sd-gold/70" />{title}</h2>
         {aside && <div className="text-[12px] text-sd-text3">{aside}</div>}
       </div>
       {children}
@@ -56,7 +57,8 @@ export const Panel: React.FC<{
   const Tag = as;
   const H = headingLevel === 2 ? "h2" : "h3";
   return (
-    <Tag className={cx("min-w-0 rounded-xl border bg-sd-panel", border, className)}>
+    <Tag className={cx("relative min-w-0 rounded-xl border", PANEL, border, className)}>
+      <Hairline tone={tone === "gold" ? "gold" : tone === "ok" ? "ok" : "faint"} />
       {(title || aside) && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-sd-soft px-4 py-3">
           {title && <H className="text-[13px] font-semibold text-sd-text">{title}</H>}
@@ -72,8 +74,8 @@ export const Panel: React.FC<{
 // ── Buttons ─────────────────────────────────────────────────────────────────
 type BtnVariant = "primary" | "secondary" | "ghost" | "approve" | "danger" | "warn";
 const BTN: Record<BtnVariant, string> = {
-  primary: "bg-sd-accentbg text-sd-accentink border-sd-accentbg hover:bg-white",
-  secondary: "bg-sd-raised text-sd-text border-sd-line hover:bg-sd-hover hover:border-[#35465d]",
+  primary: `${GOLD} border-transparent`,
+  secondary: "bg-[linear-gradient(180deg,#1a2738,#142030)] text-sd-text border-sd-line shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-sd-gold/35",
   ghost: "bg-transparent text-sd-text2 border-transparent hover:bg-sd-raised hover:text-sd-text",
   approve: "bg-[#1f5c45] text-white border-[#2f7d5f] hover:bg-[#24694f]",
   danger: "bg-[#5c2328] text-white border-[#8a3a41] hover:bg-[#6b2a30]",
@@ -266,8 +268,8 @@ export const SkeletonRows: React.FC<{ rows?: number; label?: string }> = ({ rows
 );
 
 // ── Forms ───────────────────────────────────────────────────────────────────
-export const selectCls = "rounded-lg border border-sd-line bg-sd-sunken px-3 py-2 text-[13px] text-sd-text transition-colors hover:border-[#35465d] disabled:opacity-50";
-export const controlCls = "w-full rounded-lg border border-sd-line bg-sd-sunken px-3 py-2 text-[13px] text-sd-text transition-colors hover:border-[#35465d] disabled:opacity-50";
+export const selectCls = `rounded-lg border border-sd-line bg-sd-sunken px-3 py-2 text-[13px] text-sd-text transition hover:border-[#35465d] disabled:opacity-50 ${GOLD_FOCUS}`;
+export const controlCls = `w-full rounded-lg border border-sd-line bg-sd-sunken px-3 py-2 text-[13px] text-sd-text transition hover:border-[#35465d] disabled:opacity-50 ${GOLD_FOCUS}`;
 
 export const FormField: React.FC<{ id: string; label: string; hint?: React.ReactNode; error?: string | null; required?: boolean; children: React.ReactNode; className?: string; after?: React.ReactNode }> = ({ id, label, hint, error, required, children, className, after }) => (
   <div className={className}>

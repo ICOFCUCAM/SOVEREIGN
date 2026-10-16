@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { validateRequest } from "@dispatch/ddm-schema/validator";
 import { makePool, withClaims, writeAudit } from "../../shared/src/db.mjs";
-import { resolvePrincipal, hasScope, mintServiceToken, mintUserToken, mintDownloadGrant, verifyDownloadGrant } from "../../shared/src/auth.mjs";
+import { resolvePrincipal, hasScope, mintServiceToken, mintUserToken, mintDownloadGrant, verifyDownloadGrant, hashSecretScrypt, verifySecret } from "../../shared/src/auth.mjs";
 import { signJwt, verifyJwt } from "../../shared/src/jwt.mjs";
 import { discover, buildAuthUrl, exchangeCode, verifyIdToken } from "../../shared/src/oidc.mjs";
 import { getArtifact, signUrl, sha256 as sha256Of } from "../../shared/src/storage.mjs";
@@ -772,19 +772,19 @@ const claimsFor = (p) => ({ tenant_id: p.tenantId, dispatch_role: p.role, princi
 async function tenantBilling(tenantId) {
   const claims = { tenant_id: tenantId, dispatch_role: "service", principal_type: "system", actor: "billing" };
   return withClaims(pool, claims, async (c) => {
-    const t = await c.query(`select plan, subscription_status, doc_quota, tier, requested_tier, trial_ends_at,
+    const t = await c.query(`select name, plan, subscription_status, doc_quota, tier, requested_tier, trial_ends_at,
         coalesce(trial_ends_at < now(), false) as trial_over,
         greatest(0, ceil(extract(epoch from (trial_ends_at - now())) / 86400))::int as trial_days_left
       from dispatch.tenants where id=$1`, [tenantId]);
     const n = await c.query("select count(*)::int n from dispatch.documents where tenant_id=$1", [tenantId]);
     const row = t.rows[0] || {};
-    return { plan: row.plan || "free", subscriptionStatus: row.subscription_status || "inactive", docQuota: row.doc_quota ?? 10, documentsUsed: n.rows[0]?.n ?? 0,
+    return { institution: row.name ?? null, plan: row.plan || "free", subscriptionStatus: row.subscription_status || "inactive", docQuota: row.doc_quota ?? 10, documentsUsed: n.rows[0]?.n ?? 0,
       tier: row.tier ?? null, requestedTier: row.requested_tier ?? null, trialEndsAt: row.trial_ends_at ?? null, trialOver: !!row.trial_over, trialDaysLeft: row.trial_days_left ?? null };
   });
 }
 const billingView = (b) => {
   const active = b.subscriptionStatus === "active";
-  return { plan: b.plan, subscriptionStatus: b.subscriptionStatus, tier: b.tier, requestedTier: b.requestedTier, documentsUsed: b.documentsUsed,
+  return { institution: b.institution, plan: b.plan, subscriptionStatus: b.subscriptionStatus, tier: b.tier, requestedTier: b.requestedTier, documentsUsed: b.documentsUsed,
     documentQuota: b.docQuota, quotaRemaining: Math.max(0, b.docQuota - b.documentsUsed), canDownload: active,
     // the Evaluation's two limits; null once subscribed
     trialEndsAt: active ? null : b.trialEndsAt, trialDaysLeft: active ? null : b.trialDaysLeft, trialEnded: !active && b.trialOver,
@@ -1007,8 +1007,15 @@ async function handlePeople(req, res, principal, method) {
     if (!hasScope(principal, "dispatch:read")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "read scope required"));
     const rows = await withClaims(pool, govClaims(principal), (c) => c.query(
       "select id, email, full_name, department_key, system_admin, status from dispatch.users where status <> 'deleted' order by full_name"));
+    // How each person signs in — administrators only (it says who has accepted an invitation).
+    const signIn = new Map();
+    if (hasScope(principal, "dispatch:admin")) {
+      const st = await withClaims(pool, govClaims(principal), (c) => c.query("select * from dispatch.people_sign_in_status()"));
+      for (const r of st.rows) signIn.set(r.user_id, { password: r.has_password, lastSignInAt: r.last_sign_in_at, invitationExpiresAt: r.invitation_expires_at });
+    }
     return send(res, 200, { users: rows.rows.map((u) => ({ id: u.id, subject: `user:${u.id}`, email: u.email,
-      fullName: u.full_name, departmentKey: u.department_key, systemAdmin: u.system_admin, status: u.status })) });
+      fullName: u.full_name, departmentKey: u.department_key, systemAdmin: u.system_admin, status: u.status,
+      ...(signIn.has(u.id) ? { signIn: signIn.get(u.id) } : {}) })) });
   }
   if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
   let body; try { const raw = await readBody(req); body = raw ? JSON.parse(raw) : {}; }
@@ -1021,6 +1028,7 @@ async function handlePeople(req, res, principal, method) {
     await withClaims(pool, claims, async (c) => {
       await c.query("update dispatch.users set status='deleted' where tenant_id=$1 and id=$2", [principal.tenantId, body.id]);
       await c.query("update dispatch.governance_role_grants set active=false where tenant_id=$1 and subject=$2", [principal.tenantId, `user:${body.id}`]);
+      await c.query("select dispatch.revoke_person_sign_in($1, $2)", [body.id, principal.actor]);
     });
     return send(res, 200, { deleted: body.id });
   }
@@ -1104,18 +1112,119 @@ async function handleSsoCallback(req, res, query) {
     return { id: u.id, systemAdmin: u.system_admin, offices };
   });
   if (!person) return ssoFail(res, st.ret, "not_provisioned");
-  // Two dimensions: office-holders can operate the governance surfaces; system
-  // admins also get dispatch:admin. WHO can act on a record is still gated by the
-  // office grant at request time — the token only opens the surfaces.
-  const scopes = ["dispatch:read", "dispatch:render"];
-  if (person.offices) scopes.push("dispatch:approve", "dispatch:publish", "dispatch:audit");
-  if (person.systemAdmin) scopes.push("dispatch:admin");
-  const minted = mintUserToken({ tenantId, userId: person.id, scopes, clearance: "none", role: person.systemAdmin ? "tenant_admin" : "author", email });
+  const minted = mintPersonToken({ tenantId, userId: person.id, systemAdmin: person.systemAdmin, offices: person.offices, email });
   if (minted.error) return ssoFail(res, st.ret, "mint_failed");
   const back = st.ret || process.env.DISPATCH_WEB_URL || "/";
   const sep = back.includes("#") ? "&" : "#";
   res.writeHead(302, { location: `${back}${sep}sso_token=${encodeURIComponent(minted.token)}&tenant=${tenantId}` });
   return res.end();
+}
+
+// A person's session, however they signed in (their identity provider, or a password). Two dimensions:
+// office-holders can operate the governance surfaces; system admins also get dispatch:admin. WHO can act
+// on a record is still gated by the office grant at request time — the token only opens the surfaces.
+function mintPersonToken({ tenantId, userId, systemAdmin, offices, email }) {
+  const scopes = ["dispatch:read", "dispatch:render"];
+  if (offices) scopes.push("dispatch:approve", "dispatch:publish", "dispatch:audit");
+  if (systemAdmin) scopes.push("dispatch:admin");
+  const minted = mintUserToken({ tenantId, userId, scopes, clearance: "none", role: systemAdmin ? "tenant_admin" : "author", email });
+  return minted.error ? minted : { ...minted, access_token: minted.token, tenantId, scopes };
+}
+
+// ── People without an identity provider: invitations and passwords (M27) ─────
+// The administrator adds a person, then issues a single-use invitation link (7 days). The person opens it
+// and sets their own password; afterwards they sign in with email and password. Only the SHA-256 of the
+// link's token and a salted scrypt hash of the password are stored. Where the person's email domain has an
+// enabled identity-provider connection for their institution, the provider is the only way in: no link is
+// issued and no password is accepted. Wrong-password and unknown-email answers are identical, and take the
+// same time, so the sign-in form never tells whether an address has an account.
+const PASSWORD_MIN = 10, PASSWORD_MAX = 200;
+const DUMMY_PASSWORD_HASH = hashSecretScrypt(crypto.randomBytes(16).toString("hex"));
+const tokenHash = (t) => crypto.createHash("sha256").update(String(t)).digest("hex");
+const domainOf = (email) => String(email || "").toLowerCase().split("@")[1] || "";
+async function ssoTenantFor(email) {
+  const d = domainOf(email);
+  if (!d) return null;
+  const row = (await withAdmin((c) => c.query("select tenant_id from dispatch.lookup_sso_connection($1)", [d]))).rows[0];
+  return row ? row.tenant_id : null;
+}
+function passwordProblem(pw) {
+  if (typeof pw !== "string" || pw.length < PASSWORD_MIN) return `Choose a password of at least ${PASSWORD_MIN} characters.`;
+  if (pw.length > PASSWORD_MAX) return `A password can be at most ${PASSWORD_MAX} characters.`;
+  return null;
+}
+async function jsonBody(req) { try { const raw = await readBody(req); return raw ? JSON.parse(raw) : {}; } catch { return null; } }
+
+// POST /v1/auth/method — which way a work email signs in. Answers from the email DOMAIN only (whether it
+// has an identity-provider connection), never from whether the address has an account.
+async function handleSignInMethod(req, res) {
+  const body = await jsonBody(req);
+  if (!body || !String(body.email || "").includes("@")) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "enter your full work email address"));
+  return send(res, 200, { method: (await ssoTenantFor(body.email)) ? "sso" : "password" });
+}
+
+// POST /v1/auth/password — email + password → a person session.
+async function handlePasswordSignIn(req, res) {
+  const body = await jsonBody(req);
+  if (!body) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body"));
+  const email = String(body.email || "").trim().toLowerCase(), password = String(body.password || "");
+  const wrong = () => send(res, 401, errEnvelope(null, 401, "INVALID_SIGN_IN", "That email and password don't match. Check them, or ask your administrator for a new invitation."));
+  if (!email.includes("@") || !password || password.length > PASSWORD_MAX) return wrong();
+  const row = (await withAdmin((c) => c.query("select * from dispatch.person_password_lookup($1)", [email]))).rows[0];
+  if (!row) { verifySecret(password, DUMMY_PASSWORD_HASH); return wrong(); }
+  if (row.locked_until && new Date(row.locked_until) > new Date()) {
+    return send(res, 429, errEnvelope(null, 429, "SIGN_IN_LOCKED", "Too many attempts. Sign-in for this account is paused for 15 minutes."));
+  }
+  const good = verifySecret(password, row.password_hash).ok;
+  await withAdmin((c) => c.query("select dispatch.record_person_sign_in($1, $2)", [row.user_id, good]));
+  if (!good) return wrong();
+  if ((await ssoTenantFor(email)) === row.tenant_id) {
+    return send(res, 403, errEnvelope(null, 403, "USE_SSO", "Your institution signs you in through its own sign-in. Use Continue with your work email."));
+  }
+  const minted = mintPersonToken({ tenantId: row.tenant_id, userId: row.user_id, systemAdmin: row.system_admin, offices: row.offices, email: row.email });
+  if (minted.error) return send(res, minted.error.status, errEnvelope(null, minted.error.status, minted.error.code, minted.error.message));
+  return send(res, 200, minted);
+}
+
+// POST /v1/auth/invitation — what a link is for; POST /v1/auth/invitation/accept — set the password.
+async function handleInvitation(req, res, accept) {
+  const body = await jsonBody(req);
+  const token = String(body?.token || "");
+  if (!/^[A-Za-z0-9_-]{32,128}$/.test(token)) return send(res, 400, errEnvelope(null, 400, "INVITATION_INVALID", "This invitation link is not valid. Ask your administrator for a new one."));
+  const h = tokenHash(token);
+  if (!accept) {
+    const d = (await withAdmin((c) => c.query("select * from dispatch.person_invitation_details($1)", [h]))).rows[0];
+    return send(res, 200, { state: d.state, institution: d.institution ?? null, email: d.email ?? null, fullName: d.full_name ?? null, expiresAt: d.expires_at ?? null });
+  }
+  const problem = passwordProblem(body.password);
+  if (problem) return send(res, 400, errEnvelope(null, 400, "WEAK_PASSWORD", problem));
+  let row;
+  try { row = (await withAdmin((c) => c.query("select * from dispatch.accept_person_invitation($1, $2)", [h, hashSecretScrypt(body.password)]))).rows[0]; }
+  catch (e) {
+    if (/EMAIL_IN_USE/.test(e.message)) return send(res, 409, errEnvelope(null, 409, "EMAIL_IN_USE", "This email already signs in to another institution with a password. Ask your administrator to use a different address."));
+    if (/INVITATION_INVALID/.test(e.message)) return send(res, 410, errEnvelope(null, 410, "INVITATION_INVALID", "This invitation has expired or was already used. Ask your administrator for a new one."));
+    throw e;
+  }
+  const minted = mintPersonToken({ tenantId: row.tenant_id, userId: row.user_id, systemAdmin: row.system_admin, offices: row.offices, email: row.email });
+  if (minted.error) return send(res, minted.error.status, errEnvelope(null, minted.error.status, minted.error.code, minted.error.message));
+  return send(res, 200, minted);
+}
+
+// POST /v1/users/invite {id} — the administrator issues a person's invitation. The raw token is returned
+// once; the console turns it into the link the administrator sends.
+async function handleInvitePerson(req, res, principal) {
+  if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
+  const body = await jsonBody(req);
+  if (!body?.id) return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "id is required"));
+  const claims = { ...govClaims(principal), dispatch_role: "tenant_admin" };
+  const person = (await withClaims(pool, claims, (c) => c.query("select id, email from dispatch.users where id=$1 and status='active'", [body.id]))).rows[0];
+  if (!person) return send(res, 404, errEnvelope(null, 404, "NOT_FOUND", "no such person"));
+  if ((await ssoTenantFor(person.email)) === principal.tenantId) {
+    return send(res, 409, errEnvelope(null, 409, "USE_SSO", "This person's email domain signs in through your identity provider; they need no invitation."));
+  }
+  const token = crypto.randomBytes(32).toString("base64url");
+  const exp = await withClaims(pool, claims, (c) => c.query("select dispatch.issue_person_invitation($1, $2, $3) as e", [person.id, tokenHash(token), principal.actor]));
+  return send(res, 201, { token, expiresAt: exp.rows[0].e, note: "send this link to the person — it works once and is shown only now" });
 }
 
 // GET/POST /v1/auth/sso/connection — the institution registers/views its IdP.
@@ -1963,6 +2072,13 @@ const server = http.createServer(async (req, res) => {
       return await handleSsoConnection(req, res, auth.principal, req.method);
     }
 
+    // A person's invitation (administrator).
+    if (path === "/v1/users/invite" && req.method === "POST") {
+      const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
+      if (auth.error) return send(res, auth.error.status, errEnvelope(null, auth.error.status, auth.error.code, auth.error.message));
+      return await handleInvitePerson(req, res, auth.principal);
+    }
+
     // People — the human directory (read for any principal; create/remove require admin).
     if (path === "/v1/users" && (req.method === "GET" || req.method === "POST" || req.method === "DELETE")) {
       const auth = await resolvePrincipal(pool, authHeaderFrom(req), withAdmin);
@@ -2009,6 +2125,12 @@ const server = http.createServer(async (req, res) => {
       // console/SDKs can use the conventional field name.
       return send(res, 200, { ...minted, access_token: minted.token, tenantId: ex.principal.tenantId, scopes: ex.principal.scopes });
     }
+
+    // People's sign-in without an identity provider (no auth; M27).
+    if (path === "/v1/auth/method") return await handleSignInMethod(req, res);
+    if (path === "/v1/auth/password") return await handlePasswordSignIn(req, res);
+    if (path === "/v1/auth/invitation") return await handleInvitation(req, res, false);
+    if (path === "/v1/auth/invitation/accept") return await handleInvitation(req, res, true);
 
     // Public self-serve signup — create a FREE tenant + owner credential (no auth).
     if (path === "/v1/signup") return await handleSignup(req, res);
