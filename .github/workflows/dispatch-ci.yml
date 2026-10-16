@@ -44,6 +44,8 @@ jobs:
       DISPATCH_MIGRATE_URL: postgres://postgres:postgres@localhost:5432/dispatch
       DISPATCH_TOKEN_SECRET: ci-dispatch-token-secret
       DISPATCH_TOKEN_ISSUER: sovereign-dispatch
+      # activation without payment, for the test tenants only; never set in a deployment
+      DISPATCH_BILLING_STUB: "1"
     steps:
       - uses: actions/checkout@v4
 

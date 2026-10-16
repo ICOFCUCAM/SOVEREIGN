@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../lib/auth";
 import { Button, Card, Field, inputCls, timeAgo } from "../lib/ui";
-import { listClients, issueClient, rotateClient, revokeClient, getBilling, subscribe, API_BASE, type ServiceClient, type IssuedCredential, type Billing, humanError } from "../lib/api";
-import { QuotaMeter, planLabel, useBilling } from "../lib/upsell";
+import { listClients, issueClient, rotateClient, revokeClient, getBilling, API_BASE, type ServiceClient, type IssuedCredential, type Billing, humanError } from "../lib/api";
+import { QuotaMeter, UpgradeModal, planLabel, useBilling } from "../lib/upsell";
 import SsoConnectionCard from "../components/SsoConnectionCard";
 import WebhooksCard from "../components/WebhooksCard";
 
@@ -75,7 +75,7 @@ curl -s ${base}/v1/documents -H 'authorization: Bearer <access_token>'`;
         </Line>
         {tenantId && <Line k="Tenant"><code className="select-all rounded bg-ink-900/70 px-2 py-1 font-mono text-[12.5px] text-white/70">{tenantId}</code></Line>}
         <Line k="API base"><code className="select-all rounded bg-ink-900/70 px-2 py-1 font-mono text-[12.5px] text-white/70">{base || "(same origin as this console)"}</code></Line>
-        {billing && <Line k="Usage"><span className="text-[12.5px] text-white/55">{planLabel(billing.plan)} plan · {billing.quotaRemaining}/{billing.documentQuota} records remaining this period. API calls draw on the institution's quota.</span></Line>}
+        {billing && <Line k="Usage"><span className="text-[12.5px] text-white/55">{planLabel(billing)} plan · {billing.quotaRemaining}/{billing.documentQuota} records remaining this period. API calls draw on the institution's quota.</span></Line>}
       </div>
       <div className="mt-4">
         <div className="mb-1 flex items-center justify-between">
@@ -101,7 +101,7 @@ const Access: React.FC = () => {
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
   const [reveal, setReveal] = useState<{ cred: IssuedCredential; label: string; scopes: string[] } | null>(null);
   const { billing, setBilling } = useBilling();
-  const [subBusy, setSubBusy] = useState(false);
+  const [upgrade, setUpgrade] = useState(false);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -111,12 +111,6 @@ const Access: React.FC = () => {
   }, []);
   useEffect(() => { if (admin) load(); }, [admin, load]);
 
-  const doSubscribe = async () => {
-    setSubBusy(true); setErr(null);
-    try { setBilling(await subscribe()); }
-    catch (e) { setErr(humanError(e, "failed to subscribe")); }
-    finally { setSubBusy(false); }
-  };
 
   const toggle = (id: string) => setScopes((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
@@ -178,19 +172,20 @@ const Access: React.FC = () => {
           integration concern from how SYSTEMS connect, below). */}
       <SsoConnectionCard />
 
+      {upgrade && <UpgradeModal open reason="quota" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); setUpgrade(false); }} />}
       {billing && (
         <Card className={`mb-6 p-5 ${billing.canDownload ? "border-emerald-500/30" : "border-amber-500/30"}`}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="min-w-[260px] flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white">{planLabel(billing.plan)} plan</span>
+                <span className="text-sm font-bold text-white">{planLabel(billing)} plan</span>
                 <span className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${billing.canDownload ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"}`}>{billing.canDownload ? "Downloads unlocked" : "Downloads locked"}</span>
               </div>
               <QuotaMeter b={billing} className="mt-2 max-w-xs" />
-              {!billing.canDownload && <div className="mt-1.5 text-[12px] text-white/45">Subscribe for unlimited records, PDF/DOCX downloads, preservation and audit retention.</div>}
+              {!billing.canDownload && <div className="mt-1.5 text-[12px] text-white/45">A paid plan gives official records, PDF/DOCX downloads, preservation and audit retention.</div>}
             </div>
             {!billing.canDownload && (
-              <Button variant="primary" disabled={subBusy} onClick={doSubscribe}>{subBusy ? "Subscribing…" : "Subscribe"}</Button>
+              <Button variant="primary" onClick={() => setUpgrade(true)}>Choose a plan</Button>
             )}
           </div>
         </Card>

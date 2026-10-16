@@ -5,8 +5,7 @@ import { CloseIcon, Toast } from "../lib/ui";
 import { homeFor, navForRole, needsUpgrade, ROLE_LABEL, type NavItem, type Role, type Plan } from "../lib/access";
 import { ExchangeMark } from "./ExchangeMark";
 import InstitutionalRibbon from "./InstitutionalRibbon";
-import LayerBar from "./LayerBar";
-import LayerSubNav from "./LayerSubNav";
+import LayerBar, { LAYERS } from "./LayerBar";
 import TermsDialog from "./TermsDialog";
 import PageTip from "./PageTip";
 import { JourneyBar } from "./GuidedJourney";
@@ -35,6 +34,11 @@ const WORKSTATION_ROUTES = new Set([
   "/console/diligence-ai", "/console/data-room", "/console/documents", "/console/negotiator", "/console/simulator",
   "/console/closing", "/console/wealth", "/console/knowledge-graph",
 ]);
+
+// The market ribbon is shown where the market is the subject — the two homes, the exit overview and the
+// market pages — not above forms, documents and deals.
+const RIBBON_ROUTES = new Set(["/console", "/console/buyer-portal", "/console/command", "/console/acquisition-radar"]);
+export const showsRibbon = (path: string): boolean => RIBBON_ROUTES.has(path) || LAYERS.find((l) => l.key === "MKT")!.match.includes(path);
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session, signOut, chooseSide } = useAuth();
@@ -240,9 +244,9 @@ const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
         <main ref={workspace} id="workspace" tabIndex={-1} className="relative flex-1 overflow-y-auto focus:outline-none">
           <div data-xo="dark" className="sticky top-0 z-30">
-            <InstitutionalRibbon />
+            {/* the market ribbon only where the market is the subject: Home and the market pages */}
+            {showsRibbon(loc.pathname) && <InstitutionalRibbon />}
             <LayerBar />
-            <LayerSubNav />
           </div>
           {showStarterNotice && (
             <div className="border-b border-xo-caution/25 bg-xo-caution/[0.07]">

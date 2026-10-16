@@ -27,7 +27,7 @@ const fmt = (c) => (c.governanceChain || []).map((s) => `${s.label}:${s.state}${
 (async () => {
   const su = (await call("POST", "/v1/signup", { body: { name: "Ministry of Justice" } })).body;
   const tenantId = su.tenantId; const admin = await stok(su.client_id, su.secret);
-  await call("POST", "/v1/billing/subscribe", { token: admin });
+  await call("POST", "/v1/billing/subscribe", { token: admin, body: { tier: "institutional" } });
   for (const [k, l, d, o] of [["director_policy", "Director of Policy", "policy", 20], ["permanent_secretary", "Permanent Secretary", "sec", 30], ["communications_office", "Communications Office", "comm", 40]])
     await call("POST", "/v1/governance/roles", { token: admin, body: { key: k, label: l, departmentKey: d, displayOrder: o } });
   const mk = async (full, email, office) => { const u = (await call("POST", "/v1/users", { token: admin, body: { email, fullName: full } })).body;

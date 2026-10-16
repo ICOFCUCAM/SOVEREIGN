@@ -30,7 +30,7 @@ const waitFor = async (event, ms = 8000) => { const t0 = Date.now(); while (Date
 (async () => {
   const su = (await call("POST", "/v1/signup", { body: { name: "Ministry of Interior" } })).body;
   const t = su.tenantId; const admin = await stok(su.client_id, su.secret);
-  await call("POST", "/v1/billing/subscribe", { token: admin });
+  await call("POST", "/v1/billing/subscribe", { token: admin, body: { tier: "institutional" } });
   for (const [k, l, o] of [["director_policy", "Director of Policy", 20], ["permanent_secretary", "Permanent Secretary", 30], ["communications_office", "Communications Office", 40]])
     await call("POST", "/v1/governance/roles", { token: admin, body: { key: k, label: l, displayOrder: o } });
   const mk = async (full, email, office) => { const u = (await call("POST", "/v1/users", { token: admin, body: { email, fullName: full } })).body; if (office) await call("POST", "/v1/governance/grants", { token: admin, body: { subject: u.subject, roleKey: office } }); return mintUserToken({ tenantId: t, userId: u.id, scopes: ["dispatch:read", "dispatch:render", "dispatch:approve", "dispatch:publish", "dispatch:audit"], clearance: "none", role: "author", email }).token; };

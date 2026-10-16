@@ -14,6 +14,7 @@ import { sectorSignals } from "../lib/sector-signals";
 import { AcquisitionReactor, ReactorTelemetry } from "../components/Reactor";
 import BuyerInterestGate from "../components/BuyerInterestGate";
 import StartHere from "../components/StartHere";
+import WaitingForYou from "../components/WaitingForYou";
 
 // ── ACQUISITION INTELLIGENCE TERMINAL ───────────────────────────────
 // Page 01 of the ExitOS institutional redesign (docs/redesign/PAGE-01-
@@ -118,6 +119,7 @@ const Terminal: React.FC = () => {
 
   return (
     <div data-page="terminal" className="space-y-3 text-xo-text">
+      {role === "founder" && <WaitingForYou />}
       {plan === "free" && <BuyerInterestGate />}
 
       {/* ── 1 · MANDATE ─ identity and data state ───────────────────── */}

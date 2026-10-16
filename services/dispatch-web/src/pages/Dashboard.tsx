@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { listDocuments, audit, getStats, getGovernanceOverview, type DocListItem, type AuditEvent, type Lifecycle, type Stats, type GovOverview, humanError } from "../lib/api";
 import { timeAgo } from "../lib/ui";
 import { useAuth } from "../lib/auth";
+import { useBilling } from "../lib/upsell";
 import { recordTypeLabel } from "../lib/recordTypes";
 import { actorName, fmtDateTime, waited } from "../lib/format";
 import OfficeHome from "../components/OfficeHome";
@@ -265,6 +266,9 @@ const LifecycleStrip: React.FC<{ loading: boolean; stages: Stage[]; offPath: Sta
 };
 
 const FirstRun: React.FC<{ canAuthor: boolean }> = ({ canAuthor }) => {
+  // the allowance is the server's own figure, never a number written into the page
+  const { billing } = useBilling();
+  const allowance = !billing ? "" : billing.canDownload ? "" : `Your evaluation includes ${billing.documentQuota} record${billing.documentQuota === 1 ? "" : "s"}${billing.trialDaysLeft != null ? ` over the next ${billing.trialDaysLeft} day${billing.trialDaysLeft === 1 ? "" : "s"}` : ""}. `;
   const steps = [
     { n: 1, t: "Compose a record", d: "Author an executive briefing, board report, or policy paper from a structured template." },
     { n: 2, t: "Submit for governance", d: "It enters the approval chain — reviewed and approved before anything is produced." },
@@ -275,7 +279,7 @@ const FirstRun: React.FC<{ canAuthor: boolean }> = ({ canAuthor }) => {
       <div className="max-w-xl p-2">
         <div className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-sd-accent">Welcome to Dispatch</div>
         <h2 className="mt-1.5 font-serif text-[22px] font-semibold text-sd-text">Your institution has no records yet</h2>
-        <p className="mt-1 text-[13px] text-sd-text2">Your evaluation includes three official records. Here is how the governed pipeline works.</p>
+        <p className="mt-1 text-[13px] text-sd-text2">{allowance}Here is how the governed pipeline works.</p>
       </div>
       <ol className="mt-3 grid gap-3 p-2 sm:grid-cols-3">
         {steps.map((s) => (

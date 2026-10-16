@@ -19,7 +19,7 @@ export const PRICING_ZH: PricingCopy = {
   deploymentLabel: "部署",
   plansFootnote: "每个方案均包含不限数量的机构用户——绝不按席位计费。各方案的差异体现在治理、部署、身份集成、API 吞吐量与支持上，而非人头数或存储量。Enterprise 与 Sovereign 按机构定制范围；“起”是一个起点，而非报价，SLA、数据驻留与项目条款将在评估阶段商定。",
   tiers: [
-    { name: "评估版", price: "免费", purpose: "端到端全面评估 Dispatch。", audience: "产品评估", deployment: ["托管云"], includes: ["最多 5 位用户", "10 份受治理发布", "带水印——非正式记录"], ctaLabel: "免费开始" },
+    { name: "评估版", price: "免费", purpose: "端到端全面评估 Dispatch。", audience: "产品评估", deployment: ["托管云"], includes: ["免费 30 天", "最多 5 位用户", "10 份受治理发布", "带水印——非正式记录"], ctaLabel: "免费开始" },
     { name: "机构版", price: "US$299", cadence: "/月", purpose: "以生产级治理运行一家机构。", audience: "非政府组织 · 市政机构 · 学校 · 小型企业", deployment: ["托管云"], includes: ["机构用户不限数量", "每月 500 份受治理发布", "单一机构", "支持 SSO", "邮件支持"], ctaLabel: "免费开始" },
     { name: "机构增强版", price: "US$999", cadence: "/月", purpose: "以企业级监管与高级治理运营多个部门。", carry: "机构版的全部内容，另加", audience: "高校 · 医院 · 中端市场 · 各类机构", deployment: ["托管云", "私有云"], includes: ["受治理发布不限数量", "多个部门 · 机构层级结构", "高级治理策略", "分析与高管仪表盘", "优先支持"], ctaLabel: "免费开始" },
     { name: "Enterprise", price: "起 US$3,500", cadence: "/月", purpose: "将 Dispatch 接入你的身份、基础设施与合规环境。", carry: "机构增强版的全部内容，另加", audience: "各部委 · 国家级机构 · 大型企业", deployment: ["托管", "私有", "本地部署"], includes: ["SSO——Azure AD · Okta", "审计导出", "高可用与 SLA", "企业级支持", "专属入门引导"], ctaLabel: "联系我们" },

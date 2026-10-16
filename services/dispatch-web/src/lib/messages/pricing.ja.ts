@@ -19,7 +19,7 @@ export const PRICING_JA: PricingCopy = {
   deploymentLabel: "展開",
   plansFootnote: "すべてのプランには無制限の制度ユーザーが含まれ、座席単位で課金されることは決してありません。各プランの違いは、ガバナンス、展開、ID 連携、API スループット、サポートにあり、人数やストレージによるものではありません。Enterprise と Sovereign は機関ごとに範囲が定められます。「From」は開始点であって見積もりではなく、SLA、データ所在地、契約条件は評価期間中に合意されます。",
   tiers: [
-    { name: "評価版", price: "無料", purpose: "Dispatch を端から端まで評価する。", audience: "製品評価", deployment: ["マネージドクラウド"], includes: ["最大 5 ユーザー", "10 件のガバナンス管理下の発行物", "ウォーターマーク付き ― 公式記録ではありません"], ctaLabel: "無料で開始" },
+    { name: "評価版", price: "無料", purpose: "Dispatch を端から端まで評価する。", audience: "製品評価", deployment: ["マネージドクラウド"], includes: ["30 日間無料", "最大 5 ユーザー", "10 件のガバナンス管理下の発行物", "ウォーターマーク付き ― 公式記録ではありません"], ctaLabel: "無料で開始" },
     { name: "Institutional", price: "US$299", cadence: "/月", purpose: "本番ガバナンスのもとで一つの機関を運用する。", audience: "NGO · 自治体 · 学校 · 小規模企業", deployment: ["マネージドクラウド"], includes: ["無制限の制度ユーザー", "月間 500 件のガバナンス管理下の発行物", "単一機関", "SSO 対応", "メールサポート"], ctaLabel: "無料で開始" },
     { name: "Institutional Plus", price: "US$999", cadence: "/月", purpose: "エンタープライズレベルの監督と高度なガバナンスのもとで複数の部門を運営する。", carry: "Institutional のすべてに加えて", audience: "大学 · 病院 · ミッドマーケット · 各種機関", deployment: ["マネージドクラウド", "プライベートクラウド"], includes: ["無制限のガバナンス管理下の発行物", "複数部門 · 部署階層", "高度なガバナンスポリシー", "アナリティクスと経営ダッシュボード", "優先サポート"], ctaLabel: "無料で開始" },
     { name: "Enterprise", price: "From US$3,500", cadence: "/月", purpose: "Dispatch を貴機関の ID、インフラ、コンプライアンス環境に接続する。", carry: "Institutional Plus のすべてに加えて", audience: "省庁 · 国家機関 · 大企業", deployment: ["マネージド", "プライベート", "オンプレミス"], includes: ["SSO ― Azure AD · Okta", "監査エクスポート", "高可用性と SLA", "エンタープライズサポート", "専任オンボーディング"], ctaLabel: "お問い合わせ" },
