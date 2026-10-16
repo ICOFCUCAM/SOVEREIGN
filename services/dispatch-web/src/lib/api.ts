@@ -38,6 +38,8 @@ const ERROR_COPY: Record<string, string> = {
   QUOTA_EXCEEDED: "You've reached your free evaluation limit. Subscribe to create more official records.",
   PAYMENT_REQUIRED: "Retrieving publication artifacts requires a Professional subscription.",
   VALIDATION_FAILED: "Some fields need attention before this can be submitted.",
+  INVALID_SIGN_IN: "That email and password don't match. Check them, or ask your administrator for a new invitation.",
+  SIGN_IN_LOCKED: "Too many attempts. Sign-in for this account is paused for 15 minutes.",
 };
 export function humanError(e: unknown, fallback = "Something went wrong. Please try again."): string {
   if (e instanceof DispatchError) {
@@ -165,11 +167,26 @@ export const revokeGovRole = (subject: string, roleKey: string) => request<{ rev
 // ---- people (human directory) ----
 // A person belongs to the tenant and occupies offices (a grant with subject
 // "user:<id>"). Identity only; institutional SSO federates onto this next.
-export interface Person { id: string; subject: string; email: string; fullName: string; departmentKey?: string | null; systemAdmin: boolean; status: string }
+/** How a person signs in, as the administrator sees it (absent for non-administrators). */
+export interface PersonSignIn { password: boolean; lastSignInAt: string | null; invitationExpiresAt: string | null }
+export interface Person { id: string; subject: string; email: string; fullName: string; departmentKey?: string | null; systemAdmin: boolean; status: string; signIn?: PersonSignIn }
 export const getUsers = () => request<{ users: Person[] }>("GET", "/v1/users");
 export const createUser = (p: { email: string; fullName: string; departmentKey?: string; systemAdmin?: boolean }) =>
   request<{ id: string; subject: string }>("POST", "/v1/users", { body: p });
 export const deleteUser = (id: string) => request<{ deleted: string }>("DELETE", "/v1/users", { body: { id } });
+/** Issue a person's single-use invitation (7 days). The raw token is returned once. */
+export const invitePerson = (id: string) => request<{ token: string; expiresAt: string }>("POST", "/v1/users/invite", { body: { id } });
+/** The link the administrator sends: the token travels in the fragment, so it never reaches a server log. */
+export const invitationLink = (token: string): string => `${typeof window !== "undefined" ? window.location.origin : ""}/invite#token=${encodeURIComponent(token)}`;
+
+// ---- people's sign-in without an identity provider (M27) ----
+export interface PersonSessionResponse { access_token: string; tenantId: string; expiresIn: number; scopes: string[] }
+/** Which way a work email signs in — decided by its domain only. */
+export const signInMethod = (email: string) => request<{ method: "sso" | "password" }>("POST", "/v1/auth/method", { body: { email } });
+export const passwordSignIn = (email: string, password: string) => request<PersonSessionResponse>("POST", "/v1/auth/password", { body: { email, password } });
+export interface InvitationDetails { state: "valid" | "used" | "expired" | "revoked" | "unknown"; institution: string | null; email: string | null; fullName: string | null; expiresAt: string | null }
+export const invitationDetails = (token: string) => request<InvitationDetails>("POST", "/v1/auth/invitation", { body: { token } });
+export const acceptInvitation = (token: string, password: string) => request<PersonSessionResponse>("POST", "/v1/auth/invitation/accept", { body: { token, password } });
 export const createDelegation = (d: { roleKey: string; delegateSubject: string; grantorSubject?: string; reason?: string; endsAt: string }) =>
   request<{ delegated: boolean }>("POST", "/v1/governance/delegations", { body: d });
 export const endDelegation = (roleKey: string, delegateSubject: string) =>

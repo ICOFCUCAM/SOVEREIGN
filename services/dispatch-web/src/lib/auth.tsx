@@ -1,16 +1,22 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { bindTokenGetter, bindUnauthorized, exchangeToken , humanError} from "./api";
+import { bindTokenGetter, bindUnauthorized, exchangeToken, humanError, type PersonSessionResponse } from "./api";
 import { bindAnalyticsTenant } from "./analytics";
 
 // Session model: a Dispatch service token (client-credentials) held in memory.
 // We decode the JWT payload (unverified, client-side, display-only) to surface
 // scopes/tenant in the UI — the API is the real authority on every call.
-interface Session { token: string; tenantId: string; scopes: string[]; expiresAt: number; subject: string }
+interface Session {
+  token: string; tenantId: string; scopes: string[]; expiresAt: number; subject: string;
+  /** A person (signed in through the institution's identity provider or a password) or a service key. */
+  kind: "person" | "service";
+}
 
 interface AuthCtx {
   session: Session | null;
   signIn: (clientId: string, secret: string) => Promise<void>;
   signInWithToken: (token: string, tenantId?: string) => void;
+  /** Establish a person's session from the API's answer to a password sign-in or an accepted invitation. */
+  signInPerson: (r: PersonSessionResponse) => void;
   signOut: () => void;
   has: (scope: string) => boolean;
   loading: boolean;
@@ -25,9 +31,9 @@ function decodePayload(token: string): Record<string, unknown> {
   try { return JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))); }
   catch { return {}; }
 }
-function decodeScopes(token: string): { scopes: string[]; subject: string } {
-  const p = decodePayload(token) as { scopes?: string[]; email?: string; sub?: string; client_id?: string };
-  return { scopes: p.scopes ?? [], subject: p.email ?? p.sub ?? p.client_id ?? "service" };
+function decodeScopes(token: string): { scopes: string[]; subject: string; kind: Session["kind"] } {
+  const p = decodePayload(token) as { scopes?: string[]; email?: string; sub?: string; client_id?: string; principal_type?: string };
+  return { scopes: p.scopes ?? [], subject: p.email ?? p.sub ?? p.client_id ?? "service", kind: p.principal_type === "person" ? "person" : "service" };
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -59,9 +65,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true); setError(null);
     try {
       const r = await exchangeToken(clientId, secret);
-      const { scopes, subject } = decodeScopes(r.access_token);
+      const { scopes, subject, kind } = decodeScopes(r.access_token);
       setSession({ token: r.access_token, tenantId: r.tenantId, scopes: r.scopes?.length ? r.scopes : scopes,
-        expiresAt: Date.now() + r.expiresIn * 1000, subject });
+        expiresAt: Date.now() + r.expiresIn * 1000, subject, kind });
       setNotice(null);
     } catch (e) {
       setError(humanError(e, "sign-in failed"));
@@ -72,11 +78,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Establish a session from a Dispatch-issued token (institutional SSO). The API
   // redirects back with #sso_token=… after federating the institution's IdP.
   const signInWithToken = useCallback((token: string, tenantId?: string) => {
-    const { scopes, subject } = decodeScopes(token);
+    const { scopes, subject, kind } = decodeScopes(token);
     const p = decodePayload(token) as { tenant_id?: string; exp?: number };
-    setSession({ token, tenantId: tenantId ?? p.tenant_id ?? "", scopes, subject,
+    setSession({ token, tenantId: tenantId ?? p.tenant_id ?? "", scopes, subject, kind,
       expiresAt: p.exp ? p.exp * 1000 : Date.now() + 3600_000 });
     setNotice(null);
+  }, []);
+
+  const signInPerson = useCallback((r: PersonSessionResponse) => {
+    const { subject, kind } = decodeScopes(r.access_token);
+    setSession({ token: r.access_token, tenantId: r.tenantId, scopes: r.scopes, subject, kind,
+      expiresAt: Date.now() + r.expiresIn * 1000 });
+    setError(null); setNotice(null);
   }, []);
 
   // Consume an SSO redirect once, on load: #sso_token=…&tenant=… → a session,
@@ -102,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const has = useCallback((scope: string) => !!session?.scopes.includes(scope), [session]);
 
-  const value = useMemo<AuthCtx>(() => ({ session, signIn, signInWithToken, signOut, has, loading, error, notice }), [session, signIn, signInWithToken, signOut, has, loading, error, notice]);
+  const value = useMemo<AuthCtx>(() => ({ session, signIn, signInWithToken, signInPerson, signOut, has, loading, error, notice }), [session, signIn, signInWithToken, signInPerson, signOut, has, loading, error, notice]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 

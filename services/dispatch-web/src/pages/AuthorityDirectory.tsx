@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { listClients, getGovernance, getUsers, createUser, deleteUser, createGovRole, createDepartment,
+import { listClients, getGovernance, getUsers, createUser, deleteUser, createGovRole, createDepartment, invitePerson, invitationLink, getSsoConnection,
   deleteDepartment, deleteGovRole, grantGovRole, revokeGovRole, createDelegation, endDelegation,
   type ServiceClient, type GovRole, type GovGrant, type GovDelegation, type Department, type Person, humanError } from "../lib/api";
 import { Button, Card, Field, inputCls } from "../lib/ui";
@@ -22,14 +22,32 @@ const AuthorityDirectory: React.FC = () => {
   const [newRole, setNewRole] = useState({ label: "", departmentKey: "", displayOrder: "" });
   const [newPerson, setNewPerson] = useState({ fullName: "", email: "", departmentKey: "", systemAdmin: false });
   const [del, setDel] = useState({ roleKey: "", delegateSubject: "", reason: "", endsAt: "" });
+  // The institution's identity-provider domain (people on it sign in there), and the invitation link just
+  // issued — shown once, beside the person it is for.
+  const [ssoDomain, setSsoDomain] = useState<string | null>(null);
+  const [issued, setIssued] = useState<{ id: string; link: string; expiresAt: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
     try {
       const [c, g, u] = await Promise.all([listClients(), getGovernance(), getUsers().catch(() => ({ users: [] }))]);
       setClients(c.clients); setDepartments(g.departments ?? []); setRoles(g.roles); setGrants(g.grants); setDelegations(g.delegations);
       setPeople(u.users);
+      getSsoConnection().then((r) => setSsoDomain(r.connection?.enabled ? r.connection.emailDomain.toLowerCase() : null)).catch(() => setSsoDomain(null));
     } catch (e) { setErr(humanError(e, "Could not load the authority directory.")); }
   }, []);
+  const onIdp = (p: Person) => !!ssoDomain && p.email.toLowerCase().endsWith("@" + ssoDomain);
+  const invite = async (p: Person) => {
+    setErr(null); setCopied(false);
+    try { const r = await invitePerson(p.id); setIssued({ id: p.id, link: invitationLink(r.token), expiresAt: r.expiresAt }); load(); }
+    catch (e) { setErr(humanError(e, "Could not create the invitation.")); }
+  };
+  const signInLabel = (p: Person): { text: string; tone: string } => {
+    if (onIdp(p)) return { text: "Signs in through your identity provider", tone: "text-emerald-300/80" };
+    if (p.signIn?.password) return { text: p.signIn.lastSignInAt ? `Signs in with a password · last ${new Date(p.signIn.lastSignInAt).toLocaleDateString()}` : "Password set · not signed in yet", tone: "text-emerald-300/80" };
+    if (p.signIn?.invitationExpiresAt) return { text: `Invited · link valid until ${new Date(p.signIn.invitationExpiresAt).toLocaleDateString()}`, tone: "text-amber-300/80" };
+    return { text: "Not invited yet · cannot sign in", tone: "text-white/35" };
+  };
   useEffect(() => { load(); }, [load]);
 
   // Resolve a grant subject to a human name (a person) or a service name (a
@@ -219,7 +237,7 @@ const AuthorityDirectory: React.FC = () => {
           <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">People</div>
           <div className="font-mono text-[11px] tabular-nums text-white/30">{people.length} {people.length === 1 ? "person" : "people"}</div>
         </div>
-        <p className="mb-3 text-[12px] text-white/40">People are added by the institution and assigned to offices. Authentication (institutional sign-in) federates onto these identities — Dispatch never stores their passwords.</p>
+        <p className="mb-3 text-[12px] text-white/40">Add a person, place them in their office, then let them sign in. {ssoDomain ? <>People with an <span className="text-white/60">@{ssoDomain}</span> address sign in through your identity provider; everyone else gets</> : "Send each person"} an invitation link: it works once, for 7 days, and lets them set their own password. Dispatch keeps only a scrambled fingerprint of it.</p>
 
         {/* add a person */}
         <div className="mb-4 grid gap-2 sm:grid-cols-[1.2fr_1.4fr_1fr_auto]">
@@ -260,6 +278,7 @@ const AuthorityDirectory: React.FC = () => {
                         {departments.map((d) => <option key={d.key} value={d.key}>{d.name}</option>)}
                       </select>
                     </div>
+                    <div className={`mt-0.5 text-[11px] ${signInLabel(p).tone}`}>{signInLabel(p).text}</div>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {held.length === 0 ? <span className="text-[11px] text-white/30">holds no office</span> :
                         held.map((r) => (
@@ -275,8 +294,25 @@ const AuthorityDirectory: React.FC = () => {
                       <option value="">+ Assign office…</option>
                       {roles.filter((r) => !held.includes(r.key)).map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
                     </select>
+                    {!onIdp(p) && (
+                      <Button variant={p.signIn?.password || p.signIn?.invitationExpiresAt ? "ghost" : "primary"} className="whitespace-nowrap px-2.5 py-1 text-[12px]" onClick={() => invite(p)}
+                        title={p.signIn?.password ? "Send a link to set a new password; the current one keeps working until it is used" : "Create a single-use link that lets this person set a password"}>
+                        {p.signIn?.password ? "New password link" : p.signIn?.invitationExpiresAt ? "New invitation link" : "Invite"}
+                      </Button>
+                    )}
                     <button onClick={() => removePerson(p)} title="Remove person" className="rounded px-1.5 py-1 text-[11px] font-semibold text-white/30 hover:text-red-300">Remove</button>
                   </div>
+                  {issued?.id === p.id && (
+                    <div role="status" className="basis-full rounded-lg border border-emerald-500/30 bg-emerald-500/[0.06] p-3">
+                      <div className="text-[12.5px] font-semibold text-emerald-300">Invitation link for {p.fullName}</div>
+                      <p className="mt-0.5 text-[11.5px] text-white/55">Send it to {p.email} yourself, by email or chat. It works once, until {new Date(issued.expiresAt).toLocaleDateString(undefined, { day: "numeric", month: "long" })}, and is shown only now. A new link replaces this one.</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <code className="min-w-0 flex-1 select-all truncate rounded bg-ink-900/70 px-2 py-1 font-mono text-[11.5px] text-white/80">{issued.link}</code>
+                        <Button variant="ghost" className="shrink-0 px-2.5 py-1 text-[12px]" onClick={() => { navigator.clipboard?.writeText(issued.link).then(() => setCopied(true)); }}>{copied ? "Copied" : "Copy link"}</Button>
+                        <button onClick={() => setIssued(null)} className="shrink-0 text-[11.5px] font-semibold text-white/40 hover:text-white">Done</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

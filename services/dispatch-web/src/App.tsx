@@ -8,12 +8,14 @@ import { conceptLocales } from "./lib/translations";
 import { LocaleProvider, detectPreferredLocale } from "./lib/locale";
 import { FilmGrain } from "./components/brand";
 import { BillingProvider } from "./lib/upsell";
+import { loadInstitutionConfig, computeReadiness, takeFirstEntry } from "./lib/readiness";
 
 // Eager — the homepage is the front door (no loading flash), and the auth pages
 // are the immediate fallback for every product guard.
 import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import Signup from "./pages/Signup";
+import AcceptInvitation from "./pages/AcceptInvitation";
 
 // Lazy — every other route is its own chunk. A marketing visitor never downloads
 // the console/admin product; an operator never downloads the marketing pages.
@@ -58,6 +60,7 @@ const Sovereignty = lazy(() => import("./pages/Sovereignty"));
 const Access = lazy(() => import("./pages/Access"));
 const AdminHome = lazy(() => import("./pages/AdminHome"));
 const InstitutionSetup = lazy(() => import("./pages/InstitutionSetup"));
+const Welcome = lazy(() => import("./pages/Welcome"));
 const GovernancePolicies = lazy(() => import("./pages/GovernancePolicies"));
 const AuthorityDirectory = lazy(() => import("./pages/AuthorityDirectory"));
 const GovernanceMonitor = lazy(() => import("./pages/GovernanceMonitor"));
@@ -79,10 +82,31 @@ const Polished = lazy(() => import("./pages/polished/Polished"));
 // Administration product additionally requires dispatch:admin, so an operator
 // is bounced back to Operations and never lands in an administrative surface.
 
+// A session's first page, for an administrator whose institution still lacks the essentials (structure,
+// approval rules, people in offices), is the Welcome. Once per session; any other case, or a configuration
+// that cannot be read, opens the page asked for.
+const FirstEntry: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { session, has } = useAuth();
+  const { pathname } = useLocation();
+  const [target, setTarget] = React.useState<string | null | undefined>(undefined);
+  React.useEffect(() => {
+    if (!session || !has("dispatch:admin") || !takeFirstEntry(session.token)) { setTarget((t) => t ?? null); return; }
+    loadInstitutionConfig()
+      .then((c) => setTarget(computeReadiness(c, false).essentialsDone ? null : "/admin/welcome"))
+      .catch(() => setTarget(null));
+  }, [session, has]);
+  // once the Welcome is reached the redirect is spent, so the administrator can leave it
+  React.useEffect(() => { if (target && pathname === target) setTarget(null); }, [pathname, target]);
+  if (target === undefined) return null;
+  if (target && pathname !== target) return <Navigate to={target} replace />;
+  return <>{children}</>;
+};
+
 const Operations: React.FC = () => {
   const { session } = useAuth();
   if (!session) return <SignIn />;
   return (
+    <FirstEntry>
     <BillingProvider>
       <ConsoleShell variant="operations">
         <Routes>
@@ -98,6 +122,7 @@ const Operations: React.FC = () => {
         </Routes>
       </ConsoleShell>
     </BillingProvider>
+    </FirstEntry>
   );
 };
 
@@ -106,10 +131,12 @@ const Administration: React.FC = () => {
   if (!session) return <SignIn />;
   if (!has("dispatch:admin")) return <Navigate to="/console" replace />; // operators never see Administration
   return (
+    <FirstEntry>
     <BillingProvider>
       <ConsoleShell variant="administration">
         <Routes>
           <Route path="/" element={<AdminHome />} />
+          <Route path="welcome" element={<Welcome />} />
           <Route path="publishing" element={<PublishingConsole />} />
           <Route path="setup" element={<InstitutionSetup />} />
           <Route path="authority" element={<AuthorityDirectory />} />
@@ -129,6 +156,7 @@ const Administration: React.FC = () => {
         </Routes>
       </ConsoleShell>
     </BillingProvider>
+    </FirstEntry>
   );
 };
 
@@ -291,6 +319,8 @@ const App: React.FC = () => (
     <Route path="/verify/:recordId" element={<Verify />} />
     {/* public self-serve signup (free plan) */}
     <Route path="/signup" element={<Signup />} />
+    {/* a person accepts their institution's invitation and sets a password */}
+    <Route path="/invite" element={<AcceptInvitation />} />
     {/* product 1 — institutional operations */}
     <Route path="/console/*" element={<Operations />} />
     {/* product 2 — platform administration */}

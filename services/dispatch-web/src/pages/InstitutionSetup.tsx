@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getGovernance, getUsers, getGovernancePolicies, createUser, createDepartment, createGovRole, grantGovRole,
   type Department, type GovRole, type GovGrant, type Person, type GovernancePolicy, humanError } from "../lib/api";
 import { Button, Card, inputCls } from "../lib/ui";
@@ -35,8 +35,11 @@ const InstitutionSetup: React.FC = () => {
   const [policies, setPolicies] = useState<GovernancePolicy[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [active, setActive] = useState(0);
-  const [touched, setTouched] = useState(false); // has the admin navigated manually?
+  // ?step=people (from the Welcome) opens that step; otherwise the first one still to do.
+  const [params] = useSearchParams();
+  const asked = STEPS.findIndex((s) => s.id === params.get("step"));
+  const [active, setActive] = useState(Math.max(0, asked));
+  const [touched, setTouched] = useState(asked >= 0); // has the admin navigated manually?
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -261,7 +264,7 @@ const PeopleStep: React.FC<{ people: Person[]; departments: Department[]; busy: 
         <Link to="/admin/authority" className="text-[12px] font-semibold text-seal-light hover:underline">or add individually →</Link>
         {msg && <span className="text-[12px] text-emerald-300">{msg}</span>}
       </div>
-      <p className="text-[11px] text-white/35">From an Azure AD / LDAP export or a spreadsheet: <span className="font-mono">Full name, email, department</span>. How people sign in is connected separately, in API Access.</p>
+      <p className="text-[11px] text-white/35">From an Azure AD / LDAP export or a spreadsheet: <span className="font-mono">Full name, email, department</span>. Then let them sign in: send each person an invitation from <Link to="/admin/authority" className="text-seal-light hover:underline">People &amp; offices</Link>, or connect your identity provider in API Access.</p>
     </div>
   );
 };

@@ -6,9 +6,10 @@ import { Button, Field, inputCls } from "../lib/ui";
 import { FilmGrain } from "../components/brand";
 import { track } from "../lib/analytics";
 
-// Public self-serve signup — an institution creates a FREE account and receives
-// its first credential (client_id + secret, shown once). It can then sign into
-// the console, create up to the free quota, and subscribe to download.
+// Public self-serve signup — an institution creates its account and receives its ADMINISTRATOR KEY
+// (client_id + secret, shown once). The key signs the first administrator in; the Welcome then sets up the
+// institution and invites its people, who sign in with their work email. The Evaluation is free for 30
+// days and 10 official records, whichever comes first (M26).
 const Signup: React.FC = () => {
   const { signIn } = useAuth();
   const nav = useNavigate();
@@ -41,7 +42,7 @@ const Signup: React.FC = () => {
   const enter = async () => {
     if (!cred) return;
     setEntering(true);
-    try { await signIn(cred.client_id, cred.secret); nav("/console"); }
+    try { await signIn(cred.client_id, cred.secret); nav("/admin/welcome"); }
     catch { setErr("could not sign in — copy your secret and use the sign-in page"); setEntering(false); }
   };
 
@@ -53,7 +54,7 @@ const Signup: React.FC = () => {
         <div className="mb-8 text-center">
           <a href="/" className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-seal text-lg font-black text-white">SD</a>
           <h1 className="font-serif text-2xl font-bold text-white">Create your institution account</h1>
-          <p className="mt-1 text-sm text-white/50">Issue official records under your institution's seal. <span className="text-white/70">3 official records included</span> to evaluate.</p>
+          <p className="mt-1 text-sm text-white/50">Issue official records under your institution's seal. <span className="text-white/70">Free for 30 days, with 10 official records</span> to evaluate.</p>
         </div>
 
         {!cred ? (
@@ -63,13 +64,13 @@ const Signup: React.FC = () => {
             </Field>
             {err && <div className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{err}</div>}
             <Button type="submit" disabled={busy || name.trim().length < 2} className="w-full">{busy ? "Creating…" : "Create free account"}</Button>
-            <p className="text-center text-[11px] text-white/30">No card required. You'll get an API credential to sign in with.</p>
+            <p className="text-center text-[11px] text-white/30">No card required. You'll receive your institution's administrator key.</p>
           </form>
         ) : (
           <div className="space-y-4 rounded-lg border border-emerald-500/40 bg-ink-800/60 p-6">
             <div>
-              <div className="text-sm font-bold text-emerald-300">Account created — 3 official records included</div>
-              <div className="mt-0.5 text-xs text-white/50">Save this secret now. It is shown only once and cannot be retrieved again.</div>
+              <div className="text-sm font-bold text-emerald-300">Your institution's account is ready</div>
+              <div className="mt-1 text-xs leading-relaxed text-white/55">This is your <span className="text-white/80">administrator key</span>. Use it under <span className="text-white/80">Administrator or system key</span> on the sign-in page until you've invited your people. Save the secret now, for example in a password manager: it is shown only once and cannot be retrieved.</div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -83,12 +84,12 @@ const Signup: React.FC = () => {
               </div>
             </div>
             {err && <div className="rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{err}</div>}
-            <Button variant="primary" className="w-full" disabled={entering} onClick={enter}>{entering ? "Entering…" : "Enter the console →"}</Button>
+            <Button variant="primary" className="w-full" disabled={entering} onClick={enter}>{entering ? "Entering…" : "I've saved it, set up my institution →"}</Button>
           </div>
         )}
 
         <p className="mt-4 text-center text-[12px] text-white/40">
-          Already have a credential? <Link to="/console" className="font-semibold text-seal-light hover:text-white">Sign in</Link>
+          Already have an account? <Link to="/console" className="font-semibold text-seal-light hover:text-white">Sign in</Link>
         </p>
       </div>
     </div>

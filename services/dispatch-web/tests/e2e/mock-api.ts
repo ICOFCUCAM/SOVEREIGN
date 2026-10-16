@@ -16,6 +16,18 @@ const b64 = (o: unknown) => Buffer.from(JSON.stringify(o)).toString("base64url")
 const fakeJwt = (scopes: string[], sub: string) =>
   `${b64({ alg: "none", typ: "JWT" })}.${b64({ sub, client_id: sub, scopes, tenant_id: fixtures.tenantId, exp: Math.floor(Date.now() / 1000) + 900 })}.x`;
 
+/** A person's display-only token (signed in by password or an accepted invitation). */
+export const personJwt = (email: string, scopes: string[]) =>
+  `${b64({ alg: "none", typ: "JWT" })}.${b64({ principal_type: "person", sub: "00000000-0000-4000-8000-0000000000e2", email, scopes, tenant_id: fixtures.tenantId, exp: Math.floor(Date.now() / 1000) + 3600 })}.x`;
+
+const ESTABLISHED: Record<string, unknown> = {
+  "/v1/governance/roles": { departments: [{ key: "fiscal_policy", name: "Fiscal Policy" }], roles: [{ key: "director_policy", label: "Director of Fiscal Policy", department_key: "fiscal_policy" }],
+    grants: [{ subject: "user:00000000-0000-4000-8000-0000000000a1", role_key: "director_policy" }], delegations: [] },
+  "/v1/users": { users: [{ id: "00000000-0000-4000-8000-0000000000a1", subject: "user:00000000-0000-4000-8000-0000000000a1", email: "director@example.gov", fullName: "Director of Fiscal Policy", departmentKey: "fiscal_policy", systemAdmin: false, status: "active" }] },
+  "/v1/auth/sso/connection": { connection: null },
+  "/v1/admin/clients": { clients: [] },
+};
+
 export interface MockApi { unmatched: string[]; mutations: string[] }
 
 export async function mockApi(page: Page, opts: { scopes?: string[]; subject?: string; respond?: (method: string, path: string) => { status: number; body: unknown } | undefined } = {}): Promise<MockApi> {
@@ -40,6 +52,9 @@ export async function mockApi(page: Page, opts: { scopes?: string[]; subject?: s
 
     const single = (fixtures.singles as Record<string, { status: number; body: unknown }>)[p + url.search];
     if (single) return json(route, single.status, single.body);
+    // An established institution (its essentials in place), so a sign-in opens the page asked for rather
+    // than the Welcome. Tests of a new institution answer these with empty configuration via `respond`.
+    if (ESTABLISHED[p]) return json(route, 200, ESTABLISHED[p]);
 
     if (p === "/v1/documents") {
       let items: Doc[] = fixtures.documents;
@@ -71,10 +86,10 @@ export async function mockApi(page: Page, opts: { scopes?: string[]; subject?: s
 
 export async function signIn(page: Page, path = "/console"): Promise<void> {
   await page.goto("/console");
-  await page.getByText("Sign in with a service credential").click();
+  await page.getByRole("tab", { name: /Administrator or system key/ }).click();
   await page.getByLabel("Client ID").fill("svc_e2e_console");
   await page.getByLabel("Secret").fill("not-a-real-secret");
-  await page.getByRole("button", { name: "Sign in with credential" }).click();
+  await page.getByRole("button", { name: "Sign in with key" }).click();
   await page.locator("#sd-main").waitFor();
   await page.waitForLoadState("networkidle");
   if (path !== "/console") await go(page, path);

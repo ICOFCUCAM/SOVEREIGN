@@ -109,6 +109,10 @@ jobs:
         working-directory: services
         run: node test/audit-read.test.mjs
 
+      - name: People sign-in — invitations and passwords for institutions without an identity provider (29)
+        working-directory: services
+        run: node test/person-signin.test.mjs
+
   # Operations console (services/dispatch-web): typecheck + production build, then
   # the browser suite against recorded API fixtures (no database required).
   console:

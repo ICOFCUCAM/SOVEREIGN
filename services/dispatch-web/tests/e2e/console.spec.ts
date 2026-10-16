@@ -211,7 +211,7 @@ test.describe("keyboard and session", () => {
     // background request has already ended the session (the button is then gone).
     await page.getByRole("button", { name: "Reload the register" }).click({ timeout: 3000 }).catch(() => {});
     await expect(page.getByText(/no longer accepted by the service/)).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByLabel("Work email")).toBeVisible();
+    await expect(page.getByRole("textbox", { name: "Work email" })).toBeVisible();
   });
 
   test.describe("mobile drawer", () => {
