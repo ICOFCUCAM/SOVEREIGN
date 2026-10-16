@@ -16,6 +16,7 @@ const G: Record<string, Guide> = {
     purpose: { founder: "Every step of selling your company, in order, with what is already done.", buyer: "Every step of buying a company, in order, with what is already done." },
     next: { founder: "/console/intake", buyer: "/console/acquisition-radar" } },
   "/console/intake": { purpose: "Enter your company's figures. Every page then uses your company instead of the demo.", next: "/console/company-story" },
+  "/console/companies": { purpose: "Every company or product on your account and where each one stands: listed, prepared, in a sale or sold.", next: "/console/intake" },
   "/console/company-story": { purpose: "Your company's history, products, customers, people, ownership and sources — what a CIM is written from, each figure with its basis.", next: "/console/documents" },
   "/console/acquisition-radar": {
     purpose: { founder: "Listed companies scored against an acquisition mandate: the market as a buyer sees it.", buyer: "Set what you want to buy, see listed companies scored against it, and request an NDA or make an offer." },

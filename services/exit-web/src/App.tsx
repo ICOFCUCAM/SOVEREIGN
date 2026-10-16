@@ -48,6 +48,7 @@ const KnowledgeGraph = lazy(() => import("./pages/KnowledgeGraph"));
 const OutcomeIntelligence = lazy(() => import("./pages/OutcomeIntelligence"));
 const Indexes      = lazy(() => import("./pages/Indexes"));
 const Intake       = lazy(() => import("./pages/Intake"));
+const Companies    = lazy(() => import("./pages/Companies"));
 const Journey      = lazy(() => import("./pages/Journey"));
 const CompanyStory = lazy(() => import("./pages/CompanyStory"));
 const Reviews      = lazy(() => import("./pages/Reviews"));
@@ -92,6 +93,7 @@ const ROUTES: { path: string; policy: string; el: React.ReactNode }[] = [
   { path: "/",             policy: "/console",                el: <Terminal /> },
   { path: "command",       policy: "/console",                el: <Dashboard /> },
   { path: "intake",        policy: "/console/intake",         el: <Intake /> },
+  { path: "companies",     policy: "/console/intake",         el: <Companies /> },  // a founder's companies, reached from the company switcher
   { path: "journey",       policy: "/console/journey",        el: <Journey /> },
   { path: "company-story", policy: "/console/company-story",  el: <CompanyStory /> },
   { path: "reviews",       policy: "/console/reviews",        el: <Reviews /> },
