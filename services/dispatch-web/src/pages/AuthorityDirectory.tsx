@@ -1,8 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { listClients, getGovernance, getUsers, createUser, deleteUser, createGovRole, createDepartment, invitePerson, invitationLink, getSsoConnection,
+import { listClients, getGovernance, getUsers, createUser, deleteUser, createGovRole, createDepartment, invitePerson, invitationLink, invitationMessage, getSsoConnection,
   deleteDepartment, deleteGovRole, grantGovRole, revokeGovRole, createDelegation, endDelegation,
   type ServiceClient, type GovRole, type GovGrant, type GovDelegation, type Department, type Person, humanError } from "../lib/api";
 import { Button, Card, Field, inputCls } from "../lib/ui";
+import { useBilling } from "../lib/upsell";
+import { QrCode } from "../components/QrCode";
+import { Icon } from "../components/console/icons";
 
 // Authority Directory — the Identity domain. Answers, in five seconds: who holds
 // which governance authority, and which authorities are delegated or expired.
@@ -25,8 +28,8 @@ const AuthorityDirectory: React.FC = () => {
   // The institution's identity-provider domain (people on it sign in there), and the invitation link just
   // issued — shown once, beside the person it is for.
   const [ssoDomain, setSsoDomain] = useState<string | null>(null);
+  const { billing } = useBilling();
   const [issued, setIssued] = useState<{ id: string; link: string; expiresAt: string } | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -38,7 +41,7 @@ const AuthorityDirectory: React.FC = () => {
   }, []);
   const onIdp = (p: Person) => !!ssoDomain && p.email.toLowerCase().endsWith("@" + ssoDomain);
   const invite = async (p: Person) => {
-    setErr(null); setCopied(false);
+    setErr(null);
     try { const r = await invitePerson(p.id); setIssued({ id: p.id, link: invitationLink(r.token), expiresAt: r.expiresAt }); load(); }
     catch (e) { setErr(humanError(e, "Could not create the invitation.")); }
   };
@@ -303,15 +306,7 @@ const AuthorityDirectory: React.FC = () => {
                     <button onClick={() => removePerson(p)} title="Remove person" className="rounded px-1.5 py-1 text-[11px] font-semibold text-white/30 hover:text-red-300">Remove</button>
                   </div>
                   {issued?.id === p.id && (
-                    <div role="status" className="basis-full rounded-lg border border-emerald-500/30 bg-emerald-500/[0.06] p-3">
-                      <div className="text-[12.5px] font-semibold text-emerald-300">Invitation link for {p.fullName}</div>
-                      <p className="mt-0.5 text-[11.5px] text-white/55">Send it to {p.email} yourself, by email or chat. It works once, until {new Date(issued.expiresAt).toLocaleDateString(undefined, { day: "numeric", month: "long" })}, and is shown only now. A new link replaces this one.</p>
-                      <div className="mt-2 flex items-center gap-2">
-                        <code className="min-w-0 flex-1 select-all truncate rounded bg-ink-900/70 px-2 py-1 font-mono text-[11.5px] text-white/80">{issued.link}</code>
-                        <Button variant="ghost" className="shrink-0 px-2.5 py-1 text-[12px]" onClick={() => { navigator.clipboard?.writeText(issued.link).then(() => setCopied(true)); }}>{copied ? "Copied" : "Copy link"}</Button>
-                        <button onClick={() => setIssued(null)} className="shrink-0 text-[11.5px] font-semibold text-white/40 hover:text-white">Done</button>
-                      </div>
-                    </div>
+                    <InvitationPanel person={p} link={issued.link} expiresAt={issued.expiresAt} institution={billing?.institution} onDone={() => setIssued(null)} />
                   )}
                 </div>
               );
@@ -419,6 +414,45 @@ const AuthorityDirectory: React.FC = () => {
           </Card>
         </div>
       </div>
+    </div>
+  );
+};
+
+// The invitation just issued, with the ways to send it. Dispatch sends no email itself, so each way hands
+// the message to something the administrator already uses: their email program, the device's share menu,
+// the clipboard, or a QR code for someone in the room. The link is shown once and works once.
+const InvitationPanel: React.FC<{ person: Person; link: string; expiresAt: string; institution?: string | null; onDone: () => void }> = ({ person, link, expiresAt, institution, onDone }) => {
+  const [done, setDone] = useState<"link" | "message" | "shared" | null>(null);
+  const [qr, setQr] = useState(false);
+  const msg = invitationMessage({ fullName: person.fullName, institution, link, expiresAt });
+  const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
+  const copy = (text: string, what: "link" | "message") => { navigator.clipboard?.writeText(text).then(() => setDone(what)).catch(() => {}); };
+  const share = () => { navigator.share?.({ title: msg.subject, text: msg.body }).then(() => setDone("shared")).catch(() => {}); };
+  const mailto = `mailto:${encodeURIComponent(person.email)}?subject=${encodeURIComponent(msg.subject)}&body=${encodeURIComponent(msg.body)}`;
+  const opt = "inline-flex items-center gap-1.5 rounded-lg border border-sd-line px-3 py-1.5 text-[12.5px] font-semibold text-white/80 transition hover:border-sd-gold/40 hover:text-white";
+  return (
+    <div role="status" aria-label={`Invitation for ${person.fullName}`} className="basis-full rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <div className="text-[13px] font-semibold text-emerald-300">Invitation for {person.fullName}</div>
+          <p className="mt-0.5 text-[12px] text-white/55">Send it to {person.email}. It works once, until {new Date(expiresAt).toLocaleDateString(undefined, { day: "numeric", month: "long" })}, and is shown only now. A new link replaces this one.</p>
+        </div>
+        <button onClick={onDone} className="text-[12px] font-semibold text-white/45 hover:text-white">Done</button>
+      </div>
+      <code className="mt-3 block select-all truncate rounded-lg bg-ink-900/70 px-3 py-2 font-mono text-[11.5px] text-white/80">{link}</code>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <a href={mailto} className={`${opt} border-sd-gold/45 text-white`}><Icon.external className="h-3.5 w-3.5" />Open in email</a>
+        {canShare && <button type="button" onClick={share} className={opt}><Icon.swap className="h-3.5 w-3.5" />{done === "shared" ? "Shared" : "Share…"}</button>}
+        <button type="button" onClick={() => copy(msg.body, "message")} className={opt}><Icon.copy className="h-3.5 w-3.5" />{done === "message" ? "Message copied" : "Copy message"}</button>
+        <button type="button" onClick={() => copy(link, "link")} className={opt}><Icon.copy className="h-3.5 w-3.5" />{done === "link" ? "Link copied" : "Copy link"}</button>
+        <button type="button" onClick={() => setQr((q) => !q)} aria-expanded={qr} className={opt}><Icon.hash className="h-3.5 w-3.5" />{qr ? "Hide QR code" : "QR code"}</button>
+      </div>
+      {qr && (
+        <div className="mt-4 flex flex-wrap items-center gap-4">
+          <QrCode value={link} label={`QR code of the invitation link for ${person.fullName}`} />
+          <p className="max-w-xs text-[12px] leading-relaxed text-white/55">For someone in the room: they scan it with their phone camera and set their password there. Close it once they have scanned it.</p>
+        </div>
+      )}
     </div>
   );
 };
