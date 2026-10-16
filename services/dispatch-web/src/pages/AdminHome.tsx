@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { listClients, getBilling, type ServiceClient, type Billing, humanError } from "../lib/api";
 import { Card } from "../lib/ui";
 import { useAuth } from "../lib/auth";
+import { scopeMeaning } from "../lib/console-guide";
 import { planLabel } from "../lib/upsell";
 
 // Administration overview — the platform posture of the institution's tenant:
@@ -51,15 +52,19 @@ const AdminHome: React.FC = () => {
       </div>
 
       <Card className="p-6">
-        <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Tenant identity</div>
-        <dl className="grid gap-3 sm:grid-cols-2">
-          <div><dt className="text-[11px] uppercase tracking-wide text-white/40">Principal</dt><dd className="font-mono text-sm text-white/85">{session?.subject}</dd></div>
-          <div><dt className="text-[11px] uppercase tracking-wide text-white/40">Tenant ID</dt><dd className="font-mono text-sm text-white/85">{session?.tenantId}</dd></div>
-          <div className="sm:col-span-2">
-            <dt className="text-[11px] uppercase tracking-wide text-white/40">Granted scopes</dt>
-            <dd className="mt-1 flex flex-wrap gap-1">{session?.scopes.map((s) => <span key={s} className="rounded bg-white/5 px-2 py-0.5 font-mono text-[11px] text-white/55">{s}</span>)}</dd>
-          </div>
-        </dl>
+        <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">This sign-in</div>
+        <p className="text-sm text-white/85">Signed in as <span className="font-semibold">{session?.subject}</span>. This sign-in can:</p>
+        <ul className="mt-2 grid gap-1 text-sm text-white/75 sm:grid-cols-2">
+          {session?.scopes.map((s) => <li key={s} className="flex items-baseline gap-2"><span aria-hidden className="text-[#75c9a1]">✓</span>{scopeMeaning(s)}</li>)}
+        </ul>
+        <details className="mt-4 text-[12px] text-white/50">
+          <summary className="cursor-pointer hover:text-white/75">Technical details</summary>
+          <dl className="mt-2 grid gap-3 sm:grid-cols-2">
+            <div><dt className="text-[11px] uppercase tracking-wide text-white/40">Tenant ID</dt><dd className="break-all font-mono text-[12px] text-white/70">{session?.tenantId}</dd></div>
+            <div><dt className="text-[11px] uppercase tracking-wide text-white/40">Granted scopes</dt>
+              <dd className="mt-1 flex flex-wrap gap-1">{session?.scopes.map((s) => <span key={s} className="rounded bg-white/5 px-2 py-0.5 font-mono text-[11px] text-white/55">{s}</span>)}</dd></div>
+          </dl>
+        </details>
       </Card>
     </div>
   );

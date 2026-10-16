@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth";
 import { useBilling, QuotaMeter, UpgradeModal } from "../lib/upsell";
 import { Icon } from "./console/icons";
 import { Kbd, cx } from "./console/ds";
+import { PAGE_GUIDE, guideFor, scopeMeaning } from "../lib/console-guide";
 
 // TWO DISTINCT PRODUCTS on one platform, not one console with two menus. A
 // ministry publication officer (Operations) and a systems integrator / security
@@ -29,6 +30,13 @@ const OPERATIONS_NAV: NavItem[] = [
   { to: "/console/polished", label: "Document studio", icon: "studio", group: "Studio", key: "7" },
 ];
 
+// The menu shows each page's task name (lib/console-guide) with the page's own title under it; `label`
+// stays the page title, which the breadcrumb and the page heading use.
+const taskName = (n: NavItem): string => PAGE_GUIDE[n.to]?.task ?? n.label.replace(/ ↗$/, "");
+const GUIDE_KEY = "sd.guide.hidden";
+const readGuideHidden = (): boolean => { try { return localStorage.getItem(GUIDE_KEY) === "1"; } catch { return false; } };
+const writeGuideHidden = (v: boolean): void => { try { if (v) localStorage.setItem(GUIDE_KEY, "1"); else localStorage.removeItem(GUIDE_KEY); } catch { /* unavailable: the choice lasts this visit */ } };
+
 // Administration is an institutional governance product organised by operational
 // domain — Identity (who holds authority), Governance (how records are governed),
 // Compliance (can we prove it) — not a flat list of database tables.
@@ -38,6 +46,7 @@ const ADMIN_NAV: NavItem[] = [
   { to: "/admin/authority", label: "Authority Directory", scope: "dispatch:admin", group: "Identity" },
   { to: "/admin/access", label: "API Access", scope: "dispatch:admin", group: "Platform" },
   { to: "/admin/publishing", label: "Publishing Platform", scope: "dispatch:admin", group: "Platform" },
+  { to: "/admin/intake", label: "Direct DDM Intake", scope: "dispatch:render", group: "Platform" },
   { to: "/admin/governance", label: "Policy", scope: "dispatch:admin", group: "Governance" },
   { to: "/admin/monitor", label: "Oversight", scope: "dispatch:read", group: "Governance" },
   { to: "/admin/compliance", label: "Audit & Compliance", scope: "dispatch:read", group: "Compliance" },
@@ -49,7 +58,6 @@ const ADMIN_NAV: NavItem[] = [
   { to: "/admin/resilience", label: "Operational Resilience", group: "Sovereignty" },
   { to: "/admin/evidence", label: "Evaluation Package", scope: "dispatch:read", group: "Sovereignty" },
   { to: "/evaluate", label: "Executive Evaluation ↗", scope: "dispatch:read", group: "Sovereignty" },
-  { to: "/admin/intake", label: "Direct DDM Intake", scope: "dispatch:render", group: "Platform" },
 ];
 
 const PRODUCT: Record<ConsoleVariant, { label: string; tag: string; nav: NavItem[]; home: string }> = {
@@ -81,6 +89,8 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
   const [upgrade, setUpgrade] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [shortcuts, setShortcuts] = useState(false);
+  const [guideHidden, setGuideHidden] = useState(readGuideHidden);
+  const [tip, setTip] = useState<{ to: string; top: number } | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const railRef = useRef<HTMLElement>(null);
@@ -96,6 +106,13 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
   const showSwitch = other === "administration" ? canAdmin : true;
   const crumb = crumbFor(pathname, product.nav);
   const remaining = useSessionClock(session?.expiresAt);
+  const guide = guideFor(pathname);
+  const nextPage = guide?.next && (!guide.next.scope || has(guide.next.scope)) ? guide.next.to : null;
+  const hideGuide = (v: boolean): void => { setGuideHidden(v); writeGuideHidden(v); };
+  const showTip = (to: string, el: HTMLElement): void => {
+    if (!window.matchMedia("(min-width: 1024px)").matches) return; // the drawer on small screens has no room beside it
+    setTip({ to, top: el.getBoundingClientRect().top });
+  };
   const today = new Date().toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
 
   // Close the mobile drawer on navigation; move focus to the page for screen readers.
@@ -195,8 +212,8 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
           <div className="mx-3 mb-3 flex items-center gap-2.5 rounded-lg border border-sd-line bg-sd-panel px-3 py-2.5">
             <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-md border border-sd-accent/35 text-sd-accent"><Icon.building className="h-4 w-4" /></span>
             <div className="min-w-0">
-              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-sd-text3">Tenant</div>
-              <div className="truncate font-mono text-[12px] text-sd-text" title={session?.tenantId}>{session?.tenantId ? `${session.tenantId.slice(0, 8)}…` : "—"}</div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-sd-text3">Institution workspace</div>
+              <div className="truncate text-[12px] text-sd-text">Private to your institution</div>
             </div>
           </div>
 
@@ -209,14 +226,20 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
                 {n.group && n.group !== items[i - 1]?.group && (
                   <div className="px-2.5 pb-1 pt-4 text-[10.5px] font-bold uppercase tracking-[0.16em] text-sd-faint">{n.group}</div>
                 )}
-                <NavLink to={n.to} end={n.end}
+                <NavLink to={n.to} end={n.end} aria-describedby={`sd-tip-${i}`}
+                  onMouseEnter={(e) => showTip(n.to, e.currentTarget)} onMouseLeave={() => setTip(null)}
+                  onFocus={(e) => showTip(n.to, e.currentTarget)} onBlur={() => setTip(null)}
                   className={({ isActive: a }) => { const isActive = a || inFile; return cx("group flex items-center gap-2.5 rounded-lg border px-2.5 py-[7px] text-[13px] font-medium transition-colors",
                     isActive ? "border-sd-accent/30 bg-[#16263a] text-sd-text" : "border-transparent text-sd-text2 hover:bg-sd-raised hover:text-sd-text"); }}>
                   {({ isActive: a }) => { const isActive = a || inFile; return (
                     <>
                       {n.icon ? React.createElement(Icon[n.icon], { className: cx("h-4 w-4 shrink-0", isActive ? "text-sd-accent" : "text-sd-text3 group-hover:text-sd-text2") }) : <span className="w-4" aria-hidden />}
-                      <span className="truncate">{n.label}</span>
-                      {variant === "operations" && n.key && <span aria-hidden className="ml-auto hidden font-mono text-[10px] text-sd-faint xl:inline">g {n.key}</span>}
+                      <span className="min-w-0 flex-1 leading-tight">
+                        <span className="block truncate">{taskName(n)}</span>
+                        {taskName(n) !== n.label.replace(/ ↗$/, "") && <span className="block truncate text-[10.5px] font-normal text-sd-text3">{n.label}</span>}
+                      </span>
+                      <span id={`sd-tip-${i}`} className="sr-only">{PAGE_GUIDE[n.to]?.summary}</span>
+                      {variant === "operations" && n.key && <span aria-hidden className="ml-auto hidden shrink-0 font-mono text-[10px] text-sd-faint xl:inline">g {n.key}</span>}
                     </>
                   ); }}
                 </NavLink>
@@ -224,6 +247,12 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
               );
             })}
           </nav>
+          {tip && PAGE_GUIDE[tip.to] && (
+            <div aria-hidden className="pointer-events-none fixed left-[256px] z-50 w-72 rounded-lg border border-sd-line bg-[#111a26] p-3 shadow-[0_18px_40px_-16px_rgba(0,0,0,0.7)]" style={{ top: Math.min(tip.top, window.innerHeight - 140) }}>
+              <div className="text-[12.5px] font-semibold text-sd-text">{PAGE_GUIDE[tip.to]!.task}</div>
+              <p className="mt-1 text-[12px] leading-snug text-sd-text2">{PAGE_GUIDE[tip.to]!.summary}</p>
+            </div>
+          )}
 
           {/* product switcher — only for principals with access to the other product */}
           {showSwitch && (
@@ -247,8 +276,13 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
             <div className="min-w-0 flex-1 leading-tight">
               <div className="truncate text-[12px] font-semibold text-sd-text" title={session?.subject}>{session?.subject}</div>
               <details className="group text-[11px] text-sd-text3">
-                <summary className="cursor-pointer list-none hover:text-sd-text2">{session?.scopes.length ?? 0} permission{session?.scopes.length === 1 ? "" : "s"} granted <span aria-hidden className="inline-block transition-transform group-open:rotate-90">›</span></summary>
-                <ul className="mt-1 space-y-0.5 font-mono text-[10.5px] text-sd-text2">{session?.scopes.map((sc) => <li key={sc}>{sc}</li>)}</ul>
+                <summary className="cursor-pointer list-none hover:text-sd-text2">What you can do <span aria-hidden className="inline-block transition-transform group-open:rotate-90">›</span></summary>
+                <ul className="mt-1 space-y-0.5 text-[11px] text-sd-text2">{session?.scopes.map((sc) => <li key={sc}>{scopeMeaning(sc)}</li>)}</ul>
+                <details className="mt-1.5">
+                  <summary className="cursor-pointer list-none text-[10.5px] hover:text-sd-text2">Technical details</summary>
+                  <div className="mt-1 break-all font-mono text-[10px] text-sd-text3">Tenant {session?.tenantId || "—"}</div>
+                  <ul className="mt-0.5 font-mono text-[10px] text-sd-text3">{session?.scopes.map((sc) => <li key={sc}>{sc}</li>)}</ul>
+                </details>
               </details>
             </div>
             <Link to="/" aria-label="Sovereign Dispatch home" title="Home" className="rounded-md p-1.5 text-sd-text3 hover:bg-sd-hover hover:text-sd-text"><Icon.home /></Link>
@@ -268,6 +302,9 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
               </ol>
             </nav>
             <span className="hidden font-mono text-[11.5px] text-sd-text3 md:block">{today}</span>
+            {guide && guideHidden && (
+              <button onClick={() => hideGuide(false)} className="hidden rounded-md px-2 py-1 text-[11.5px] text-sd-text3 hover:bg-sd-hover hover:text-sd-text sm:block">Page guide</button>
+            )}
             {variant === "operations" && (
               <button onClick={() => setShortcuts((s) => !s)} className="hidden items-center gap-1.5 rounded-md px-2 py-1 text-[11.5px] text-sd-text3 hover:bg-sd-hover hover:text-sd-text md:flex" aria-expanded={shortcuts} aria-controls="sd-shortcuts">
                 <Icon.keyboard /> <Kbd>?</Kbd>
@@ -278,7 +315,7 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
           {shortcuts && (
             <div id="sd-shortcuts" role="region" aria-label="Keyboard shortcuts" className="sd-fade border-b border-sd-soft bg-sd-panel px-4 py-3 sm:px-6">
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] text-sd-text2">
-                {items.filter((n) => n.key).map((n) => <span key={n.to} className="flex items-center gap-1.5"><Kbd>g</Kbd><Kbd>{n.key}</Kbd>{n.label}</span>)}
+                {items.filter((n) => n.key).map((n) => <span key={n.to} className="flex items-center gap-1.5"><Kbd>g</Kbd><Kbd>{n.key}</Kbd>{taskName(n)}</span>)}
                 <span className="flex items-center gap-1.5"><Kbd>/</Kbd>Focus search</span>
                 <span className="flex items-center gap-1.5"><Kbd>j</Kbd><Kbd>k</Kbd>Move in queue / register</span>
                 <span className="flex items-center gap-1.5"><Kbd>o</Kbd>Open selected record (review)</span>
@@ -286,6 +323,16 @@ const ConsoleShell: React.FC<{ children: React.ReactNode; variant?: ConsoleVaria
                 <button onClick={() => setShortcuts(false)} className="ml-auto text-[12px] font-semibold text-sd-accent hover:underline">Close</button>
               </div>
             </div>
+          )}
+
+          {guide && !guideHidden && (
+            <section aria-label="Page guide" className="sd-noprint flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-sd-soft bg-[#0d1520] px-4 py-2 text-[12.5px] sm:px-6">
+              <p className="min-w-0 flex-1 text-sd-text2"><span className="font-semibold text-sd-text">This page:</span> {guide.summary}</p>
+              {nextPage && PAGE_GUIDE[nextPage] && (
+                <Link to={nextPage} className="font-semibold text-sd-accent hover:underline">Usually next: {PAGE_GUIDE[nextPage]!.task} →</Link>
+              )}
+              <button onClick={() => hideGuide(true)} className="text-[12px] text-sd-text3 hover:text-sd-text">Hide</button>
+            </section>
           )}
 
           {/* announces the destination after client-side navigation */}
