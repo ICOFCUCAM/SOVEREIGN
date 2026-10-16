@@ -1,11 +1,38 @@
 import { test, expect } from "@playwright/test";
-import { FIX, mockApi, personJwt, signIn } from "./mock-api";
+import type { Page } from "@playwright/test";
+import { FIX, go, mockApi, personJwt, signIn } from "./mock-api";
 
 // Sign-in doors, people's password sign-in, the invitation page, the Welcome on a new institution's first
 // sign-in, "Go to a page" and the folding rail. API answers for the new endpoints are given per test.
 const PERSON = "amina.okafor@example.org";
 const personSession = (scopes = ["dispatch:read", "dispatch:render"]) => ({ status: 200, body: { access_token: personJwt(PERSON, scopes), tenantId: FIX.tenantId, expiresIn: 3600, scopes } });
 const TOKEN = "Q".repeat(43);
+
+// A brand-new institution: nothing configured, answered from state the set-up's own writes change.
+function newInstitution() {
+  const st = { departments: [] as unknown[], roles: [] as unknown[] };
+  const respond = (m: string, p: string): { status: number; body: unknown } | undefined => {
+    if (m === "GET" && p === "/v1/governance/roles") return { status: 200, body: { departments: st.departments, roles: st.roles, grants: [], delegations: [] } };
+    if (m === "GET" && p === "/v1/users") return { status: 200, body: { users: [] } };
+    if (m === "GET" && p === "/v1/governance/policies") return { status: 200, body: { policies: [] } };
+    if (m === "GET" && p === "/v1/auth/sso/connection") return { status: 200, body: { connection: null } };
+    if (m === "GET" && p === "/v1/admin/clients") return { status: 200, body: { clients: [] } };
+    if (m === "GET" && p === "/v1/billing") return { status: 200, body: { ...FIX.singles["/v1/billing"].body, institution: "Ministry of Records" } };
+    if (m === "POST" && p === "/v1/governance/departments") { st.departments.push({ key: "fiscal_policy", name: "Fiscal Policy" }); return { status: 201, body: { key: "fiscal_policy" } }; }
+    if (m === "POST" && p === "/v1/governance/roles") { st.roles.push({ key: "director_of_fiscal_policy", label: "Director of Fiscal Policy", department_key: null }); return { status: 201, body: { key: "director_of_fiscal_policy" } }; }
+    return undefined;
+  };
+  return { respond };
+}
+// The administrator key door, without waiting for the console (the set-up is outside it).
+async function keySignIn(page: Page): Promise<void> {
+  await page.goto("/console");
+  await page.getByRole("tab", { name: /Administrator or system key/ }).click();
+  await page.getByLabel("Client ID").fill("svc_e2e_console");
+  await page.getByLabel("Secret").fill("not-a-real-secret");
+  await page.getByRole("button", { name: "Sign in with key" }).click();
+  await page.waitForLoadState("networkidle");
+}
 
 test.describe("sign-in and onboarding", () => {
   test("three named doors; a person on a domain without an identity provider signs in with a password", async ({ page }) => {
@@ -81,21 +108,52 @@ test.describe("sign-in and onboarding", () => {
     await expect(page.getByLabel("Choose a password")).toHaveCount(0);
   });
 
-  test("an administrator's first sign-in to an empty institution opens the Welcome, once", async ({ page }) => {
-    const empty: Record<string, unknown> = {
-      "/v1/governance/roles": { departments: [], roles: [], grants: [], delegations: [] },
-      "/v1/users": { users: [] }, "/v1/governance/policies": { policies: [] },
-      "/v1/auth/sso/connection": { connection: null }, "/v1/admin/clients": { clients: [] },
-    };
-    await mockApi(page, { respond: (m, p) => (m === "GET" && empty[p] ? { status: 200, body: empty[p] } : undefined) });
-    await signIn(page);
-    await expect(page).toHaveURL(/\/admin\/welcome$/);
-    await expect(page.getByRole("heading", { name: "Let's set up your institution" })).toBeVisible();
-    const first = page.locator("#sd-main ol > li").first();
-    await expect(first).toContainText("Establish your institution");
-    await expect(first).toContainText("Next");
-    await page.locator("#sd-rail nav").getByRole("link", { name: /Overview/ }).click();
-    await expect(page).toHaveURL(/\/admin$/);
+  test("a new institution's administrator lands on the full-screen set-up, and the console stays closed", async ({ page }) => {
+    await mockApi(page, { respond: newInstitution().respond });
+    await keySignIn(page);
+    await expect(page).toHaveURL(/\/setup$/);
+    await expect(page.getByRole("heading", { name: "Let's establish the Ministry of Records" })).toBeVisible();
+    await expect(page.locator("#sd-rail")).toHaveCount(0);
+    const cards = page.locator("ol > li");
+    await expect(cards).toHaveCount(3);
+    await expect(cards.first()).toContainText("Start here");
+    await expect(cards.nth(1)).toContainText("After step 1");
+    await expect(page.getByText("Your console opens once the three essentials are complete.")).toBeVisible();
+    await go(page, "/admin");
+    await expect(page).toHaveURL(/\/setup$/);
+    await go(page, "/console/library");
+    await expect(page).toHaveURL(/\/setup$/);
+  });
+
+  test("step 1 records the structure, then leads to the approval rules", async ({ page }) => {
+    const inst = newInstitution();
+    await mockApi(page, { respond: inst.respond });
+    await keySignIn(page);
+    await page.getByRole("link", { name: /Begin/ }).click();
+    await expect(page).toHaveURL(/\/setup\/structure$/);
+    await expect(page.getByRole("heading", { name: "How is your institution organised?" })).toBeVisible();
+    const next = page.getByRole("button", { name: /Save and continue/ });
+    await expect(next).toBeDisabled();
+    await page.getByLabel("Department name").fill("Fiscal Policy");
+    await page.getByRole("button", { name: "Add department" }).click();
+    await expect(page.getByRole("button", { name: "Remove Fiscal Policy" })).toBeVisible();
+    await page.getByLabel("Office name").fill("Director of Fiscal Policy");
+    await page.getByRole("button", { name: "Add office" }).click();
+    await expect(next).toBeEnabled();
+    await next.click();
+    await expect(page).toHaveURL(/\/setup\/rules$/);
+    await expect(page.getByRole("heading", { name: "Who must approve your records?" })).toBeVisible();
+    await page.getByLabel("Add an office to the chain").selectOption({ label: "Director of Fiscal Policy" });
+    await expect(page.getByText(/In plain words:.*approved by the Director of Fiscal Policy/)).toBeVisible();
+  });
+
+  test("once the essentials are in place the set-up says so and opens the console", async ({ page }) => {
+    await mockApi(page, { respond: (m, p) => (m === "GET" && p === "/v1/billing" ? { status: 200, body: { ...FIX.singles["/v1/billing"].body, institution: "Ministry of Records" } } : undefined) });
+    await keySignIn(page);
+    await expect(page).toHaveURL(/\/console$/);
+    await go(page, "/setup");
+    await expect(page.getByRole("heading", { name: "Ministry of Records is established" })).toBeVisible();
+    await page.getByRole("link", { name: /Open the console/ }).click();
     await expect(page.getByRole("heading", { name: "Institutional Posture" })).toBeVisible();
   });
 

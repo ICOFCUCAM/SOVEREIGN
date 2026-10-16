@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { getGovernance, getUsers, getGovernancePolicies, getSsoConnection, listClients, type Department, type GovRole, type GovGrant, type Person, type GovernancePolicy, type SsoConnection, type ServiceClient } from "./api";
 
-// How far the institution is set up, read from its live configuration (never from a tick box). The
-// Welcome page shows it, and a new institution's first sign-in opens the Welcome until the ESSENTIALS are
-// in place: the institution's structure (departments and offices), its approval rules, and its people in
-// their offices. Sign-in for people, connected systems and the plan are shown too, but none of them holds
-// the Welcome open.
+// How far the institution is set up, read from its live configuration (never from a tick box). Until the
+// ESSENTIALS are in place (the institution's structure, its approval rules, and its people in their offices)
+// an administrator works in the full-screen set-up (/setup) and the console stays closed. Sign-in for
+// people, connected systems and the plan come after, from the console; none of them holds it closed.
 
 export interface InstitutionConfig {
   departments: Department[]; roles: GovRole[]; grants: GovGrant[]; people: Person[];
@@ -55,11 +54,8 @@ export function useInstitutionConfig(): { config: InstitutionConfig | null; erro
   return { config, error, reload };
 }
 
-// The first route a session opens, for an administrator whose institution still lacks the essentials, is
-// the Welcome. Once per session: the administrator can then go anywhere. Held in memory, like the session.
-const welcomed = new Set<string>();
-export function takeFirstEntry(token: string): boolean {
-  if (welcomed.has(token)) return false;
-  welcomed.add(token);
-  return true;
-}
+// Sessions whose institution has its essentials, so the console gate does not ask again. Held in memory,
+// like the session; the set-up page adds a session the moment its essentials are complete.
+const established = new Set<string>();
+export const isEstablished = (token: string): boolean => established.has(token);
+export const markEstablished = (token: string): void => { established.add(token); };

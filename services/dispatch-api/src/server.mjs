@@ -772,19 +772,19 @@ const claimsFor = (p) => ({ tenant_id: p.tenantId, dispatch_role: p.role, princi
 async function tenantBilling(tenantId) {
   const claims = { tenant_id: tenantId, dispatch_role: "service", principal_type: "system", actor: "billing" };
   return withClaims(pool, claims, async (c) => {
-    const t = await c.query(`select plan, subscription_status, doc_quota, tier, requested_tier, trial_ends_at,
+    const t = await c.query(`select name, plan, subscription_status, doc_quota, tier, requested_tier, trial_ends_at,
         coalesce(trial_ends_at < now(), false) as trial_over,
         greatest(0, ceil(extract(epoch from (trial_ends_at - now())) / 86400))::int as trial_days_left
       from dispatch.tenants where id=$1`, [tenantId]);
     const n = await c.query("select count(*)::int n from dispatch.documents where tenant_id=$1", [tenantId]);
     const row = t.rows[0] || {};
-    return { plan: row.plan || "free", subscriptionStatus: row.subscription_status || "inactive", docQuota: row.doc_quota ?? 10, documentsUsed: n.rows[0]?.n ?? 0,
+    return { institution: row.name ?? null, plan: row.plan || "free", subscriptionStatus: row.subscription_status || "inactive", docQuota: row.doc_quota ?? 10, documentsUsed: n.rows[0]?.n ?? 0,
       tier: row.tier ?? null, requestedTier: row.requested_tier ?? null, trialEndsAt: row.trial_ends_at ?? null, trialOver: !!row.trial_over, trialDaysLeft: row.trial_days_left ?? null };
   });
 }
 const billingView = (b) => {
   const active = b.subscriptionStatus === "active";
-  return { plan: b.plan, subscriptionStatus: b.subscriptionStatus, tier: b.tier, requestedTier: b.requestedTier, documentsUsed: b.documentsUsed,
+  return { institution: b.institution, plan: b.plan, subscriptionStatus: b.subscriptionStatus, tier: b.tier, requestedTier: b.requestedTier, documentsUsed: b.documentsUsed,
     documentQuota: b.docQuota, quotaRemaining: Math.max(0, b.docQuota - b.documentsUsed), canDownload: active,
     // the Evaluation's two limits; null once subscribed
     trialEndsAt: active ? null : b.trialEndsAt, trialDaysLeft: active ? null : b.trialDaysLeft, trialEnded: !active && b.trialOver,

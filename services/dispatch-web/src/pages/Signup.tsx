@@ -7,8 +7,8 @@ import { FilmGrain } from "../components/brand";
 import { track } from "../lib/analytics";
 
 // Public self-serve signup — an institution creates its account and receives its ADMINISTRATOR KEY
-// (client_id + secret, shown once). The key signs the first administrator in; the Welcome then sets up the
-// institution and invites its people, who sign in with their work email. The Evaluation is free for 30
+// (client_id + secret, shown once). The key signs the first administrator in; the set-up then establishes the
+// institution (structure, approval rules, people) before the console opens. The Evaluation is free for 30
 // days and 10 official records, whichever comes first (M26).
 const Signup: React.FC = () => {
   const { signIn } = useAuth();
@@ -42,7 +42,7 @@ const Signup: React.FC = () => {
   const enter = async () => {
     if (!cred) return;
     setEntering(true);
-    try { await signIn(cred.client_id, cred.secret); nav("/admin/welcome"); }
+    try { await signIn(cred.client_id, cred.secret); nav("/setup"); }
     catch { setErr("could not sign in — copy your secret and use the sign-in page"); setEntering(false); }
   };
 

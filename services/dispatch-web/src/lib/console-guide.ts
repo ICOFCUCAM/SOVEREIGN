@@ -22,9 +22,8 @@ export const PAGE_GUIDE: Readonly<Record<string, PageGuide>> = {
   "/console/audit": { task: "Audit trail", summary: "Every governance act on every record, in order, read-only. Use it to show who did what, and when." },
   "/console/polished": { task: "Personal documents", summary: "A separate studio for CVs, cover letters and books. It is outside the official record process." },
   // ── Administration ────────────────────────────────────────────
-  "/admin/welcome": { task: "Get started", summary: "Six steps from an empty account to an institution that issues official records, each ticked off from your live set-up.", next: { to: "/admin/setup", scope: "dispatch:admin" } },
-  "/admin": { task: "Overview", summary: "Your institution's account at a glance: credentials, plan, integrations and where its data lives.", next: { to: "/admin/setup", scope: "dispatch:admin" } },
-  "/admin/setup": { task: "Set up your institution", summary: "A step-by-step setup: departments, offices, approval rules, people and who holds which office.", next: { to: "/admin/authority", scope: "dispatch:admin" } },
+  "/admin": { task: "Overview", summary: "Your institution's account at a glance: credentials, plan, integrations and where its data lives.", next: { to: "/admin/authority", scope: "dispatch:admin" } },
+  "/setup": { task: "Set up your institution", summary: "The full-screen set-up: departments and offices, approval rules, and the people who hold the offices.", next: { to: "/admin/authority", scope: "dispatch:admin" } },
   "/admin/authority": { task: "People & offices", summary: "Your departments, the offices in them and who holds each office now, and each person's invitation to sign in. Authority belongs to the office, not the person.", next: { to: "/admin/governance", scope: "dispatch:admin" } },
   "/admin/governance": { task: "Approval rules", summary: "Who must approve each type of record, in what order, who may publish it and how long it is kept.", next: { to: "/admin/monitor", scope: "dispatch:read" } },
   "/admin/monitor": { task: "Work in progress", summary: "Every record in flight: who must act next and what is blocked.", next: { to: "/admin/intelligence", scope: "dispatch:read" } },

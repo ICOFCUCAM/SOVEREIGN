@@ -1058,12 +1058,17 @@ ExitOS writes, versions, reviews and renders its documents; Dispatch certifies t
 
 A new institution is now guided from its first sign-in, its people can sign in without an identity provider of their own, and the console's menu matches ExitOS's.
 
-- Welcome (`pages/Welcome.tsx`, `lib/readiness.ts`): six steps, ticked from the live configuration. The essentials are establishing the institution (departments and offices), approval rules, and people in their offices. The optional steps are letting people sign in, connecting systems and choosing a plan. While the essentials are missing, an administrator's first page of each session is the Welcome; afterwards they go where they asked. The guided set-up (`/admin/setup`) is still where the work is done, now opened at a step (`?step=people`).
+- Set-up (`pages/Setup.tsx`, `lib/readiness.ts`): a new institution's first experience, full screen and outside the console. It replaces the in-console Welcome and the earlier set-up wizard (`InstitutionSetup.tsx`); `/admin/setup` now leads here.
+  - The home page names the institution and shows the three essentials as a path: establishing the institution (departments and offices), approval rules, and people in their offices. Each essential shows its state ("Start here", "After step 1", "Done · 4 departments · 4 offices").
+  - Each essential is a split-screen step. On the left: the institution, a progress ring and the step list. On the right: one question with its form.
+  - The approval-rule step builds the chain of offices as boxes and states the rule in plain words. The people step adds people with their office, places existing people in offices, and imports a pasted list.
+  - Until the essentials are in place, every console page sends an administrator to the set-up (a configuration that cannot be read never locks anyone out). Afterwards the home page reads "… is established" and opens the console, where people's invitations, connected systems and the plan follow.
+  - Every count and tick is read from the live configuration. Billing now also returns the institution's name.
 - Sign-in (`pages/SignIn.tsx`): three named doors.
   - "I work at an institution": a work email. Its domain alone decides between the institution's identity provider and a password, so the form never reveals whether an address has an account.
   - "Set up a new institution": the Evaluation's terms, then sign-up.
   - "Administrator or system key": the key from the institution's creation, or an integration's key.
-- Sign-up: now says 30 days and 10 records (it said 3), names the key it shows as the administrator key, and opens the Welcome.
+- Sign-up: now says 30 days and 10 records (it said 3), names the key it shows as the administrator key, and opens the set-up.
 - People's sign-in without an identity provider (`db/migrations/M27__person_invitations_and_passwords.sql`, `services/dispatch-api`):
   - The administrator issues a single-use invitation link that expires after 7 days (`POST /v1/users/invite`). The person sets a password on `/invite` and is signed in. Later sign-ins use email and password (`POST /v1/auth/password`).
   - Only the token's SHA-256 and a salted scrypt hash of the password are stored. The tables are reached only through security-definer functions, and the application role cannot read them.
@@ -1072,11 +1077,11 @@ A new institution is now guided from its first sign-in, its people can sign in w
   - Removing a person deletes their password and revokes their links. Every step is audited.
   - People & offices shows each person's sign-in state ("Signs in with a password", "Invited · link valid until …", "Not invited yet"), with Invite and New password link actions.
 - Menu (`components/Shell.tsx`): an icon on every item.
-  - Administration is regrouped as Get started, Your institution, Oversight, Connections and Assurance. All 17 pages remain, plus the Welcome.
+  - Administration is regrouped as Your institution, Oversight, Connections and Assurance. All 17 pages remain; "Set up your institution" opens the full-screen set-up.
   - The rail folds to its icons ("[" or the button, remembered per browser).
   - "Go to a page" (Ctrl/⌘ K) searches both products by name or purpose.
   - Other changes: a gold active marker, a brand gradient, and an account card saying who is signed in and how (person, administrator key, system key).
 
-**Results**: people sign-in e2e **29/29** (new in `dispatch-ci`). Backbone e2e 14, retry 3, provisioning 15, billing 18 and audit-read 8 pass on a scratch Postgres 16 with all migrations. Browser tests: 69 pass (console 61, onboarding 8 new; the browser mock now answers as an established institution). Typecheck and build are clean, and lint shows no new findings.
+**Results**: people sign-in e2e **29/29** (new in `dispatch-ci`). Backbone e2e 14, retry 3, provisioning 15, billing 18 and audit-read 8 pass on a scratch Postgres 16 with all migrations. Browser tests: 71 pass (console 61, onboarding 10 new; the browser mock answers as an established institution unless a test sets up a new one). Billing 18/18 with the institution's name. Typecheck and build are clean, and lint shows no new findings.
 
 **To go live**: apply `M27__person_invitations_and_passwords.sql` to the Dispatch schema; merge (the console deploys from `main`, the API through DeployPro). Dispatch does not send email: the administrator copies the invitation link and sends it.

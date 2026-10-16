@@ -120,6 +120,8 @@ export const signup = (name: string) => request<SignupResponse>("POST", "/v1/sig
 
 export type PlanTier = "institutional" | "institutional_plus" | "enterprise" | "sovereign";
 export interface Billing {
+  /** The institution's name, as it was registered. */
+  institution?: string | null;
   plan: string; subscriptionStatus: string; documentsUsed: number; documentQuota: number; quotaRemaining: number; canDownload: boolean;
   /** The paid plan that is active, and a plan asked for but not yet paid for. */
   tier?: PlanTier | null; requestedTier?: PlanTier | null;

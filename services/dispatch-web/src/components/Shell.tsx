@@ -40,13 +40,12 @@ const writeFolded = (v: boolean): void => { try { if (v) localStorage.setItem(RA
 const readGuideHidden = (): boolean => { try { return localStorage.getItem(GUIDE_KEY) === "1"; } catch { return false; } };
 const writeGuideHidden = (v: boolean): void => { try { if (v) localStorage.setItem(GUIDE_KEY, "1"); else localStorage.removeItem(GUIDE_KEY); } catch { /* unavailable: the choice lasts this visit */ } };
 
-// Administration is organised the way an institution is set up and run: get started, the institution
-// itself (structure, people, approval rules), oversight (is it working), connections (systems that use
+// Administration is organised the way an institution is set up and run: the institution itself
+// (its set-up, people and offices, approval rules; the set-up opens full screen), oversight (is it working), connections (systems that use
 // Dispatch) and assurance (what you show an auditor) — not a flat list of database tables.
 const ADMIN_NAV: NavItem[] = [
-  { to: "/admin/welcome", label: "Welcome", icon: "compass" },
   { to: "/admin", label: "Posture", end: true, icon: "shield" },
-  { to: "/admin/setup", label: "Establish Institution", scope: "dispatch:admin", group: "Your institution", icon: "building" },
+  { to: "/setup", label: "Establish Institution", scope: "dispatch:admin", group: "Your institution", icon: "building" },
   { to: "/admin/authority", label: "Authority Directory", scope: "dispatch:admin", group: "Your institution", icon: "users" },
   { to: "/admin/governance", label: "Policy", scope: "dispatch:admin", group: "Your institution", icon: "rules" },
   { to: "/admin/monitor", label: "Oversight", scope: "dispatch:read", group: "Oversight", icon: "activity" },

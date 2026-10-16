@@ -124,7 +124,7 @@ const SignIn: React.FC = () => {
               <p className="text-[13px] leading-relaxed text-white/65">Create your institution's account in a minute. The <span className="text-white/85">Evaluation is free for 30 days and includes 10 official records</span>; no card is needed.</p>
               <ol className="space-y-1.5 text-[12.5px] text-white/55">
                 <li><span className="mr-1.5 font-mono text-seal-light">1</span>Name your institution and receive its administrator key.</li>
-                <li><span className="mr-1.5 font-mono text-seal-light">2</span>A guided welcome sets up your offices, approval rules and people.</li>
+                <li><span className="mr-1.5 font-mono text-seal-light">2</span>A guided set-up establishes your offices, approval rules and people.</li>
                 <li><span className="mr-1.5 font-mono text-seal-light">3</span>Invite your people; they sign in with their work email.</li>
               </ol>
               <Link to="/signup" className="flex h-10 w-full items-center justify-center rounded-md bg-seal text-sm font-semibold text-white transition hover:bg-seal-light">Create your institution's account →</Link>
