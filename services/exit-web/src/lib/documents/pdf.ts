@@ -204,8 +204,8 @@ const meta = (d: DdmDocument): Record<string, string> => {
 
 /** Options: `review` is the version's review state in words ("Approved", "In review"), shown beside the
  *  document's own status; `notice` is set in a callout under the title block (e.g. that the figures are
- *  sample data). */
-export interface PdfOptions { readonly review?: string; readonly notice?: string }
+ *  sample data); `record` is the Dispatch record number of a certified version, printed in the footer. */
+export interface PdfOptions { readonly review?: string; readonly notice?: string; readonly record?: string }
 
 /** The PDF for a document version's model, as bytes. */
 export function renderDocumentPdf(doc: DdmDocument, opts: PdfOptions = {}): Uint8Array {
@@ -276,7 +276,7 @@ export function renderDocumentPdf(doc: DdmDocument, opts: PdfOptions = {}): Uint
   // ── running header and footer on every page
   const total = L.pages.length;
   const headLeft = toWinAnsi(cls.level ?? ""), headRight = wrap(toWinAnsi(title), "F1", 7.5, CONTENT_W * 0.55)[0] ?? "";
-  const foot = toWinAnsi(`ExitOS${m.referenceCode ? ` · ${m.referenceCode}` : ""}`);
+  const foot = toWinAnsi(`ExitOS${m.referenceCode ? ` · ${m.referenceCode}` : ""}${opts.record ? ` · Certified record ${opts.record}` : ""}`);
   L.pages.forEach((ops, i) => {
     const put = (x: number, y: number, win: string, font: Font, size: number, color: RGB): void => { ops.push(`BT ${rgb(color)} /${font} ${n2(size)} Tf ${n2(x)} ${n2(y)} Td (${esc(win)}) Tj ET`); };
     if (headLeft) put(MARGIN, PAGE_H - 40, headLeft, "F2", 7.5, BRONZE);

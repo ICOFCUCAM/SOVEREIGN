@@ -75,7 +75,7 @@ describe("ExitOS PDF renderer", () => {
     expect(lines.join(" ")).toBe(text);
   });
 
-  it.skipIf(!poppler)("states sample data under the title when asked", () => {
+  it.skipIf(!poppler)("states sample data under the title, and a certified record in the footer, when asked", () => {
     const dir = mkdtempSync(join(tmpdir(), "exitos-pdf-"));
     const file = join(dir, "notice.pdf");
     writeFileSync(file, renderDocumentPdf(items[0]!.item.version.ddm, { review: "In review", notice: "Every figure is demo data." }));
@@ -83,6 +83,8 @@ describe("ExitOS PDF renderer", () => {
     expect(text).toContain("Sample data");
     expect(text).toContain("Every figure is demo data.");
     expect(text).toContain("In review");
+    writeFileSync(file, renderDocumentPdf(items[0]!.item.version.ddm, { record: "SD-2026-00000013" }));
+    expect(execFileSync("pdftotext", [file, "-"]).toString()).toContain("Certified record SD-2026-00000013");
   });
 
   it("names the file after the title and version", () => {

@@ -1037,3 +1037,17 @@ The two consoles serve different users: ExitOS guides founders and buyers throug
 - Tests (`pdf.test.ts`): every document in the two-company sample pack renders to a well-formed PDF and passes the quality gate's rendered-output checks on the PDF text (every heading, every table's columns and rows, title, status, no placeholders, no valuation in buyer-facing documents).
 
 **Results**: web 475 tests; lint, typecheck, build clean. Browser: the Report hub button downloads `Helios-Freight-Board-Transaction-Memorandum-v1.pdf` (3 pages, Title and Producer set, sample-data notice shown).
+
+## 26. Increment report — certified deal documents (ExitOS → Sovereign Dispatch)
+
+ExitOS writes, versions, reviews and renders its documents; Dispatch certifies the ones both parties rely on after the deal (NDA, letter of intent, exclusivity, bring-down certificate, funds flow, post-closing register).
+
+- Bridge (`supabase/functions/exit-dispatch-submit`): `certify` registers an approved version of a certifiable type, owned by the caller and matching its content hash, using the request envelope Dispatch's contract requires (the earlier bridge sent only the document and could not have been accepted); `status` publishes it once rendered and seals it for preservation. The Dispatch logic is `certify.mjs`, plain JavaScript shared with the CI test.
+- ExitOS record (`20261016150000_exitos_document_certificates.sql`): one row per certified version, written only by the function (service role), read by the version's owner; record-number and https-link patterns enforced. Self-test `exitos_selftest_document_certificates()`: 9 checks, passing locally.
+- Dispatch: a replayed submission now answers with the document it created (`services/dispatch-api`).
+- Website: "Certify" on approved deal documents, "Check certification" while Dispatch renders, a "Certified · SD-… · Verify" badge, and the record number in the PDF footer (`lib/documents/certificate.ts`).
+- Public: the verify page confirms the record (preserved, issued by the ExitOS institution, integrity hash) and withholds the title of these classified documents; no part of the body is public.
+
+**Results**: web 480 tests; lint, typecheck, build clean. Dispatch backbone on a scratch Postgres 16 with all migrations: e2e 14, retry 3, provisioning 15, billing 18, **ExitOS certification 14/14** (an ExitOS letter of intent certified as SD-2026-00000013, PRESERVED, title withheld), audit-read 8. Database self-tests: all pass, including the new 9/9.
+
+**To go live**: apply the migration and its self-test; deploy `exit-dispatch-submit`; in Dispatch, put the ExitOS institution on an active plan and issue its client (render, read, publish); set the function's `DISPATCH_API_URL`, `DISPATCH_CLIENT_ID`, `DISPATCH_CLIENT_SECRET` and `DISPATCH_VERIFY_URL`.
