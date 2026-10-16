@@ -268,7 +268,7 @@ const LifecycleStrip: React.FC<{ loading: boolean; stages: Stage[]; offPath: Sta
 const FirstRun: React.FC<{ canAuthor: boolean }> = ({ canAuthor }) => {
   // the allowance is the server's own figure, never a number written into the page
   const { billing } = useBilling();
-  const allowance = !billing ? "" : billing.canDownload ? "Your plan has no record limit. " : `Your evaluation includes ${billing.documentQuota} official record${billing.documentQuota === 1 ? "" : "s"}. `;
+  const allowance = !billing ? "" : billing.canDownload ? "" : `Your evaluation includes ${billing.documentQuota} record${billing.documentQuota === 1 ? "" : "s"}${billing.trialDaysLeft != null ? ` over the next ${billing.trialDaysLeft} day${billing.trialDaysLeft === 1 ? "" : "s"}` : ""}. `;
   const steps = [
     { n: 1, t: "Compose a record", d: "Author an executive briefing, board report, or policy paper from a structured template." },
     { n: 2, t: "Submit for governance", d: "It enters the approval chain — reviewed and approved before anything is produced." },

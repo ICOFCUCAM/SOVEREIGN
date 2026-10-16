@@ -1,7 +1,8 @@
-// Billing / plans e2e — "sign up free, taste it, subscribe to download".
-// Proves: self-serve signup → free owner credential → create up to the quota →
-// quota 402 → metadata preview is free → download 402 on free → subscribe →
-// download 200 and quota lifted. Assumes the API on :8787 and a superuser pool.
+// Billing / plans e2e — "evaluate free for 30 days, subscribe to a plan to download".
+// Proves: self-serve signup → free owner credential → the Evaluation's two limits (10 records, 30 days) →
+// metadata preview is free → download 402 on free → subscribe needs a named plan; a scoped plan is only
+// requested → subscribe to a self-serve plan (development stub) → download 200, quota lifted, plan named.
+// Assumes the API on :8787 started with DISPATCH_BILLING_STUB=1, and a superuser pool.
 import crypto from "node:crypto";
 import pgpkg from "pg";
 import { tick } from "../dispatch-worker/src/worker.mjs";
@@ -56,15 +57,26 @@ async function main() {
 
   // 3. Billing starts free, no download.
   const b0 = await jget("/v1/billing", token);
-  ok(b0.status === 200 && b0.json.plan === "free" && b0.json.canDownload === false && b0.json.documentQuota === 3, "billing: free plan, downloads locked, quota 3");
+  ok(b0.status === 200 && b0.json.plan === "free" && b0.json.canDownload === false && b0.json.documentQuota === 10, "billing: free plan, downloads locked, quota 10");
+  ok(b0.json.trialDaysLeft >= 29 && b0.json.trialDaysLeft <= 30 && b0.json.trialEnded === false && b0.json.canCreate === true, `billing: a 30-day evaluation (${b0.json.trialDaysLeft} days left)`);
 
-  // 4. Create up to quota (3), then the 4th is refused.
+  // 4. Create up to the quota (10), then the 11th is refused.
   const c1 = await create(token, su.tenantId);
   ok(c1.status === 202 && c1.json.jobId, "create #1 → 202");
-  ok((await create(token, su.tenantId)).status === 202, "create #2 → 202");
-  ok((await create(token, su.tenantId)).status === 202, "create #3 → 202");
-  const c4 = await create(token, su.tenantId);
-  ok(c4.status === 402 && c4.json.error?.code === "QUOTA_EXCEEDED", "create #4 → 402 QUOTA_EXCEEDED (free cap)");
+  let created = 1;
+  for (let i = 2; i <= 10; i++) if ((await create(token, su.tenantId)).status === 202) created++;
+  ok(created === 10, `creates #2–#10 → 202 (${created} of 10)`);
+  const c11 = await create(token, su.tenantId);
+  ok(c11.status === 402 && c11.json.error?.code === "QUOTA_EXCEEDED", "create #11 → 402 QUOTA_EXCEEDED (evaluation cap)");
+
+  // 4b. The 30 days: once the evaluation date has passed, a new record is refused even under the cap.
+  const su2 = await (await fetch(API + "/v1/signup", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "Republic of Late" }) })).json();
+  const tok2 = (await (await fetch(API + "/v1/token", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ client_id: su2.client_id, secret: su2.secret }) })).json()).access_token;
+  await admin.query("update dispatch.tenants set trial_ends_at = now() - interval '1 minute' where id = $1", [su2.tenantId]);
+  const late = await create(tok2, su2.tenantId);
+  ok(late.status === 402 && late.json.error?.code === "TRIAL_ENDED", "after 30 days → 402 TRIAL_ENDED, though no record was created");
+  const b2 = await jget("/v1/billing", tok2);
+  ok(b2.json.trialEnded === true && b2.json.canCreate === false && b2.json.trialDaysLeft === 0, "billing says the evaluation has ended");
 
   // 5. Render #1 so there is an artifact to (try to) download.
   for (let i = 0; i < 6; i++) { if (!(await tick())) break; }
@@ -78,9 +90,14 @@ async function main() {
   const dl = await jget(`/v1/artifacts/${artifactId}`, token);
   ok(dl.status === 402 && dl.json?.error?.code === "PAYMENT_REQUIRED", "free tier download → 402 PAYMENT_REQUIRED");
 
-  // 7. Subscribe (stub) → downloads unlock.
-  const sub = await (await fetch(API + "/v1/billing/subscribe", { method: "POST", headers: { authorization: "Bearer " + token } })).json();
-  ok(sub.canDownload === true && sub.plan === "paid", "subscribe → plan paid, downloads unlocked");
+  // 7. Subscribe needs a named plan; a scoped plan is only requested; a self-serve plan activates (stub).
+  const subscribe = async (tier) => { const r = await fetch(API + "/v1/billing/subscribe", { method: "POST", headers: { authorization: "Bearer " + token, "content-type": "application/json" }, body: JSON.stringify(tier ? { tier } : {}) }); return { status: r.status, json: await r.json() }; };
+  const none = await subscribe(null);
+  ok(none.status === 400 && none.json.error?.code === "UNKNOWN_PLAN", "subscribe without a plan → 400 UNKNOWN_PLAN");
+  const ent = await subscribe("enterprise");
+  ok(ent.status === 202 && ent.json.activated === false && ent.json.requestedTier === "enterprise" && ent.json.canDownload === false, "Enterprise is requested, not activated");
+  const sub = (await subscribe("institutional_plus")).json;
+  ok(sub.canDownload === true && sub.plan === "paid" && sub.tier === "institutional_plus" && sub.requestedTier === null, "subscribe to Institutional Plus → that plan, downloads unlocked");
   const dl2 = await jget(`/v1/artifacts/${artifactId}`, token);
   ok(dl2.status === 200, "paid tier download → 200 (bytes delivered)");
 

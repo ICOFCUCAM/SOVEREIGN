@@ -27,7 +27,7 @@ const doc = (tenantId, title, docType = "executive_briefing", level = "UNCLASSIF
 (async () => {
   const su = (await call("POST", "/v1/signup", { body: { name: "Ministry of Health" } })).body;
   const tenantId = su.tenantId; const admin = await tok(su.client_id, su.secret);
-  await call("POST", "/v1/billing/subscribe", { token: admin }); // lift the free 3-record quota for the exercise
+  await call("POST", "/v1/billing/subscribe", { token: admin, body: { tier: "institutional" } }); // lift the evaluation quota for the exercise
   for (const [k, l] of [["director_policy", "Director"], ["permanent_secretary", "Permanent Secretary"]])
     await call("POST", "/v1/governance/roles", { token: admin, body: { key: k, label: l } });
   const issue = async (name, scopes) => (await call("POST", "/v1/admin/clients", { token: admin, body: { name, scopes } })).body;

@@ -116,9 +116,18 @@ export const testWebhook = (id: string) => request<{ tested: string; attempted: 
 export interface SignupResponse { tenantId: string; client_id: string; secret: string; plan: string; scopes: string[]; note?: string }
 export const signup = (name: string) => request<SignupResponse>("POST", "/v1/signup", { body: { name } });
 
-export interface Billing { plan: string; subscriptionStatus: string; documentsUsed: number; documentQuota: number; quotaRemaining: number; canDownload: boolean; activated?: boolean }
+export type PlanTier = "institutional" | "institutional_plus" | "enterprise" | "sovereign";
+export interface Billing {
+  plan: string; subscriptionStatus: string; documentsUsed: number; documentQuota: number; quotaRemaining: number; canDownload: boolean;
+  /** The paid plan that is active, and a plan asked for but not yet paid for. */
+  tier?: PlanTier | null; requestedTier?: PlanTier | null;
+  /** The Evaluation's 30 days (null once subscribed) and whether a new record may be created. */
+  trialEndsAt?: string | null; trialDaysLeft?: number | null; trialEnded?: boolean; canCreate?: boolean;
+  activated?: boolean; requested?: PlanTier; note?: string;
+}
 export const getBilling = () => request<Billing>("GET", "/v1/billing");
-export const subscribe = () => request<Billing>("POST", "/v1/billing/subscribe", { body: {} });
+/** Subscribe to a named plan. The server records the request; the plan starts once payment is confirmed. */
+export const subscribe = (tier: PlanTier) => request<Billing>("POST", "/v1/billing/subscribe", { body: { tier } });
 
 export interface Stats { officialRecords: number; artifactsGenerated: number; approvalDecisions: number; auditEvents: number; published: number }
 export const getStats = () => request<Stats>("GET", "/v1/stats");

@@ -27,7 +27,7 @@ const verify = async (rid) => call("GET", `/v1/verify/${encodeURIComponent(rid)}
 (async () => {
   const su = (await call("POST", "/v1/signup", { body: { name: "Ministry of Health" } })).body;
   const t = su.tenantId; const admin = await stok(su.client_id, su.secret);
-  await call("POST", "/v1/billing/subscribe", { token: admin });
+  await call("POST", "/v1/billing/subscribe", { token: admin, body: { tier: "institutional" } });
   for (const [k, l, o] of [["director_policy", "Director of Policy", 20], ["permanent_secretary", "Permanent Secretary", 30], ["communications_office", "Communications Office", 40]])
     await call("POST", "/v1/governance/roles", { token: admin, body: { key: k, label: l, displayOrder: o } });
   const mk = async (full, email, office, scopes) => { const u = (await call("POST", "/v1/users", { token: admin, body: { email, fullName: full } })).body; if (office) await call("POST", "/v1/governance/grants", { token: admin, body: { subject: u.subject, roleKey: office } }); return mintUserToken({ tenantId: t, userId: u.id, scopes, clearance: "top_secret", role: "author", email }).token; };

@@ -40,7 +40,7 @@ const titles = (mw) => (mw?.underYourAuthority || []).map((r) => `${r.title} [${
   console.log("\n── The institution: Ministry of Health ──");
   const su = (await call("POST", "/v1/signup", { body: { name: "Ministry of Health" } })).body;
   const tenantId = su.tenantId; const admin = await stok(su.client_id, su.secret);
-  await call("POST", "/v1/billing/subscribe", { token: admin });
+  await call("POST", "/v1/billing/subscribe", { token: admin, body: { tier: "institutional" } });
 
   for (const [k, n, o] of [["policy", "Policy Division", 10], ["secretariat", "Office of the Permanent Secretary", 20], ["communications", "Communications", 30], ["records", "Records & Preservation", 40]])
     await call("POST", "/v1/governance/departments", { token: admin, body: { key: k, name: n, displayOrder: o } });

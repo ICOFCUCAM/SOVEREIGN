@@ -123,12 +123,14 @@ async function handleDocuments(req, res, principal) {
       if (existing.rows[0]) {
         return { replay: true, jobId: existing.rows[0].id, requestId: existing.rows[0].request_id, state: existing.rows[0].state };
       }
-      // Free-tier quota: a tenant without an active subscription may hold at most
-      // doc_quota documents. Counted after idempotency, so replays don't consume it.
-      const tq = await client.query("select subscription_status, doc_quota from dispatch.tenants where id=$1", [principal.tenantId]);
+      // The Evaluation: a tenant without an active subscription may create up to doc_quota records within
+      // 30 days of sign-up (trial_ends_at), whichever limit comes first. Counted after idempotency, so
+      // replays don't consume it; the clock is the database's.
+      const tq = await client.query("select subscription_status, doc_quota, coalesce(trial_ends_at < now(), false) as trial_over from dispatch.tenants where id=$1", [principal.tenantId]);
       if (tq.rows[0]?.subscription_status !== "active") {
+        if (tq.rows[0]?.trial_over) { const e = new Error("TRIAL_ENDED"); e.code = "TRIAL_ENDED"; throw e; }
         const used = await client.query("select count(*)::int n from dispatch.documents where tenant_id=$1", [principal.tenantId]);
-        if (used.rows[0].n >= (tq.rows[0]?.doc_quota ?? 3)) { const e = new Error("QUOTA_EXCEEDED"); e.code = "QUOTA_EXCEEDED"; throw e; }
+        if (used.rows[0].n >= (tq.rows[0]?.doc_quota ?? 10)) { const e = new Error("QUOTA_EXCEEDED"); e.code = "QUOTA_EXCEEDED"; throw e; }
       }
       // Persist document (governance lifecycle starts at 'submitted').
       const dres = await client.query(
@@ -183,7 +185,8 @@ async function handleDocuments(req, res, principal) {
     return send(res, 202, { requestId: result.requestId, jobId: result.jobId, documentId: result.documentId,
       status: result.replay ? (result.state || "queued") : "queued", statusUrl: `/v1/jobs/${result.jobId}`, replay: !!result.replay });
   } catch (e) {
-    if (e.code === "QUOTA_EXCEEDED") return send(res, 402, errEnvelope(requestId, 402, "QUOTA_EXCEEDED", "free plan document limit reached — subscribe to create more"));
+    if (e.code === "QUOTA_EXCEEDED") return send(res, 402, errEnvelope(requestId, 402, "QUOTA_EXCEEDED", "the evaluation's record limit is reached — subscribe to create more"));
+    if (e.code === "TRIAL_ENDED") return send(res, 402, errEnvelope(requestId, 402, "TRIAL_ENDED", "the 30-day evaluation has ended — subscribe to create more records"));
     if (String(e.message).includes("idempotency")) return send(res, 409, errEnvelope(requestId, 409, "IDEMPOTENCY_CONFLICT", "duplicate idempotency key with different body"));
     console.error("documents error:", e);
     return send(res, 500, errEnvelope(requestId, 500, "ENGINE_ERROR", "internal error"));
@@ -768,14 +771,30 @@ const claimsFor = (p) => ({ tenant_id: p.tenantId, dispatch_role: p.role, princi
 async function tenantBilling(tenantId) {
   const claims = { tenant_id: tenantId, dispatch_role: "service", principal_type: "system", actor: "billing" };
   return withClaims(pool, claims, async (c) => {
-    const t = await c.query("select plan, subscription_status, doc_quota from dispatch.tenants where id=$1", [tenantId]);
+    const t = await c.query(`select plan, subscription_status, doc_quota, tier, requested_tier, trial_ends_at,
+        coalesce(trial_ends_at < now(), false) as trial_over,
+        greatest(0, ceil(extract(epoch from (trial_ends_at - now())) / 86400))::int as trial_days_left
+      from dispatch.tenants where id=$1`, [tenantId]);
     const n = await c.query("select count(*)::int n from dispatch.documents where tenant_id=$1", [tenantId]);
     const row = t.rows[0] || {};
-    return { plan: row.plan || "free", subscriptionStatus: row.subscription_status || "inactive", docQuota: row.doc_quota ?? 3, documentsUsed: n.rows[0]?.n ?? 0 };
+    return { plan: row.plan || "free", subscriptionStatus: row.subscription_status || "inactive", docQuota: row.doc_quota ?? 10, documentsUsed: n.rows[0]?.n ?? 0,
+      tier: row.tier ?? null, requestedTier: row.requested_tier ?? null, trialEndsAt: row.trial_ends_at ?? null, trialOver: !!row.trial_over, trialDaysLeft: row.trial_days_left ?? null };
   });
 }
-const billingView = (b) => ({ plan: b.plan, subscriptionStatus: b.subscriptionStatus, documentsUsed: b.documentsUsed,
-  documentQuota: b.docQuota, quotaRemaining: Math.max(0, b.docQuota - b.documentsUsed), canDownload: b.subscriptionStatus === "active" });
+const billingView = (b) => {
+  const active = b.subscriptionStatus === "active";
+  return { plan: b.plan, subscriptionStatus: b.subscriptionStatus, tier: b.tier, requestedTier: b.requestedTier, documentsUsed: b.documentsUsed,
+    documentQuota: b.docQuota, quotaRemaining: Math.max(0, b.docQuota - b.documentsUsed), canDownload: active,
+    // the Evaluation's two limits; null once subscribed
+    trialEndsAt: active ? null : b.trialEndsAt, trialDaysLeft: active ? null : b.trialDaysLeft, trialEnded: !active && b.trialOver,
+    canCreate: active || (!b.trialOver && b.documentsUsed < b.docQuota) };
+};
+// The paid plans on the pricing page. Enterprise and Sovereign are scoped per institution, so they are
+// only ever requested, never activated from the console.
+const TIERS = { institutional: { selfServe: true }, institutional_plus: { selfServe: true }, enterprise: { selfServe: false }, sovereign: { selfServe: false } };
+// Activation without payment exists only for development and CI. In any other deployment a subscribe
+// call records the plan asked for; the plan starts when the payment provider (or an operator) confirms it.
+const BILLING_STUB = process.env.DISPATCH_BILLING_STUB === "1";
 
 // Public self-serve signup — create a FREE tenant + owner credential. No auth.
 async function handleSignup(req, res) {
@@ -791,14 +810,22 @@ async function handleSignup(req, res) {
   }
 }
 
-// Billing status + the (stubbed) subscribe action. The stub flips the tenant to
-// active; swap the body of `subscribe` for a Stripe Checkout session + webhook.
+// Billing status + subscribe to a named plan. Subscribe records the plan asked for; it activates the plan
+// only through the development stub (DISPATCH_BILLING_STUB=1), for a self-serve plan. In production the
+// payment provider's confirmation (Stripe Checkout + webhook, not built yet) calls set_subscription_tier.
 async function handleBilling(req, res, principal, action) {
   if (action === "subscribe") {
     if (!hasScope(principal, "dispatch:admin")) return send(res, 403, errEnvelope(null, 403, "FORBIDDEN_SCOPE", "admin scope required"));
-    await withClaims(pool, claimsFor(principal), (c) => c.query("select dispatch.set_subscription('active', $1)", ["stub_" + crypto.randomUUID()]));
-    const b = await tenantBilling(principal.tenantId);
-    return send(res, 200, { ...billingView(b), activated: true, note: "stub activation — wire Stripe Checkout + webhook here" });
+    let body = {}; try { body = JSON.parse((await readBody(req)) || "{}"); } catch { return send(res, 400, errEnvelope(null, 400, "SCHEMA_INVALID", "invalid JSON body")); }
+    const tier = String(body.tier || "");
+    if (!TIERS[tier]) return send(res, 400, errEnvelope(null, 400, "UNKNOWN_PLAN", "choose a plan: institutional, institutional_plus, enterprise or sovereign"));
+    if (BILLING_STUB && TIERS[tier].selfServe) {
+      await withClaims(pool, claimsFor(principal), (c) => c.query("select dispatch.set_subscription_tier('active', $1, $2)", ["stub_" + crypto.randomUUID(), tier]));
+      return send(res, 200, { ...billingView(await tenantBilling(principal.tenantId)), activated: true, note: "development stub activation — no payment taken" });
+    }
+    await withClaims(pool, claimsFor(principal), (c) => c.query("select dispatch.request_plan($1)", [tier]));
+    return send(res, 202, { ...billingView(await tenantBilling(principal.tenantId)), activated: false, requested: tier,
+      note: TIERS[tier].selfServe ? "request recorded — the plan starts when payment is confirmed" : "request recorded — this plan is scoped with your institution; we will contact you" });
   }
   return send(res, 200, billingView(await tenantBilling(principal.tenantId)));
 }
@@ -1998,7 +2025,7 @@ const server = http.createServer(async (req, res) => {
     if (path === "/v1/documents") return await handleDocuments(req, res, principal);
     if (path === "/v1/authoring/assist") return await handleAuthoringAssist(req, res, principal);
 
-    // Billing: subscribe (stub) — flips the tenant to paid and unlocks downloads.
+    // Billing: subscribe to a named plan (records the request; activates only via the development stub).
     if (path === "/v1/billing/subscribe") return await handleBilling(req, res, principal, "subscribe");
 
     // Admin: issue / rotate / revoke this tenant's service clients (dispatch:admin).

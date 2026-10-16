@@ -24,7 +24,7 @@ const AdminHome: React.FC = () => {
   const active = clients?.filter((c) => c.active).length;
   const tiles: { label: string; value: string; to: string; sub: string }[] = [
     { label: "Active credentials", value: active === undefined ? "·" : String(active), to: "/admin/access", sub: "API clients & secrets" },
-    { label: "Plan", value: billing ? planLabel(billing.plan) : "·", to: "/admin/access", sub: billing ? (billing.subscriptionStatus === "active" ? "Subscription active" : "Evaluation") : "" },
+    { label: "Plan", value: billing ? planLabel(billing) : "·", to: "/admin/access", sub: billing ? (billing.subscriptionStatus === "active" ? "Subscription active" : "Evaluation") : "" },
     { label: "Integrations", value: "Direct DDM", to: "/admin/integrations", sub: "Programmatic intake" },
     { label: "Data residency", value: "Single region", to: "/admin/sovereignty", sub: "Tenant-isolated (RLS)" },
   ];
