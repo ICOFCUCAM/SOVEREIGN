@@ -119,9 +119,10 @@ async function handleDocuments(req, res, principal) {
   try {
     const result = await withClaims(pool, claims, async (client) => {
       // Idempotency: existing job for (tenant, key)?
-      const existing = await client.query("select id, request_id, state from dispatch.jobs where tenant_id=$1 and idempotency_key=$2", [principal.tenantId, idem]);
+      const existing = await client.query("select id, request_id, state, document_id from dispatch.jobs where tenant_id=$1 and idempotency_key=$2", [principal.tenantId, idem]);
       if (existing.rows[0]) {
-        return { replay: true, jobId: existing.rows[0].id, requestId: existing.rows[0].request_id, state: existing.rows[0].state };
+        // a replay answers with the same document the original request created
+        return { replay: true, jobId: existing.rows[0].id, requestId: existing.rows[0].request_id, state: existing.rows[0].state, documentId: existing.rows[0].document_id };
       }
       // The Evaluation: a tenant without an active subscription may create up to doc_quota records within
       // 30 days of sign-up (trial_ends_at), whichever limit comes first. Counted after idempotency, so

@@ -99,6 +99,12 @@ jobs:
         working-directory: services
         run: node test/billing.test.mjs
 
+      - name: ExitOS certification — an ExitOS deal document certified, published, preserved and verified (14)
+        working-directory: services
+        run: |
+          export CHROMIUM_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          node test/exitos-certify.test.mjs
+
       - name: Audit read — service credential with dispatch:audit, tenant-isolated (8)
         working-directory: services
         run: node test/audit-read.test.mjs

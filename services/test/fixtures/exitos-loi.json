@@ -1,0 +1,219 @@
+{
+ "typeId": "exitos.loi",
+ "contentHash": "885c8212bfcd297daf6db99afe22bd6d2518b31934cd2a587bca79a7c2c638c8",
+ "versionId": "dv-885c8212bfcd297d-mv6mphc0",
+ "ddm": {
+  "ddmVersion": "1.0",
+  "docType": "contract_record",
+  "locale": "en-GB",
+  "metadata": {
+   "title": "Draft Heads of Terms — Bidder A",
+   "subtitle": "Northwind Analytics",
+   "owningBody": "Northwind Analytics",
+   "audience": "parties",
+   "referenceCode": "exitos.loi · 791924eda1c8",
+   "date": "2026-10-13",
+   "version": "1",
+   "status": "draft"
+  },
+  "classification": {
+   "scheme": "corporate",
+   "level": "RESTRICTED — TRANSACTION PARTIES",
+   "handling": "Only for the parties to the transaction and their counsel."
+  },
+  "sections": [
+   {
+    "id": "s1",
+    "heading": "Summary",
+    "level": 1,
+    "order": 1,
+    "blocks": [
+     {
+      "id": "s1-p",
+      "type": "paragraph",
+      "text": "Draft heads of terms for the proposed acquisition of Northwind Analytics by Bidder A, prepared from Bidder A's indication of interest of $112.0M and the company's recorded positions, for the parties' counsel to complete. It is not a binding document and has not been reviewed by counsel."
+     }
+    ],
+    "role": "summary"
+   },
+   {
+    "id": "s2",
+    "heading": "Parties",
+    "level": 1,
+    "order": 2,
+    "blocks": [
+     {
+      "id": "s2-b",
+      "type": "bullets",
+      "items": [
+       {
+        "text": "Seller: the shareholders of Northwind Analytics"
+       },
+       {
+        "text": "Company: Northwind Analytics"
+       },
+       {
+        "text": "Buyer: Bidder A (legal entity to be confirmed by the buyer)"
+       }
+      ]
+     }
+    ],
+    "role": "parties"
+   },
+   {
+    "id": "s3",
+    "heading": "Commercial terms",
+    "level": 1,
+    "order": 3,
+    "blocks": [
+     {
+      "id": "s3-t0",
+      "type": "table",
+      "columns": [
+       {
+        "key": "c0",
+        "label": "Term"
+       },
+       {
+        "key": "c1",
+        "label": "Position"
+       }
+      ],
+      "rows": [
+       [
+        {
+         "text": "Headline price"
+        },
+        {
+         "text": "$112.0M; the company asks $118.0M"
+        }
+       ],
+       [
+        {
+         "text": "Cash at completion"
+        },
+        {
+         "text": "85%; the company asks at least 80%"
+        }
+       ],
+       [
+        {
+         "text": "Earn-out"
+        },
+        {
+         "text": "10%; the company asks no more than 15%"
+        }
+       ],
+       [
+        {
+         "text": "Escrow or holdback"
+        },
+        {
+         "text": "8%; the company asks no more than 5% for 12 months"
+        }
+       ],
+       [
+        {
+         "text": "Indemnity cap"
+        },
+        {
+         "text": "15%; the company asks no more than 10% of the price"
+        }
+       ],
+       [
+        {
+         "text": "Exclusivity"
+        },
+        {
+         "text": "60 days; the company asks no more than 45 days"
+        }
+       ],
+       [
+        {
+         "text": "Reverse break fee"
+        },
+        {
+         "text": "not stated"
+        }
+       ]
+      ]
+     }
+    ],
+    "role": "obligations"
+   },
+   {
+    "id": "s4",
+    "heading": "Conditions",
+    "level": 1,
+    "order": 4,
+    "blocks": [
+     {
+      "id": "s4-b",
+      "type": "bullets",
+      "items": [
+       {
+        "text": "Satisfactory confirmatory diligence"
+       },
+       {
+        "text": "Retention of the two founders for 24 months"
+       },
+       {
+        "text": "Buyer board approval (approval)"
+       },
+       {
+        "text": "Merger control clearance where required (approval)"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "s5",
+    "heading": "Term and exclusivity",
+    "level": 1,
+    "order": 5,
+    "blocks": [
+     {
+      "id": "s5-p",
+      "type": "paragraph",
+      "text": "Bidder A asks for 60 days of exclusivity; the company's position is no more than 45 days. Exclusivity would be agreed in a separate letter."
+     },
+     {
+      "id": "s5-c",
+      "type": "callout",
+      "style": "info",
+      "title": "Status",
+      "text": "Requires review by qualified counsel; not a legal instrument."
+     }
+    ],
+    "role": "term"
+   },
+   {
+    "id": "s6",
+    "heading": "For counsel to draft",
+    "level": 1,
+    "order": 6,
+    "blocks": [
+     {
+      "id": "s6-b",
+      "type": "bullets",
+      "items": [
+       {
+        "text": "Which provisions bind (typically confidentiality, exclusivity, costs and governing law) and which do not."
+       },
+       {
+        "text": "Governing law and jurisdiction."
+       },
+       {
+        "text": "Warranty, indemnity and limitation framework consistent with the commercial terms above."
+       },
+       {
+        "text": "Treatment of employees, option holders and management arrangements."
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

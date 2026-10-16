@@ -8,14 +8,16 @@ import { generateVersion, canonicalJson } from "../lib/documents/service";
 import { listVersions, saveVersion, reviewAction, logEvent, type StoredVersion, type ReviewAction } from "../lib/documents/store";
 import { useDocumentRemote } from "../lib/documents/remote";
 import { capabilityOf, CAPABILITY_LABEL } from "../lib/documents/capability";
-import { renderVersionPdf } from "../lib/dispatch-client";
+import { downloadPdf } from "../lib/documents/pdf";
+import { CERTIFIABLE_TYPES, certifyVersion, loadCertificates, type Certificate } from "../lib/documents/certificate";
 import { docToMarkdown, docFilename, downloadDeliverable } from "../lib/deliverables";
 import { notify } from "../lib/ui";
 
 const STATUS_LABEL: Record<string, string> = { draft: "Draft", in_review: "In review", counsel_review: "With counsel", approved: "Approved", superseded: "Superseded" };
 const BTN = "rounded-sm border border-xo-line px-2.5 py-1 text-[12px] font-medium text-xo-text hover:bg-xo-raise disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xo-action";
 
-/** Versions of the document on screen: save, download, review, render to PDF. */
+/** Versions of the document on screen: save, download, review, and download each version as a PDF
+ *  (ExitOS's own renderer, in the browser). */
 export const DocumentVersions: React.FC<{
   typeId: string;
   doc: MemorandumDocument | null;
@@ -40,9 +42,14 @@ export const DocumentVersions: React.FC<{
   const [busy, setBusy] = useState(false);
   const type = documentType(typeId);
 
+  const [certs, setCerts] = useState<Map<string, Certificate>>(new Map());
+  const certifiable = CERTIFIABLE_TYPES.has(typeId);
   const refresh = useCallback(() => {
-    void listVersions(typeId, companyId, remote).then(setVersions).catch(() => setVersions([]));
-  }, [typeId, companyId, remote]);
+    void listVersions(typeId, companyId, remote).then((vs) => {
+      setVersions(vs);
+      if (remote && certifiable) void loadCertificates(remote, vs.map((v) => v.version.id)).then(setCerts).catch(() => undefined);
+    }).catch(() => setVersions([]));
+  }, [typeId, companyId, remote, certifiable]);
   useEffect(refresh, [refresh]);
 
   const latest = versions[0] ?? null;
@@ -76,9 +83,20 @@ export const DocumentVersions: React.FC<{
     await logEvent(s.version.id, "downloaded", remote);
   });
   const pdf = (s: StoredVersion): Promise<void> => run(async () => {
-    if (!remote) { notify("PDF rendering needs a signed-in account (e-mail sign-in)."); return; }
-    const r = await renderVersionPdf(s.version.id, remote.accessToken);
-    notify(r.ok ? `PDF requested from Dispatch${r.jobId ? ` · job ${r.jobId.slice(0, 8)}` : ""}` : r.configured ? `Dispatch error: ${r.error}` : "PDF rendering is not connected yet: no PDF was produced.");
+    const demo = s.version.unconfirmedInputs.length;
+    const cert = certs.get(s.version.id);
+    downloadPdf(s.version.ddm, { review: STATUS_LABEL[s.status], ...(cert?.state === "certified" && cert.recordId ? { record: cert.recordId } : {}),
+      ...(demo ? { notice: `${demo} of this version's inputs are the demo company's values, not this company's figures.` } : {}) });
+    await logEvent(s.version.id, "rendered_pdf", remote, { renderer: "exitos" });
+  });
+  // certification by Sovereign Dispatch: the function checks and records everything; this only asks
+  const certify = (s: StoredVersion, action: "certify" | "status"): Promise<void> => run(async () => {
+    if (!remote) return;
+    const r = await certifyVersion(remote, s.version.id, action);
+    if (!r.ok) { notify(r.configured ? `Not certified: ${r.error}` : "Certification is not connected yet: nothing was sent."); return; }
+    const c = r.certificate;
+    if (c) setCerts((m) => new Map(m).set(s.version.id, c));
+    notify(c?.state === "certified" ? `Certified · ${c.recordId}` : c?.state === "failed" ? `Certification failed: ${c.error ?? "Dispatch refused it"}` : `Certification requested${r.waitingFor ? ` · ${r.waitingFor}` : ""}`);
   });
   const act = (s: StoredVersion, a: ReviewAction): Promise<void> => run(async () => {
     const status = await reviewAction(s.version.id, a, remote);
@@ -102,7 +120,7 @@ export const DocumentVersions: React.FC<{
           <button type="button" className={BTN} disabled={!doc || busy || !!gate?.blocked} onClick={() => void download()}>Download draft (.md)</button>
         </div>
       </div>
-      {!remote && <p className="border-b border-xo-line px-4 py-2 text-[11px] text-xo-faint">Versions are kept in this browser. Review, approval and PDF rendering need a signed-in account; they are checked on the server.</p>}
+      {!remote && <p className="border-b border-xo-line px-4 py-2 text-[11px] text-xo-faint">Versions are kept in this browser. Review and approval need a signed-in account; they are checked on the server.</p>}
       {versions.length === 0 ? (
         <p className="px-4 py-3 text-[12px] text-xo-muted">No saved version yet. Saving one records what it was made from (an input hash) and its exact content (a content hash).</p>
       ) : (
@@ -114,8 +132,20 @@ export const DocumentVersions: React.FC<{
               <span className={s.status === "approved" ? "text-xo-verified" : s.status === "superseded" ? "text-xo-faint" : "text-xo-caution"}>{STATUS_LABEL[s.status]}</span>
               <span className="font-mono text-[11px] text-xo-faint" title={`content ${s.version.contentHash}\nsource ${s.version.sourceHash}`}>#{s.version.contentHash.slice(0, 10)}</span>
               {s.version.unconfirmedInputs.length > 0 && <span className="text-xo-caution">{s.version.unconfirmedInputs.length} demo input{s.version.unconfirmedInputs.length === 1 ? "" : "s"}</span>}
+              {(() => {
+                const c = certs.get(s.version.id);
+                if (!c) return null;
+                if (c.state === "certified") return (
+                  <span className="inline-flex items-center gap-1.5 rounded-sm border border-xo-verified/40 px-1.5 py-0.5 text-[11px] font-semibold text-xo-verified" title={c.integritySha256 ? `integrity ${c.integritySha256}` : undefined}>
+                    Certified · <span className="font-mono">{c.recordId}</span>
+                    {c.verifyUrl && <a href={c.verifyUrl} target="_blank" rel="noreferrer" className="underline underline-offset-2">Verify ↗</a>}
+                  </span>);
+                return <span className={c.state === "failed" ? "text-xo-risk" : "text-xo-caution"}>{c.state === "failed" ? `Certification failed${c.error ? `: ${c.error}` : ""}` : "Certification requested"}</span>;
+              })()}
               <span className="ml-auto flex flex-wrap gap-1.5">
-                {remote && s.status !== "superseded" && <button type="button" className={BTN} disabled={busy} onClick={() => void pdf(s)}>Render PDF</button>}
+                {s.status !== "superseded" && <button type="button" className={BTN} disabled={busy} onClick={() => void pdf(s)}>Download PDF</button>}
+                {remote && certifiable && mine(s) && s.status === "approved" && (!certs.get(s.version.id) || certs.get(s.version.id)!.state === "failed") && <button type="button" className={BTN} disabled={busy} onClick={() => void certify(s, "certify")} title="Register this approved version with Sovereign Dispatch: a permanent record number, a public verification page and preservation">Certify</button>}
+                {remote && certs.get(s.version.id)?.state === "requested" && <button type="button" className={BTN} disabled={busy} onClick={() => void certify(s, "status")}>Check certification</button>}
                 {remote && mine(s) && s.status === "draft" && <button type="button" className={BTN} disabled={busy} onClick={() => void act(s, "submit")}>Submit for review</button>}
                 {remote && mine(s) && s.status === "in_review" && type.reviewRequired === "counsel" && <button type="button" className={BTN} disabled={busy} onClick={() => void act(s, "send_to_counsel")}>Send to counsel</button>}
                 {remote && mine(s) && (s.status === "in_review" || s.status === "counsel_review") && <button type="button" className={BTN} disabled={busy} onClick={() => void act(s, "withdraw")}>Withdraw</button>}

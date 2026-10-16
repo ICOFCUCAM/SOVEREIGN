@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { loadActiveCompany } from "../lib/active-company";
 import { buildBoardMemo } from "../lib/report-docs";
 import { boardMemoToDdm } from "../lib/dispatch-ddm";
-import { renderVersionPdf } from "../lib/dispatch-client";
+import { downloadPdf } from "../lib/documents/pdf";
 import { useAuth } from "../lib/auth";
 import { useDocumentRemote } from "../lib/documents/remote";
 import { generateVersion } from "../lib/documents/service";
-import { saveVersion } from "../lib/documents/store";
+import { saveVersion, logEvent } from "../lib/documents/store";
 import { notify } from "../lib/ui";
 import { AdPanel, useAdSlides } from "../components/AdPanel";
 
@@ -32,29 +32,27 @@ const DOCUMENTS: DocCard[] = [
 
 const ReportHub: React.FC = () => {
   const nav = useNavigate();
-  const { company, companyId, unconfirmed } = useMemo(() => loadActiveCompany(), []);
+  const { company, companyId, unconfirmed, fromIntake } = useMemo(() => loadActiveCompany(), []);
   const { session } = useAuth();
   const remote = useDocumentRemote();
   const [dispatching, setDispatching] = useState(false);
   const ads = useAdSlides(remote, "reports");
   const [adHidden, setAdHidden] = useState(false);
 
-  // the board memorandum becomes a saved, hashed version, which Dispatch renders by id
-  const submitBoardToDispatch = async (): Promise<void> => {
-    if (!remote || !session) { notify("PDF rendering needs a signed-in account (e-mail sign-in)."); return; }
+  // the board memorandum becomes a saved, hashed version, and ExitOS renders that version to PDF
+  const boardMemoPdf = async (): Promise<void> => {
     setDispatching(true);
     try {
       const memo = buildBoardMemo(company);
       const v = await generateVersion({
         typeId: "exitos.board_memo_process", title: "Board Transaction Memorandum", sections: [], ddm: boardMemoToDdm(memo) as never,
         producedBy: "lib/report-docs:buildBoardMemo", company, companyId, unconfirmed, inputs: { memo },
-        generatedBy: session.email, ownerName: company.name,
+        generatedBy: session?.email ?? "this browser", ownerName: company.name,
       });
       await saveVersion(v, remote);
-      const r = await renderVersionPdf(v.id, remote.accessToken);
-      if (r.ok) notify(`PDF requested from Dispatch${r.jobId ? ` · job ${r.jobId.slice(0, 8)}` : ""}`);
-      else if (!r.configured) notify("PDF rendering is not connected yet: the version is saved, but no PDF was produced.");
-      else notify(`Dispatch error: ${r.error}`);
+      downloadPdf(v.ddm, { review: "Draft", ...(fromIntake ? {} : { notice: "This is the sample company. Every figure is demo data, not a real company's." }) });
+      await logEvent(v.id, "rendered_pdf", remote, { renderer: "exitos" });
+      notify("Board memorandum saved as a version and downloaded as a PDF");
     } catch (e) {
       notify(e instanceof Error ? e.message : "Could not prepare the document");
     } finally { setDispatching(false); }
@@ -79,12 +77,12 @@ const ReportHub: React.FC = () => {
 
         <div className="mt-6 flex flex-wrap items-center gap-3 rounded-lg border border-deal-400/25 bg-deal-600/[0.06] px-4 py-3">
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-deal-300">Governed publication · Sovereign Dispatch</div>
-            <p className="mt-0.5 text-[12px] text-white/55">Submit the Board Memorandum into the Dispatch pipeline (Submit → Approve → Render → Publish) for a classified, audited institutional document.</p>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-deal-300">Board memorandum · PDF</div>
+            <p className="mt-0.5 text-[12px] text-white/55">Saved as a hashed version you can review and approve, and downloaded as a PDF with its classification, version and reference on every page.</p>
           </div>
-          <button onClick={submitBoardToDispatch} disabled={dispatching}
+          <button onClick={boardMemoPdf} disabled={dispatching}
             className="shrink-0 rounded-md bg-desk-gold px-4 py-2 text-[12.5px] font-semibold text-desk-ink transition hover:bg-[#AA8443] disabled:opacity-60">
-            {dispatching ? "Preparing…" : "Board memo · render PDF via Dispatch →"}
+            {dispatching ? "Preparing…" : "Download board memo PDF →"}
           </button>
         </div>
 
