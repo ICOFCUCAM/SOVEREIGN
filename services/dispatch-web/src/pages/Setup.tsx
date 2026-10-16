@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useId, useMemo, useState } from "react";
 import { Link, Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useBilling, QuotaMeter, UpgradeModal } from "../lib/upsell";
 import { useInstitutionConfig, computeReadiness, markEstablished, type InstitutionConfig } from "../lib/readiness";
 import { createDepartment, deleteDepartment, createGovRole, deleteGovRole, createUser, grantGovRole, upsertGovernancePolicy, humanError, type GovernancePolicy } from "../lib/api";
 import { RECORD_TYPES } from "../lib/recordTypes";
-import { inputCls } from "../lib/ui";
 import { Icon } from "../components/console/icons";
+import { FilmGrain } from "../components/brand";
 
 // SET-UP — a new institution's first experience, full screen and outside the console. The home page
 // ("ceremony") shows the three essentials as a path; each essential is its own split-screen step: the
@@ -22,14 +22,17 @@ const STEPS: StepDef[] = [
     lede: "Add the departments your institution is organised into, and the offices within them. Authority belongs to the office, not the person, so governance never depends on who holds it." },
   { id: "rules", title: "Set your approval rules", question: "Who must approve your records?", minutes: 10,
     lede: "Choose a type of record, then the offices that approve it, in order. A record is published only after every office in its chain has approved it." },
-  { id: "people", title: "Add your leadership and people", question: "Who holds your offices?", minutes: 15,
+  { id: "people", title: "Add leadership and people", question: "Who holds your offices?", minutes: 15,
     lede: "Add the people who work in the institution and place each one in the office they hold. When someone leaves, you reassign the office; the rules stay as they are." },
 ];
 
-const GOLD = "bg-[linear-gradient(180deg,#e4cc95,#c9ad75)] text-[#1d160a] shadow-[0_10px_30px_-12px_rgba(201,173,117,.7)] hover:brightness-105";
+const GOLD = "bg-[linear-gradient(180deg,#ecd7a6,#c9ad75_55%,#b8975c)] text-[#1d160a] shadow-[inset_0_1px_0_rgba(255,255,255,.45),0_12px_32px_-12px_rgba(201,173,117,.75)] hover:brightness-[1.06] active:translate-y-px";
 const BTN = "inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-[13.5px] font-semibold transition disabled:cursor-not-allowed disabled:opacity-40";
 const GHOST = "border border-sd-line text-sd-text2 hover:border-sd-gold/40 hover:text-sd-text";
 const LABEL = "mb-1.5 block text-[12px] text-sd-text3";
+// form fields: a touch taller than the console's, with a gold focus ring
+const FIELD = "h-11 w-full rounded-[10px] border border-sd-line bg-[#0b131d] px-3.5 text-[14px] text-sd-text placeholder:text-sd-faint outline-none transition focus:border-sd-gold/60 focus:ring-[3px] focus:ring-sd-gold/15";
+const ROMAN = ["I", "II", "III"];
 const SMALL_WORDS = /^(of|and|the|for|de|la|le|du|des|of\.)$/i;
 const initialsOf = (name: string): string => name.split(/\s+/).filter(Boolean).map((w) => (SMALL_WORDS.test(w) ? w[0].toLowerCase() : w[0].toUpperCase())).join("").slice(0, 4) || "SD";
 const slug = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 40);
@@ -50,6 +53,51 @@ const Seal: React.FC<{ text: string; size: number; className?: string }> = ({ te
   <span aria-hidden className={`relative grid shrink-0 place-items-center rounded-full border border-sd-gold/55 bg-[radial-gradient(circle_at_30%_25%,rgba(201,173,117,0.22),transparent_65%)] font-serif font-semibold text-sd-text shadow-[0_0_30px_-8px_rgba(201,173,117,0.6)] ${className}`}
     style={{ width: size, height: size, fontSize: Math.round(size * 0.27) }}>
     <span className="absolute inset-[4px] rounded-full border border-sd-gold/25" />{text}
+  </span>
+);
+
+// The institution's seal, engraved: a ring of ticks, the legend on a circle, the initials at the centre.
+const EngravedSeal: React.FC<{ initials: string; size: number; className?: string }> = ({ initials, size, className = "" }) => {
+  const id = useId().replace(/:/g, "");
+  const ticks = Array.from({ length: 60 }, (_, i) => i * 6);
+  return (
+    <svg aria-hidden viewBox="0 0 120 120" width={size} height={size} className={`shrink-0 drop-shadow-[0_0_28px_rgba(201,173,117,0.35)] ${className}`}>
+      <defs>
+        <radialGradient id={`${id}f`} cx="38%" cy="30%" r="75%"><stop offset="0" stopColor="#c9ad75" stopOpacity=".28" /><stop offset=".7" stopColor="#0f1722" stopOpacity=".2" /><stop offset="1" stopColor="#0b1018" stopOpacity="0" /></radialGradient>
+        <linearGradient id={`${id}g`} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f0dcab" /><stop offset=".5" stopColor="#c9ad75" /><stop offset="1" stopColor="#8f7445" /></linearGradient>
+        <path id={`${id}p`} d="M60 60 m-45.5 0 a45.5 45.5 0 1 1 91 0 a45.5 45.5 0 1 1 -91 0" />
+      </defs>
+      <circle cx="60" cy="60" r="58" fill={`url(#${id}f)`} stroke={`url(#${id}g)`} strokeWidth="1" />
+      <circle cx="60" cy="60" r="53.5" fill="none" stroke="#c9ad75" strokeOpacity=".45" strokeWidth=".5" />
+      {ticks.map((a) => <line key={a} x1="60" y1="3.6" x2="60" y2={a % 30 === 0 ? 8 : 6.2} stroke="#c9ad75" strokeOpacity=".55" strokeWidth=".5" transform={`rotate(${a} 60 60)`} />)}
+      <text fill="#c9ad75" fillOpacity=".85" fontFamily="ui-monospace, Menlo, monospace" fontSize="6.4" letterSpacing="2.1">
+        <textPath href={`#${id}p`}>SOVEREIGN DISPATCH · OFFICIAL RECORD · INSTITUTION ·</textPath>
+      </text>
+      <circle cx="60" cy="60" r="37" fill="#0d1520" stroke={`url(#${id}g)`} strokeWidth=".8" />
+      <circle cx="60" cy="60" r="34" fill="none" stroke="#c9ad75" strokeOpacity=".3" strokeWidth=".4" />
+      <text x="60" y={60 + 6.5} textAnchor="middle" fill="#f3ead6" fontFamily="Fraunces, Georgia, serif" fontWeight="600" fontSize={initials.length > 3 ? 15 : 19}>{initials}</text>
+    </svg>
+  );
+};
+
+// Fine-line guilloche, as on a banknote or a charter: a slow rosette behind the seal.
+const Rosette: React.FC<{ className?: string }> = ({ className = "" }) => (
+  <svg aria-hidden viewBox="-100 -100 200 200" fill="none" stroke="#c9ad75" className={`pointer-events-none ${className}`}>
+    <g className="su-turn">{Array.from({ length: 36 }, (_, i) => <ellipse key={i} rx="92" ry="31" strokeWidth=".16" transform={`rotate(${i * 5})`} />)}</g>
+    <circle r="97" strokeWidth=".35" /><circle r="99.2" strokeWidth=".18" />
+    {Array.from({ length: 120 }, (_, i) => <line key={i} x1="0" y1="-94.5" x2="0" y2={i % 10 === 0 ? -90.5 : -92.8} strokeWidth=".22" transform={`rotate(${i * 3})`} />)}
+  </svg>
+);
+
+// Gold, engraved-looking emphasis inside a heading.
+const Gilt: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <span className="-mr-[0.06em] bg-[linear-gradient(180deg,#f3e2b6,#c9ad75_60%,#a8884f)] bg-clip-text pr-[0.12em] italic text-transparent">{children}</span>
+);
+
+// A short gold rule with a diamond, under eyebrows and between sections.
+const Ornament: React.FC<{ className?: string }> = ({ className = "" }) => (
+  <span aria-hidden className={`flex items-center justify-center gap-2.5 ${className}`}>
+    <span className="h-px w-12 bg-[linear-gradient(90deg,transparent,#c9ad75)]" /><span className="h-1.5 w-1.5 rotate-45 border border-sd-gold/80" /><span className="h-px w-12 bg-[linear-gradient(90deg,#c9ad75,transparent)]" />
   </span>
 );
 
@@ -90,9 +138,10 @@ const SetupHome: React.FC<Ctx> = ({ config, error, reload, name, states, essenti
   const current = STEPS.find((s) => !states[s.id].done);
   const named = name !== "your institution";
   return (
-    <div className="relative min-h-screen overflow-hidden" style={{ backgroundImage: "radial-gradient(55% 50% at 50% 0%, rgba(201,173,117,0.14), transparent 70%), radial-gradient(40% 40% at 100% 100%, rgba(141,187,255,0.06), transparent 70%)" }}>
+    <div className="relative min-h-screen overflow-hidden" style={{ backgroundImage: "radial-gradient(60% 52% at 50% 0%, rgba(201,173,117,0.16), transparent 70%), radial-gradient(45% 40% at 100% 100%, rgba(141,187,255,0.07), transparent 70%), radial-gradient(35% 35% at 0% 80%, rgba(201,173,117,0.05), transparent 70%)" }}>
+      <FilmGrain />
       {upgrade && <UpgradeModal open reason="quota" onClose={() => setUpgrade(false)} onSubscribed={(b) => { setBilling(b); setUpgrade(false); }} />}
-      <header className="relative z-10 flex h-16 items-center px-6 sm:px-11">
+      <header className="relative z-10 flex h-16 items-center px-6 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-[linear-gradient(90deg,transparent,rgba(201,173,117,0.28),transparent)] sm:px-11">
         <Seal text="SD" size={34} />
         <span className="ml-3 text-[14px] font-semibold">Sovereign <span className="font-normal text-sd-text2">Dispatch</span></span>
         <span className="ml-auto text-[13px] text-sd-text3">
@@ -100,45 +149,49 @@ const SetupHome: React.FC<Ctx> = ({ config, error, reload, name, states, essenti
         </span>
       </header>
 
-      <section className="relative px-4 pt-6 text-center">
-        <span aria-hidden className="pointer-events-none absolute left-1/2 top-[-120px] h-[420px] w-[420px] -translate-x-1/2 rounded-full border border-sd-gold/[0.12]" />
-        <span aria-hidden className="pointer-events-none absolute left-1/2 top-[-190px] h-[560px] w-[560px] -translate-x-1/2 rounded-full border border-sd-gold/[0.07]" />
-        <Seal text={named ? initialsOf(name) : "SD"} size={92} className="mx-auto" />
-        <div className="mt-5 font-mono text-[10.5px] uppercase tracking-[0.22em] text-sd-gold">{named ? name : "Welcome to Sovereign Dispatch"}</div>
-        <h1 className="mx-auto mt-2.5 max-w-4xl font-serif text-[34px] font-semibold leading-tight tracking-[-0.015em] sm:text-[46px]">
-          {essentialsDone ? "Your institution is established" : "Let's establish your institution"}
+      <section className="relative px-4 pt-7 text-center">
+        <Rosette className="absolute left-1/2 top-[-178px] h-[520px] w-[520px] -translate-x-1/2 opacity-[0.22]" />
+        <EngravedSeal initials={named ? initialsOf(name) : "SD"} size={124} className="su-rise relative mx-auto" />
+        <div className="su-rise relative mt-5 font-mono text-[10.5px] uppercase tracking-[0.26em] text-sd-gold" style={{ animationDelay: "80ms" }}>{named ? name : "Welcome to Sovereign Dispatch"}</div>
+        <Ornament className="su-rise relative mt-3" />
+        <h1 className="su-rise relative mx-auto mt-3.5 max-w-4xl font-serif text-[36px] font-semibold leading-[1.08] tracking-[-0.02em] sm:text-[52px]" style={{ animationDelay: "140ms" }}>
+          {essentialsDone ? <>Your institution is <Gilt>established</Gilt></> : <>Let's establish <Gilt>your institution</Gilt></>}
         </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-[15.5px] leading-relaxed text-sd-text2">
+        <p className="su-rise relative mx-auto mt-4 max-w-2xl text-[15.5px] leading-relaxed text-sd-text2" style={{ animationDelay: "200ms" }}>
           {essentialsDone
             ? "Its structure, approval rules and people are in place. The console is open: invite your people, connect your systems and issue your first official record."
             : "Three essentials make your institution ready to issue official records. Most institutions finish them in under an hour, and everything is saved as you go."}
         </p>
         {essentialsDone && (
-          <Link to="/admin" className={`${BTN} ${GOLD} mt-6 px-6 py-3 text-[14.5px]`}>Open the console <Icon.arrowRight className="h-4 w-4" /></Link>
+          <Link to="/admin" className={`${BTN} ${GOLD} su-rise relative mt-7 px-7 py-3 text-[14.5px]`} style={{ animationDelay: "260ms" }}>Open the console <Icon.arrowRight className="h-4 w-4" /></Link>
         )}
       </section>
 
       {error && <p role="alert" className="relative mx-auto mt-6 max-w-xl rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-center text-sm text-red-300">Your institution's set-up could not be read. <button onClick={reload} className="font-semibold underline">Try again</button></p>}
 
       <section className="relative mx-auto mt-9 w-full max-w-[1180px] px-4 sm:px-6">
-        <div aria-hidden className="absolute left-[16%] right-[16%] top-[49px] hidden h-0.5 bg-[linear-gradient(90deg,#c9ad75,rgba(201,173,117,0.25)_45%,#263548)] md:block" />
+        <div aria-hidden className="absolute left-[16%] right-[16%] top-[51px] hidden h-px bg-[linear-gradient(90deg,#c9ad75,rgba(201,173,117,0.35)_48%,rgba(38,53,72,0.9))] md:block" />
         <ol className="relative grid gap-6 md:grid-cols-3">
           {STEPS.map((s, i) => {
             const st = states[s.id];
             const isNext = current?.id === s.id;
             return (
-              <li key={s.id} className={`relative flex flex-col rounded-[18px] border bg-[linear-gradient(180deg,rgba(22,33,49,0.92),rgba(13,21,32,0.92))] px-6 pb-5 pt-6 ${isNext ? "border-sd-gold/55 shadow-[0_28px_70px_-40px_rgba(201,173,117,0.6)]" : st.done ? "border-sd-ok/35" : "border-sd-line"}`}>
+              <li key={s.id} style={{ animationDelay: `${260 + i * 90}ms` }}
+                className={`su-rise group relative flex flex-col overflow-hidden rounded-[20px] border bg-[linear-gradient(180deg,rgba(24,36,53,0.94),rgba(12,19,29,0.96))] px-6 pb-5 pt-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition duration-300 hover:-translate-y-0.5 ${isNext ? "border-sd-gold/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_30px_80px_-42px_rgba(201,173,117,0.7)]" : st.done ? "border-sd-ok/30" : "border-sd-line hover:border-sd-line"}`}>
+                {/* gold hairline along the top edge */}
+                <span aria-hidden className={`absolute inset-x-8 top-0 h-px ${isNext ? "bg-[linear-gradient(90deg,transparent,#e4cc95,transparent)]" : st.done ? "bg-[linear-gradient(90deg,transparent,rgba(117,201,161,0.6),transparent)]" : "bg-[linear-gradient(90deg,transparent,rgba(201,173,117,0.25),transparent)]"}`} />
+                {isNext && <span aria-hidden className="su-sheen pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-18deg] bg-[linear-gradient(90deg,transparent,rgba(236,215,166,0.07),transparent)]" />}
                 <div className="flex justify-center">
-                  <span className={`grid h-[46px] w-[46px] place-items-center rounded-full font-serif text-[19px] font-semibold ${st.done ? "border border-sd-ok/50 bg-[#0f1f1a] text-sd-ok" : isNext ? "bg-[linear-gradient(180deg,#e4cc95,#c9ad75)] text-[#1d160a]" : "border border-sd-line bg-sd-bg text-sd-text3"}`}>
-                    {st.done ? <Icon.check className="h-5 w-5" /> : i + 1}
+                  <span className={`grid h-[52px] w-[52px] place-items-center rounded-full font-serif text-[18px] font-semibold tracking-[0.04em] ring-[5px] ring-sd-bg ${st.done ? "border border-sd-ok/50 bg-[#0f1f1a] text-sd-ok" : isNext ? "bg-[linear-gradient(180deg,#ecd7a6,#c9ad75_60%,#b8975c)] text-[#1d160a] shadow-[inset_0_1px_0_rgba(255,255,255,.5),0_0_24px_-4px_rgba(201,173,117,.6)]" : "border border-sd-gold/25 bg-[#0d1520] text-sd-text2"}`}>
+                    {st.done ? <Icon.check className="h-5 w-5" /> : ROMAN[i]}
                   </span>
                 </div>
                 <div className="mt-4 text-center">
                   <span className={`rounded px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.08em] ${st.done ? "bg-sd-ok/15 text-sd-ok" : isNext ? "bg-sd-gold/15 text-sd-gold" : "bg-white/5 text-sd-text3"}`}>{st.done ? "Done" : isNext ? (i === 0 ? "Start here" : "Next") : "Essential"}</span>
                 </div>
-                <h2 className={`mt-3 text-center font-serif text-[21px] font-semibold ${st.done || isNext ? "text-sd-text" : "text-sd-text2"}`}>{s.title}</h2>
+                <h2 className={`mt-3 text-center font-serif text-[22px] font-semibold tracking-[-0.01em] ${st.done || isNext ? "text-sd-text" : "text-sd-text2"}`}>{s.title}</h2>
                 <p className={`mt-2 flex-1 text-center text-[13.5px] leading-relaxed ${isNext ? "text-sd-text2" : "text-sd-text3"}`}>{s.lede.split(". ")[0]}.</p>
-                <div className="mt-5 flex items-center justify-between gap-3">
+                <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/[0.05] pt-4">
                   <span className={`font-mono text-[11.5px] ${st.done ? "text-sd-ok" : "text-sd-text3"}`}>{config ? (st.done ? st.detail : `≈ ${s.minutes} min`) : "…"}</span>
                   {st.done ? <Link to={`/setup/${s.id}`} className={`${BTN} ${GHOST} px-3 py-1.5 text-[12.5px]`}>Review</Link>
                     : isNext ? <Link to={`/setup/${s.id}`} className={`${BTN} ${GOLD}`}>{i === 0 ? "Begin" : "Continue"} <Icon.arrowRight className="h-3.5 w-3.5" /></Link>
@@ -151,7 +204,7 @@ const SetupHome: React.FC<Ctx> = ({ config, error, reload, name, states, essenti
       </section>
 
       <section className="relative mx-auto mt-9 w-full max-w-[1180px] px-4 pb-12 sm:px-6">
-        <div className="mb-3.5 flex items-center gap-3.5"><span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-sd-text3">{essentialsDone ? "Next, in the console" : "Then, when you're ready"}</span><span aria-hidden className="h-px flex-1 bg-sd-soft" /></div>
+        <div className="mb-4 flex items-center gap-3.5"><span className="font-mono text-[10.5px] uppercase tracking-[0.24em] text-sd-text3">{essentialsDone ? "Next, in the console" : "Then, when you're ready"}</span><span aria-hidden className="h-px flex-1 bg-[linear-gradient(90deg,rgba(201,173,117,0.3),transparent)]" /></div>
         <div className="grid gap-4 md:grid-cols-3">
           {[
             { icon: "users" as const, title: "Let your people sign in", line: "Invitation links, or your identity provider", to: "/admin/authority" },
@@ -161,10 +214,10 @@ const SetupHome: React.FC<Ctx> = ({ config, error, reload, name, states, essenti
               <span className="min-w-0 flex-1"><span className="block text-[13.5px] font-semibold">{t.title}</span><span className="block text-[12px] text-sd-text3">{t.line}</span></span>
               {essentialsDone ? <Icon.arrowRight className="h-4 w-4 text-sd-text3" /> : <Icon.lock className="h-3.5 w-3.5 text-sd-faint" />}</>;
             return essentialsDone
-              ? <Link key={t.title} to={t.to} className="flex items-center gap-3.5 rounded-[14px] border border-sd-soft bg-sd-panel/60 px-4 py-4 transition hover:border-sd-gold/40">{body}</Link>
-              : <div key={t.title} aria-disabled="true" className="flex items-center gap-3.5 rounded-[14px] border border-sd-soft bg-sd-panel/40 px-4 py-4 opacity-80">{body}</div>;
+              ? <Link key={t.title} to={t.to} className="flex items-center gap-3.5 rounded-2xl border border-sd-soft bg-[linear-gradient(180deg,rgba(17,26,38,0.8),rgba(12,19,29,0.8))] px-4 py-4 transition hover:-translate-y-0.5 hover:border-sd-gold/40">{body}</Link>
+              : <div key={t.title} aria-disabled="true" className="flex items-center gap-3.5 rounded-2xl border border-sd-soft bg-[linear-gradient(180deg,rgba(17,26,38,0.55),rgba(12,19,29,0.55))] px-4 py-4">{body}</div>;
           })}
-          <div className="flex items-center gap-3.5 rounded-[14px] border border-sd-soft bg-sd-panel/60 px-4 py-4">
+          <div className="flex items-center gap-3.5 rounded-2xl border border-sd-soft bg-[linear-gradient(180deg,rgba(17,26,38,0.8),rgba(12,19,29,0.8))] px-4 py-4">
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sd-gold ring-1 ring-sd-gold/40"><Icon.seal className="h-4 w-4" /></span>
             <span className="min-w-0 flex-1">
               <span className="block text-[13.5px] font-semibold">Choose your plan</span>
@@ -177,6 +230,8 @@ const SetupHome: React.FC<Ctx> = ({ config, error, reload, name, states, essenti
           {essentialsDone ? <>Running more than one institution? Each is its own isolated account. <a href="/signup" className="font-semibold text-sd-text2 hover:text-sd-text">Establish another →</a></>
             : <><Icon.lock className="mr-1.5 inline h-3.5 w-3.5 align-[-2px]" />Your console opens once the three essentials are complete.</>}
         </p>
+        <Ornament className="mt-6 opacity-60" />
+        <p className="mt-4 text-center font-mono text-[9.5px] uppercase tracking-[0.24em] text-sd-faint">Private to your institution <span className="mx-2 text-sd-gold/60">·</span> Every act audited <span className="mx-2 text-sd-gold/60">·</span> Records sealed for preservation</p>
       </section>
     </div>
   );
@@ -201,29 +256,31 @@ const SetupStep: React.FC<Ctx> = (ctx) => {
       {/* the institution and its progress */}
       <aside className="relative overflow-hidden border-b border-sd-soft px-6 py-8 sm:px-12 lg:w-[540px] lg:shrink-0 lg:border-b-0 lg:border-r lg:py-11"
         style={{ backgroundImage: "radial-gradient(90% 60% at 0% 0%, rgba(201,173,117,0.2), transparent 60%), radial-gradient(80% 50% at 100% 100%, rgba(141,187,255,0.1), transparent 60%), linear-gradient(180deg, #0f1722, #0a0f17)" }}>
-        <svg aria-hidden viewBox="0 0 200 200" fill="none" stroke="#c9ad75" strokeWidth=".35" className="pointer-events-none absolute -right-[300px] top-[330px] hidden h-[560px] w-[560px] opacity-30 lg:block">
-          <circle cx="100" cy="100" r="96" /><circle cx="100" cy="100" r="84" /><circle cx="100" cy="100" r="72" />
-          <g transform="translate(100 100)">{[0, 30, 60, 90, 120, 150].map((a) => <ellipse key={a} rx="90" ry="34" transform={`rotate(${a})`} />)}</g>
-        </svg>
+        <Rosette className="absolute -right-[380px] top-[360px] hidden h-[640px] w-[640px] opacity-[0.15] lg:block" />
         <Link to="/setup" className="relative flex items-center gap-3"><Seal text="SD" size={40} /><span className="text-[15px] font-semibold">Sovereign <span className="font-normal text-sd-text2">Dispatch</span></span></Link>
         <div className="relative mt-10 lg:mt-16">
-          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-sd-gold">Establishing</div>
-          <div className="mt-2.5 font-serif text-[30px] font-semibold leading-[1.1] lg:text-[38px]">{named ? ctx.name : "Your institution"}</div>
+          <div className="flex items-center gap-4">
+            <EngravedSeal initials={named ? initialsOf(ctx.name) : "SD"} size={64} />
+            <div className="min-w-0"><div className="font-mono text-[10.5px] uppercase tracking-[0.24em] text-sd-gold">Establishing</div>
+              <div className="mt-1.5 font-serif text-[28px] font-semibold leading-[1.1] tracking-[-0.01em] lg:text-[34px]">{named ? ctx.name : "Your institution"}</div></div>
+          </div>
           <div className="mt-7 flex items-center gap-4">
             <svg width="74" height="74" viewBox="0 0 74 74" aria-hidden>
               <circle cx="37" cy="37" r="31" stroke="rgba(255,255,255,.08)" strokeWidth="5" fill="none" />
-              <circle cx="37" cy="37" r="31" stroke="#c9ad75" strokeWidth="5" fill="none" strokeLinecap="round" strokeDasharray={`${(C * doneCount) / 3} ${C}`} transform="rotate(-90 37 37)" />
+              <defs><linearGradient id="su-ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f0dcab" /><stop offset="1" stopColor="#a8884f" /></linearGradient></defs>
+              {Array.from({ length: 36 }, (_, i) => <line key={i} x1="37" y1="1.5" x2="37" y2={i % 12 === 0 ? 4.5 : 3.2} stroke="#c9ad75" strokeOpacity=".4" strokeWidth=".6" transform={`rotate(${i * 10} 37 37)`} />)}
+              <circle cx="37" cy="37" r="31" stroke="url(#su-ring)" strokeWidth="5" fill="none" strokeLinecap="round" strokeDasharray={`${(C * doneCount) / 3} ${C}`} transform="rotate(-90 37 37)" />
               <text x="37" y="42" textAnchor="middle" fill="#edf2f8" fontFamily="Fraunces, Georgia, serif" fontSize="17" fontWeight="600">{doneCount}/3</text>
             </svg>
             <div><div className="text-[14.5px] font-semibold">Essentials in place</div>
               <div className="mt-0.5 text-[12.5px] text-sd-text3">{doneCount === 3 ? "The console is open" : `About ${STEPS.filter((s) => !ctx.states[s.id].done).reduce((n, s) => n + s.minutes, 0)} minutes to go`}</div></div>
           </div>
-          <ol className="mt-7 space-y-1">
+          <ol className="relative mt-7 space-y-1 before:absolute before:bottom-[22px] before:left-[12.5px] before:top-[22px] before:w-px before:bg-[linear-gradient(180deg,rgba(201,173,117,0.5),rgba(38,53,72,0.9))]">
             {STEPS.map((s, i) => {
               const ss = ctx.states[s.id];
               const here = s.id === step.id;
               const dot = ss.done ? "border border-sd-ok/45 bg-sd-ok/15 text-sd-ok" : here ? "bg-[linear-gradient(180deg,#e4cc95,#c9ad75)] text-[#1d160a]" : "border border-sd-line text-sd-text3";
-              const row = <><span className={`grid h-[26px] w-[26px] shrink-0 place-items-center rounded-full text-[11.5px] font-bold ${dot}`}>{ss.done ? "✓" : i + 1}</span>
+              const row = <><span className={`relative grid h-[26px] w-[26px] shrink-0 place-items-center rounded-full bg-[#0c131d] font-serif text-[11px] font-semibold ${dot}`}>{ss.done ? "✓" : ROMAN[i]}</span>
                 <span className={here ? "font-semibold text-sd-text" : ss.done ? "text-sd-text2" : "text-sd-text3"}>{s.title}</span>
                 <span className={`ml-auto font-mono text-[11px] ${here ? "text-sd-gold" : "text-sd-ok"}`}>{here ? "now" : ss.done ? ss.detail : ""}</span></>;
               return <li key={s.id}>{ss.available && !here
@@ -241,12 +298,12 @@ const SetupStep: React.FC<Ctx> = (ctx) => {
       {/* the question */}
       <main className="flex min-w-0 flex-1 flex-col px-6 py-8 sm:px-12 lg:px-20 lg:py-14">
         <div className="flex items-center justify-between text-[13px] text-sd-text3">
-          <span className="font-mono text-[12px]">Step {idx + 1} of 3</span>
+          <span className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em] text-sd-gold">Step {ROMAN[idx]} of III<span aria-hidden className="h-px w-16 bg-[linear-gradient(90deg,#c9ad75,transparent)]" /></span>
           <span>Saved as you go · <SignOut /></span>
         </div>
-        <h1 className="mt-5 font-serif text-[30px] font-semibold leading-tight tracking-[-0.01em] lg:text-[36px]">{step.question}</h1>
+        <h1 className="su-rise mt-5 font-serif text-[32px] font-semibold leading-[1.1] tracking-[-0.02em] lg:text-[40px]">{step.question}</h1>
         <p className="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-sd-text2">{step.lede}</p>
-        <div className="mt-7 max-w-[820px] flex-1">
+        <div className="su-rise mt-8 max-w-[820px] flex-1" style={{ animationDelay: "90ms" }}>
           {!ctx.config ? <p className="text-sm text-sd-text3">{ctx.error ? "Your institution's set-up could not be read." : "Loading…"}</p>
             : step.id === "structure" ? <StructureStep config={ctx.config} reload={ctx.reload} />
             : step.id === "rules" ? <RulesStep config={ctx.config} reload={ctx.reload} />
@@ -280,19 +337,20 @@ const useAct = (reload: () => void) => {
 };
 const Err: React.FC<{ text: string | null }> = ({ text }) => text ? <p role="alert" className="mt-3 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12.5px] text-red-300">{text}</p> : null;
 const Panel: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <section className="rounded-2xl border border-sd-line bg-[linear-gradient(180deg,rgba(17,26,38,0.95),rgba(13,21,32,0.95))] p-5 sm:p-6">
-    <div className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-sd-text3">{title}</div>
+  <section className="relative overflow-hidden rounded-[18px] border border-sd-line bg-[linear-gradient(180deg,rgba(20,30,44,0.95),rgba(12,19,29,0.95))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_24px_60px_-40px_rgba(0,0,0,0.9)] sm:p-6">
+    <span aria-hidden className="absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(201,173,117,0.35),transparent)]" />
+    <div className="flex items-center gap-2.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.2em] text-sd-text3"><span aria-hidden className="h-1 w-1 rotate-45 bg-sd-gold/70" />{title}</div>
     <div className="mt-3">{children}</div>
   </section>
 );
 const Chip: React.FC<{ children: React.ReactNode; onRemove?: () => void; removeLabel?: string }> = ({ children, onRemove, removeLabel }) => (
-  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05] py-1 pl-3 pr-2 text-[12.5px]">
+  <span className="inline-flex items-center gap-1.5 rounded-full border border-sd-gold/20 bg-[linear-gradient(180deg,rgba(201,173,117,0.10),rgba(201,173,117,0.03))] py-1 pl-3 pr-2 text-[12.5px]">
     {children}
     {onRemove && <button onClick={onRemove} aria-label={removeLabel} className="rounded-full px-1 text-sd-text3 hover:text-red-300">✕</button>}
   </span>
 );
 const Primary: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", ...p }) =>
-  <button {...p} className={`h-[42px] shrink-0 rounded-lg bg-sd-accentbg px-4 text-[13.5px] font-semibold text-sd-accentink transition hover:bg-white disabled:opacity-40 ${className}`} />;
+  <button {...p} className={`h-11 shrink-0 rounded-[10px] bg-sd-accentbg px-4 text-[13.5px] font-semibold text-sd-accentink shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition hover:bg-white disabled:opacity-40 ${className}`} />;
 
 const StructureStep: React.FC<{ config: InstitutionConfig; reload: () => void }> = ({ config, reload }) => {
   const { busy, err, act } = useAct(reload);
@@ -310,7 +368,7 @@ const StructureStep: React.FC<{ config: InstitutionConfig; reload: () => void }>
         </div>
         <form className="mt-4 flex gap-2.5" onSubmit={(e) => { e.preventDefault(); void addDept(); }}>
           <label className="sr-only" htmlFor="su-dept">Department name</label>
-          <input id="su-dept" className={inputCls} value={dept} onChange={(e) => setDept(e.target.value)} placeholder="Department name" />
+          <input id="su-dept" className={FIELD} value={dept} onChange={(e) => setDept(e.target.value)} placeholder="Department name" />
           <Primary type="submit" disabled={!dept.trim() || busy}>Add department</Primary>
         </form>
       </Panel>
@@ -319,11 +377,11 @@ const StructureStep: React.FC<{ config: InstitutionConfig; reload: () => void }>
           {config.roles.length === 0 && <span className="text-[13px] text-sd-text3">None yet. Director of Policy, Legal Counsel, Permanent Secretary…</span>}
           {config.roles.map((r) => <Chip key={r.key} onRemove={() => act(() => deleteGovRole(r.key), "The office could not be removed.")} removeLabel={`Remove ${r.label}`}>{r.label}{deptName(r.department_key) && <span className="text-sd-text3"> · {deptName(r.department_key)}</span>}</Chip>)}
         </div>
-        <form className="mt-4 flex flex-wrap gap-2.5" onSubmit={(e) => { e.preventDefault(); void addOffice(); }}>
+        <form className="mt-4 grid gap-2.5 sm:grid-cols-[1fr_210px_auto]" onSubmit={(e) => { e.preventDefault(); void addOffice(); }}>
           <label className="sr-only" htmlFor="su-office">Office name</label>
-          <input id="su-office" className={`${inputCls} min-w-[200px] flex-1`} value={office} onChange={(e) => setOffice(e.target.value)} placeholder="Office name" />
+          <input id="su-office" className={FIELD} value={office} onChange={(e) => setOffice(e.target.value)} placeholder="Office name" />
           <label className="sr-only" htmlFor="su-office-dept">Department of the office</label>
-          <select id="su-office-dept" className={`${inputCls} w-auto min-w-[180px]`} value={officeDept} onChange={(e) => setOfficeDept(e.target.value)}>
+          <select id="su-office-dept" className={FIELD} value={officeDept} onChange={(e) => setOfficeDept(e.target.value)}>
             <option value="">No department</option>
             {config.departments.map((d) => <option key={d.key} value={d.key}>{d.name}</option>)}
           </select>
@@ -374,11 +432,11 @@ const RulesStep: React.FC<{ config: InstitutionConfig; reload: () => void }> = (
       <Panel title={existing.length ? "Add another rule" : "Your first rule"}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block" htmlFor="su-type"><span className={LABEL}>Type of record</span>
-            <select id="su-type" className={inputCls} value={docType} onChange={(e) => setDocType(e.target.value)}>
+            <select id="su-type" className={FIELD} value={docType} onChange={(e) => setDocType(e.target.value)}>
               {RECORD_TYPES.map((t) => <option key={t.docType} value={t.docType}>{t.label}{ruled.has(t.docType) ? " (has a rule; saving replaces it)" : ""}</option>)}
             </select></label>
           <label className="block" htmlFor="su-keep"><span className={LABEL}>Kept for</span>
-            <select id="su-keep" className={inputCls} value={retention} onChange={(e) => setRetention(Number(e.target.value))}>
+            <select id="su-keep" className={FIELD} value={retention} onChange={(e) => setRetention(Number(e.target.value))}>
               {RETENTION.map((r) => <option key={r.d} value={r.d}>{r.l}</option>)}
             </select></label>
         </div>
@@ -403,7 +461,7 @@ const RulesStep: React.FC<{ config: InstitutionConfig; reload: () => void }> = (
           </div>
         </div>
         <label className="mt-5 block max-w-sm" htmlFor="su-pub"><span className={LABEL}>Published by</span>
-          <select id="su-pub" className={inputCls} value={publisher} onChange={(e) => setPublisher(e.target.value)}>
+          <select id="su-pub" className={FIELD} value={publisher} onChange={(e) => setPublisher(e.target.value)}>
             <option value="">Any office in the chain</option>
             {config.roles.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
           </select></label>
@@ -453,11 +511,11 @@ const PeopleStep: React.FC<{ config: InstitutionConfig; reload: () => void }> = 
       <Panel title="Add a person">
         <form className="grid gap-2.5 sm:grid-cols-[1.1fr_1.3fr_1fr]" onSubmit={(e) => { e.preventDefault(); void add(); }}>
           <label className="sr-only" htmlFor="su-name">Full name</label>
-          <input id="su-name" className={inputCls} value={p.fullName} onChange={(e) => setP({ ...p, fullName: e.target.value })} placeholder="Full name" />
+          <input id="su-name" className={FIELD} value={p.fullName} onChange={(e) => setP({ ...p, fullName: e.target.value })} placeholder="Full name" />
           <label className="sr-only" htmlFor="su-email">Work email</label>
-          <input id="su-email" className={inputCls} type="email" value={p.email} onChange={(e) => setP({ ...p, email: e.target.value })} placeholder="name@institution.org" />
+          <input id="su-email" className={FIELD} type="email" value={p.email} onChange={(e) => setP({ ...p, email: e.target.value })} placeholder="name@institution.org" />
           <label className="sr-only" htmlFor="su-holds">Office they hold</label>
-          <select id="su-holds" className={inputCls} value={p.office} onChange={(e) => setP({ ...p, office: e.target.value })}>
+          <select id="su-holds" className={FIELD} value={p.office} onChange={(e) => setP({ ...p, office: e.target.value })}>
             <option value="">Office they hold…</option>
             {config.roles.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
           </select>
@@ -492,7 +550,7 @@ const PeopleStep: React.FC<{ config: InstitutionConfig; reload: () => void }> = 
       <details className="rounded-2xl border border-sd-soft px-5 py-4 text-[13px] text-sd-text2">
         <summary className="cursor-pointer font-semibold text-sd-text">Add many people at once</summary>
         <p className="mt-2 text-[12.5px] text-sd-text3">Paste one person per line: <span className="font-mono">Full name, email, office</span> (the office is optional and must match an office's name). From a spreadsheet or a directory export.</p>
-        <textarea aria-label="People to import" className={`${inputCls} mt-3 h-24 font-mono text-[12px]`} value={csv} onChange={(e) => setCsv(e.target.value)} placeholder={"Amina Okafor, a.okafor@institution.org, Director of Policy\nKofi Mensah, k.mensah@institution.org"} />
+        <textarea aria-label="People to import" className="mt-3 h-24 w-full rounded-[10px] border border-sd-line bg-[#0b131d] px-3.5 py-2.5 font-mono text-[12px] text-sd-text placeholder:text-sd-faint outline-none transition focus:border-sd-gold/60 focus:ring-[3px] focus:ring-sd-gold/15" value={csv} onChange={(e) => setCsv(e.target.value)} placeholder={"Amina Okafor, a.okafor@institution.org, Director of Policy\nKofi Mensah, k.mensah@institution.org"} />
         <div className="mt-3 flex items-center gap-3"><Primary onClick={() => void importList()} disabled={!csv.trim() || busy}>Import</Primary>{msg && <span className="text-[12.5px] text-sd-ok">{msg}</span>}</div>
       </details>
       <Err text={err} />

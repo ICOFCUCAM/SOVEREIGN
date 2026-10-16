@@ -210,3 +210,15 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 .sd-console ::-webkit-scrollbar-thumb { background: #263548; border: 2px solid transparent; background-clip: padding-box; border-radius: 8px; }
 .sd-console ::-webkit-scrollbar-thumb:hover { background: #3b5374; background-clip: padding-box; }
 .sd-console * { scrollbar-color: #263548 transparent; }
+
+/* Set-up (pages/Setup.tsx): a gentle rise on arrival, a slow-turning rosette and a sheen across the
+   current step. Motion only for people who have not asked for less. */
+.su-rise { animation: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .su-rise { animation: su-rise 0.7s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes su-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .su-turn { transform-origin: 0 0; animation: su-turn 240s linear infinite; }
+  @keyframes su-turn { to { transform: rotate(360deg); } }
+  .su-sheen { animation: su-sheen 5.5s ease-in-out 1.2s infinite; }
+  @keyframes su-sheen { 0% { left: -50%; } 45%, 100% { left: 150%; } }
+}
