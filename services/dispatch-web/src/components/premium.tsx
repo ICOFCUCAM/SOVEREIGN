@@ -29,25 +29,35 @@ const SMALL_WORDS = /^(of|and|the|for|de|la|le|du|des)$/i;
 export const initialsOf = (name: string): string => name.split(/\s+/).filter(Boolean).map((w) => (SMALL_WORDS.test(w) ? w[0].toLowerCase() : w[0].toUpperCase())).join("").slice(0, 4) || "SD";
 
 // The institution's seal, engraved: a ring of ticks, the legend on a circle, the initials at the centre.
-export const EngravedSeal: React.FC<{ initials: string; size: number; className?: string }> = ({ initials, size, className = "" }) => {
+// The same seal certifies: a tone (ok for verified, warn for revoked, bad for unknown) and a legend of its
+// own ("VERIFIED · OFFICIAL RECORD ·") turn it into the stamp on a certificate or a verification verdict.
+type SealTone = "gold" | "ok" | "warn" | "bad";
+const SEAL_TONE: Record<SealTone, { hi: string; mid: string; lo: string; ink: string }> = {
+  gold: { hi: "#f0dcab", mid: "#c9ad75", lo: "#8f7445", ink: "#f3ead6" },
+  ok: { hi: "#b9ecd2", mid: "#75c9a1", lo: "#3f8a67", ink: "#d9f5e7" },
+  warn: { hi: "#f6dfaa", mid: "#e6bd72", lo: "#a17a37", ink: "#fbecc9" },
+  bad: { hi: "#f2b9b9", mid: "#e28b8b", lo: "#9c4f4f", ink: "#f7d6d6" },
+};
+export const EngravedSeal: React.FC<{ initials: string; size: number; className?: string; legend?: string; tone?: SealTone }> = ({ initials, size, className = "", legend = "SOVEREIGN DISPATCH · OFFICIAL RECORD · INSTITUTION ·", tone = "gold" }) => {
   const id = useId().replace(/:/g, "");
+  const t = SEAL_TONE[tone];
   const ticks = Array.from({ length: 60 }, (_, i) => i * 6);
   return (
-    <svg aria-hidden viewBox="0 0 120 120" width={size} height={size} className={`shrink-0 drop-shadow-[0_0_28px_rgba(201,173,117,0.35)] ${className}`}>
+    <svg aria-hidden viewBox="0 0 120 120" width={size} height={size} className={`shrink-0 ${className}`} style={{ filter: `drop-shadow(0 0 22px ${t.mid}55)` }}>
       <defs>
-        <radialGradient id={`${id}f`} cx="38%" cy="30%" r="75%"><stop offset="0" stopColor="#c9ad75" stopOpacity=".28" /><stop offset=".7" stopColor="#0f1722" stopOpacity=".2" /><stop offset="1" stopColor="#0b1018" stopOpacity="0" /></radialGradient>
-        <linearGradient id={`${id}g`} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f0dcab" /><stop offset=".5" stopColor="#c9ad75" /><stop offset="1" stopColor="#8f7445" /></linearGradient>
+        <radialGradient id={`${id}f`} cx="38%" cy="30%" r="75%"><stop offset="0" stopColor={t.mid} stopOpacity=".28" /><stop offset=".7" stopColor="#0f1722" stopOpacity=".2" /><stop offset="1" stopColor="#0b1018" stopOpacity="0" /></radialGradient>
+        <linearGradient id={`${id}g`} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={t.hi} /><stop offset=".5" stopColor={t.mid} /><stop offset="1" stopColor={t.lo} /></linearGradient>
         <path id={`${id}p`} d="M60 60 m-45.5 0 a45.5 45.5 0 1 1 91 0 a45.5 45.5 0 1 1 -91 0" />
       </defs>
       <circle cx="60" cy="60" r="58" fill={`url(#${id}f)`} stroke={`url(#${id}g)`} strokeWidth="1" />
-      <circle cx="60" cy="60" r="53.5" fill="none" stroke="#c9ad75" strokeOpacity=".45" strokeWidth=".5" />
-      {ticks.map((a) => <line key={a} x1="60" y1="3.6" x2="60" y2={a % 30 === 0 ? 8 : 6.2} stroke="#c9ad75" strokeOpacity=".55" strokeWidth=".5" transform={`rotate(${a} 60 60)`} />)}
-      <text fill="#c9ad75" fillOpacity=".85" fontFamily="ui-monospace, Menlo, monospace" fontSize="6.4" letterSpacing="2.1">
-        <textPath href={`#${id}p`}>SOVEREIGN DISPATCH · OFFICIAL RECORD · INSTITUTION ·</textPath>
+      <circle cx="60" cy="60" r="53.5" fill="none" stroke={t.mid} strokeOpacity=".45" strokeWidth=".5" />
+      {ticks.map((a) => <line key={a} x1="60" y1="3.6" x2="60" y2={a % 30 === 0 ? 8 : 6.2} stroke={t.mid} strokeOpacity=".55" strokeWidth=".5" transform={`rotate(${a} 60 60)`} />)}
+      <text fill={t.mid} fillOpacity=".9" fontFamily="ui-monospace, Menlo, monospace" fontSize="6.4" letterSpacing="2.1">
+        <textPath href={`#${id}p`}>{legend}</textPath>
       </text>
       <circle cx="60" cy="60" r="37" fill="#0d1520" stroke={`url(#${id}g)`} strokeWidth=".8" />
-      <circle cx="60" cy="60" r="34" fill="none" stroke="#c9ad75" strokeOpacity=".3" strokeWidth=".4" />
-      <text x="60" y={60 + 6.5} textAnchor="middle" fill="#f3ead6" fontFamily="Fraunces, Georgia, serif" fontWeight="600" fontSize={initials.length > 3 ? 15 : 19}>{initials}</text>
+      <circle cx="60" cy="60" r="34" fill="none" stroke={t.mid} strokeOpacity=".3" strokeWidth=".4" />
+      <text x="60" y={60 + 6.5} textAnchor="middle" fill={t.ink} fontFamily="Fraunces, Georgia, serif" fontWeight="600" fontSize={initials.length > 3 ? 15 : initials.length === 1 ? 30 : 19}>{initials}</text>
     </svg>
   );
 };

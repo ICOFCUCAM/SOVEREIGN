@@ -11,6 +11,7 @@ import { actorName, fmtBytes, fmtDateTime, recordNo, waited } from "../lib/forma
 import { Alert, Badge, Button, ClassificationMark, ConfirmDialog, CopyButton, EmptyState, EvidenceValue, Fact, LifecycleStatus, Panel, Skeleton, cx, postureText } from "../components/console/ds";
 import { ChainOfAuthority } from "../components/console/governance";
 import { Icon } from "../components/console/icons";
+import { EngravedSeal, Rosette, Hairline, PANEL } from "../components/premium";
 
 type LifecycleAct = "publish" | "archive" | "withdraw";
 
@@ -423,16 +424,30 @@ const GovernanceStanding: React.FC<{ p: NonNullable<DocumentDetail["posture"]>; 
 };
 
 // ── Certificates ────────────────────────────────────────────────────────────
-const CertFrame: React.FC<{ kind: string; aside?: React.ReactNode; children: React.ReactNode; statement: React.ReactNode }> = ({ kind, aside, children, statement }) => (
-  <section aria-label={kind} className="sd-cert relative rounded-xl border border-sd-gold/45 bg-sd-panel p-5 sm:p-6">
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-      <div className="flex items-center gap-2.5"><Icon.seal className="h-5 w-5 text-sd-gold" /><h2 className="font-serif text-[18px] font-semibold text-sd-text">{kind}</h2></div>
+// A certificate reads as one: a double gold frame, a faint guilloche, the engraved seal pressed on
+// (once, on arrival; reduced motion skips it) and the issuing statement under a gold rule.
+const CertFrame: React.FC<{ kind: string; aside?: React.ReactNode; children: React.ReactNode; statement: React.ReactNode; tone?: "gold" | "bad" }> = ({ kind, aside, children, statement, tone = "gold" }) => (
+  <section aria-label={kind} className={cx("sd-cert relative overflow-hidden rounded-2xl border p-5 sm:p-7", PANEL, tone === "bad" ? "border-sd-bad/45" : "border-sd-gold/45")}>
+    <span aria-hidden className={cx("pointer-events-none absolute inset-[6px] rounded-[12px] border", tone === "bad" ? "border-sd-bad/15" : "border-sd-gold/20")} />
+    <Hairline tone={tone === "bad" ? "faint" : "gold"} />
+    {tone !== "bad" && <Rosette className="absolute -right-40 -top-40 h-[360px] w-[360px] opacity-[0.12]" />}
+    <div className="relative mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center gap-4">
+        <span className="sd-stamp inline-block" style={{ ["--sd-rot" as string]: "-8deg" }}>
+          <EngravedSeal initials="SD" size={58} tone={tone === "bad" ? "bad" : "gold"} legend={tone === "bad" ? "SOVEREIGN DISPATCH · NOT COMPLIANT ·" : "SOVEREIGN DISPATCH · CERTIFIED · SEALED ·"} />
+        </span>
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-sd-gold">Certificate</div>
+          <h2 className="mt-1 font-serif text-[21px] font-semibold capitalize leading-tight tracking-[-0.01em] text-sd-text">{kind}</h2>
+        </div>
+      </div>
       {aside}
     </div>
-    {children}
-    <div className="mt-5 border-t border-sd-soft pt-3.5">
-      <div className="text-[10.5px] font-bold uppercase tracking-[0.14em] text-sd-text3">Issued by Sovereign Dispatch</div>
-      <p className="mt-1.5 max-w-[80ch] text-[12.5px] leading-relaxed text-sd-text2">{statement}</p>
+    <div className="relative">{children}</div>
+    <div className="relative mt-6 pt-4">
+      <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(201,173,117,0.5),rgba(38,53,72,0.8)_40%,transparent)]" />
+      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-sd-text3"><span aria-hidden className="h-1 w-1 rotate-45 bg-sd-gold/70" />Issued by Sovereign Dispatch</div>
+      <p className="mt-2 max-w-[80ch] font-serif text-[14px] italic leading-relaxed text-sd-text2">{statement}</p>
     </div>
   </section>
 );
@@ -442,7 +457,7 @@ const HASH_NOTE = "Recomputing this digest over the same canonical content yield
 const GovernanceCertificatePanel: React.FC<{ c: GovernanceCertificate }> = ({ c }) => {
   const ok = c.complianceResult === "COMPLIANT";
   return (
-    <CertFrame kind="Governance certificate" aside={<Badge tone={ok ? "ok" : "bad"} glyph={ok ? "✓" : "✕"}>{c.complianceResult}</Badge>}
+    <CertFrame kind="Governance certificate" tone={ok ? "gold" : "bad"} aside={<Badge tone={ok ? "ok" : "bad"} glyph={ok ? "✓" : "✕"}>{c.complianceResult}</Badge>}
       statement={<>Sovereign Dispatch certifies that this publication {ok ? "satisfied" : "did not satisfy"} governance policy <span className="font-semibold text-sd-text">{c.policyName}</span> (v{c.policyVersion}): the required approval chain was {ok ? "satisfied in order" : "not satisfied in order"}, with separation of duties {c.separationOfDuties}. This certificate can be verified independently against the SHA-256 integrity proof above.</>}>
       <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-3">
         <Fact label="Governing policy" value={<>{c.policyName} <span className="font-mono text-sd-text3">v{c.policyVersion}</span></>} />
