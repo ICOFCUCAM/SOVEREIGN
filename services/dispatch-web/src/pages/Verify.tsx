@@ -4,6 +4,7 @@ import { PublicHeader, PublicFooter, PageBanner, FilmGrain } from "../components
 import { verifyRecord, type VerifyResult } from "../lib/api";
 import { useMarketing4Copy } from "../lib/messages";
 import type { VerifyCopy } from "../lib/messages/marketing4";
+import { EngravedSeal, Rosette, Hairline, Ornament, Gilt, PANEL, GOLD, ACTION, FIELD } from "../components/premium";
 
 // PUBLIC VERIFICATION PORTAL — the institutional proof a copied PDF can never
 // carry. Anyone holding a copy of an Official Record can confirm, with no account,
@@ -15,20 +16,22 @@ import type { VerifyCopy } from "../lib/messages/marketing4";
 
 const fmtDate = (s?: string | null) => s ? new Date(s).toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" }) : "—";
 
-const VERDICT_STYLE: Record<string, { ring: string; chip: string; mark: string }> = {
-  OFFICIAL: { ring: "border-emerald-500/40 from-emerald-500/[0.10]", chip: "bg-emerald-500/15 text-emerald-300", mark: "✓" },
-  PRESERVED: { ring: "border-emerald-500/40 from-emerald-500/[0.10]", chip: "bg-emerald-500/15 text-emerald-300", mark: "✓" },
-  REVOKED: { ring: "border-amber-500/50 from-amber-500/[0.10]", chip: "bg-amber-500/15 text-amber-300", mark: "!" },
-  EVALUATION: { ring: "border-amber-500/50 from-amber-500/[0.10]", chip: "bg-amber-500/20 text-amber-300", mark: "!" },
-  NOT_FOUND: { ring: "border-red-500/40 from-red-500/[0.08]", chip: "bg-red-500/15 text-red-300", mark: "✕" },
-  ERROR: { ring: "border-red-500/40 from-red-500/[0.08]", chip: "bg-red-500/15 text-red-300", mark: "✕" },
+// Each verdict is a seal pressed onto the result: green for a genuine record, amber for one revoked or
+// issued under an evaluation, red for none. Only a genuine record is framed as a certificate.
+const VERDICT_STYLE: Record<string, { ring: string; chip: string; mark: string; tone: "ok" | "warn" | "bad"; certificate: boolean }> = {
+  OFFICIAL: { ring: "border-sd-gold/45", chip: "bg-emerald-500/15 text-emerald-300", mark: "✓", tone: "ok", certificate: true },
+  PRESERVED: { ring: "border-sd-gold/45", chip: "bg-emerald-500/15 text-emerald-300", mark: "✓", tone: "ok", certificate: true },
+  REVOKED: { ring: "border-amber-500/45", chip: "bg-amber-500/15 text-amber-300", mark: "!", tone: "warn", certificate: false },
+  EVALUATION: { ring: "border-amber-500/45", chip: "bg-amber-500/20 text-amber-300", mark: "!", tone: "warn", certificate: false },
+  NOT_FOUND: { ring: "border-red-500/35", chip: "bg-red-500/15 text-red-300", mark: "✕", tone: "bad", certificate: false },
+  ERROR: { ring: "border-red-500/35", chip: "bg-red-500/15 text-red-300", mark: "✕", tone: "bad", certificate: false },
 };
 
 const Fact: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) =>
   children == null || children === "" ? null : (
     <div>
-      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">{k}</div>
-      <div className="mt-1 text-[14px] font-medium text-white/90">{children}</div>
+      <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-sd-gold/70">{k}</div>
+      <div className="mt-1.5 text-[14px] font-medium text-white/90">{children}</div>
     </div>
   );
 
@@ -50,12 +53,12 @@ const FileCheck: React.FC<{ artifacts: NonNullable<VerifyResult["artifacts"]>; f
   const matchParts = fc.match.split(/\{name\}|\{format\}/);
   const nomatchParts = fc.nomatch.split("{name}");
   return (
-    <div className="border-t border-white/[0.08] p-6 sm:p-7">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">{fc.label}</div>
+    <div className="relative border-t border-white/[0.08] p-6 sm:p-7">
+      <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-sd-gold/70">{fc.label}</div>
       <p className="mt-1.5 max-w-xl text-[12.5px] leading-relaxed text-white/50">
         {artifacts.length > 1 ? fc.leadPlural : fc.lead}
       </p>
-      <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-md border border-white/20 px-4 py-2 text-[13px] font-semibold text-white/80 transition hover:border-white/40">
+      <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-[10px] border border-sd-gold/35 bg-[linear-gradient(180deg,rgba(201,173,117,0.10),rgba(201,173,117,0.02))] px-4 py-2.5 text-[13px] font-semibold text-white/90 transition hover:border-sd-gold/60">
         {fc.choose}
         <input type="file" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
       </label>
@@ -105,31 +108,39 @@ const Verify: React.FC = () => {
         <div className="mx-auto max-w-3xl">
           <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gold-400">{m.eyebrow}</div>
           <h1 className="mt-3 font-serif text-[2.4rem] font-bold leading-[1.05] tracking-tight">{m.title}</h1>
+          <Ornament className="mt-4 !justify-start" />
           <p className="mt-4 max-w-2xl text-[14.5px] leading-relaxed text-white/55">
             {m.lead}
           </p>
 
           <form onSubmit={submit} className="mt-7 flex flex-wrap gap-2">
-            <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={m.placeholder}
-              className="min-w-[260px] flex-1 rounded-md border border-white/15 bg-white/[0.04] px-4 py-2.5 font-mono text-sm text-white placeholder:text-white/30 focus:border-gold-400/50 focus:outline-none" />
-            <button type="submit" className="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/85">{m.verifyBtn}</button>
+            <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={m.placeholder} aria-label={m.placeholder}
+              className={`${FIELD} min-w-[260px] flex-1 !w-auto font-mono`} />
+            <button type="submit" className={`${ACTION} ${GOLD} px-6`}>{m.verifyBtn}</button>
           </form>
 
           {loading && <div className="mt-8 text-sm text-white/40">{m.verifyingMsg}</div>}
 
           {v && verdict && (
-            <div className={`mt-8 overflow-hidden rounded-2xl border bg-gradient-to-br to-transparent ${verdict.ring}`}>
-              <div className="flex items-start gap-4 p-6 sm:p-7">
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-2xl font-bold ${verdict.chip}`}>{verdict.mark}</div>
+            <div className={`su-rise relative mt-8 overflow-hidden rounded-2xl border ${PANEL} ${verdict.ring}`}>
+              {verdict.certificate && <>
+                <span aria-hidden className="pointer-events-none absolute inset-[6px] rounded-[12px] border border-sd-gold/20" />
+                <Hairline tone="gold" />
+                <Rosette className="absolute -right-48 -top-48 h-[400px] w-[400px] opacity-[0.12]" />
+              </>}
+              <div className="relative flex items-start gap-5 p-6 sm:p-7">
+                <span className="sd-stamp inline-block shrink-0" style={{ ["--sd-rot" as string]: "-8deg" }}>
+                  <EngravedSeal initials={verdict.mark} size={76} tone={verdict.tone} legend={`${v.verified ? v.status : "UNVERIFIED"} · SOVEREIGN DISPATCH · `} />
+                </span>
                 <div className="min-w-0">
                   <div className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ${verdict.chip}`}>{v.verified ? v.status : m.unverifiedChip}</div>
-                  <h2 className="mt-2 font-serif text-[1.7rem] font-bold leading-tight">{verdict.title}</h2>
+                  <h2 className="mt-2 font-serif text-[1.8rem] font-bold leading-tight">{verdict.certificate ? <Gilt>{verdict.title}</Gilt> : verdict.title}</h2>
                   <p className="mt-1.5 max-w-xl text-[13.5px] leading-relaxed text-white/55">{v.message || verdict.note}</p>
                 </div>
               </div>
 
               {v.verified && (
-                <div className="grid grid-cols-2 gap-x-8 gap-y-5 border-t border-white/[0.08] p-6 sm:grid-cols-3 sm:p-7">
+                <div className="relative grid grid-cols-2 gap-x-8 gap-y-5 border-t border-white/[0.08] p-6 sm:grid-cols-3 sm:p-7">
                   <Fact k={f.institution}>{v.institution}</Fact>
                   <Fact k={v.status === "EVALUATION" ? f.evaluationRecordId : f.officialRecordId}><span className="font-mono text-[13px]">{v.recordId}</span></Fact>
                   <Fact k={f.recordType}>{v.docType?.replace(/_/g, " ")}</Fact>
@@ -138,11 +149,11 @@ const Verify: React.FC = () => {
                   <Fact k={f.governance}>{v.governanceCompliance ? <span className="text-emerald-300">{v.governanceCompliance}</span> : "—"}</Fact>
                   {v.approvalChain && v.approvalChain.length > 0 && (
                     <div className="col-span-2 sm:col-span-3">
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">{f.approvalChain}</div>
+                      <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-sd-gold/70">{f.approvalChain}</div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[13px]">
                         {v.approvalChain.map((r, i) => (
                           <React.Fragment key={i}>
-                            <span className="rounded bg-white/[0.06] px-2 py-0.5 text-white/80 ring-1 ring-white/10">{r}</span>
+                            <span className="rounded-full border border-sd-gold/25 bg-[linear-gradient(180deg,rgba(201,173,117,0.10),rgba(201,173,117,0.03))] px-2.5 py-0.5 text-white/85">{r}</span>
                             {i < v.approvalChain!.length - 1 && <span className="text-white/25" aria-hidden>→</span>}
                           </React.Fragment>
                         ))}
@@ -161,12 +172,12 @@ const Verify: React.FC = () => {
                   {v.status === "PRESERVED" && <Fact k={f.preserved}>{fmtDate(v.preservedAt)}</Fact>}
                   {v.status === "REVOKED" && <Fact k={f.revoked}>{fmtDate(v.revokedAt)}</Fact>}
                   <div className="col-span-2 sm:col-span-3">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">{f.integrityProof}</div>
-                    <div className="mt-1 break-all font-mono text-[12px] text-emerald-200/90">{v.integrityHash || "—"}</div>
+                    <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-sd-gold/70">{f.integrityProof}</div>
+                    <div className="mt-1.5 break-all rounded-[10px] border border-sd-gold/25 bg-[linear-gradient(180deg,rgba(201,173,117,0.07),rgba(11,19,29,0.85))] px-3.5 py-2.5 font-mono text-[12px] text-[#f3e2b6]">{v.integrityHash || "—"}</div>
                   </div>
                   {v.artifacts && v.artifacts.length > 0 && (
                     <div className="col-span-2 sm:col-span-3">
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">{f.artifactHashes}</div>
+                      <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-sd-gold/70">{f.artifactHashes}</div>
                       <ul className="mt-1.5 space-y-1">
                         {v.artifacts.map((a) => (
                           <li key={a.format} className="flex flex-wrap items-baseline gap-2 text-[12px]">
@@ -180,7 +191,7 @@ const Verify: React.FC = () => {
                 </div>
               )}
               {v.verified && v.artifacts && v.artifacts.length > 0 && <FileCheck artifacts={v.artifacts} fc={m.fileCheck} />}
-              <div className="border-t border-white/[0.06] px-6 py-2.5 text-[11px] text-white/35 sm:px-7">{m.verifiedBy}{v.verifiedAt ? ` · ${fmtDate(v.verifiedAt)}` : ""}</div>
+              <div className="relative flex items-center gap-2 border-t border-white/[0.06] px-6 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-white/40 sm:px-7"><span aria-hidden className="h-1 w-1 rotate-45 bg-sd-gold/70" />{m.verifiedBy}{v.verifiedAt ? ` · ${fmtDate(v.verifiedAt)}` : ""}</div>
             </div>
           )}
 

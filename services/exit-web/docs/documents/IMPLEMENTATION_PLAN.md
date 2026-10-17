@@ -1090,4 +1090,10 @@ A new institution is now guided from its first sign-in, its people can sign in w
 - **Materials, everywhere:** gold hairlines, panel depth, the gold primary button, gold-focus fields, gilt emphasis in headings and the diamond rule. `lib/ui` and `components/console/ds` take their finish from the kit, so every console page that uses their panels, buttons and fields follows it.
 - **Ceremony, for moments:** the engraved seal and the slow guilloche rosette. They appear on sign-in, sign-up, the invitation page (`components/AuthFrame.tsx`) and the set-up. The record-sealed, verification and certificate pages come next.
 - **Results:** browser tests 71 pass, including the accessibility checks.
+- **Ceremony for verification and certificates (step 3):**
+  - **The public verification page** (`pages/Verify.tsx`): the verdict is pressed on as an engraved seal, green for a genuine record, amber for one revoked or issued under an evaluation, red for none. A genuine record is framed as a certificate, with a double gold border, a faint rosette, a gilt title and the integrity proof in an engraved box. The search uses the gold field and button.
+  - **The Governance and Preservation Certificates** on a record's page (`CertFrame` in `pages/DocumentView.tsx`) share the same frame. The seal is stamped once on arrival, and the issuing statement is set in serif italic under a gold rule. A non-compliant governance certificate is framed in red.
+  - **The seal** (`EngravedSeal`) now takes a tone and a legend of its own.
+  - **Invitations** can also be sent by email, the device's share menu, a copied message or a QR code.
+  - **Results:** browser tests 72 pass.
 

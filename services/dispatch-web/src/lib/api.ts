@@ -181,6 +181,27 @@ export const invitePerson = (id: string) => request<{ token: string; expiresAt: 
 /** The link the administrator sends: the token travels in the fragment, so it never reaches a server log. */
 export const invitationLink = (token: string): string => `${typeof window !== "undefined" ? window.location.origin : ""}/invite#token=${encodeURIComponent(token)}`;
 
+/** The invitation as a ready-to-send message: who it is for, from which institution, the link and its expiry. */
+export function invitationMessage(p: { fullName: string; institution?: string | null; link: string; expiresAt: string }): { subject: string; body: string } {
+  const inst = p.institution?.trim() || "your institution";
+  const until = new Date(p.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  return {
+    subject: `Your invitation to Sovereign Dispatch, ${inst}`,
+    body: [
+      `Dear ${p.fullName},`,
+      "",
+      `${inst} has invited you to Sovereign Dispatch, where the institution's official records are written, approved and published.`,
+      "",
+      "Open this link to set your password and sign in:",
+      p.link,
+      "",
+      `The link works once, until ${until}. Please do not forward it: it is for you alone.`,
+      "",
+      `${inst}`,
+    ].join("\n"),
+  };
+}
+
 // ---- people's sign-in without an identity provider (M27) ----
 export interface PersonSessionResponse { access_token: string; tenantId: string; expiresIn: number; scopes: string[] }
 /** Which way a work email signs in — decided by its domain only. */

@@ -158,6 +158,29 @@ test.describe("sign-in and onboarding", () => {
     await expect(page.getByRole("heading", { name: "Institutional Posture" })).toBeVisible();
   });
 
+  test("an invitation can be sent by email, copied as a message, or scanned as a QR code", async ({ page }) => {
+    const users = { users: [{ id: "u3", subject: "user:u3", email: "s.berg@example.gov", fullName: "Sarah Berg", departmentKey: null, systemAdmin: false, status: "active", signIn: { password: false, lastSignInAt: null, invitationExpiresAt: null } }] };
+    await mockApi(page, { respond: (m, p) => {
+      if (m === "GET" && p === "/v1/users") return { status: 200, body: users };
+      if (m === "GET" && p === "/v1/billing") return { status: 200, body: { ...FIX.singles["/v1/billing"].body, institution: "Ministry of Records" } };
+      if (m === "POST" && p === "/v1/users/invite") return { status: 201, body: { token: TOKEN, expiresAt: new Date(Date.now() + 7 * 86400000).toISOString() } };
+      return undefined;
+    } });
+    await signIn(page, "/admin/authority");
+    await page.getByRole("button", { name: "Invite", exact: true }).click();
+    const panel = page.getByRole("status", { name: "Invitation for Sarah Berg" });
+    await expect(panel).toBeVisible();
+    const href = await panel.getByRole("link", { name: "Open in email" }).getAttribute("href");
+    expect(href).toMatch(/^mailto:s\.berg%40example\.gov\?subject=/);
+    const body = decodeURIComponent(href!.split("&body=")[1]);
+    expect(body).toContain("Dear Sarah Berg,");
+    expect(body).toContain("Ministry of Records has invited you");
+    expect(body).toContain(`/invite#token=${TOKEN}`);
+    await expect(panel.getByRole("button", { name: "Copy message" })).toBeVisible();
+    await panel.getByRole("button", { name: "QR code" }).click();
+    await expect(panel.getByRole("img", { name: "QR code of the invitation link for Sarah Berg" })).toBeVisible();
+  });
+
   test("Go to a page finds a page by what it is for", async ({ page }) => {
     await mockApi(page);
     await signIn(page);
