@@ -8,24 +8,28 @@ import type { BookOutline } from "@/types/book";
 // Supabase session; the runner checks it and its own allowlist on each request.
 export const RUNNER_URL = ((import.meta.env.VITE_CLAUDE_RUNNER_URL as string | undefined) || "").replace(/\/+$/, "");
 
-export type StudioAction = "chat" | "summarize" | "rewrite" | "cite" | "book-outline" | "book-chapter" | "book-improve";
+export type StudioAction = "chat" | "summarize" | "rewrite" | "cite" | "tool" | "book-outline" | "book-chapter" | "book-improve";
 
 export interface StudioFile { name: string; storedAs: string; kind: "original" | "text"; bytes: number; at: string }
 export interface StudioOutput { path: string; bytes: number; modifiedAt: string }
-export interface StudioMessage { id: string; role: "user" | "assistant"; action: StudioAction; text: string; at: string; jobId: string; status?: "done" | "failed" | "cancelled"; outputs?: string[] }
+export interface StudioMessage { id: string; role: "user" | "assistant"; engine?: "claude-code" | "api"; action: StudioAction; text: string; at: string; jobId: string; status?: "done" | "failed" | "cancelled"; outputs?: string[] }
 export interface StudioThread { id: string; title: string; createdAt: string; updatedAt: string; sessionId: string | null; files: StudioFile[]; messages: StudioMessage[]; outputs: StudioOutput[]; runningJobId?: string }
 export interface StudioThreadSummary { id: string; title: string; createdAt: string; updatedAt: string; files: number; outputs: number }
 export interface StudioJob { id: string; threadId: string; action: StudioAction; label: string; output: string | null; status: "running" | "done" | "failed" | "cancelled"; startedAt: string; endedAt: string | null; error: string | null }
-export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; busy: StudioJob | null; citationStyles: string[] }
+export interface ClaudeStatus { state: "ok" | "unknown" | "signed_out" | "limit" | "not_configured"; at: string | null; resetsAt: string | null; message: string | null }
+export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; claude?: ClaudeStatus; busy: StudioJob | null; citationStyles: string[] }
 export type StudioEvent =
   | { type: "status"; status: string; line: string; at: string }
   | { type: "text"; text: string; at: string }
   | { type: "tool"; name: string; line: string; at: string }
   | { type: "denied"; line: string; at: string }
   | { type: "notice"; line: string; at: string }
-  | { type: "done"; status: StudioJob["status"] | "unknown"; error?: string | null; outputs?: string[]; output?: string | null; at: string };
+  | { type: "done"; status: StudioJob["status"] | "unknown"; error?: string | null; errorKind?: "auth" | "limit" | "other" | "stopped" | null; outputs?: string[]; output?: string | null; at: string };
 
 export interface RunOptions {
+  tool?: string;
+  a?: string;
+  b?: string;
   message?: string;
   target?: string; // "source" or a path under out/
   length?: string;
@@ -75,6 +79,8 @@ export const studio = {
   remove: (id: string) => call<{ ok: true }>(`/v1/threads/${id}`, { method: "DELETE" }),
   removeFile: (id: string, storedAs: string) => call<{ thread: StudioThread }>(`/v1/threads/${id}/files/${encodeURIComponent(storedAs)}`, { method: "DELETE" }).then((r) => r.thread),
   run: (id: string, action: StudioAction, options: RunOptions) => call<{ job: StudioJob }>(`/v1/threads/${id}/run`, { method: "POST", body: JSON.stringify({ action, options }) }).then((r) => r.job),
+  source: (id: string, storedAs: string) => call<{ name: string; text: string }>(`/v1/threads/${id}/sources/${encodeURIComponent(storedAs)}`).then((r) => r.text),
+  record: (id: string, r: { action: StudioAction; userText: string; text: string; outputs: Record<string, string>; status: "done" | "failed" }) => call<{ thread: StudioThread }>(`/v1/threads/${id}/record`, { method: "POST", body: JSON.stringify(r) }).then((x) => x.thread),
   output: (id: string, path: string) => call<{ path: string; text: string }>(`/v1/threads/${id}/outputs/${path.split("/").map(encodeURIComponent).join("/")}`).then((r) => r.text),
   cancel: (jobId: string) => call<{ job: StudioJob }>(`/v1/jobs/${jobId}/cancel`, { method: "POST" }),
 };
@@ -82,7 +88,7 @@ export const studio = {
 const put = (threadId: string, name: string, kind: "original" | "text", body: Blob) =>
   call<{ thread: StudioThread }>(`/v1/threads/${threadId}/files?name=${encodeURIComponent(name)}&kind=${kind}`, { method: "POST", body }).then((r) => r.thread);
 
-export const STUDIO_ACCEPT = ".pdf,.docx,.txt,.md,.markdown,.rtf,.html,.htm,.csv,.json";
+export const STUDIO_ACCEPT = ".pdf,.docx,.txt,.md,.markdown,.rtf,.html,.htm,.csv,.json,.jpg,.jpeg,.png,.webp";
 
 /**
  * Uploads a document: the original file (Claude can open a PDF itself when the
@@ -90,7 +96,7 @@ export const STUDIO_ACCEPT = ".pdf,.docx,.txt,.md,.markdown,.rtf,.html,.htm,.csv
  */
 export async function uploadToStudio(threadId: string, file: File): Promise<StudioThread> {
   let thread = await put(threadId, file.name, "original", file);
-  if (/\.(txt|md|markdown)$/i.test(file.name)) return thread; // already plain text
+  if (!/\.(pdf|docx)$/i.test(file.name)) return thread; // text is already text; images are read by Claude itself
   try {
     const text = await extractFileText(file);
     thread = await put(threadId, file.name, "text", new Blob([text], { type: "text/plain;charset=utf-8" }));
@@ -124,6 +130,19 @@ export function titleOf(markdown: string, fallback: string): string {
 
 export const OUTPUT_NAMES: Record<string, string> = {
   "book/outline.json": "Book wizard · outline",
+  "proofread.md": "Proofread text",
+  "proofread-changes.md": "Proofreading changes",
+  "fact-check.md": "Fact-check report",
+  "quotes-check.md": "Quotations & scripture check",
+  "translation.md": "Translated book",
+  "translation-notes.md": "Translation notes",
+  "marketing-pack.md": "Marketing pack",
+  "study-guide.md": "Study guide",
+  "index.md": "Index",
+  "glossary.md": "Glossary",
+  "compare.md": "Comparison of versions",
+  "readability.md": "Readability review",
+  "scanned-text.md": "Text from scanned pages",
   "summary.md": "Summary",
   "rewrite.md": "Rewritten book",
   "rewrite-notes.md": "Rewrite notes",
@@ -132,7 +151,7 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "citation-report.md": "Citation report",
 };
 
-export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? (p.startsWith("book/chapters/") ? `Book wizard · chapter ${Number(p.slice(14, 16))}` : p.startsWith("book/improved/") ? `Book wizard · improved chapter ${Number(p.slice(14, 16))}` : p.startsWith("rewrite/") ? `Chapter · ${p.slice(8).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p);
+export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? (p.startsWith("book/chapters/") ? `Book wizard · chapter ${Number(p.slice(14, 16))}` : p.startsWith("book/improved/") ? `Book wizard · improved chapter ${Number(p.slice(14, 16))}` : p.startsWith("translation/") ? `Translated chapter · ${p.slice(12).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p.startsWith("rewrite/") ? `Chapter · ${p.slice(8).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p);
 
 // ── Book wizard on Claude Code ───────────────────────────────────────────────
 // The Book Creator's engine for Claude Studio: each step is a runner job in the

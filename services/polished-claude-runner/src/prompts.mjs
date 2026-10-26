@@ -83,6 +83,7 @@ Do not stop early and do not skip chapters. If the work is very long, keep going
 4. Write ./out/citation-report.md: a table of each claim, the source that supports it, and every claim left as [citation needed].`,
       };
     }
+    case "tool": return tool(opts);
     case "book-outline": return bookOutline(opts);
     case "book-chapter": return bookChapter(opts);
     case "book-improve": return bookImprove(opts);
@@ -197,4 +198,117 @@ The current chapter is in ./book/improve-${pad2(i + 1)}.md. If ./book/BRIEF.md e
 Task: ${IMPROVE[type]}
 Keep the "## " chapter heading and Markdown structure. Write the complete improved chapter to ./out/${out}. No meta-commentary.`,
   };
+}
+
+// ── Studio tools ─────────────────────────────────────────────────────────────
+// Each tool works on the uploaded documents (or one earlier result) and writes
+// named files under ./out/. Long documents are handled chapter by chapter.
+
+const LONG = "If the document is long, work one chapter or major section at a time and keep going until the whole document is done; never stop early or sample.";
+
+export const TOOLS = {
+  proofread: {
+    title: "Proofread & copy-edit",
+    build: (o, tgt) => ({
+      output: "proofread.md",
+      prompt: `Proofread and copy-edit ${tgt}.
+Level: ${o.level === "light" ? "light: spelling, grammar, punctuation and obvious typos only" : "thorough: also clarity, word choice, repetition, consistency of names, numbers, capitalisation and terminology"}.
+Spelling and conventions: ${o.dialect || "keep the document's own (British or American) spelling"}. ${o.keepVoice === false ? "" : "Keep the author's voice; do not rewrite style."}
+Do not change quotations, scripture or cited text except obvious transcription typos, and list those.
+${LONG}
+Write ./out/proofread.md: the full corrected text. Write ./out/proofread-changes.md: a table | Where | Before | After | Why | of every change, grouped by chapter, then a short list of recurring issues.`,
+    }),
+  },
+  factcheck: {
+    title: "Fact-check",
+    build: (o, tgt) => ({
+      output: "fact-check.md",
+      prompt: `Fact-check ${tgt}.
+Find the checkable claims (${o.scope === "all" ? "every factual claim" : "names, dates, numbers, statistics, historical and scientific claims, attributions"}). For each, search the web and open the best sources; prefer primary and authoritative ones.
+${LONG}
+Write ./out/fact-check.md: a summary (how many claims, how many supported), then a table | # | Claim (with chapter) | Verdict | Evidence | Source | where Verdict is one of Supported, Partly supported, Unsupported, Contradicted, Unverifiable. Cite only sources you opened, with URL and access date. Then a list of suggested corrections.`,
+    }),
+  },
+  quotes: {
+    title: "Verify quotations & scripture",
+    build: (o, tgt) => ({
+      output: "quotes-check.md",
+      prompt: `Verify every quotation and scripture reference in ${tgt}.
+Bible translation to check against: ${o.translation || "the translation the document itself uses (say which you inferred)"}. ${o.includeQuotes === false ? "Check scripture only." : "Also check quotations attributed to people or books."}
+For each one: find the reference, look up the exact wording from a reliable source (open it), and compare.
+${LONG}
+Write ./out/quotes-check.md: a summary, then a table | # | Chapter | Reference | As written | Source wording | Result | Fix | where Result is Exact, Minor differences, Wrong reference, Misattributed, or Not found. Quote only as much source text as needed to compare. Cite the source for each.`,
+    }),
+  },
+  translate: {
+    title: "Translate the whole book",
+    build: (o, tgt) => ({
+      output: "translation.md",
+      prompt: `Translate ${tgt} into ${o.language || "the language the owner named"}.
+Mode: ${o.mode === "adapted" ? "culturally adapted: keep the meaning, adapt idioms, examples and references for readers of that language" : "faithful: accurate and natural, no additions or omissions"}.
+${o.scriptureVersion ? `Quote scripture from ${o.scriptureVersion} where it exists in that language; otherwise translate it and mark it [translated].` : "For scripture, use a standard published translation in that language where you can verify it; otherwise translate and mark it [translated]."}
+Keep headings, structure and formatting. Keep proper names unless they have an established form in that language.
+Work chapter by chapter: write ./out/translation/NN-short-title.md for each, then the whole book to ./out/translation.md, and ./out/translation-notes.md with terms you chose and anything to check.`,
+    }),
+  },
+  marketing: {
+    title: "Marketing pack",
+    build: (o, tgt) => ({
+      output: "marketing-pack.md",
+      prompt: `Read ${tgt} in full and write a marketing pack for it.
+Audience: ${o.audience || "the readers the book is written for"}. Tone: ${o.tone || "warm and credible"}.
+Write ./out/marketing-pack.md with: three title/subtitle options; a one-line hook; a 150-word blurb; back-cover copy (about 200 words); an online store description (about 400 words, scannable); 7 keywords; 3 suggested BISAC categories; a short author bio template with [placeholders] for facts you don't know; 5 social posts; a short press release. Never invent endorsements, sales figures or facts about the author.`,
+    }),
+  },
+  studyguide: {
+    title: "Study guide",
+    build: (o, tgt) => ({
+      output: "study-guide.md",
+      prompt: `Create a study guide for ${tgt}.
+For: ${o.audience || "small groups"}. Per chapter: a short summary, ${o.questions || 6} discussion questions (from simple recall to reflection and application), key terms${o.scripture === false ? "" : " and the key scriptures it uses"}, and one practical exercise.${o.quiz === false ? "" : " Finish with a quiz (multiple choice, with an answer key)."}
+${LONG}
+Write ./out/study-guide.md, starting with "# Study guide: <title>" and how to use it.`,
+    }),
+  },
+  index: {
+    title: "Index & glossary",
+    build: (o, tgt) => ({
+      output: o.kind === "glossary" ? "glossary.md" : "index.md",
+      prompt: `Build ${o.kind === "glossary" ? "a glossary" : o.kind === "index" ? "a back-of-book index" : "a back-of-book index and a glossary"} for ${tgt}.
+${o.kind === "glossary" ? "" : "Index: the important names, places, subjects and terms (and scripture references, if any), alphabetised, each with the chapters where it appears (Chapter numbers, since page numbers depend on layout), with sensible sub-entries and see-also links. Write ./out/index.md."}
+${o.kind === "index" ? "" : "Glossary: the specialised terms a reader may not know, each defined in one or two sentences as the book uses them. Write ./out/glossary.md."}
+${LONG}`,
+    }),
+  },
+  compare: {
+    title: "Compare two versions",
+    build: (o) => ({
+      output: "compare.md",
+      prompt: `Compare two versions of a document: A is ${o.a ? `./${o.a}` : "the first file in ./source/"} and B is ${o.b ? `./${o.b}` : "the second file in ./source/"}.
+Write ./out/compare.md: what changed overall; then chapter by chapter, the substantive differences (added, removed, reworded, moved), quoting short passages; then changes in facts, names, numbers or scripture; and anything in A that B lost. Ignore pure formatting.`,
+    }),
+  },
+  readability: {
+    title: "Readability & audience review",
+    build: (o, tgt) => ({
+      output: "readability.md",
+      prompt: `Review ${tgt} for readability and fit for ${o.audience || "its intended readers"}.
+Write ./out/readability.md: the estimated reading level with your reasoning; average sentence and paragraph length; the hardest passages (quoted, with simpler versions); jargon to explain; pacing and structure by chapter; tone and sensitivity notes; and the ten changes that would help these readers most.`,
+    }),
+  },
+  ocr: {
+    title: "Read scanned pages",
+    build: () => ({
+      output: "scanned-text.md",
+      prompt: `The documents in ./source/ include scanned pages or images (PDFs without a text layer, JPG or PNG). Read each one directly, page by page, in file order, and transcribe the text exactly, keeping headings, paragraphs, lists and verse numbers. Mark anything unreadable as [illegible] and uncertain words as [word?]. Do not correct or modernise the text.
+Write ./out/scanned-text.md with "# <file name>" before each file's text and "<!-- page N -->" before each page. ${LONG}`,
+    }),
+  },
+};
+
+function tool(o) {
+  const t = TOOLS[o.tool];
+  if (!t) return { error: "Unknown tool." };
+  const built = t.build(o, target(o));
+  return { ...built, title: t.title };
 }

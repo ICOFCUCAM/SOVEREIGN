@@ -1,0 +1,352 @@
+import { authHeader } from "@/lib/session";
+import { splitBook } from "@/lib/book-split";
+import { extractFileText } from "@/lib/extract-file-text";
+import {
+  RUNNER_URL, followJob, studio, uploadToStudio,
+  type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioMe, type StudioThread, type StudioThreadSummary,
+} from "@/lib/claude-studio";
+import { API_SYSTEM, compareApiPrompt, toolApiPlan, toolById, type ToolId } from "@/lib/studio-tools";
+
+// Which engine does the work, and where projects live.
+//   Engine: the owner's Claude Code (on the runner, their plan) or the API (billed per use).
+//   Storage: the runner's disk when it's reachable; otherwise this browser.
+// "Auto" uses Claude Code whenever it is available and the API otherwise, and
+// always says which one is in use and why.
+
+export type EngineMode = "auto" | "claude" | "api";
+export type EngineId = "claude-code" | "api";
+export interface EngineDecision { active: EngineId | null; reason: string; tone: "ok" | "warn" | "bad" }
+
+export function decideEngine(mode: EngineMode, me: StudioMe | null, runnerError: string | null): EngineDecision {
+  const reachable = Boolean(RUNNER_URL) && !runnerError && Boolean(me);
+  const st = me?.claude?.state;
+  const until = me?.claude?.resetsAt ? ` until ${new Date(me.claude.resetsAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}` : "";
+  const claudeProblem = !RUNNER_URL ? "the Claude Code runner isn't set up"
+    : runnerError ? "the Claude Code runner can't be reached"
+    : !me ? "connecting to Claude Code…"
+    : st === "not_configured" ? "Claude Code isn't signed in on the runner"
+    : st === "signed_out" ? "Claude Code is signed out"
+    : st === "limit" ? `your Claude plan's limit is reached${until}`
+    : null;
+  if (mode === "api") return { active: "api", reason: "You chose the API. Billed per use.", tone: "warn" };
+  if (mode === "claude") return claudeProblem ? { active: null, reason: `Claude Code only: ${claudeProblem}.`, tone: "bad" } : { active: "claude-code", reason: "Your Claude Code, on your plan.", tone: "ok" };
+  if (claudeProblem && reachable === false && !RUNNER_URL) return { active: "api", reason: "Using the API: the Claude Code runner isn't set up. Billed per use.", tone: "warn" };
+  if (claudeProblem && me === null && !runnerError) return { active: null, reason: "Connecting…", tone: "warn" };
+  if (claudeProblem) return { active: "api", reason: `Switched to the API: ${claudeProblem}. Billed per use.`, tone: "warn" };
+  return { active: "claude-code", reason: "Your Claude Code, on your plan.", tone: "ok" };
+}
+
+// ── The API engine ───────────────────────────────────────────────────────────
+
+async function callApi(user: string, opts: { system?: string; web?: boolean; maxTokens?: number } = {}): Promise<{ text: string; sources: { url: string; title: string }[] }> {
+  const r = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/studio-api`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: await authHeader() },
+    body: JSON.stringify({ system: opts.system ?? API_SYSTEM, user, webSearch: Boolean(opts.web), maxTokens: opts.maxTokens ?? 16000 }),
+  });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error((body as { error?: string }).error || `The API answered ${r.status}.`);
+  return body as { text: string; sources: { url: string; title: string }[] };
+}
+
+interface ApiContext {
+  thread: StudioThread;
+  readSource: (storedAs: string) => Promise<string | null>;
+  readOutput: (path: string) => Promise<string | null>;
+  record: (r: { action: StudioAction; userText: string; text: string; outputs: Record<string, string>; status: "done" | "failed" }) => Promise<void>;
+}
+
+interface LocalJob { job: StudioJob; events: StudioEvent[]; subs: Set<(e: StudioEvent) => void>; cancelled: boolean }
+const apiJobs = new Map<string, LocalJob>();
+
+function emit(j: LocalJob, e: Omit<StudioEvent, "at">) {
+  const ev = { ...e, at: new Date().toISOString() } as StudioEvent;
+  j.events.push(ev);
+  j.subs.forEach((s) => s(ev));
+}
+
+export function followApiJob(jobId: string, onEvent: (e: StudioEvent) => void, signal: AbortSignal): Promise<void> {
+  const j = apiJobs.get(jobId);
+  if (!j) { onEvent({ type: "done", status: "unknown", at: new Date().toISOString() }); return Promise.resolve(); }
+  j.events.forEach(onEvent);
+  if (j.job.status !== "running") return Promise.resolve();
+  return new Promise((resolve) => {
+    const sub = (e: StudioEvent) => { onEvent(e); if (e.type === "done") { j.subs.delete(sub); resolve(); } };
+    j.subs.add(sub);
+    signal.addEventListener("abort", () => { j.subs.delete(sub); resolve(); });
+  });
+}
+
+async function documentText(ctx: ApiContext, target?: string): Promise<{ text: string; skipped: string[] }> {
+  if (target && target !== "source") return { text: (await ctx.readOutput(target)) ?? "", skipped: [] };
+  const skipped: string[] = [];
+  const parts: string[] = [];
+  const originals = ctx.thread.files.filter((f) => f.kind === "original");
+  for (const f of originals) {
+    const copy = ctx.thread.files.find((x) => x.kind === "text" && x.storedAs !== f.storedAs && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt");
+    let text: string | null = null;
+    if (copy) text = await ctx.readSource(copy.storedAs);
+    else if (/\.(txt|md|markdown|csv|json|html?)$/i.test(f.storedAs)) text = await ctx.readSource(f.storedAs);
+    if (text && text.trim()) parts.push(originals.length > 1 ? `# ${f.name.replace(/\.[^.]+$/, "")}\n\n${text.trim()}` : text.trim());
+    else skipped.push(f.name);
+  }
+  return { text: parts.join("\n\n"), skipped };
+}
+
+async function pathText(ctx: ApiContext, p: string) {
+  if (p.startsWith("out/")) return (await ctx.readOutput(p.slice(4))) ?? "";
+  if (p.startsWith("source/")) return (await ctx.readSource(p.slice(7))) ?? "";
+  return "";
+}
+
+const ONE_CALL = 120_000;
+
+/** Runs one Studio action on the API, chapter by chapter where needed, and records the result in the project. */
+export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions & Record<string, unknown>): StudioJob {
+  const label = action === "tool" ? toolById(String(o.tool))?.title ?? "Tool" : ({ chat: "Chat", summarize: "Summarise", rewrite: "Rewrite", cite: "Citations & references" } as Record<string, string>)[action] ?? action;
+  const job: StudioJob = { id: crypto.randomUUID(), threadId: ctx.thread.id, action, label, output: null, status: "running", startedAt: new Date().toISOString(), endedAt: null, error: null };
+  const j: LocalJob = { job, events: [], subs: new Set(), cancelled: false };
+  apiJobs.set(job.id, j);
+  const say = (line: string) => emit(j, { type: "tool", name: "api", line } as Omit<StudioEvent, "at">);
+  const check = () => { if (j.cancelled) throw new Error("__cancelled"); };
+  const userText = action === "chat" ? String(o.message ?? "") : `${label}${o.target && o.target !== "source" ? ` · ${o.target}` : ""}${action === "rewrite" ? `\n\n${String(o.instructions ?? "")}` : ""}`;
+
+  (async () => {
+    emit(j, { type: "status", status: "running", line: "Working on the API…" } as Omit<StudioEvent, "at">);
+    const outputs: Record<string, string> = {};
+    let reply = "";
+    const per = async (text: string, make: (t: string, i: number, n: number) => string, web = false, verb = "Working on") => {
+      const parts = text.length <= 14_000 * 1.2 ? [text] : splitBook(text);
+      const out: string[] = [];
+      for (let i = 0; i < parts.length; i++) {
+        check();
+        const head = /^#{1,3}\s+(.+)$/m.exec(parts[i])?.[1];
+        say(`${verb} part ${i + 1} of ${parts.length}${head ? `: ${head.slice(0, 60)}` : ""}${web ? " (searching the web)" : ""}`);
+        const r = await callApi(make(parts[i], i, parts.length), { web });
+        out.push(r.text.trim());
+        if (r.sources.length) say(`${r.sources.length} sources consulted`);
+      }
+      return out;
+    };
+    try {
+      if (action === "chat") {
+        const { text } = await documentText(ctx);
+        const history = ctx.thread.messages.slice(-12).map((m) => `${m.role === "user" ? "Owner" : "Claude"}: ${m.text.slice(0, 4000)}`).join("\n\n");
+        const doc = text.length > 300_000 ? `${text.slice(0, 300_000)}\n\n[The rest of the document is not included on the API: it is longer than one request allows.]` : text;
+        say("Reading the project and your message");
+        reply = (await callApi(`${doc ? `The owner's documents:\n\n${doc}\n\n---\n\n` : ""}${history ? `Conversation so far:\n\n${history}\n\n---\n\n` : ""}Owner: ${String(o.message ?? "")}`, { web: true })).text;
+      } else {
+        const { text, skipped } = await documentText(ctx, o.target);
+        if (skipped.length) say(`Skipped on the API (no readable text; Claude Code can read these): ${skipped.join(", ")}`);
+        if (!text.trim() && !(action === "tool" && o.tool === "compare")) throw new Error("There's no readable text to work on. Scanned files need Claude Code (Read scanned pages).");
+        if (action === "summarize") {
+          const len = ({ brief: "about 300 words", detailed: "as long as needed, with a summary of every chapter" } as Record<string, string>)[String(o.length)] ?? "about 800 words";
+          const ask = `Summarise the document. Length: ${len}.${o.focus ? ` Focus on: ${o.focus}.` : ""} Give the title, a one-paragraph overview, key points as a list, and for a long document a short summary of each chapter. Add nothing that isn't in the document. Start with "# <title> — Summary".`;
+          if (text.length <= ONE_CALL) { say("Summarising"); outputs["summary.md"] = (await callApi(`${ask}\n\n${text}`)).text; }
+          else {
+            const notes = await per(text, (t, i, n) => `Summarise part ${i + 1} of ${n} of a long document in 250 words, keeping chapter names.\n\n${t}`, false, "Summarising");
+            check(); say("Writing the final summary");
+            outputs["summary.md"] = (await callApi(`${ask}\n\nThe document, as part summaries:\n\n${notes.join("\n\n")}`)).text;
+          }
+          reply = "Summary written.";
+        } else if (action === "rewrite") {
+          const rules = [`Owner's instructions (follow strictly):\n${String(o.instructions ?? "").trim()}`,
+            o.keepStructure === false ? "You may reorganise where the instructions call for it." : "Keep every chapter and section, in order, with the same headings unless told otherwise.",
+            o.keepVoice === false ? "Adopt the voice the instructions describe." : "Keep the author's voice.",
+            ({ shorter: "Make it noticeably shorter.", longer: "Expand where it adds value." } as Record<string, string>)[String(o.length)] ?? "Keep about the same length.",
+            o.audience ? `Audience: ${o.audience}.` : "", o.language ? `Write in ${o.language}.` : "",
+            "Keep every fact, name, date, quotation and reference accurate. Never summarise in place of rewriting.",
+            o.addCitations ? `Add in-text citations in ${o.citationStyle || "APA 7"} style from sources you find, ending with "## References".` : ""].filter(Boolean).join("\n");
+          const parts = await per(text, (t, i, n) => `Rewrite this text following the rules. This is part ${i + 1} of ${n}; rewrite it in full and reply with the rewritten text only.\n\n${rules}\n\n---\n\n${t}`, Boolean(o.addCitations), "Rewriting");
+          outputs["rewrite.md"] = parts.join("\n\n") + "\n";
+          outputs["rewrite-notes.md"] = `# Rewrite notes\n\nRewritten on the API in ${parts.length} part${parts.length === 1 ? "" : "s"}, each with the same instructions:\n\n${rules}\n`;
+          reply = `Rewrote the document in ${parts.length} part${parts.length === 1 ? "" : "s"}.`;
+        } else if (action === "cite") {
+          const style = o.citationStyle || "APA 7";
+          const parts = await per(text, (t, i, n) => `Add citations to this text (part ${i + 1} of ${n}) in ${style} style. Scope: ${o.scope === "all" ? "every factual claim" : "quotations, statistics, dates and specific claims"}.${o.notes ? ` The owner adds: ${o.notes}.` : ""} Search the web, open the best sources, and check they support each claim. Keep the text unchanged apart from in-text citations; mark unsupported claims [citation needed]. End with "## References" listing only sources you used.\n\n${t}`, true, "Citing");
+          const refs = new Set<string>(); const bodies: string[] = [];
+          for (const p of parts) {
+            const [body, ref = ""] = p.split(/\n##\s+References\s*\n/i);
+            bodies.push(body.trim());
+            ref.split("\n").map((l) => l.trim()).filter((l) => /^[-*\d]/.test(l)).forEach((l) => refs.add(l.replace(/^(\d+[.)]|[-*])\s*/, "- ")));
+          }
+          const refList = [...refs].sort((a, b) => a.localeCompare(b)).join("\n");
+          outputs["cited.md"] = `${bodies.join("\n\n")}\n\n## References\n\n${refList}\n`;
+          outputs["references.md"] = `# References\n\n${refList}\n`;
+          reply = `Added citations (${refs.size} sources).`;
+        } else if (action === "tool") {
+          const id = String(o.tool) as ToolId;
+          const meta = toolById(id);
+          if (!meta) throw new Error("Unknown tool.");
+          if (meta.claudeOnly) throw new Error(`${meta.title} needs Claude Code: it reads the scanned images itself.`);
+          if (id === "compare") {
+            const a = String(o.a ?? ""), b = String(o.b ?? "");
+            const [ta, tb] = [await pathText(ctx, a), await pathText(ctx, b)];
+            if (!ta || !tb) throw new Error("Both versions need readable text.");
+            say("Comparing the two versions");
+            outputs["compare.md"] = (await callApi(compareApiPrompt(ta.slice(0, 600_000), tb.slice(0, 600_000), a, b))).text;
+          } else {
+            const plan = toolApiPlan(id, o)!;
+            const finishIsPrompt = id === "index" || id === "marketing" || id === "readability";
+            const parts = finishIsPrompt && text.length <= ONE_CALL ? [text] : await per(text, plan.part, Boolean(plan.web), meta.title);
+            check();
+            let main: string;
+            if (plan.split === "changes") {
+              const fixed = parts.map((p) => p.split(/\n=== CHANGES ===\n/)[0].trim());
+              const changes = parts.map((p, i) => `${parts.length > 1 ? `## Part ${i + 1}\n\n` : ""}${(p.split(/\n=== CHANGES ===\n/)[1] ?? "No changes listed.").trim()}`);
+              main = fixed.join("\n\n") + "\n";
+              outputs["proofread-changes.md"] = `# Changes\n\n${changes.join("\n\n")}\n`;
+            } else if (finishIsPrompt) { say("Putting it together"); main = (await callApi(plan.finish!(parts), { web: false })).text; }
+            else main = plan.finish ? plan.finish(parts) : parts.join("\n\n");
+            outputs[meta.output(o)] = main;
+            if (id === "index" && o.kind === "both") outputs["glossary.md"] = (/(#\s+Glossary[\s\S]*)$/i.exec(main)?.[1] ?? "");
+            if (!outputs["glossary.md"]) delete outputs["glossary.md"];
+          }
+          reply = `${meta.title} done.`;
+        }
+      }
+      check();
+      await ctx.record({ action, userText, text: reply, outputs, status: "done" });
+      job.status = "done"; job.endedAt = new Date().toISOString();
+      emit(j, { type: "done", status: "done", outputs: Object.keys(outputs), output: Object.keys(outputs)[0] ?? null } as Omit<StudioEvent, "at">);
+    } catch (e) {
+      const cancelled = e instanceof Error && e.message === "__cancelled";
+      job.status = cancelled ? "cancelled" : "failed"; job.endedAt = new Date().toISOString();
+      job.error = cancelled ? null : e instanceof Error ? e.message : "The API run failed.";
+      await ctx.record({ action, userText, text: cancelled ? "Stopped." : `Couldn't finish on the API: ${job.error}`, outputs, status: "failed" }).catch(() => {});
+      emit(j, { type: "done", status: job.status, error: job.error, outputs: Object.keys(outputs) } as Omit<StudioEvent, "at">);
+    }
+  })();
+  return job;
+}
+
+export function cancelApiJob(jobId: string) { const j = apiJobs.get(jobId); if (j) j.cancelled = true; }
+
+// ── Backends ─────────────────────────────────────────────────────────────────
+
+export interface StudioBackend {
+  storage: "runner" | "browser";
+  threads(): Promise<StudioThreadSummary[]>;
+  create(title: string): Promise<StudioThread>;
+  thread(id: string): Promise<{ thread: StudioThread; job: StudioJob | null }>;
+  rename(id: string, title: string): Promise<StudioThread>;
+  remove(id: string): Promise<unknown>;
+  removeFile(id: string, storedAs: string): Promise<StudioThread>;
+  upload(id: string, file: File): Promise<StudioThread>;
+  run(id: string, action: StudioAction, options: RunOptions, engine: EngineId): Promise<StudioJob>;
+  follow(job: StudioJob, onEvent: (e: StudioEvent) => void, signal: AbortSignal): Promise<void>;
+  output(id: string, path: string): Promise<string>;
+  cancel(job: StudioJob): Promise<unknown>;
+}
+
+const runnerApiCtx = async (id: string): Promise<ApiContext> => {
+  const { thread } = await studio.thread(id);
+  return {
+    thread,
+    readSource: (s) => studio.source(id, s).catch(() => null),
+    readOutput: (p) => studio.output(id, p).catch(() => null),
+    record: async (r) => { await studio.record(id, r); },
+  };
+};
+
+export const runnerBackend: StudioBackend = {
+  storage: "runner",
+  threads: () => studio.threads(),
+  create: (t) => studio.create(t),
+  thread: (id) => studio.thread(id),
+  rename: (id, t) => studio.rename(id, t),
+  remove: (id) => studio.remove(id),
+  removeFile: (id, s) => studio.removeFile(id, s),
+  upload: (id, f) => uploadToStudio(id, f),
+  run: async (id, action, options, engine) => (engine === "claude-code" ? studio.run(id, action, options) : startApiRun(await runnerApiCtx(id), action, options as RunOptions & Record<string, unknown>)),
+  follow: (job, onEvent, signal) => (apiJobs.has(job.id) ? followApiJob(job.id, onEvent, signal) : followJob(job.id, job.threadId, onEvent, signal)),
+  output: (id, p) => studio.output(id, p),
+  cancel: (job) => (apiJobs.has(job.id) ? Promise.resolve(cancelApiJob(job.id)) : studio.cancel(job.id)),
+};
+
+// Browser storage for when the runner is offline: projects, files' text and
+// results live in this browser (IndexedDB) and every run goes to the API.
+const DB = "claude-studio";
+let dbp: Promise<IDBDatabase> | null = null;
+function openDb(): Promise<IDBDatabase> {
+  dbp ??= new Promise((resolve, reject) => {
+    const open = indexedDB.open(DB, 1);
+    open.onupgradeneeded = () => { open.result.createObjectStore("threads", { keyPath: "id" }); open.result.createObjectStore("blobs"); };
+    open.onerror = () => { dbp = null; reject(open.error); };
+    open.onsuccess = () => resolve(open.result);
+  });
+  return dbp;
+}
+async function req<T>(name: "threads" | "blobs", mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRequest): Promise<T> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const r = fn(db.transaction(name, mode).objectStore(name));
+    r.onsuccess = () => resolve(r.result as T);
+    r.onerror = () => reject(r.error);
+  });
+}
+const store = (name: "threads" | "blobs") => ({
+  get: <T>(key: string) => req<T | undefined>(name, "readonly", (s) => s.get(key)),
+  put: (value: unknown, key?: string) => req<void>(name, "readwrite", (s) => s.put(value, key)),
+  del: (key: string) => req<void>(name, "readwrite", (s) => s.delete(key)),
+  all: <T>() => req<T[]>(name, "readonly", (s) => s.getAll()),
+});
+const threadsDb = store("threads");
+const blobsDb = store("blobs");
+const bkey = (id: string, kind: "src" | "out", name: string) => `${id}|${kind}|${name}`;
+
+async function saveLocal(t: StudioThread) { t.updatedAt = new Date().toISOString(); await threadsDb.put(t); return t; }
+async function localThread(id: string) { const t = await threadsDb.get<StudioThread>(id); if (!t) throw new Error("Project not found."); return t; }
+
+export const browserBackend: StudioBackend = {
+  storage: "browser",
+  threads: async () => (await threadsDb.all<StudioThread>()).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .map((t) => ({ id: t.id, title: t.title, createdAt: t.createdAt, updatedAt: t.updatedAt, files: t.files.length, outputs: t.outputs.length })),
+  create: async (title) => { const now = new Date().toISOString(); return saveLocal({ id: crypto.randomUUID(), title, createdAt: now, updatedAt: now, sessionId: null, files: [], messages: [], outputs: [] }); },
+  thread: async (id) => ({ thread: await localThread(id), job: null }),
+  rename: async (id, title) => { const t = await localThread(id); t.title = title; return saveLocal(t); },
+  remove: async (id) => {
+    const t = await localThread(id);
+    for (const f of t.files) await blobsDb.del(bkey(id, "src", f.storedAs));
+    for (const o of t.outputs) await blobsDb.del(bkey(id, "out", o.path));
+    await threadsDb.del(id);
+  },
+  removeFile: async (id, storedAs) => { const t = await localThread(id); t.files = t.files.filter((f) => f.storedAs !== storedAs); await blobsDb.del(bkey(id, "src", storedAs)); return saveLocal(t); },
+  upload: async (id, file) => {
+    const t = await localThread(id);
+    const at = new Date().toISOString();
+    let text: string | null = null;
+    if (/\.(txt|md|markdown|csv|json|html?)$/i.test(file.name)) text = await file.text();
+    else if (/\.(pdf|docx)$/i.test(file.name)) text = await extractFileText(file).catch(() => null);
+    t.files = t.files.filter((f) => f.storedAs !== file.name);
+    t.files.push({ name: file.name, storedAs: file.name, kind: "original", bytes: file.size, at });
+    if (text != null) {
+      const txt = file.name.replace(/\.[^.]+$/, "") + ".txt";
+      await blobsDb.put(text, bkey(id, "src", txt === file.name ? file.name : txt));
+      if (txt !== file.name) t.files.push({ name: file.name, storedAs: txt, kind: "text", bytes: text.length, at });
+    }
+    return saveLocal(t);
+  },
+  run: async (id, action, options) => {
+    const thread = await localThread(id);
+    return startApiRun({
+      thread,
+      readSource: (s) => blobsDb.get<string>(bkey(id, "src", s)).then((v) => v ?? null),
+      readOutput: (p) => blobsDb.get<string>(bkey(id, "out", p)).then((v) => v ?? null),
+      record: async (r) => {
+        const t = await localThread(id);
+        const at = new Date().toISOString(); const jobId = crypto.randomUUID();
+        if (r.userText) t.messages.push({ id: crypto.randomUUID(), role: "user", engine: "api", action: r.action, text: r.userText, at, jobId });
+        for (const [p, text] of Object.entries(r.outputs)) {
+          await blobsDb.put(text, bkey(id, "out", p));
+          t.outputs = [{ path: p, bytes: text.length, modifiedAt: at }, ...t.outputs.filter((o) => o.path !== p)];
+        }
+        t.messages.push({ id: crypto.randomUUID(), role: "assistant", engine: "api", action: r.action, text: r.text, at, jobId, status: r.status, outputs: Object.keys(r.outputs) });
+        await saveLocal(t);
+      },
+    }, action, options as RunOptions & Record<string, unknown>);
+  },
+  follow: (job, onEvent, signal) => followApiJob(job.id, onEvent, signal),
+  output: async (id, p) => (await blobsDb.get<string>(bkey(id, "out", p))) ?? "",
+  cancel: async (job) => cancelApiJob(job.id),
+};

@@ -181,6 +181,51 @@ test("book wizard: outline, chapters that see earlier chapters, improve", async 
   assert.equal(ev.at(-1).status, "failed");
 });
 
+test("tools run on the uploads and write their named file", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Tools" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=book.txt&kind=original`, { method: "POST", raw: Buffer.from("Some text to check.") });
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "nope" } } })).status, 400);
+  const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "quotes", translation: "KJV" } } })).json();
+  assert.equal(job.label, "Verify quotations & scripture");
+  assert.equal(job.output, "quotes-check.md");
+  const ev = await streamUntilDone(job.id, thread.id);
+  assert.equal(ev.at(-1).status, "done");
+  const text = (await (await call(`/v1/threads/${thread.id}/outputs/quotes-check.md`)).json()).text;
+  assert.match(text, /Verify every quotation and scripture/);
+  // compare refuses paths outside the project
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "compare", a: "../../x", b: "source/book.txt" } } })).status, 400);
+});
+
+test("Claude Code status: signed out, usage limit with reset time, then ok again", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Status" } })).json();
+  let { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "AUTHFAIL" } } })).json();
+  let ev = await streamUntilDone(job.id, thread.id);
+  assert.equal(ev.at(-1).status, "failed"); assert.equal(ev.at(-1).errorKind, "auth");
+  assert.equal((await (await call("/v1/me")).json()).claude.state, "signed_out");
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "LIMITHIT" } } })).json());
+  ev = await streamUntilDone(job.id, thread.id);
+  assert.equal(ev.at(-1).errorKind, "limit");
+  const me = (await (await call("/v1/me")).json()).claude;
+  assert.equal(me.state, "limit"); assert.ok(Date.parse(me.resetsAt) > Date.now());
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "hello" } } })).json());
+  await streamUntilDone(job.id, thread.id);
+  assert.equal((await (await call("/v1/me")).json()).claude.state, "ok");
+  const t = (await (await call(`/v1/threads/${thread.id}`)).json()).thread;
+  assert.ok(t.messages.filter((m) => m.role === "assistant").every((m) => m.engine === "claude-code"));
+});
+
+test("API results are recorded into the project, labelled as API", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "API" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=doc.txt&kind=original`, { method: "POST", raw: Buffer.from("Source words.") });
+  assert.equal((await (await call(`/v1/threads/${thread.id}/sources/doc.txt`)).json()).text, "Source words.");
+  assert.equal((await call(`/v1/threads/${thread.id}/record`, { method: "POST", body: { outputs: { "../evil.md": "x" } } })).status, 400);
+  assert.equal((await call(`/v1/threads/${thread.id}/record`, { method: "POST", body: { outputs: { "x.exe": "x" } } })).status, 400);
+  const r = await call(`/v1/threads/${thread.id}/record`, { method: "POST", body: { action: "summarize", userText: "Summarise", text: "Done on the API.", outputs: { "summary.md": "# Summary\n\nShort." } } });
+  const t = (await r.json()).thread;
+  assert.deepEqual(t.messages.map((m) => [m.role, m.engine]), [["user", "api"], ["assistant", "api"]]);
+  assert.ok(t.outputs.some((o) => o.path === "summary.md"));
+});
+
 test("the sandbox settings and helpers", () => {
   const s = settingsFor("/data/threads/x/work");
   assert.ok(s.permissions.deny.includes("Read(//etc/**)"));

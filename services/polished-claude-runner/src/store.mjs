@@ -104,6 +104,11 @@ export function createStore(dataDir) {
       await walk(root);
       return found.sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt));
     },
+    async readSource(id, storedAs) {
+      const p = inside(path.join(workDir(id), "source"), storedAs);
+      if (!p) return null;
+      try { return await fs.readFile(p, "utf8"); } catch { return null; }
+    },
     async readOutput(id, rel) {
       const p = inside(path.join(workDir(id), "out"), rel);
       if (!p) return null;

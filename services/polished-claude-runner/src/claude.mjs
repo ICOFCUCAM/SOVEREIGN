@@ -93,6 +93,7 @@ export function runClaude({ cfg, cwd, home, prompt, sessionId, resume, onEvent, 
   let final = null;
   let sid = resume || sessionId || null;
   let stderr = "";
+  let rateLimit = null;
 
   const handle = (line) => {
     let e;
@@ -108,8 +109,9 @@ export function runClaude({ cfg, cwd, home, prompt, sessionId, resume, onEvent, 
       for (const b of e.message.content) {
         if (b.type === "tool_result" && b.is_error && /denied|not allowed|permission/i.test(String(b.content))) onEvent({ type: "denied", line: "A step outside Claude Studio's allowed area was refused." });
       }
-    } else if (e.type === "rate_limit_event" && e.rate_limit_info?.status && e.rate_limit_info.status !== "allowed") {
-      onEvent({ type: "notice", line: "Your Claude plan's usage limit has been reached for now." });
+    } else if (e.type === "rate_limit_event" && e.rate_limit_info) {
+      rateLimit = e.rate_limit_info;
+      if (e.rate_limit_info.status && !/^allowed/.test(e.rate_limit_info.status)) onEvent({ type: "notice", line: "Your Claude plan's usage limit has been reached for now." });
     } else if (e.type === "result") final = e;
   };
 
@@ -136,20 +138,31 @@ export function runClaude({ cfg, cwd, home, prompt, sessionId, resume, onEvent, 
       clearTimeout(timer);
       if (buf.trim()) handle(buf.trim());
       if (final) {
+        const failed = final.is_error || final.subtype !== "success";
         resolve({
-          ok: final.subtype === "success" && !final.is_error,
+          ok: !failed,
           result: typeof final.result === "string" ? final.result : "",
           sessionId: final.session_id || sid,
-          error: final.is_error || final.subtype !== "success" ? explain(final, stderr) : null,
+          error: failed ? explain(final, stderr) : null,
+          errorKind: failed ? errorKind(final, stderr, rateLimit) : null,
+          rateLimit,
           durationMs: final.duration_ms ?? null,
           turns: final.num_turns ?? null,
         });
       } else {
-        resolve({ ok: false, sessionId: sid, error: timedOut ? "The run took longer than the time limit and was stopped." : signal ? "The run was stopped." : explain(null, stderr, code) });
+        resolve({ ok: false, sessionId: sid, rateLimit, error: timedOut ? "The run took longer than the time limit and was stopped." : signal ? "The run was stopped." : explain(null, stderr, code), errorKind: timedOut || signal ? "stopped" : errorKind(null, stderr, rateLimit) });
       }
     });
   });
   return { done, stop };
+}
+
+/** Why a run failed, in the terms the engine switch needs: auth, limit, or other. */
+export function errorKind(final, stderr, rateLimit) {
+  const text = `${final?.result ?? ""} ${final?.api_error_status ?? ""} ${stderr}`.toLowerCase();
+  if (/invalid api key|oauth|401|unauthori[sz]ed|not logged in|login|expired token|authentication/.test(text)) return "auth";
+  if (/rate limit|usage limit|429|limit reached|quota/.test(text) || (rateLimit?.status && !/^allowed/.test(rateLimit.status))) return "limit";
+  return "other";
 }
 
 function explain(final, stderr, code) {

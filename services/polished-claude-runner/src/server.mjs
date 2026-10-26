@@ -24,7 +24,7 @@ import { runClaude } from "./claude.mjs";
 //   GET    /v1/jobs/:id/stream              server-sent events: replay + live
 //   POST   /v1/jobs/:id/cancel
 // One run at a time: this is one person's Claude plan, not a shared service.
-const ACTIONS = new Set(["chat", "summarize", "rewrite", "cite", "book-outline", "book-chapter", "book-improve"]);
+const ACTIONS = new Set(["chat", "summarize", "rewrite", "cite", "tool", "book-outline", "book-chapter", "book-improve"]);
 const LABEL = { chat: "Chat", summarize: "Summarise", rewrite: "Rewrite", cite: "Citations & references", "book-outline": "Book wizard · outline", "book-chapter": "Book wizard · chapter", "book-improve": "Book wizard · improve" };
 
 export function createServer(cfg = loadConfig(), deps = {}) {
@@ -33,6 +33,22 @@ export function createServer(cfg = loadConfig(), deps = {}) {
   const home = path.join(cfg.dataDir, "home");
   const jobs = new Map(); // id → job (kept in memory for streaming; logs on disk)
   let running = null;
+
+  // Whether the owner's Claude Code worked last time: the page's engine switch
+  // reads this to decide between Claude Code and the API.
+  const statusFile = path.join(cfg.dataDir, "claude-status.json");
+  let claudeStatus = { state: "unknown", at: null, resetsAt: null, message: null };
+  fs.readFile(statusFile, "utf8").then((t) => { claudeStatus = { ...claudeStatus, ...JSON.parse(t) }; }).catch(() => {});
+  const setStatus = (st) => {
+    claudeStatus = { state: st.state, at: new Date().toISOString(), resetsAt: st.resetsAt ?? null, message: st.message ?? null };
+    fs.mkdir(cfg.dataDir, { recursive: true }).then(() => fs.writeFile(statusFile, JSON.stringify(claudeStatus))).catch(() => {});
+  };
+  const currentStatus = () => {
+    if (!cfg.claudeToken) return { state: "not_configured", at: null, resetsAt: null, message: "CLAUDE_CODE_OAUTH_TOKEN is not set on the runner." };
+    // A usage limit lifts on its own at its reset time.
+    if (claudeStatus.state === "limit" && claudeStatus.resetsAt && Date.parse(claudeStatus.resetsAt) < Date.now()) return { ...claudeStatus, state: "unknown" };
+    return claudeStatus;
+  };
 
   const cors = (req, res) => {
     const origin = req.headers.origin;
@@ -58,7 +74,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
   const json = async (req) => { const b = await body(req, 1024 * 1024); try { return b.length ? JSON.parse(b.toString("utf8")) : {}; } catch { throw Object.assign(new Error("bad json"), { status: 400 }); } };
 
   function publicJob(j) {
-    return j && { id: j.id, threadId: j.threadId, action: j.action, label: LABEL[j.action], output: j.output ?? null, status: j.status, startedAt: j.startedAt, endedAt: j.endedAt ?? null, error: j.error ?? null };
+    return j && { id: j.id, threadId: j.threadId, action: j.action, label: j.label || LABEL[j.action], output: j.output ?? null, status: j.status, startedAt: j.startedAt, endedAt: j.endedAt ?? null, error: j.error ?? null };
   }
 
   function emit(job, ev) {
@@ -75,8 +91,11 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     const isBook = action.startsWith("book-");
     if (action === "chat" && !String(options?.message || "").trim()) return { status: 400, error: "Write a message first." };
     if (action === "rewrite" && !String(options?.instructions || "").trim()) return { status: 400, error: "Give the rewrite instructions." };
-    if (action !== "chat" && !isBook && thread.files.length === 0 && !options?.target) return { status: 400, error: "Upload a document first." };
+    if (action !== "chat" && !isBook && thread.files.length === 0 && !options?.target && !(action === "tool" && options?.tool === "compare" && options?.a)) return { status: 400, error: "Upload a document first." };
     if (options?.target && options.target !== "source" && !inside(path.join(store.workDir(thread.id), "out"), options.target)) return { status: 400, error: "That file isn't in this project." };
+    if (action === "tool" && options?.tool === "compare") {
+      for (const k of ["a", "b"]) if (options[k] && !inside(store.workDir(thread.id), options[k])) return { status: 400, error: "Pick files from this project to compare." };
+    }
     if (running) return { status: 409, error: "Claude is already working on something. Wait for it to finish or stop it." };
     if (!cfg.claudeToken) return { status: 503, error: "Claude Code is not connected yet: set CLAUDE_CODE_OAUTH_TOKEN on the runner." };
 
@@ -90,12 +109,12 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     }
     await fs.mkdir(home, { recursive: true });
 
-    const job = { id: randomUUID(), threadId: thread.id, action, output: spec.output || null, status: "running", startedAt: new Date().toISOString(), events: [], subscribers: new Set(), text: [] };
+    const job = { id: randomUUID(), threadId: thread.id, action, label: spec.title || LABEL[action], output: spec.output || null, status: "running", startedAt: new Date().toISOString(), events: [], subscribers: new Set(), text: [] };
     jobs.set(job.id, job);
     running = job;
 
-    const userLine = isBook ? `${LABEL[action]}${action === "book-outline" ? ` · ${String(options.bookTitle).trim()}` : ` ${Number(options.chapterIndex) + 1}${options.chapters?.[options.chapterIndex]?.title ? ` · ${options.chapters[options.chapterIndex].title}` : ""}`}` : action === "chat" ? String(options.message).trim() : `${LABEL[action]}${options?.target && options.target !== "source" ? ` · ${options.target}` : ""}${action === "rewrite" ? `\n\n${String(options.instructions).trim()}` : ""}`;
-    thread.messages.push({ id: randomUUID(), role: "user", action, text: userLine, at: job.startedAt, jobId: job.id });
+    const userLine = action === "tool" ? `${spec.title}${options?.target && options.target !== "source" ? ` · ${options.target}` : ""}${options?.language ? ` · ${options.language}` : ""}` : isBook ? `${LABEL[action]}${action === "book-outline" ? ` · ${String(options.bookTitle).trim()}` : ` ${Number(options.chapterIndex) + 1}${options.chapters?.[options.chapterIndex]?.title ? ` · ${options.chapters[options.chapterIndex].title}` : ""}`}` : action === "chat" ? String(options.message).trim() : `${LABEL[action]}${options?.target && options.target !== "source" ? ` · ${options.target}` : ""}${action === "rewrite" ? `\n\n${String(options.instructions).trim()}` : ""}`;
+    thread.messages.push({ id: randomUUID(), role: "user", engine: "claude-code", action, text: userLine, at: job.startedAt, jobId: job.id });
     thread.runningJobId = job.id;
     await store.write(thread);
 
@@ -117,6 +136,12 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     run.done.then(async (r) => {
       const t = (await store.read(thread.id)) || thread;
       if (r.sessionId) t.sessionId = r.sessionId;
+      if (r.ok) setStatus({ state: "ok" });
+      else if (r.errorKind === "auth") setStatus({ state: "signed_out", message: r.error });
+      else if (r.errorKind === "limit") {
+        const reset = r.rateLimit?.resetsAt ?? r.rateLimit?.resets_at;
+        setStatus({ state: "limit", message: r.error, resetsAt: reset ? new Date(typeof reset === "number" ? reset * (reset < 1e12 ? 1000 : 1) : reset).toISOString() : null });
+      }
       // A rewrite that finished its chapters but not the merged book still gives the owner a whole book.
       if (action === "rewrite") await mergeChapters(cwd).catch(() => {});
       const after = await store.scanOutputs(thread.id);
@@ -125,12 +150,12 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       job.status = job.cancelled ? "cancelled" : r.ok ? "done" : "failed";
       job.error = job.cancelled ? null : r.error ?? null;
       job.endedAt = new Date().toISOString();
-      t.messages.push({ id: randomUUID(), role: "assistant", action, text: r.result || job.text.join("\n\n") || (job.cancelled ? "Stopped." : job.error || ""), at: job.endedAt, jobId: job.id, status: job.status, outputs: changed });
+      t.messages.push({ id: randomUUID(), role: "assistant", engine: "claude-code", errorKind: r.ok ? null : r.errorKind ?? null, action, text: r.result || job.text.join("\n\n") || (job.cancelled ? "Stopped." : job.error || ""), at: job.endedAt, jobId: job.id, status: job.status, outputs: changed });
       delete t.runningJobId;
       await store.write(t);
       // A step with one expected file fails plainly if Claude didn't write it.
       if (job.status === "done" && job.output && !changed.includes(job.output)) { job.status = "failed"; job.error = "Claude finished without writing the result. Try again."; }
-      emit(job, { type: "done", status: job.status, error: job.error, outputs: changed, output: job.output });
+      emit(job, { type: "done", status: job.status, error: job.error, errorKind: job.status === "failed" ? r.errorKind ?? null : null, outputs: changed, output: job.output });
       for (const s of job.subscribers) s.end();
       job.subscribers.clear();
       running = null;
@@ -180,7 +205,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
 
     const [, kind, id, sub, ...rest] = parts;
     if (kind === "me" && req.method === "GET") {
-      return send(res, 200, { user: who.user, claudeConnected: Boolean(cfg.claudeToken), busy: publicJob(running), citationStyles: CITATION_STYLES });
+      return send(res, 200, { user: who.user, claudeConnected: Boolean(cfg.claudeToken), claude: currentStatus(), busy: publicJob(running), citationStyles: CITATION_STYLES });
     }
     if (kind === "threads" && !id) {
       if (req.method === "GET") return send(res, 200, { threads: await store.list() });
@@ -221,6 +246,27 @@ export function createServer(cfg = loadConfig(), deps = {}) {
         if (!ACTIONS.has(action)) return fail(res, 400, "Unknown action.");
         const r = await startRun(thread, action, b.options || {});
         return r.job ? send(res, 202, { job: r.job }) : fail(res, r.status, r.error);
+      }
+      if (sub === "sources" && req.method === "GET" && rest.length === 1) {
+        const text = await store.readSource(id, safeName(rest[0]));
+        if (text == null) return fail(res, 404, "File not found.");
+        return send(res, 200, { name: rest[0], text });
+      }
+      if (sub === "record" && req.method === "POST") {
+        // Results produced by the API engine join the same project history.
+        if (running?.threadId === id) return fail(res, 409, "Claude is working in this project right now.");
+        const b = JSON.parse((await body(req, 30 * 1024 * 1024)).toString("utf8") || "{}");
+        const files = Object.entries(b.outputs || {});
+        const outRoot = path.join(store.workDir(id), "out");
+        for (const [rel] of files) if (!inside(outRoot, rel) || !/\.(md|txt|json)$/i.test(rel)) return fail(res, 400, "Results must be Markdown, text or JSON inside the project.");
+        for (const [rel, text] of files) { const p = inside(outRoot, rel); await fs.mkdir(path.dirname(p), { recursive: true }); await fs.writeFile(p, String(text)); }
+        const t = await store.read(id);
+        const at = new Date().toISOString();
+        const jobId = randomUUID();
+        if (b.userText) t.messages.push({ id: randomUUID(), role: "user", engine: "api", action: String(b.action || "chat"), text: String(b.userText).slice(0, 20000), at, jobId });
+        t.messages.push({ id: randomUUID(), role: "assistant", engine: "api", action: String(b.action || "chat"), text: String(b.text || "").slice(0, 200000), at, jobId, status: b.status === "failed" ? "failed" : "done", outputs: files.map(([rel]) => rel) });
+        t.outputs = await store.scanOutputs(id);
+        return send(res, 200, { thread: await store.write(t) });
       }
       if (sub === "outputs" && req.method === "GET" && rest.length) {
         const text = await store.readOutput(id, rest.join("/"));

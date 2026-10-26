@@ -25,7 +25,27 @@ admin. Never add customers to it.
   chapter and improve steps written by Claude Code. Each chapter is written
   after reading the chapters before it. Covers, audiobook voices and
   translations and repurposing still use the site's own services.
+- **More tools**: proofread & copy-edit, fact-check, verify quotations &
+  scripture (against a chosen Bible translation), translate the whole book,
+  marketing pack, study guide, index & glossary, compare two versions,
+  readability review, and read scanned pages (Claude Code only).
+- **Join files** (in the browser): PDFs and scans into one PDF, Word files into
+  one Word file, or any mix into one book.
 - Results are saved to the Library as books, where every book tool applies.
+
+## Engine switch: Claude Code or the API
+
+The page header always shows the engine in use and why. **Auto** uses this
+runner's Claude Code whenever it works and switches to the API (the
+`studio-api` Supabase function, admin-only, billed per use on the site's
+`ANTHROPIC_API_KEY`) when Claude Code is signed out, has reached the plan's
+usage limit (until its reset time), or the runner can't be reached. **Claude
+Code only** and **API only** force one engine. The runner reports what it
+last saw at `GET /v1/me` (`claude.state`: `ok`, `signed_out`, `limit` with
+`resetsAt`, `not_configured`). Every reply in a project is labelled with the
+engine that wrote it; API results are recorded into the same project
+(`POST /v1/threads/:id/record`). When the runner is offline, projects are kept
+in the browser until it is back.
 
 ## What Claude can and cannot do here
 

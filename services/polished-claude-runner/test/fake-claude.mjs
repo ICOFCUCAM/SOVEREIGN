@@ -17,6 +17,23 @@ const paceFile = path.join(process.env.HOME || ".", "pace");
 const pace = Number(fs.existsSync(paceFile) ? fs.readFileSync(paceFile, "utf8") : 0) || 0;
 
 out({ type: "system", subtype: "init", session_id: sid, cwd: process.cwd(), tools: [] });
+if (prompt.includes("AUTHFAIL")) {
+  out({ type: "result", subtype: "success", is_error: true, result: "Invalid API key · Please run /login", session_id: sid });
+  process.exit(1);
+}
+if (prompt.includes("LIMITHIT")) {
+  out({ type: "rate_limit_event", rate_limit_info: { status: "rejected", resetsAt: Math.floor(Date.now() / 1000) + 3600 } });
+  out({ type: "result", subtype: "success", is_error: true, result: "Claude AI usage limit reached", session_id: sid });
+  process.exit(1);
+}
+const toolOut = /Write \.\/out\/([\w./-]+\.md)/.exec(prompt);
+if (toolOut && !/^(Rewrite|Summarise|Add citations|Create a book|Write Chapter|Improve Chapter)/.test(prompt)) {
+  fs.mkdirSync(path.dirname(`out/${toolOut[1]}`), { recursive: true });
+  fs.writeFileSync(`out/${toolOut[1]}`, `# Tool output\n\n${prompt.split("\n")[0]}`);
+  say(`Wrote out/${toolOut[1]}.`);
+  out({ type: "result", subtype: "success", is_error: false, result: "", session_id: sid });
+  process.exit(0);
+}
 if (prompt.includes("SLOW")) { process.on("SIGTERM", () => process.exit(143)); setTimeout(() => {}, 60_000); }
 else {
   const cwd = process.cwd();

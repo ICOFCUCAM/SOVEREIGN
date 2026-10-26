@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { Link } from "react-router-dom";
 import {
   AlertTriangle, ArrowLeft, BookOpen, Check, Copy, Download, FileText, FolderOpen, Globe, Languages, Library, Loader2, MessageSquare,
-  Layers, PenLine, Plus, Quote, Rocket, ScrollText, Search, Send, ShieldAlert, Sparkles, Square, Trash2, Upload, Wand2, X,
+  Cpu, Layers, PenLine, Plus, Wrench, Quote, Rocket, ScrollText, Search, Send, ShieldAlert, Sparkles, Square, Trash2, Upload, Wand2, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,9 +16,12 @@ import { useToast } from "@/hooks/use-toast";
 import SpineMark from "@/components/brand/SpineMark";
 import Markdown from "@/components/studio/Markdown";
 import JoinFiles from "@/components/studio/JoinFiles";
+import ToolsDialog from "@/components/studio/ToolsDialog";
+import { apiBookEngine } from "@/lib/book-engine";
+import { browserBackend, decideEngine, runnerBackend, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
 import { isAdmin, saveDocument } from "@/lib/documents";
 import {
-  RUNNER_URL, STUDIO_ACCEPT, StudioError, claudeBookEngine, followJob, outputLabel, studio, titleOf, uploadToStudio,
+  RUNNER_URL, STUDIO_ACCEPT, StudioError, claudeBookEngine, outputLabel, studio, titleOf,
   type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioMe, type StudioThread, type StudioThreadSummary,
 } from "@/lib/claude-studio";
 
@@ -55,10 +58,32 @@ const ClaudeStudio = () => {
   return <Studio />;
 };
 
-function StatusPill({ me, error }: { me: StudioMe | null; error: string | null }) {
-  const [tone, text] = !RUNNER_URL ? ["warn", "Runner not set up"] : error ? ["bad", "Runner offline"] : !me ? ["idle", "Connecting…"] : !me.claudeConnected ? ["warn", "Claude Code not signed in"] : me.busy ? ["busy", "Claude is working"] : ["ok", "Connected to your Claude Code"];
-  const dot = { ok: "bg-emerald-400", warn: "bg-amber-400", bad: "bg-red-400", busy: "bg-sky-400 animate-pulse", idle: "bg-white/40" }[tone];
-  return <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/80"><span className={`h-2 w-2 rounded-full ${dot}`} />{text}</span>;
+const MODE_KEY = "studio.engineMode";
+const readMode = (): EngineMode => { try { const v = localStorage.getItem(MODE_KEY); return v === "claude" || v === "api" ? v : "auto"; } catch { return "auto"; } };
+
+// Always visible: which engine does the work right now, and why.
+function EngineBadge({ decision, mode, onMode, busy }: { decision: EngineDecision; mode: EngineMode; onMode: (m: EngineMode) => void; busy: boolean }) {
+  const isClaude = decision.active === "claude-code";
+  const dot = decision.tone === "ok" ? "bg-emerald-400" : decision.tone === "warn" ? "bg-amber-400" : "bg-red-400";
+  return (
+    <div className="flex flex-col items-start gap-1.5 sm:items-end">
+      <div className="flex items-center gap-2">
+        <span data-testid="engine-badge" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white">
+          <span className={`h-2 w-2 rounded-full ${dot} ${busy ? "animate-pulse" : ""}`} />
+          {decision.active === null ? "No engine available" : isClaude ? "Engine: Claude Code · your plan" : "Engine: API · billed per use"}
+        </span>
+        <Select value={mode} onValueChange={(v) => onMode(v as EngineMode)}>
+          <SelectTrigger aria-label="Engine mode" className="h-8 w-[150px] border-white/15 bg-white/5 text-xs text-white"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="auto">Auto (prefer Claude Code)</SelectItem>
+            <SelectItem value="claude">Claude Code only</SelectItem>
+            <SelectItem value="api">API only</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <span className="text-[11px] text-white/55">{decision.reason}</span>
+    </div>
+  );
 }
 
 function Studio() {
@@ -68,21 +93,38 @@ function Studio() {
   const [threads, setThreads] = useState<StudioThreadSummary[] | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [projectsOpen, setProjectsOpen] = useState(false);
+  const [mode, setModeState] = useState<EngineMode>(readMode);
+  const setMode = (m: EngineMode) => { setModeState(m); try { localStorage.setItem(MODE_KEY, m); } catch { /* per-browser preference only */ } };
 
-  const loadThreads = useCallback(async () => {
-    try { const t = await studio.threads(); setThreads(t); return t; }
-    catch (e) { setThreads([]); setMeError(e instanceof Error ? e.message : "The runner can't be reached."); return []; }
+  const decision = decideEngine(mode, me, meError);
+  // Projects live on the runner when it answers; otherwise in this browser (API only).
+  const backend: StudioBackend = RUNNER_URL && !meError ? runnerBackend : browserBackend;
+  const ready = backend === browserBackend || Boolean(me);
+
+  const refreshMe = useCallback(() => {
+    if (!RUNNER_URL) return;
+    studio.me().then((m) => { setMe(m); setMeError(null); }).catch((e) => { setMe(null); setMeError(e instanceof Error ? e.message : "The runner can't be reached."); });
   }, []);
 
+  const loadThreads = useCallback(async () => {
+    try { const t = await backend.threads(); setThreads(t); return t; }
+    catch (e) { setThreads([]); if (backend === runnerBackend) setMeError(e instanceof Error ? e.message : "The runner can't be reached."); return []; }
+  }, [backend]);
+
   useEffect(() => {
-    if (!RUNNER_URL) return;
-    studio.me().then((m) => { setMe(m); setMeError(null); }).catch((e) => setMeError(e instanceof Error ? e.message : "The runner can't be reached."));
-    loadThreads().then((t) => { if (t[0]) setActiveId((id) => id ?? t[0].id); });
-  }, [loadThreads]);
+    refreshMe();
+    const t = window.setInterval(refreshMe, 60_000); // a plan limit lifts, a runner comes back
+    return () => window.clearInterval(t);
+  }, [refreshMe]);
+  useEffect(() => {
+    if (!ready) return;
+    setThreads(null);
+    loadThreads().then((t) => setActiveId((id) => (id && t.some((x) => x.id === id) ? id : t[0]?.id ?? null)));
+  }, [ready, loadThreads]);
 
   const newProject = async () => {
     try {
-      const t = await studio.create("Untitled project");
+      const t = await backend.create("Untitled project");
       await loadThreads();
       setActiveId(t.id); setProjectsOpen(false);
     } catch (e) { toast({ title: "Could not create the project", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
@@ -90,10 +132,10 @@ function Studio() {
 
   const list = (
     <div className="flex h-full flex-col">
-      <Button onClick={newProject} className={`h-10 w-full rounded-full ${GRADIENT}`} disabled={!me}><Plus className="h-4 w-4" /> New project</Button>
-      <div className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Projects</div>
+      <Button onClick={newProject} className={`h-10 w-full rounded-full ${GRADIENT}`} disabled={!ready}><Plus className="h-4 w-4" /> New project</Button>
+      <div className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Projects{backend === browserBackend ? " · in this browser" : ""}</div>
       <div className="mt-2 flex-1 space-y-1 overflow-y-auto">
-        {threads === null && RUNNER_URL && !meError && <p className="px-2 py-3 text-sm text-muted-foreground">Loading…</p>}
+        {threads === null && ready && <p className="px-2 py-3 text-sm text-muted-foreground">Loading…</p>}
         {threads?.length === 0 && <p className="px-2 py-3 text-sm text-muted-foreground">No projects yet. Start one, then upload a document or a book.</p>}
         {threads?.map((t) => (
           <button key={t.id} onClick={() => { setActiveId(t.id); setProjectsOpen(false); }}
@@ -115,21 +157,30 @@ function Studio() {
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">Owner workspace</p>
             <h1 className="text-display mt-1.5 text-3xl font-bold sm:text-4xl">Claude <span className="bg-gradient-to-r from-[hsl(217_91%_70%)] via-[hsl(245_85%_74%)] to-[hsl(280_85%_74%)] bg-clip-text pr-1 italic text-transparent">Studio</span></h1>
-            <p className="mt-1.5 max-w-xl text-sm text-white/60">Your own Claude Code: summarise, rewrite under strict instructions, research citations, and talk through any document or book. Runs on your Claude plan, not the API.</p>
+            <p className="mt-1.5 max-w-xl text-sm text-white/60">Summarise, rewrite under strict instructions, research citations, check, translate and produce books. Runs on your own Claude Code when it's available, and on the API when it isn't.</p>
           </div>
-          <div className="flex items-center gap-2">
-            <StatusPill me={me} error={meError} />
+          <div className="flex items-end gap-2">
+            <EngineBadge decision={decision} mode={mode} onMode={setMode} busy={Boolean(me?.busy)} />
             <Button variant="outline" size="sm" className="border-white/15 bg-white/5 text-white hover:bg-white/10 lg:hidden" onClick={() => setProjectsOpen(true)}><FolderOpen className="h-4 w-4" /> Projects</Button>
           </div>
         </div>
       </section>
 
-      {!RUNNER_URL ? <SetupCard /> : meError && !me ? (
+      {backend === browserBackend && (
+        <div className="border-b border-amber-500/30 bg-amber-500/10">
+          <div className="container px-6 py-2.5 text-sm text-amber-800 dark:text-amber-300">
+            {RUNNER_URL ? "The Claude Code runner isn't answering, so" : "The Claude Code runner isn't set up yet, so"} projects are kept in this browser and every run uses the API (billed per use). {RUNNER_URL && <button className="font-semibold underline underline-offset-2" onClick={refreshMe}>Check again</button>}
+            {!RUNNER_URL && <SetupHint />}
+          </div>
+        </div>
+      )}
+
+      {mode === "claude" && backend === browserBackend ? (
         <div className="container max-w-2xl px-6 py-16 text-center">
           <AlertTriangle className="mx-auto h-8 w-8 text-amber-500" />
-          <h2 className="mt-4 font-serif text-2xl font-bold">The runner isn't answering</h2>
-          <p className="mt-2 text-muted-foreground">{meError}</p>
-          <Button className="mt-6" variant="outline" onClick={() => window.location.reload()}>Try again</Button>
+          <h2 className="mt-4 font-serif text-2xl font-bold">Claude Code isn't available</h2>
+          <p className="mt-2 text-muted-foreground">{decision.reason} Choose Auto or API only in the engine menu to keep working on the API.</p>
+          {!RUNNER_URL && <SetupCard />}
         </div>
       ) : (
         <div className="container grid gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[250px_minmax(0,1fr)]">
@@ -137,15 +188,23 @@ function Studio() {
           <Sheet open={projectsOpen} onOpenChange={setProjectsOpen}>
             <SheetContent side="left" className="w-[300px]"><SheetHeader><SheetTitle>Projects</SheetTitle></SheetHeader><div className="mt-4 h-[calc(100%-3rem)]">{list}</div></SheetContent>
           </Sheet>
-          {activeId && me ? (
-            <Project key={activeId} id={activeId} me={me} onChanged={loadThreads} onDeleted={async () => { const t = await loadThreads(); setActiveId(t[0]?.id ?? null); }} />
+          {activeId && ready ? (
+            <Project key={`${backend.storage}:${activeId}`} id={activeId} backend={backend} decision={decision} mode={mode}
+              citationStyles={me?.citationStyles ?? CITATION_STYLES_FALLBACK} busyElsewhere={Boolean(me?.busy && me.busy.threadId !== activeId)}
+              onChanged={() => { loadThreads(); refreshMe(); }} onDeleted={async () => { const t = await loadThreads(); setActiveId(t[0]?.id ?? null); }} />
           ) : (
-            <EmptyState onNew={newProject} disabled={!me} />
+            <EmptyState onNew={newProject} disabled={!ready} />
           )}
         </div>
       )}
     </div>
   );
+}
+
+const CITATION_STYLES_FALLBACK = ["APA 7", "Chicago (notes and bibliography)", "Chicago (author-date)", "MLA 9", "Harvard", "SBL", "IEEE", "Vancouver"];
+
+function SetupHint() {
+  return <span className="ml-1">To use your Claude Code plan instead, deploy the runner (see <code className="rounded bg-amber-500/10 px-1">services/polished-claude-runner</code>).</span>;
 }
 
 function SetupCard() {
@@ -187,7 +246,10 @@ const ACTIONS: { id: DialogAction; title: string; line: string; icon: typeof Scr
   { id: "cite", title: "Citations & references", line: "Researched on the web, never invented", icon: Quote },
 ];
 
-function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; onChanged: () => void; onDeleted: () => void }) {
+function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, onChanged, onDeleted }: {
+  id: string; backend: StudioBackend; decision: EngineDecision; mode: EngineMode; citationStyles: string[]; busyElsewhere: boolean;
+  onChanged: () => void; onDeleted: () => void;
+}) {
   const { toast } = useToast();
   const [thread, setThread] = useState<StudioThread | null>(null);
   const [live, setLive] = useState<Live | null>(null);
@@ -199,20 +261,28 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
   const [drag, setDrag] = useState(false);
   const [wizard, setWizard] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [tools, setTools] = useState(false);
+  // A Claude Code run that failed because the plan is signed out or at its limit can be re-run on the API.
+  const [retry, setRetry] = useState<{ action: StudioAction; options: RunOptions; why: string } | null>(null);
+  const lastRun = useRef<{ action: StudioAction; options: RunOptions } | null>(null);
+  const engineId = decision.active;
   const titleRef = useRef("");
-  const engine = useMemo(() => claudeBookEngine(id, (o) => {
-    // An untitled project takes the book's title once Claude has outlined it.
-    if (o.title && titleRef.current === "Untitled project") studio.rename(id, o.title).then((t) => { setThread(t); setTitle(t.title); onChanged(); }).catch(() => {});
-  }), [id, onChanged]);
+  // The Book wizard follows the engine in use, and says so in its header.
+  const engine = useMemo(() => engineId === "claude-code" && backend === runnerBackend
+    ? claudeBookEngine(id, (o) => {
+      // An untitled project takes the book's title once Claude has outlined it.
+      if (o.title && titleRef.current === "Untitled project") backend.rename(id, o.title).then((t) => { setThread(t); setTitle(t.title); onChanged(); }).catch(() => {});
+    })
+    : { ...apiBookEngine, label: "Written by the API · billed per use" }, [id, onChanged, engineId, backend]);
   const fileRef = useRef<HTMLInputElement>(null);
   const feedEnd = useRef<HTMLDivElement>(null);
   const abort = useRef<AbortController | null>(null);
 
   const reload = useCallback(async () => {
-    const { thread: t, job } = await studio.thread(id);
+    const { thread: t, job } = await backend.thread(id);
     setThread(t); setTitle(t.title);
     return { t, job };
-  }, [id]);
+  }, [id, backend]);
 
   const follow = useCallback((job: StudioJob) => {
     abort.current?.abort();
@@ -227,7 +297,11 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
           if (pick && t.outputs.some((o) => o.path === pick)) setViewing(pick);
         }).catch(() => {});
         onChanged();
-        if (e.status === "failed") toast({ title: "Claude couldn't finish", description: e.error ?? "", variant: "destructive" });
+        if (e.status === "failed") {
+          const planProblem = e.errorKind === "auth" || e.errorKind === "limit";
+          if (planProblem && lastRun.current && mode !== "claude") setRetry({ ...lastRun.current, why: e.errorKind === "auth" ? "Claude Code is signed out." : "Your Claude plan's limit is reached." });
+          else toast({ title: "Claude couldn't finish", description: e.error ?? "", variant: "destructive" });
+        }
         return;
       }
       setLive((l) => {
@@ -236,8 +310,8 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
         return { ...l, steps: [...l.steps, { line: e.line, kind: e.type, at: e.at }].slice(-200) };
       });
     };
-    followJob(job.id, id, onEvent, ctl.signal).catch((err) => { if (!ctl.signal.aborted) toast({ title: "Lost the live view", description: err instanceof Error ? err.message : "", variant: "destructive" }); });
-  }, [id, reload, onChanged, toast]);
+    backend.follow(job, onEvent, ctl.signal).catch((err) => { if (!ctl.signal.aborted) toast({ title: "Lost the live view", description: err instanceof Error ? err.message : "", variant: "destructive" }); });
+  }, [reload, onChanged, toast, backend, mode]);
 
   useEffect(() => {
     reload().then(({ job }) => { if (job?.status === "running") follow(job); }).catch((e) => toast({ title: "Could not open the project", description: e instanceof Error ? e.message : "", variant: "destructive" }));
@@ -251,18 +325,22 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
     for (const f of Array.from(files)) {
       setUploading(f.name);
       try {
-        const t = await uploadToStudio(id, f);
+        const t = await backend.upload(id, f);
         setThread(t);
-        if (t.title === "Untitled project") { const nt = await studio.rename(id, f.name.replace(/\.[^.]+$/, "")); setThread(nt); setTitle(nt.title); }
+        if (t.title === "Untitled project") { const nt = await backend.rename(id, f.name.replace(/\.[^.]+$/, "")); setThread(nt); setTitle(nt.title); }
         onChanged();
       } catch (e) { toast({ title: `Could not upload ${f.name}`, description: e instanceof Error ? e.message : "", variant: "destructive" }); }
     }
     setUploading(null);
   };
 
-  const start = async (action: StudioAction, options: RunOptions) => {
+  const start = async (action: StudioAction, options: RunOptions, force?: "api") => {
+    const use = force ?? engineId;
+    if (!use) { toast({ title: "No engine available", description: decision.reason, variant: "destructive" }); return; }
     try {
-      const job = await studio.run(id, action, options);
+      setRetry(null);
+      lastRun.current = { action, options };
+      const job = await backend.run(id, action, options, use);
       setDialog(null);
       if (action === "chat") setMessage("");
       await reload();
@@ -272,16 +350,16 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
     }
   };
 
-  const stop = async () => { if (live) await studio.cancel(live.job.id).catch(() => {}); };
+  const stop = async () => { if (live) await backend.cancel(live.job).catch(() => {}); };
 
   const saveTitle = async () => {
     if (!thread || !title.trim() || title === thread.title) return;
-    try { setThread(await studio.rename(id, title.trim())); onChanged(); } catch { setTitle(thread.title); }
+    try { setThread(await backend.rename(id, title.trim())); onChanged(); } catch { setTitle(thread.title); }
   };
 
   const remove = async () => {
     if (!window.confirm(`Delete “${thread?.title}” with its documents and results? Anything saved to your Library stays.`)) return;
-    try { await studio.remove(id); onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+    try { await backend.remove(id); onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
   };
 
   if (!thread) return <div className="grid min-h-[50vh] place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
@@ -291,7 +369,7 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
       <div className="min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Button variant="ghost" size="sm" onClick={() => { setWizard(false); reload().catch(() => {}); onChanged(); }}><ArrowLeft className="h-4 w-4" /> Back to {thread.title}</Button>
-          <span className="text-xs text-muted-foreground">Outline, chapters and improvements are written by your Claude Code in this project. Covers, audiobook voices, translations and repurposing use the site's own services.</span>
+          <span className="text-xs text-muted-foreground">{engine.label === "Written by your Claude Code" ? "Outline, chapters and improvements are written by your Claude Code in this project." : "Outline, chapters and improvements are written by the API (billed per use)."} Covers, audiobook voices, translations and repurposing use the site's own services.</span>
         </div>
         <div className="-mx-4 mt-2 overflow-hidden rounded-2xl border border-border sm:mx-0">
           <Suspense fallback={<div className="grid min-h-[40vh] place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
@@ -303,9 +381,9 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
   }
 
   const originals = thread.files.filter((f) => f.kind === "original");
-  const busy = Boolean(live) || Boolean(me.busy && me.busy.threadId !== id && !live);
+  const busy = Boolean(live) || (busyElsewhere && engineId === "claude-code" && !live) || !engineId;
   const hasSource = thread.files.length > 0;
-  const mainOutputs = thread.outputs.filter((o) => !o.path.startsWith("rewrite/") && !o.path.startsWith("book/"));
+  const mainOutputs = thread.outputs.filter((o) => !o.path.startsWith("rewrite/") && !o.path.startsWith("book/") && !o.path.startsWith("translation/"));
   const wizardOutputs = thread.outputs.filter((o) => o.path.startsWith("book/")).sort((a, b) => a.path.localeCompare(b.path));
   const chapters = thread.outputs.filter((o) => o.path.startsWith("rewrite/")).sort((a, b) => a.path.localeCompare(b.path));
 
@@ -331,7 +409,7 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
                 <span className="max-w-[220px] truncate">{f.name}</span>
                 <span className="text-xs text-muted-foreground">{formatBytes(f.bytes)}{thread.files.some((x) => x.kind === "text" && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt") ? " · text read" : ""}</span>
                 <button type="button" aria-label={`Remove ${f.name}`} disabled={Boolean(live)} className="text-muted-foreground hover:text-foreground"
-                  onClick={async () => { let t = await studio.removeFile(id, f.storedAs); const txt = f.storedAs.replace(/\.[^.]+$/, "") + ".txt"; if (txt !== f.storedAs && t.files.some((x) => x.storedAs === txt)) t = await studio.removeFile(id, txt); setThread(t); onChanged(); }}>
+                  onClick={async () => { let t = await backend.removeFile(id, f.storedAs); const txt = f.storedAs.replace(/\.[^.]+$/, "") + ".txt"; if (txt !== f.storedAs && t.files.some((x) => x.storedAs === txt)) t = await backend.removeFile(id, txt); setThread(t); onChanged(); }}>
                   <X className="h-3.5 w-3.5" />
                 </button>
               </span>
@@ -339,7 +417,7 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
             <Button variant="outline" size="sm" className="rounded-full" onClick={() => fileRef.current?.click()} disabled={Boolean(uploading)}>
               {uploading ? <><Loader2 className="h-4 w-4 animate-spin" /> Uploading {uploading}…</> : <><Upload className="h-4 w-4" /> {originals.length ? "Add document" : "Upload a document or book"}</>}
             </Button>
-            {!originals.length && !uploading && <span className="text-xs text-muted-foreground">PDF, Word, text or Markdown. Drop files here.</span>}
+            {!originals.length && !uploading && <span className="text-xs text-muted-foreground">PDF, Word, text, Markdown or scanned images. Drop files here.</span>}
             <input ref={fileRef} type="file" accept={STUDIO_ACCEPT} multiple hidden onChange={(e) => { if (e.target.files?.length) upload(e.target.files); e.target.value = ""; }} />
           </div>
         </div>
@@ -356,6 +434,11 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Layers className="h-5 w-5" /></span>
             <span><span className="block font-semibold">Join files</span><span className="block text-xs text-muted-foreground">Many PDFs or Word files into one PDF, one Word file or one book</span></span>
           </button>
+          <button type="button" disabled={busy || (!hasSource && thread.outputs.length === 0)} onClick={() => setTools(true)}
+            className="group flex items-start gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md disabled:pointer-events-none disabled:opacity-50">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Wrench className="h-5 w-5" /></span>
+            <span><span className="block font-semibold">More tools</span><span className="block text-xs text-muted-foreground">Proofread, fact-check, verify scripture, translate, study guide, index and more</span></span>
+          </button>
           {ACTIONS.map((a) => (
             <button key={a.id} type="button" disabled={busy || (!hasSource && thread.outputs.length === 0)} onClick={() => setDialog(a.id)}
               className="group flex items-start gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md disabled:pointer-events-none disabled:opacity-50">
@@ -364,6 +447,15 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
             </button>
           ))}
         </div>
+
+        {retry && (
+          <div role="alert" className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <span className="flex-1">{retry.why} The engine has switched to the API for new runs.</span>
+            <Button size="sm" className={`rounded-full ${GRADIENT}`} onClick={() => start(retry.action, retry.options, "api")}><Cpu className="h-4 w-4" /> Run it on the API</Button>
+            <Button size="sm" variant="ghost" onClick={() => setRetry(null)}>Dismiss</Button>
+          </div>
+        )}
 
         {/* Conversation */}
         <div className="mt-6 space-y-4" aria-live="polite">
@@ -418,9 +510,10 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
         </div>
       </aside>
 
+      {tools && <ToolsDialog thread={thread} engine={engineId} onClose={() => setTools(false)} onRun={(o) => { setTools(false); start("tool", o); }} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
-      {dialog && <ActionDialog action={dialog} thread={thread} styles={me.citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
-      {viewing && <ResultViewer threadId={id} path={viewing} projectTitle={thread.title} onClose={() => setViewing(null)} onUseAsTarget={(p) => { setViewing(null); setDialog("rewrite"); setPendingTarget(p); }} />}
+      {dialog && <ActionDialog action={dialog} thread={thread} styles={citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
+      {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => setViewing(null)} onUseAsTarget={(p) => { setViewing(null); setDialog("rewrite"); setPendingTarget(p); }} />}
     </div>
   );
 }
@@ -440,7 +533,7 @@ function formatBytes(n: number) {
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-const ACTION_ICON: Record<StudioAction, typeof MessageSquare> = { chat: MessageSquare, summarize: ScrollText, rewrite: Wand2, cite: Quote, "book-outline": BookOpen, "book-chapter": BookOpen, "book-improve": BookOpen };
+const ACTION_ICON: Record<StudioAction, typeof MessageSquare> = { chat: MessageSquare, summarize: ScrollText, rewrite: Wand2, cite: Quote, tool: Wrench, "book-outline": BookOpen, "book-chapter": BookOpen, "book-improve": BookOpen };
 
 function MessageCard({ m, onOpen }: { m: StudioThread["messages"][number]; onOpen: (p: string) => void }) {
   const Icon = ACTION_ICON[m.action] ?? MessageSquare;
@@ -456,6 +549,7 @@ function MessageCard({ m, onOpen }: { m: StudioThread["messages"][number]; onOpe
     <div className="rounded-2xl rounded-bl-md border border-border bg-card px-5 py-4">
       <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
         <Sparkles className="h-3.5 w-3.5 text-primary" /> Claude
+        {m.engine && <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${m.engine === "api" ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"}`}>{m.engine === "api" ? "API" : "Claude Code"}</span>}
         {m.status === "failed" && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-destructive">Didn't finish</span>}
         {m.status === "cancelled" && <span className="rounded-full bg-muted px-2 py-0.5">Stopped</span>}
       </div>
@@ -593,12 +687,12 @@ function StylePicker({ styles, value, onChange }: { styles: string[]; value?: st
   );
 }
 
-function ResultViewer({ threadId, path, projectTitle, onClose, onUseAsTarget }: { threadId: string; path: string; projectTitle: string; onClose: () => void; onUseAsTarget: (p: string) => void }) {
+function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsTarget }: { backend: StudioBackend; threadId: string; path: string; projectTitle: string; onClose: () => void; onUseAsTarget: (p: string) => void }) {
   const { toast } = useToast();
   const [text, setText] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  useEffect(() => { studio.output(threadId, path).then(setText).catch((e) => { setText(""); toast({ title: "Could not open the result", description: e instanceof Error ? e.message : "", variant: "destructive" }); }); }, [threadId, path, toast]);
+  useEffect(() => { backend.output(threadId, path).then(setText).catch((e) => { setText(""); toast({ title: "Could not open the result", description: e instanceof Error ? e.message : "", variant: "destructive" }); }); }, [backend, threadId, path, toast]);
 
   const bookTitle = text ? titleOf(text, projectTitle) : projectTitle;
   const save = async () => {
