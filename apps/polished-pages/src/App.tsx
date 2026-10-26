@@ -56,6 +56,7 @@ const PublicSeriesPage = lazy(() => import("./pages/PublicSeries.tsx"));
 const CollectionsPage = lazy(() => import("./pages/CollectionsPage.tsx"));
 const PublicCollection = lazy(() => import("./pages/PublicCollection.tsx"));
 const BookCreator = lazy(() => import("./pages/BookCreator.tsx"));
+const ClaudeStudio = lazy(() => import("./pages/ClaudeStudio.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Gallery = lazy(() => import("./pages/Gallery.tsx"));
@@ -101,6 +102,8 @@ const App = () => (
           <Route path="/organizations" element={<AuthGate><Organizations /></AuthGate>} />
           <Route path="/organizations/:slug" element={<AuthGate><OrgWorkspace /></AuthGate>} />
           <Route path="/organizations/:slug/analytics" element={<AuthGate><OrgAnalyticsPage /></AuthGate>} />
+          {/* The owner's own Claude Code (admin only; the runner re-checks every request). */}
+          <Route path="/admin/claude" element={<AuthGate><ClaudeStudio /></AuthGate>} />
           <Route path="/marketplace-health" element={<AuthGate><MarketplaceHealth /></AuthGate>} />
           <Route path="/cv" element={<AuthGate><CVGenerator /></AuthGate>} />
           <Route path="/cover-letter" element={<AuthGate><CoverLetterGenerator /></AuthGate>} />

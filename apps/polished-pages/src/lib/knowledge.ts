@@ -74,7 +74,7 @@ async function retrieveKnowledge(docIds: string[], query: string): Promise<strin
   } catch { return ""; }
 }
 
-interface RuleSet { rules: string; terminology: string; forbidden: string }
+export interface RuleSet { rules: string; terminology: string; forbidden: string }
 const hasAny = (k: RuleSet) => !!(k.rules.trim() || k.terminology.trim() || k.forbidden.trim());
 
 // Build the knowledge object to send to a generator: fold the selected reference

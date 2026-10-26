@@ -18,6 +18,7 @@ const NAMES: Record<string, string> = {
   "/collections": "Collections",
   "/organizations": "Organizations",
   "/marketplace-health": "Marketplace Health",
+  "/admin/claude": "Claude Studio",
   "/series": "Storybooks & Series",
   "/storybook": "Storybook Creator",
   "/coloring": "Coloring Books",

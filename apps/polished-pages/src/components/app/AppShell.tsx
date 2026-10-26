@@ -1,12 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Sparkles, Search, ChevronDown, LogOut, Settings, LayoutDashboard, Crown, Library, Rocket, Store, FolderOpen, Menu, BarChart3 } from "lucide-react";
+import { Sparkles, Search, ChevronDown, LogOut, Settings, LayoutDashboard, Crown, Library, Rocket, Store, FolderOpen, Menu, BarChart3, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPlanStatus, type PlanStatus } from "@/lib/session";
+import { isAdmin } from "@/lib/documents";
 import { planDisplayName } from "@/lib/plans";
 import { BRAND, DASHBOARD_NAV, ACCOUNT_NAV, LIBRARY_NAV } from "@/lib/tools";
 import CommandPalette from "@/components/app/CommandPalette";
@@ -28,7 +29,8 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
   // Close the mobile drawer whenever the route changes.
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
-  useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
+  const [admin, setAdmin] = useState(false);
+  useEffect(() => { fetchPlanStatus().then(setStatus); isAdmin().then(setAdmin).catch(() => {}); }, []);
 
   const isPro = !!status && status.plan !== "free"; // any paid tier
   const usageLabel = status
@@ -97,6 +99,10 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
                 <DropdownMenuItem asChild><Link to="/insights"><BarChart3 className="mr-2 h-4 w-4" /> Insights</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to={ACCOUNT_NAV.path}><Settings className="mr-2 h-4 w-4" /> Account & billing</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/pricing"><Crown className="mr-2 h-4 w-4" /> Plans &amp; pricing</Link></DropdownMenuItem>
+                {admin && (<>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild><Link to="/admin/claude"><Wand2 className="mr-2 h-4 w-4" /> Claude Studio</Link></DropdownMenuItem>
+                </>)}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => supabase.auth.signOut()}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>
               </DropdownMenuContent>
