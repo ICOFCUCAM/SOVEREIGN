@@ -17,9 +17,15 @@ import { coverCopyPrompt, parseCoverCopy, type CoverCopyWriter } from "@/lib/cov
 
 export type EngineMode = "auto" | "claude" | "api";
 export type EngineId = "claude-code" | "api";
-export interface EngineDecision { active: EngineId | null; reason: string; tone: "ok" | "warn" | "bad" }
+export interface EngineDecision { active: EngineId | null; reason: string; tone: "ok" | "warn" | "bad"; /** What to do about Claude Code's sign-in, from the runner. */ fix?: string }
 
 export function decideEngine(mode: EngineMode, me: StudioMe | null, runnerError: string | null): EngineDecision {
+  const d = decide(mode, me, runnerError);
+  const st = me?.claude?.state;
+  return (st === "signed_out" || st === "not_configured") && me?.claude?.message ? { ...d, fix: me.claude.message } : d;
+}
+
+function decide(mode: EngineMode, me: StudioMe | null, runnerError: string | null): EngineDecision {
   const reachable = Boolean(RUNNER_URL) && !runnerError && Boolean(me);
   const st = me?.claude?.state;
   const until = me?.claude?.resetsAt ? ` until ${new Date(me.claude.resetsAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}` : "";
@@ -47,7 +53,11 @@ async function callApi(user: string, opts: { system?: string; web?: boolean; max
     body: JSON.stringify({ system: opts.system ?? API_SYSTEM, user, webSearch: Boolean(opts.web), maxTokens: opts.maxTokens ?? 16000 }),
   });
   const body = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error((body as { error?: string }).error || `The API answered ${r.status}.`);
+  if (!r.ok) {
+    const msg = (body as { error?: string }).error || `The API answered ${r.status}.`;
+    if (/credit balance is too low/i.test(msg)) throw new Error("The Anthropic API account has no credit left. Add credit at console.anthropic.com → Plans & Billing (separate from your Claude subscription), or use Claude Code.");
+    throw new Error(msg);
+  }
   return body as { text: string; sources: { url: string; title: string }[] };
 }
 

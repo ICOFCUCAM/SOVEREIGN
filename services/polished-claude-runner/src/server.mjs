@@ -1,9 +1,18 @@
 import http from "node:http";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { loadConfig, configProblems } from "./config.mjs";
+import { loadConfig, configProblems, tokenShape } from "./config.mjs";
+
+// What to do about the token, by what kind of value the runner holds.
+const FIX = "On a computer signed in to your Claude subscription run `claude setup-token`, paste the whole token it prints (one line, starting sk-ant-oat01-) as CLAUDE_CODE_OAUTH_TOKEN on the runner, then redeploy the runner.";
+const TOKEN_HELP = {
+  missing: `CLAUDE_CODE_OAUTH_TOKEN is not set. ${FIX}`,
+  "api-key": `CLAUDE_CODE_OAUTH_TOKEN holds an API key (sk-ant-api…), not a subscription token. ${FIX}`,
+  unrecognised: `CLAUDE_CODE_OAUTH_TOKEN doesn't look like a subscription token. ${FIX}`,
+  subscription: `The subscription token was refused (expired, revoked or mistyped). ${FIX}`,
+};
 import { createAuth } from "./auth.mjs";
 import { createStore, safeName, inside, manuscriptFile } from "./store.mjs";
 import { buildRun, CITATION_STYLES } from "./prompts.mjs";
@@ -12,6 +21,7 @@ import { runClaude } from "./claude.mjs";
 // Claude Studio runner. A small HTTP API in front of the owner's Claude Code:
 //   GET    /health                          liveness (no data)
 //   GET    /v1/me                           who you are, whether the runner is ready
+//   POST   /v1/claude/check                 a tiny Claude Code run, to re-test the sign-in
 //   GET    /v1/threads                      projects
 //   POST   /v1/threads                      {title} → new project
 //   GET    /v1/threads/:id                  project with messages, files, outputs, running job
@@ -37,17 +47,22 @@ export function createServer(cfg = loadConfig(), deps = {}) {
   // Whether the owner's Claude Code worked last time: the page's engine switch
   // reads this to decide between Claude Code and the API.
   const statusFile = path.join(cfg.dataDir, "claude-status.json");
+  // The saved status belongs to the token it was learned with: after the token
+  // is replaced (and the runner redeployed), an old "signed out" no longer applies.
+  const tokenId = cfg.claudeToken ? createHash("sha256").update(cfg.claudeToken).digest("hex").slice(0, 16) : "";
   let claudeStatus = { state: "unknown", at: null, resetsAt: null, message: null };
-  fs.readFile(statusFile, "utf8").then((t) => { claudeStatus = { ...claudeStatus, ...JSON.parse(t) }; }).catch(() => {});
+  fs.readFile(statusFile, "utf8").then((t) => { const saved = JSON.parse(t); if (saved.tokenId === tokenId) claudeStatus = { ...claudeStatus, ...saved }; }).catch(() => {});
   const setStatus = (st) => {
-    claudeStatus = { state: st.state, at: new Date().toISOString(), resetsAt: st.resetsAt ?? null, message: st.message ?? null };
+    claudeStatus = { state: st.state, at: new Date().toISOString(), resetsAt: st.resetsAt ?? null, message: st.message ?? null, tokenId };
     fs.mkdir(cfg.dataDir, { recursive: true }).then(() => fs.writeFile(statusFile, JSON.stringify(claudeStatus))).catch(() => {});
   };
   const currentStatus = () => {
-    if (!cfg.claudeToken) return { state: "not_configured", at: null, resetsAt: null, message: "CLAUDE_CODE_OAUTH_TOKEN is not set on the runner." };
+    if (!cfg.claudeToken) return { state: "not_configured", at: null, resetsAt: null, message: TOKEN_HELP.missing };
+    if (tokenShape(cfg.claudeToken) === "api-key") return { state: "signed_out", at: null, resetsAt: null, message: TOKEN_HELP["api-key"] };
     // A usage limit lifts on its own at its reset time.
     if (claudeStatus.state === "limit" && claudeStatus.resetsAt && Date.parse(claudeStatus.resetsAt) < Date.now()) return { ...claudeStatus, state: "unknown" };
-    return claudeStatus;
+    const { tokenId: _id, ...pub } = claudeStatus;
+    return pub;
   };
 
   const cors = (req, res) => {
@@ -104,6 +119,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     }
     if (running) return { status: 409, error: "Claude is already working on something. Wait for it to finish or stop it." };
     if (!cfg.claudeToken) return { status: 503, error: "Claude Code is not connected yet: set CLAUDE_CODE_OAUTH_TOKEN on the runner." };
+    if (tokenShape(cfg.claudeToken) === "api-key") return { status: 503, error: TOKEN_HELP["api-key"] };
 
     const cwd = store.workDir(thread.id);
     if (spec.instructions) await fs.writeFile(path.join(cwd, "INSTRUCTIONS.md"), spec.instructions);
@@ -148,7 +164,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       const t = (await store.read(thread.id)) || thread;
       if (r.sessionId) t.sessionId = r.sessionId;
       if (r.ok) setStatus({ state: "ok" });
-      else if (r.errorKind === "auth") setStatus({ state: "signed_out", message: r.error });
+      else if (r.errorKind === "auth") setStatus({ state: "signed_out", message: `${r.error} ${TOKEN_HELP[tokenShape(cfg.claudeToken)] ?? TOKEN_HELP.subscription}` });
       else if (r.errorKind === "limit") {
         const reset = r.rateLimit?.resetsAt ?? r.rateLimit?.resets_at;
         setStatus({ state: "limit", message: r.error, resetsAt: reset ? new Date(typeof reset === "number" ? reset * (reset < 1e12 ? 1000 : 1) : reset).toISOString() : null });
@@ -216,7 +232,19 @@ export function createServer(cfg = loadConfig(), deps = {}) {
 
     const [, kind, id, sub, ...rest] = parts;
     if (kind === "me" && req.method === "GET") {
-      return send(res, 200, { user: who.user, claudeConnected: Boolean(cfg.claudeToken), claude: currentStatus(), busy: publicJob(running), citationStyles: CITATION_STYLES });
+      return send(res, 200, { user: who.user, claudeConnected: Boolean(cfg.claudeToken), token: tokenShape(cfg.claudeToken), claude: currentStatus(), busy: publicJob(running), citationStyles: CITATION_STYLES });
+    }
+    // "Check again": a tiny Claude Code run with no tools, to learn whether the token works now.
+    if (kind === "claude" && id === "check" && req.method === "POST") {
+      if (!cfg.claudeToken) return send(res, 200, { claude: currentStatus() });
+      if (running) return fail(res, 409, "Claude is working on something. Check again when it's done.");
+      const cwd = path.join(cfg.dataDir, "check");
+      await fs.mkdir(cwd, { recursive: true }); await fs.mkdir(home, { recursive: true });
+      const r = await runClaude({ cfg, cwd, home, prompt: "Reply with the single word OK.", timeoutMs: 90_000, onEvent: () => {} }).done;
+      if (r.ok) setStatus({ state: "ok" });
+      else if (r.errorKind === "auth") setStatus({ state: "signed_out", message: `${r.error} ${TOKEN_HELP[tokenShape(cfg.claudeToken)] ?? TOKEN_HELP.subscription}` });
+      else if (r.errorKind === "limit") setStatus({ state: "limit", message: r.error, resetsAt: null });
+      return send(res, 200, { claude: currentStatus() });
     }
     if (kind === "voice" && !id) {
       if (req.method === "GET") return send(res, 200, { voice: await store.readVoice() });

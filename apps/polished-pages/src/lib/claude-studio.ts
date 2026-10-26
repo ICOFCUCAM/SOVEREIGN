@@ -80,6 +80,8 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export const studio = {
   me: () => call<StudioMe>("/v1/me"),
+  /** Re-tests Claude Code's sign-in with a tiny run (after replacing the token). */
+  checkClaude: () => call<{ claude: ClaudeStatus }>("/v1/claude/check", { method: "POST" }),
   threads: () => call<{ threads: StudioThreadSummary[] }>("/v1/threads").then((r) => r.threads),
   create: (title: string) => call<{ thread: StudioThread }>("/v1/threads", { method: "POST", body: JSON.stringify({ title }) }).then((r) => r.thread),
   thread: (id: string) => call<{ thread: StudioThread; job: StudioJob | null }>(`/v1/threads/${id}`),

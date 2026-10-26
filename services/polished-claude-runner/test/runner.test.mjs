@@ -202,6 +202,9 @@ test("Claude Code status: signed out, usage limit with reset time, then ok again
   let ev = await streamUntilDone(job.id, thread.id);
   assert.equal(ev.at(-1).status, "failed"); assert.equal(ev.at(-1).errorKind, "auth");
   assert.equal((await (await call("/v1/me")).json()).claude.state, "signed_out");
+  // "Check Claude Code again" re-tests the sign-in with a tiny run.
+  assert.equal((await (await call("/v1/claude/check", { method: "POST" })).json()).claude.state, "ok");
+  assert.equal((await (await call("/v1/me")).json()).claude.state, "ok");
   ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "LIMITHIT" } } })).json());
   ev = await streamUntilDone(job.id, thread.id);
   assert.equal(ev.at(-1).errorKind, "limit");
@@ -293,6 +296,20 @@ test("cover copy: written from book text sent with the request, no upload needed
   // Without text (and without uploads) it still needs a document.
   const r = await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "cover-copy" } } });
   assert.equal(r.status, 400);
+});
+
+test("the Claude Code token is cleaned up from however it was pasted", async () => {
+  const { cleanToken, tokenShape } = await import("../src/config.mjs");
+  const tok = "sk-ant-oat01-" + "A1b2_C3d4-".repeat(8);
+  assert.equal(cleanToken(tok), tok);
+  assert.equal(cleanToken(`  "${tok}"\n`), tok);
+  assert.equal(cleanToken(`CLAUDE_CODE_OAUTH_TOKEN=${tok}`), tok);
+  assert.equal(cleanToken(`${tok.slice(0, 30)}\n${tok.slice(30)}`), tok); // wrapped by the terminal
+  assert.equal(cleanToken(`Your OAuth token (valid for 1 year):\n\n${tok}\n\nStore this token securely.`), tok);
+  assert.equal(tokenShape(tok), "subscription");
+  assert.equal(tokenShape("sk-ant-api03-xyz"), "api-key");
+  assert.equal(tokenShape("your-token-here"), "unrecognised");
+  assert.equal(tokenShape(""), "missing");
 });
 
 test("the sandbox settings and helpers", () => {
