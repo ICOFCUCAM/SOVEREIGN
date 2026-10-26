@@ -8,6 +8,7 @@ import AuthGate from "./components/AuthGate.tsx";
 import RequirePlan from "./components/app/RequirePlan.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
+import PageTitle from "./components/PageTitle.tsx";
 import RouteFallback from "./components/RouteFallback.tsx";
 import { I18nProvider } from "@/lib/i18n";
 
@@ -55,6 +56,7 @@ const PublicSeriesPage = lazy(() => import("./pages/PublicSeries.tsx"));
 const CollectionsPage = lazy(() => import("./pages/CollectionsPage.tsx"));
 const PublicCollection = lazy(() => import("./pages/PublicCollection.tsx"));
 const BookCreator = lazy(() => import("./pages/BookCreator.tsx"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Gallery = lazy(() => import("./pages/Gallery.tsx"));
 
@@ -68,6 +70,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <PageTitle />
         <ErrorBoundary>
         <Suspense fallback={<RouteFallback />}>
         <Routes>
@@ -86,6 +89,8 @@ const App = () => (
           <Route path="/institutions" element={<Institutions />} />
           <Route path="/collection/:token" element={<PublicCollection />} />
           <Route path="/series/public/:token" element={<PublicSeriesPage />} />
+          {/* Where the emailed password-reset link lands. */}
+          <Route path="/reset-password" element={<ResetPassword />} />
           {/* Generators require sign-in (metered per user); the gate prompts
               for sign-in only when someone actually goes to create. */}
           <Route path="/dashboard" element={<AuthGate><Dashboard /></AuthGate>} />
