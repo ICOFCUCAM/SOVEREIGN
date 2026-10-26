@@ -85,3 +85,23 @@ describe("cover copy", () => {
     expect(x).toMatch(/^# Book/); expect(x).toMatch(/## Three/); expect(x).toMatch(/The end\.$/);
   });
 });
+
+describe("typefaces", () => {
+  it("uses the nearest bundled weight, never a faux bold", async () => {
+    const { fontWeight, fontOf, COVER_FONTS, FONT_PAIRINGS } = await import("@/lib/cover-design");
+    expect(fontWeight("greatvibes", 700)).toBe(400);
+    expect(fontWeight("cinzel", 700)).toBe(700);
+    expect(fontWeight("josefin", 500)).toBe(400);
+    // Pairings only use faces that exist, with a readable text face.
+    for (const p of FONT_PAIRINGS) { expect(COVER_FONTS[p.title]).toBeTruthy(); expect(fontOf(p.body).text).toBe(true); }
+  });
+  it("bundles every face it lists", async () => {
+    const fs = await import("node:fs");
+    const { COVER_FONTS } = await import("@/lib/cover-design");
+    const css = fs.readFileSync("src/lib/cover-fonts.ts", "utf8") + fs.readFileSync("src/lib/fonts.ts", "utf8");
+    for (const f of Object.values(COVER_FONTS)) {
+      const pkg = f.family.match(/'([^']+)'/)![1].toLowerCase().replace(/ /g, "-");
+      for (const w of f.weights) expect(css, `${f.label} ${w}`).toMatch(new RegExp(`@fontsource/${pkg}/${w}\\.css`));
+    }
+  });
+});

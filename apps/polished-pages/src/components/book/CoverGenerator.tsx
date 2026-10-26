@@ -8,14 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import "@/lib/cover-fonts";
 import { useToast } from "@/hooks/use-toast";
 import { authHeader, fetchPlanStatus, startUpgrade, type PlanStatus } from "@/lib/session";
 import { translateLocalize } from "@/lib/translate";
 import { recordBatchOp } from "@/lib/editions";
 import { LANGUAGE_NAMES } from "@/lib/languages";
 import { PAPER_MM_PER_PAGE, TRIM_SIZES } from "@/lib/print-sizes";
-import { COVER_FONTS, TEMPLATES, coverChecks, defaultDesign, estimatePages, templateById, toIsbn13, type CoverDesign, type FontKey, type TitlePos } from "@/lib/cover-design";
+import { COVER_FONTS, FONT_CATEGORIES, FONT_PAIRINGS, TEMPLATES, fontOf, coverChecks, defaultDesign, estimatePages, templateById, toIsbn13, type CoverDesign, type FontKey, type TitlePos } from "@/lib/cover-design";
 import { artDpi, backImage, downloadBack, downloadFront, exportPrintPdf, frontImage, loadImage, shrinkImage } from "@/lib/cover-render";
 import { findBookCover, saveCover } from "@/lib/book-covers";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
@@ -38,6 +39,38 @@ const PRO_PERKS = [
   "Print-ready full-wrap PDF and ebook cover",
 ];
 const INKS: { v: string | null; l: string }[] = [{ v: null, l: "Auto" }, { v: "#ffffff", l: "White" }, { v: "#14171d", l: "Dark" }, { v: "#f6e7c1", l: "Cream" }, { v: "#d8b45a", l: "Gold" }];
+
+// A typeface menu grouped by kind, each face shown in itself.
+function TypefacePicker({ label, value, fallback, sample, textOnly, onChange }: { label: string; value: FontKey | null; fallback: FontKey; sample: string; textOnly?: boolean; onChange: (v: FontKey | null) => void }) {
+  const keys = (Object.keys(COVER_FONTS) as FontKey[]).filter((k) => !textOnly || fontOf(k).text);
+  return (
+    <div className="space-y-1.5"><Label className="font-sans text-xs">{label}</Label>
+      <Select value={value ?? "__"} onValueChange={(v) => onChange(v === "__" ? null : (v as FontKey))}>
+        <SelectTrigger aria-label={label}><span className="truncate" style={{ fontFamily: fontOf(value ?? fallback).family }}>{value ? fontOf(value).label : `Template's · ${fontOf(fallback).label}`}</span></SelectTrigger>
+        <SelectContent className="max-h-[360px]">
+          <SelectItem value="__">Template's · {fontOf(fallback).label}</SelectItem>
+          {FONT_CATEGORIES.map((c) => {
+            const inCat = keys.filter((k) => fontOf(k).category === c);
+            if (!inCat.length) return null;
+            return (
+              <SelectGroup key={c}>
+                <SelectLabel className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">{c}</SelectLabel>
+                {inCat.map((k) => (
+                  <SelectItem key={k} value={k} textValue={fontOf(k).label}>
+                    <span className="flex flex-col">
+                      <span className="text-base leading-tight" style={{ fontFamily: fontOf(k).family }}>{sample.slice(0, 32)}</span>
+                      <span className="text-[10px] text-muted-foreground">{fontOf(k).label} · {fontOf(k).line}</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            );
+          })}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
 
 const readFile = (f: File) => new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = () => rej(new Error("Couldn't read the file.")); r.readAsDataURL(f); });
 const wordCount = (s: string) => (s.match(/\S+/g) ?? []).length;
@@ -314,17 +347,29 @@ const CoverGenerator = (props: {
           <TabsContent value="design" className="space-y-4 pt-2">
             <div className="grid grid-cols-3 gap-2.5">
               {TEMPLATES.map((x) => (
-                <button key={x.id} type="button" onClick={() => setD((v) => ({ ...v, template: x.id, titleFont: null, titlePos: null }))} aria-pressed={d.template === x.id} data-template={x.id}
+                <button key={x.id} type="button" onClick={() => setD((v) => ({ ...v, template: x.id, titleFont: null, bodyFont: null, titlePos: null }))} aria-pressed={d.template === x.id} data-template={x.id}
                   className={`rounded-xl border p-1.5 text-left transition ${d.template === x.id ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/40"}`}>
-                  <CoverPreview design={{ ...d, template: x.id, titleFont: null, titlePos: null }} part="front" label={`${x.label} template`} />
+                  <CoverPreview design={{ ...d, template: x.id, titleFont: null, bodyFont: null, titlePos: null }} part="front" label={`${x.label} template`} />
                   <span className="mt-1.5 block text-xs font-semibold">{x.label}</span>
                   <span className="block text-[10px] leading-tight text-muted-foreground">{x.line}</span>
                 </button>
               ))}
             </div>
-            <div className="space-y-1.5"><Label className="font-sans text-xs">Title typeface</Label>
-              <Select value={d.titleFont ?? "__"} onValueChange={(v) => set("titleFont", v === "__" ? null : (v as FontKey))}><SelectTrigger aria-label="Title typeface"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="__">Template's ({COVER_FONTS[t.titleFont].label})</SelectItem>{(Object.keys(COVER_FONTS) as FontKey[]).map((k) => <SelectItem key={k} value={k}>{COVER_FONTS[k].label}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-1.5"><Label className="font-sans text-xs">Font pairings</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {FONT_PAIRINGS.map((x) => {
+                  const on = (d.titleFont ?? t.titleFont) === x.title && (d.bodyFont ?? t.bodyFont) === x.body;
+                  return (
+                    <button key={x.label} type="button" onClick={() => setD((v) => ({ ...v, titleFont: x.title, bodyFont: x.body }))} aria-pressed={on}
+                      className={`rounded-xl border px-2.5 py-1.5 text-left transition ${on ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                      <span className="block text-[15px] leading-tight" style={{ fontFamily: fontOf(x.title).family }}>{x.label}</span>
+                      <span className="block text-[10px] text-muted-foreground" style={{ fontFamily: fontOf(x.body).family }}>{fontOf(x.title).label} + {fontOf(x.body).label}</span>
+                    </button>
+                  );
+                })}
+              </div></div>
+            <TypefacePicker label="Title typeface" value={d.titleFont} fallback={t.titleFont} sample={d.title || "The Long Road Home"} onChange={(v) => set("titleFont", v)} />
+            <TypefacePicker label="Text typeface (subtitle, author, back cover)" value={d.bodyFont} fallback={t.bodyFont} sample={d.author || "A story of faith and return"} textOnly onChange={(v) => set("bodyFont", v)} />
             <div className="space-y-2"><Label className="font-sans text-xs">Title size · {Math.round(d.titleScale * 100)}%</Label>
               <Slider min={0.6} max={1.6} step={0.05} value={[d.titleScale]} onValueChange={([v]) => set("titleScale", v)} aria-label="Title size" /></div>
             <div className="space-y-1.5"><Label className="font-sans text-xs">Title position</Label>

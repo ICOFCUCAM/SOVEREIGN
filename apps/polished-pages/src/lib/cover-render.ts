@@ -3,9 +3,10 @@
 // the same code makes the live preview, the 300 dpi print file and the ebook
 // cover. Type is set here, never painted by the image model.
 import {
-  COVER_FONTS, SAFE_MM, SPINE_MARGIN_MM, ean13Modules, inkFor, isGuard, isbnLabel, templateById, toIsbn13, wrapGeometry,
+  SAFE_MM, fontOf, fontWeight, SPINE_MARGIN_MM, ean13Modules, inkFor, isGuard, isbnLabel, templateById, toIsbn13, wrapGeometry,
   type CoverDesign, type CoverTemplate, type Rect,
 } from "@/lib/cover-design";
+import "@/lib/cover-fonts";
 
 export type CoverPart = "wrap" | "front" | "back" | "spine";
 export interface CoverImages { front: HTMLImageElement | null; back: HTMLImageElement | null; photo: HTMLImageElement | null }
@@ -37,8 +38,11 @@ export async function loadCoverImages(d: CoverDesign): Promise<CoverImages> {
 export async function loadCoverFonts(d: CoverDesign) {
   if (typeof document === "undefined" || !document.fonts) return;
   const t = templateById(d.template);
-  const fams = new Set([COVER_FONTS[d.titleFont ?? t.titleFont].family, COVER_FONTS[t.bodyFont].family]);
-  await Promise.all([...fams].flatMap((f) => [`${t.titleWeight} 40px ${f}`, `400 20px ${f}`, `600 20px ${f}`, `italic 400 20px ${f}`].map((s) => document.fonts.load(s).catch(() => []))));
+  const keys = [d.titleFont ?? t.titleFont, d.bodyFont ?? t.bodyFont];
+  await Promise.all(keys.flatMap((k) => {
+    const f = fontOf(k);
+    return [...f.weights.map((w) => `${w} 40px ${f.family}`), ...(f.italic ? [`italic 400 20px ${f.family}`] : [])].map((spec) => document.fonts.load(spec).catch(() => []));
+  }));
 }
 
 /** Re-encodes an uploaded or generated image as a JPEG no taller than maxH, to keep saved covers small. */
@@ -141,7 +145,15 @@ function palette(d: CoverDesign, imgs: CoverImages) {
   const t = templateById(d.template);
   const hasArt = Boolean(imgs.front);
   const ink = d.ink ?? (hasArt ? t.ink : t.ink === "#ffffff" ? inkFor(t.bg[0]) : t.ink);
-  return { t, hasArt, ink, accent: d.accent ?? t.accent, title: COVER_FONTS[d.titleFont ?? t.titleFont].family, body: COVER_FONTS[t.bodyFont].family, pos: d.titlePos ?? t.titlePos };
+  const titleKey = d.titleFont ?? t.titleFont, bodyKey = d.bodyFont ?? t.bodyFont;
+  const tfam = fontOf(titleKey), bfam = fontOf(bodyKey);
+  return {
+    t, hasArt, ink, accent: d.accent ?? t.accent, title: tfam.family, body: bfam.family, pos: d.titlePos ?? t.titlePos,
+    /** Capitals only where the template wants them and the title face reads well in them. */
+    upper: t.upper && !tfam.noCaps, bodyCaps: !bfam.noCaps,
+    tf: (w: number, size: number) => font(fontWeight(titleKey, w), size, tfam.family),
+    bf: (w: number, size: number, italic = false) => font(fontWeight(bodyKey, w), size, bfam.family, italic && bfam.italic),
+  };
 }
 
 function fillBg(ctx: Ctx, r: Rect, t: CoverTemplate) {
@@ -179,15 +191,15 @@ function drawFront(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: 
   };
 
   // Title block: series line, title, ornament, subtitle, tagline.
-  const titleText = t.upper ? d.title.toUpperCase() : d.title;
+  const titleText = p.upper ? d.title.toUpperCase() : d.title;
   const maxSize = t.titleSize * T.w * d.titleScale * 1.35;
-  const tf = (s: number) => font(t.titleWeight, s, p.title);
+  const tf = (s: number) => p.tf(t.titleWeight, s);
   const fitted = fit(ctx, titleText || " ", tf, w, maxSize, 4);
   const tlh = fitted.size * 1.06;
   const seriesSize = T.w * 0.03, subSize = T.w * 0.046, tagSize = T.w * 0.034, authorSize = T.w * 0.052 * Math.min(1.2, Math.max(0.85, d.titleScale));
-  ctx.font = font(400, subSize, p.body, true);
+  ctx.font = p.bf(400, subSize, true);
   const subLines = d.subtitle ? wrap(ctx, d.subtitle, w * 0.92).slice(0, 3) : [];
-  ctx.font = font(400, tagSize, p.body);
+  ctx.font = p.bf(400, tagSize);
   const tagLines = d.tagline ? wrap(ctx, d.tagline, w * 0.9).slice(0, 2) : [];
 
   const blockH = (d.seriesLine ? seriesSize * 2 : 0) + fitted.lines.length * tlh + (t.ornament ? T.w * 0.06 : 0) + (subLines.length ? subSize * 0.6 + subLines.length * subSize * 1.3 : 0) + (tagLines.length ? tagSize + tagLines.length * tagSize * 1.35 : 0);
@@ -198,7 +210,7 @@ function drawFront(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: 
   withShadow(() => {
     ctx.fillStyle = p.ink;
     if (d.seriesLine) {
-      ctx.font = font(600, seriesSize, p.body); spacing(ctx, 0.18, seriesSize);
+      ctx.font = p.bf(600, seriesSize); spacing(ctx, 0.18, seriesSize);
       ctx.fillStyle = p.accent;
       textLines(ctx, [d.seriesLine.toUpperCase()], cx, y + seriesSize, 0, align);
       spacing(ctx, 0, seriesSize);
@@ -209,11 +221,11 @@ function drawFront(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: 
     spacing(ctx, 0, fitted.size);
     if (t.ornament) { y += T.w * 0.03; ornament(ctx, cx, y, T.w * 0.32, p.accent, T.w * 0.004); y += T.w * 0.03; }
     if (subLines.length) {
-      ctx.font = font(400, subSize, p.body, true);
+      ctx.font = p.bf(400, subSize, true);
       y = textLines(ctx, subLines, cx, y + subSize * 1.5, subSize * 1.3, align) - subSize * 1.3;
     }
     if (tagLines.length) {
-      ctx.font = font(400, tagSize, p.body);
+      ctx.font = p.bf(400, tagSize);
       ctx.globalAlpha = 0.9;
       textLines(ctx, tagLines, cx, y + tagSize * 2.1, tagSize * 1.35, align);
       ctx.globalAlpha = 1;
@@ -224,8 +236,8 @@ function drawFront(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: 
   if (d.author) {
     const ay = p.pos === "bottom" ? T.y + S + authorSize : T.y + T.h - S - authorSize * 0.4;
     withShadow(() => {
-      const caps = t.upper || t.id === "academic";
-      ctx.font = font(600, authorSize, t.id === "classic" || t.id === "devotional" ? p.title : p.body);
+      const caps = p.bodyCaps && (t.upper || t.id === "academic");
+      ctx.font = t.id === "classic" || t.id === "devotional" ? p.tf(600, authorSize) : p.bf(600, authorSize);
       spacing(ctx, caps ? 0.12 : 0.04, authorSize);
       ctx.fillStyle = t.band && p.pos !== "bottom" ? "#ffffff" : p.ink;
       ctx.textAlign = align;
@@ -268,13 +280,13 @@ function drawBack(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: R
     const bs = Math.min(4.4, Math.max(3.1, T.w * 0.024)) * k; // ~9–12.5 pt
     if (d.backHeadline.trim()) {
       const hs = T.w * 0.05 * k;
-      ctx.font = font(t.titleWeight, hs, p.title);
+      ctx.font = p.tf(t.titleWeight, hs);
       const lines = wrap(ctx, d.backHeadline, w);
       if (draw) { ctx.fillStyle = d.accent ?? (ink === "#ffffff" ? t.accent : ink); textLines(ctx, lines, x, y + hs, hs * 1.15, "left"); }
       y += lines.length * hs * 1.15 + bs * 1.2;
     }
     if (d.blurb.trim()) {
-      ctx.font = font(400, bs, body);
+      ctx.font = p.bf(400, bs);
       if (draw) ctx.fillStyle = ink;
       for (const para of d.blurb.trim().split(/\n\s*\n/)) {
         const lines = wrap(ctx, para.replace(/\n/g, " "), w);
@@ -286,12 +298,12 @@ function drawBack(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: R
     if (ends.length) {
       y += bs * 0.4;
       for (const e of ends) {
-        ctx.font = font(400, bs * 0.95, body, true);
+        ctx.font = p.bf(400, bs * 0.95, true);
         const lines = wrap(ctx, `“${e.quote.trim()}”`, w * 0.94);
         if (draw) { ctx.fillStyle = ink; textLines(ctx, lines, x, y + bs, bs * 1.4, "left"); }
         y += lines.length * bs * 1.4;
         if (e.by.trim()) {
-          ctx.font = font(600, bs * 0.82, body);
+          ctx.font = p.bf(600, bs * 0.82);
           if (draw) { ctx.fillStyle = ink === "#ffffff" ? t.accent : ink; ctx.textAlign = "left"; ctx.fillText(`— ${e.by.trim()}`, x + w * 0.04, y + bs * 0.95, w * 0.9); }
           y += bs * 1.4;
         }
@@ -304,7 +316,7 @@ function drawBack(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: R
       y += bs * 1.1;
       const ph = imgs.photo ? Math.min(24, T.w * 0.17) * k : 0;
       const tx = imgs.photo ? x + ph + bs * 1.2 : x, tw = imgs.photo ? w - ph - bs * 1.2 : w;
-      ctx.font = font(400, bs * 0.9, body);
+      ctx.font = p.bf(400, bs * 0.9);
       const lines = wrap(ctx, d.bio.trim(), tw);
       if (draw) {
         if (imgs.photo) {
@@ -329,9 +341,9 @@ function drawBack(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: R
   const fs = Math.min(3.4, T.w * 0.02);
   ctx.textAlign = "left"; ctx.fillStyle = ink;
   let fy = barcode.y + barcode.h - fs * 0.2;
-  if (d.price.trim()) { ctx.font = font(600, fs, body); ctx.fillText(d.price.trim(), x, fy, barcode.x - x - 4); fy -= fs * 1.5; }
-  if (d.category.trim()) { ctx.font = font(400, fs * 0.92, body); spacing(ctx, 0.08, fs); ctx.fillText(d.category.trim().toUpperCase(), x, fy, barcode.x - x - 4); spacing(ctx, 0, fs); fy -= fs * 1.7; }
-  if (d.publisher.trim()) { ctx.font = font(t.titleWeight, fs * 1.25, p.title); ctx.fillText(d.publisher.trim(), x, fy, barcode.x - x - 4); }
+  if (d.price.trim()) { ctx.font = p.bf(600, fs); ctx.fillText(d.price.trim(), x, fy, barcode.x - x - 4); fy -= fs * 1.5; }
+  if (d.category.trim()) { ctx.font = p.bf(400, fs * 0.92); spacing(ctx, 0.08, fs); ctx.fillText(d.category.trim().toUpperCase(), x, fy, barcode.x - x - 4); spacing(ctx, 0, fs); fy -= fs * 1.7; }
+  if (d.publisher.trim()) { ctx.font = p.tf(t.titleWeight, fs * 1.25); ctx.fillText(d.publisher.trim(), x, fy, barcode.x - x - 4); }
 
   const isbn = toIsbn13(d.isbn);
   if (isbn) {
@@ -378,14 +390,14 @@ function drawSpine(ctx: Ctx, d: CoverDesign, imgs: CoverImages, r: Rect, trimH: 
   ctx.rotate(Math.PI / 2); // reads top to bottom, the US/UK convention
   ctx.textBaseline = "middle"; ctx.fillStyle = ink;
   const pubSize = size * 0.62;
-  const pubW = d.publisher.trim() ? (ctx.font = font(p.t.titleWeight, pubSize, p.title), Math.min(ctx.measureText(d.publisher.trim()).width, len * 0.18)) : 0;
-  const authW = d.author ? (ctx.font = font(600, size * 0.78, p.body), Math.min(ctx.measureText(d.author).width, len * 0.3)) : 0;
+  const pubW = d.publisher.trim() ? (ctx.font = p.tf(p.t.titleWeight, pubSize), Math.min(ctx.measureText(d.publisher.trim()).width, len * 0.18)) : 0;
+  const authW = d.author ? (ctx.font = p.bf(600, size * 0.78), Math.min(ctx.measureText(d.author).width, len * 0.3)) : 0;
   const titleRoom = len - authW - pubW - size * (pubW ? 4 : 2.5);
-  ctx.font = font(p.t.titleWeight, size, p.title); ctx.textAlign = "left";
-  ctx.fillText(p.t.upper ? d.title.toUpperCase() : d.title, -len / 2, 0, Math.max(10, titleRoom));
+  ctx.font = p.tf(p.t.titleWeight, size); ctx.textAlign = "left";
+  ctx.fillText(p.upper ? d.title.toUpperCase() : d.title, -len / 2, 0, Math.max(10, titleRoom));
   let end = len / 2;
-  if (pubW) { ctx.font = font(p.t.titleWeight, pubSize, p.title); ctx.textAlign = "right"; ctx.fillText(d.publisher.trim(), end, 0, pubW); end -= pubW + size * 1.6; }
-  if (authW) { ctx.font = font(600, size * 0.78, p.body); ctx.textAlign = "right"; ctx.fillText(d.author, end, 0, authW); }
+  if (pubW) { ctx.font = p.tf(p.t.titleWeight, pubSize); ctx.textAlign = "right"; ctx.fillText(d.publisher.trim(), end, 0, pubW); end -= pubW + size * 1.6; }
+  if (authW) { ctx.font = p.bf(600, size * 0.78); ctx.textAlign = "right"; ctx.fillText(d.author, end, 0, authW); }
   ctx.restore();
 }
 

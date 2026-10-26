@@ -7,16 +7,72 @@ import { BLEED_MM, coverSpec, getTrim, type TrimSize } from "@/lib/print-sizes";
 
 export type TemplateId = "classic" | "modern" | "devotional" | "academic" | "children" | "thriller";
 export type TitlePos = "top" | "middle" | "bottom";
-export type FontKey = "playfair" | "fraunces" | "grotesk" | "inter" | "manrope" | "jakarta";
+export type FontCategory = "Book serif" | "Display" | "Sans serif" | "Script & handwritten" | "Decorative";
+export const FONT_CATEGORIES: FontCategory[] = ["Book serif", "Display", "Sans serif", "Script & handwritten", "Decorative"];
 
-export const COVER_FONTS: Record<FontKey, { label: string; family: string }> = {
-  playfair: { label: "Playfair Display (serif)", family: "'Playfair Display', Georgia, serif" },
-  fraunces: { label: "Fraunces (soft serif)", family: "'Fraunces', Georgia, serif" },
-  grotesk: { label: "Space Grotesk (bold sans)", family: "'Space Grotesk', 'Inter', sans-serif" },
-  inter: { label: "Inter (clean sans)", family: "'Inter', system-ui, sans-serif" },
-  manrope: { label: "Manrope (modern sans)", family: "'Manrope', system-ui, sans-serif" },
-  jakarta: { label: "Plus Jakarta Sans", family: "'Plus Jakarta Sans', system-ui, sans-serif" },
-};
+export interface CoverFont {
+  label: string;
+  family: string;
+  category: FontCategory;
+  /** Weights bundled with the site; the nearest one is used, so nothing is faux-bolded. */
+  weights: number[];
+  italic: boolean;
+  /** Script and blackletter faces read badly in capitals. */
+  noCaps?: boolean;
+  /** Fit for paragraphs (back-cover blurb, bio), not only for titles. */
+  text?: boolean;
+  line: string;
+}
+
+// Every face is open-licensed (SIL OFL) and bundled with the site (see
+// src/lib/cover-fonts.ts), so covers look the same everywhere and print
+// files never depend on an external font request.
+export const COVER_FONTS = {
+  ebgaramond: { label: "EB Garamond", family: "'EB Garamond', Georgia, serif", category: "Book serif", weights: [400, 500, 600, 700, 800], italic: true, text: true, line: "The classic book face" },
+  cormorant: { label: "Cormorant Garamond", family: "'Cormorant Garamond', Georgia, serif", category: "Book serif", weights: [300, 400, 500, 600, 700], italic: true, text: true, line: "Refined, high-contrast" },
+  baskerville: { label: "Libre Baskerville", family: "'Libre Baskerville', Georgia, serif", category: "Book serif", weights: [400, 500, 600, 700], italic: true, text: true, line: "Traditional, very readable" },
+  crimson: { label: "Crimson Pro", family: "'Crimson Pro', Georgia, serif", category: "Book serif", weights: [300, 400, 500, 600, 700, 800, 900], italic: true, text: true, line: "Warm literary serif" },
+  lora: { label: "Lora", family: "'Lora', Georgia, serif", category: "Book serif", weights: [400, 500, 600, 700], italic: true, text: true, line: "Soft, contemporary serif" },
+  playfair: { label: "Playfair Display", family: "'Playfair Display', Georgia, serif", category: "Display", weights: [400, 500, 600, 700, 800], italic: true, text: true, line: "Elegant high-contrast titles" },
+  fraunces: { label: "Fraunces", family: "'Fraunces', Georgia, serif", category: "Display", weights: [400, 600, 700], italic: false, text: true, line: "Soft, characterful serif" },
+  dmserif: { label: "DM Serif Display", family: "'DM Serif Display', Georgia, serif", category: "Display", weights: [400], italic: true, line: "Bold editorial serif" },
+  abril: { label: "Abril Fatface", family: "'Abril Fatface', Georgia, serif", category: "Display", weights: [400], italic: false, line: "Heavy poster serif" },
+  cinzel: { label: "Cinzel", family: "'Cinzel', Georgia, serif", category: "Display", weights: [400, 500, 600, 700, 800, 900], italic: false, line: "Roman inscription capitals" },
+  inter: { label: "Inter", family: "'Inter', system-ui, sans-serif", category: "Sans serif", weights: [400, 500, 600, 700, 800], italic: false, text: true, line: "Clean and neutral" },
+  montserrat: { label: "Montserrat", family: "'Montserrat', system-ui, sans-serif", category: "Sans serif", weights: [300, 400, 500, 600, 700, 800, 900], italic: true, text: true, line: "Geometric, confident" },
+  raleway: { label: "Raleway", family: "'Raleway', system-ui, sans-serif", category: "Sans serif", weights: [300, 400, 500, 600, 700, 800], italic: true, text: true, line: "Light, elegant sans" },
+  josefin: { label: "Josefin Sans", family: "'Josefin Sans', system-ui, sans-serif", category: "Sans serif", weights: [300, 400, 600, 700], italic: true, text: true, line: "Vintage geometric" },
+  manrope: { label: "Manrope", family: "'Manrope', system-ui, sans-serif", category: "Sans serif", weights: [400, 500, 600, 700, 800], italic: false, text: true, line: "Modern, friendly" },
+  jakarta: { label: "Plus Jakarta Sans", family: "'Plus Jakarta Sans', system-ui, sans-serif", category: "Sans serif", weights: [400, 500, 600, 700, 800], italic: false, text: true, line: "Rounded, warm" },
+  grotesk: { label: "Space Grotesk", family: "'Space Grotesk', 'Inter', sans-serif", category: "Sans serif", weights: [400, 500, 700], italic: false, text: true, line: "Bold technical sans" },
+  oswald: { label: "Oswald", family: "'Oswald', 'Inter', sans-serif", category: "Sans serif", weights: [300, 400, 500, 600, 700], italic: false, line: "Tall condensed headlines" },
+  bebas: { label: "Bebas Neue", family: "'Bebas Neue', 'Oswald', sans-serif", category: "Sans serif", weights: [400], italic: false, line: "All-caps poster type" },
+  greatvibes: { label: "Great Vibes", family: "'Great Vibes', cursive", category: "Script & handwritten", weights: [400], italic: false, noCaps: true, line: "Formal flowing script" },
+  parisienne: { label: "Parisienne", family: "'Parisienne', cursive", category: "Script & handwritten", weights: [400], italic: false, noCaps: true, line: "Romantic script" },
+  dancing: { label: "Dancing Script", family: "'Dancing Script', cursive", category: "Script & handwritten", weights: [400, 500, 600, 700], italic: false, noCaps: true, line: "Lively handwriting" },
+  caveat: { label: "Caveat", family: "'Caveat', cursive", category: "Script & handwritten", weights: [400, 500, 600, 700], italic: false, noCaps: true, line: "Casual handwritten" },
+  amatic: { label: "Amatic SC", family: "'Amatic SC', cursive", category: "Script & handwritten", weights: [400, 700], italic: false, line: "Hand-drawn small caps" },
+  uncial: { label: "Uncial Antiqua", family: "'Uncial Antiqua', serif", category: "Decorative", weights: [400], italic: false, noCaps: true, line: "Celtic manuscript" },
+  fraktur: { label: "UnifrakturMaguntia", family: "'UnifrakturMaguntia', serif", category: "Decorative", weights: [400], italic: false, noCaps: true, line: "Gothic blackletter" },
+  typewriter: { label: "Special Elite", family: "'Special Elite', 'Courier New', monospace", category: "Decorative", weights: [400], italic: false, line: "Worn typewriter" },
+} satisfies Record<string, CoverFont>;
+export type FontKey = keyof typeof COVER_FONTS;
+export const fontOf = (k: FontKey): CoverFont => COVER_FONTS[k] ?? COVER_FONTS.playfair;
+/** The bundled weight nearest to the one asked for. */
+export function fontWeight(k: FontKey, want: number): number {
+  return fontOf(k).weights.reduce((a, b) => (Math.abs(b - want) < Math.abs(a - want) ? b : a));
+}
+/** Ready-made title + text pairings. */
+export const FONT_PAIRINGS: { label: string; title: FontKey; body: FontKey }[] = [
+  { label: "Literary", title: "cormorant", body: "ebgaramond" },
+  { label: "Timeless", title: "baskerville", body: "crimson" },
+  { label: "Ancient", title: "cinzel", body: "ebgaramond" },
+  { label: "Romantic", title: "greatvibes", body: "lora" },
+  { label: "Bold modern", title: "bebas", body: "montserrat" },
+  { label: "Editorial", title: "dmserif", body: "raleway" },
+  { label: "Handmade", title: "amatic", body: "josefin" },
+  { label: "Gothic", title: "fraktur", body: "crimson" },
+];
 
 export interface CoverTemplate {
   id: TemplateId;
@@ -43,9 +99,9 @@ export interface CoverTemplate {
 }
 
 export const TEMPLATES: CoverTemplate[] = [
-  { id: "classic", label: "Classic", line: "Centred serif, timeless", titleFont: "playfair", bodyFont: "playfair", titleWeight: 700, upper: false, titleSize: 0.105, titlePos: "top", align: "center", scrim: "both", band: false, ornament: false, letterSpacing: 0, bg: ["#1d2b45", "#0c1424"], ink: "#ffffff", accent: "#d8b45a" },
+  { id: "classic", label: "Classic", line: "Centred serif, timeless", titleFont: "playfair", bodyFont: "ebgaramond", titleWeight: 700, upper: false, titleSize: 0.105, titlePos: "top", align: "center", scrim: "both", band: false, ornament: false, letterSpacing: 0, bg: ["#1d2b45", "#0c1424"], ink: "#ffffff", accent: "#d8b45a" },
   { id: "modern", label: "Modern", line: "Bold sans, left-aligned", titleFont: "grotesk", bodyFont: "inter", titleWeight: 700, upper: true, titleSize: 0.12, titlePos: "bottom", align: "left", scrim: "bottom", band: false, ornament: false, letterSpacing: 0.01, bg: ["#202225", "#0d0e10"], ink: "#ffffff", accent: "#f05a3c" },
-  { id: "devotional", label: "Devotional", line: "Elegant serif with ornament", titleFont: "fraunces", bodyFont: "playfair", titleWeight: 600, upper: false, titleSize: 0.1, titlePos: "middle", align: "center", scrim: "both", band: false, ornament: true, letterSpacing: 0.005, bg: ["#3d2a1a", "#1c120a"], ink: "#fbf4e6", accent: "#d6ae62" },
+  { id: "devotional", label: "Devotional", line: "Elegant serif with ornament", titleFont: "fraunces", bodyFont: "ebgaramond", titleWeight: 600, upper: false, titleSize: 0.1, titlePos: "middle", align: "center", scrim: "both", band: false, ornament: true, letterSpacing: 0.005, bg: ["#3d2a1a", "#1c120a"], ink: "#fbf4e6", accent: "#d6ae62" },
   { id: "academic", label: "Academic", line: "Title band, sober and clear", titleFont: "inter", bodyFont: "inter", titleWeight: 700, upper: false, titleSize: 0.085, titlePos: "top", align: "left", scrim: "none", band: true, ornament: false, letterSpacing: 0, bg: ["#12355b", "#0a2038"], ink: "#ffffff", accent: "#f2b134" },
   { id: "children", label: "Children's", line: "Big, friendly and bright", titleFont: "fraunces", bodyFont: "jakarta", titleWeight: 700, upper: false, titleSize: 0.135, titlePos: "top", align: "center", scrim: "none", band: false, ornament: false, letterSpacing: 0, bg: ["#2f8fd8", "#1b5fa8"], ink: "#ffffff", accent: "#ffd23f" },
   { id: "thriller", label: "Thriller", line: "Huge caps, dark and tense", titleFont: "grotesk", bodyFont: "inter", titleWeight: 700, upper: true, titleSize: 0.15, titlePos: "bottom", align: "center", scrim: "bottom", band: false, ornament: false, letterSpacing: 0.04, bg: ["#151515", "#000000"], ink: "#ffffff", accent: "#c8102e" },
@@ -63,6 +119,8 @@ export interface CoverDesign {
   tagline: string;
   template: TemplateId;
   titleFont: FontKey | null;
+  /** Subtitle, author, spine and back-cover text; null = the template's. */
+  bodyFont: FontKey | null;
   titleScale: number; // 0.6 – 1.6
   titlePos: TitlePos | null;
   ink: string | null; // null = template / automatic
@@ -91,7 +149,7 @@ export interface CoverDesign {
 export function defaultDesign(p: Partial<CoverDesign> = {}): CoverDesign {
   return {
     title: "", subtitle: "", author: "", seriesLine: "", tagline: "",
-    template: "classic", titleFont: null, titleScale: 1, titlePos: null, ink: null, accent: null, shade: 0.55,
+    template: "classic", titleFont: null, bodyFont: null, titleScale: 1, titlePos: null, ink: null, accent: null, shade: 0.55,
     frontArt: null, backArt: null, backFill: "front-blur",
     backHeadline: "", blurb: "", endorsements: [], bio: "", authorPhoto: null,
     publisher: "", category: "", price: "", isbn: "", reserveBarcode: true,
