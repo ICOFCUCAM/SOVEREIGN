@@ -88,6 +88,7 @@ function EngineBadge({ decision, mode, onMode, busy }: { decision: EngineDecisio
         </Select>
       </div>
       <span className="text-[11px] text-white/55">{decision.reason}</span>
+      {decision.fix && <span className="max-w-[340px] text-[11px] text-amber-200/90">{decision.fix}</span>}
     </div>
   );
 }
@@ -545,7 +546,7 @@ function Project({ id, backend, decision, mode, coverWriter, citationStyles, bus
         {retry && (
           <div role="alert" className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <span className="flex-1">{retry.why} The engine has switched to the API for new runs.</span>
+            <span className="flex-1">{retry.why} The engine has switched to the API for new runs.{decision.fix && <span className="mt-1 block text-xs opacity-90">{decision.fix}</span>}</span>
             <Button size="sm" className={`rounded-full ${GRADIENT}`} onClick={() => start(retry.action, retry.options, "api")}><Cpu className="h-4 w-4" /> Run it on the API</Button>
             <Button size="sm" variant="ghost" onClick={() => setRetry(null)}>Dismiss</Button>
           </div>

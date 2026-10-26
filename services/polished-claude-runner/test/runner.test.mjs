@@ -295,6 +295,20 @@ test("cover copy: written from book text sent with the request, no upload needed
   assert.equal(r.status, 400);
 });
 
+test("the Claude Code token is cleaned up from however it was pasted", async () => {
+  const { cleanToken, tokenShape } = await import("../src/config.mjs");
+  const tok = "sk-ant-oat01-" + "A1b2_C3d4-".repeat(8);
+  assert.equal(cleanToken(tok), tok);
+  assert.equal(cleanToken(`  "${tok}"\n`), tok);
+  assert.equal(cleanToken(`CLAUDE_CODE_OAUTH_TOKEN=${tok}`), tok);
+  assert.equal(cleanToken(`${tok.slice(0, 30)}\n${tok.slice(30)}`), tok); // wrapped by the terminal
+  assert.equal(cleanToken(`Your OAuth token (valid for 1 year):\n\n${tok}\n\nStore this token securely.`), tok);
+  assert.equal(tokenShape(tok), "subscription");
+  assert.equal(tokenShape("sk-ant-api03-xyz"), "api-key");
+  assert.equal(tokenShape("your-token-here"), "unrecognised");
+  assert.equal(tokenShape(""), "missing");
+});
+
 test("the sandbox settings and helpers", () => {
   const s = settingsFor("/data/threads/x/work");
   assert.ok(s.permissions.deny.includes("Read(//etc/**)"));
