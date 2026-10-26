@@ -49,7 +49,8 @@ if (sectionOut) {
   const before = fs.readFileSync(file, "utf8").replace(/^## .*\n\n/, "").trim();
   const voice = fs.existsSync("VOICE.md") ? " [voice used]" : "";
   fs.mkdirSync("out/sections", { recursive: true });
-  fs.writeFileSync(`out/${sectionOut[1]}`, `${before} (expanded by Claude Code)${voice}`);
+  const rules = /Rules for the whole book[^\n]*\n(.+)/.exec(prompt)?.[1];
+  fs.writeFileSync(`out/${sectionOut[1]}`, sectionOut[1].endsWith("-summary.md") ? `It says: ${before}` : rules ? `${before} [rules: ${rules}]` : `${before} (expanded by Claude Code)${voice}`);
   out({ type: "result", subtype: "success", is_error: false, result: "Section done.", session_id: sid });
   process.exit(0);
 }

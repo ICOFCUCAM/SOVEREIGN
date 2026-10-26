@@ -343,7 +343,9 @@ const VOICE_RULE = "Write in the owner's voice as described in ./VOICE.md (read 
 function section(o) {
   const file = String(o._file || "");
   if (!file) return { error: "That section isn't in the manuscript." };
-  const out = `sections/${String(o.sectionId).replace(/[^\w-]/g, "")}.md`;
+  const sid = String(o.sectionId).replace(/[^\w-]/g, "");
+  // "explain" writes a summary for the owner; every other action writes a new version of the section.
+  const out = o.op === "explain" ? `sections/${sid}-summary.md` : `sections/${sid}.md`;
   const voice = o.useVoice ? `\n${VOICE_RULE}` : "";
   const read = `The book is in ./manuscript/ (./manuscript/INDEX.md lists the sections in order). The section to work on is ./manuscript/${file}.`;
   const ops = {
@@ -351,17 +353,19 @@ function section(o) {
     cite: `Add citations to this section in ${o.citationStyle || "APA 7"} style. Search the web, open the best sources, and check each supports the claim. Keep the text otherwise unchanged; mark unsupported claims [citation needed]. End the section with "### Sources" listing only sources you opened (with URL and access date).`,
     voice: `Rewrite this section in the owner's voice. Keep its meaning, facts, quotations and references.`,
     edit: `Revise this section as the owner asks: ${o.instructions || "improve clarity and flow"}. Keep facts, quotations and references accurate.`,
+    explain: `Read this section and tell the owner what it says, in plain language: its main teaching in two or three sentences, then its key points as a short list, then the scriptures, quotations and sources it relies on. Report faithfully; do not rewrite, correct or judge it.`,
+    rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help).${o.idea ? `\nThe owner's idea for this section (follow it): ${String(o.idea).slice(0, 6000)}` : ""}${o.rules ? `\nRules for the whole book (follow strictly, everywhere, including quotations unless the rule says otherwise):\n${String(o.rules).slice(0, 6000)}` : ""}\nKeep every fact, scripture reference and quotation accurate apart from what the rules change.`,
     draft: `Write the "${o.title || "section"}" section of this book. Read the whole manuscript first so it fits the book. Guidance: ${o.guidance || "follow publishing convention for this section"}.${o.instructions ? ` The owner asks: ${o.instructions}` : ""} Never invent facts about the author; use [placeholders] where a fact is needed.`,
   };
   const task = ops[o.op];
   if (!task) return { error: "Unknown section action." };
   return {
-    title: { expand: "Expand section", cite: "Add citations to section", voice: "Section in my voice", edit: "Edit section", draft: `Draft: ${o.title || "section"}` }[o.op],
+    title: { explain: "What this section says", rewrite: "Rewrite section", expand: "Expand section", cite: "Add citations to section", voice: "Section in my voice", edit: "Edit section", draft: `Draft: ${o.title || "section"}` }[o.op],
     output: out,
     needsVoice: o.op === "voice" || Boolean(o.useVoice),
     prompt: `${read}
 ${task}${o.op === "voice" ? `\n${VOICE_RULE}` : voice}
-Write only the new text of this section (no "## " heading, no commentary) to ./out/${out}.`,
+${o.op === "explain" ? `Write the summary to ./out/${out}.` : `Write only the new text of this section (no "## " heading, no commentary) to ./out/${out}.`}`,
   };
 }
 

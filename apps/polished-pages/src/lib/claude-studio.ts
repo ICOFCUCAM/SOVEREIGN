@@ -31,7 +31,10 @@ export type StudioEvent =
 export interface RunOptions {
   tool?: string;
   sectionId?: string;
-  op?: "expand" | "cite" | "voice" | "edit" | "draft";
+  op?: "expand" | "cite" | "voice" | "edit" | "draft" | "explain" | "rewrite";
+  /** Guided rewrite: the owner's idea for this section, and rules for the whole book. */
+  idea?: string;
+  rules?: string;
   factor?: number;
   guidance?: string;
   title?: string;
@@ -108,7 +111,29 @@ export const STUDIO_ACCEPT = ".pdf,.docx,.txt,.md,.markdown,.rtf,.html,.htm,.csv
  * Uploads a document: the original file (Claude can open a PDF itself when the
  * layout matters) and, where it can be read here, its extracted text.
  */
-export async function uploadToStudio(threadId: string, file: File): Promise<StudioThread> {
+/**
+ * Text from a plain-text file in whatever encoding it was saved in: UTF-8 (or
+ * UTF-16 with a byte-order mark) when it is valid, else Windows-1252, which is
+ * what older Windows editors save and which reads Latin-1 too.
+ */
+export function decodeText(bytes: Uint8Array): string {
+  if (bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder("utf-16le").decode(bytes.subarray(2));
+  if (bytes[0] === 0xfe && bytes[1] === 0xff) return new TextDecoder("utf-16be").decode(bytes.subarray(2));
+  try { return new TextDecoder("utf-8", { fatal: true }).decode(bytes).replace(/^\uFEFF/, ""); }
+  catch { return Array.from(bytes, (b) => (b >= 0x80 && b < 0xa0 ? CP1252[b - 0x80] : String.fromCharCode(b))).join(""); }
+}
+// Windows-1252's characters for bytes 0x80–0x9F (the rest matches Latin-1); mapped by hand because some runtimes decode them as Latin-1.
+const CP1252 = [..."\u20AC\u0081\u201A\u0192\u201E\u2026\u2020\u2021\u02C6\u2030\u0160\u2039\u0152\u008D\u017D\u008F\u0090\u2018\u2019\u201C\u201D\u2022\u2013\u2014\u02DC\u2122\u0161\u203A\u0153\u009D\u017E\u0178"];
+
+/** Plain-text files are stored as UTF-8 so Claude reads them correctly whatever encoding they came in. */
+export async function asUtf8(file: File): Promise<File> {
+  if (!/\.(txt|md|markdown|csv|html?)$/i.test(file.name)) return file;
+  const text = decodeText(new Uint8Array(await file.arrayBuffer()));
+  return new File([text], file.name, { type: `${file.type.split(";")[0] || "text/plain"};charset=utf-8` });
+}
+
+export async function uploadToStudio(threadId: string, original: File): Promise<StudioThread> {
+  const file = await asUtf8(original);
   let thread = await put(threadId, file.name, "original", file);
   if (!/\.(pdf|docx)$/i.test(file.name)) return thread; // text is already text; images are read by Claude itself
   try {

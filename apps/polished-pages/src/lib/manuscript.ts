@@ -49,9 +49,17 @@ export const kindDef = (k: string) => SECTION_KINDS.find((d) => d.kind === k) ??
 const rank = (k: string) => SECTION_KINDS.findIndex((d) => d.kind === k);
 const GROUP_ORDER: Record<SectionGroup, number> = { front: 0, body: 1, back: 2 };
 
-export interface Section { id: string; kind: string; title: string; body: string }
+export interface Section {
+  id: string; kind: string; title: string; body: string;
+  /** Guided rewrite: what Claude says the section says, the owner's idea for it, and the text before it was rewritten. */
+  summary?: string; idea?: string; original?: string;
+}
 export interface HistoryEntry { sectionId: string; op: string; engine: "claude-code" | "api"; at: string; accepted: boolean }
-export interface Manuscript { title: string; subtitle?: string; author?: string; sections: Section[]; history: HistoryEntry[]; updatedAt?: string }
+export interface Manuscript {
+  title: string; subtitle?: string; author?: string; sections: Section[]; history: HistoryEntry[]; updatedAt?: string;
+  /** Rules for rewriting the whole book (e.g. names to replace), applied to every guided rewrite. */
+  rules?: string;
+}
 
 export const newId = () => `s-${Math.random().toString(36).slice(2, 10)}`;
 export const words = (t: string) => (t.trim() ? t.trim().split(/\s+/).length : 0);

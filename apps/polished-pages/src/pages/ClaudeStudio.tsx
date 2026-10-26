@@ -823,11 +823,14 @@ function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsT
   const [text, setText] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [edited, setEdited] = useState(false);
   useEffect(() => { backend.output(threadId, path).then(setText).catch((e) => { setText(""); toast({ title: "Could not open the result", description: e instanceof Error ? e.message : "", variant: "destructive" }); }); }, [backend, threadId, path, toast]);
 
   const bookTitle = text ? titleOf(text, projectTitle) : projectTitle;
   const save = async () => {
     if (!text) return;
+    if (warning && !window.confirm(`${warning}\n\nSave it to your Library anyway?`)) return;
     setSaving(true);
     try {
       const id = await saveDocument({ kind: "book", title: bookTitle, payload: { markdown: text, title: bookTitle }, preview: text.replace(/^#.*$/m, "").trim().slice(0, 160) });
@@ -845,16 +848,24 @@ function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsT
   };
   const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
   const isJson = path.endsWith(".json");
+  // A rewrite that came back very short, or that says the source couldn't be read, is not a book yet.
+  const warning = !text || isJson ? null
+    : /\b(could ?n[o']t|can ?not|unable to|was not able to) (read|open|decode|extract)\b|\b(garbled|unreadable|not readable|encoding (problem|issue|error))\b/i.test(text) ? "Claude says it couldn't read part of the source, so this may be incomplete."
+    : words < 300 && /book|rewrite|draft|manuscript/i.test(path + projectTitle) ? `Only ${words.toLocaleString()} words came back. The source file may not have been read properly: upload the original PDF or Word file and run it again.`
+    : null;
 
   return (
     <Dialog open onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="flex max-h-[92vh] max-w-4xl flex-col gap-0 p-0">
         <DialogHeader className="border-b border-border px-6 py-4 text-left">
           <DialogTitle className="flex items-center gap-2 font-serif text-xl"><button onClick={onClose} className="text-muted-foreground hover:text-foreground sm:hidden" aria-label="Back"><ArrowLeft className="h-5 w-5" /></button>{outputLabel(path)}</DialogTitle>
-          <DialogDescription>{text === null ? "Opening…" : `${words.toLocaleString()} words · ${path}`}</DialogDescription>
+          <DialogDescription>{text === null ? "Opening…" : `${words.toLocaleString()} words · ${path}${edited ? " · edited" : ""}`}</DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 py-5 sm:px-10">
-          {text === null ? <Loader2 className="mx-auto mt-10 h-6 w-6 animate-spin text-muted-foreground" /> : path.endsWith(".json") ? <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-[13px]">{prettyJson(text)}</pre> : <Markdown text={text} />}
+          {warning && <div role="alert" className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">{warning}</div>}
+          {text === null ? <Loader2 className="mx-auto mt-10 h-6 w-6 animate-spin text-muted-foreground" /> : editing
+            ? <Textarea value={text} onChange={(e) => { setText(e.target.value); setEdited(true); setSavedId(null); }} aria-label="Edit the result" className="min-h-[60vh] font-serif text-[15px] leading-relaxed" />
+            : path.endsWith(".json") ? <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-[13px]">{prettyJson(text)}</pre> : <Markdown text={text} />}
         </div>
         <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 px-6 py-3">
           {isJson ? <span className="text-sm text-muted-foreground">The outline the Book wizard uses. Edit it in the wizard.</span> : savedId ? (<>
@@ -866,6 +877,7 @@ function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsT
             <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || saving} onClick={save}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} Save to Library as a book</Button>
           )}
           <div className="ml-auto flex gap-1">
+            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => setEditing((v) => !v)}><PenLine className="h-4 w-4" /> {editing ? "Preview" : "Edit before saving"}</Button>}
             {path === "series-plan.md" && <SeriesActions backend={backend} threadId={threadId} onDone={onClose} />}
             {path === "voice-profile.md" && <Button size="sm" variant="ghost" disabled={!text} onClick={async () => { try { await backend.saveVoice(text ?? ""); toast({ title: "Saved as your voice profile", description: "“In my voice” and “Rewrite in my voice” now follow it." }); } catch (e) { toast({ title: "Couldn't save", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}><PenLine className="h-4 w-4" /> Use as my voice profile</Button>}
             {!isJson && <Button size="sm" variant="ghost" disabled={!text} onClick={() => onUseAsTarget(path)}><Wand2 className="h-4 w-4" /> Rewrite this</Button>}
