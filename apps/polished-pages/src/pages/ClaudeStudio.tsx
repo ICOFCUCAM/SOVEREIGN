@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { Link } from "react-router-dom";
 import {
   AlertTriangle, ArrowLeft, BookOpen, Check, Copy, Download, FileText, FolderOpen, Globe, Languages, Library, Loader2, MessageSquare,
-  PenLine, Plus, Quote, Rocket, ScrollText, Search, Send, ShieldAlert, Sparkles, Square, Trash2, Upload, Wand2, X,
+  Layers, PenLine, Plus, Quote, Rocket, ScrollText, Search, Send, ShieldAlert, Sparkles, Square, Trash2, Upload, Wand2, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useToast } from "@/hooks/use-toast";
 import SpineMark from "@/components/brand/SpineMark";
 import Markdown from "@/components/studio/Markdown";
+import JoinFiles from "@/components/studio/JoinFiles";
 import { isAdmin, saveDocument } from "@/lib/documents";
 import {
   RUNNER_URL, STUDIO_ACCEPT, StudioError, claudeBookEngine, followJob, outputLabel, studio, titleOf, uploadToStudio,
@@ -197,6 +198,7 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
   const [title, setTitle] = useState("");
   const [drag, setDrag] = useState(false);
   const [wizard, setWizard] = useState(false);
+  const [joining, setJoining] = useState(false);
   const titleRef = useRef("");
   const engine = useMemo(() => claudeBookEngine(id, (o) => {
     // An untitled project takes the book's title once Claude has outlined it.
@@ -349,6 +351,11 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
             <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${GRADIENT}`}><BookOpen className="h-5 w-5" /></span>
             <span><span className="block font-semibold">Book wizard</span><span className="block text-xs text-muted-foreground">Outline, write and produce a new book, chapter by chapter</span></span>
           </button>
+          <button type="button" disabled={Boolean(live)} onClick={() => setJoining(true)}
+            className="group flex items-start gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md disabled:pointer-events-none disabled:opacity-50">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Layers className="h-5 w-5" /></span>
+            <span><span className="block font-semibold">Join files</span><span className="block text-xs text-muted-foreground">Many PDFs or Word files into one PDF, one Word file or one book</span></span>
+          </button>
           {ACTIONS.map((a) => (
             <button key={a.id} type="button" disabled={busy || (!hasSource && thread.outputs.length === 0)} onClick={() => setDialog(a.id)}
               className="group flex items-start gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md disabled:pointer-events-none disabled:opacity-50">
@@ -411,6 +418,7 @@ function Project({ id, me, onChanged, onDeleted }: { id: string; me: StudioMe; o
         </div>
       </aside>
 
+      <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
       {dialog && <ActionDialog action={dialog} thread={thread} styles={me.citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
       {viewing && <ResultViewer threadId={id} path={viewing} projectTitle={thread.title} onClose={() => setViewing(null)} onUseAsTarget={(p) => { setViewing(null); setDialog("rewrite"); setPendingTarget(p); }} />}
     </div>
