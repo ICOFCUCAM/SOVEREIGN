@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { apiBookEngine, type BookEngine } from "@/lib/book-engine";
+import { apiBookEngine, type BookApproach, type BookEngine } from "@/lib/book-engine";
+import BookApproachPicker from "@/components/book/BookApproach";
+import Markdown from "@/components/studio/Markdown";
 import { logAiActivity } from "@/lib/ai-activity-log";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive, Languages, Headphones, ClipboardCheck, BrainCircuit } from "lucide-react";
@@ -36,6 +38,7 @@ interface BookDraft {
   meta: BookMeta; coverDone: boolean;
   knowledge: BookKnowledge;
   knowledgeDocIds: string[];
+  approach?: BookApproach;
 }
 
 // Assemble the publishable markdown from a draft (same shape the reader/export
@@ -99,10 +102,21 @@ const BookCreator = ({ engine = apiBookEngine, draftKey = DEFAULT_DRAFT_KEY }: {
   // Knowledge Base & Author Memory — rules/terminology/forbidden, injected into generation.
   const [knowledge, setKnowledge] = useState<BookKnowledge>(init?.knowledge ?? emptyKnowledge());
   const [knowledgeDocIds, setKnowledgeDocIds] = useState<string[]>(init?.knowledgeDocIds ?? []);
+  const [approach, setApproach] = useState<BookApproach>(init?.approach ?? (engine.approaches ? "mine-and-research" : "new"));
+  // Only engines that can read the project's uploads take an approach; the site's service always writes from the outline.
+  const approachOpt = engine.approaches ? { approach } : {};
+  const [chapterNotes, setChapterNotes] = useState<string | null>(null);
+  useEffect(() => {
+    setChapterNotes(null);
+    if (viewingChapter === null || !engine.chapterNotes) return;
+    let live = true;
+    engine.chapterNotes(viewingChapter).then((n) => { if (live) setChapterNotes(n?.trim() || null); });
+    return () => { live = false; };
+  }, [viewingChapter, engine]);
 
   const draft: BookDraft = useMemo(
-    () => ({ bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone, knowledge, knowledgeDocIds }),
-    [bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone, knowledge, knowledgeDocIds]
+    () => ({ bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone, knowledge, knowledgeDocIds, approach }),
+    [bookTitle, genre, targetAudience, depth, mode, existingContent, view, outline, chapters, editedBook, meta, coverDone, knowledge, knowledgeDocIds, approach]
   );
 
   const autosave = useDraftAutosave<BookDraft>({
@@ -145,7 +159,7 @@ const BookCreator = ({ engine = apiBookEngine, draftKey = DEFAULT_DRAFT_KEY }: {
     setIsGeneratingOutline(true);
     try {
       const gk = await buildGenerationKnowledge(knowledge, knowledgeDocIds, `${bookTitle} ${genre} ${targetAudience}`.trim());
-      const ol: BookOutline = await engine.outline({ bookTitle, genre, targetAudience, depth, mode, existingContent, knowledge: gk });
+      const ol: BookOutline = await engine.outline({ bookTitle, genre, targetAudience, depth, mode, existingContent, knowledge: gk, ...approachOpt });
       setOutline(ol);
       setBookTitle(ol.title || bookTitle);
 
@@ -198,6 +212,7 @@ const BookCreator = ({ engine = apiBookEngine, draftKey = DEFAULT_DRAFT_KEY }: {
         depth,
         previousChapters,
         knowledge: gk,
+        ...approachOpt,
       });
       setChapters((prev) => prev.map((c, i) => (i === index ? { ...c, content: chapterText, isGenerating: false, status: "complete" } : c)));
     } catch (error) {
@@ -315,6 +330,12 @@ const BookCreator = ({ engine = apiBookEngine, draftKey = DEFAULT_DRAFT_KEY }: {
                 <Button variant="ghost" size="sm" onClick={() => setViewingChapter(null)} className="mb-4">
                   <ArrowLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
+                {chapterNotes && (
+                  <details className="mb-4 rounded-2xl border border-primary/25 bg-primary/5 px-5 py-3" open>
+                    <summary className="cursor-pointer text-sm font-semibold">What Claude used for this chapter</summary>
+                    <div className="mt-2 text-sm"><Markdown text={chapterNotes} /></div>
+                  </details>
+                )}
                 <BookContentViewer content={chapters[viewingChapter].content!} title={chapters[viewingChapter].title} />
               </div>
             ) : view === "setup" ? (
@@ -334,6 +355,7 @@ const BookCreator = ({ engine = apiBookEngine, draftKey = DEFAULT_DRAFT_KEY }: {
                   </h1>
                   <p className="text-muted-foreground font-sans">Full-length books with structured chapters — outline, write, refine, and export to EPUB, PDF, or print.</p>
                 </div>
+                {engine.approaches && <div className="mb-6"><BookApproachPicker value={approach} onChange={setApproach} /></div>}
                 <BookSetup
                   bookTitle={bookTitle} setBookTitle={setBookTitle}
                   genre={genre} setGenre={setGenre}
@@ -353,6 +375,8 @@ const BookCreator = ({ engine = apiBookEngine, draftKey = DEFAULT_DRAFT_KEY }: {
                 onStartWriting={() => setView("writing")}
               />
             ) : view === "writing" ? (
+              <>
+              {engine.approaches && <div className="mb-5"><BookApproachPicker value={approach} onChange={setApproach} disabled={isAnyGenerating} /></div>}
               <BookWritingPanel
                 chapters={chapters}
                 bookTitle={outline?.title || bookTitle}
@@ -362,6 +386,7 @@ const BookCreator = ({ engine = apiBookEngine, draftKey = DEFAULT_DRAFT_KEY }: {
                 onViewChapter={(i) => setViewingChapter(i)}
                 isAnyGenerating={isAnyGenerating}
               />
+              </>
             ) : view === "preview" ? (
               <BookReader content={effectiveContent} title={outline?.title || bookTitle} onContentChange={setEditedBook} />
             ) : view === "export" ? (

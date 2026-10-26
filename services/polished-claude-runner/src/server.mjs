@@ -112,6 +112,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     const isBook = action.startsWith("book-");
     if (action === "chat" && !String(options?.message || "").trim()) return { status: 400, error: "Write a message first." };
     if (action === "rewrite" && !String(options?.instructions || "").trim()) return { status: 400, error: "Give the rewrite instructions." };
+    if (isBook && action !== "book-improve" && ["polish", "mine", "mine-and-research", "research"].includes(options?.approach) && thread.files.length === 0) return { status: 400, error: "Upload your book to this project first, so Claude can build on it." };
     if (action !== "chat" && action !== "section" && !isBook && thread.files.length === 0 && !options?.target && !(action === "tool" && options?.tool === "compare" && options?.a) && !(action === "tool" && options?.tool === "cover-copy" && String(options?.text || "").trim())) return { status: 400, error: "Upload a document first." };
     if (options?.target && options.target !== "source" && !inside(path.join(store.workDir(thread.id), "out"), options.target)) return { status: 400, error: "That file isn't in this project." };
     if (action === "tool" && options?.tool === "compare") {

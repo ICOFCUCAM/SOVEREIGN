@@ -156,7 +156,7 @@ function bookOutline(o) {
     files,
     output: "book/outline.json",
     prompt: `Create a book outline as the Book Creator's outline step. Read ./book/BRIEF.md first and obey its knowledge rules.
-${MODE[o.mode] || MODE.guided}
+${MODE[o.mode] || MODE.guided}${USES_BOOK(o.approach) ? "\nThe owner's own book is in ./source/. Read all of it and base the structure on it, so every part of the author's material has a place in the outline." : ""}
 
 Write ./out/book/outline.json: valid JSON only (no comments, no code fences) with exactly this shape:
 {"title": "", "subtitle": "", "description": "2-3 sentences for marketing", "targetAudience": "", "positioning": "what makes it unique", "keywords": [""], "categories": [""], "coverDirection": {"style": "", "colors": "", "typography": ""}, "frontMatter": "introduction / preface outline", "backMatter": "conclusion / author bio outline", "chapters": [{"title": "", "summary": "2-3 sentences", "keyPoints": ["", "", ""], "hook": "opening hook concept"}]}
@@ -165,6 +165,20 @@ Rules: ${DEPTH_OUTLINE[o.depth] || DEPTH_OUTLINE.standard}. Every chapter has a 
   };
 }
 
+// The approaches to writing a chapter: how much comes from the owner's own book
+// (./source/) and how much from outside research. "new" (or none) writes from
+// the outline alone.
+const FIND = "find every part of the documents in ./source/ that belongs to this chapter's subject (search the whole of each document, not only one place)";
+const CITE = `Cite every added fact or quotation in the text (author, year) and end the chapter with "### Sources", listing only sources you opened (with URL and access date) and the owner's book.`;
+const RESEARCH = "search the web (WebSearch), open the best scholarly and primary sources (WebFetch)";
+export const APPROACHES = {
+  polish: `Polish the owner's own book: ${FIND} and keep the author's own words wherever they work. Only fix order, clarity, grammar and flow, join the scattered parts into one well-ordered chapter, and add short transitions. Do not add new material or change the author's arguments.`,
+  mine: `Build this chapter only from the owner's own book: ${FIND} and carry over all of the author's teaching, arguments, facts, scriptures and examples, reorganised and improved in new, better prose. Add nothing from outside the book except transitions and explanation.`,
+  "mine-and-research": `Build this chapter from the owner's own book first: ${FIND} and carry over all of the author's teaching, arguments, facts, scriptures and examples, reorganised and improved. Then strengthen it with other sources: ${RESEARCH}, and add what they contribute that the book lacks (history, context, other scholars' views, evidence). The author's position leads; present other views as other views. ${CITE}`,
+  research: `Write this chapter mainly from research: ${RESEARCH} and build a thorough, well-evidenced chapter on its subject. Use the owner's book in ./source/ (${FIND.replace("find ", "read ")}) as the author's viewpoint and conclusions, which the chapter argues for and must not contradict. ${CITE}`,
+};
+const USES_BOOK = (a) => a === "polish" || a === "mine" || a === "mine-and-research" || a === "research";
+
 function bookChapter(o) {
   const chapters = Array.isArray(o.chapters) ? o.chapters : [];
   const i = Number(o.chapterIndex);
@@ -172,17 +186,20 @@ function bookChapter(o) {
   const ch = chapters[i] || {};
   const outlineMd = ["# Outline", "", ...chapters.map((c, n) => `${n + 1}. ${c.title || "Untitled"}${c.summary ? ` – ${c.summary}` : ""}${c.notes ? `\n   Author notes: ${c.notes}` : ""}${c.keyPoints?.length ? `\n   Key points: ${c.keyPoints.join("; ")}` : ""}${c.hook ? `\n   Hook: ${c.hook}` : ""}`)].join("\n") + "\n";
   const out = `book/chapters/${pad2(i + 1)}.md`;
+  const notes = `book/chapters/${pad2(i + 1)}-notes.md`;
+  const from = APPROACHES[o.approach];
   return {
     files: { "book/BRIEF.md": brief(o), "book/OUTLINE.md": outlineMd },
     output: out,
     prompt: `Write Chapter ${i + 1}, "${ch.title || "Untitled"}", of the book "${o.bookTitle || "Untitled book"}".
 1. Read ./book/BRIEF.md (obey its knowledge rules) and ./book/OUTLINE.md.
 2. Read the chapters already written in ./out/book/chapters/ (if any) so you do not repeat their ideas, examples or explanations, and so names, facts and voice stay consistent.
-3. Write ${DEPTH_CHAPTER[o.depth] || DEPTH_CHAPTER.standard}.
-${ch.summary ? `Chapter brief: ${ch.summary}\n` : ""}${ch.notes ? `Author notes: ${ch.notes}\n` : ""}${ch.keyPoints?.length ? `Key points to cover: ${ch.keyPoints.join(", ")}\n` : ""}${ch.hook ? `Suggested hook: ${ch.hook}\n` : ""}
+3. Write ${o.approach === "polish" ? "a chapter about as long as the author's own material on this subject" : DEPTH_CHAPTER[o.depth] || DEPTH_CHAPTER.standard}.
+${from ? `${from}\nThe author's notes for this chapter come before everything else, then the rules in ./book/BRIEF.md (apply them everywhere, including in material from other sources).\n` : ""}${ch.summary ? `Chapter brief: ${ch.summary}\n` : ""}${ch.notes ? `Author notes: ${ch.notes}\n` : ""}${ch.keyPoints?.length ? `Key points to cover: ${ch.keyPoints.join(", ")}\n` : ""}${ch.hook ? `Suggested hook: ${ch.hook}\n` : ""}
 Quality: open with a powerful, specific hook (never "In this chapter…"); use ### for distinct sections; include 2-3 concrete examples or scenarios (real ones must be accurate; mark invented scenarios as illustrations); give practical insights; short paragraphs with varied rhythm; end with a strong summary, takeaways or action steps. No meta-commentary.
 Format: start with "## ${String(ch.title || "Chapter").replace(/"/g, "'")}", ### for sections, **bold** for emphasis, - for lists.
-4. Write the whole chapter to ./out/${out} (replace it if it exists).`,
+4. Write the whole chapter to ./out/${out} (replace it if it exists).${from ? `
+5. Write ./out/${notes} for the owner (not part of the book): "### From your book" (which parts of the documents in ./source/ you used, with their headings or page numbers), "### Added from other sources" (each addition and its source${o.approach === "polish" || o.approach === "mine" ? "; there should be none with this approach" : ""}), "### Your notes and rules" (how you followed the author's notes and each rule), and "### For you to check" (anything uncertain, contradictory or left out).` : ""}`,
   };
 }
 

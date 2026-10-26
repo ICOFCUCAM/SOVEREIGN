@@ -175,6 +175,16 @@ test("book wizard: outline, chapters that see earlier chapters, improve", async 
   ev = await streamUntilDone(job.id, thread.id);
   assert.equal(ev.at(-1).output, "book/improved/02-tighten.md");
   assert.match((await (await call(`/v1/threads/${thread.id}/outputs/book/improved/02-tighten.md`)).json()).text, /\(improved\)/);
+  // approaches that build on the owner's book need it uploaded, and leave notes on what was used
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "book-chapter", options: { bookTitle: outline.title, chapters, chapterIndex: 0, approach: "mine-and-research" } } })).status, 400);
+  await call(`/v1/threads/${thread.id}/files?name=my-book.txt&kind=original`, { method: "POST", raw: Buffer.from("My teaching on faith.") });
+  for (const approach of ["polish", "mine-and-research"]) {
+    ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "book-chapter", options: { bookTitle: outline.title, chapters, chapterIndex: 0, approach } } })).json());
+    ev = await streamUntilDone(job.id, thread.id);
+    assert.equal(ev.at(-1).status, "done");
+    const notes = (await (await call(`/v1/threads/${thread.id}/outputs/book/chapters/01-notes.md`)).json()).text;
+    assert.match(notes, /my-book\.txt/); assert.match(notes, new RegExp(`Approach: ${approach}$`));
+  }
   // a step whose expected file never appears fails plainly
   ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "book-improve", options: { content: "FORGET", improvementType: "enhance", chapterIndex: 4 } } })).json());
   ev = await streamUntilDone(job.id, thread.id);
