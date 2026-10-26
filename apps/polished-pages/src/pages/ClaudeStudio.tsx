@@ -68,7 +68,8 @@ const MODE_KEY = "studio.engineMode";
 const readMode = (): EngineMode => { try { const v = localStorage.getItem(MODE_KEY); return v === "claude" || v === "api" ? v : "auto"; } catch { return "auto"; } };
 
 // Always visible: which engine does the work right now, and why.
-function EngineBadge({ decision, mode, onMode, busy }: { decision: EngineDecision; mode: EngineMode; onMode: (m: EngineMode) => void; busy: boolean }) {
+function EngineBadge({ decision, mode, onMode, busy, onCheck }: { decision: EngineDecision; mode: EngineMode; onMode: (m: EngineMode) => void; busy: boolean; onCheck?: () => Promise<void> }) {
+  const [checking, setChecking] = useState(false);
   const isClaude = decision.active === "claude-code";
   const dot = decision.tone === "ok" ? "bg-emerald-400" : decision.tone === "warn" ? "bg-amber-400" : "bg-red-400";
   return (
@@ -89,6 +90,12 @@ function EngineBadge({ decision, mode, onMode, busy }: { decision: EngineDecisio
       </div>
       <span className="text-[11px] text-white/55">{decision.reason}</span>
       {decision.fix && <span className="max-w-[340px] text-[11px] text-amber-200/90">{decision.fix}</span>}
+      {decision.fix && onCheck && (
+        <button type="button" disabled={checking} onClick={async () => { setChecking(true); try { await onCheck(); } finally { setChecking(false); } }}
+          className="inline-flex items-center gap-1 rounded-full border border-white/20 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-white/10 disabled:opacity-60">
+          {checking ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Check Claude Code again
+        </button>
+      )}
     </div>
   );
 }
@@ -184,7 +191,14 @@ function Studio() {
             <p className="mt-1.5 max-w-xl text-sm text-white/60">Summarise, rewrite under strict instructions, research citations, check, translate and produce books. Runs on your own Claude Code when it's available, and on the API when it isn't.</p>
           </div>
           <div className="flex items-end gap-2">
-            <EngineBadge decision={decision} mode={mode} onMode={setMode} busy={Boolean(me?.busy)} />
+            <EngineBadge decision={decision} mode={mode} onMode={setMode} busy={Boolean(me?.busy)}
+              onCheck={async () => {
+                try {
+                  const r = await studio.checkClaude();
+                  toast(r.claude.state === "ok" ? { title: "Claude Code is signed in", description: "New runs use your Claude plan." } : { title: "Still not signed in", description: r.claude.message ?? "", variant: "destructive" });
+                } catch (e) { toast({ title: "Couldn't check", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+                refreshMe();
+              }} />
             <Button variant="outline" size="sm" className="border-white/15 bg-white/5 text-white hover:bg-white/10 lg:hidden" onClick={() => setProjectsOpen(true)}><FolderOpen className="h-4 w-4" /> Projects</Button>
           </div>
         </div>

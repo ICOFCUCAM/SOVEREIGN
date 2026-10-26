@@ -53,7 +53,11 @@ async function callApi(user: string, opts: { system?: string; web?: boolean; max
     body: JSON.stringify({ system: opts.system ?? API_SYSTEM, user, webSearch: Boolean(opts.web), maxTokens: opts.maxTokens ?? 16000 }),
   });
   const body = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error((body as { error?: string }).error || `The API answered ${r.status}.`);
+  if (!r.ok) {
+    const msg = (body as { error?: string }).error || `The API answered ${r.status}.`;
+    if (/credit balance is too low/i.test(msg)) throw new Error("The Anthropic API account has no credit left. Add credit at console.anthropic.com → Plans & Billing (separate from your Claude subscription), or use Claude Code.");
+    throw new Error(msg);
+  }
   return body as { text: string; sources: { url: string; title: string }[] };
 }
 

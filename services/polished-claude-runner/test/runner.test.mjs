@@ -202,6 +202,9 @@ test("Claude Code status: signed out, usage limit with reset time, then ok again
   let ev = await streamUntilDone(job.id, thread.id);
   assert.equal(ev.at(-1).status, "failed"); assert.equal(ev.at(-1).errorKind, "auth");
   assert.equal((await (await call("/v1/me")).json()).claude.state, "signed_out");
+  // "Check Claude Code again" re-tests the sign-in with a tiny run.
+  assert.equal((await (await call("/v1/claude/check", { method: "POST" })).json()).claude.state, "ok");
+  assert.equal((await (await call("/v1/me")).json()).claude.state, "ok");
   ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "LIMITHIT" } } })).json());
   ev = await streamUntilDone(job.id, thread.id);
   assert.equal(ev.at(-1).errorKind, "limit");
