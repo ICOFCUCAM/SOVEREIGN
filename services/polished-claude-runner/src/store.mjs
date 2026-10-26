@@ -117,7 +117,11 @@ export function createStore(dataDir) {
       const d = dir(id);
       if (!d) return null;
       const sections = Array.isArray(m?.sections) ? m.sections : [];
-      const clean = { title: String(m?.title ?? "").slice(0, 300), subtitle: String(m?.subtitle ?? "").slice(0, 300), author: String(m?.author ?? "").slice(0, 200), sections: sections.map((x) => ({ id: String(x.id).replace(/[^\w-]/g, "").slice(0, 64), kind: String(x.kind ?? "chapter").slice(0, 40), title: String(x.title ?? "").slice(0, 300), body: String(x.body ?? "") })), history: Array.isArray(m?.history) ? m.history.slice(-2000) : [], updatedAt: new Date().toISOString() };
+      const clean = { title: String(m?.title ?? "").slice(0, 300), subtitle: String(m?.subtitle ?? "").slice(0, 300), author: String(m?.author ?? "").slice(0, 200), sections: sections.map((x) => ({
+        id: String(x.id).replace(/[^\w-]/g, "").slice(0, 64), kind: String(x.kind ?? "chapter").slice(0, 40), title: String(x.title ?? "").slice(0, 300), body: String(x.body ?? ""),
+        // Guided rewrite: Claude's summary, the owner's idea, and the text before the rewrite.
+        ...(x.summary ? { summary: String(x.summary).slice(0, 20_000) } : {}), ...(x.idea ? { idea: String(x.idea).slice(0, 20_000) } : {}), ...(x.original ? { original: String(x.original) } : {}),
+      })), rules: String(m?.rules ?? "").slice(0, 20_000), history: Array.isArray(m?.history) ? m.history.slice(-2000) : [], updatedAt: new Date().toISOString() };
       await fs.writeFile(path.join(d, "manuscript.json.tmp"), JSON.stringify(clean));
       await fs.rename(path.join(d, "manuscript.json.tmp"), path.join(d, "manuscript.json"));
       const md = path.join(workDir(id), "manuscript");

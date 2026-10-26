@@ -2,7 +2,7 @@ import { authHeader } from "@/lib/session";
 import { splitBook } from "@/lib/book-split";
 import { extractFileText } from "@/lib/extract-file-text";
 import {
-  RUNNER_URL, followJob, studio, uploadToStudio,
+  RUNNER_URL, decodeText, followJob, studio, uploadToStudio,
   type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioMe, type StudioThread, type StudioThreadSummary,
 } from "@/lib/claude-studio";
 import { API_SYSTEM, VOICE_RULE, compareApiPrompt, toolApiPlan, toolById, type ToolId } from "@/lib/studio-tools";
@@ -123,7 +123,7 @@ const ONE_CALL = 120_000;
 
 /** Runs one Studio action on the API, chapter by chapter where needed, and records the result in the project. */
 export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions & Record<string, unknown>): StudioJob {
-  const SECTION_OPS: Record<string, string> = { expand: "Expand section", cite: "Add citations to section", voice: "Section in my voice", edit: "Edit section", draft: "Draft" };
+  const SECTION_OPS: Record<string, string> = { explain: "What this section says", rewrite: "Rewrite section", expand: "Expand section", cite: "Add citations to section", voice: "Section in my voice", edit: "Edit section", draft: "Draft" };
   const label = action === "section" ? `${SECTION_OPS[String(o.op)] ?? "Section"} · ${o.title ?? ""}` : action === "tool" ? toolById(String(o.tool))?.title ?? "Tool" : ({ chat: "Chat", summarize: "Summarise", rewrite: "Rewrite", cite: "Citations & references" } as Record<string, string>)[action] ?? action;
   const job: StudioJob = { id: crypto.randomUUID(), threadId: ctx.thread.id, action, label, output: null, status: "running", startedAt: new Date().toISOString(), endedAt: null, error: null };
   const j: LocalJob = { job, events: [], subs: new Set(), cancelled: false };
@@ -168,13 +168,15 @@ export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions
           cite: `Add citations to this section in ${o.citationStyle || "APA 7"} style. Search the web and check each source supports the claim. Keep the text otherwise unchanged; mark unsupported claims [citation needed]. End with "### Sources" listing only sources you used, with URL and access date.`,
           voice: "Rewrite this section in the owner's voice. Keep its meaning, facts, quotations and references.",
           edit: `Revise this section as the owner asks: ${o.instructions || "improve clarity and flow"}. Keep facts, quotations and references accurate.`,
+          explain: "Tell the owner what this section says, in plain language: its main teaching in two or three sentences, then its key points as a short list, then the scriptures, quotations and sources it relies on. Report faithfully; do not rewrite, correct or judge it.",
+          rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help).${o.idea ? `\nThe owner's idea for this section (follow it): ${o.idea}` : ""}${o.rules ? `\nRules for the whole book (follow strictly, everywhere, including quotations unless the rule says otherwise): ${o.rules}` : ""}\nKeep every fact, scripture reference and quotation accurate apart from what the rules change.`,
           draft: `Write the "${sec.title}" section of this book. Guidance: ${o.guidance || def.guidance}.${o.instructions ? ` The owner asks: ${o.instructions}` : ""} Never invent facts about the author; use [placeholders] where a fact is needed.`,
         };
         if (!ops[String(o.op)]) throw new Error("Unknown section action.");
         say(`${label} (${o.op === "draft" && def.wholeBook ? "reading the whole book" : "reading the section and its neighbours"})`);
-        const prompt = `Book: ${m.title || "Untitled"}\nSections:\n${outline}\n\n${o.op === "draft" && def.wholeBook ? `The manuscript:\n\n${book}\n\n` : near}---\n\nThe section to work on: "${sec.title}" (${def.label})\n\n${sec.body || "(empty)"}\n\n---\n\n${ops[String(o.op)]}${needsVoice ? `\n${VOICE_RULE}\nVoice profile:\n${voice}` : ""}\nReply with only the new text of this section: no "## " heading, no commentary.`;
+        const prompt = `Book: ${m.title || "Untitled"}\nSections:\n${outline}\n\n${o.op === "draft" && def.wholeBook ? `The manuscript:\n\n${book}\n\n` : near}---\n\nThe section to work on: "${sec.title}" (${def.label})\n\n${sec.body || "(empty)"}\n\n---\n\n${ops[String(o.op)]}${needsVoice ? `\n${VOICE_RULE}\nVoice profile:\n${voice}` : ""}\n${o.op === "explain" ? "Reply with only the summary." : 'Reply with only the new text of this section: no "## " heading, no commentary.'}`;
         const r = await callApi(prompt, { web: o.op === "cite" });
-        outputs[`sections/${sec.id}.md`] = r.text.trim();
+        outputs[o.op === "explain" ? `sections/${sec.id}-summary.md` : `sections/${sec.id}.md`] = r.text.trim();
         reply = `${label}: suggestion ready.`;
       } else if (action === "chat") {
         const { text } = await documentText(ctx);
@@ -423,7 +425,7 @@ export const browserBackend: StudioBackend = {
     const t = await localThread(id);
     const at = new Date().toISOString();
     let text: string | null = null;
-    if (/\.(txt|md|markdown|csv|json|html?)$/i.test(file.name)) text = await file.text();
+    if (/\.(txt|md|markdown|csv|json|html?)$/i.test(file.name)) text = decodeText(new Uint8Array(await file.arrayBuffer()));
     else if (/\.(pdf|docx)$/i.test(file.name)) text = await extractFileText(file).catch(() => null);
     t.files = t.files.filter((f) => f.storedAs !== file.name);
     t.files.push({ name: file.name, storedAs: file.name, kind: "original", bytes: file.size, at });

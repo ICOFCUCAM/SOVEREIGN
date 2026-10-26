@@ -254,6 +254,21 @@ test("manuscript: saved as JSON and mirrored as files; sections expanded; voice 
   assert.equal(ev.at(-1).status, "done");
   assert.equal((await (await call(`/v1/threads/${thread.id}/outputs/sections/s-1.md`)).json()).text, "Faith begins small. (expanded by Claude Code)");
 
+  // guided rewrite: what the section says, then a rewrite with the owner's idea and the book's rules
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "explain" } } })).json());
+  assert.equal(job.output, "sections/s-1-summary.md");
+  await streamUntilDone(job.id, thread.id);
+  assert.equal((await (await call(`/v1/threads/${thread.id}/outputs/sections/s-1-summary.md`)).json()).text, "It says: Faith begins small.");
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "rewrite", idea: "Start with Abraham", rules: "Write Yahuah instead of God" } } })).json());
+  await streamUntilDone(job.id, thread.id);
+  assert.equal((await (await call(`/v1/threads/${thread.id}/outputs/sections/s-1.md`)).json()).text, "Faith begins small. [rules: Write Yahuah instead of God]");
+  // the guided fields are kept with the manuscript
+  const guided = { ...manuscript, rules: "Write Yahuah instead of God", sections: manuscript.sections.map((x) => (x.id === "s-1" ? { ...x, summary: "It says…", idea: "Start with Abraham", original: "Faith begins small." } : x)) };
+  const kept = (await (await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", body: { manuscript: guided } })).json()).manuscript;
+  assert.equal(kept.rules, "Write Yahuah instead of God");
+  assert.deepEqual([kept.sections[1].summary, kept.sections[1].idea, kept.sections[1].original], ["It says…", "Start with Abraham", "Faith begins small."]);
+  assert.equal(kept.sections[0].idea, undefined);
+
   // voice actions need a saved voice profile
   assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "voice" } } })).status, 400);
   assert.equal((await call("/v1/voice", { method: "PUT", body: { voice: "# Voice\n\nShort sentences. Warm." } })).status, 200);

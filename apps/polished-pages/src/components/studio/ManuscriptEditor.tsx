@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDown, ArrowUp, BookOpen, Palette, Check, ChevronDown, Download, FileText, Library, Loader2, PenLine, Plus, Quote, Sparkles, Square, Trash2, Wand2, X } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUp, BookOpen, Eye, RotateCcw, Undo2, Palette, Check, ChevronDown, Download, FileText, Library, Loader2, PenLine, Plus, Quote, Sparkles, Square, Trash2, Wand2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,7 +13,7 @@ import CoverDialog from "@/components/studio/CoverDialog";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
 import { saveDocument, setTags } from "@/lib/documents";
 import { COMPLETE, DEFAULT_SHELVES, SHELF } from "@/lib/bookshelf";
-import { SECTION_KINDS, authorshipNotes, compile, importText, insertSection, kindDef, moveSection, words, type Manuscript, type SectionGroup } from "@/lib/manuscript";
+import { SECTION_KINDS, authorshipNotes, compile, importText, insertSection, kindDef, moveSection, words, type Manuscript, type Section, type SectionGroup } from "@/lib/manuscript";
 import type { StudioThread, StudioJob, StudioEvent, RunOptions } from "@/lib/claude-studio";
 import type { EngineId, StudioBackend } from "@/lib/studio-backend";
 
@@ -21,7 +21,9 @@ import type { EngineId, StudioBackend } from "@/lib/studio-backend";
 // owner writes; Claude expands, cites, rewrites in their voice, edits on
 // request, or drafts standard sections (preface, bibliography, index…). Every
 // suggestion is shown first and only replaces the text when accepted; what was
-// accepted is kept as authorship notes.
+// accepted is kept as authorship notes. The guided rewrite goes chapter by
+// chapter: Claude says what the chapter says, the owner gives their idea for
+// it, then Claude rewrites it with that idea and the rules for the whole book.
 
 const GRADIENT = "bg-gradient-to-r from-[hsl(221_83%_53%)] to-[hsl(262_83%_58%)] text-white shadow-[0_10px_28px_-12px_hsl(248_83%_55%/0.7)] hover:opacity-95";
 const GROUPS: { id: SectionGroup; label: string }[] = [{ id: "front", label: "Front matter" }, { id: "body", label: "Chapters" }, { id: "back", label: "Back matter" }];
@@ -33,6 +35,7 @@ const OPS: { id: Op; label: string; icon: typeof Wand2; line: string }[] = [
   { id: "edit", label: "Edit as I say", icon: Wand2, line: "Your instruction, applied to this section" },
   { id: "draft", label: "Draft with Claude", icon: FileText, line: "Write this section for the book" },
 ];
+const GUIDED_LABEL = "Rewrite with my idea";
 const download = (name: string, text: string) => {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" })); a.download = name; a.click();
@@ -55,6 +58,8 @@ export default function ManuscriptEditor({ thread, backend, engine, coverWriter,
   const [useVoice, setUseVoice] = useState(false);
   const [running, setRunning] = useState<{ job: StudioJob; line: string; sectionId: string; op: Op } | null>(null);
   const [proposal, setProposal] = useState<{ sectionId: string; op: Op; text: string; engine: EngineId } | null>(null);
+  const [editingProposal, setEditingProposal] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState<boolean | undefined>(undefined);
   const [compiled, setCompiled] = useState<string | null>(null);
   const [shelf, setShelfName] = useState("");
   const [complete, setComplete] = useState(true);
@@ -106,24 +111,40 @@ export default function ManuscriptEditor({ thread, backend, engine, coverWriter,
   const section = m?.sections.find((s) => s.id === sel) ?? null;
   const def = section ? kindDef(section.kind) : null;
   const total = useMemo(() => (m ? m.sections.reduce((n, s) => n + words(s.body), 0) : 0), [m]);
+  const chapters = useMemo(() => (m ? m.sections.filter((s) => s.kind === "chapter") : []), [m]);
+  const rewritten = chapters.filter((s) => s.original !== undefined).length;
+  const next = section ? (() => { const i = m!.sections.findIndex((s) => s.id === section.id); return m!.sections.slice(i + 1).find((s) => s.kind === "chapter") ?? null; })() : null;
   const yours = useMemo(() => (section ? [...section.body.matchAll(/\[\[YOURS:\s*([^\]]+)\]\]/g)].map((x) => ({ at: x.index ?? 0, text: x[1].trim() })) : []), [section]);
 
-  const run = async () => {
+  const setSection = (sectionId: string, patch: Partial<Section>) => {
+    const cur = latest.current; if (!cur) return;
+    update({ ...cur, sections: cur.sections.map((s) => (s.id === sectionId ? { ...s, ...patch } : s)) });
+  };
+
+  const run = async (which: Op = op) => {
     if (!m || !section || !engine) return;
     await persist();
-    const options: RunOptions = { sectionId: section.id, op, title: section.title, instructions: instructions.trim() || undefined, factor: Number(factor), citationStyle: style, guidance: def?.guidance, useVoice: (op === "expand" || op === "edit" || op === "draft") && useVoice };
+    const guided = which === "explain" || which === "rewrite";
+    const options: RunOptions = guided
+      ? { sectionId: section.id, op: which, title: section.title, idea: section.idea?.trim() || undefined, rules: m.rules?.trim() || undefined }
+      : { sectionId: section.id, op: which, title: section.title, instructions: instructions.trim() || undefined, factor: Number(factor), citationStyle: style, guidance: def?.guidance, useVoice: (which === "expand" || which === "edit" || which === "draft") && useVoice };
     try {
       const job = await backend.run(id, "section", options, engine);
       const ctl = new AbortController(); abort.current = ctl;
-      setRunning({ job, line: "Starting…", sectionId: section.id, op });
-      setProposal(null);
+      setRunning({ job, line: "Starting…", sectionId: section.id, op: which });
+      if (which !== "explain") setProposal(null);
       await backend.follow(job, async (e: StudioEvent) => {
         if (e.type === "tool" || e.type === "status" || e.type === "notice") setRunning((r) => (r ? { ...r, line: e.line } : r));
         if (e.type === "done") {
           setRunning(null);
           onChanged();
           if (e.status !== "done") { if (e.status !== "cancelled") toast({ title: "Claude couldn't finish", description: e.error ?? "", variant: "destructive" }); return; }
-          const out = e.output ?? `sections/${options.sectionId}.md`;
+          const out = e.output ?? `sections/${options.sectionId}${which === "explain" ? "-summary" : ""}.md`;
+          if (which === "explain") {
+            try { setSection(options.sectionId!, { summary: (await backend.output(id, out)).trim() }); }
+            catch { toast({ title: "Couldn't open Claude's summary", variant: "destructive" }); }
+            return;
+          }
           try { setProposal({ sectionId: options.sectionId!, op: options.op!, text: (await backend.output(id, out)).trim(), engine }); }
           catch { toast({ title: "Couldn't open Claude's suggestion", variant: "destructive" }); }
         }
@@ -135,10 +156,10 @@ export default function ManuscriptEditor({ thread, backend, engine, coverWriter,
     if (!m || !proposal) return;
     const next: Manuscript = {
       ...m,
-      sections: m.sections.map((s) => (s.id !== proposal.sectionId || how === "discard" ? s : { ...s, body: how === "replace" ? proposal.text : `${s.body.trim()}\n\n${proposal.text}`.trim() })),
+      sections: m.sections.map((s) => (s.id !== proposal.sectionId || how === "discard" ? s : { ...s, body: how === "replace" ? proposal.text : `${s.body.trim()}\n\n${proposal.text}`.trim(), ...(proposal.op === "rewrite" && !s.original ? { original: s.body } : {}) })),
       history: [...m.history, { sectionId: proposal.sectionId, op: proposal.op, engine: proposal.engine, at: new Date().toISOString(), accepted: how !== "discard" }],
     };
-    update(next); setProposal(null);
+    update(next); setProposal(null); setEditingProposal(false);
   };
 
   const [coverOpen, setCoverOpen] = useState(false);
@@ -267,6 +288,43 @@ export default function ManuscriptEditor({ thread, backend, engine, coverWriter,
                 )}
               </div>
 
+              {/* Guided rewrite */}
+              <div className="rounded-2xl border border-primary/25 bg-primary/[0.03] p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold">Guided rewrite</span>
+                  <span className="text-xs text-muted-foreground">{rewritten} of {chapters.length} chapters rewritten</span>
+                  {next && <Button size="sm" variant="ghost" className="ml-auto" onClick={() => { setSel(next.id); setProposal(null); setEditingProposal(false); }}>Next chapter <ArrowRight className="h-4 w-4" /></Button>}
+                </div>
+                <details className="mt-2 text-sm" open={rulesOpen ?? !m.rules?.trim()} onToggle={(e) => setRulesOpen(e.currentTarget.open)}>
+                  <summary className="cursor-pointer text-xs font-medium text-muted-foreground">Rules for the whole book{m.rules?.trim() ? ` · ${m.rules.trim().split("\n").length} set` : ""}</summary>
+                  <Textarea value={m.rules ?? ""} onChange={(e) => { setRulesOpen(true); update({ ...m, rules: e.target.value }); }} aria-label="Rules for the whole book" className="mt-2 min-h-[70px] text-sm"
+                    placeholder={"One per line, e.g.\nWrite Yahusha instead of Jesus\nWrite Yahuah instead of God (never Jehovah or Yahweh)"} />
+                </details>
+                <ol className="mt-3 space-y-3 text-sm">
+                  <li>
+                    <div className="flex items-center gap-2"><span className="font-medium">1. What this chapter says</span>
+                      <Button size="sm" variant="outline" className="ml-auto h-8 rounded-full" onClick={() => void run("explain")} disabled={!engine || Boolean(running) || !section.body.trim()}>
+                        {running?.op === "explain" && running.sectionId === section.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Eye className="h-3.5 w-3.5" />} {section.summary ? "Read it again" : "Read this chapter"}
+                      </Button></div>
+                    {section.summary ? <div className="mt-2 rounded-xl border border-border bg-card px-4 py-3"><Markdown text={section.summary} /></div>
+                      : <p className="mt-1 text-xs text-muted-foreground">Claude reads the chapter and tells you its main teaching, key points and sources, without changing anything.</p>}
+                  </li>
+                  <li>
+                    <span className="font-medium">2. Your idea for this chapter</span>
+                    <Textarea value={section.idea ?? ""} onChange={(e) => setSection(section.id, { idea: e.target.value })} aria-label="Your idea for this chapter" className="mt-1.5 min-h-[70px] text-sm"
+                      placeholder="In a few lines: what should this chapter teach, what to keep, add, cut or reorder?" />
+                  </li>
+                  <li className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium">3. Claude's rewrite</span>
+                    {section.original && <Button size="sm" variant="ghost" className="h-8" onClick={() => { if (window.confirm("Put back the text from before the rewrite?")) setSection(section.id, { body: section.original!, original: undefined }); }}><Undo2 className="h-3.5 w-3.5" /> Restore original</Button>}
+                    <Button size="sm" className={`ml-auto h-8 rounded-full ${GRADIENT}`} onClick={() => void run("rewrite")} disabled={!engine || Boolean(running) || !section.body.trim()}>
+                      {running?.op === "rewrite" && running.sectionId === section.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />} {GUIDED_LABEL}
+                    </Button>
+                  </li>
+                </ol>
+                <p className="mt-2 text-[11px] text-muted-foreground">You see the rewrite first: use it, edit it, redo it or discard it, then go to the next chapter.</p>
+              </div>
+
               {/* Ask Claude */}
               <div className="rounded-2xl border border-border bg-card p-3">
                 <div className="flex flex-wrap gap-1.5">
@@ -293,7 +351,7 @@ export default function ManuscriptEditor({ thread, backend, engine, coverWriter,
                   {(op === "expand" || op === "edit" || op === "draft") && (
                     <label className="flex items-center gap-2 text-xs"><Switch checked={useVoice} onCheckedChange={setUseVoice} /> In my voice</label>
                   )}
-                  <Button size="sm" className={`ml-auto rounded-full ${GRADIENT}`} onClick={run}
+                  <Button size="sm" className={`ml-auto rounded-full ${GRADIENT}`} onClick={() => void run()}
                     disabled={!engine || Boolean(running) || (op === "edit" && !instructions.trim()) || (op !== "draft" && !section.body.trim())}>
                     {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} {OPS.find((o) => o.id === op)!.label}
                   </Button>
@@ -312,16 +370,20 @@ export default function ManuscriptEditor({ thread, backend, engine, coverWriter,
               {proposal && proposal.sectionId === section.id && (
                 <div className="overflow-hidden rounded-2xl border border-primary/40">
                   <div className="flex flex-wrap items-center gap-2 border-b border-border bg-primary/5 px-4 py-2.5">
-                    <span className="text-sm font-semibold">Claude's suggestion · {OPS.find((o) => o.id === proposal.op)?.label}</span>
+                    <span className="text-sm font-semibold">Claude's suggestion · {OPS.find((o) => o.id === proposal.op)?.label ?? GUIDED_LABEL}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${proposal.engine === "api" ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"}`}>{proposal.engine === "api" ? "API" : "Claude Code"}</span>
                     <span className="text-xs text-muted-foreground">{words(proposal.text).toLocaleString()} words (now {words(section.body).toLocaleString()})</span>
                     <span className="ml-auto flex gap-1.5">
                       <Button size="sm" className={`rounded-full ${GRADIENT}`} onClick={() => decide("replace")}><Check className="h-4 w-4" /> Use it</Button>
-                      {section.body.trim() && <Button size="sm" variant="outline" className="rounded-full" onClick={() => decide("append")}>Add below</Button>}
+                      {section.body.trim() && proposal.op !== "rewrite" && <Button size="sm" variant="outline" className="rounded-full" onClick={() => decide("append")}>Add below</Button>}
+                      <Button size="sm" variant="outline" className="rounded-full" onClick={() => setEditingProposal((v) => !v)}><PenLine className="h-4 w-4" /> {editingProposal ? "Preview" : "Edit first"}</Button>
+                      {proposal.op === "rewrite" && <Button size="sm" variant="ghost" onClick={() => void run("rewrite")} disabled={Boolean(running)}><RotateCcw className="h-4 w-4" /> Redo</Button>}
                       <Button size="sm" variant="ghost" onClick={() => decide("discard")}><X className="h-4 w-4" /> Discard</Button>
                     </span>
                   </div>
-                  <div className="max-h-[50vh] overflow-y-auto px-5 py-4"><Markdown text={proposal.text} /></div>
+                  {editingProposal
+                    ? <Textarea value={proposal.text} onChange={(e) => setProposal({ ...proposal, text: e.target.value })} aria-label="Edit Claude's suggestion" className="min-h-[40vh] rounded-none border-0 font-serif text-[15px] leading-relaxed focus-visible:ring-0" />
+                    : <div className="max-h-[50vh] overflow-y-auto px-5 py-4"><Markdown text={proposal.text} /></div>}
                 </div>
               )}
             </div>
