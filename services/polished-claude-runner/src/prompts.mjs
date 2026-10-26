@@ -305,6 +305,28 @@ Write ./out/readability.md: the estimated reading level with your reasoning; ave
 Write ./out/scanned-text.md with "# <file name>" before each file's text and "<!-- page N -->" before each page. ${LONG}`,
     }),
   },
+  "cover-copy": {
+    title: "Cover copy",
+    // Cover Studio sends the book's text with the request (it may come from the
+    // Library rather than this project), so it is written to ./cover/book.md.
+    build: (o, tgt) => ({
+      output: "cover-copy.json",
+      files: o.text ? { "cover/book.md": String(o.text) } : undefined,
+      prompt: `Read ${o.text ? "the book in ./cover/book.md" : tgt} and write the copy and art direction for its printed cover.
+Title: ${o.title || "(from the book)"}${o.subtitle ? `\nSubtitle: ${o.subtitle}` : ""}${o.author ? `\nAuthor: ${o.author}` : ""}
+Write ./out/cover-copy.json: valid JSON only (no comments, no code fences) with exactly this shape:
+{"tagline": "", "backHeadline": "", "blurb": "", "bio": "", "category": "", "template": "", "frontArt": "", "backArt": ""}
+- tagline: one line for the front cover, under 12 words.
+- backHeadline: a short hook line that opens the back cover (under 14 words).
+- blurb: back-cover copy of 120-180 words that sells the book honestly: the hook, what the reader will gain or feel, why this book. Short paragraphs separated by a blank line (\\n\\n). For fiction, don't give away the ending.
+- bio: a 40-70 word author bio in the third person, using only facts the book states about the author; [placeholders] for anything else.
+- category: a shelving line in BISAC style, e.g. "Religion / Christian Living / Spiritual Growth".
+- template: one of classic, modern, devotional, academic, children, thriller (whichever suits the book).
+- frontArt: art direction for a front-cover illustration with NO text, letters or logos: subject, composition, mood, palette, medium, and where to leave calm space for the title.
+- backArt: art direction for a quieter, matching back-cover background with large calm areas for text, also with no text.
+Never invent endorsements, reviews, awards, sales figures or facts about the author. After writing, re-read the file and make sure it parses as JSON.`,
+    }),
+  },
 };
 
 function tool(o) {

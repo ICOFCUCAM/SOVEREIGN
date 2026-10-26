@@ -280,6 +280,21 @@ test("turn into a series: volumes, planned books and a machine-readable plan", a
   assert.match((await (await call(`/v1/threads/${thread.id}/outputs/${plan.volumes[1].file}`)).json()).text, /^# The Road/);
 });
 
+test("cover copy: written from book text sent with the request, no upload needed", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Book covers" } })).json();
+  const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "cover-copy", title: "The Long Road", text: "# The Long Road\n\n## One\n\nFirst." } } })).json();
+  assert.equal(job.label, "Cover copy");
+  assert.equal(job.output, "cover-copy.json");
+  const ev = await streamUntilDone(job.id, thread.id);
+  assert.equal(ev.at(-1).status, "done");
+  const copy = JSON.parse((await (await call(`/v1/threads/${thread.id}/outputs/cover-copy.json`)).json()).text);
+  assert.equal(copy.template, "devotional");
+  assert.match(copy.blurb, /The Long Road/);
+  // Without text (and without uploads) it still needs a document.
+  const r = await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "cover-copy" } } });
+  assert.equal(r.status, 400);
+});
+
 test("the sandbox settings and helpers", () => {
   const s = settingsFor("/data/threads/x/work");
   assert.ok(s.permissions.deny.includes("Read(//etc/**)"));

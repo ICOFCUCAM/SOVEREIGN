@@ -21,12 +21,13 @@ import ManuscriptEditor from "@/components/studio/ManuscriptEditor";
 import MyBooks from "@/components/studio/MyBooks";
 import VoicePanel from "@/components/studio/VoicePanel";
 import { importText } from "@/lib/manuscript";
+import type { CoverCopyWriter } from "@/lib/cover-copy";
 import { createSeriesInLibrary, readManifest, startPlannedBooks } from "@/lib/series-from-plan";
 import { apiBookEngine } from "@/lib/book-engine";
-import { browserBackend, decideEngine, runnerBackend, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
+import { apiCoverCopyWriter, browserBackend, decideEngine, runnerBackend, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
 import { isAdmin, saveDocument } from "@/lib/documents";
 import {
-  RUNNER_URL, STUDIO_ACCEPT, StudioError, claudeBookEngine, outputLabel, studio, titleOf,
+  RUNNER_URL, STUDIO_ACCEPT, StudioError, claudeBookEngine, claudeCoverCopyWriter, outputLabel, studio, titleOf,
   type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioMe, type StudioThread, type StudioThreadSummary,
 } from "@/lib/claude-studio";
 
@@ -118,6 +119,20 @@ function Studio() {
     try { const t = await backend.threads(); setThreads(t); return t; }
     catch (e) { setThreads([]); if (backend === runnerBackend) setMeError(e instanceof Error ? e.message : "The runner can't be reached."); return []; }
   }, [backend]);
+  // Who writes cover copy: the owner's Claude Code (as a job in the given
+  // project, or in a "Book covers" project for books from the Library), else the API.
+  const coverWriter = useCallback((threadId?: string): CoverCopyWriter | undefined => {
+    if (decision.active === "claude-code" && backend === runnerBackend) {
+      return claudeCoverCopyWriter(async () => {
+        if (threadId) return threadId;
+        const found = (await backend.threads()).find((t) => t.title === "Book covers");
+        const id = found?.id ?? (await backend.create("Book covers")).id;
+        void loadThreads();
+        return id;
+      });
+    }
+    return decision.active ? { ...apiCoverCopyWriter, label: "API · billed per use" } : undefined;
+  }, [decision.active, backend, loadThreads]);
 
   useEffect(() => {
     refreshMe();
@@ -195,6 +210,7 @@ function Studio() {
       {tab === "books" ? (
         <div className="container px-4 py-6 sm:px-6">
           <MyBooks
+            coverWriter={coverWriter()}
             onWorkInStudio={async (title, markdown) => {
               const t = await backend.create(title);
               await backend.upload(t.id, new File([markdown], `${title.replace(/[^\p{L}\p{N} _-]+/gu, "").trim() || "book"}.md`, { type: "text/markdown" }));
@@ -227,7 +243,7 @@ function Studio() {
             <SheetContent side="left" className="w-[300px]"><SheetHeader><SheetTitle>Projects</SheetTitle></SheetHeader><div className="mt-4 h-[calc(100%-3rem)]">{list}</div></SheetContent>
           </Sheet>
           {activeId && ready ? (
-            <Project key={`${backend.storage}:${activeId}`} id={activeId} backend={backend} decision={decision} mode={mode}
+            <Project key={`${backend.storage}:${activeId}`} id={activeId} backend={backend} decision={decision} mode={mode} coverWriter={coverWriter(activeId)}
               citationStyles={me?.citationStyles ?? CITATION_STYLES_FALLBACK} busyElsewhere={Boolean(me?.busy && me.busy.threadId !== activeId)}
               handoff={handoff?.id === activeId ? handoff : null} onHandoffUsed={() => setHandoff(null)}
               onChanged={() => { loadThreads(); refreshMe(); }} onDeleted={async () => { const t = await loadThreads(); setActiveId(t[0]?.id ?? null); }} />
@@ -285,8 +301,8 @@ const ACTIONS: { id: DialogAction; title: string; line: string; icon: typeof Scr
   { id: "cite", title: "Citations & references", line: "Researched on the web, never invented", icon: Quote },
 ];
 
-function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, handoff, onHandoffUsed, onChanged, onDeleted }: {
-  id: string; backend: StudioBackend; decision: EngineDecision; mode: EngineMode; citationStyles: string[]; busyElsewhere: boolean;
+function Project({ id, backend, decision, mode, coverWriter, citationStyles, busyElsewhere, handoff, onHandoffUsed, onChanged, onDeleted }: {
+  id: string; backend: StudioBackend; decision: EngineDecision; mode: EngineMode; coverWriter?: CoverCopyWriter; citationStyles: string[]; busyElsewhere: boolean;
   handoff: { view?: "assistant" | "manuscript"; run?: { action: StudioAction; options: RunOptions } } | null; onHandoffUsed: () => void;
   onChanged: () => void; onDeleted: () => void;
 }) {
@@ -314,7 +330,7 @@ function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, h
       // An untitled project takes the book's title once Claude has outlined it.
       if (o.title && titleRef.current === "Untitled project") backend.rename(id, o.title).then((t) => { setThread(t); setTitle(t.title); onChanged(); }).catch(() => {});
     })
-    : { ...apiBookEngine, label: "Written by the API · billed per use" }, [id, onChanged, engineId, backend]);
+    : { ...apiBookEngine, label: "Written by the API · billed per use", coverCopy: apiCoverCopyWriter }, [id, onChanged, engineId, backend]);
   const fileRef = useRef<HTMLInputElement>(null);
   const feedEnd = useRef<HTMLDivElement>(null);
   const abort = useRef<AbortController | null>(null);
@@ -430,7 +446,7 @@ function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, h
     return (
       <div className="min-w-0">
         {viewSwitch}
-        <ManuscriptEditor thread={thread} backend={backend} engine={engineId} citationStyles={citationStyles} onChanged={() => { reload().catch(() => {}); onChanged(); }} />
+        <ManuscriptEditor thread={thread} backend={backend} engine={engineId} coverWriter={coverWriter} citationStyles={citationStyles} onChanged={() => { reload().catch(() => {}); onChanged(); }} />
       </div>
     );
   }

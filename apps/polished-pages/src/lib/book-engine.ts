@@ -1,5 +1,6 @@
 import { authHeader } from "@/lib/session";
 import type { RuleSet } from "@/lib/knowledge";
+import { siteCoverCopyWriter, type CoverCopyWriter } from "@/lib/cover-copy";
 import type { BookDepth, BookMode, BookOutline, ImprovementType } from "@/types/book";
 
 // The Book Creator's three AI steps behind one interface, so the same wizard can
@@ -19,6 +20,8 @@ export interface BookEngine {
   outline(input: OutlineInput): Promise<BookOutline>;
   chapter(input: ChapterInput): Promise<string>;
   improve(input: ImproveInput): Promise<string>;
+  /** Writes the cover copy (blurb, tagline, bio, art direction) in Cover Studio. */
+  coverCopy?: CoverCopyWriter;
 }
 
 async function post<T>(fn: string, body: unknown, fallback: string): Promise<T> {
@@ -41,4 +44,5 @@ export const apiBookEngine: BookEngine = {
     (await post<{ chapter: string }>("generate-book-chapter", { ...rest, chapters, chapterIndex, knowledge: knowledge ?? undefined }, "Generation failed")).chapter,
   improve: async ({ content, improvementType, bookContext }) =>
     (await post<{ content: string }>("improve-book-content", { content, improvementType, bookContext }, "Improvement failed")).content,
+  coverCopy: siteCoverCopyWriter,
 };

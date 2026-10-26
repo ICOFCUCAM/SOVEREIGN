@@ -97,7 +97,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     const isBook = action.startsWith("book-");
     if (action === "chat" && !String(options?.message || "").trim()) return { status: 400, error: "Write a message first." };
     if (action === "rewrite" && !String(options?.instructions || "").trim()) return { status: 400, error: "Give the rewrite instructions." };
-    if (action !== "chat" && action !== "section" && !isBook && thread.files.length === 0 && !options?.target && !(action === "tool" && options?.tool === "compare" && options?.a)) return { status: 400, error: "Upload a document first." };
+    if (action !== "chat" && action !== "section" && !isBook && thread.files.length === 0 && !options?.target && !(action === "tool" && options?.tool === "compare" && options?.a) && !(action === "tool" && options?.tool === "cover-copy" && String(options?.text || "").trim())) return { status: 400, error: "Upload a document first." };
     if (options?.target && options.target !== "source" && !inside(path.join(store.workDir(thread.id), "out"), options.target)) return { status: 400, error: "That file isn't in this project." };
     if (action === "tool" && options?.tool === "compare") {
       for (const k of ["a", "b"]) if (options[k] && !inside(store.workDir(thread.id), options[k])) return { status: 400, error: "Pick files from this project to compare." };

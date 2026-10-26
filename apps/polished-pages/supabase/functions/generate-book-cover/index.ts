@@ -30,6 +30,10 @@ Deno.serve(async (req) => {
     const blurb: string = (body.blurb || "").toString();
     const isbn: string = (body.isbn || "").toString().trim();
     const publisher: string = (body.publisher || "").toString().trim();
+    // Cover Studio asks for artwork only and typesets the cover itself, so the
+    // lettering is always sharp, correctly spelled and inside the safe zones.
+    const textless = body.textless === true;
+    const titlePos: string = ["top", "middle", "bottom"].includes(body.titlePos) ? body.titlePos : "top";
 
     if (!instruction.trim() && !title.trim()) {
       return new Response(JSON.stringify({ error: "Describe the cover you want, or provide a title." }), {
@@ -50,7 +54,15 @@ Deno.serve(async (req) => {
         ? `Design a professional, premium FRONT BOOK COVER, portrait orientation, print-ready.${title ? ` Title text to feature prominently: "${title.slice(0, 120)}".` : ""}${subtitle ? ` Subtitle: "${subtitle.slice(0, 160)}".` : ""}${author ? ` Author name: "${author.slice(0, 80)}".` : ""} Strong typographic hierarchy, balanced composition, bookstore-quality.`
         : `Design a professional BACK BOOK COVER, portrait orientation, print-ready, visually consistent with a premium front cover.${blurb ? ` Leave a clean area for this back-cover blurb text: "${blurb.slice(0, 400)}".` : " Leave a clean area for back-cover blurb text."}${barcode}${imprint} Restrained, elegant.`;
 
-    const prompt = `${base}${instruction.trim() ? ` Art direction from the author: ${instruction.slice(0, 1200)}.` : ""} High production value, sharp, professional book-cover design.`;
+    const NO_TEXT = " The image must contain NO text of any kind: no letters, words, numbers, title, author name, logos, signatures, watermarks or typographic marks.";
+    const art =
+      side === "front"
+        ? `Create ARTWORK ONLY for a premium book cover, portrait orientation, full-bleed edge to edge.${title ? ` The book is titled "${title.slice(0, 120)}"${subtitle ? ` (${subtitle.slice(0, 160)})` : ""}; express its theme visually.` : ""} Leave a calm, uncluttered area in the ${titlePos} third where the title will be set afterwards, and a quieter strip ${titlePos === "bottom" ? "at the top" : "at the bottom"} for the author name.${NO_TEXT} Bookstore-quality composition and lighting.`
+        : `Create ARTWORK ONLY for the back of a premium book cover, portrait orientation, full-bleed, visually matching the front: the same palette and mood, but quieter and lower in detail, with large calm areas where the blurb and barcode will be placed afterwards.${NO_TEXT}`;
+
+    const prompt = textless
+      ? `${art}${instruction.trim() ? ` Art direction from the author: ${instruction.slice(0, 1200)}.` : ""} High production value, sharp and professional.`
+      : `${base}${instruction.trim() ? ` Art direction from the author: ${instruction.slice(0, 1200)}.` : ""} High production value, sharp, professional book-cover design.`;
 
     const ac = new AbortController();
     const killer = setTimeout(() => ac.abort(), 55000);

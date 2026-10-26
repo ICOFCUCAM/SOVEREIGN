@@ -26,6 +26,13 @@ if (prompt.includes("LIMITHIT")) {
   out({ type: "result", subtype: "success", is_error: true, result: "Claude AI usage limit reached", session_id: sid });
   process.exit(1);
 }
+if (prompt.includes("copy and art direction for its printed cover")) {
+  const book = fs.readFileSync("cover/book.md", "utf8");
+  fs.writeFileSync("out/cover-copy.json", JSON.stringify({ tagline: "A road worth walking", backHeadline: "Every journey begins in doubt.", blurb: `A book about ${/^# (.+)$/m.exec(book)?.[1] ?? "something"}.\n\nSecond paragraph.`, bio: "The author lives in [city].", category: "Religion / Christian Living", template: "devotional", frontArt: "A lone path at dawn", backArt: "Soft dawn sky" }));
+  say("Wrote out/cover-copy.json.");
+  out({ type: "result", subtype: "success", is_error: false, result: "done", session_id: sid });
+  process.exit(0);
+}
 if (prompt.includes("turn it into a book series")) {
   fs.mkdirSync("out/volumes", { recursive: true }); fs.mkdirSync("out/planned", { recursive: true });
   fs.writeFileSync("out/volumes/01-beginnings.md", "# Beginnings\n\n## One\n\nFirst.");

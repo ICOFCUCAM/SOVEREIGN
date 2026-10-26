@@ -400,8 +400,9 @@ const BookCreator = ({ engine = apiBookEngine, draftKey = DEFAULT_DRAFT_KEY }: {
             ) : view === "cover" ? (
               <div>
                 <h2 className="font-serif text-2xl font-bold mb-1">Cover design</h2>
-                <p className="text-sm text-muted-foreground font-sans mb-5">Generate a front and back cover with AI, guided by your art direction. ISBN &amp; publisher (set under Production) shape the barcode and imprint.</p>
-                <CoverGenerator title={outline?.title || bookTitle} subtitle={outline?.subtitle || meta.subtitle} isbn={meta.isbn} publisher={meta.publisher} pageCount={meta.pageCount} paper={meta.paper} trimSize={meta.trimSize} onGenerated={() => setCoverDone(true)} />
+                <p className="text-sm text-muted-foreground font-sans mb-5">Professional front and back covers: text-free artwork, typeset titles, a back cover with blurb and barcode, a spine sized to your book, and print-ready files. Title, author, ISBN, trim and paper come from Production.</p>
+                <CoverGenerator title={outline?.title || bookTitle} subtitle={outline?.subtitle || meta.subtitle} author={meta.author} isbn={meta.isbn} publisher={meta.publisher || meta.imprint} pageCount={meta.pageCount} paper={meta.paper} trimSize={meta.trimSize} onGenerated={() => setCoverDone(true)}
+                  bookText={() => effectiveContent} copyWriter={engine.coverCopy} bookId={autosave.docId} ensureSaved={() => autosave.flush()} />
               </div>
             ) : view === "knowledge" ? (
               <div>

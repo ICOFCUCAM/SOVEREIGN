@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { extractFileText } from "@/lib/extract-file-text";
 import type { BookEngine } from "@/lib/book-engine";
+import { bookExcerpt, parseCoverCopy, type CoverCopyWriter } from "@/lib/cover-copy";
 import type { BookOutline } from "@/types/book";
 import type { Manuscript } from "@/lib/manuscript";
 
@@ -148,6 +149,7 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "translation.md": "Translated book",
   "translation-notes.md": "Translation notes",
   "marketing-pack.md": "Marketing pack",
+  "cover-copy.json": "Cover copy",
   "study-guide.md": "Study guide",
   "index.md": "Index",
   "glossary.md": "Glossary",
@@ -173,7 +175,7 @@ export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? (p.startsWith("book
 // ── Book wizard on Claude Code ───────────────────────────────────────────────
 // The Book Creator's engine for Claude Studio: each step is a runner job in the
 // project, awaited to the end, and its one expected file is the result.
-async function runToFile(threadId: string, action: "book-outline" | "book-chapter" | "book-improve", options: Record<string, unknown>): Promise<string> {
+async function runToFile(threadId: string, action: "book-outline" | "book-chapter" | "book-improve" | "tool", options: Record<string, unknown>): Promise<string> {
   const job = await studio.run(threadId, action as StudioAction, options as RunOptions);
   let end: Extract<StudioEvent, { type: "done" }> | null = null;
   const ctl = new AbortController();
@@ -198,5 +200,14 @@ export function claudeBookEngine(threadId: string, onOutline?: (o: BookOutline) 
     },
     chapter: ({ previousChapters: _previous, ...i }) => runToFile(threadId, "book-chapter", { ...i }),
     improve: (i) => runToFile(threadId, "book-improve", { ...i }),
+    coverCopy: claudeCoverCopyWriter(() => Promise.resolve(threadId)),
+  };
+}
+
+/** Cover copy on the owner's Claude Code: a job in the given project, with the book's text sent along. */
+export function claudeCoverCopyWriter(thread: () => Promise<string>): CoverCopyWriter {
+  return {
+    label: "Claude Code",
+    write: async (i) => parseCoverCopy(await runToFile(await thread(), "tool", { tool: "cover-copy", title: i.title, subtitle: i.subtitle, author: i.author, text: bookExcerpt(i.text, 600_000) })),
   };
 }

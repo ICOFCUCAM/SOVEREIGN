@@ -7,6 +7,7 @@ import {
 } from "@/lib/claude-studio";
 import { API_SYSTEM, VOICE_RULE, compareApiPrompt, toolApiPlan, toolById, type ToolId } from "@/lib/studio-tools";
 import { importText, kindDef, type Manuscript } from "@/lib/manuscript";
+import { coverCopyPrompt, parseCoverCopy, type CoverCopyWriter } from "@/lib/cover-copy";
 
 // Which engine does the work, and where projects live.
 //   Engine: the owner's Claude Code (on the runner, their plan) or the API (billed per use).
@@ -49,6 +50,12 @@ async function callApi(user: string, opts: { system?: string; web?: boolean; max
   if (!r.ok) throw new Error((body as { error?: string }).error || `The API answered ${r.status}.`);
   return body as { text: string; sources: { url: string; title: string }[] };
 }
+
+/** Cover copy on the API (billed per use), from the book's opening, headings and close when it's long. */
+export const apiCoverCopyWriter: CoverCopyWriter = {
+  label: "API",
+  write: async (i) => parseCoverCopy((await callApi(coverCopyPrompt(i), { maxTokens: 4000 })).text),
+};
 
 interface ApiContext {
   thread: StudioThread;

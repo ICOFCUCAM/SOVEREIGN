@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, Check, Headphones, Layers, Library, Loader2, MoreHorizontal, PenLine, Plus, Search } from "lucide-react";
+import { BookOpen, Check, Headphones, Palette, Layers, Library, Loader2, MoreHorizontal, PenLine, Plus, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AudiobookPanel from "@/components/book/AudiobookPanel";
+import CoverDialog from "@/components/studio/CoverDialog";
+import { latestCovers, loadCover } from "@/lib/book-covers";
+import type { CoverCopyWriter } from "@/lib/cover-copy";
 import { createSeries, getSeries, listSeries, setDocumentSeries, type SeriesSummary } from "@/lib/series";
 import { importText } from "@/lib/manuscript";
 import { Button } from "@/components/ui/button";
@@ -20,7 +23,8 @@ const GRADIENT = "bg-gradient-to-r from-[hsl(221_83%_53%)] to-[hsl(262_83%_58%)]
 const SPINES = ["from-[#1e3a5f] to-[#0f2440]", "from-[#5b2a3c] to-[#3a1626]", "from-[#2f4f3a] to-[#1b3024]", "from-[#4a3b1f] to-[#2d2311]", "from-[#3b2f5e] to-[#22193d]", "from-[#1f4a4f] to-[#11292c]"];
 const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 
-export default function MyBooks({ onWorkInStudio, onLearnVoice }: {
+export default function MyBooks({ coverWriter, onWorkInStudio, onLearnVoice }: {
+  coverWriter?: CoverCopyWriter;
   onWorkInStudio: (title: string, markdown: string) => Promise<void>;
   onLearnVoice: (books: { title: string; markdown: string }[]) => Promise<void>;
 }) {
@@ -34,6 +38,9 @@ export default function MyBooks({ onWorkInStudio, onLearnVoice }: {
   const [audio, setAudio] = useState<{ doc: DocSummary; chapters: { title: string; content: string }[] } | null>(null);
   const [seriesFor, setSeriesFor] = useState<DocSummary | null>(null);
   const [series, setSeries] = useState<SeriesSummary[]>([]);
+  const [coverFor, setCoverFor] = useState<DocSummary | null>(null);
+  // Each book's saved cover (its front image), shown instead of the plain spine.
+  const [covers, setCovers] = useState<Map<string, string>>(new Map());
   const [memberOf, setMemberOf] = useState<Map<string, { id: string; title: string; index: number | null }>>(new Map());
 
   const loadSeries = async () => {
@@ -46,7 +53,16 @@ export default function MyBooks({ onWorkInStudio, onLearnVoice }: {
     }
     setMemberOf(map);
   };
-  useEffect(() => { listDocuments().then((d) => setDocs(d.filter((x) => x.kind === "book"))).catch(() => setDocs([])); void loadSeries(); }, []);
+  const loadCovers = async (all: DocSummary[]) => {
+    const latest = latestCovers(all);
+    const out = new Map<string, string>();
+    await Promise.all([...latest].map(async ([bookId, c]) => { const x = await loadCover(c.id).catch(() => null); if (x?.payload.front) out.set(bookId, x.payload.front); }));
+    setCovers(out);
+  };
+  useEffect(() => {
+    listDocuments().then((d) => { setDocs(d.filter((x) => x.kind === "book")); void loadCovers(d); }).catch(() => setDocs([]));
+    void loadSeries();
+  }, []);
 
   const shelves = useMemo(() => {
     const used = new Set((docs ?? []).map(shelfOf).filter(Boolean) as string[]);
@@ -145,10 +161,17 @@ export default function MyBooks({ onWorkInStudio, onLearnVoice }: {
               const s = shelfOf(d); const done = isComplete(d);
               return (
                 <li key={d.id} className="group relative flex gap-4 rounded-2xl border border-border bg-card p-4 transition hover:shadow-md">
-                  <div className={`relative grid h-32 w-[88px] shrink-0 place-items-center overflow-hidden rounded-md bg-gradient-to-br ${SPINES[hash(d.title) % SPINES.length]} p-2 text-center shadow-[4px_6px_14px_-6px_rgba(0,0,0,0.5)]`}>
-                    <span className="absolute inset-y-0 left-1.5 w-px bg-white/15" />
-                    <span className="line-clamp-4 font-serif text-[12px] font-semibold leading-tight text-white">{d.title}</span>
-                  </div>
+                  {covers.get(d.id) ? (
+                    <button type="button" onClick={() => setCoverFor(d)} aria-label={`Edit the cover of ${d.title}`} className="relative h-32 w-[88px] shrink-0 overflow-hidden rounded-[3px] shadow-[4px_6px_14px_-6px_rgba(0,0,0,0.5)]">
+                      <img src={covers.get(d.id)} alt={`Cover of ${d.title}`} className="h-full w-full object-cover" />
+                      <span className="absolute inset-y-0 left-1 w-px bg-white/20" />
+                    </button>
+                  ) : (
+                    <div className={`relative grid h-32 w-[88px] shrink-0 place-items-center overflow-hidden rounded-md bg-gradient-to-br ${SPINES[hash(d.title) % SPINES.length]} p-2 text-center shadow-[4px_6px_14px_-6px_rgba(0,0,0,0.5)]`}>
+                      <span className="absolute inset-y-0 left-1.5 w-px bg-white/15" />
+                      <span className="line-clamp-4 font-serif text-[12px] font-semibold leading-tight text-white">{d.title}</span>
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start gap-2">
                       <h3 className="line-clamp-2 flex-1 font-serif text-base font-bold leading-snug">{d.title}</h3>
@@ -157,6 +180,7 @@ export default function MyBooks({ onWorkInStudio, onLearnVoice }: {
                         <DropdownMenuContent align="end" className="max-h-[60vh] w-56 overflow-y-auto">
                           <DropdownMenuItem asChild><Link to={`/library?open=${d.id}`}><Library className="mr-2 h-4 w-4" /> Open in Library</Link></DropdownMenuItem>
                           <DropdownMenuItem onClick={() => toStudio(d)}><BookOpen className="mr-2 h-4 w-4" /> Keep writing in Studio</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setCoverFor(d)}><Palette className="mr-2 h-4 w-4" /> {covers.has(d.id) ? "Edit cover" : "Design cover"}</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openAudio(d)}><Headphones className="mr-2 h-4 w-4" /> Make audiobook</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setSeriesFor(d)}><Layers className="mr-2 h-4 w-4" /> {memberOf.has(d.id) ? "Change series" : "Add to series"}</DropdownMenuItem>
                           <DropdownMenuItem onClick={async () => patch(d.id, await setComplete(d, !done))}><Check className="mr-2 h-4 w-4" /> {done ? "Mark as in progress" : "Mark as completed"}</DropdownMenuItem>
@@ -197,6 +221,11 @@ export default function MyBooks({ onWorkInStudio, onLearnVoice }: {
             <AudiobookPanel chapters={audio.chapters} bookTitle={audio.doc.title} parentId={audio.doc.id} />
           </DialogContent>
         </Dialog>
+      )}
+
+      {coverFor && (
+        <CoverDialog title={coverFor.title} bookId={coverFor.id} bookText={() => markdownOf(coverFor)} copyWriter={coverWriter}
+          onClose={() => setCoverFor(null)} onSaved={() => { listDocuments().then(loadCovers).catch(() => {}); }} />
       )}
 
       {seriesFor && (

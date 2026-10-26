@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDown, ArrowUp, BookOpen, Check, ChevronDown, Download, FileText, Library, Loader2, PenLine, Plus, Quote, Sparkles, Square, Trash2, Wand2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, BookOpen, Palette, Check, ChevronDown, Download, FileText, Library, Loader2, PenLine, Plus, Quote, Sparkles, Square, Trash2, Wand2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import Markdown from "@/components/studio/Markdown";
+import CoverDialog from "@/components/studio/CoverDialog";
+import type { CoverCopyWriter } from "@/lib/cover-copy";
 import { saveDocument, setTags } from "@/lib/documents";
 import { COMPLETE, DEFAULT_SHELVES, SHELF } from "@/lib/bookshelf";
 import { SECTION_KINDS, authorshipNotes, compile, importText, insertSection, kindDef, moveSection, words, type Manuscript, type SectionGroup } from "@/lib/manuscript";
@@ -37,7 +39,8 @@ const download = (name: string, text: string) => {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 };
 
-export default function ManuscriptEditor({ thread, backend, engine, citationStyles, onChanged }: {
+export default function ManuscriptEditor({ thread, backend, engine, coverWriter, citationStyles, onChanged }: {
+  coverWriter?: CoverCopyWriter;
   thread: StudioThread; backend: StudioBackend; engine: EngineId | null; citationStyles: string[]; onChanged: () => void;
 }) {
   const { toast } = useToast();
@@ -138,8 +141,9 @@ export default function ManuscriptEditor({ thread, backend, engine, citationStyl
     update(next); setProposal(null);
   };
 
-  const saveBook = async () => {
-    if (!m) return;
+  const [coverOpen, setCoverOpen] = useState(false);
+  const saveBook = async (): Promise<string | null> => {
+    if (!m) return null;
     await persist();
     const md = compile(m, { contents });
     const title = m.title.trim() || "Untitled book";
@@ -149,7 +153,8 @@ export default function ManuscriptEditor({ thread, backend, engine, citationStyl
       if (tags.length) await setTags(docId, tags).catch(() => {});
       setCompiled(docId);
       toast({ title: "Saved to your Library", description: `“${title}”${shelf ? ` on the ${shelf} shelf` : ""}.` });
-    } catch (e) { toast({ title: "Couldn't save the book", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+      return docId;
+    } catch (e) { toast({ title: "Couldn't save the book", description: e instanceof Error ? e.message : "", variant: "destructive" }); return null; }
   };
 
   const jumpTo = (at: number) => { const t = area.current; if (!t) return; t.focus(); t.setSelectionRange(at, at); };
@@ -335,10 +340,15 @@ export default function ManuscriptEditor({ thread, backend, engine, citationStyl
               <label className="flex items-center gap-2 text-sm"><Switch checked={contents} onCheckedChange={setContents} /> Table of contents</label>
               {compiled
                 ? <Button asChild size="sm" className={`ml-auto rounded-full ${GRADIENT}`}><Link to={`/library?open=${compiled}`}><Library className="h-4 w-4" /> Open in Library</Link></Button>
-                : <Button size="sm" className={`ml-auto rounded-full ${GRADIENT}`} onClick={saveBook} disabled={!m.sections.length}><BookOpen className="h-4 w-4" /> Save book to my Library</Button>}
+                : <Button size="sm" className={`ml-auto rounded-full ${GRADIENT}`} onClick={() => void saveBook()} disabled={!m.sections.length}><BookOpen className="h-4 w-4" /> Save book to my Library</Button>}
+              <Button size="sm" variant="outline" className="rounded-full" onClick={() => setCoverOpen(true)} disabled={!m.sections.length}><Palette className="h-4 w-4" /> Design the cover</Button>
             </div>
             {compiled && <button type="button" className="mt-2 text-xs text-primary underline-offset-2 hover:underline" onClick={() => setCompiled(null)}>Saved. Save again as a new version</button>}
           </div>
+          {coverOpen && (
+            <CoverDialog title={m.title.trim() || "Untitled book"} bookId={compiled} ensureSaved={saveBook} bookText={() => compile(m, { contents: false })}
+              copyWriter={coverWriter} onClose={() => setCoverOpen(false)} />
+          )}
         </div>
       </div>
     </div>
