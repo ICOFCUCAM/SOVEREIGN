@@ -28,6 +28,7 @@ export const COVER_COPY_RULES = `- tagline: one line for the front cover, under 
 - template: the cover style that suits the book, one of ${TEMPLATES.map((t) => t.id).join(", ")}.
 - frontArt: art direction for a front-cover illustration that contains NO text, letters or logos: subject, composition, mood, palette, medium, and where to leave calm space for the title.
 - backArt: art direction for a quieter, matching back-cover background with large calm areas for text, also with no text.
+Write everything except the art direction in the language the book is written in.
 Never invent endorsements, reviews, awards, sales figures or facts about the author.`;
 
 export function coverCopyPrompt(i: CoverCopyInput) {

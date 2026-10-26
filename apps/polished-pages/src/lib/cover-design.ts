@@ -109,6 +109,7 @@ export const TEMPLATES: CoverTemplate[] = [
 export const templateById = (id: string) => TEMPLATES.find((t) => t.id === id) ?? TEMPLATES[0];
 
 export interface Endorsement { quote: string; by: string }
+export interface ArtCredit { text: string; required: boolean; license: string; page: string }
 
 export interface CoverDesign {
   title: string;
@@ -128,6 +129,9 @@ export interface CoverDesign {
   shade: number; // 0 – 1, strength of the scrim
   frontArt: string | null;
   backArt: string | null;
+  /** Where a free image came from, and whether its licence needs the credit printed. */
+  frontCredit: ArtCredit | null;
+  backCredit: ArtCredit | null;
   /** How the back is filled when there's no back artwork. */
   backFill: "front-blur" | "solid";
   backHeadline: string;
@@ -150,7 +154,7 @@ export function defaultDesign(p: Partial<CoverDesign> = {}): CoverDesign {
   return {
     title: "", subtitle: "", author: "", seriesLine: "", tagline: "",
     template: "classic", titleFont: null, bodyFont: null, titleScale: 1, titlePos: null, ink: null, accent: null, shade: 0.55,
-    frontArt: null, backArt: null, backFill: "front-blur",
+    frontArt: null, backArt: null, frontCredit: null, backCredit: null, backFill: "front-blur",
     backHeadline: "", blurb: "", endorsements: [], bio: "", authorPhoto: null,
     publisher: "", category: "", price: "", isbn: "", reserveBarcode: true,
     trimId: "6x9", paper: "Cream", pages: 0,
@@ -222,6 +226,10 @@ export function coverChecks(d: CoverDesign): { level: "ok" | "warn"; text: strin
   if (isbn && !toIsbn13(isbn)) out.push({ level: "warn", text: "That ISBN isn't valid (check the digits)." });
   else if (isbn) out.push({ level: "ok", text: "ISBN barcode drawn as sharp vector lines in the print PDF." });
   else if (d.reserveBarcode) out.push({ level: "ok", text: "Barcode area kept clear: KDP adds its own barcode there." });
+  for (const c of [d.frontArt ? d.frontCredit : null, d.backArt ? d.backCredit : null]) {
+    if (c?.required) out.push({ level: "ok", text: `Image credit printed on the back, as its licence (${c.license}) requires.` });
+    else if (c) out.push({ level: "ok", text: `${c.text} (${c.license}): free to use on a cover, no credit required.` });
+  }
   if (d.blurb.trim().split(/\s+/).length > 230) out.push({ level: "warn", text: "The blurb is long for a back cover (aim for 120–200 words)." });
   if (d.endorsements.some((e) => /\[|\]/.test(e.quote + e.by))) out.push({ level: "warn", text: "An endorsement still has a [placeholder]. Use only real quotes you have permission to print." });
   if (/\[[^\]]+\]/.test(d.bio)) out.push({ level: "warn", text: "The author bio still has [placeholders] to fill in." });

@@ -324,7 +324,7 @@ Write ./out/cover-copy.json: valid JSON only (no comments, no code fences) with 
 - template: one of classic, modern, devotional, academic, children, thriller (whichever suits the book).
 - frontArt: art direction for a front-cover illustration with NO text, letters or logos: subject, composition, mood, palette, medium, and where to leave calm space for the title.
 - backArt: art direction for a quieter, matching back-cover background with large calm areas for text, also with no text.
-Never invent endorsements, reviews, awards, sales figures or facts about the author. After writing, re-read the file and make sure it parses as JSON.`,
+Write everything except frontArt and backArt in the language the book is written in. Never invent endorsements, reviews, awards, sales figures or facts about the author. After writing, re-read the file and make sure it parses as JSON.`,
     }),
   },
 };

@@ -14,6 +14,7 @@ import { markdownToEpub } from "@/lib/export-epub";
 import { markdownToPrintPdf } from "@/lib/export-print-pdf";
 import { markdownToIngramSparkPdf } from "@/lib/export-ingramspark-pdf";
 import SpineMark from "@/components/brand/SpineMark";
+import InteriorType from "@/components/book/InteriorType";
 
 type Fmt = "epub" | "kdp" | "ingram" | "all";
 const Chips = ({ items }: { items?: string[] }) => (
@@ -122,6 +123,10 @@ const ExportCenter = () => {
                 </select>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <Label className="font-sans text-xs">Interior design</Label>
+              <InteriorType />
+            </div>
             <div className="space-y-1.5">
               <Label className="font-sans text-xs">Author (for the IngramSpark title page, optional)</Label>
               <Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="e.g. Alex Morgan" maxLength={80} />
@@ -189,7 +194,7 @@ const ExportCenter = () => {
                 {busy === "all" ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Package className="mr-1 h-4 w-4" />} Export store bundle
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground font-sans">RTL languages export via EPUB; the text-interior PDFs are for left-to-right scripts. Need a cover? Use the spine calculator below.</p>
+            <p className="text-xs text-muted-foreground font-sans">Print interiors work in every writing system, right-to-left included. Need a cover? Use the spine calculator below.</p>
           </>
         )}
       </CardContent>

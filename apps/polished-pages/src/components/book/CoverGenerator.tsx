@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertTriangle, BookOpen, Check, CheckCircle2, Crown, Download, FileDown, ImageIcon, Loader2, Plus, Ruler, Save, Sparkles, Trash2, Upload, Wand2 } from "lucide-react";
+import { AlertTriangle, BookOpen, Images, Check, CheckCircle2, Crown, Download, FileDown, ImageIcon, Loader2, Plus, Ruler, Save, Sparkles, Trash2, Upload, Wand2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +22,7 @@ import { findBookCover, saveCover } from "@/lib/book-covers";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
 import CoverPreview from "@/components/book/CoverPreview";
 import CoverPackage from "@/components/book/CoverPackage";
+import FreeImages from "@/components/book/FreeImages";
 
 type Side = "front" | "back";
 
@@ -107,6 +108,7 @@ const CoverGenerator = (props: {
   const [words, setWords] = useState<number | null>(null);
   const [coverLangs, setCoverLangs] = useState<string[]>([]);
   const [batchImg, setBatchImg] = useState<Record<string, string>>({});
+  const [freeFor, setFreeFor] = useState<Side | null>(null);
   const fileFor = useRef<"front" | "back" | "photo">("front");
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -148,7 +150,7 @@ const CoverGenerator = (props: {
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || "Artwork generation failed"); }
       const src = await shrinkImage((await res.json()).image as string);
-      set(side === "front" ? "frontArt" : "backArt", src);
+      setD((x) => ({ ...x, [side === "front" ? "frontArt" : "backArt"]: src, [side === "front" ? "frontCredit" : "backCredit"]: null }));
     } catch (e) {
       toast({ title: "Couldn't create the artwork", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally { setBusy(null); }
@@ -159,7 +161,8 @@ const CoverGenerator = (props: {
     if (!/^image\/(png|jpe?g|webp)$/.test(f.type)) { toast({ title: "Use a PNG, JPEG or WebP image", variant: "destructive" }); return; }
     const which = fileFor.current;
     const src = await shrinkImage(await readFile(f), which === "photo" ? 800 : 3000, 0.92);
-    set(which === "front" ? "frontArt" : which === "back" ? "backArt" : "authorPhoto", src);
+    if (which === "photo") set("authorPhoto", src);
+    else setD((x) => ({ ...x, [which === "front" ? "frontArt" : "backArt"]: src, [which === "front" ? "frontCredit" : "backCredit"]: null }));
   };
 
   const writeCopy = async () => {
@@ -219,7 +222,7 @@ const CoverGenerator = (props: {
   }
 
   const checks = coverChecks(d);
-  if (dpi !== null && dpi < 200) checks.push({ level: "warn", text: `The front artwork prints at about ${dpi} dpi on this trim (300 is ideal). Generated art is 1024 × 1536; for sharper print, upload a larger image.` });
+  if (dpi !== null && dpi < 200) checks.push({ level: "warn", text: `The front artwork prints at about ${dpi} dpi on this trim (300 is ideal)${d.frontCredit ? "" : "; generated art is 1024 × 1536"}. For sharper print, use a larger image.` });
   if (overflow) checks.push({ level: "warn", text: "The back-cover text doesn't fit above the barcode, even made smaller. Shorten the blurb, endorsements or bio." });
   const isbnOk = !d.isbn.trim() || Boolean(toIsbn13(d.isbn));
   const field = (k: keyof CoverDesign, label: string, o: { ph?: string; max?: number; area?: number } = {}) => (
@@ -245,9 +248,13 @@ const CoverGenerator = (props: {
             <div className="flex flex-wrap gap-1.5">
               <Button size="sm" variant="hero" className="h-8" disabled={busy !== null} onClick={() => generate(side)}><Sparkles className="mr-1 h-3.5 w-3.5" /> {src ? "Regenerate" : "Generate"}</Button>
               <Button size="sm" variant="heroOutline" className="h-8" onClick={() => pickFile(side)}><Upload className="mr-1 h-3.5 w-3.5" /> Upload</Button>
+              <Button size="sm" variant="heroOutline" className="h-8" onClick={() => setFreeFor(side)}><Images className="mr-1 h-3.5 w-3.5" /> Free images</Button>
             </div>
           </div>
         </div>
+        {(side === "front" ? d.frontCredit : d.backCredit) && src && (
+          <p className="text-[11px] text-muted-foreground">{(side === "front" ? d.frontCredit : d.backCredit)!.text} · {(side === "front" ? d.frontCredit : d.backCredit)!.license}{(side === "front" ? d.frontCredit : d.backCredit)!.required ? " (credit printed on the back)" : ""}</p>
+        )}
         {side === "front" && <div className="flex flex-wrap gap-1">{STYLE_PRESETS.map((p) => (
           <button key={p.label} type="button" onClick={() => setArtDir((a) => ({ ...a, front: a.front ? `${a.front} ${p.text}` : p.text }))}
             className="rounded-full border border-border px-2 py-0.5 text-[11px] font-sans text-muted-foreground transition hover:border-primary/40 hover:text-primary">{p.label}</button>))}</div>}
@@ -257,6 +264,10 @@ const CoverGenerator = (props: {
 
   return (
     <div className="space-y-6" data-testid="cover-studio">
+      {freeFor && (
+        <FreeImages side={freeFor} initial={artDir[freeFor].split(/[.,;]/)[0].slice(0, 60) || d.title} onClose={() => setFreeFor(null)}
+          onPick={async (src, credit) => { const img = await shrinkImage(src, 3000, 0.92); setD((x) => ({ ...x, [freeFor === "front" ? "frontArt" : "backArt"]: img, [freeFor === "front" ? "frontCredit" : "backCredit"]: credit })); }} />
+      )}
       <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = ""; }} />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
         {/* Preview */}
@@ -325,7 +336,7 @@ const CoverGenerator = (props: {
           </TabsContent>
 
           <TabsContent value="art" className="space-y-3 pt-2">
-            <p className="text-xs text-muted-foreground">Artwork is created without any lettering; the type is set by Cover Studio, so it's always sharp and spelled right. Generated by OpenAI's image model, billed to your plan, or upload your own.</p>
+            <p className="text-xs text-muted-foreground">Artwork never carries lettering; Cover Studio sets the type, so it's always sharp and spelled right. Generate it with OpenAI's image model (billed to your plan), pick a free image (public domain, CC0, CC BY, Pexels, Unsplash, Pixabay), or upload your own.</p>
             {artPanel("front")}
             <div className="space-y-2 rounded-xl border border-border p-3">
               <span className="text-sm font-semibold">Back background</span>

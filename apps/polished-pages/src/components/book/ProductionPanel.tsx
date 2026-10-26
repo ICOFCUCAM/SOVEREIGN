@@ -16,6 +16,7 @@ import { TRIM_SIZES, PAPER_MM_PER_PAGE, getTrim } from "@/lib/print-sizes";
 import { markdownToPrintPdf } from "@/lib/export-print-pdf";
 import { markdownToIngramSparkPdf } from "@/lib/export-ingramspark-pdf";
 import { markdownToEpub } from "@/lib/export-epub";
+import InteriorType from "@/components/book/InteriorType";
 import { getPublishingAdvice, type PublishingAdvice } from "@/lib/publishing-advisor";
 
 const MM_PER_IN = 25.4;
@@ -325,6 +326,10 @@ const ProductionPanel = ({
                 <option value="">Choose…</option>
                 {TRIM_SIZES.filter((t) => t.id !== "a4").map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
               </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="font-sans text-xs">Interior design</Label>
+              <div><InteriorType /></div>
             </div>
             <div className="space-y-1.5">
               <Label className="font-sans text-xs">Page count</Label>

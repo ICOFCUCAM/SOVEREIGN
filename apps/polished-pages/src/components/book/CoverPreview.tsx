@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { drawCover, loadCoverFonts, loadCoverImages, partSize, type CoverImages, type CoverPart } from "@/lib/cover-render";
 import type { CoverDesign } from "@/lib/cover-design";
+import { scriptsIn } from "@/lib/typeset/scripts";
 
 // Live canvas preview of a cover part, redrawn as the design changes. Drawn at
 // the element's real pixel size (times the screen's density), so it's crisp.
@@ -14,7 +15,9 @@ export default function CoverPreview({ design, part, guides, className, onOverfl
   const [width, setWidth] = useState(0);
 
   useEffect(() => { let on = true; loadCoverImages(design).then((x) => on && setImgs(x)); return () => { on = false; }; }, [design.frontArt, design.backArt, design.authorPhoto]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { let on = true; loadCoverFonts(design).then(() => on && setFontsReady((n) => n + 1)); return () => { on = false; }; }, [design.template, design.titleFont]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Reload when the faces change, or the text starts using another writing system.
+  const scripts = [...scriptsIn(`${design.title} ${design.subtitle} ${design.author} ${design.tagline} ${design.blurb} ${design.backHeadline} ${design.bio}`)].join(",");
+  useEffect(() => { let on = true; loadCoverFonts(design).then(() => on && setFontsReady((n) => n + 1)); return () => { on = false; }; }, [design.template, design.titleFont, design.bodyFont, scripts]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const el = box.current;
     if (!el || typeof ResizeObserver === "undefined") return;

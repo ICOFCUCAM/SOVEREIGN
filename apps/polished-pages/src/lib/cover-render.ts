@@ -7,6 +7,8 @@ import {
   type CoverDesign, type CoverTemplate, type Rect,
 } from "@/lib/cover-design";
 import "@/lib/cover-fonts";
+import { SCRIPT_FACES } from "@/lib/typeset/font-files";
+import { canBreakAfter, isRtl, scriptsIn, tokenize, type ScriptId } from "@/lib/typeset/scripts";
 
 export type CoverPart = "wrap" | "front" | "back" | "spine";
 export interface CoverImages { front: HTMLImageElement | null; back: HTMLImageElement | null; photo: HTMLImageElement | null }
@@ -35,8 +37,26 @@ export async function loadCoverImages(d: CoverDesign): Promise<CoverImages> {
 }
 
 /** Waits for the cover typefaces, so the first render isn't set in a fallback font. */
+// Faces for non-Latin text (Arabic, Hebrew, Amharic, Hindi, Chinese…), the
+// same files the interior typesetter embeds, registered with the browser when
+// a cover needs them and placed after the chosen face in every font list.
+const registered = new Set<ScriptId>();
+let scriptStack = "";
+async function loadScriptFonts(text: string) {
+  const need = [...scriptsIn(text)].filter((s) => !registered.has(s));
+  await Promise.all(need.map(async (s) => {
+    const f = SCRIPT_FACES[s];
+    const faces = [new FontFace(f.family, `url(${f.files.regular})`, { weight: "400" }), new FontFace(f.family, `url(${f.files.bold})`, { weight: "700" })];
+    await Promise.all(faces.map(async (x) => { try { await x.load(); document.fonts.add(x); } catch { /* offline: the browser falls back */ } }));
+    registered.add(s);
+  }));
+  scriptStack = [...registered].map((s) => `'${SCRIPT_FACES[s].family}'`).join(", ");
+}
+const coverText = (d: CoverDesign) => [d.title, d.subtitle, d.author, d.seriesLine, d.tagline, d.backHeadline, d.blurb, d.bio, d.publisher, d.category, ...d.endorsements.flatMap((e) => [e.quote, e.by])].join(" ");
+
 export async function loadCoverFonts(d: CoverDesign) {
   if (typeof document === "undefined" || !document.fonts) return;
+  await loadScriptFonts(coverText(d));
   const t = templateById(d.template);
   const keys = [d.titleFont ?? t.titleFont, d.bodyFont ?? t.bodyFont];
   await Promise.all(keys.flatMap((k) => {
@@ -81,22 +101,31 @@ function averageHex(img: HTMLImageElement, edge = false): string {
   return `#${[r, g, b].map((v) => Math.round(v * k).toString(16).padStart(2, "0")).join("")}`;
 }
 
-function font(weight: number | string, size: number, family: string, italic = false) { return `${italic ? "italic " : ""}${weight} ${size}px ${family}`; }
+function font(weight: number | string, size: number, family: string, italic = false) {
+  // Script faces go right after the chosen face, before its generic fallback.
+  const fam = scriptStack ? family.replace(/^([^,]+)/, `$1, ${scriptStack}`) : family;
+  return `${italic ? "italic " : ""}${weight} ${size}px ${fam}`;
+}
 function spacing(ctx: Ctx, em: number, size: number) {
   const c = ctx as Ctx & { letterSpacing?: string };
   if ("letterSpacing" in c) c.letterSpacing = `${em * size}px`;
 }
 
+/** Breaks text into lines no wider than maxW: at spaces, and between Chinese/Japanese characters. */
 function wrap(ctx: Ctx, text: string, maxW: number): string[] {
   const out: string[] = [];
   for (const para of text.split(/\n/)) {
-    const words = para.split(/\s+/).filter(Boolean);
-    let line = "";
-    for (const w of words) {
-      const t = line ? `${line} ${w}` : w;
-      if (ctx.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t;
+    const toks = tokenize(para);
+    let line = "", pending = "";
+    // Group tokens that can't be separated (a word and its punctuation).
+    const groups: string[] = [];
+    for (const t of toks) { pending += t.text; if (canBreakAfter(t)) { groups.push(pending + (t.space ? " " : "")); pending = ""; } }
+    if (pending) groups.push(pending);
+    for (const g of groups) {
+      const tst = line + g;
+      if (ctx.measureText(tst.trimEnd()).width > maxW && line) { out.push(line.trimEnd()); line = g; } else line = tst;
     }
-    out.push(line);
+    out.push(line.trimEnd());
   }
   return out;
 }
@@ -114,7 +143,8 @@ function fit(ctx: Ctx, text: string, f: (size: number) => string, maxW: number, 
 
 function textLines(ctx: Ctx, lines: string[], x: number, y: number, lh: number, align: CanvasTextAlign) {
   ctx.textAlign = align;
-  for (const l of lines) { ctx.fillText(l, x, y); y += lh; }
+  for (const l of lines) { ctx.direction = isRtl(l) ? "rtl" : "ltr"; ctx.fillText(l, x, y); y += lh; }
+  ctx.direction = "ltr";
   return y;
 }
 
@@ -168,8 +198,10 @@ function drawFront(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: 
   if (imgs.front) cover(ctx, imgs.front, panel); else fillBg(ctx, panel, t);
   const S = SAFE_MM;
   const x0 = T.x + S, w = T.w - 2 * S;
-  const cx = p.t.align === "center" ? T.x + T.w / 2 : x0;
-  const align: CanvasTextAlign = t.align === "center" ? "center" : "left";
+  // Left-aligned templates set right-to-left titles (Arabic, Hebrew) from the right.
+  const rtl = isRtl(d.title);
+  const cx = p.t.align === "center" ? T.x + T.w / 2 : rtl ? x0 + w : x0;
+  const align: CanvasTextAlign = t.align === "center" ? "center" : rtl ? "right" : "left";
 
   let bandBottom = 0;
   if (t.band) {
@@ -241,7 +273,9 @@ function drawFront(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: 
       spacing(ctx, caps ? 0.12 : 0.04, authorSize);
       ctx.fillStyle = t.band && p.pos !== "bottom" ? "#ffffff" : p.ink;
       ctx.textAlign = align;
+      ctx.direction = isRtl(d.author) ? "rtl" : "ltr";
       ctx.fillText(caps ? d.author.toUpperCase() : d.author, cx, ay, w);
+      ctx.direction = "ltr";
       spacing(ctx, 0, authorSize);
     });
   }
@@ -270,8 +304,13 @@ function drawBack(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: R
 
   const S = SAFE_MM;
   const x = T.x + S + T.w * 0.02, w = T.w - 2 * S - T.w * 0.04;
+  // Right-to-left back-cover text runs from the right edge of the column.
+  const rtl = isRtl(d.blurb || d.backHeadline || d.title);
+  const bx = rtl ? x + w : x, ba: CanvasTextAlign = rtl ? "right" : "left";
   const top = T.y + S + T.h * 0.02;
-  const limit = barcode.y - T.h * 0.03;
+  const creditCount = [d.frontArt ? d.frontCredit : null, d.backArt ? d.backCredit : null].filter((c) => c?.required).length;
+  // Room is kept above the barcode line for any required image credit.
+  const limit = barcode.y - T.h * 0.03 - creditCount * Math.min(3.4, T.w * 0.02) * 2.2;
   const body = p.body;
 
   // Lay out at a scale; shrink until everything fits above the barcode line.
@@ -282,7 +321,7 @@ function drawBack(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: R
       const hs = T.w * 0.05 * k;
       ctx.font = p.tf(t.titleWeight, hs);
       const lines = wrap(ctx, d.backHeadline, w);
-      if (draw) { ctx.fillStyle = d.accent ?? (ink === "#ffffff" ? t.accent : ink); textLines(ctx, lines, x, y + hs, hs * 1.15, "left"); }
+      if (draw) { ctx.fillStyle = d.accent ?? (ink === "#ffffff" ? t.accent : ink); textLines(ctx, lines, bx, y + hs, hs * 1.15, ba); }
       y += lines.length * hs * 1.15 + bs * 1.2;
     }
     if (d.blurb.trim()) {
@@ -290,7 +329,7 @@ function drawBack(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: R
       if (draw) ctx.fillStyle = ink;
       for (const para of d.blurb.trim().split(/\n\s*\n/)) {
         const lines = wrap(ctx, para.replace(/\n/g, " "), w);
-        if (draw) textLines(ctx, lines, x, y + bs, bs * 1.45, "left");
+        if (draw) textLines(ctx, lines, bx, y + bs, bs * 1.45, ba);
         y += lines.length * bs * 1.45 + bs * 0.7;
       }
     }
@@ -300,11 +339,11 @@ function drawBack(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: R
       for (const e of ends) {
         ctx.font = p.bf(400, bs * 0.95, true);
         const lines = wrap(ctx, `“${e.quote.trim()}”`, w * 0.94);
-        if (draw) { ctx.fillStyle = ink; textLines(ctx, lines, x, y + bs, bs * 1.4, "left"); }
+        if (draw) { ctx.fillStyle = ink; textLines(ctx, lines, bx, y + bs, bs * 1.4, ba); }
         y += lines.length * bs * 1.4;
         if (e.by.trim()) {
           ctx.font = p.bf(600, bs * 0.82);
-          if (draw) { ctx.fillStyle = ink === "#ffffff" ? t.accent : ink; ctx.textAlign = "left"; ctx.fillText(`— ${e.by.trim()}`, x + w * 0.04, y + bs * 0.95, w * 0.9); }
+          if (draw) { ctx.fillStyle = ink === "#ffffff" ? t.accent : ink; ctx.textAlign = ba; ctx.direction = isRtl(e.by) ? "rtl" : "ltr"; ctx.fillText(`— ${e.by.trim()}`, rtl ? bx - w * 0.04 : x + w * 0.04, y + bs * 0.95, w * 0.9); ctx.direction = "ltr"; }
           y += bs * 1.4;
         }
         y += bs * 0.5;
@@ -323,7 +362,7 @@ function drawBack(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: R
           ctx.save(); ctx.beginPath(); ctx.arc(x + ph / 2, y + ph / 2, ph / 2, 0, Math.PI * 2); ctx.clip();
           cover(ctx, imgs.photo, { x, y, w: ph, h: ph }); ctx.restore();
         }
-        ctx.fillStyle = ink; textLines(ctx, lines, tx, y + bs * 0.95, bs * 1.35, "left");
+        ctx.fillStyle = ink; textLines(ctx, lines, rtl ? tx + tw : tx, y + bs * 0.95, bs * 1.35, ba);
       }
       y += Math.max(ph, lines.length * bs * 1.35);
     }
@@ -344,6 +383,14 @@ function drawBack(ctx: Ctx, d: CoverDesign, imgs: CoverImages, panel: Rect, T: R
   if (d.price.trim()) { ctx.font = p.bf(600, fs); ctx.fillText(d.price.trim(), x, fy, barcode.x - x - 4); fy -= fs * 1.5; }
   if (d.category.trim()) { ctx.font = p.bf(400, fs * 0.92); spacing(ctx, 0.08, fs); ctx.fillText(d.category.trim().toUpperCase(), x, fy, barcode.x - x - 4); spacing(ctx, 0, fs); fy -= fs * 1.7; }
   if (d.publisher.trim()) { ctx.font = p.tf(t.titleWeight, fs * 1.25); ctx.fillText(d.publisher.trim(), x, fy, barcode.x - x - 4); }
+  // Credits that an image's licence requires (CC BY), set small above the foot.
+  const credits = [d.frontArt ? d.frontCredit : null, d.backArt ? d.backCredit : null].filter((c) => c?.required).map((c) => c!.text);
+  if (credits.length) {
+    ctx.font = p.bf(400, fs * 0.72); ctx.globalAlpha = 0.85;
+    let cy = barcode.y - fs * 0.9;
+    for (const line of wrap(ctx, `Cover image: ${credits.join("; ")}`, barcode.x - x - 4).reverse()) { ctx.fillText(line, x, cy); cy -= fs * 1.0; }
+    ctx.globalAlpha = 1;
+  }
 
   const isbn = toIsbn13(d.isbn);
   if (isbn) {

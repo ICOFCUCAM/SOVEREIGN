@@ -42,6 +42,7 @@ Reply with valid JSON only (no code fences, no commentary), with exactly this sh
 - template: one of ${TEMPLATES.join(", ")}.
 - frontArt: art direction for a front-cover illustration with NO text, letters or logos: subject, composition, mood, palette, medium, and where to leave calm space for the title.
 - backArt: art direction for a quieter, matching back-cover background with large calm areas for text, also with no text.
+Write everything except frontArt and backArt in the language the book is written in.
 Never invent endorsements, reviews, awards, sales figures or facts about the author.
 
 The book:
