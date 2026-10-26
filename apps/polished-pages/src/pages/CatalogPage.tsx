@@ -254,7 +254,7 @@ const CatalogPage = () => {
         <div className="mt-6 flex flex-wrap items-center gap-2">
           <div className="relative min-w-[200px] flex-1">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search the marketplace…" className="pl-8" />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search the marketplace" placeholder="Search the marketplace…" className="pl-8" />
           </div>
           {!author && institutions.length > 0 && (
             <select value={orgFilter} onChange={(e) => setOrgFilter(e.target.value)} className="field select-premium font-sans" aria-label="Filter by institution">

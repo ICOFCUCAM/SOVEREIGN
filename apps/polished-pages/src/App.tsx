@@ -118,8 +118,8 @@ const App = () => (
           <Route path="/editions" element={<AuthGate><RequirePlan feature="multilingual"><EditionManager /></RequirePlan></AuthGate>} />
           <Route path="/illustrations" element={<AuthGate><IllustrationStudio /></AuthGate>} />
           <Route path="/publishing" element={<AuthGate><PublishingPrep /></AuthGate>} />
-          {/* internal visual-QA gallery (not linked) */}
-          <Route path="/__gallery" element={<Gallery />} />
+          {/* internal visual-QA gallery (not linked); development builds only */}
+          {import.meta.env.DEV && <Route path="/__gallery" element={<Gallery />} />}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
