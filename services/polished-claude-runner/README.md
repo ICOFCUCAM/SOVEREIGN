@@ -29,6 +29,16 @@ admin. Never add customers to it.
   scripture (against a chosen Bible translation), translate the whole book,
   marketing pack, study guide, index & glossary, compare two versions,
   readability review, and read scanned pages (Claude Code only).
+- **Manuscript**: write a book as sections (front matter, chapters, back
+  matter). Claude expands a section, adds citations, rewrites it in the
+  owner's voice, edits it as asked, or drafts standard sections (preface,
+  introduction, bibliography, notes, glossary, index, discussion questions,
+  about the author…). Suggestions are accepted or discarded; accepted work is
+  kept as authorship notes. `GET/PUT /v1/threads/:id/manuscript` stores it and
+  mirrors one Markdown file per section under `work/manuscript/`.
+- **My voice**: a style guide learned from the owner's own books
+  (`GET/PUT /v1/voice`), used by "Rewrite in my voice" and "In my voice". It
+  makes AI-assisted text read like the author; it doesn't hide AI use.
 - **Join files** (in the browser): PDFs and scans into one PDF, Word files into
   one Word file, or any mix into one book.
 - Results are saved to the Library as books, where every book tool applies.

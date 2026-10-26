@@ -26,8 +26,18 @@ if (prompt.includes("LIMITHIT")) {
   out({ type: "result", subtype: "success", is_error: true, result: "Claude AI usage limit reached", session_id: sid });
   process.exit(1);
 }
-const toolOut = /Write \.\/out\/([\w./-]+\.md)/.exec(prompt);
-if (toolOut && !/^(Rewrite|Summarise|Add citations|Create a book|Write Chapter|Improve Chapter)/.test(prompt)) {
+const sectionOut = /to \.\/out\/(sections\/[\w-]+\.md)/.exec(prompt);
+if (sectionOut) {
+  const file = /The section to work on is \.\/(manuscript\/[^\s]+\.md)/.exec(prompt)[1];
+  const before = fs.readFileSync(file, "utf8").replace(/^## .*\n\n/, "").trim();
+  const voice = fs.existsSync("VOICE.md") ? " [voice used]" : "";
+  fs.mkdirSync("out/sections", { recursive: true });
+  fs.writeFileSync(`out/${sectionOut[1]}`, `${before} (expanded by Claude Code)${voice}`);
+  out({ type: "result", subtype: "success", is_error: false, result: "Section done.", session_id: sid });
+  process.exit(0);
+}
+const toolOut = /write \.\/out\/([\w./-]+\.md)/i.exec(prompt);
+if (toolOut && !/^(Summarise|Add citations|Create a book|Write Chapter|Improve Chapter)/.test(prompt) && !prompt.includes("following ./INSTRUCTIONS.md")) {
   fs.mkdirSync(path.dirname(`out/${toolOut[1]}`), { recursive: true });
   fs.writeFileSync(`out/${toolOut[1]}`, `# Tool output\n\n${prompt.split("\n")[0]}`);
   say(`Wrote out/${toolOut[1]}.`);
@@ -41,7 +51,7 @@ else {
   tool("Read", { file_path: path.join(cwd, "source", "book.txt") }); await wait(pace);
   tool("WebSearch", { query: "oslo capital" }); await wait(pace);
   out({ type: "user", message: { content: [{ type: "tool_result", is_error: true, content: "File is in a directory that is denied by your permission settings." }] } });
-  if (prompt.startsWith("Rewrite")) {
+  if (prompt.startsWith("Rewrite") && prompt.includes("following ./INSTRUCTIONS.md")) {
     for (const [n, t] of [["01", "Beginnings"], ["02", "The Journey"], ["03", "Home"]]) {
       tool("Read", { file_path: path.join(cwd, "INSTRUCTIONS.md") }); await wait(pace);
       fs.writeFileSync(`out/rewrite/${n}-${t.toLowerCase().replace(/ /g, "-")}.md`, `## ${t}\n\n*In one sentence: chapter ${Number(n)}.*\n\nRewritten text of ${t.toLowerCase()}, warm and modern, keeping **every reference** (John 3:16).`);

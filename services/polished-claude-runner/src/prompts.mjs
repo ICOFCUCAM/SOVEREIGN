@@ -84,6 +84,7 @@ Do not stop early and do not skip chapters. If the work is very long, keep going
       };
     }
     case "tool": return tool(opts);
+    case "section": return section(opts);
     case "book-outline": return bookOutline(opts);
     case "book-chapter": return bookChapter(opts);
     case "book-improve": return bookImprove(opts);
@@ -312,3 +313,60 @@ function tool(o) {
   const built = t.build(o, target(o));
   return { ...built, title: t.title };
 }
+
+// ── Manuscript sections ──────────────────────────────────────────────────────
+// The server adds _file (the section's file under ./manuscript/) before this runs.
+const VOICE_RULE = "Write in the owner's voice as described in ./VOICE.md (read it first). Avoid stock AI phrasing (\"delve\", \"tapestry\", \"in today's fast-paced world\", \"it's important to note\", \"navigate the complexities\"), formulaic three-part lists, and paragraphs that all share one rhythm. Where a personal story, example or conviction from the author would make the passage theirs, leave a marker [[YOURS: what to add]] instead of inventing one.";
+
+function section(o) {
+  const file = String(o._file || "");
+  if (!file) return { error: "That section isn't in the manuscript." };
+  const out = `sections/${String(o.sectionId).replace(/[^\w-]/g, "")}.md`;
+  const voice = o.useVoice ? `\n${VOICE_RULE}` : "";
+  const read = `The book is in ./manuscript/ (./manuscript/INDEX.md lists the sections in order). The section to work on is ./manuscript/${file}.`;
+  const ops = {
+    expand: `Expand this section to about ${o.factor || 2} times its length: deepen the explanation, add concrete examples, transitions and detail that fit the rest of the book. Keep every existing point, quotation and reference, and the author's voice.${o.instructions ? ` The owner asks: ${o.instructions}` : ""}`,
+    cite: `Add citations to this section in ${o.citationStyle || "APA 7"} style. Search the web, open the best sources, and check each supports the claim. Keep the text otherwise unchanged; mark unsupported claims [citation needed]. End the section with "### Sources" listing only sources you opened (with URL and access date).`,
+    voice: `Rewrite this section in the owner's voice. Keep its meaning, facts, quotations and references.`,
+    edit: `Revise this section as the owner asks: ${o.instructions || "improve clarity and flow"}. Keep facts, quotations and references accurate.`,
+    draft: `Write the "${o.title || "section"}" section of this book. Read the whole manuscript first so it fits the book. Guidance: ${o.guidance || "follow publishing convention for this section"}.${o.instructions ? ` The owner asks: ${o.instructions}` : ""} Never invent facts about the author; use [placeholders] where a fact is needed.`,
+  };
+  const task = ops[o.op];
+  if (!task) return { error: "Unknown section action." };
+  return {
+    title: { expand: "Expand section", cite: "Add citations to section", voice: "Section in my voice", edit: "Edit section", draft: `Draft: ${o.title || "section"}` }[o.op],
+    output: out,
+    needsVoice: o.op === "voice" || Boolean(o.useVoice),
+    prompt: `${read}
+${task}${o.op === "voice" ? `\n${VOICE_RULE}` : voice}
+Write only the new text of this section (no "## " heading, no commentary) to ./out/${out}.`,
+  };
+}
+
+// Voice: a profile from the owner's own writing, and rewriting in it.
+TOOLS["voice-profile"] = {
+  title: "Learn my voice",
+  build: () => ({
+    output: "voice-profile.md",
+    prompt: `The documents in ./source/ are samples of the owner's own writing. Study them closely and write ./out/voice-profile.md, a practical style guide another writer could follow to sound exactly like this author:
+- voice and stance (who they speak as, to whom, how direct or warm);
+- sentence length and rhythm (with numbers: typical and range), paragraph length;
+- vocabulary: words and phrases they use often, words they never use, register;
+- how they open and close chapters, how they use questions, stories, humour;
+- how they use scripture or quotations (translation, how introduced, how explained);
+- formatting habits (headings, lists, emphasis);
+- ten short verbatim example sentences that are characteristic.
+Describe only what the samples show.`,
+  }),
+};
+TOOLS.voice = {
+  title: "Rewrite in my voice",
+  build: (o, tgt) => ({
+    output: "voice.md",
+    needsVoice: true,
+    prompt: `Rewrite ${tgt} in the owner's voice.
+${VOICE_RULE}
+Keep the meaning, structure, facts, quotations and references. ${LONG}
+Write ./out/voice.md (the full rewritten text) and ./out/voice-notes.md: the AI-sounding patterns you removed (with before/after examples), every [[YOURS: …]] marker you left and why, and a short authorship note saying what was rewritten.`,
+  }),
+};

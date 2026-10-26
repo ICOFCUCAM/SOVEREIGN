@@ -17,6 +17,10 @@ import SpineMark from "@/components/brand/SpineMark";
 import Markdown from "@/components/studio/Markdown";
 import JoinFiles from "@/components/studio/JoinFiles";
 import ToolsDialog from "@/components/studio/ToolsDialog";
+import ManuscriptEditor from "@/components/studio/ManuscriptEditor";
+import MyBooks from "@/components/studio/MyBooks";
+import VoicePanel from "@/components/studio/VoicePanel";
+import { importText } from "@/lib/manuscript";
 import { apiBookEngine } from "@/lib/book-engine";
 import { browserBackend, decideEngine, runnerBackend, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
 import { isAdmin, saveDocument } from "@/lib/documents";
@@ -92,6 +96,9 @@ function Studio() {
   const [meError, setMeError] = useState<string | null>(null);
   const [threads, setThreads] = useState<StudioThreadSummary[] | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [tab, setTab] = useState<"projects" | "books" | "voice">("projects");
+  // Handed to a project when it opens: a view to show, or a run to start once.
+  const [handoff, setHandoff] = useState<{ id: string; view?: "assistant" | "manuscript"; run?: { action: StudioAction; options: RunOptions } } | null>(null);
   const [projectsOpen, setProjectsOpen] = useState(false);
   const [mode, setModeState] = useState<EngineMode>(readMode);
   const setMode = (m: EngineMode) => { setModeState(m); try { localStorage.setItem(MODE_KEY, m); } catch { /* per-browser preference only */ } };
@@ -175,7 +182,37 @@ function Studio() {
         </div>
       )}
 
-      {mode === "claude" && backend === browserBackend ? (
+      <div className="border-b border-border">
+        <div className="container flex gap-1 px-4 sm:px-6" role="tablist" aria-label="Studio">
+          {([["projects", "Projects"], ["books", "My books"], ["voice", "My voice"]] as const).map(([k, l]) => (
+            <button key={k} role="tab" aria-selected={tab === k} type="button" onClick={() => setTab(k)}
+              className={`-mb-px border-b-2 px-4 py-3 text-sm font-medium transition-colors ${tab === k ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      {tab === "books" ? (
+        <div className="container px-4 py-6 sm:px-6">
+          <MyBooks
+            onWorkInStudio={async (title, markdown) => {
+              const t = await backend.create(title);
+              await backend.upload(t.id, new File([markdown], `${title.replace(/[^\p{L}\p{N} _-]+/gu, "").trim() || "book"}.md`, { type: "text/markdown" }));
+              await backend.saveManuscript(t.id, importText(title, markdown));
+              await loadThreads();
+              setHandoff({ id: t.id, view: "manuscript" }); setActiveId(t.id); setTab("projects");
+            }}
+            onLearnVoice={async (books) => {
+              if (!decision.active) throw new Error(decision.reason);
+              const t = await backend.create("My voice samples");
+              for (const b of books) await backend.upload(t.id, new File([b.markdown], `${b.title.replace(/[^\p{L}\p{N} _-]+/gu, "").trim() || "book"}.md`, { type: "text/markdown" }));
+              await loadThreads();
+              setHandoff({ id: t.id, run: { action: "tool", options: { tool: "voice-profile" } } }); setActiveId(t.id); setTab("projects");
+            }}
+          />
+        </div>
+      ) : tab === "voice" ? (
+        <div className="container px-4 py-8 sm:px-6"><VoicePanel backend={backend} onGoToBooks={() => setTab("books")} /></div>
+      ) : mode === "claude" && backend === browserBackend ? (
         <div className="container max-w-2xl px-6 py-16 text-center">
           <AlertTriangle className="mx-auto h-8 w-8 text-amber-500" />
           <h2 className="mt-4 font-serif text-2xl font-bold">Claude Code isn't available</h2>
@@ -191,6 +228,7 @@ function Studio() {
           {activeId && ready ? (
             <Project key={`${backend.storage}:${activeId}`} id={activeId} backend={backend} decision={decision} mode={mode}
               citationStyles={me?.citationStyles ?? CITATION_STYLES_FALLBACK} busyElsewhere={Boolean(me?.busy && me.busy.threadId !== activeId)}
+              handoff={handoff?.id === activeId ? handoff : null} onHandoffUsed={() => setHandoff(null)}
               onChanged={() => { loadThreads(); refreshMe(); }} onDeleted={async () => { const t = await loadThreads(); setActiveId(t[0]?.id ?? null); }} />
           ) : (
             <EmptyState onNew={newProject} disabled={!ready} />
@@ -246,8 +284,9 @@ const ACTIONS: { id: DialogAction; title: string; line: string; icon: typeof Scr
   { id: "cite", title: "Citations & references", line: "Researched on the web, never invented", icon: Quote },
 ];
 
-function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, onChanged, onDeleted }: {
+function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, handoff, onHandoffUsed, onChanged, onDeleted }: {
   id: string; backend: StudioBackend; decision: EngineDecision; mode: EngineMode; citationStyles: string[]; busyElsewhere: boolean;
+  handoff: { view?: "assistant" | "manuscript"; run?: { action: StudioAction; options: RunOptions } } | null; onHandoffUsed: () => void;
   onChanged: () => void; onDeleted: () => void;
 }) {
   const { toast } = useToast();
@@ -262,6 +301,7 @@ function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, o
   const [wizard, setWizard] = useState(false);
   const [joining, setJoining] = useState(false);
   const [tools, setTools] = useState(false);
+  const [view, setView] = useState<"assistant" | "manuscript">(handoff?.view ?? "assistant");
   // A Claude Code run that failed because the plan is signed out or at its limit can be re-run on the API.
   const [retry, setRetry] = useState<{ action: StudioAction; options: RunOptions; why: string } | null>(null);
   const lastRun = useRef<{ action: StudioAction; options: RunOptions } | null>(null);
@@ -362,7 +402,36 @@ function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, o
     try { await backend.remove(id); onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
   };
 
+  // A run handed over from My books (e.g. Learn my voice) starts once, when the project is open.
+  const handed = useRef(false);
+  const loaded = Boolean(thread);
+  useEffect(() => {
+    if (!loaded || !handoff || handed.current) return;
+    handed.current = true;
+    onHandoffUsed();
+    if (handoff.run) void start(handoff.run.action, handoff.run.options);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per hand-over
+  }, [loaded, handoff]);
+
   if (!thread) return <div className="grid min-h-[50vh] place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+
+  const viewSwitch = (
+    <div className="mb-4 inline-flex rounded-full border border-border p-0.5 text-sm" role="tablist" aria-label="Project view">
+      {([["assistant", "Assistant"], ["manuscript", "Manuscript"]] as const).map(([k, l]) => (
+        <button key={k} role="tab" aria-selected={view === k} type="button" onClick={() => setView(k)}
+          className={`rounded-full px-4 py-1.5 font-medium ${view === k ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
+      ))}
+    </div>
+  );
+
+  if (view === "manuscript" && !wizard) {
+    return (
+      <div className="min-w-0">
+        {viewSwitch}
+        <ManuscriptEditor thread={thread} backend={backend} engine={engineId} citationStyles={citationStyles} onChanged={() => { reload().catch(() => {}); onChanged(); }} />
+      </div>
+    );
+  }
 
   if (wizard) {
     return (
@@ -390,6 +459,7 @@ function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, o
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="min-w-0">
+        {viewSwitch}
         {/* Title */}
         <div className="flex items-center gap-2">
           <Input value={title} onChange={(e) => setTitle(e.target.value)} onBlur={saveTitle} onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
@@ -533,7 +603,7 @@ function formatBytes(n: number) {
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-const ACTION_ICON: Record<StudioAction, typeof MessageSquare> = { chat: MessageSquare, summarize: ScrollText, rewrite: Wand2, cite: Quote, tool: Wrench, "book-outline": BookOpen, "book-chapter": BookOpen, "book-improve": BookOpen };
+const ACTION_ICON: Record<StudioAction, typeof MessageSquare> = { chat: MessageSquare, summarize: ScrollText, rewrite: Wand2, cite: Quote, tool: Wrench, section: PenLine, "book-outline": BookOpen, "book-chapter": BookOpen, "book-improve": BookOpen };
 
 function MessageCard({ m, onOpen }: { m: StudioThread["messages"][number]; onOpen: (p: string) => void }) {
   const Icon = ACTION_ICON[m.action] ?? MessageSquare;
@@ -735,6 +805,7 @@ function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsT
             <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || saving} onClick={save}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} Save to Library as a book</Button>
           )}
           <div className="ml-auto flex gap-1">
+            {path === "voice-profile.md" && <Button size="sm" variant="ghost" disabled={!text} onClick={async () => { try { await backend.saveVoice(text ?? ""); toast({ title: "Saved as your voice profile", description: "“In my voice” and “Rewrite in my voice” now follow it." }); } catch (e) { toast({ title: "Couldn't save", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}><PenLine className="h-4 w-4" /> Use as my voice profile</Button>}
             {!isJson && <Button size="sm" variant="ghost" disabled={!text} onClick={() => onUseAsTarget(path)}><Wand2 className="h-4 w-4" /> Rewrite this</Button>}
             <Button size="sm" variant="ghost" disabled={!text} onClick={() => { navigator.clipboard.writeText(text ?? ""); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /> Copy</Button>
             <Button size="sm" variant="ghost" disabled={!text} onClick={download}><Download className="h-4 w-4" /> .md</Button>

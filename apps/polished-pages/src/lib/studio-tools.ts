@@ -2,7 +2,7 @@
 // on Claude Code (the runner holds those prompts, file-based) and on the API
 // (the prompts below, applied chapter by chapter by studio-api.ts).
 
-export type ToolId = "proofread" | "factcheck" | "quotes" | "translate" | "marketing" | "studyguide" | "index" | "compare" | "readability" | "ocr";
+export type ToolId = "voice-profile" | "voice" | "proofread" | "factcheck" | "quotes" | "translate" | "marketing" | "studyguide" | "index" | "compare" | "readability" | "ocr";
 
 export interface ToolField {
   key: string;
@@ -17,7 +17,7 @@ export interface StudioTool {
   id: ToolId;
   title: string;
   line: string;
-  icon: "spell" | "check" | "quote" | "languages" | "megaphone" | "graduation" | "list" | "diff" | "gauge" | "scan";
+  icon: "voice" | "pen" | "spell" | "check" | "quote" | "languages" | "megaphone" | "graduation" | "list" | "diff" | "gauge" | "scan";
   fields: ToolField[];
   /** Main file the tool writes (relative to out/). */
   output: (o: Record<string, unknown>) => string;
@@ -31,6 +31,8 @@ export interface StudioTool {
 const BIBLES = ["KJV", "NKJV", "ESV", "NIV", "NASB", "NLT", "CSB", "AMP", "RSV", "NRSV", "WEB"].map((v) => ({ v, l: v }));
 
 export const STUDIO_TOOLS: StudioTool[] = [
+  { id: "voice-profile", title: "Learn my voice", line: "A style guide of how you write, from your own samples", icon: "voice", output: () => "voice-profile.md", fields: [] },
+  { id: "voice", title: "Rewrite in my voice", line: "Your voice, AI-sounding patterns removed, places to add your own", icon: "pen", output: () => "voice.md", fields: [] },
   { id: "proofread", title: "Proofread & copy-edit", line: "Corrected text plus a list of every change", icon: "spell", output: () => "proofread.md",
     fields: [
       { key: "level", label: "Level", type: "select", initial: "thorough", options: [{ v: "light", l: "Light: spelling, grammar, punctuation" }, { v: "thorough", l: "Thorough: also clarity and consistency" }] },
@@ -82,9 +84,23 @@ type O = Record<string, unknown>;
 const s = (v: unknown, d = "") => (typeof v === "string" && v.trim() ? v.trim() : d);
 
 /** Per-part prompt for a tool on the API, plus how parts are combined. */
-export function toolApiPlan(id: ToolId, o: O): { part: (text: string, i: number, n: number) => string; finish?: (parts: string[]) => string; web?: boolean; split?: "changes" } | null {
+export const VOICE_RULE = `Write in the owner's voice as described in the voice profile. Avoid stock AI phrasing ("delve", "tapestry", "in today's fast-paced world", "it's important to note", "navigate the complexities"), formulaic three-part lists, and paragraphs that all share one rhythm. Where a personal story, example or conviction from the author would make the passage theirs, leave a marker [[YOURS: what to add]] instead of inventing one.`;
+
+export function toolApiPlan(id: ToolId, o: O): { part: (text: string, i: number, n: number) => string; finish?: (parts: string[]) => string; web?: boolean; split?: "changes" | "notes" } | null {
   const where = (i: number, n: number) => (n > 1 ? `This is part ${i + 1} of ${n} of the document.` : "");
   switch (id) {
+    case "voice-profile":
+      return { part: (t, i, n) => (n > 1 ? `These are samples of an author's own writing (part ${i + 1} of ${n}). Note their voice, sentence rhythm, vocabulary, favourite phrases, how they open and close, how they use scripture or quotations, and formatting habits, with short verbatim examples.\n\n${t}` : t),
+        finish: (p) => `Write a practical style guide another writer could follow to sound exactly like this author (${p.length > 1 ? "from these notes on their samples" : "from the sample below"}): voice and stance; sentence length and rhythm (typical and range); paragraph length; vocabulary they use and avoid; how they open and close chapters; use of questions, stories and humour; how they use scripture or quotations; formatting habits; and ten short characteristic sentences quoted verbatim. Describe only what the samples show. Start with "# My voice profile".\n\n${p.join("\n\n")}` };
+    case "voice":
+      return { split: "notes", part: (t, i, n) => `Rewrite this text in the owner's voice. ${where(i, n)}
+${VOICE_RULE}
+Voice profile:
+${s(o._voice)}
+
+Keep the meaning, structure, facts, quotations and references. Reply with the rewritten text, then a line "=== NOTES ===", then the AI-sounding patterns you removed (before/after examples) and every [[YOURS: …]] marker you left.
+
+${t}` };
     case "proofread":
       return { split: "changes", part: (t, i, n) => `Proofread and copy-edit this text. ${where(i, n)}
 Level: ${o.level === "light" ? "light: spelling, grammar, punctuation and typos only" : "thorough: also clarity, word choice, repetition and consistency of names, numbers and terminology"}. Spelling: ${s(o.dialect, "keep the text's own")}. ${o.keepVoice === false ? "" : "Keep the author's voice."} Do not change quotations or scripture except obvious typos.

@@ -5,7 +5,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { loadConfig, configProblems } from "./config.mjs";
 import { createAuth } from "./auth.mjs";
-import { createStore, safeName, inside } from "./store.mjs";
+import { createStore, safeName, inside, manuscriptFile } from "./store.mjs";
 import { buildRun, CITATION_STYLES } from "./prompts.mjs";
 import { runClaude } from "./claude.mjs";
 
@@ -24,7 +24,7 @@ import { runClaude } from "./claude.mjs";
 //   GET    /v1/jobs/:id/stream              server-sent events: replay + live
 //   POST   /v1/jobs/:id/cancel
 // One run at a time: this is one person's Claude plan, not a shared service.
-const ACTIONS = new Set(["chat", "summarize", "rewrite", "cite", "tool", "book-outline", "book-chapter", "book-improve"]);
+const ACTIONS = new Set(["chat", "summarize", "rewrite", "cite", "tool", "section", "book-outline", "book-chapter", "book-improve"]);
 const LABEL = { chat: "Chat", summarize: "Summarise", rewrite: "Rewrite", cite: "Citations & references", "book-outline": "Book wizard · outline", "book-chapter": "Book wizard · chapter", "book-improve": "Book wizard · improve" };
 
 export function createServer(cfg = loadConfig(), deps = {}) {
@@ -85,13 +85,19 @@ export function createServer(cfg = loadConfig(), deps = {}) {
   }
 
   async function startRun(thread, action, options) {
+    if (action === "section") {
+      const m = await store.readManuscript(thread.id);
+      const i = m?.sections?.findIndex((x) => x.id === options?.sectionId) ?? -1;
+      if (i < 0) return { status: 400, error: "Save the manuscript first, then try again." };
+      options = { ...options, _file: manuscriptFile(i, m.sections[i]), title: options.title || m.sections[i].title };
+    }
     const spec = buildRun(action, options);
     if (!spec) return { status: 400, error: "Unknown action." };
     if (spec.error) return { status: 400, error: spec.error };
     const isBook = action.startsWith("book-");
     if (action === "chat" && !String(options?.message || "").trim()) return { status: 400, error: "Write a message first." };
     if (action === "rewrite" && !String(options?.instructions || "").trim()) return { status: 400, error: "Give the rewrite instructions." };
-    if (action !== "chat" && !isBook && thread.files.length === 0 && !options?.target && !(action === "tool" && options?.tool === "compare" && options?.a)) return { status: 400, error: "Upload a document first." };
+    if (action !== "chat" && action !== "section" && !isBook && thread.files.length === 0 && !options?.target && !(action === "tool" && options?.tool === "compare" && options?.a)) return { status: 400, error: "Upload a document first." };
     if (options?.target && options.target !== "source" && !inside(path.join(store.workDir(thread.id), "out"), options.target)) return { status: 400, error: "That file isn't in this project." };
     if (action === "tool" && options?.tool === "compare") {
       for (const k of ["a", "b"]) if (options[k] && !inside(store.workDir(thread.id), options[k])) return { status: 400, error: "Pick files from this project to compare." };
@@ -101,6 +107,11 @@ export function createServer(cfg = loadConfig(), deps = {}) {
 
     const cwd = store.workDir(thread.id);
     if (spec.instructions) await fs.writeFile(path.join(cwd, "INSTRUCTIONS.md"), spec.instructions);
+    if (spec.needsVoice) {
+      const voice = await store.readVoice();
+      if (!voice.trim()) return { status: 400, error: "Create your voice profile first (Learn my voice), then save it as your profile." };
+      await fs.writeFile(path.join(cwd, "VOICE.md"), voice);
+    }
     for (const [rel, text] of Object.entries(spec.files || {})) {
       const p = inside(cwd, rel);
       if (!p) continue;
@@ -113,7 +124,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     jobs.set(job.id, job);
     running = job;
 
-    const userLine = action === "tool" ? `${spec.title}${options?.target && options.target !== "source" ? ` · ${options.target}` : ""}${options?.language ? ` · ${options.language}` : ""}` : isBook ? `${LABEL[action]}${action === "book-outline" ? ` · ${String(options.bookTitle).trim()}` : ` ${Number(options.chapterIndex) + 1}${options.chapters?.[options.chapterIndex]?.title ? ` · ${options.chapters[options.chapterIndex].title}` : ""}`}` : action === "chat" ? String(options.message).trim() : `${LABEL[action]}${options?.target && options.target !== "source" ? ` · ${options.target}` : ""}${action === "rewrite" ? `\n\n${String(options.instructions).trim()}` : ""}`;
+    const userLine = action === "section" ? `${spec.title} · ${options.title}${options.instructions ? `\n\n${String(options.instructions).trim()}` : ""}` : action === "tool" ? `${spec.title}${options?.target && options.target !== "source" ? ` · ${options.target}` : ""}${options?.language ? ` · ${options.language}` : ""}` : isBook ? `${LABEL[action]}${action === "book-outline" ? ` · ${String(options.bookTitle).trim()}` : ` ${Number(options.chapterIndex) + 1}${options.chapters?.[options.chapterIndex]?.title ? ` · ${options.chapters[options.chapterIndex].title}` : ""}`}` : action === "chat" ? String(options.message).trim() : `${LABEL[action]}${options?.target && options.target !== "source" ? ` · ${options.target}` : ""}${action === "rewrite" ? `\n\n${String(options.instructions).trim()}` : ""}`;
     thread.messages.push({ id: randomUUID(), role: "user", engine: "claude-code", action, text: userLine, at: job.startedAt, jobId: job.id });
     thread.runningJobId = job.id;
     await store.write(thread);
@@ -207,6 +218,10 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     if (kind === "me" && req.method === "GET") {
       return send(res, 200, { user: who.user, claudeConnected: Boolean(cfg.claudeToken), claude: currentStatus(), busy: publicJob(running), citationStyles: CITATION_STYLES });
     }
+    if (kind === "voice" && !id) {
+      if (req.method === "GET") return send(res, 200, { voice: await store.readVoice() });
+      if (req.method === "PUT") { const b = await json(req); await store.writeVoice(String(b.voice ?? "").slice(0, 200_000)); return send(res, 200, { ok: true }); }
+    }
     if (kind === "threads" && !id) {
       if (req.method === "GET") return send(res, 200, { threads: await store.list() });
       if (req.method === "POST") { const b = await json(req); return send(res, 201, { thread: await store.create(b.title) }); }
@@ -246,6 +261,14 @@ export function createServer(cfg = loadConfig(), deps = {}) {
         if (!ACTIONS.has(action)) return fail(res, 400, "Unknown action.");
         const r = await startRun(thread, action, b.options || {});
         return r.job ? send(res, 202, { job: r.job }) : fail(res, r.status, r.error);
+      }
+      if (sub === "manuscript" && !rest.length) {
+        if (req.method === "GET") return send(res, 200, { manuscript: await store.readManuscript(id) });
+        if (req.method === "PUT") {
+          if (running?.threadId === id && running.action === "section") return fail(res, 409, "Claude is working on a section; save again when it finishes.");
+          const b = JSON.parse((await body(req, 30 * 1024 * 1024)).toString("utf8") || "{}");
+          return send(res, 200, { manuscript: await store.writeManuscript(id, b.manuscript) });
+        }
       }
       if (sub === "sources" && req.method === "GET" && rest.length === 1) {
         const text = await store.readSource(id, safeName(rest[0]));

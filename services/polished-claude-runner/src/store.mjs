@@ -21,6 +21,8 @@ export function inside(root, rel) {
   return p === root || p.startsWith(root + path.sep) ? p : null;
 }
 
+export const manuscriptFile = (i, x) => `${String(i + 1).padStart(2, "0")}-${String(x.kind).replace(/[^a-z-]/g, "")}-${String(x.title || "section").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "section"}.md`;
+
 export function createStore(dataDir) {
   const threadsDir = path.join(dataDir, "threads");
   const dir = (id) => (ID.test(id) ? path.join(threadsDir, id) : null);
@@ -103,6 +105,39 @@ export function createStore(dataDir) {
       }
       await walk(root);
       return found.sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt));
+    },
+    // The manuscript (sections in order) is kept as JSON, and mirrored as one
+    // Markdown file per section under work/manuscript/ so Claude can read it.
+    async readManuscript(id) {
+      const d = dir(id);
+      if (!d) return null;
+      try { return JSON.parse(await fs.readFile(path.join(d, "manuscript.json"), "utf8")); } catch { return null; }
+    },
+    async writeManuscript(id, m) {
+      const d = dir(id);
+      if (!d) return null;
+      const sections = Array.isArray(m?.sections) ? m.sections : [];
+      const clean = { title: String(m?.title ?? "").slice(0, 300), subtitle: String(m?.subtitle ?? "").slice(0, 300), author: String(m?.author ?? "").slice(0, 200), sections: sections.map((x) => ({ id: String(x.id).replace(/[^\w-]/g, "").slice(0, 64), kind: String(x.kind ?? "chapter").slice(0, 40), title: String(x.title ?? "").slice(0, 300), body: String(x.body ?? "") })), history: Array.isArray(m?.history) ? m.history.slice(-2000) : [], updatedAt: new Date().toISOString() };
+      await fs.writeFile(path.join(d, "manuscript.json.tmp"), JSON.stringify(clean));
+      await fs.rename(path.join(d, "manuscript.json.tmp"), path.join(d, "manuscript.json"));
+      const md = path.join(workDir(id), "manuscript");
+      await fs.rm(md, { recursive: true, force: true });
+      await fs.mkdir(md, { recursive: true });
+      const index = [`# ${clean.title || "Untitled book"}`, ""];
+      for (const [i, x] of clean.sections.entries()) {
+        const file = manuscriptFile(i, x);
+        index.push(`${i + 1}. ${file} · ${x.kind} · ${x.title}`);
+        await fs.writeFile(path.join(md, file), `## ${x.title}\n\n${x.body}\n`);
+      }
+      await fs.writeFile(path.join(md, "INDEX.md"), index.join("\n") + "\n");
+      return clean;
+    },
+    async readVoice() {
+      try { return await fs.readFile(path.join(dataDir, "voice-profile.md"), "utf8"); } catch { return ""; }
+    },
+    async writeVoice(text) {
+      await fs.mkdir(dataDir, { recursive: true });
+      await fs.writeFile(path.join(dataDir, "voice-profile.md"), String(text ?? ""));
     },
     async readSource(id, storedAs) {
       const p = inside(path.join(workDir(id), "source"), storedAs);

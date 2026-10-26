@@ -226,6 +226,48 @@ test("API results are recorded into the project, labelled as API", async () => {
   assert.ok(t.outputs.some((o) => o.path === "summary.md"));
 });
 
+test("manuscript: saved as JSON and mirrored as files; sections expanded; voice required for voice actions", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Book" } })).json();
+  const manuscript = { title: "Walking by Faith", sections: [
+    { id: "s-ded", kind: "dedication", title: "Dedication", body: "To my mother." },
+    { id: "s-1", kind: "chapter", title: "The First Step", body: "Faith begins small." },
+    { id: "../evil", kind: "chapter", title: "Two", body: "x" },
+  ] };
+  const saved = (await (await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", body: { manuscript } })).json()).manuscript;
+  assert.equal(saved.sections[2].id, "evil", "ids are sanitised");
+  const work = path.join(dataDir, "threads", thread.id, "work", "manuscript");
+  const files = (await fs.readdir(work)).sort();
+  assert.deepEqual(files, ["01-dedication-dedication.md", "02-chapter-the-first-step.md", "03-chapter-two.md", "INDEX.md"]);
+  assert.match(await fs.readFile(path.join(work, "INDEX.md"), "utf8"), /2\. 02-chapter-the-first-step\.md · chapter · The First Step/);
+  assert.equal((await (await call(`/v1/threads/${thread.id}/manuscript`)).json()).manuscript.title, "Walking by Faith");
+
+  // unknown section and unknown op are refused
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "nope", op: "expand" } } })).status, 400);
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "dance" } } })).status, 400);
+
+  let { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "expand", factor: 2 } } })).json();
+  assert.equal(job.output, "sections/s-1.md");
+  let ev = await streamUntilDone(job.id, thread.id);
+  assert.equal(ev.at(-1).status, "done");
+  assert.equal((await (await call(`/v1/threads/${thread.id}/outputs/sections/s-1.md`)).json()).text, "Faith begins small. (expanded by Claude Code)");
+
+  // voice actions need a saved voice profile
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "voice" } } })).status, 400);
+  assert.equal((await call("/v1/voice", { method: "PUT", body: { voice: "# Voice\n\nShort sentences. Warm." } })).status, 200);
+  assert.match((await (await call("/v1/voice")).json()).voice, /Short sentences/);
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "voice" } } })).json());
+  ev = await streamUntilDone(job.id, thread.id);
+  assert.match((await (await call(`/v1/threads/${thread.id}/outputs/sections/s-1.md`)).json()).text, /\[voice used\]/);
+  // voice tools
+  await call(`/v1/threads/${thread.id}/files?name=sample.txt&kind=original`, { method: "POST", raw: Buffer.from("My own words.") });
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "voice-profile" } } })).json());
+  ev = await streamUntilDone(job.id, thread.id);
+  assert.equal(ev.at(-1).output, "voice-profile.md"); assert.equal(ev.at(-1).status, "done");
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "voice" } } })).json());
+  ev = await streamUntilDone(job.id, thread.id);
+  assert.equal(ev.at(-1).status, "done");
+});
+
 test("the sandbox settings and helpers", () => {
   const s = settingsFor("/data/threads/x/work");
   assert.ok(s.permissions.deny.includes("Read(//etc/**)"));

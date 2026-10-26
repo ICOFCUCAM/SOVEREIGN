@@ -56,7 +56,14 @@ describe("API engine", () => {
     readSource: async (s) => (s === "book.txt" ? text : null),
     readOutput: async () => null,
     record: async (r) => { recorded.push(r); },
+    manuscript: async () => ({ title: "Walking by Faith", history: [], sections: [
+      { id: "s-pre", kind: "preface", title: "Preface", body: "" },
+      { id: "s-1", kind: "chapter", title: "The First Step", body: "Faith begins small." },
+      { id: "s-2", kind: "chapter", title: "The Long Road", body: "The road is long." },
+    ] }),
+    voice: async () => voiceProfile,
   });
+  let voiceProfile = "";
 
   it("rewrites a long book chapter by chapter with the same instructions and records it", async () => {
     const ev = await run(ctx(), "rewrite", { instructions: "Modern English only." });
@@ -87,6 +94,27 @@ describe("API engine", () => {
     expect(calls[0].user).toMatch(/marketing pack/i);
     const ev = await run(ctx(), "tool", { tool: "ocr" });
     expect(ev.at(-1)).toMatchObject({ status: "failed", error: expect.stringMatching(/needs Claude Code/) });
+  });
+
+  it("expands a section with its neighbours, and drafts a preface from the whole book", async () => {
+    await run(ctx(), "section", { sectionId: "s-1", op: "expand", factor: 3 });
+    expect(calls[0].user).toMatch(/about 3 times its length/);
+    expect(calls[0].user).toMatch(/Next section \(The Long Road\)/);
+    expect(recorded[0].outputs["sections/s-1.md"]).toBe("ANSWER 1");
+    await run(ctx(), "section", { sectionId: "s-pre", op: "draft" });
+    expect(calls[1].user).toMatch(/The manuscript:[\s\S]*Faith begins small[\s\S]*The road is long/);
+    expect(calls[1].user).toMatch(/why and how the book came to be written/);
+  });
+
+  it("voice actions need a profile, then use it and split the notes", async () => {
+    voiceProfile = "";
+    let ev = await run(ctx(), "section", { sectionId: "s-1", op: "voice" });
+    expect(ev.at(-1)).toMatchObject({ status: "failed", error: expect.stringMatching(/voice profile first/) });
+    voiceProfile = "# My voice\n\nShort, warm sentences.";
+    ev = await run(ctx("## One\n\nSome text."), "tool", { tool: "voice" });
+    expect(ev.at(-1)).toMatchObject({ status: "done" });
+    expect(calls.at(-1)!.user).toMatch(/Short, warm sentences/);
+    expect(Object.keys(recorded.at(-1)!.outputs).sort()).toEqual(["voice-notes.md", "voice.md"]);
   });
 
   it("explains when there is nothing readable (a scan) and records the failure", async () => {

@@ -2,13 +2,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { extractFileText } from "@/lib/extract-file-text";
 import type { BookEngine } from "@/lib/book-engine";
 import type { BookOutline } from "@/types/book";
+import type { Manuscript } from "@/lib/manuscript";
 
 // Client for the Claude Studio runner (services/polished-claude-runner): the
 // owner's own Claude Code, reached over HTTPS. Every call carries the signed-in
 // Supabase session; the runner checks it and its own allowlist on each request.
 export const RUNNER_URL = ((import.meta.env.VITE_CLAUDE_RUNNER_URL as string | undefined) || "").replace(/\/+$/, "");
 
-export type StudioAction = "chat" | "summarize" | "rewrite" | "cite" | "tool" | "book-outline" | "book-chapter" | "book-improve";
+export type StudioAction = "chat" | "summarize" | "rewrite" | "cite" | "tool" | "section" | "book-outline" | "book-chapter" | "book-improve";
 
 export interface StudioFile { name: string; storedAs: string; kind: "original" | "text"; bytes: number; at: string }
 export interface StudioOutput { path: string; bytes: number; modifiedAt: string }
@@ -28,6 +29,12 @@ export type StudioEvent =
 
 export interface RunOptions {
   tool?: string;
+  sectionId?: string;
+  op?: "expand" | "cite" | "voice" | "edit" | "draft";
+  factor?: number;
+  guidance?: string;
+  title?: string;
+  useVoice?: boolean;
   a?: string;
   b?: string;
   message?: string;
@@ -79,6 +86,10 @@ export const studio = {
   remove: (id: string) => call<{ ok: true }>(`/v1/threads/${id}`, { method: "DELETE" }),
   removeFile: (id: string, storedAs: string) => call<{ thread: StudioThread }>(`/v1/threads/${id}/files/${encodeURIComponent(storedAs)}`, { method: "DELETE" }).then((r) => r.thread),
   run: (id: string, action: StudioAction, options: RunOptions) => call<{ job: StudioJob }>(`/v1/threads/${id}/run`, { method: "POST", body: JSON.stringify({ action, options }) }).then((r) => r.job),
+  manuscript: (id: string) => call<{ manuscript: Manuscript | null }>(`/v1/threads/${id}/manuscript`).then((r) => r.manuscript),
+  saveManuscript: (id: string, m: Manuscript) => call<{ manuscript: Manuscript }>(`/v1/threads/${id}/manuscript`, { method: "PUT", body: JSON.stringify({ manuscript: m }) }).then((r) => r.manuscript),
+  voice: () => call<{ voice: string }>("/v1/voice").then((r) => r.voice),
+  saveVoice: (voice: string) => call<{ ok: true }>("/v1/voice", { method: "PUT", body: JSON.stringify({ voice }) }),
   source: (id: string, storedAs: string) => call<{ name: string; text: string }>(`/v1/threads/${id}/sources/${encodeURIComponent(storedAs)}`).then((r) => r.text),
   record: (id: string, r: { action: StudioAction; userText: string; text: string; outputs: Record<string, string>; status: "done" | "failed" }) => call<{ thread: StudioThread }>(`/v1/threads/${id}/record`, { method: "POST", body: JSON.stringify(r) }).then((x) => x.thread),
   output: (id: string, path: string) => call<{ path: string; text: string }>(`/v1/threads/${id}/outputs/${path.split("/").map(encodeURIComponent).join("/")}`).then((r) => r.text),
@@ -143,6 +154,9 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "compare.md": "Comparison of versions",
   "readability.md": "Readability review",
   "scanned-text.md": "Text from scanned pages",
+  "voice-profile.md": "My voice profile",
+  "voice.md": "Rewritten in my voice",
+  "voice-notes.md": "Voice notes & authorship",
   "summary.md": "Summary",
   "rewrite.md": "Rewritten book",
   "rewrite-notes.md": "Rewrite notes",
@@ -151,7 +165,7 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "citation-report.md": "Citation report",
 };
 
-export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? (p.startsWith("book/chapters/") ? `Book wizard · chapter ${Number(p.slice(14, 16))}` : p.startsWith("book/improved/") ? `Book wizard · improved chapter ${Number(p.slice(14, 16))}` : p.startsWith("translation/") ? `Translated chapter · ${p.slice(12).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p.startsWith("rewrite/") ? `Chapter · ${p.slice(8).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p);
+export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? (p.startsWith("book/chapters/") ? `Book wizard · chapter ${Number(p.slice(14, 16))}` : p.startsWith("book/improved/") ? `Book wizard · improved chapter ${Number(p.slice(14, 16))}` : p.startsWith("sections/") ? "Manuscript section suggestion" : p.startsWith("translation/") ? `Translated chapter · ${p.slice(12).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p.startsWith("rewrite/") ? `Chapter · ${p.slice(8).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p);
 
 // ── Book wizard on Claude Code ───────────────────────────────────────────────
 // The Book Creator's engine for Claude Studio: each step is a runner job in the
