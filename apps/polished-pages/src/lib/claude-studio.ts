@@ -197,7 +197,7 @@ export const OUTPUT_NAMES: Record<string, string> = {
 };
 
 const pretty = (f: string) => { const t = f.replace(/\.md$/, "").replace(/-/g, " "); return t.charAt(0).toUpperCase() + t.slice(1); };
-export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? (p.startsWith("book/chapters/") ? `Book wizard · chapter ${Number(p.slice(14, 16))}` : p.startsWith("book/improved/") ? `Book wizard · improved chapter ${Number(p.slice(14, 16))}` : p.startsWith("sections/") ? "Manuscript section suggestion" : p.startsWith("volumes/") ? `Volume ${Number(p.slice(8, 10))} · ${pretty(p.slice(11))}` : p.startsWith("planned/") ? `Planned book ${Number(p.slice(8, 10))} · ${pretty(p.slice(11))}` : p.startsWith("translation/") ? `Translated chapter · ${p.slice(12).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p.startsWith("rewrite/") ? `Chapter · ${p.slice(8).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p);
+export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? (p.startsWith("book/chapters/") ? `Book wizard · chapter ${Number(p.slice(14, 16))}${p.endsWith("-notes.md") ? " · what Claude used" : ""}` : p.startsWith("book/improved/") ? `Book wizard · improved chapter ${Number(p.slice(14, 16))}` : p.startsWith("sections/") ? "Manuscript section suggestion" : p.startsWith("volumes/") ? `Volume ${Number(p.slice(8, 10))} · ${pretty(p.slice(11))}` : p.startsWith("planned/") ? `Planned book ${Number(p.slice(8, 10))} · ${pretty(p.slice(11))}` : p.startsWith("translation/") ? `Translated chapter · ${p.slice(12).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p.startsWith("rewrite/") ? `Chapter · ${p.slice(8).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p);
 
 // ── Book wizard on Claude Code ───────────────────────────────────────────────
 // The Book Creator's engine for Claude Studio: each step is a runner job in the
@@ -216,6 +216,8 @@ async function runToFile(threadId: string, action: "book-outline" | "book-chapte
 export function claudeBookEngine(threadId: string, onOutline?: (o: BookOutline) => void): BookEngine {
   return {
     label: "Written by your Claude Code",
+    approaches: true,
+    chapterNotes: (i) => studio.output(threadId, `book/chapters/${String(i + 1).padStart(2, "0")}-notes.md`).catch(() => null),
     async outline(i) {
       const raw = await runToFile(threadId, "book-outline", { ...i });
       let o: BookOutline;

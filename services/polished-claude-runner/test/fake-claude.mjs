@@ -96,10 +96,12 @@ else {
     say("Outline written.");
   } else if (prompt.startsWith("Write Chapter")) {
     const n = /^Write Chapter (\d+), "([^"]*)"/.exec(prompt);
-    const prior = fs.existsSync("out/book/chapters") ? fs.readdirSync("out/book/chapters").length : 0;
+    const prior = fs.existsSync("out/book/chapters") ? fs.readdirSync("out/book/chapters").filter((f) => /^\d+\.md$/.test(f)).length : 0;
     fs.mkdirSync("out/book/chapters", { recursive: true });
     fs.writeFileSync(`out/book/chapters/${n[1].padStart(2, "0")}.md`, `## ${n[2]}\n\nChapter ${n[1]} by Claude Code (saw ${prior} earlier chapters).`);
     tool("Write", { file_path: path.join(cwd, `out/book/chapters/${n[1].padStart(2, "0")}.md`) }); await wait(pace);
+    const notes = /Write \.\/out\/(book\/chapters\/\d+-notes\.md)/.exec(prompt)?.[1];
+    if (notes) fs.writeFileSync(`out/${notes}`, `### From your book\n\n${fs.readdirSync("source").join(", ")}\n\nApproach: ${/Polish the owner's own book/.test(prompt) ? "polish" : /mainly from research/.test(prompt) ? "research" : /strengthen it with other sources/.test(prompt) ? "mine-and-research" : "mine"}`);
     say(`Chapter ${n[1]} written.`);
   } else if (prompt.startsWith("Improve Chapter")) {
     const target = /\.\/out\/(book\/improved\/[^ ]+\.md)/.exec(prompt)[1];
