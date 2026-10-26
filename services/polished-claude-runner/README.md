@@ -89,7 +89,7 @@ marked `[citation needed]`.
    | `SUPABASE_URL` | the Polished Pages Supabase URL |
    | `SUPABASE_ANON_KEY` | the Supabase publishable (anon) key |
    | `RUNNER_ADMIN_USER_IDS` | the owner's Supabase user id |
-   | `ALLOWED_ORIGINS` | the Polished Pages site, e.g. `https://polishedpages.example` |
+   | `ALLOWED_ORIGINS` | the Polished Pages site: `https://polishedpages.vercel.app` (comma-separate any custom domain too) |
    | `JOB_TIMEOUT_MIN` | optional, default `240` (a whole book can take hours) |
    | `MAX_UPLOAD_MB` | optional, default `40` |
    | `CLAUDE_MODEL` | optional, e.g. `opus`; default is Claude Code's default |
