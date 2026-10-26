@@ -1,0 +1,12 @@
+{
+  "name": "@polished/claude-runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Claude Studio runner: the Polished Pages owner's private Claude Code, reached from the admin page.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test test/runner.test.mjs"
+  }
+}
