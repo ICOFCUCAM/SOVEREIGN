@@ -2,7 +2,7 @@
 // on Claude Code (the runner holds those prompts, file-based) and on the API
 // (the prompts below, applied chapter by chapter by studio-api.ts).
 
-export type ToolId = "voice-profile" | "voice" | "proofread" | "factcheck" | "quotes" | "translate" | "marketing" | "studyguide" | "index" | "compare" | "readability" | "ocr";
+export type ToolId = "series" | "voice-profile" | "voice" | "proofread" | "factcheck" | "quotes" | "translate" | "marketing" | "studyguide" | "index" | "compare" | "readability" | "ocr";
 
 export interface ToolField {
   key: string;
@@ -17,7 +17,7 @@ export interface StudioTool {
   id: ToolId;
   title: string;
   line: string;
-  icon: "voice" | "pen" | "spell" | "check" | "quote" | "languages" | "megaphone" | "graduation" | "list" | "diff" | "gauge" | "scan";
+  icon: "series" | "voice" | "pen" | "spell" | "check" | "quote" | "languages" | "megaphone" | "graduation" | "list" | "diff" | "gauge" | "scan";
   fields: ToolField[];
   /** Main file the tool writes (relative to out/). */
   output: (o: Record<string, unknown>) => string;
@@ -31,6 +31,12 @@ export interface StudioTool {
 const BIBLES = ["KJV", "NKJV", "ESV", "NIV", "NASB", "NLT", "CSB", "AMP", "RSV", "NRSV", "WEB"].map((v) => ({ v, l: v }));
 
 export const STUDIO_TOOLS: StudioTool[] = [
+  { id: "series", title: "Turn into a series", line: "Split into volumes, plan books that continue it, or both", icon: "series", output: () => "series-plan.md",
+    fields: [
+      { key: "mode", label: "What to do", type: "select", initial: "split", options: [{ v: "split", l: "Split this book into volumes" }, { v: "continue", l: "Plan new books that continue it" }, { v: "both", l: "Both" }] },
+      { key: "volumes", label: "How many volumes or new books (empty: Claude decides)", type: "number" },
+      { key: "audience", label: "Readers (optional)", type: "text", placeholder: "e.g. small-group Bible study" },
+    ] },
   { id: "voice-profile", title: "Learn my voice", line: "A style guide of how you write, from your own samples", icon: "voice", output: () => "voice-profile.md", fields: [] },
   { id: "voice", title: "Rewrite in my voice", line: "Your voice, AI-sounding patterns removed, places to add your own", icon: "pen", output: () => "voice.md", fields: [] },
   { id: "proofread", title: "Proofread & copy-edit", line: "Corrected text plus a list of every change", icon: "spell", output: () => "proofread.md",

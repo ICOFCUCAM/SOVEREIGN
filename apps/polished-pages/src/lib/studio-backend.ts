@@ -6,7 +6,7 @@ import {
   type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioMe, type StudioThread, type StudioThreadSummary,
 } from "@/lib/claude-studio";
 import { API_SYSTEM, VOICE_RULE, compareApiPrompt, toolApiPlan, toolById, type ToolId } from "@/lib/studio-tools";
-import { kindDef, type Manuscript } from "@/lib/manuscript";
+import { importText, kindDef, type Manuscript } from "@/lib/manuscript";
 
 // Which engine does the work, and where projects live.
 //   Engine: the owner's Claude Code (on the runner, their plan) or the API (billed per use).
@@ -209,7 +209,9 @@ export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions
           const meta = toolById(id);
           if (!meta) throw new Error("Unknown tool.");
           if (meta.claudeOnly) throw new Error(`${meta.title} needs Claude Code: it reads the scanned images itself.`);
-          if (id === "compare") {
+          if (id === "series") {
+            Object.assign(outputs, await seriesOnApi(text, o, say));
+          } else if (id === "compare") {
             const a = String(o.a ?? ""), b = String(o.b ?? "");
             const [ta, tb] = [await pathText(ctx, a), await pathText(ctx, b)];
             if (!ta || !tb) throw new Error("Both versions need readable text.");
@@ -253,6 +255,47 @@ export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions
     }
   })();
   return job;
+}
+
+const slug = (t: string) => t.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "book";
+
+/** Series on the API: one planning call; volumes are then assembled from the author's own chapters, verbatim. */
+async function seriesOnApi(text: string, o: Record<string, unknown>, say: (l: string) => void): Promise<Record<string, string>> {
+  const split = o.mode !== "continue", cont = o.mode === "continue" || o.mode === "both";
+  const n = Number(o.volumes) > 0 ? Number(o.volumes) : null;
+  const book = importText("", text);
+  const chapters = book.sections;
+  say(`Planning the series from ${chapters.length} chapters`);
+  const list = chapters.map((c, i) => `${i}. ${c.title} (${c.body.split(/\s+/).length} words): ${c.body.slice(0, 600).replace(/\s+/g, " ")}`).join("\n");
+  const r = await callApi(`Plan a book series from this book${o.audience ? ` for ${o.audience}` : ""}.
+${split ? `Split it into ${n ? n : "the number of volumes that reads best (usually 2-5)"} volumes at natural turning points: whole chapters, in order, every chapter used once.` : ""}
+${cont ? `Plan ${n && !split ? n : "2-3"} new books that continue it (same world, themes and voice), each with chapter titles and 2-3 sentence summaries.` : ""}
+Reply with JSON only: {"title": "", "premise": "", "guide": "markdown series guide: themes or arguments, recurring people, places, key terms, timeline, voice", "volumes": [{"title": "", "summary": "", "chapters": [chapter numbers]}], "planned": [{"title": "", "premise": "", "chapters": [{"title": "", "summary": ""}]}]}
+${split ? "" : 'Use "volumes": [].'} ${cont ? "" : 'Use "planned": [].'}
+
+Book: ${book.title || "Untitled"}
+Chapters (number. title (words): opening):
+${list}`, { maxTokens: 16000 });
+  let plan: { title?: string; premise?: string; guide?: string; volumes?: { title: string; summary?: string; chapters: number[] }[]; planned?: { title: string; premise?: string; chapters: { title: string; summary: string }[] }[] };
+  try { plan = JSON.parse(r.text.replace(/^```(?:json)?\s*|\s*```\s*$/g, "")); } catch { throw new Error("The series plan wasn't valid. Try again."); }
+  const out: Record<string, string> = {};
+  const manifest = { title: plan.title ?? "Series", premise: plan.premise ?? "", volumes: [] as { title: string; file: string }[], planned: [] as { title: string; file: string }[] };
+  (plan.volumes ?? []).forEach((v, i) => {
+    const file = `volumes/${String(i + 1).padStart(2, "0")}-${slug(v.title)}.md`;
+    const body = (v.chapters ?? []).map((k) => chapters[k]).filter(Boolean).map((c) => `## ${c.title}\n\n${c.body}`).join("\n\n");
+    out[file] = `# ${v.title}\n\n${body}\n`;
+    manifest.volumes.push({ title: v.title, file });
+  });
+  (plan.planned ?? []).forEach((b, i) => {
+    const file = `planned/${String(i + 1).padStart(2, "0")}-${slug(b.title)}.md`;
+    out[file] = `# ${b.title}\n\n${b.premise ?? ""}\n\n${(b.chapters ?? []).map((c) => `## ${c.title}\n\n${c.summary}`).join("\n\n")}\n`;
+    manifest.planned.push({ title: b.title, file });
+  });
+  const used = new Set((plan.volumes ?? []).flatMap((v) => v.chapters ?? []));
+  const missing = split ? chapters.filter((_, i) => !used.has(i)).map((c) => c.title) : [];
+  out["series-plan.md"] = `# ${manifest.title}\n\n${manifest.premise}\n\n${plan.guide ?? ""}\n\n${manifest.volumes.length ? `## Volumes\n\n${(plan.volumes ?? []).map((v, i) => `${i + 1}. **${v.title}**: ${v.summary ?? ""} (chapters ${(v.chapters ?? []).map((k) => chapters[k]?.title).filter(Boolean).join(", ")})`).join("\n")}\n\n` : ""}${manifest.planned.length ? `## Planned books\n\n${(plan.planned ?? []).map((b, i) => `${i + 1}. **${b.title}**: ${b.premise ?? ""}`).join("\n")}\n\n` : ""}${missing.length ? `> Chapters not placed in a volume: ${missing.join(", ")}\n` : ""}`;
+  out["series.json"] = JSON.stringify(manifest, null, 2);
+  return out;
 }
 
 export function cancelApiJob(jobId: string) { const j = apiJobs.get(jobId); if (j) j.cancelled = true; }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, AudioLines, BadgeCheck, Feather, BookMarked, Gauge, GitCompare, Globe, GraduationCap, Languages, ListTree, Megaphone, ScanText, SpellCheck2 } from "lucide-react";
+import { ArrowLeft, AudioLines, Layers3, BadgeCheck, Feather, BookMarked, Gauge, GitCompare, Globe, GraduationCap, Languages, ListTree, Megaphone, ScanText, SpellCheck2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import type { EngineId } from "@/lib/studio-backend";
 
 // The "More tools" window: pick a tool, set its few options, run it on the
 // engine in use (shown), on the uploads or on an earlier result.
-const ICONS: Record<StudioTool["icon"], typeof SpellCheck2> = { voice: AudioLines, pen: Feather, spell: SpellCheck2, check: BadgeCheck, quote: BookMarked, languages: Languages, megaphone: Megaphone, graduation: GraduationCap, list: ListTree, diff: GitCompare, gauge: Gauge, scan: ScanText };
+const ICONS: Record<StudioTool["icon"], typeof SpellCheck2> = { series: Layers3, voice: AudioLines, pen: Feather, spell: SpellCheck2, check: BadgeCheck, quote: BookMarked, languages: Languages, megaphone: Megaphone, graduation: GraduationCap, list: ListTree, diff: GitCompare, gauge: Gauge, scan: ScanText };
 const GRADIENT = "bg-gradient-to-r from-[hsl(221_83%_53%)] to-[hsl(262_83%_58%)] text-white shadow-[0_10px_28px_-12px_hsl(248_83%_55%/0.7)] hover:opacity-95";
 
 export default function ToolsDialog({ thread, engine, onClose, onRun }: { thread: StudioThread; engine: EngineId | null; onClose: () => void; onRun: (o: RunOptions & Record<string, unknown>) => void }) {
@@ -100,7 +100,7 @@ export default function ToolsDialog({ thread, engine, onClose, onRun }: { thread
                       </Select>
                     ) : (
                       <Input id={`tool-${f.key}`} type={f.type === "number" ? "number" : "text"} min={f.type === "number" ? 1 : undefined} max={f.type === "number" ? 20 : undefined}
-                        value={String(values[f.key] ?? "")} placeholder={f.placeholder} onChange={(e) => set(f.key, f.type === "number" ? Number(e.target.value) : e.target.value)} />
+                        value={String(values[f.key] ?? "")} placeholder={f.placeholder} onChange={(e) => set(f.key, f.type === "number" ? (e.target.value === "" ? "" : Number(e.target.value)) : e.target.value)} />
                     )}
                   </>)}
                 </div>

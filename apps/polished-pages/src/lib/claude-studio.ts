@@ -155,6 +155,8 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "readability.md": "Readability review",
   "scanned-text.md": "Text from scanned pages",
   "voice-profile.md": "My voice profile",
+  "series-plan.md": "Series plan",
+  "series.json": "Series plan (data)",
   "voice.md": "Rewritten in my voice",
   "voice-notes.md": "Voice notes & authorship",
   "summary.md": "Summary",
@@ -165,7 +167,8 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "citation-report.md": "Citation report",
 };
 
-export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? (p.startsWith("book/chapters/") ? `Book wizard · chapter ${Number(p.slice(14, 16))}` : p.startsWith("book/improved/") ? `Book wizard · improved chapter ${Number(p.slice(14, 16))}` : p.startsWith("sections/") ? "Manuscript section suggestion" : p.startsWith("translation/") ? `Translated chapter · ${p.slice(12).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p.startsWith("rewrite/") ? `Chapter · ${p.slice(8).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p);
+const pretty = (f: string) => { const t = f.replace(/\.md$/, "").replace(/-/g, " "); return t.charAt(0).toUpperCase() + t.slice(1); };
+export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? (p.startsWith("book/chapters/") ? `Book wizard · chapter ${Number(p.slice(14, 16))}` : p.startsWith("book/improved/") ? `Book wizard · improved chapter ${Number(p.slice(14, 16))}` : p.startsWith("sections/") ? "Manuscript section suggestion" : p.startsWith("volumes/") ? `Volume ${Number(p.slice(8, 10))} · ${pretty(p.slice(11))}` : p.startsWith("planned/") ? `Planned book ${Number(p.slice(8, 10))} · ${pretty(p.slice(11))}` : p.startsWith("translation/") ? `Translated chapter · ${p.slice(12).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p.startsWith("rewrite/") ? `Chapter · ${p.slice(8).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p);
 
 // ── Book wizard on Claude Code ───────────────────────────────────────────────
 // The Book Creator's engine for Claude Studio: each step is a runner job in the

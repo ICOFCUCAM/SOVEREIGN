@@ -26,6 +26,16 @@ if (prompt.includes("LIMITHIT")) {
   out({ type: "result", subtype: "success", is_error: true, result: "Claude AI usage limit reached", session_id: sid });
   process.exit(1);
 }
+if (prompt.includes("turn it into a book series")) {
+  fs.mkdirSync("out/volumes", { recursive: true }); fs.mkdirSync("out/planned", { recursive: true });
+  fs.writeFileSync("out/volumes/01-beginnings.md", "# Beginnings\n\n## One\n\nFirst.");
+  fs.writeFileSync("out/volumes/02-the-road.md", "# The Road\n\n## Previously\n\nRecap.\n\n## Two\n\nSecond.");
+  fs.writeFileSync("out/planned/01-home.md", "# Home\n\nA premise.\n\n## Arrival\n\nThey arrive.\n\n## Rest\n\nThey rest.");
+  fs.writeFileSync("out/series-plan.md", "# The Long Road series\n\nPremise.");
+  fs.writeFileSync("out/series.json", JSON.stringify({ title: "The Long Road", premise: "A journey.", volumes: [{ title: "Beginnings", file: "volumes/01-beginnings.md" }, { title: "The Road", file: "volumes/02-the-road.md" }], planned: [{ title: "Home", file: "planned/01-home.md" }] }));
+  out({ type: "result", subtype: "success", is_error: false, result: "Series planned.", session_id: sid });
+  process.exit(0);
+}
 const sectionOut = /to \.\/out\/(sections\/[\w-]+\.md)/.exec(prompt);
 if (sectionOut) {
   const file = /The section to work on is \.\/(manuscript\/[^\s]+\.md)/.exec(prompt)[1];

@@ -46,6 +46,7 @@ describe("API engine", () => {
       calls.push({ user: b.user, webSearch: b.webSearch });
       let text = `ANSWER ${calls.length}`;
       if (/Proofread/.test(b.user)) text = `Fixed text ${calls.length}\n=== CHANGES ===\n| a | b | why |`;
+      if (/Plan a book series/.test(b.user)) text = JSON.stringify({ title: "The Long Road", premise: "A journey.", guide: "## Guide\n\nThemes.", volumes: [{ title: "Beginnings", summary: "s", chapters: [0, 1] }, { title: "Arrival", summary: "s", chapters: [2] }], planned: [{ title: "Home", premise: "p", chapters: [{ title: "Rest", summary: "They rest." }] }] });
       if (/Add citations/.test(b.user)) text = `Cited body ${calls.length} (Smith, 2020)\n## References\n- Smith, J. (2020). Book.\n- Zed, A. (2019). Other.`;
       return new Response(JSON.stringify({ text, sources: b.webSearch ? [{ url: "https://x.org", title: "X" }] : [] }), { status: 200 });
     }));
@@ -115,6 +116,18 @@ describe("API engine", () => {
     expect(ev.at(-1)).toMatchObject({ status: "done" });
     expect(calls.at(-1)!.user).toMatch(/Short, warm sentences/);
     expect(Object.keys(recorded.at(-1)!.outputs).sort()).toEqual(["voice-notes.md", "voice.md"]);
+  });
+
+  it("turns a book into a series: volumes keep the author's chapters verbatim", async () => {
+    const book = "## One\n\nFirst words.\n\n## Two\n\nSecond words.\n\n## Three\n\nThird words.";
+    const ev = await run(ctx(book), "tool", { tool: "series", mode: "both" });
+    expect(ev.at(-1)).toMatchObject({ status: "done" });
+    const out = recorded.at(-1)!.outputs;
+    expect(out["volumes/01-beginnings.md"]).toBe("# Beginnings\n\n## One\n\nFirst words.\n\n## Two\n\nSecond words.\n");
+    expect(out["volumes/02-arrival.md"]).toContain("Third words.");
+    expect(out["planned/01-home.md"]).toMatch(/## Rest\n\nThey rest\./);
+    expect(JSON.parse(out["series.json"]).volumes.map((v: { file: string }) => v.file)).toEqual(["volumes/01-beginnings.md", "volumes/02-arrival.md"]);
+    expect(out["series-plan.md"]).toMatch(/## Volumes[\s\S]*Beginnings[\s\S]*## Planned books[\s\S]*Home/);
   });
 
   it("explains when there is nothing readable (a scan) and records the failure", async () => {

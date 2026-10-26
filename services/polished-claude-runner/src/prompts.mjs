@@ -370,3 +370,21 @@ Keep the meaning, structure, facts, quotations and references. ${LONG}
 Write ./out/voice.md (the full rewritten text) and ./out/voice-notes.md: the AI-sounding patterns you removed (with before/after examples), every [[YOURS: …]] marker you left and why, and a short authorship note saying what was rewritten.`,
   }),
 };
+
+// Series: split one book into volumes, plan new books that continue it, or both.
+TOOLS.series = {
+  title: "Turn into a series",
+  build: (o, tgt) => {
+    const split = o.mode !== "continue";
+    const cont = o.mode === "continue" || o.mode === "both";
+    const n = Number(o.volumes) > 0 ? Number(o.volumes) : null;
+    return {
+      output: "series-plan.md",
+      prompt: `Read ${tgt} in full and turn it into a book series${o.audience ? ` for ${o.audience}` : ""}.
+${split ? `Split: divide the existing book into ${n ? `${n} volumes` : "the number of volumes that reads best (usually 2–5)"} at natural turning points. Volumes keep the author's text exactly as written, whole chapters only, in order; nothing is rewritten. Write each volume to ./out/volumes/NN-short-title.md starting with "# <volume title>", then its chapters as "## " sections, verbatim. For volume 2 onward you may add, right after the title, a short "## Previously" recap of the earlier volumes, clearly new text.` : ""}
+${cont ? `Continue: plan ${n && !split ? n : "2–3"} new books that continue this one (same world, themes and voice). For each, write ./out/planned/NN-short-title.md starting with "# <title>", a one-paragraph premise, then "## " chapter headings each followed by a 2–3 sentence summary. These are outlines to write from, not finished text.` : ""}
+Then write ./out/series-plan.md: the series title and premise; a series guide (main themes or arguments, recurring people or characters, places, key terms, timeline, voice notes); and the list of ${split ? "volumes (title, one line, which chapters)" : ""}${split && cont ? " and " : ""}${cont ? "planned books (title, one line)" : ""}.
+Finally write ./out/series.json, valid JSON only: {"title": "", "premise": "", "volumes": [{"title": "", "file": "volumes/01-….md"}], "planned": [{"title": "", "file": "planned/01-….md"}]} listing exactly the files you wrote.`,
+    };
+  },
+};

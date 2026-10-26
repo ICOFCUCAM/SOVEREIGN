@@ -21,6 +21,7 @@ import ManuscriptEditor from "@/components/studio/ManuscriptEditor";
 import MyBooks from "@/components/studio/MyBooks";
 import VoicePanel from "@/components/studio/VoicePanel";
 import { importText } from "@/lib/manuscript";
+import { createSeriesInLibrary, readManifest, startPlannedBooks } from "@/lib/series-from-plan";
 import { apiBookEngine } from "@/lib/book-engine";
 import { browserBackend, decideEngine, runnerBackend, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
 import { isAdmin, saveDocument } from "@/lib/documents";
@@ -333,7 +334,8 @@ function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, h
         setLive(null);
         reload().then(({ t }) => {
           const outs = e.outputs ?? [];
-          const pick = ["rewrite.md", "cited.md", "summary.md"].find((p) => outs.includes(p)) ?? outs[0];
+          // Open the run's main result (series plan, summary, rewritten book…), not a by-product.
+          const pick = (e.output && outs.includes(e.output) ? e.output : null) ?? ["rewrite.md", "cited.md", "summary.md", "series-plan.md"].find((p) => outs.includes(p)) ?? outs.find((p) => !p.includes("/") && !p.endsWith(".json")) ?? outs[0];
           if (pick && t.outputs.some((o) => o.path === pick)) setViewing(pick);
         }).catch(() => {});
         onChanged();
@@ -452,8 +454,14 @@ function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, h
   const originals = thread.files.filter((f) => f.kind === "original");
   const busy = Boolean(live) || (busyElsewhere && engineId === "claude-code" && !live) || !engineId;
   const hasSource = thread.files.length > 0;
-  const mainOutputs = thread.outputs.filter((o) => !o.path.startsWith("rewrite/") && !o.path.startsWith("book/") && !o.path.startsWith("translation/"));
-  const wizardOutputs = thread.outputs.filter((o) => o.path.startsWith("book/")).sort((a, b) => a.path.localeCompare(b.path));
+  // Results: main files first; by-products folded into named groups.
+  const GROUPS: { prefix: string; label: string }[] = [
+    { prefix: "volumes/", label: "Series volumes" }, { prefix: "planned/", label: "Planned books" }, { prefix: "book/", label: "Book wizard" },
+    { prefix: "translation/", label: "Translated chapters" }, { prefix: "sections/", label: "Manuscript suggestions" },
+  ];
+  const grouped = (o: { path: string }) => o.path.startsWith("rewrite/") || o.path === "series.json" || GROUPS.some((g) => o.path.startsWith(g.prefix));
+  const mainOutputs = thread.outputs.filter((o) => !grouped(o));
+  const outputGroups = GROUPS.map((g) => ({ ...g, items: thread.outputs.filter((o) => o.path.startsWith(g.prefix)).sort((a, b) => a.path.localeCompare(b.path)) })).filter((g) => g.items.length);
   const chapters = thread.outputs.filter((o) => o.path.startsWith("rewrite/")).sort((a, b) => a.path.localeCompare(b.path));
 
   return (
@@ -560,12 +568,12 @@ function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, h
         ) : (
           <div className="mt-2 space-y-1.5">
             {mainOutputs.map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={setViewing} />)}
-            {wizardOutputs.length > 0 && (
-              <details className="rounded-xl border border-border px-3 py-2">
-                <summary className="cursor-pointer text-sm font-medium">Book wizard · {wizardOutputs.length} {wizardOutputs.length === 1 ? "file" : "files"}</summary>
-                <div className="mt-2 space-y-1">{wizardOutputs.map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={setViewing} compact />)}</div>
+            {outputGroups.map((g) => (
+              <details key={g.prefix} className="rounded-xl border border-border px-3 py-2">
+                <summary className="cursor-pointer text-sm font-medium">{g.label} · {g.items.length}</summary>
+                <div className="mt-2 space-y-1">{g.items.map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={setViewing} compact />)}</div>
               </details>
-            )}
+            ))}
             {chapters.length > 0 && (
               <details className="rounded-xl border border-border px-3 py-2">
                 <summary className="cursor-pointer text-sm font-medium">{chapters.length} rewritten chapters</summary>
@@ -583,7 +591,7 @@ function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, h
       {tools && <ToolsDialog thread={thread} engine={engineId} onClose={() => setTools(false)} onRun={(o) => { setTools(false); start("tool", o); }} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
       {dialog && <ActionDialog action={dialog} thread={thread} styles={citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
-      {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => setViewing(null)} onUseAsTarget={(p) => { setViewing(null); setDialog("rewrite"); setPendingTarget(p); }} />}
+      {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => { setViewing(null); onChanged(); }} onUseAsTarget={(p) => { setViewing(null); setDialog("rewrite"); setPendingTarget(p); }} />}
     </div>
   );
 }
@@ -592,6 +600,28 @@ function Project({ id, backend, decision, mode, citationStyles, busyElsewhere, h
 // handed to the dialog through this small module-level slot.
 let pendingTarget: string | null = null;
 const setPendingTarget = (p: string | null) => { pendingTarget = p; };
+
+function SeriesActions({ backend, threadId, onDone }: { backend: StudioBackend; threadId: string; onDone: () => void }) {
+  const { toast } = useToast();
+  const [counts, setCounts] = useState<{ volumes: number; planned: number } | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  useEffect(() => { readManifest(backend, threadId).then((m) => setCounts({ volumes: m.volumes.length, planned: m.planned.length })).catch(() => setCounts({ volumes: 0, planned: 0 })); }, [backend, threadId]);
+  if (!counts) return null;
+  return (<>
+    {counts.volumes > 0 && <Button size="sm" variant="ghost" disabled={Boolean(busy)} onClick={async () => {
+      setBusy("lib");
+      try { const r = await createSeriesInLibrary(backend, threadId); toast({ title: "Series created in your Library", description: `${r.books} volumes saved as books, in order. Find them in My books and on the Series page.` }); }
+      catch (e) { toast({ title: "Couldn't create the series", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+      finally { setBusy(null); }
+    }}>{busy === "lib" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Layers className="h-4 w-4" />} Save {counts.volumes} volumes as a series</Button>}
+    {counts.planned > 0 && <Button size="sm" variant="ghost" disabled={Boolean(busy)} onClick={async () => {
+      setBusy("plan");
+      try { const ids = await startPlannedBooks(backend, threadId); toast({ title: `${ids.length} new ${ids.length === 1 ? "project" : "projects"} started`, description: "Each planned book is in Projects, with its chapters laid out in the Manuscript." }); onDone(); }
+      catch (e) { toast({ title: "Couldn't start the books", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+      finally { setBusy(null); }
+    }}>{busy === "plan" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Start writing {counts.planned} planned {counts.planned === 1 ? "book" : "books"}</Button>}
+  </>);
+}
 
 function prettyJson(t: string) {
   try { return JSON.stringify(JSON.parse(t), null, 2); } catch { return t; }
@@ -805,6 +835,7 @@ function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsT
             <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || saving} onClick={save}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} Save to Library as a book</Button>
           )}
           <div className="ml-auto flex gap-1">
+            {path === "series-plan.md" && <SeriesActions backend={backend} threadId={threadId} onDone={onClose} />}
             {path === "voice-profile.md" && <Button size="sm" variant="ghost" disabled={!text} onClick={async () => { try { await backend.saveVoice(text ?? ""); toast({ title: "Saved as your voice profile", description: "“In my voice” and “Rewrite in my voice” now follow it." }); } catch (e) { toast({ title: "Couldn't save", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}><PenLine className="h-4 w-4" /> Use as my voice profile</Button>}
             {!isJson && <Button size="sm" variant="ghost" disabled={!text} onClick={() => onUseAsTarget(path)}><Wand2 className="h-4 w-4" /> Rewrite this</Button>}
             <Button size="sm" variant="ghost" disabled={!text} onClick={() => { navigator.clipboard.writeText(text ?? ""); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /> Copy</Button>

@@ -268,6 +268,18 @@ test("manuscript: saved as JSON and mirrored as files; sections expanded; voice 
   assert.equal(ev.at(-1).status, "done");
 });
 
+test("turn into a series: volumes, planned books and a machine-readable plan", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Series" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=book.txt&kind=original`, { method: "POST", raw: Buffer.from("## One\n\nFirst.\n\n## Two\n\nSecond.") });
+  const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "series", mode: "both" } } })).json();
+  assert.equal(job.label, "Turn into a series");
+  const ev = await streamUntilDone(job.id, thread.id);
+  assert.equal(ev.at(-1).status, "done");
+  const plan = JSON.parse((await (await call(`/v1/threads/${thread.id}/outputs/series.json`)).json()).text);
+  assert.equal(plan.volumes.length, 2); assert.equal(plan.planned.length, 1);
+  assert.match((await (await call(`/v1/threads/${thread.id}/outputs/${plan.volumes[1].file}`)).json()).text, /^# The Road/);
+});
+
 test("the sandbox settings and helpers", () => {
   const s = settingsFor("/data/threads/x/work");
   assert.ok(s.permissions.deny.includes("Read(//etc/**)"));
