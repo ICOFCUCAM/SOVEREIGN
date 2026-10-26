@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { authHeader } from "@/lib/session";
+import { apiBookEngine, type BookEngine } from "@/lib/book-engine";
 import { logAiActivity } from "@/lib/ai-activity-log";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen, PenTool, Download, Repeat, Eye, Package, Image as ImageIcon, Check, Loader2, HardDrive, Languages, Headphones, ClipboardCheck, BrainCircuit } from "lucide-react";
@@ -26,7 +26,7 @@ import CoverGenerator from "@/components/book/CoverGenerator";
 // One book workspace = one auto-saved draft. The whole working state is mirrored
 // to localStorage on every change and checkpointed into the library, so a
 // refresh, crash, lost connection or logout never loses a generated book.
-const DRAFT_KEY = "book.workspace";
+const DEFAULT_DRAFT_KEY = "book.workspace";
 
 interface BookDraft {
   bookTitle: string; genre: string; targetAudience: string;
@@ -59,8 +59,12 @@ const relTime = (ts: number | null): string => {
   return `${Math.floor(m / 60)}h ago`;
 };
 
-const BookCreator = () => {
+// The same wizard runs in two places: here at /book on the site's generation
+// service, and inside Claude Studio, where `engine` is the owner's own Claude
+// Code and `draftKey` keeps each Studio project's book separate.
+const BookCreator = ({ engine = apiBookEngine, draftKey = DEFAULT_DRAFT_KEY }: { engine?: BookEngine; draftKey?: string } = {}) => {
   const { toast } = useToast();
+  const DRAFT_KEY = draftKey;
 
   // Restore any saved draft synchronously, so there's no empty-flash and the
   // first persisted value equals what we restored (no clobber on mount).
@@ -141,25 +145,7 @@ const BookCreator = () => {
     setIsGeneratingOutline(true);
     try {
       const gk = await buildGenerationKnowledge(knowledge, knowledgeDocIds, `${bookTitle} ${genre} ${targetAudience}`.trim());
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-book-outline`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: await authHeader(),
-          },
-          body: JSON.stringify({ bookTitle, genre, targetAudience, depth, mode, existingContent, knowledge: gk ?? undefined }),
-        }
-      );
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error || "Outline generation failed");
-      }
-
-      const data = await response.json();
-      const ol: BookOutline = data.outline;
+      const ol: BookOutline = await engine.outline({ bookTitle, genre, targetAudience, depth, mode, existingContent, knowledge: gk });
       setOutline(ol);
       setBookTitle(ol.title || bookTitle);
 
@@ -203,34 +189,17 @@ const BookCreator = () => {
       const previousChapters = currentChapters.slice(0, index).filter((c) => c.content).map((c) => c.content!.substring(0, 600));
       const gk = await buildGenerationKnowledge(knowledge, knowledgeDocIds, `${ch.title} ${ch.summary ?? ""} ${(ch.keyPoints ?? []).join(" ")}`.trim());
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-book-chapter`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: await authHeader(),
-          },
-          body: JSON.stringify({
-            bookTitle: outline?.title || bookTitle,
-            genre,
-            targetAudience,
-            chapters: currentChapters.map((c) => ({ title: c.title, summary: c.summary, notes: c.notes, keyPoints: c.keyPoints, hook: c.hook })),
-            chapterIndex: index,
-            depth,
-            previousChapters,
-            knowledge: gk ?? undefined,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error || "Generation failed");
-      }
-
-      const data = await response.json();
-      setChapters((prev) => prev.map((c, i) => (i === index ? { ...c, content: data.chapter, isGenerating: false, status: "complete" } : c)));
+      const chapterText = await engine.chapter({
+        bookTitle: outline?.title || bookTitle,
+        genre,
+        targetAudience,
+        chapters: currentChapters.map((c) => ({ title: c.title, summary: c.summary, notes: c.notes, keyPoints: c.keyPoints, hook: c.hook })),
+        chapterIndex: index,
+        depth,
+        previousChapters,
+        knowledge: gk,
+      });
+      setChapters((prev) => prev.map((c, i) => (i === index ? { ...c, content: chapterText, isGenerating: false, status: "complete" } : c)));
     } catch (error) {
       setChapters((prev) => prev.map((c, i) => (i === index ? { ...c, isGenerating: false, status: "pending" } : c)));
       toast({ title: "Error", description: error instanceof Error ? error.message : "Failed", variant: "destructive" });
@@ -254,29 +223,13 @@ const BookCreator = () => {
     setChapters((prev) => prev.map((c, i) => (i === index ? { ...c, isGenerating: true } : c)));
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/improve-book-content`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: await authHeader(),
-          },
-          body: JSON.stringify({
-            content: ch.content,
-            improvementType: type,
-            bookContext: `Book: ${outline?.title || bookTitle}, Genre: ${genre}, Audience: ${targetAudience}`,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.error || "Improvement failed");
-      }
-
-      const data = await response.json();
-      setChapters((prev) => prev.map((c, i) => (i === index ? { ...c, content: data.content, isGenerating: false, status: "improved" } : c)));
+      const improved = await engine.improve({
+        content: ch.content,
+        improvementType: type,
+        bookContext: `Book: ${outline?.title || bookTitle}, Genre: ${genre}, Audience: ${targetAudience}`,
+        chapterIndex: index,
+      });
+      setChapters((prev) => prev.map((c, i) => (i === index ? { ...c, content: improved, isGenerating: false, status: "improved" } : c)));
       toast({ title: "Chapter Improved", description: `Applied "${type}" enhancement` });
     } catch (error) {
       setChapters((prev) => prev.map((c, i) => (i === index ? { ...c, isGenerating: false } : c)));
@@ -371,6 +324,11 @@ const BookCreator = () => {
                     <BookOpen className="w-4 h-4 text-publishing" />
                     <span className="text-sm text-publishing font-medium font-sans">Book Creator</span>
                   </div>
+                  {engine.label && (
+                    <div className="mb-3 ml-2 inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs font-medium text-primary font-sans">
+                      <Check className="h-3.5 w-3.5" /> {engine.label}
+                    </div>
+                  )}
                   <h1 className="text-3xl md:text-4xl font-bold font-serif mb-2">
                     Create your <span className="text-gradient-gold italic">book</span>
                   </h1>
@@ -442,8 +400,9 @@ const BookCreator = () => {
             ) : view === "cover" ? (
               <div>
                 <h2 className="font-serif text-2xl font-bold mb-1">Cover design</h2>
-                <p className="text-sm text-muted-foreground font-sans mb-5">Generate a front and back cover with AI, guided by your art direction. ISBN &amp; publisher (set under Production) shape the barcode and imprint.</p>
-                <CoverGenerator title={outline?.title || bookTitle} subtitle={outline?.subtitle || meta.subtitle} isbn={meta.isbn} publisher={meta.publisher} pageCount={meta.pageCount} paper={meta.paper} trimSize={meta.trimSize} onGenerated={() => setCoverDone(true)} />
+                <p className="text-sm text-muted-foreground font-sans mb-5">Professional front and back covers: text-free artwork, typeset titles, a back cover with blurb and barcode, a spine sized to your book, and print-ready files. Title, author, ISBN, trim and paper come from Production.</p>
+                <CoverGenerator title={outline?.title || bookTitle} subtitle={outline?.subtitle || meta.subtitle} author={meta.author} isbn={meta.isbn} publisher={meta.publisher || meta.imprint} pageCount={meta.pageCount} paper={meta.paper} trimSize={meta.trimSize} onGenerated={() => setCoverDone(true)}
+                  bookText={() => effectiveContent} copyWriter={engine.coverCopy} bookId={autosave.docId} ensureSaved={() => autosave.flush()} />
               </div>
             ) : view === "knowledge" ? (
               <div>

@@ -22,7 +22,7 @@ const Organizations = () => {
   const [creating, setCreating] = useState(false);
 
   const load = () => myOrganizations().then(setOrgs).catch(() => setOrgs([]));
-  useEffect(load, []);
+  useEffect(() => { void load(); }, []);
 
   const create = async () => {
     if (!name.trim()) return;

@@ -25,7 +25,7 @@ interface Props {
 }
 
 const FeatureStage = ({ eyebrow, eyebrowClass = "text-primary", title, body, ctaLabel, ctaTo, visual, glow = "hsl(221 83% 53% / 0.18)", reversed, act, chapter, alt }: Props) => (
-  <section className={`relative py-24 md:py-32 ${alt ? "bg-secondary/30" : "bg-background"}`}>
+  <section className={`relative overflow-x-clip py-24 md:py-32 ${alt ? "bg-secondary/30" : "bg-background"}`}>
     {/* Connecting thread — the spine running through every chapter */}
     <div className="pointer-events-none absolute left-1/2 top-0 flex -translate-x-1/2 flex-col items-center" aria-hidden>
       <div className="h-14 w-px bg-gradient-to-b from-transparent via-border to-border md:h-20" />

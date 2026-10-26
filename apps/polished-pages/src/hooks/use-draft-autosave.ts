@@ -84,13 +84,13 @@ export function useDraftAutosave<T>(opts: {
     return () => window.clearTimeout(t);
   }, [data, serialize, writeLocal]);
 
-  const flush = useCallback(async () => {
+  const flush = useCallback(async (): Promise<string | null> => {
     const d = dataRef.current;
-    if (!hasContent(d)) return;
+    if (!hasContent(d)) return docIdRef.current;
     const cur = serialize(d);
-    if (cur === lastServerRef.current) return; // nothing new since last checkpoint
+    if (cur === lastServerRef.current) return docIdRef.current; // nothing new since last checkpoint
     const doc = toDocument(d);
-    if (!doc) return;
+    if (!doc) return docIdRef.current;
     setStatus("saving");
     try {
       if (docIdRef.current) {
@@ -103,9 +103,11 @@ export function useDraftAutosave<T>(opts: {
       setLastSavedAt(now);
       setStatus("saved");
       writeLocal(d); // persist the new docId/savedAt into the local snapshot too
+      return docIdRef.current;
     } catch {
       // Signed out, offline, or transient — the local snapshot still holds it.
       setStatus("local");
+      return docIdRef.current;
     }
   }, [hasContent, toDocument, serialize, writeLocal]);
 

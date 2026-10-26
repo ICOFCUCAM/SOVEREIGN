@@ -8,6 +8,7 @@ import AuthGate from "./components/AuthGate.tsx";
 import RequirePlan from "./components/app/RequirePlan.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
+import PageTitle from "./components/PageTitle.tsx";
 import RouteFallback from "./components/RouteFallback.tsx";
 import { I18nProvider } from "@/lib/i18n";
 
@@ -55,6 +56,8 @@ const PublicSeriesPage = lazy(() => import("./pages/PublicSeries.tsx"));
 const CollectionsPage = lazy(() => import("./pages/CollectionsPage.tsx"));
 const PublicCollection = lazy(() => import("./pages/PublicCollection.tsx"));
 const BookCreator = lazy(() => import("./pages/BookCreator.tsx"));
+const ClaudeStudio = lazy(() => import("./pages/ClaudeStudio.tsx"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Gallery = lazy(() => import("./pages/Gallery.tsx"));
 
@@ -68,6 +71,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <PageTitle />
         <ErrorBoundary>
         <Suspense fallback={<RouteFallback />}>
         <Routes>
@@ -86,6 +90,8 @@ const App = () => (
           <Route path="/institutions" element={<Institutions />} />
           <Route path="/collection/:token" element={<PublicCollection />} />
           <Route path="/series/public/:token" element={<PublicSeriesPage />} />
+          {/* Where the emailed password-reset link lands. */}
+          <Route path="/reset-password" element={<ResetPassword />} />
           {/* Generators require sign-in (metered per user); the gate prompts
               for sign-in only when someone actually goes to create. */}
           <Route path="/dashboard" element={<AuthGate><Dashboard /></AuthGate>} />
@@ -96,6 +102,8 @@ const App = () => (
           <Route path="/organizations" element={<AuthGate><Organizations /></AuthGate>} />
           <Route path="/organizations/:slug" element={<AuthGate><OrgWorkspace /></AuthGate>} />
           <Route path="/organizations/:slug/analytics" element={<AuthGate><OrgAnalyticsPage /></AuthGate>} />
+          {/* The owner's own Claude Code (admin only; the runner re-checks every request). */}
+          <Route path="/admin/claude" element={<AuthGate><ClaudeStudio /></AuthGate>} />
           <Route path="/marketplace-health" element={<AuthGate><MarketplaceHealth /></AuthGate>} />
           <Route path="/cv" element={<AuthGate><CVGenerator /></AuthGate>} />
           <Route path="/cover-letter" element={<AuthGate><CoverLetterGenerator /></AuthGate>} />
@@ -118,8 +126,8 @@ const App = () => (
           <Route path="/editions" element={<AuthGate><RequirePlan feature="multilingual"><EditionManager /></RequirePlan></AuthGate>} />
           <Route path="/illustrations" element={<AuthGate><IllustrationStudio /></AuthGate>} />
           <Route path="/publishing" element={<AuthGate><PublishingPrep /></AuthGate>} />
-          {/* internal visual-QA gallery (not linked) */}
-          <Route path="/__gallery" element={<Gallery />} />
+          {/* internal visual-QA gallery (not linked); development builds only */}
+          {import.meta.env.DEV && <Route path="/__gallery" element={<Gallery />} />}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

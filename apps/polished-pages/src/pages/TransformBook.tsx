@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import BookReader from "@/components/book/BookReader";
 import BookExportPanel from "@/components/book/BookExportPanel";
 import CoverGenerator from "@/components/book/CoverGenerator";
+import { siteCoverCopyWriter } from "@/lib/cover-copy";
 import SaveToLibrary from "@/components/app/SaveToLibrary";
 
 const TransformBook = () => {
@@ -104,7 +105,7 @@ const TransformBook = () => {
             </motion.div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-              <CoverGenerator title={displayTitle} />
+              <CoverGenerator title={displayTitle} bookText={() => result} copyWriter={siteCoverCopyWriter} />
             </motion.div>
           )}
         </div>

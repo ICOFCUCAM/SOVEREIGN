@@ -8,6 +8,7 @@ import { elementToPdf } from "@/lib/export-pdf";
 import { markdownToEpub } from "@/lib/export-epub";
 import { markdownToPrintPdf } from "@/lib/export-print-pdf";
 import { markdownToIngramSparkPdf } from "@/lib/export-ingramspark-pdf";
+import InteriorType from "@/components/book/InteriorType";
 import { BOOK_THEMES, getBookTheme } from "@/lib/book-themes";
 import { TRIM_SIZES, getTrim } from "@/lib/print-sizes";
 import BookPaper from "@/components/book/BookPaper";
@@ -106,6 +107,7 @@ const BookReader = ({
           <select value={trimId} onChange={(e) => setTrimId(e.target.value)} className="rounded-md border border-border bg-card px-2 py-1.5 text-xs font-sans" title="Print trim size">
             {TRIM_SIZES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
           </select>
+          <InteriorType compact />
           <Button variant="heroOutline" size="sm" disabled={printing} onClick={printInterior} title="Selectable-text interior at the chosen trim (KDP)">
             {printing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Print interior
           </Button>
