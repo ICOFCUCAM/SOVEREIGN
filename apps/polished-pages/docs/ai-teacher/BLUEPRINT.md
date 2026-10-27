@@ -23,6 +23,35 @@ Stack stays: Vite, React, TypeScript, Supabase (Postgres, pgvector, Auth, Storag
 4. Author rules govern how the book is taught; they never override safety, privacy, or the ban on fabricating evidence.
 5. Privacy, authorisation, versioning and evidence provenance are foundations, built first — not enhancements.
 
+## 0.1 Operating modes and the course model (adopted by the owner: "I support both")
+
+The product is **Polished Pages Academic Tutor**: one dual-source academic teaching platform. **The course is the teaching unit, not the document.** A course can combine published Polished Pages books (e.g. *Demonology*) with private course materials (lecture notes, scanned readings, papers, slides, instructor-written lessons). The tutor uses **only** the sources authorised for that course.
+
+Three modes on one system (not three products):
+- **Author mode**: an author enables a tutor for one published book (a course with one published source).
+- **Course mode**: a lecturer combines published books with private academic materials.
+- **Institution mode**: a university manages courses, users, policies and budgets across departments.
+
+Layers: Published Library (books, approved editions, author lessons and quizzes — licensed access) · Private Course Library (institution documents — restricted access) · Course Knowledge Layer (versioned sources, permissions, chapter metadata, hybrid retrieval, citations) · Teacher Runtime (grounded answers, lessons, assessments, progress, policy enforcement) · one learning interface for students, authors and instructors.
+
+Decisions:
+| Decision | Rule |
+|---|---|
+| Source ownership | Published books and private institution documents are separate source types. |
+| Course configuration | Instructors choose allowed sources and mark each **required**, **supplementary** or **excluded**. |
+| Search and citations | Search across all permitted sources; every citation names the book/document title, chapter or section, and page where available. |
+| Author rules | Each book keeps its approved terminology and teaching instructions. Course rules may add constraints; **conflicts are detected and surfaced, never silently resolved**. |
+| Privacy | Private institution documents are isolated from the public marketplace and from other institutions, and never appear in another course's retrieval. |
+
+Core relationships (introduced incrementally; the existing `documents` table stays the content store):
+- `courses` — the course and its teaching policies (mode, owner, institution, rules, budgets).
+- `course_sources` — which published books or private documents are authorised for the course, with required/supplementary/excluded.
+- `source_versions` — immutable versions of each source (content hash, ingestion status).
+- `source_chunks` — indexed passages with exact locations and retrieval metadata (§2a fields, keyed by `source_version_id`).
+**Indexing never makes a source available to any tutor by itself.** Retrieval is always scoped to the authenticated student's course, its permitted sources and their exact versions.
+
+Validation order: *Demonology* as the first reference implementation (author mode), then the same system with a private university lecture pack (course mode), before any larger institutional deployment. A single definitive product and technical specification covering the modes, ingestion, the Teacher Runtime, lessons/assessment/mastery, instructor and institution administration, permissions/privacy/security/metering, the React and Supabase plan (migrations, edge functions) and evaluation/rollout may supersede detail in this file once the owner adopts it.
+
 ## 1. Teaching methods
 
 ### 1a. Lesson structure (eight parts, author-approved before students see it)
@@ -171,12 +200,15 @@ Later (not before the core works): real-time voice, complex adaptive algorithms,
 **Launch criterion**: a student can learn one complete chapter, ask difficult questions, receive source-linked answers, take a meaningful assessment and see progress — while the author can verify the content and trust the system not to invent the book's position. Reference implementation: *Demonology*, one representative chapter, the author's real terminology rules, the 200-case suite — before Teacher becomes available to every book.
 
 ## 10. Implementation checklist
+- [ ] 0.1 Course model: courses, course_sources (required/supplementary/excluded), source_versions, source_chunks; retrieval scoped to course + permitted sources + versions; private-source isolation
 - [ ] 1 Content pipeline (validation, IDs, token chunks, metadata, versions, author preview)
 - [ ] 2 Hybrid retrieval, RRF, evidence validation, exact quotes
 - [ ] 3 Teacher Runtime: authorisation, rules resolution, structured output, citation and terminology validation, response classes, metering, logging
 - [ ] 4 Demonology chapter package generated, approved by the author
 - [ ] 5 Learner experience: five destinations, onboarding, practice, mastery and spaced review, read-along narration, caps
 - [ ] 6 200-case evaluation suite with release gates; pilot
-- [ ] Structured author rules with scope and precedence
+- [ ] Structured author rules with scope and precedence; course rules layered with conflict detection
+- [ ] Course mode with a private lecture pack validated after Demonology
+- [ ] Institution mode: courses, users, policies, budgets per department
 - [ ] Privacy: retention, deletion, access separation for groups
 - [ ] Per-book cost accounting and usage alerts
