@@ -55,8 +55,12 @@ export interface Section {
   summary?: string; idea?: string; original?: string;
   /** Notes the owner pinned to pages of their uploaded book; Claude follows these first. */
   pageNotes?: PageNote[];
+  /** Version history: snapshots, autosaved revisions and the text before each accepted change or restore. */
+  versions?: SectionVersion[];
 }
 export interface PageNote { page: string; text: string }
+export type VersionKind = "snapshot" | "autosave" | "before-accept" | "before-restore";
+export interface SectionVersion { id: string; at: string; kind: VersionKind; title: string; body: string; label?: string }
 export interface HistoryEntry { sectionId: string; op: string; engine: "claude-code" | "api"; at: string; accepted: boolean }
 export interface Manuscript {
   title: string; subtitle?: string; author?: string; sections: Section[]; history: HistoryEntry[]; updatedAt?: string;
