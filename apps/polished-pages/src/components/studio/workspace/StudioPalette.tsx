@@ -24,12 +24,12 @@ export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, 
   const run = (f: () => void) => () => { onOpenChange(false); f(); };
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
+    <CommandDialog open={open} onOpenChange={onOpenChange} title="Claude Studio: tools, chapters and results">
       <CommandInput placeholder="Search tools, chapters and results…" />
       <CommandList className="max-h-[60vh]">
         <CommandEmpty>Nothing matches.</CommandEmpty>
         <CommandGroup heading="Go to">
-          {STAGES.map((s) => <CommandItem key={s.id} onSelect={run(() => onPlace(s.id))}><s.icon className="mr-2" />{s.label}<span className="ml-2 text-xs text-muted-foreground">{s.line}</span></CommandItem>)}
+          {STAGES.map((s) => <CommandItem key={s.id} onSelect={run(() => onPlace(s.id))}><s.icon className="mr-2" />{s.label}<span className="ml-2 truncate text-xs opacity-70">{s.line}</span></CommandItem>)}
           <CommandItem onSelect={run(() => onPlace("books"))}><BookOpen className="mr-2" />My books</CommandItem>
           <CommandItem onSelect={run(() => onPlace("voice"))}><PenLine className="mr-2" />My voice</CommandItem>
         </CommandGroup>
@@ -44,7 +44,7 @@ export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, 
           <CommandItem onSelect={run(() => onAction("rewrite"))}><Wand2 className="mr-2" />Rewrite the whole book</CommandItem>
           <CommandItem onSelect={run(() => onAction("cite"))}><Quote className="mr-2" />Citations and references</CommandItem>
           <CommandItem onSelect={run(onJoin)}><Layers className="mr-2" />Join files</CommandItem>
-          {STUDIO_TOOLS.map((t) => <CommandItem key={t.id} value={`tool ${t.title} ${t.line}`} onSelect={run(() => onTool(t.id))}><Wrench className="mr-2" />{t.title}<span className="ml-2 truncate text-xs text-muted-foreground">{t.line}</span></CommandItem>)}
+          {STUDIO_TOOLS.map((t) => <CommandItem key={t.id} value={`tool ${t.title} ${t.line}`} onSelect={run(() => onTool(t.id))}><Wrench className="mr-2" /><span className="shrink-0">{t.title}</span><span className="ml-2 truncate text-xs opacity-70">{t.line}</span></CommandItem>)}
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="View">
