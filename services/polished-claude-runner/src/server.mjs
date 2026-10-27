@@ -15,7 +15,7 @@ const TOKEN_HELP = {
 };
 import { createAuth } from "./auth.mjs";
 import { createStore, safeName, inside, manuscriptFile } from "./store.mjs";
-import { buildRun, CITATION_STYLES } from "./prompts.mjs";
+import { USES_BOOK, buildRun, CITATION_STYLES } from "./prompts.mjs";
 import { runClaude } from "./claude.mjs";
 
 // Claude Studio runner. A small HTTP API in front of the owner's Claude Code:
@@ -104,7 +104,10 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       const m = await store.readManuscript(thread.id);
       const i = m?.sections?.findIndex((x) => x.id === options?.sectionId) ?? -1;
       if (i < 0) return { status: 400, error: "Save the manuscript first, then try again." };
-      options = { ...options, _file: manuscriptFile(i, m.sections[i]), title: options.title || m.sections[i].title };
+      const sec = m.sections[i];
+      // The owner's notes and rules come from the saved manuscript, so every action sees the same ones.
+      options = { ...options, _file: manuscriptFile(i, sec), title: options.title || sec.title, _book: { rules: m.rules || options.rules, knowledge: m.knowledge, idea: sec.idea || options.idea, pageNotes: sec.pageNotes } };
+      if (options.op === "compose" && USES_BOOK(options.approach) && thread.files.length === 0) return { status: 400, error: "Upload your book to this project first, so Claude can build on it." };
     }
     const spec = buildRun(action, options);
     if (!spec) return { status: 400, error: "Unknown action." };

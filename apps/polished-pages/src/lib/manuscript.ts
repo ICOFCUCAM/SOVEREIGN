@@ -53,12 +53,21 @@ export interface Section {
   id: string; kind: string; title: string; body: string;
   /** Guided rewrite: what Claude says the section says, the owner's idea for it, and the text before it was rewritten. */
   summary?: string; idea?: string; original?: string;
+  /** Notes the owner pinned to pages of their uploaded book; Claude follows these first. */
+  pageNotes?: PageNote[];
 }
+export interface PageNote { page: string; text: string }
 export interface HistoryEntry { sectionId: string; op: string; engine: "claude-code" | "api"; at: string; accepted: boolean }
 export interface Manuscript {
   title: string; subtitle?: string; author?: string; sections: Section[]; history: HistoryEntry[]; updatedAt?: string;
-  /** Rules for rewriting the whole book (e.g. names to replace), applied to every guided rewrite. */
+  /** Rules for the whole book (e.g. names to replace), applied to every action on it. */
   rules?: string;
+  /** Knowledge base: rules, required terminology and forbidden content, plus Library documents to draw on. */
+  knowledge?: { rules: string; terminology: string; forbidden: string };
+  knowledgeDocIds?: string[];
+  /** Production details (ISBN, trim, publisher…) and the Library book this manuscript was last saved as. */
+  meta?: Record<string, unknown>;
+  libraryId?: string;
 }
 
 export const newId = () => `s-${Math.random().toString(36).slice(2, 10)}`;

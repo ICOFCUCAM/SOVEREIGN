@@ -177,7 +177,7 @@ export const APPROACHES = {
   "mine-and-research": `Build this chapter from the owner's own book first: ${FIND} and carry over all of the author's teaching, arguments, facts, scriptures and examples, reorganised and improved. Then strengthen it with other sources: ${RESEARCH}, and add what they contribute that the book lacks (history, context, other scholars' views, evidence). The author's position leads; present other views as other views. ${CITE}`,
   research: `Write this chapter mainly from research: ${RESEARCH} and build a thorough, well-evidenced chapter on its subject. Use the owner's book in ./source/ (${FIND.replace("find ", "read ")}) as the author's viewpoint and conclusions, which the chapter argues for and must not contradict. ${CITE}`,
 };
-const USES_BOOK = (a) => a === "polish" || a === "mine" || a === "mine-and-research" || a === "research";
+export const USES_BOOK = (a) => a === "polish" || a === "mine" || a === "mine-and-research" || a === "research";
 
 function bookChapter(o) {
   const chapters = Array.isArray(o.chapters) ? o.chapters : [];
@@ -357,12 +357,34 @@ function tool(o) {
 // The server adds _file (the section's file under ./manuscript/) before this runs.
 const VOICE_RULE = "Write in the owner's voice as described in ./VOICE.md (read it first). Avoid stock AI phrasing (\"delve\", \"tapestry\", \"in today's fast-paced world\", \"it's important to note\", \"navigate the complexities\"), formulaic three-part lists, and paragraphs that all share one rhythm. Where a personal story, example or conviction from the author would make the passage theirs, leave a marker [[YOURS: what to add]] instead of inventing one.";
 
+// What the owner has said about the book and this section, in priority order:
+// notes on particular pages, the idea for the section, then the rules and
+// knowledge for the whole book. The server reads these from the saved
+// manuscript (_book); older clients may still send idea and rules directly.
+function bookContext(o) {
+  const b = o._book && typeof o._book === "object" ? o._book : {};
+  const idea = String(b.idea ?? o.idea ?? "").trim().slice(0, 6000);
+  const rules = String(b.rules ?? o.rules ?? "").trim().slice(0, 6000);
+  const pages = (Array.isArray(b.pageNotes) ? b.pageNotes : Array.isArray(o.pageNotes) ? o.pageNotes : [])
+    .filter((n) => n && String(n.text ?? "").trim()).slice(0, 200)
+    .map((n) => `- Page ${String(n.page ?? "").replace(/\s+/g, " ").slice(0, 20)}: ${String(n.text).replace(/\s+/g, " ").slice(0, 1000)}`).join("\n");
+  const knowledge = knowledgeText(b.knowledge);
+  return [
+    pages ? `The owner's notes on particular pages of their book (highest priority; the page numbers refer to the owner's uploaded book):\n${pages}` : "",
+    idea ? `The owner's idea for this section (follow it):\n${idea}` : "",
+    rules ? `Rules for the whole book (follow strictly, everywhere, including quotations and material from other sources, unless the rule says otherwise):\n${rules}` : "",
+    knowledge ? `Knowledge base for the whole book (obey strictly):\n${knowledge}` : "",
+  ].filter(Boolean).join("\n\n");
+}
+
 function section(o) {
   const file = String(o._file || "");
   if (!file) return { error: "That section isn't in the manuscript." };
   const sid = String(o.sectionId).replace(/[^\w-]/g, "");
   // "explain" writes a summary for the owner; every other action writes a new version of the section.
   const out = o.op === "explain" ? `sections/${sid}-summary.md` : `sections/${sid}.md`;
+  const notes = `sections/${sid}-notes.md`;
+  const approach = APPROACHES[o.approach];
   const voice = o.useVoice ? `\n${VOICE_RULE}` : "";
   const read = `The book is in ./manuscript/ (./manuscript/INDEX.md lists the sections in order). The section to work on is ./manuscript/${file}.`;
   const ops = {
@@ -371,18 +393,24 @@ function section(o) {
     voice: `Rewrite this section in the owner's voice. Keep its meaning, facts, quotations and references.`,
     edit: `Revise this section as the owner asks: ${o.instructions || "improve clarity and flow"}. Keep facts, quotations and references accurate.`,
     explain: `Read this section and tell the owner what it says, in plain language: its main teaching in two or three sentences, then its key points as a short list, then the scriptures, quotations and sources it relies on. Report faithfully; do not rewrite, correct or judge it.`,
-    rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help).${o.idea ? `\nThe owner's idea for this section (follow it): ${String(o.idea).slice(0, 6000)}` : ""}${o.rules ? `\nRules for the whole book (follow strictly, everywhere, including quotations unless the rule says otherwise):\n${String(o.rules).slice(0, 6000)}` : ""}\nKeep every fact, scripture reference and quotation accurate apart from what the rules change.`,
+    rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help). Keep every fact, scripture reference and quotation accurate apart from what the rules change.`,
+    compose: `${approach ? `${approach} The section's current text in ./manuscript/${file} is part of the owner's own book too.` : `Write this section new, from the plan in ./manuscript/INDEX.md, the other sections and the owner's notes. Never invent facts about the author; use [placeholders] where a fact is needed.`}
+Length: ${o.approach === "polish" ? "about as long as the author's own material on this subject" : DEPTH_CHAPTER[o.depth] || DEPTH_CHAPTER.standard}. Use "### " for sub-headings, short paragraphs with varied rhythm, no meta-commentary.`,
+    improve: `${IMPROVE[o.improvementType] || IMPROVE.enhance} Keep the Markdown structure.`,
     draft: `Write the "${o.title || "section"}" section of this book. Read the whole manuscript first so it fits the book. Guidance: ${o.guidance || "follow publishing convention for this section"}.${o.instructions ? ` The owner asks: ${o.instructions}` : ""} Never invent facts about the author; use [placeholders] where a fact is needed.`,
   };
   const task = ops[o.op];
   if (!task) return { error: "Unknown section action." };
+  const context = bookContext(o);
   return {
-    title: { explain: "What this section says", rewrite: "Rewrite section", expand: "Expand section", cite: "Add citations to section", voice: "Section in my voice", edit: "Edit section", draft: `Draft: ${o.title || "section"}` }[o.op],
+    title: { explain: "What this section says", rewrite: "Rewrite section", compose: "Write section", improve: "Improve section", expand: "Expand section", cite: "Add citations to section", voice: "Section in my voice", edit: "Edit section", draft: `Draft: ${o.title || "section"}` }[o.op],
     output: out,
     needsVoice: o.op === "voice" || Boolean(o.useVoice),
     prompt: `${read}
 ${task}${o.op === "voice" ? `\n${VOICE_RULE}` : voice}
-${o.op === "explain" ? `Write the summary to ./out/${out}.` : `Write only the new text of this section (no "## " heading, no commentary) to ./out/${out}.`}`,
+${o.op === "explain" ? "" : context ? `\n${context}\n` : ""}
+${o.op === "explain" ? `Write the summary to ./out/${out}.` : `Write only the new text of this section (no "## " heading, no commentary) to ./out/${out}.`}${o.op === "compose" && approach ? `
+Then write ./out/${notes} for the owner (not part of the book): "### From your book" (which parts of the documents in ./source/ you used, with their headings or page numbers), "### Added from other sources" (each addition and its source${o.approach === "polish" || o.approach === "mine" ? "; there should be none with this approach" : ""}), "### Your notes and rules" (how you followed the page notes, the idea and each rule), and "### For you to check" (anything uncertain, contradictory or left out).` : ""}`,
   };
 }
 

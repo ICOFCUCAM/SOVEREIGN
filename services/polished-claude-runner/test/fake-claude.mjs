@@ -50,7 +50,11 @@ if (sectionOut) {
   const voice = fs.existsSync("VOICE.md") ? " [voice used]" : "";
   fs.mkdirSync("out/sections", { recursive: true });
   const rules = /Rules for the whole book[^\n]*\n(.+)/.exec(prompt)?.[1];
-  fs.writeFileSync(`out/${sectionOut[1]}`, sectionOut[1].endsWith("-summary.md") ? `It says: ${before}` : rules ? `${before} [rules: ${rules}]` : `${before} (expanded by Claude Code)${voice}`);
+  const pageNote = /notes on particular pages[^\n]*\n- (Page [^\n]+)/.exec(prompt)?.[1];
+  const notesOut = /Then write \.\/out\/(sections\/[\w-]+-notes\.md)/.exec(prompt)?.[1];
+  if (notesOut) fs.writeFileSync(`out/${notesOut}`, `### From your book\n\n${fs.readdirSync("source").join(", ")}${pageNote ? `\n\n### Your notes and rules\n\n${pageNote}` : ""}`);
+  if (/^Enhance the writing quality|Tighten this content/m.test(prompt)) { fs.writeFileSync(`out/${sectionOut[1]}`, `${before} (improved)`); out({ type: "result", subtype: "success", is_error: false, result: "Section done.", session_id: sid }); process.exit(0); }
+  fs.writeFileSync(`out/${sectionOut[1]}`, sectionOut[1].endsWith("-summary.md") ? `It says: ${before}` : `${before}${rules ? ` [rules: ${rules}]` : " (expanded by Claude Code)"}${voice}`);
   out({ type: "result", subtype: "success", is_error: false, result: "Section done.", session_id: sid });
   process.exit(0);
 }

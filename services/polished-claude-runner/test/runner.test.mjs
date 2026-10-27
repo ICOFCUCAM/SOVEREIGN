@@ -279,6 +279,23 @@ test("manuscript: saved as JSON and mirrored as files; sections expanded; voice 
   assert.deepEqual([kept.sections[1].summary, kept.sections[1].idea, kept.sections[1].original], ["It says…", "Start with Abraham", "Faith begins small."]);
   assert.equal(kept.sections[0].idea, undefined);
 
+  // writing a section with an approach: needs the book uploaded, follows page notes, and leaves a note on what was used
+  const withNotes = { ...guided, knowledge: { rules: "Use the KJV.", terminology: "", forbidden: "" }, meta: { isbn: "978-0-00" }, libraryId: "doc-1",
+    sections: guided.sections.map((x) => (x.id === "s-1" ? { ...x, pageNotes: [{ page: "14", text: "Keep this sentence word for word." }, { page: "15", text: "  " }] } : x)) };
+  const keptNotes = (await (await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", body: { manuscript: withNotes } })).json()).manuscript;
+  assert.deepEqual(keptNotes.sections[1].pageNotes, [{ page: "14", text: "Keep this sentence word for word." }], "empty page notes are dropped");
+  assert.deepEqual([keptNotes.knowledge.rules, keptNotes.meta.isbn, keptNotes.libraryId], ["Use the KJV.", "978-0-00", "doc-1"]);
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "compose", approach: "mine-and-research" } } })).status, 400, "the book must be uploaded first");
+  await call(`/v1/threads/${thread.id}/files?name=demonology.txt&kind=original`, { method: "POST", raw: Buffer.from("My teaching on spirits.") });
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "compose", approach: "mine-and-research" } } })).json());
+  assert.equal(job.output, "sections/s-1.md");
+  assert.equal((await streamUntilDone(job.id, thread.id)).at(-1).status, "done");
+  const used = (await (await call(`/v1/threads/${thread.id}/outputs/sections/s-1-notes.md`)).json()).text;
+  assert.match(used, /demonology\.txt/); assert.match(used, /Page 14: Keep this sentence word for word\./);
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "improve", improvementType: "tighten" } } })).json());
+  await streamUntilDone(job.id, thread.id);
+  assert.match((await (await call(`/v1/threads/${thread.id}/outputs/sections/s-1.md`)).json()).text, /\(improved\)$/);
+
   // voice actions need a saved voice profile
   assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "voice" } } })).status, 400);
   assert.equal((await call("/v1/voice", { method: "PUT", body: { voice: "# Voice\n\nShort sentences. Warm." } })).status, 200);
