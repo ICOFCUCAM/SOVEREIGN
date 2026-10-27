@@ -12,7 +12,7 @@ import { readWizardDraft, wizardDraftToManuscript } from "@/lib/studio-merge";
 import { apiBookEngine, type BookEngine } from "@/lib/book-engine";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
 import { apiCoverCopyWriter, apiDesignBook, runnerBackend, sourceText, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
-import { StudioError, claudeBookEngine, type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioThread, type StudioThreadSummary } from "@/lib/claude-studio";
+import { StudioError, claudeBookEngine, setSectionTitles, type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioThread, type StudioThreadSummary } from "@/lib/claude-studio";
 import type { ToolId } from "@/lib/studio-tools";
 import { designToManuscript, parseDesign, restoreArchived, resultToManuscript, type BookDesign, type BookTypeId, type DesignApproach, type DesignBriefInput } from "@/lib/book-design";
 import JoinFiles from "@/components/studio/JoinFiles";
@@ -130,6 +130,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [sectionId, setSectionId] = useState<string | null>(null);
   useEffect(() => { if (m && (!sectionId || !m.sections.some((s) => s.id === sectionId))) setSectionId(m.sections.find((s) => s.kind === "chapter")?.id ?? m.sections[0]?.id ?? null); }, [m, sectionId]);
   const section = m?.sections.find((s) => s.id === sectionId) ?? null;
+  useEffect(() => { setSectionTitles(Object.fromEntries((m?.sections ?? []).map((s) => [s.id, s.title]))); }, [m?.sections]);
   const wizard = useMemo(() => readWizardDraft(id), [id]);
 
   // The Book wizard's engine (outline): the owner's Claude Code when it's in use, else the API.
@@ -177,11 +178,13 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (!(await cost.confirm({ what: action === "chat" ? "Your message to Claude" : action === "tool" ? "This tool" : "This whole-book run", words: bookWords || undefined }, use))) return;
     try {
       setRetry(null); lastRun.current = { action, options };
+      // A run on the manuscript reads the saved one.
+      if (options.target === "manuscript") await persist();
       const job = await backend.run(id, action, options, use);
       setDialog(null); setTool(null);
       await reload(); follow(job);
     } catch (e) { toast({ title: e instanceof StudioError && e.status === 409 ? "Claude is busy" : "Could not start", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
-  }, [engineId, backend, id, reload, follow, toast, decision.reason, cost, latest]);
+  }, [engineId, backend, id, reload, follow, toast, decision.reason, cost, latest, persist]);
 
   // Section runs ask about API billing first, like every other run.
   const runSection = async (o: Parameters<typeof sr.run>[0]) => {
@@ -316,11 +319,12 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           onRestore={(i) => update(restoreArchived(m, i))} />
       </>;
     }
-    if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover} />;
+    if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}
+      projectId={id} outputs={thread.outputs} onOpenResult={setViewing} onTool={(t) => setTool({ initial: t, target: "manuscript" })} />;
     if (!section) return <EmptyWrite onAdd={() => { const r = insertSection(m, "chapter"); update(r.manuscript); setSectionId(r.id); }} onPlan={() => setPlace("plan")} />;
-    return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")}
+    return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")} onSection={openSection}
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
-      onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); toast({ title: "Accepted", description: "Your previous text is kept in Version history." }); }}
+      onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); const next = m.sections[m.sections.findIndex((s) => s.id === section.id) + 1]; toast({ title: "Accepted", description: `Your previous text is kept in Version history.${next ? ` Next: “${next.title}”, at the end of the page.` : ""}` }); }}
       onDiscard={() => { sr.decide(section.id, "discard"); setView("writing"); }}
       onRedo={() => { const op = proposal?.op ?? "rewrite"; void runSection({ ...(proposal?.request ?? {}), sectionId: section.id, op, title: section.title, approach: proposal?.request?.approach ?? proposal?.approach }); }}
       onRestoreOriginal={() => { if (window.confirm("Put back the text from before Claude's rewrite? The current text becomes the earlier version.")) patchSection(section.id, { body: section.original!, original: section.body }); }} />;
@@ -338,6 +342,12 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         </p>
         {state && <span className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11.5px] ${proposal ? "bg-[#EFF6FF] text-[#1D4ED8] dark:bg-[#172554] dark:text-[#93C5FD]" : "bg-[#F1F5F9] text-[#475569] dark:bg-white/10 dark:text-[#CBD5E1]"}`}>{state}</span>}
       </div>
+      {place === "write" && section && (
+        // On narrow screens the views are a menu (the tabs need the width).
+        <select aria-label="Page view" value={view} onChange={(e) => setView(e.target.value as CanvasView)} className="h-9 rounded-[8px] border border-[#E6E8ED] bg-white px-2 text-[13px] md:hidden dark:border-white/10 dark:bg-white/5">
+          {VIEWS.filter((v) => !v.needsProposal || proposal).map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}
+        </select>
+      )}
       {place === "write" && section && (
         <div role="tablist" aria-label="Page view" className="hidden items-center gap-0.5 rounded-[9px] bg-[#F1F5F9] p-[3px] md:flex dark:bg-white/5">
           {VIEWS.filter((v) => !v.needsProposal || proposal).map((v) => (
@@ -431,7 +441,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread} hasProposal={Boolean(proposal)}
         onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onTour={() => setTour(true)} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
         onResult={setViewing} onView={(v) => { setPlace("write"); setView(v); }} onFocus={() => { setPlace("write"); setFocus(true); }} onPanel={() => setPanelOpen(!panelOpen)} onTheme={toggleTheme} />
-      {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} initialTarget={tool.target} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
+      {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} initialTarget={tool.target} hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
       {dialog && <ActionDialog action={dialog} thread={thread} styles={p.citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
       {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => { setViewing(null); p.onChanged(); }} onUseAsTarget={(x, o) => { setViewing(null); setPendingTarget(x, o ?? null); setDialog("rewrite"); }} check={check}

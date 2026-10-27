@@ -278,7 +278,15 @@ Publisher's design, not the manuscript's order; everything placed or listed; the
 - Rebuild needs the book uploaded in Sources (chapters are written from it).
 - On the API the design reads at most about 400,000 characters of material in one request; Claude Code reads all of it.
 - "Draws on" and "Not placed" are Claude's account; the comparison with the original (§16) is the check of what the rewrite kept.
-- Not changed, for the owner to decide: the Library page keeps its own export and design tools beside Finish; the Book Creator wizard's chapter and improve steps on Claude Code are not used by Claude Studio (Studio writes through manuscript sections); marketing kit and study guide are in More tools, not in Finish; guided rewrite has no "next chapter" button; section suggestions share one label in Results.
+- The Book Creator wizard's chapter and improve steps on Claude Code are not used by Claude Studio (Studio writes through manuscript sections); they remain for the wizard.
+- The Library page is used by every customer, so its export and interior tools stay; for a book made in Claude Studio it is a companion, not a second Finish (§17f).
+
+### 17f. Added on "add those left" (27 October 2026)
+- Library: a book saved from Claude Studio keeps its author, trim size, draft or approved status and its Studio project (kept when edited in the Library); its page says so and links to "Finish in Claude Studio" (`/admin/claude?project=…` opens that project); the interior tools start with the book's author and trim; one EPUB export per page (the reader's own EPUB button is off where the export list has one).
+- Finish: Marketing and Study guide tabs, written from the manuscript as it stands. Every tool can now work on "The book's manuscript, as it stands" (both engines), not only on the upload or a result.
+- Write: previous and next section at the end of each page, and "Next: …" after accepting a suggestion, for working through the book chapter by chapter.
+- Results: each suggestion is named after its section ("Suggestion · …", "What it says · …", "What Claude used · …").
+- Narrow screens: the page views are a menu.
 
 ### 17e. Checklist
 - [x] Owner's instruction recorded (above)
@@ -289,3 +297,4 @@ Publisher's design, not the manuscript's order; everything placed or listed; the
 - [x] Old "Restructure" outline removed (it appended instead of restructuring)
 - [x] Whole-book result → manuscript; saved design re-applied; runs and results from every stage; full Redo; busy elsewhere shown; chapter count in the Library
 - [x] Every stage, Finish tab and card clicked through in the preview with no page errors; screenshots 42–47
+- [x] §17f: Library keeps the book's details and links to the Studio; Marketing and Study guide in Finish on the manuscript (runner test "Finish's tools work on the manuscript"); previous/next section; suggestions named after their section (`output-label.test.ts`); view menu on narrow screens

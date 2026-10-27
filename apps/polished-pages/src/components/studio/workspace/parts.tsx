@@ -332,7 +332,7 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
     try {
       // The Library copy says whether it is the approved book or a working draft, and which version.
       const state = versioned ? { status: approvedNow ? "approved" : "draft", version: latest?.n ?? null, approvedAt: approvedNow ? history!.approval!.at : null, approvedBy: approvedNow ? history!.approval!.by : null } : {};
-      const id = await saveDocument({ kind: "book", title: bookTitle, payload: { markdown: text, title: bookTitle, ...state }, preview: text.replace(/^#.*$/m, "").trim().slice(0, 160) });
+      const id = await saveDocument({ kind: "book", title: bookTitle, payload: { markdown: text, title: bookTitle, ...state, studioProject: threadId }, preview: text.replace(/^#.*$/m, "").trim().slice(0, 160) });
       setSavedId(id);
       toast({ title: "Saved to your Library", description: versioned ? (approvedNow ? `“${bookTitle}”, version ${latest?.n}, approved for publication.` : `“${bookTitle}” is saved as a working draft (not approved for publication).`) : `“${bookTitle}” is ready for editing, export and publishing.` });
     } catch (e) { toast({ title: "Could not save", description: e instanceof Error ? e.message : "", variant: "destructive" }); }

@@ -464,3 +464,15 @@ test("rebuild as a professional book: a design from the whole material, then cha
   assert.match(p2, /Course textbook/);
   assert.match(p2, /never pad/);
 });
+
+test("Finish's tools work on the manuscript as it stands, not only on the upload", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Finish tools" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=book.txt&kind=original`, { method: "POST", raw: Buffer.from("The original.") });
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "marketing", target: "manuscript" } } })).status, 400, "an empty manuscript is refused");
+  await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", body: { manuscript: { title: "Rebuilt", sections: [{ id: "s-1", kind: "chapter", title: "One", body: "The rebuilt chapter." }] } } });
+  const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "marketing", target: "manuscript" } } })).json();
+  assert.equal(job.output, "marketing-pack.md");
+  await streamUntilDone(job.id, thread.id);
+  const last = JSON.parse(await fs.readFile(path.join(dataDir, "threads", thread.id, "last-call.json"), "utf8"));
+  assert.match(last.args[last.args.indexOf("-p") + 1], /the book's manuscript in \.\/manuscript\//);
+});

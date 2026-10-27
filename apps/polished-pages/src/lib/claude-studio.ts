@@ -225,7 +225,16 @@ export const OUTPUT_NAMES: Record<string, string> = {
 };
 
 const pretty = (f: string) => { const t = f.replace(/\.md$/, "").replace(/-/g, " "); return t.charAt(0).toUpperCase() + t.slice(1); };
-export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? (p.startsWith("book/chapters/") ? `Book wizard · chapter ${Number(p.slice(14, 16))}${p.endsWith("-notes.md") ? " · what Claude used" : ""}` : p.startsWith("book/improved/") ? `Book wizard · improved chapter ${Number(p.slice(14, 16))}` : p.startsWith("sections/") ? "Manuscript section suggestion" : p.startsWith("volumes/") ? `Volume ${Number(p.slice(8, 10))} · ${pretty(p.slice(11))}` : p.startsWith("planned/") ? `Planned book ${Number(p.slice(8, 10))} · ${pretty(p.slice(11))}` : p.startsWith("translation/") ? `Translated chapter · ${p.slice(12).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p.startsWith("rewrite/") ? `Chapter · ${p.slice(8).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p);
+// The open project's section titles, so suggestions are named after their section wherever results are listed.
+let sectionTitles: Record<string, string> = {};
+export const setSectionTitles = (t: Record<string, string>) => { sectionTitles = t; };
+function sectionLabel(p: string): string | null {
+  const x = /^sections\/([\w-]+?)(-summary|-notes)?\.md$/.exec(p);
+  const title = x && sectionTitles[x[1]];
+  if (!title) return null;
+  return `${x![2] === "-summary" ? "What it says" : x![2] === "-notes" ? "What Claude used" : "Suggestion"} · ${title}`;
+}
+export const outputLabel = (p: string) => OUTPUT_NAMES[p] ?? sectionLabel(p) ?? (p.startsWith("book/chapters/") ? `Book wizard · chapter ${Number(p.slice(14, 16))}${p.endsWith("-notes.md") ? " · what Claude used" : ""}` : p.startsWith("book/improved/") ? `Book wizard · improved chapter ${Number(p.slice(14, 16))}` : p.startsWith("sections/") ? "Manuscript section suggestion" : p.startsWith("volumes/") ? `Volume ${Number(p.slice(8, 10))} · ${pretty(p.slice(11))}` : p.startsWith("planned/") ? `Planned book ${Number(p.slice(8, 10))} · ${pretty(p.slice(11))}` : p.startsWith("translation/") ? `Translated chapter · ${p.slice(12).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p.startsWith("rewrite/") ? `Chapter · ${p.slice(8).replace(/\.md$/, "").replace(/^\d+-/, "").replace(/-/g, " ")}` : p);
 
 // ── Book wizard on Claude Code ───────────────────────────────────────────────
 // The Book Creator's engine for Claude Studio: each step is a runner job in the

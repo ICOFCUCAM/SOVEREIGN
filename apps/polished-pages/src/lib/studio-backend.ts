@@ -6,7 +6,7 @@ import {
   type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioMe, type StudioThread, type StudioThreadSummary,
 } from "@/lib/claude-studio";
 import { API_SYSTEM, REWRITE_POLICY, SECTION_POLICY, VOICE_RULE, compareApiPrompt, toolApiPlan, toolById, type ToolId } from "@/lib/studio-tools";
-import { importText, kindDef, type Manuscript } from "@/lib/manuscript";
+import { compile, importText, kindDef, type Manuscript } from "@/lib/manuscript";
 import { coverCopyPrompt, parseCoverCopy, type CoverCopyWriter } from "@/lib/cover-copy";
 import { DESIGN_SHAPE, designBrief, parseDesign, type BookDesign, type DesignBriefInput } from "@/lib/book-design";
 
@@ -114,6 +114,8 @@ export function followApiJob(jobId: string, onEvent: (e: StudioEvent) => void, s
 }
 
 async function documentText(ctx: ApiContext, target?: string): Promise<{ text: string; skipped: string[] }> {
+  // The book as it stands in the manuscript (Finish's tools work on the book, not the upload).
+  if (target === "manuscript") { const m = await ctx.manuscript(); return { text: m ? compile(m) : "", skipped: [] }; }
   if (target && target !== "source") return { text: (await ctx.readOutput(target)) ?? "", skipped: [] };
   return sourceText(ctx.thread.files, ctx.readSource);
 }

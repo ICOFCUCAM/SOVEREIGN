@@ -92,6 +92,7 @@ When you finish
 const LENGTH = { brief: "about 300 words", standard: "about 800 words", detailed: "as long as needed, with a summary of every chapter or section" };
 
 export function target(opts) {
+  if (opts?.target === "manuscript") return "the book's manuscript in ./manuscript/ (./manuscript/INDEX.md lists its sections in reading order; read every section)";
   return opts?.target && opts.target !== "source"
     ? `the file ./out/${opts.target}`
     : "the documents in ./source/";

@@ -83,7 +83,9 @@ function Studio() {
   useEffect(() => {
     if (!ready) return;
     setThreads(null);
-    loadThreads().then((t) => setActiveId((id) => (id && t.some((x) => x.id === id) ? id : t[0]?.id ?? null)));
+    // ?project=<id> (from a Library book made here) opens that project.
+    const wanted = new URLSearchParams(window.location.search).get("project");
+    loadThreads().then((t) => setActiveId((id) => (wanted && t.some((x) => x.id === wanted) ? wanted : id && t.some((x) => x.id === id) ? id : t[0]?.id ?? null)));
   }, [ready, loadThreads]);
 
   const newProject = async () => {

@@ -56,10 +56,12 @@ function numberChanges(blocks: DiffBlock[]) {
   }));
 }
 
-export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim }: {
+export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onSection }: {
   m: Manuscript; section: Section; view: CanvasView; proposal: Proposal | null; running: boolean;
   onBody: (t: string) => void; onTitle: (t: string) => void;
   onAccept: (text: string) => void; onDiscard: () => void; onRedo: () => void; onRestoreOriginal: () => void; onView: (v: CanvasView) => void; bookTrim?: string;
+  /** Moves to another section: the previous and next ones, for working through the book chapter by chapter. */
+  onSection?: (id: string) => void;
 }) {
   const reduce = useReducedMotion();
   const def = kindDef(section.kind);
@@ -125,6 +127,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
           <GrowingText value={section.body} onChange={onBody} label={`${section.title} text`} className={PROSE}
             placeholder={`Write the ${def.label.toLowerCase()} here${effective === "writing" ? ", or ask Claude in the panel" : ""}.`} />
           <p className="mt-6 text-[12px] text-[#64748B]">{words(section.body).toLocaleString()} words</p>
+          {onSection && <SectionSteps m={m} section={section} onSection={onSection} />}
         </>
       ) : effective === "original" ? (
         <>
@@ -204,5 +207,18 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
         </motion.div>
       )}
     </div>
+  );
+}
+
+/** Previous and next section, so a guided rewrite moves through the book chapter by chapter (spec §10). */
+function SectionSteps({ m, section, onSection }: { m: Manuscript; section: Section; onSection: (id: string) => void }) {
+  const i = m.sections.findIndex((s) => s.id === section.id);
+  const prev = i > 0 ? m.sections[i - 1] : null, next = i >= 0 && i < m.sections.length - 1 ? m.sections[i + 1] : null;
+  if (!prev && !next) return null;
+  return (
+    <nav aria-label="Previous and next section" className="mt-10 flex items-center justify-between gap-4 border-t border-[#E6E8ED] pt-4 text-[13px] dark:border-white/10">
+      {prev ? <button type="button" onClick={() => onSection(prev.id)} className="min-w-0 text-left text-[#475569] hover:text-[#1D4ED8] dark:text-[#CBD5E1]"><span className="block text-[11px] uppercase tracking-[0.12em] text-[#94A3B8]">Previous</span><span className="block truncate">← {prev.title}</span></button> : <span />}
+      {next && <button type="button" onClick={() => onSection(next.id)} className="min-w-0 text-right font-medium text-[#1D4ED8] hover:underline dark:text-[#93C5FD]"><span className="block text-[11px] font-normal uppercase tracking-[0.12em] text-[#94A3B8]">{next.body.trim() ? "Next" : "Next · not written yet"}</span><span className="block truncate">{next.title} →</span></button>}
+    </nav>
   );
 }
