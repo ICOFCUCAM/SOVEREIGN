@@ -62,6 +62,37 @@ async function callApi(user: string, opts: { system?: string; web?: boolean; max
   return body as { text: string; sources: { url: string; title: string }[] };
 }
 
+/**
+ * Claude on a book in the Library (owner only; DESIGN-SPEC.md §18): revise one passage as the owner asks,
+ * under the same editorial standard as a section rewrite, or answer a question about the book.
+ * Runs on the API (the Library has no Studio project to run Claude Code in).
+ */
+export async function apiReviseInLibrary(i: { title: string; passage: string; instruction: string; rules?: string; context?: string }): Promise<string> {
+  if (!i.passage.trim()) throw new Error("Choose a part of the book first.");
+  const r = await callApi(`Book: ${i.title}
+${i.context ? `\nThe text around the passage, for context only (do not return it):\n${i.context.slice(0, 6000)}\n` : ""}
+---
+
+The passage to work on:
+
+${i.passage}
+
+---
+
+The owner asks: ${i.instruction.trim() || "correct the English and make it read professionally"}
+Editorial standard:
+${SECTION_POLICY.map((l) => `- ${l}`).join("\n")}
+${i.rules?.trim() ? `Rules for the whole book (follow strictly, everywhere, unless the rule says otherwise):\n${i.rules.trim()}\n` : ""}Keep the passage's Markdown headings and structure. Reply with only the new text of the passage: no commentary, nothing before or after it.`, { maxTokens: 16000 });
+  return r.text.trim();
+}
+
+/** A question about a Library book, answered from the book's text (nothing in the book changes). */
+export async function apiAskInLibrary(i: { title: string; book: string; question: string; rules?: string }): Promise<string> {
+  const book = i.book.length <= 300_000 ? i.book : `${i.book.slice(0, 300_000)}\n\n[The rest of the book is not included: it is longer than one request allows.]`;
+  const r = await callApi(`The book "${i.title}":\n\n${book}\n\n---\n\n${i.rules?.trim() ? `The book's rules: ${i.rules.trim()}\n\n` : ""}The owner asks: ${i.question.trim()}\n\nAnswer from the book; quote it where that helps, and say where (heading). Do not rewrite the book here.`, { web: true });
+  return r.text.trim();
+}
+
 /** The design of a rebuilt book on the API (DESIGN-SPEC.md §17): the same brief and shape as Claude Code, the material in one request. */
 export async function apiDesignBook(material: string, brief: DesignBriefInput & { rules?: string }): Promise<BookDesign> {
   if (!material.trim()) throw new Error("Upload your book (or write the manuscript) first, so Claude has material to design the book from.");

@@ -7,7 +7,7 @@ import { ActionDialog, setPendingTarget } from "./parts";
 const toasts = vi.hoisted(() => [] as { title?: string; description?: string }[]);
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: (t: { title?: string; description?: string }) => { toasts.push(t); } }) }));
 import type { ApprovalSummary, ResultHistory, StudioThread } from "@/lib/claude-studio";
-const docs = vi.hoisted(() => ({ save: vi.fn(async () => "doc-9"), update: vi.fn(async () => {}) }));
+const docs = vi.hoisted(() => ({ save: vi.fn(async (_i: unknown) => "doc-9"), update: vi.fn(async (_id: string, _p: unknown, _pr?: string) => {}) }));
 vi.mock("@/lib/documents", () => ({ saveDocument: docs.save, updateDocument: docs.update }));
 
 const thread: StudioThread = { id: "t1", title: "Demonology I", createdAt: "", updatedAt: "", sessionId: null, messages: [],
