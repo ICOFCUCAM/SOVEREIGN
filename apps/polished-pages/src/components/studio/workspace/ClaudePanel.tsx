@@ -179,7 +179,7 @@ export default function ClaudePanel(p: {
               <div className="rounded-[10px] border border-[#E6E8ED] p-4 dark:border-white/10">
                 <p className="text-[13.5px] font-medium">{OP_LABEL[mine.op] ?? "Suggestion"} is ready</p>
                 {mine.approach && <p className="mt-0.5 text-[12px] text-[#64748B]">Source policy: {APPROACH_CARDS.find((a) => a.id === mine.approach)?.policy}</p>}
-                <Button size="sm" variant="outline" className="mt-3 h-8" onClick={p.onReview}>Review the changes</Button>
+                <button type="button" onClick={p.onReview} className="mt-2 text-[12.5px] font-medium text-[#2563EB] hover:underline">Show it on the page</button>
               </div>
             )}
 
