@@ -100,11 +100,13 @@ language sql stable security definer set search_path to 'public', 'polished' as 
     from lex l full join vec v on v.version_id = l.version_id and v.chunk_id = l.chunk_id
   )
   select p.version_id, p.chunk_id, p.chapter_id, p.chapter_number, p.heading_path, p.paragraph_start, p.paragraph_end, p.char_start, p.char_end,
-    p.chunk_text, p.source_location, p.title, p.role, f.lr, f.vr, f.score
+    p.chunk_text, p.source_location, p.title, p.role, f.lr, f.vr, f.score::double precision
   from fused f join pool p on p.version_id = f.version_id and p.chunk_id = f.chunk_id
   order by f.score desc limit greatest(1, least(p_limit, 40));
 $$;
 
--- Every function checks auth.uid() itself: signed-out callers get an error or no rows.
+-- Every function also checks auth.uid() itself; signed-out callers cannot call them at all.
+revoke all on function public.polished_teacher_save_version(uuid, text, jsonb, jsonb), public.polished_teacher_versions(uuid), public.polished_teacher_approve_version(uuid),
+  public.polished_teacher_ensure_course(uuid, text), public.polished_teacher_retrieve(uuid, text, text, int, text) from public, anon;
 grant execute on function public.polished_teacher_save_version(uuid, text, jsonb, jsonb), public.polished_teacher_versions(uuid), public.polished_teacher_approve_version(uuid),
   public.polished_teacher_ensure_course(uuid, text), public.polished_teacher_retrieve(uuid, text, text, int, text) to authenticated;
