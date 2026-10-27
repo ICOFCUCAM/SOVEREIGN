@@ -47,7 +47,7 @@ const props = (backend: StudioBackend) => ({
   handoff: null, onHandoffUsed: () => {}, onChanged: () => {}, onDeleted: () => {}, onWorkInStudio: async () => {}, onLearnVoice: async () => {},
 });
 
-beforeEach(() => { localStorage.clear(); localStorage.setItem("studio.place", "write"); window.matchMedia = ((q: string) => ({ matches: false, media: q, addEventListener: () => {}, removeEventListener: () => {} })) as never; });
+beforeEach(() => { Element.prototype.scrollIntoView = vi.fn(); localStorage.clear(); sessionStorage.clear(); localStorage.setItem("studio.place", "write"); window.matchMedia = ((q: string) => ({ matches: false, media: q, addEventListener: () => {}, removeEventListener: () => {} })) as never; });
 
 describe("Claude Studio workspace", () => {
   it("revises a chapter with Claude: summary, idea, approach, change-by-change review, accept keeps the previous version", async () => {
@@ -74,6 +74,62 @@ describe("Claude Studio workspace", () => {
     await waitFor(() => expect(f.saved().sections[0].body).toBe("Yahuah's people lived among nations.\n\nThese spirits had names."), { timeout: 3000 });
     expect(f.saved().sections[0]).toMatchObject({ original: "God's people lived among nations.\n\nThese spirits had names.", idea: "Open with Mesopotamia" });
     expect(f.saved().history.at(-1)).toMatchObject({ sectionId: "c1", op: "compose", accepted: true });
+    // the text before the change is in the section's version history, and can be restored without losing the new text
+    expect(f.saved().sections[0].versions?.at(-1)).toMatchObject({ kind: "before-accept", body: "God's people lived among nations.\n\nThese spirits had names." });
+    fireEvent.click(screen.getByRole("button", { name: "Version history" }));
+    const sheet = await screen.findByRole("dialog");
+    fireEvent.click(within(sheet).getByRole("button", { name: /Restore/ }));
+    await waitFor(() => expect(f.saved().sections[0].body).toBe("God's people lived among nations.\n\nThese spirits had names."), { timeout: 3000 });
+    expect(f.saved().sections[0].versions?.at(-1)).toMatchObject({ kind: "before-restore", body: "Yahuah's people lived among nations.\n\nThese spirits had names." });
+  });
+
+  it("reviews changes from the keyboard: J moves, X rejects, ⌘↵ accepts", async () => {
+    const f = fake();
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const panel = await screen.findByRole("complementary", { name: "Claude" });
+    fireEvent.click(within(panel).getByRole("button", { name: /Rewrite with my idea/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Review the changes" }));
+    const key = (k: string, o: KeyboardEventInit = {}) => act(() => { document.dispatchEvent(new KeyboardEvent("keydown", { key: k, ...o })); });
+    key("j"); key("x"); // change 2 ("many") rejected
+    expect(screen.getByRole("button", { name: /Added: change 2 of 2/ }).getAttribute("aria-pressed")).toBe("false");
+    key("Enter", { ctrlKey: true });
+    await waitFor(() => expect(f.saved().sections[0].body).toBe("Yahuah's people lived among nations.\n\nThese spirits had names."), { timeout: 3000 });
+  });
+
+  it("undoes and redoes a change to the book, independently of Claude", async () => {
+    const f = fake();
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const body = await screen.findByLabelText("Spirits in the Ancient Near East text");
+    fireEvent.change(body, { target: { value: "A new opening." } });
+    fireEvent.click(screen.getByRole("button", { name: /^Undo/ }));
+    await waitFor(() => expect((screen.getByLabelText("Spirits in the Ancient Near East text") as HTMLTextAreaElement).value).toBe("God's people lived among nations.\n\nThese spirits had names."));
+    fireEvent.click(screen.getByRole("button", { name: /^Redo/ }));
+    await waitFor(() => expect((screen.getByLabelText("Spirits in the Ancient Near East text") as HTMLTextAreaElement).value).toBe("A new opening."));
+  });
+
+  it("asks before a run billed to the API, and runs nothing when cancelled", async () => {
+    const f = fake();
+    render(<MemoryRouter><Workspace {...props(f.backend)} decision={{ ...decision, active: "api" }} /></MemoryRouter>);
+    const panel = await screen.findByRole("complementary", { name: "Claude" });
+    fireEvent.click(within(panel).getByRole("button", { name: /Read it/ }));
+    const ask = await screen.findByRole("dialog", { name: /billed to the API/ });
+    expect(within(ask).getByText(/About 9 words of your book/)).toBeTruthy();
+    fireEvent.click(within(ask).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(f.runs).toHaveLength(0);
+    fireEvent.click(within(panel).getByRole("button", { name: /Read it/ }));
+    fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: /Run on the API/ }));
+    await waitFor(() => expect(f.runs).toHaveLength(1));
+  });
+
+  it("offers back changes kept on this device that the server never received", async () => {
+    const f = fake();
+    const local = { ...f.saved(), sections: f.saved().sections.map((x) => (x.id === "c1" ? { ...x, body: "Written offline." } : x)) };
+    localStorage.setItem("studio.unsaved.t1", JSON.stringify({ at: new Date().toISOString(), manuscript: local }));
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "Put them back" }));
+    await waitFor(() => expect(f.saved().sections[0].body).toBe("Written offline."), { timeout: 3000 });
+    await waitFor(() => expect(localStorage.getItem("studio.unsaved.t1")).toBeNull());
   });
 
   it("adds a note on a page in Notes, and opens focus mode and leaves it with Escape", async () => {

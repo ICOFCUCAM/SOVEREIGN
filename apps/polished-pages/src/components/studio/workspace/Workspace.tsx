@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, Check, Cpu, Focus, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Search, Sparkles, X } from "lucide-react";
+import { AlertTriangle, Check, CloudOff, Cpu, Focus, History, LifeBuoy, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Redo2, Search, Sparkles, Undo2, WifiOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { getStoredTheme, setTheme, type Theme } from "@/lib/theme";
-import { importText, insertSection, kindDef, type Manuscript } from "@/lib/manuscript";
+import { importText, insertSection, kindDef, words, type Manuscript } from "@/lib/manuscript";
 import { readWizardDraft, wizardDraftToManuscript } from "@/lib/studio-merge";
 import { apiBookEngine, type BookEngine } from "@/lib/book-engine";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
@@ -30,6 +30,8 @@ import { useManuscript } from "./useManuscript";
 import { useSectionRun } from "./useSectionRun";
 import { APPROACH_CARDS, type ApproachId } from "./approaches";
 import { GRADIENT } from "./ui";
+import VersionsSheet from "./VersionsSheet";
+import { useApiCostNotice } from "./ApiCostNotice";
 
 // Claude Studio's workspace (design spec): the frame, a top bar, the stage in
 // the middle and the Claude panel. Every capability of the earlier project
@@ -108,7 +110,12 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const abort = useRef<AbortController | null>(null);
   const rulesRef = useRef<HTMLTextAreaElement>(null);
   const titleRef = useRef("");
-  const { m, update, patchSection, replace, persist, saving, latest } = useManuscript(backend, id);
+  const { m, update, patchSection, replace, persist, saving, latest, undo, redo, canUndo, canRedo, recovery, recover } = useManuscript(backend, id);
+  const [versions, setVersions] = useState(false);
+  const online = useOnline();
+  const cost = useApiCostNotice(engineId);
+  // Back online after a failed save: save again.
+  useEffect(() => { if (online && saving === "error") void persist(); }, [online]); // eslint-disable-line react-hooks/exhaustive-deps
   const sr = useSectionRun({ backend, id, engine: engineId, persist, patchSection, latest, update, onChanged: () => { reload().catch(() => {}); p.onChanged(); } });
   const [sectionId, setSectionId] = useState<string | null>(null);
   useEffect(() => { if (m && (!sectionId || !m.sections.some((s) => s.id === sectionId))) setSectionId(m.sections.find((s) => s.kind === "chapter")?.id ?? m.sections[0]?.id ?? null); }, [m, sectionId]);
@@ -155,13 +162,25 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const start = useCallback(async (action: StudioAction, options: RunOptions, force?: "api") => {
     const use = force ?? engineId;
     if (!use) { toast({ title: "No engine available", description: decision.reason, variant: "destructive" }); return; }
+    const bookWords = latest.current ? latest.current.sections.reduce((n, s) => n + words(s.body), 0) : undefined;
+    if (!(await cost.confirm({ what: action === "chat" ? "Your message to Claude" : action === "tool" ? "This tool" : "This whole-book run", words: bookWords || undefined }, use))) return;
     try {
       setRetry(null); lastRun.current = { action, options };
       const job = await backend.run(id, action, options, use);
       setDialog(null); setTool(null);
       await reload(); follow(job);
     } catch (e) { toast({ title: e instanceof StudioError && e.status === 409 ? "Claude is busy" : "Could not start", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
-  }, [engineId, backend, id, reload, follow, toast, decision.reason]);
+  }, [engineId, backend, id, reload, follow, toast, decision.reason, cost, latest]);
+
+  // Section runs ask about API billing first, like every other run.
+  const runSection = async (o: Parameters<typeof sr.run>[0]) => {
+    const sec = latest.current?.sections.find((x) => x.id === o.sectionId);
+    if (await cost.confirm({ what: `Claude working on “${sec?.title || "this section"}”`, words: sec ? words(sec.body) || undefined : undefined })) void sr.run(o);
+  };
+  const runSections = async (list: Parameters<typeof sr.runAll>[0]) => {
+    const all = latest.current?.sections.filter((x) => list.some((o) => o.sectionId === x.id)) ?? [];
+    if (await cost.confirm({ what: `Claude writing ${list.length} ${list.length === 1 ? "section" : "sections"}`, words: all.reduce((n, x) => n + words(x.body), 0) || undefined })) void sr.runAll(list);
+  };
 
   // A run handed over from My books (e.g. Learn my voice) starts once, when the project opens.
   const handed = useRef(false);
@@ -215,13 +234,17 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   // Keyboard: ⌘. focus, ⌘\ Claude panel, Esc leaves focus (spec §6). ⌘K is handled by the palette.
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === ".") { e.preventDefault(); setFocus(!focus); }
+      const t = e.target as HTMLElement | null;
+      const typing = Boolean(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)));
+      // ⌘Z / ⌘⇧Z undo and redo book changes; inside a text field the field's own undo applies.
+      if ((e.metaKey || e.ctrlKey) && !typing && (e.key.toLowerCase() === "z" || e.key.toLowerCase() === "y")) { e.preventDefault(); if (e.shiftKey || e.key.toLowerCase() === "y") redo(); else undo(); }
+      else if ((e.metaKey || e.ctrlKey) && e.key === ".") { e.preventDefault(); setFocus(!focus); }
       else if ((e.metaKey || e.ctrlKey) && e.key === "\\") { e.preventDefault(); setPanelOpen(!panelOpen); }
       else if (e.key === "Escape" && focus) setFocus(false);
     };
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, [focus, panelOpen, setFocus, setPanelOpen]);
+  }, [focus, panelOpen, setFocus, setPanelOpen, undo, redo]);
 
   if (!thread || m === undefined) {
     return <Shell p={p} place={place} setPlace={setPlace} collapsed={collapsed} setCollapsed={setCollapsed} drawer={drawer} setDrawer={setDrawer} m={undefined} sectionId={null} onSection={() => {}} pending={null} title={thread?.title ?? ""}>
@@ -245,7 +268,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       thread={thread} live={live} onStopLive={() => { if (live) void backend.cancel(live.job); }} onChat={(message) => start("chat", { message })} chatBusy={busy || !engineId}
       onOpenResult={setViewing} onAction={setDialog} onTool={(t) => setTool({ initial: t })} onJoin={() => setJoining(true)}
       m={m} section={section} hasUploads={hasUploads} engine={engineId} citationStyles={p.citationStyles}
-      run={(o) => { void sr.run(o); }} running={sr.running} onCancel={sr.cancel} proposal={proposal} onReview={() => setView("changes")}
+      run={(o) => { void runSection(o); }} running={sr.running} onCancel={sr.cancel} proposal={proposal} onReview={() => setView("changes")}
       patchSection={patchSection} onEditRules={() => { setPlace("sources"); setTimeout(() => rulesRef.current?.focus(), 250); }} approach={approach} onApproach={setApproach} />
   ) : null;
 
@@ -259,7 +282,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       return <>
         {wizard && !m.sections.some((s) => s.body.trim()) && <WizardBanner count={wizard.chapters?.length ?? 0} onBring={() => update(wizardDraftToManuscript(wizard, m))} />}
         <PlanStage m={m} onUpdate={update} onOpen={openSection} engine={bookEngine} approach={approach} hasUploads={hasUploads} busy={busy}
-          onWriteAll={(ids) => void sr.runAll(ids.map((sid) => ({ sectionId: sid, op: "compose" as const, approach, title: m.sections.find((s) => s.id === sid)?.title })))}
+          onWriteAll={(ids) => void runSections(ids.map((sid) => ({ sectionId: sid, op: "compose" as const, approach, title: m.sections.find((s) => s.id === sid)?.title })))}
           queue={sr.queue} onSeries={() => setTool({ initial: "series" })} />
       </>;
     }
@@ -269,7 +292,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
       onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); toast({ title: "Accepted", description: "Your previous text is kept: see Original to put it back." }); }}
       onDiscard={() => { sr.decide(section.id, "discard"); setView("writing"); }}
-      onRedo={() => { const op = proposal?.op ?? "rewrite"; void sr.run({ sectionId: section.id, op, title: section.title, approach: proposal?.approach }); }}
+      onRedo={() => { const op = proposal?.op ?? "rewrite"; void runSection({ sectionId: section.id, op, title: section.title, approach: proposal?.approach }); }}
       onRestoreOriginal={() => { if (window.confirm("Put back the text from before Claude's rewrite? The current text becomes the earlier version.")) patchSection(section.id, { body: section.original!, original: section.body }); }} />;
   })();
 
@@ -291,7 +314,17 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           ))}
         </div>
       )}
-      <span aria-live="polite" className="hidden min-w-[72px] text-right text-[12px] text-[#64748B] sm:block">{saving === "saving" ? "Saving…" : saving === "saved" ? <span className="inline-flex items-center gap-1"><Check className="h-3 w-3" /> Saved</span> : ""}</span>
+      {m && (
+        <div className="hidden items-center sm:flex">
+          <button type="button" onClick={undo} disabled={!canUndo} aria-label="Undo (⌘Z)" title="Undo (⌘Z)" className="grid h-9 w-8 place-items-center rounded-md text-[#475569] hover:bg-muted disabled:opacity-35 dark:text-[#CBD5E1]"><Undo2 className="h-4 w-4" /></button>
+          <button type="button" onClick={redo} disabled={!canRedo} aria-label="Redo (⌘⇧Z)" title="Redo (⌘⇧Z)" className="grid h-9 w-8 place-items-center rounded-md text-[#475569] hover:bg-muted disabled:opacity-35 dark:text-[#CBD5E1]"><Redo2 className="h-4 w-4" /></button>
+          {place === "write" && section && <button type="button" onClick={() => setVersions(true)} aria-label="Version history" title="Version history" className="grid h-9 w-8 place-items-center rounded-md text-[#475569] hover:bg-muted dark:text-[#CBD5E1]"><History className="h-4 w-4" /></button>}
+        </div>
+      )}
+      <span aria-live="polite" className="hidden min-w-[72px] text-right text-[12px] text-[#64748B] sm:block">
+        {saving === "error" ? <button type="button" onClick={() => void persist()} className="inline-flex items-center gap-1 font-medium text-[#B91C1C] hover:underline dark:text-[#FCA5A5]"><CloudOff className="h-3.5 w-3.5" /> Not saved · Retry</button>
+          : saving === "saving" ? "Saving…" : saving === "saved" ? <span className="inline-flex items-center gap-1"><Check className="h-3 w-3" /> Saved</span> : ""}
+      </span>
       {live && <button type="button" onClick={() => { setPlace("write"); setPanelOpen(true); setPanelMode("ask"); }} className="hidden items-center gap-1.5 rounded-full bg-[#EFF6FF] px-2.5 py-1 text-[12px] font-medium text-[#1D4ED8] sm:flex dark:bg-[#172554] dark:text-[#93C5FD]"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> {live.job.label}</button>}
       <button type="button" onClick={() => setPalette(true)} className="flex h-9 items-center gap-2 rounded-[8px] border border-[#E6E8ED] bg-white px-2.5 text-[13px] text-[#64748B] hover:border-[#CBD5E1] dark:border-white/10 dark:bg-white/5">
         <Search className="h-4 w-4" /><span className="hidden lg:inline">Tools and chapters</span><kbd className="rounded border border-[#E6E8ED] bg-[#F8FAFC] px-1.5 text-[11px] text-[#475569] dark:border-white/10 dark:bg-white/5">⌘K</kbd>
@@ -305,7 +338,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   return (
     <>
       {focus ? (
-        <div className="fixed inset-0 z-[70] overflow-y-auto bg-[#F7F6F2] dark:bg-[#0D1016]">
+        <div className="fixed inset-0 z-[45] overflow-y-auto bg-[#F7F6F2] dark:bg-[#0D1016]">
           <button type="button" onClick={() => setFocus(false)} className="fixed right-5 top-4 z-10 inline-flex h-9 items-center gap-2 rounded-full border border-[#E6E8ED] bg-white/90 px-3.5 text-[12.5px] text-[#475569] shadow-sm backdrop-blur hover:text-[#172033] dark:border-white/10 dark:bg-[#11151C]/90 dark:text-[#CBD5E1]"><X className="h-3.5 w-3.5" /> Leave focus <kbd className="text-[11px]">Esc</kbd></button>
           <div className="px-6 py-20 sm:px-16">{stage}</div>
         </div>
@@ -315,10 +348,22 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           onRename={() => setRenaming(thread.title)}
           onDelete={busy ? undefined : async () => { if (!window.confirm(`Delete “${thread.title}” with its documents and results? Anything saved to your Library stays.`)) return; try { await backend.remove(id); p.onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}
           header={top} side={showPanel && !narrow ? panel : null} reduce={reduce}>
+          {recovery && (
+            <div role="alert" className="mx-auto mb-6 flex w-full max-w-[720px] flex-wrap items-center gap-3 rounded-[10px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-[13.5px] text-[#1E3A8A] dark:border-[#1E3A8A] dark:bg-[#172554] dark:text-[#BFDBFE]">
+              <LifeBuoy className="h-4 w-4" /><span className="flex-1">Changes from {new Date(recovery.at).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} were never saved to the server. They are kept on this device.</span>
+              <Button size="sm" className="h-8" onClick={() => recover(true)}>Put them back</Button>
+              <Button size="sm" variant="ghost" className="h-8" onClick={() => recover(false)}>Discard</Button>
+            </div>
+          )}
+          {!online && (
+            <div role="status" className="mx-auto mb-6 flex w-full max-w-[720px] items-center gap-3 rounded-[10px] border border-[#E6E8ED] bg-white px-4 py-3 text-[13.5px] text-[#475569] dark:border-white/10 dark:bg-white/5 dark:text-[#CBD5E1]">
+              <WifiOff className="h-4 w-4" /><span className="flex-1">You're offline. Keep writing: changes stay on this device and are saved when the connection returns. Claude can't run until then.</span>
+            </div>
+          )}
           {retry && (
             <div role="alert" className="mx-auto mb-6 flex w-full max-w-[720px] flex-wrap items-center gap-3 rounded-[10px] border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-[13.5px]">
               <AlertTriangle className="h-4 w-4 text-amber-600" /><span className="flex-1">{retry.why} New runs use the API.{decision.fix && <span className="mt-1 block text-[12px] opacity-90">{decision.fix}</span>}</span>
-              <Button size="sm" className={GRADIENT} onClick={() => start(retry.action, retry.options, "api")}><Cpu className="h-4 w-4" /> Run it on the API</Button>
+              <Button size="sm" className={GRADIENT} onClick={() => void start(retry.action, retry.options, "api")}><Cpu className="h-4 w-4" /> Run it on the API</Button>
               <Button size="sm" variant="ghost" onClick={() => setRetry(null)}>Dismiss</Button>
             </div>
           )}
@@ -338,12 +383,16 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       </Dialog>
       {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[320px] p-0 sm:max-w-[320px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
 
-      <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
+      {m && section && <VersionsSheet open={versions} onOpenChange={setVersions} m={m} section={section} onUpdate={update} />}
+      <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread}
+        onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
         onResult={setViewing} onView={(v) => { setPlace("write"); setView(v); }} onFocus={() => { setPlace("write"); setFocus(true); }} onPanel={() => setPanelOpen(!panelOpen)} onTheme={toggleTheme} />
       {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
       {dialog && <ActionDialog action={dialog} thread={thread} styles={p.citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
       {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => { setViewing(null); p.onChanged(); }} onUseAsTarget={(x) => { setViewing(null); setPendingTarget(x); setDialog("rewrite"); }} />}
+      {/* Last, so it sits above a tool or action dialog that started the run. */}
+      {cost.dialog}
     </>
   );
 }
@@ -422,4 +471,15 @@ function Library({ place, p, onBooks }: { place: "books" | "voice"; p: Workspace
       <p className="mt-10 text-center text-[12px] text-[#64748B]"><MessageSquare className="mr-1 inline h-3 w-3" />My books and My voice are shared by all your projects.</p>
     </div>
   );
+}
+
+/** Whether the browser has a connection (offline state, spec §7). */
+function useOnline() {
+  const [on, setOn] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine));
+  useEffect(() => {
+    const up = () => setOn(true), down = () => setOn(false);
+    window.addEventListener("online", up); window.addEventListener("offline", down);
+    return () => { window.removeEventListener("online", up); window.removeEventListener("offline", down); };
+  }, []);
+  return on;
 }
