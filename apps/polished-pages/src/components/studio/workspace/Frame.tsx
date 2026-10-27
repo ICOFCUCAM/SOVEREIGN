@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  AudioLines, BookMarked, Check, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Cpu, FolderOpen, Library, ListTree, Loader2, PenLine, Plus, Rocket, Sparkles,
+  AudioLines, BookMarked, Check, Pencil, Trash2, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Cpu, FolderOpen, Library, ListTree, Loader2, PenLine, Plus, Rocket, Sparkles,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -25,13 +25,15 @@ const MODE_LABEL: Record<EngineMode, string> = { auto: "Automatic", claude: "Cla
 
 export default function Frame({
   collapsed, onCollapse, place, onPlace, threads, activeId, onProject, onNewProject, ready, title,
-  m, sectionId, onSection, pending, decision, mode, onMode, onCheckEngine, busy,
+  m, sectionId, onSection, pending, decision, mode, onMode, onCheckEngine, busy, onRename, onDelete,
 }: {
   collapsed: boolean; onCollapse: (v: boolean) => void;
   place: Place; onPlace: (p: Place) => void;
   threads: StudioThreadSummary[] | null; activeId: string | null; onProject: (id: string) => void; onNewProject: () => void; ready: boolean; title: string;
   m: Manuscript | null | undefined; sectionId: string | null; onSection: (id: string) => void; pending: string | null;
   decision: EngineDecision; mode: EngineMode; onMode: (m: EngineMode) => void; onCheckEngine: () => Promise<void>; busy: boolean;
+  /** Rename or delete the open project (absent when no project is open). */
+  onRename?: () => void; onDelete?: () => void;
 }) {
   const [tree, setTree] = useState(true);
   const [checking, setChecking] = useState(false);
@@ -77,6 +79,8 @@ export default function Frame({
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onNewProject}><Plus className="mr-2 h-4 w-4" /> New project</DropdownMenuItem>
+          {onRename && <DropdownMenuItem onClick={onRename}><Pencil className="mr-2 h-4 w-4" /> Rename this project</DropdownMenuItem>}
+          {onDelete && <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete this project</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
 
