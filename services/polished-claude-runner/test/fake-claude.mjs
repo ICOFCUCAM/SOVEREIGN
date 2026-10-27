@@ -33,6 +33,14 @@ if (prompt.includes("copy and art direction for its printed cover")) {
   out({ type: "result", subtype: "success", is_error: false, result: "done", session_id: sid });
   process.exit(0);
 }
+if (prompt.includes("include scanned pages or images")) {
+  fs.mkdirSync("out/scanned", { recursive: true });
+  const words = "The oneness of God is taught throughout the scriptures from Genesis to Revelation, and this book sets out that teaching plainly for every reader. ";
+  for (const f of fs.readdirSync("source").filter((x) => /\.pdf$/i.test(x))) fs.writeFileSync(`out/scanned/${f.replace(/\.[^.]+$/, "")}.txt`, words.repeat(3));
+  fs.writeFileSync("out/scanned-text.md", "# scans\n\n<!-- page 1 -->\n" + words);
+  out({ type: "result", subtype: "success", is_error: false, result: "Read.", session_id: sid });
+  process.exit(0);
+}
 if (prompt.includes("Design a new, professional book")) {
   const sources = fs.existsSync("source") ? fs.readdirSync("source") : [];
   fs.writeFileSync("out/book-design-inventory.md", `# Inventory\n\n${sources.join(", ")}`);

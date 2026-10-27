@@ -326,3 +326,8 @@ Found by comparing every button and label of the Studio before the redesign (`Cl
 - **Ask about the book:** answers from the book's text; the book is not changed.
 - Runs on the owner's Claude Code (the runner), never on the API (owner's instruction, 27 October 2026: "this should run on Claude Code and not API calls"). The book's text goes with the request (runner tools `library-revise` and `library-ask`); it runs in the book's Studio project when it has one, else in one "Library corrections" project. If the runner is not reachable or busy, the panel says so; it never falls back to the API. Whole-book work stays in Claude Studio.
 - [x] Tested: `LibraryClaude.test.tsx`; runner test "Claude on a Library book runs on Claude Code".
+
+### 18a. Scanned PDFs (27 October 2026: "why is Claude failing to rewrite the pdf?")
+A scanned PDF (pictures of pages) has no text, so the rewrite had nothing to work from; "Read scanned pages" wrote its transcription only as a separate result, so the upload stayed "No text yet" and Split, Rewrite and Rebuild still found nothing.
+- [x] The transcription now becomes the scanned document's own text (runner: per-file `out/scanned/<name>.txt`, adopted as the upload's text copy), so the card shows "Text ready" and every action uses it (runner test "read scanned pages").
+- [x] A rewrite, summary, citation run, tool or rebuild on uploads that are all scans offers "Read the scanned pages now?" first instead of a run that fails (`scanned.test.ts`).

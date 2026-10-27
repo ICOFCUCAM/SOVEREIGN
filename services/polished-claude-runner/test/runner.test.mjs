@@ -495,3 +495,15 @@ test("Claude on a Library book runs on Claude Code with the text sent along, no 
   // Without text it still needs a document.
   assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "library-ask", message: "x" } } })).status, 400);
 });
+
+test("read scanned pages: the transcription becomes the scanned document's text", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Scanned" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=onenessofgod.pdf&kind=original`, { method: "POST", raw: Buffer.from("%PDF-1.4 scanned images only") });
+  const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "ocr" } } })).json();
+  assert.equal(job.output, "scanned-text.md");
+  assert.equal((await streamUntilDone(job.id, thread.id)).at(-1).status, "done");
+  const t = (await (await call(`/v1/threads/${thread.id}`)).json()).thread;
+  const copy = t.files.find((f) => f.kind === "text" && f.storedAs === "onenessofgod.txt");
+  assert.ok(copy, "the scanned PDF now has its text copy");
+  assert.match(await fs.readFile(path.join(dataDir, "threads", thread.id, "work", "source", "onenessofgod.txt"), "utf8"), /oneness of God/);
+});

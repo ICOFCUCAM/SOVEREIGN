@@ -102,6 +102,19 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     for (const s of job.subscribers) s.write(`data: ${JSON.stringify(e)}\n\n`);
   }
 
+  async function adoptScannedText(id, cwd) {
+    const t = await store.read(id);
+    if (!t) return;
+    const needs = t.files.filter((f) => f.kind === "original" && !/\.(txt|md|markdown)$/i.test(f.storedAs) && !t.files.some((x) => x.kind === "text" && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt"));
+    for (const f of needs) {
+      const base = f.storedAs.replace(/\.[^.]+$/, "");
+      let text = await fs.readFile(path.join(cwd, "out", "scanned", `${base}.txt`), "utf8").catch(() => "");
+      // One scanned document and no per-file copy: the combined transcription is its text.
+      if (!text.trim() && needs.length === 1) text = (await fs.readFile(path.join(cwd, "out", "scanned-text.md"), "utf8").catch(() => "")).replace(/<!--\s*page\s+\d+\s*-->\n?/gi, "");
+      if (text.trim().split(/\s+/).length >= 20) await store.addFile(id, f.name, "text", Buffer.from(text));
+    }
+  }
+
   async function startRun(thread, action, options) {
     if (action === "section") {
       const m = await store.readManuscript(thread.id);
@@ -177,6 +190,8 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     job.stop = run.stop;
 
     run.done.then(async (r) => {
+      // Read scanned pages: each transcription becomes its document's text, so the upload is "Text ready" for everything else.
+      if (action === "tool" && options?.tool === "ocr") await adoptScannedText(thread.id, cwd).catch(() => {});
       const t = (await store.read(thread.id)) || thread;
       if (r.sessionId) t.sessionId = r.sessionId;
       if (r.ok) setStatus({ state: "ok" });
