@@ -8,6 +8,8 @@ import { words, type Manuscript, type Section, type SectionVersion } from "@/lib
 import { VERSION_LABEL, addVersion, removeVersion, restoreVersion, versionsNewestFirst } from "@/lib/section-versions";
 import { countChanges, diffText } from "@/lib/word-diff";
 import { EYEBROW, SERIF } from "./ui";
+import { OP_LABEL } from "./approaches";
+import type { SectionOp } from "./useSectionRun";
 
 const when = (iso: string) => {
   const d = new Date(iso);
@@ -95,9 +97,9 @@ export default function VersionsSheet({ open, onOpenChange, m, section, onUpdate
 
             {ai.length > 0 && (
               <section aria-labelledby="ai-h" className="mt-8">
-                <h3 id="ai-h" className={`${EYEBROW} mb-2`}>Claude's history for this section</h3>
+                <h3 id="ai-h" className={`${EYEBROW} mb-2 font-sans`}>Claude's history for this section</h3>
                 <ul className="space-y-1 text-[12.5px] text-[#475569] dark:text-[#94A3B8]">
-                  {ai.map((h, i) => <li key={i} className="flex gap-2"><span className="w-28 shrink-0 text-[#64748B]">{when(h.at)}</span><span className="flex-1">{h.op} · {h.engine === "api" ? "API" : "Claude Code"}</span><span className={h.accepted ? "text-emerald-700 dark:text-emerald-400" : ""}>{h.accepted ? "accepted" : "not used"}</span></li>)}
+                  {ai.map((h, i) => <li key={i} className="flex gap-2"><span className="w-28 shrink-0 text-[#64748B]">{when(h.at)}</span><span className="flex-1">{OP_LABEL[h.op as SectionOp] ?? h.op} · {h.engine === "api" ? "API" : "Claude Code"}</span><span className={h.accepted ? "text-emerald-700 dark:text-emerald-400" : ""}>{h.accepted ? "accepted" : "not used"}</span></li>)}
                 </ul>
               </section>
             )}
