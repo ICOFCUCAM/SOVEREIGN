@@ -258,11 +258,16 @@ Later (not before the core works): real-time voice, complex adaptive algorithms,
   - [x] Database: `20261027100000_teacher_course_model.sql` (courses, course_sources, source_versions, source_chunks, owner-only RLS) and `20261027110000_teacher_rpcs.sql` (save/list/approve versions, author-mode course) applied; tested live in a rolled-back transaction: owner-only access, other users and signed-out callers refused, same text keeps one version
 - [ ] 2 Retrieval (in progress)
   - [x] Hybrid retrieval RPC `polished_teacher_retrieve`: keyword leg (English stemming, stop words removed, any meaningful word, ranked by cover density) + vector leg, reciprocal rank fusion (k = 60), scoped to the course's non-excluded sources at their approved version, chapter filter (`20261027120000_teacher_retrieval_english.sql`); tested live: nothing searchable before approval, excluded sources never searched, natural questions rank the better passage first, filler-only questions match nothing
-  - [ ] Embeddings written server-side for each approved version (vector leg is inert until then)
-  - [ ] Evidence validation and exact-quote resolution in the Teacher Runtime (step 3)
-  - [ ] Author preview screen and the "confirm chapters, then index" action; embeddings written server-side
+  - [x] Embeddings written server-side for each approved version (`teacher-index`, OpenAI text-embedding-3-small, owner-checked RPCs `20261027130000_teacher_runtime_rpcs.sql`, applied)
+  - [x] Evidence validation and exact-quote resolution in the Teacher Runtime (`_shared/teacher-core.ts`, tested)
+  - [x] Author preview screen and the "confirm chapters, then index" action (Claude Studio → Finish → AI Teacher); embeddings written server-side by the `teacher-index` edge function (deployed); tested with the panel test
 - [ ] 2 Hybrid retrieval, RRF, evidence validation, exact quotes
-- [ ] 3 Teacher Runtime: authorisation, rules resolution, structured output, citation and terminology validation, response classes, metering, logging
+- [ ] 3 Teacher Runtime: authorisation, rules resolution, structured output, citation and terminology validation, response classes, metering, logging (in progress)
+  - [x] `teacher-runtime` edge function deployed (verify_jwt on; boots and refuses signed-out callers, checked live): course, rules and sources loaded server-side through owner-checked RPCs; hybrid retrieval; 5–8 evidence passages; Claude through the API only (never the runner); JSON output contract; validation of evidence IDs, exact quotations (resolved to stored offsets) and terminology outside quotations; one repair attempt, otherwise a safe error; not-covered answered without a model call; metered with the plan's generations; logs request id, model, tokens, status and validation without question or answer text
+  - [x] Book rules parsed into structured term rules (Yahusha / Yahuah, never Jehovah or Yahweh) and stored on the course
+  - [ ] Live end-to-end answer on the real Demonology book (needs the owner to index it from the AI Teacher tab)
+  - [ ] Student access (enrolment) — retrieval and runtime are owner-only until then
+  - [ ] Usage events table and per-book cost reporting (today: logs and the plan's generation quota)
 - [ ] 4 Demonology chapter package generated, approved by the author
 - [ ] 5 Learner experience: five destinations, onboarding, practice, mastery and spaced review, read-along narration, caps
 - [ ] 6 200-case evaluation suite with release gates; pilot
