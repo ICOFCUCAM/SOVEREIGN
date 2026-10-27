@@ -2,6 +2,7 @@ import http from "node:http";
 import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { gunzipSync } from "node:zlib";
 import { pathToFileURL } from "node:url";
 import { loadConfig, configProblems, tokenShape } from "./config.mjs";
 
@@ -73,7 +74,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     if (origin && cfg.allowedOrigins.has(origin)) {
       res.setHeader("Access-Control-Allow-Origin", origin);
       res.setHeader("Vary", "Origin");
-      res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+      res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Content-Encoding");
       res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
       res.setHeader("Access-Control-Max-Age", "600");
     }
@@ -87,7 +88,13 @@ export function createServer(cfg = loadConfig(), deps = {}) {
   async function body(req, limit) {
     const chunks = []; let n = 0;
     for await (const c of req) { n += c.length; if (n > limit) throw Object.assign(new Error("too large"), { status: 413 }); chunks.push(c); }
-    return Buffer.concat(chunks);
+    const raw = Buffer.concat(chunks);
+    // The Studio gzips large saves (a whole book), so they pass proxies that cap request size.
+    if (/gzip/i.test(String(req.headers["content-encoding"] || ""))) {
+      try { return gunzipSync(raw, { maxOutputLength: limit }); }
+      catch (e) { throw Object.assign(new Error("bad gzip"), { status: e?.code === "ERR_BUFFER_TOO_LARGE" ? 413 : 400 }); }
+    }
+    return raw;
   }
   const json = async (req) => { const b = await body(req, 1024 * 1024); try { return b.length ? JSON.parse(b.toString("utf8")) : {}; } catch { throw Object.assign(new Error("bad json"), { status: 400 }); } };
 

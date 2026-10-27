@@ -535,3 +535,14 @@ test("a report that a PDF could not be opened is never taken as its text", async
   const after = (await (await call(`/v1/threads/${thread.id}/files/locked.txt`, { method: "DELETE" })).json()).thread;
   assert.ok(after.files.some((f) => f.storedAs === "locked-p001.jpg"));
 });
+
+test("a large save may arrive gzipped and is read the same", async () => {
+  const { gzipSync } = await import("node:zlib");
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Big" } })).json();
+  const manuscript = { title: "Big book", sections: [{ id: "s-1", kind: "chapter", title: "One", body: "word ".repeat(200_000) }] };
+  const r = await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", raw: gzipSync(Buffer.from(JSON.stringify({ manuscript }))), headers: { "Content-Encoding": "gzip", "Content-Type": "application/json" } });
+  assert.equal(r.status, 200);
+  assert.equal((await r.json()).manuscript.sections[0].body.length, 1_000_000);
+  const bad = await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", raw: Buffer.from("not gzip"), headers: { "Content-Encoding": "gzip" } });
+  assert.equal(bad.status, 400);
+});

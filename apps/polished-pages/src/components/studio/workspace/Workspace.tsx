@@ -246,18 +246,34 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     setThread(t); p.onChanged();
   };
 
+  /** The uploaded manuscripts' text, in order (their text copies, or the files themselves when they are text). */
+  const uploadsText = async (): Promise<string | null> => {
+    if (!thread) return null;
+    const texts: string[] = [];
+    for (const f of thread.files.filter((x) => x.kind === "original")) {
+      const copy = thread.files.find((x) => x.kind === "text" && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt");
+      const t = copy ? await backend.source(id, copy.storedAs) : /\.(txt|md|markdown)$/i.test(f.storedAs) ? await backend.source(id, f.storedAs) : null;
+      if (t?.trim()) texts.push(t);
+    }
+    if (!texts.length) { toast({ title: "No readable text in the manuscripts", description: "On the PDF's card in Sources, use “open it (password or scanned pages)” first.", variant: "destructive" }); return null; }
+    return texts.join("\n\n");
+  };
+  /** Splits the uploads into chapters again (the current chapters are kept to restore). */
+  const resplit = async () => {
+    if (!m || !window.confirm("Split your uploaded manuscript into chapters again?\n\nThe current chapters are replaced, and kept: restore them from Plan at any time.")) return;
+    const text = await uploadsText();
+    if (!text) return;
+    try { update(resultToManuscript(text, m, "Split again from the upload")); toast({ title: "Split again", description: "The earlier chapters can be restored from Plan." }); }
+    catch (e) { toast({ title: "Couldn't split it", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+  };
+
   const startBook = async (from: "uploads" | "blank" | "wizard") => {
     let next: Manuscript;
     if (from === "wizard" && wizard) next = wizardDraftToManuscript(wizard);
     else if (from === "uploads" && thread) {
-      const texts: string[] = [];
-      for (const f of thread.files.filter((x) => x.kind === "original")) {
-        const copy = thread.files.find((x) => x.kind === "text" && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt");
-        const t = copy ? await backend.source(id, copy.storedAs) : /\.(txt|md|markdown)$/i.test(f.storedAs) ? await backend.source(id, f.storedAs) : null;
-        if (t?.trim()) texts.push(t);
-      }
-      if (!texts.length) { toast({ title: "No readable text in the manuscripts", description: "Scanned files need Claude Code: use “Read scanned pages” first.", variant: "destructive" }); return; }
-      next = importText(thread.title, texts.join("\n\n"));
+      const text = await uploadsText();
+      if (!text) return;
+      next = importText(thread.title, text);
     } else next = insertSection({ title: thread?.title === "Untitled project" ? "" : thread?.title ?? "", sections: [], history: [] }, "chapter", "Chapter 1").manuscript;
     await replace(next);
     setSectionId(next.sections.find((s) => s.kind === "chapter")?.id ?? next.sections[0]?.id ?? null);
@@ -354,7 +370,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           queue={sr.queue} onSeries={() => setTool({ initial: "series" })} onFinish={() => setPlace("finish")}
           onDesign={bookEngine ? designBook : undefined}
           onApplyDesign={(d, b) => { update(designToManuscript(d, m, b)); setApproach(b.approach); }}
-          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} />
+          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} onResplit={hasUploads ? () => void resplit() : undefined} />
       </>;
     }
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}

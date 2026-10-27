@@ -25,7 +25,7 @@ const GROUPS = [{ id: "front", label: "Front matter" }, { id: "body", label: "Ch
 
 // Plan (design spec §2): the book's contents, with the plan and notes for each
 // chapter, its order, Claude's outline, and turning the book into a series.
-export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard }: {
+export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard, onResplit }: {
   m: Manuscript; onUpdate: (m: Manuscript) => void; onOpen: (id: string) => void; engine: BookEngine | null; approach: ApproachId; hasUploads: boolean;
   onWriteAll: (ids: string[]) => void; queue: { done: number; total: number } | null; onSeries: () => void; busy: boolean;
   /** Finish joins every chapter into one book. */
@@ -37,6 +37,8 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
   onRestore: (index: number) => void;
   /** Opens the Book wizard inside this project. */
   onWizard?: () => void;
+  /** Splits the uploaded manuscript into chapters again (when the first split found the wrong headings). */
+  onResplit?: () => void;
 }) {
   const { toast } = useToast();
   const [open, setOpen] = useState<string | null>(null);
@@ -185,6 +187,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
 
         <div className="border-t border-[#E6E8ED] pt-6 dark:border-white/10">
           {onWizard && <Button variant="outline" className="mb-2 w-full" onClick={onWizard} disabled={busy}><BookOpen className="h-4 w-4" /> Book wizard</Button>}
+          {onResplit && <Button variant="outline" className="mb-2 w-full" onClick={onResplit} disabled={busy || Boolean(queue)} title="When the chapters were split at the wrong headings">Split the upload again</Button>}
           <Button variant="outline" className="w-full" onClick={onSeries} disabled={busy}><Layers3 className="h-4 w-4" /> Turn into a series</Button>
         </div>
       </aside>

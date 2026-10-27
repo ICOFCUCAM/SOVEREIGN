@@ -113,6 +113,20 @@ export function moveSection(m: Manuscript, id: string, dir: -1 | 1): Manuscript 
 }
 
 /** A manuscript from an existing text: "## " headings (or "Chapter N" lines) become chapters. */
+/**
+ * A plain-text line that is a chapter or part heading ("CHAPTER 3", "Chapter 3: The Name", "Part II"),
+ * not a sentence of the book that starts with the word ("Chapter 4 affirmed that…", "chapter 9.) In short…").
+ */
+export function isChapterLine(line: string): boolean {
+  const m = /^(Chapter|CHAPTER|Part|PART)\s+([0-9]+|[IVXLC]+|[ivxlc]+|One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN)\b(.*)$/.exec(line);
+  if (!m) return false;
+  const rest = m[3].trim();
+  if (line.length > 90 || line.split(/\s+/).length > 14) return false;
+  if (/[-,;]$/.test(rest) || /[.!?]\s+\S/.test(rest) || /^\.?\)/.test(rest)) return false;
+  // A title after the number starts with a separator or a capital (or a digit), never a lower-case word.
+  return !rest || /^[:.\-–—]/.test(rest) || /^["“'‘(]?[A-Z0-9]/.test(rest);
+}
+
 export function importText(title: string, text: string): Manuscript {
   const lines = text.replace(/\r\n?/g, "\n").split("\n");
   const sections: Section[] = [];
@@ -121,7 +135,7 @@ export function importText(title: string, text: string): Manuscript {
   for (const line of lines) {
     const h1 = /^#\s+(.+)$/.exec(line);
     if (h1 && !sections.length && !cur) { bookTitle = h1[1].trim(); continue; }
-    const h = /^##\s+(.+)$/.exec(line) || /^((?:chapter|part)\s+[\divxlc]+\b.*)$/i.exec(line.trim());
+    const h = /^##\s+(.+)$/.exec(line) || (isChapterLine(line.trim()) ? [line, line.trim()] : null);
     if (h) {
       if (cur) sections.push(cur);
       const t = h[1].trim();
