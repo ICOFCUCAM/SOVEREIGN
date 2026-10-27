@@ -77,6 +77,22 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
   const go = (d: 1 | -1) => { if (!total) return; const next = (at + d + total) % total; setAt(next); changeRefs.current.get(next)?.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" }); };
   const toggle = (c: number) => setRejected((r) => { const x = new Set(r); if (x.has(c)) x.delete(c); else x.add(c); return x; });
 
+  // Keyboard review (spec §6): J/K next and previous change, X keeps or rejects it, ⌘↵ accepts. Never while typing.
+  const reviewing = Boolean(mine) && view === "changes" && editing === null && !running;
+  useEffect(() => {
+    if (!reviewing) return;
+    const down = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); onAccept(accepted); return; }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k === "j") { e.preventDefault(); go(1); } else if (k === "k") { e.preventDefault(); go(-1); } else if (k === "x" && total) { e.preventDefault(); toggle(at); }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  });
+
   const card = mine ? APPROACH_CARDS.find((a) => a.id === mine.approach) : null;
   const header = (
     <header className="mb-10">
@@ -173,14 +189,15 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
           </p>
           <div className="flex flex-wrap items-center gap-1.5">
           {effective === "changes" && editing === null && total > 1 && <>
-            <button type="button" aria-label="Previous change" onClick={() => go(-1)} className="grid h-8 w-8 place-items-center rounded-md hover:bg-white/10"><ArrowUp className="h-4 w-4" /></button>
-            <button type="button" aria-label="Next change" onClick={() => go(1)} className="grid h-8 w-8 place-items-center rounded-md hover:bg-white/10"><ArrowDown className="h-4 w-4" /></button>
+            <button type="button" aria-label="Previous change (K)" title="Previous change (K)" onClick={() => go(-1)} className="grid h-8 w-8 place-items-center rounded-md hover:bg-white/10"><ArrowUp className="h-4 w-4" /></button>
+            <button type="button" aria-label="Next change (J)" title="Next change (J)" onClick={() => go(1)} className="grid h-8 w-8 place-items-center rounded-md hover:bg-white/10"><ArrowDown className="h-4 w-4" /></button>
             <button type="button" onClick={() => setRejected(rejected.size ? new Set() : new Set(Array.from({ length: total }, (_, i) => i)))} className="h-8 rounded-md px-2.5 hover:bg-white/10">{rejected.size ? "Keep all" : "Reject all"}</button>
           </>}
-          <Button size="sm" className="h-8 bg-white text-[#172033] hover:bg-white/90" onClick={() => onAccept(editing ?? accepted)}><Check className="h-4 w-4" /> Accept</Button>
+          <Button size="sm" className="h-8 bg-white text-[#172033] hover:bg-white/90" onClick={() => onAccept(editing ?? accepted)} title="Accept (⌘↵)"><Check className="h-4 w-4" /> Accept</Button>
           {effective === "changes" && <Button size="sm" variant="ghost" className="h-8 text-white hover:bg-white/10 hover:text-white" onClick={() => setEditing(editing === null ? accepted : null)}>{editing === null ? <><PenLine className="h-4 w-4" /> Edit first</> : <><CornerDownLeft className="h-4 w-4" /> Back to changes</>}</Button>}
           <Button size="sm" variant="ghost" className="h-8 text-white hover:bg-white/10 hover:text-white" onClick={onRedo}><RotateCcw className="h-4 w-4" /> Redo</Button>
           <Button size="sm" variant="ghost" className="h-8 text-[#CBD5E1] hover:bg-white/10 hover:text-white" onClick={onDiscard}><X className="h-4 w-4" /> Discard</Button>
+          {reviewing && <span className="ml-auto hidden text-[11.5px] text-[#94A3B8] lg:inline" aria-hidden><kbd>J</kbd>/<kbd>K</kbd> move · <kbd>X</kbd> keep or reject · <kbd>⌘↵</kbd> accept</span>}
           </div>
         </motion.div>
       )}
