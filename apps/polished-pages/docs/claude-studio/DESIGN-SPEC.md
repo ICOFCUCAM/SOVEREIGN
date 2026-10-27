@@ -298,3 +298,8 @@ Publisher's design, not the manuscript's order; everything placed or listed; the
 - [x] Whole-book result → manuscript; saved design re-applied; runs and results from every stage; full Redo; busy elsewhere shown; chapter count in the Library
 - [x] Every stage, Finish tab and card clicked through in the preview with no page errors; screenshots 42–47
 - [x] §17f: Library keeps the book's details and links to the Studio; Marketing and Study guide in Finish on the manuscript (runner test "Finish's tools work on the manuscript"); previous/next section; suggestions named after their section (`output-label.test.ts`); view menu on narrow screens
+
+### 17g. Corrections after the owner's check of the live Studio (27 October 2026)
+- Plan, Write and Finish showed the Sources page whenever the project had no manuscript yet, so the four stages looked identical. Each now has its own page saying what it is for and offering every way to start: Rebuild as a professional book (straight from the upload), Split into chapters, the Book wizard, a blank book.
+- The Book wizard (Book Creator: quick, guided, restructure, improve, publishing-ready; depth; writing voice) was part of Claude Studio until the workspace redesign (commit 49dc52be), which dropped it without telling the owner. It is back inside the project, on the engine in use: Plan (Book wizard), Sources ("Or start from the Book wizard") and the no-manuscript pages; its chapters come into the manuscript with "Bring them in".
+- [x] Tested: `Workspace.test.tsx` "shows Plan, Write and Finish as their own pages before there is a manuscript… and opens the Book wizard"

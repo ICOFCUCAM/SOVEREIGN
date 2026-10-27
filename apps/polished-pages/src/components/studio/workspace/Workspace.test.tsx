@@ -225,4 +225,24 @@ describe("Claude Studio workspace", () => {
     fireEvent.click(within(start).getByRole("button", { name: /Rewrite the whole book/ }));
     expect(await screen.findByRole("dialog", { name: /Rewrite/ })).toBeTruthy();
   });
+
+  it("shows Plan, Write and Finish as their own pages before there is a manuscript, with every way to start, and opens the Book wizard", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: () => Promise<null> }).manuscript = async () => null;
+    localStorage.setItem("studio.place", "plan");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const plan = await screen.findByRole("region", { name: "Plan the book" });
+    expect(within(plan).getByText("No manuscript yet")).toBeTruthy();
+    expect(within(plan).getByRole("button", { name: "Rebuild the book" })).toBeTruthy();
+    expect(within(plan).getByRole("button", { name: "Split into chapters" })).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "Start the book" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^Write/ }));
+    expect(await screen.findByRole("region", { name: "Write" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /^Finish/ }));
+    const finish = await screen.findByRole("region", { name: "Finish" });
+    fireEvent.click(within(finish).getByRole("button", { name: "Open the Book wizard" }));
+    expect(await screen.findByText(/Creation Mode/, {}, { timeout: 10_000 })).toBeTruthy();
+    expect(screen.getByText(/Restructure/)).toBeTruthy();
+  }, 20_000);
 });
+

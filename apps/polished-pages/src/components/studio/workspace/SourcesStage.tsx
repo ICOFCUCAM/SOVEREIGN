@@ -13,11 +13,13 @@ import { EYEBROW, SERIF } from "./ui";
 
 // Sources (design spec §2): what Claude builds the book from and the rules it
 // never breaks: manuscripts, file tools, book details, rules, knowledge, voice.
-export default function SourcesStage({ thread, m, uploading, onUpload, onRemove, onTool, onAction, onJoin, onStart, wizardChapters, onUpdate, onVoice, busy, rulesRef, readText }: {
+export default function SourcesStage({ thread, m, uploading, onUpload, onRemove, onTool, onAction, onJoin, onStart, wizardChapters, onUpdate, onVoice, busy, rulesRef, readText, onWizard }: {
   thread: StudioThread; m: Manuscript | null | undefined; uploading: string | null;
   onUpload: (files: FileList | File[]) => void; onRemove: (storedAs: string) => void;
   onTool: (t: ToolId) => void; onAction: (a: DialogAction) => void; onJoin: () => void;
   onStart: (from: "uploads" | "blank" | "wizard") => void; wizardChapters: number;
+  /** Opens the Book wizard inside this project. */
+  onWizard?: () => void;
   onUpdate: (m: Manuscript) => void; onVoice: () => void; busy: boolean; rulesRef: React.RefObject<HTMLTextAreaElement>;
   /** Reads a file's extracted text (for the word count and preview); null when there is none. */
   readText: (storedAs: string) => Promise<string | null>;
@@ -99,6 +101,7 @@ export default function SourcesStage({ thread, m, uploading, onUpload, onRemove,
           <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-[#E6E8ED] pt-4 text-[13px] dark:border-white/10">
             <span className="text-[#64748B]">Or start from</span>
             {wizardChapters > 0 && <Button size="sm" variant="ghost" onClick={() => onStart("wizard")}><FileText className="h-4 w-4" /> my Book wizard draft ({wizardChapters} chapters)</Button>}
+            {onWizard && <Button size="sm" variant="ghost" onClick={onWizard}><BookOpen className="h-4 w-4" /> the Book wizard</Button>}
             <Button size="sm" variant="ghost" onClick={() => onStart("blank")}><Plus className="h-4 w-4" /> a blank book</Button>
           </div>
         </section>
