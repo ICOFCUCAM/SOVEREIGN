@@ -285,6 +285,14 @@ test("manuscript: saved as JSON and mirrored as files; sections expanded; voice 
   const keptNotes = (await (await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", body: { manuscript: withNotes } })).json()).manuscript;
   assert.deepEqual(keptNotes.sections[1].pageNotes, [{ page: "14", text: "Keep this sentence word for word." }], "empty page notes are dropped");
   assert.deepEqual([keptNotes.knowledge.rules, keptNotes.meta.isbn, keptNotes.libraryId], ["Use the KJV.", "978-0-00", "doc-1"]);
+  // version history is kept with each section, cleaned and capped
+  const withVersions = { ...withNotes, sections: withNotes.sections.map((x) => (x.id === "s-1" ? { ...x, versions: [
+    ...Array.from({ length: 45 }, (_, i) => ({ id: `v-${i}`, at: "2026-10-27T10:00:00Z", kind: "autosave", title: "One", body: `draft ${i}` })),
+    { id: "v-../bad", at: "2026-10-27T11:00:00Z", kind: "weird", title: "One", body: "named", label: "Sent to editor" },
+  ] } : x)) };
+  const keptVersions = (await (await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", body: { manuscript: withVersions } })).json()).manuscript.sections[1].versions;
+  assert.equal(keptVersions.length, 40);
+  assert.deepEqual(keptVersions.at(-1), { id: "v-bad", at: "2026-10-27T11:00:00Z", kind: "snapshot", title: "One", body: "named", label: "Sent to editor" });
   assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "compose", approach: "mine-and-research" } } })).status, 400, "the book must be uploaded first");
   await call(`/v1/threads/${thread.id}/files?name=demonology.txt&kind=original`, { method: "POST", raw: Buffer.from("My teaching on spirits.") });
   ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-1", op: "compose", approach: "mine-and-research" } } })).json());

@@ -9,6 +9,7 @@ import path from "node:path";
 //     out/      everything Claude writes
 //   <data>/threads/<id>/jobs/<job>.jsonl   the event log of each run, for replay
 const ID = /^[0-9a-f-]{36}$/;
+const VERSION_KINDS = new Set(["snapshot", "autosave", "before-accept", "before-restore"]);
 
 export function safeName(name) {
   const base = path.basename(String(name || "file")).normalize("NFKC").replace(/[^\p{L}\p{N}._ -]+/gu, "_").replace(/^[.\s]+/, "").slice(0, 120);
@@ -122,6 +123,12 @@ export function createStore(dataDir) {
         // Guided rewrite: Claude's summary, the owner's idea, and the text before the rewrite.
         ...(x.summary ? { summary: String(x.summary).slice(0, 20_000) } : {}), ...(x.idea ? { idea: String(x.idea).slice(0, 20_000) } : {}), ...(x.original ? { original: String(x.original) } : {}),
         ...(Array.isArray(x.pageNotes) && x.pageNotes.length ? { pageNotes: x.pageNotes.slice(0, 500).map((n) => ({ page: String(n?.page ?? "").slice(0, 20), text: String(n?.text ?? "").slice(0, 2000) })).filter((n) => n.text.trim()) } : {}),
+        // Version history: snapshots, autosaved revisions, the text before accepted changes and restores.
+        ...(Array.isArray(x.versions) && x.versions.length ? { versions: x.versions.slice(-40).map((v) => ({
+          id: String(v?.id ?? "").replace(/[^\w-]/g, "").slice(0, 40), at: String(v?.at ?? "").slice(0, 40),
+          kind: VERSION_KINDS.has(v?.kind) ? v.kind : "snapshot", title: String(v?.title ?? "").slice(0, 300), body: String(v?.body ?? ""),
+          ...(v?.label ? { label: String(v.label).slice(0, 120) } : {}),
+        })).filter((v) => v.id) } : {}),
       })),
         rules: String(m?.rules ?? "").slice(0, 20_000),
         // The book's knowledge base, production details and the Library book it was saved as.
