@@ -249,6 +249,14 @@ Later (not before the core works): real-time voice, complex adaptive algorithms,
 ## 10. Implementation checklist
 - [ ] 0.1 Course model: courses, course_sources (required/supplementary/excluded), source_versions, source_chunks; retrieval scoped to course + permitted sources + versions; private-source isolation
 - [ ] 1 Content pipeline (validation, IDs, token chunks, metadata, versions, author preview)
+  - [x] Structure validation (no chapters, empty or duplicate chapters, heading skips, text before the first chapter, leftover [[YOURS]] markers) — `src/lib/teacher/pipeline.ts`, tested
+  - [x] Stable chapter and section IDs (`{#anchor}` wins; numbered chapters `ch-NN-slug`; front and back matter unnumbered) — tested
+  - [x] Token-based, structure-first chunks: target 450, range 300–650, sentence overlap ≤ 64 tokens, never across sections, long paragraphs split at sentences — tested
+  - [x] Every §2a field: chapter id and number, heading path, paragraph and character offsets (exact into the source), text, tokens, normalised scripture references with the original wording, source type and location, content hash — tested
+  - [x] Versions: content hash per version; chunk IDs stable for unchanged passages so citations survive edits; version diff — tested
+  - [x] Author preview: chapters as detected, counts, scripture, issues, and whether anything blocks indexing — tested
+  - [ ] Database: migration `20261027100000_teacher_course_model.sql` written (courses, course_sources, source_versions, source_chunks, owner-only RLS); **not yet applied** (the database asked for confirmation, unanswered)
+  - [ ] Author preview screen and the "confirm chapters, then index" action; embeddings written server-side
 - [ ] 2 Hybrid retrieval, RRF, evidence validation, exact quotes
 - [ ] 3 Teacher Runtime: authorisation, rules resolution, structured output, citation and terminology validation, response classes, metering, logging
 - [ ] 4 Demonology chapter package generated, approved by the author
