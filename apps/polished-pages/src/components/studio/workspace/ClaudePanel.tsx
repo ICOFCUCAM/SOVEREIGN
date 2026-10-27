@@ -110,11 +110,11 @@ export default function ClaudePanel(p: {
 
   return (
     <aside aria-label="Claude" className="flex h-full w-full flex-col bg-white dark:bg-[#11151C]">
-      <div className="flex items-center gap-1 border-b border-[#E6E8ED] px-3 dark:border-white/10" role="tablist" aria-label="Claude panel">
+      <div className="flex items-center gap-0.5 border-b border-[#E6E8ED] px-2 dark:border-white/10" role="tablist" aria-label="Claude panel">
         {MODES.map((x) => (
           <button key={x.id} type="button" role="tab" aria-selected={p.mode === x.id} onClick={() => p.onMode(x.id)}
-            className={`-mb-px flex h-12 items-center gap-1.5 border-b-2 px-2.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] ${p.mode === x.id ? "border-[#172033] font-semibold text-[#172033] dark:border-white dark:text-white" : "border-transparent font-medium text-[#64748B] hover:text-[#172033] dark:hover:text-white"}`}>
-            <x.icon className="h-3.5 w-3.5" aria-hidden />{x.label}
+            className={`-mb-px flex h-12 items-center gap-1 border-b-2 px-2 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] ${p.mode === x.id ? "border-[#172033] font-semibold text-[#172033] dark:border-white dark:text-white" : "border-transparent font-medium text-[#64748B] hover:text-[#172033] dark:hover:text-white"}`}>
+{x.label}
           </button>
         ))}
         <button type="button" onClick={p.onClose} aria-label="Close the Claude panel" className="ml-auto grid h-8 w-8 place-items-center rounded-md text-[#64748B] hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]"><PanelRightClose className="h-4 w-4" /></button>
