@@ -25,7 +25,7 @@ const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >
 
 export default function MyBooks({ coverWriter, onWorkInStudio, onLearnVoice }: {
   coverWriter?: CoverCopyWriter;
-  onWorkInStudio: (title: string, markdown: string) => Promise<void>;
+  onWorkInStudio: (title: string, markdown: string, docId?: string) => Promise<void>;
   onLearnVoice: (books: { title: string; markdown: string }[]) => Promise<void>;
 }) {
   const { toast } = useToast();
@@ -110,7 +110,7 @@ export default function MyBooks({ coverWriter, onWorkInStudio, onLearnVoice }: {
 
   const toStudio = async (d: DocSummary) => {
     setBusy(d.id);
-    try { await onWorkInStudio(d.title, await markdownOf(d)); }
+    try { await onWorkInStudio(d.title, await markdownOf(d), d.id); }
     catch (e) { toast({ title: "Couldn't open it in Studio", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
     finally { setBusy(null); }
   };

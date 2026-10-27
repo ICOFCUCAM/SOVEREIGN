@@ -56,12 +56,14 @@ function numberChanges(blocks: DiffBlock[]) {
   }));
 }
 
-export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onSection }: {
+export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onSection, onAppend }: {
   m: Manuscript; section: Section; view: CanvasView; proposal: Proposal | null; running: boolean;
   onBody: (t: string) => void; onTitle: (t: string) => void;
   onAccept: (text: string) => void; onDiscard: () => void; onRedo: () => void; onRestoreOriginal: () => void; onView: (v: CanvasView) => void; bookTrim?: string;
   /** Moves to another section: the previous and next ones, for working through the book chapter by chapter. */
   onSection?: (id: string) => void;
+  /** Adds Claude's text below the section's own, instead of replacing it (as the Manuscript editor offered). */
+  onAppend?: () => void;
 }) {
   const reduce = useReducedMotion();
   const def = kindDef(section.kind);
@@ -199,6 +201,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
             <button type="button" onClick={() => setRejected(rejected.size ? new Set() : new Set(Array.from({ length: total }, (_, i) => i)))} className="h-8 rounded-md px-2.5 hover:bg-white/10">{rejected.size ? "Keep all" : "Reject all"}</button>
           </>}
           <Button size="sm" className="h-8 bg-white text-[#172033] hover:bg-white/90" onClick={() => onAccept(editing ?? accepted)} title="Accept (⌘↵)"><Check className="h-4 w-4" /> Accept</Button>
+          {onAppend && editing === null && <Button size="sm" variant="ghost" className="h-8 text-white hover:bg-white/10 hover:text-white" onClick={onAppend} title="Keep your text and add Claude's below it">Add below</Button>}
           {effective === "changes" && <Button size="sm" variant="ghost" className="h-8 text-white hover:bg-white/10 hover:text-white" onClick={() => setEditing(editing === null ? accepted : null)}>{editing === null ? <><PenLine className="h-4 w-4" /> Edit first</> : <><CornerDownLeft className="h-4 w-4" /> Back to changes</>}</Button>}
           <Button size="sm" variant="ghost" className="h-8 text-white hover:bg-white/10 hover:text-white" onClick={onRedo}><RotateCcw className="h-4 w-4" /> Redo</Button>
           <Button size="sm" variant="ghost" className="h-8 text-[#CBD5E1] hover:bg-white/10 hover:text-white" onClick={onDiscard}><X className="h-4 w-4" /> Discard</Button>

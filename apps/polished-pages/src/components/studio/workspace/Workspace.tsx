@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, Check, CloudOff, FileText, Cpu, Focus, History, LifeBuoy, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Redo2, Search, Sparkles, Undo2, WifiOff, X } from "lucide-react";
+import { AlertTriangle, Check, CloudOff, FileText, Library as LibraryIcon, Cpu, Focus, History, LifeBuoy, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Redo2, Search, Sparkles, Undo2, WifiOff, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -25,8 +26,11 @@ import ClaudePanel, { type PanelMode } from "./ClaudePanel";
 import StudioPalette from "./StudioPalette";
 import SourcesStage from "./SourcesStage";
 import PlanStage from "./PlanStage";
+import BookDesignDialog from "./BookDesignDialog";
+// The Book Creator wizard, run inside the project on the engine in use (loaded on demand).
+const BookCreator = lazy(() => import("@/pages/BookCreator"));
 import FinishStage from "./FinishStage";
-import { ActionDialog, LiveCard, OutputRow, ResultViewer, setPendingTarget, type DialogAction, type Live } from "./parts";
+import { ActionDialog, LiveCard, MessageCard, ResultsList, ResultViewer, setPendingTarget, type DialogAction, type Live } from "./parts";
 import { useManuscript } from "./useManuscript";
 import { useSectionRun } from "./useSectionRun";
 import { APPROACH_CARDS, type ApproachId } from "./approaches";
@@ -53,7 +57,7 @@ export interface WorkspaceProps {
   threads: StudioThreadSummary[] | null; onProject: (id: string) => void; onNewProject: () => Promise<void>;
   handoff: { view?: "assistant" | "manuscript"; run?: { action: StudioAction; options: RunOptions } } | null; onHandoffUsed: () => void;
   onChanged: () => void; onDeleted: () => void;
-  onWorkInStudio: (title: string, markdown: string) => Promise<void>; onLearnVoice: (books: { title: string; markdown: string }[]) => Promise<void>;
+  onWorkInStudio: (title: string, markdown: string, docId?: string) => Promise<void>; onLearnVoice: (books: { title: string; markdown: string }[]) => Promise<void>;
   notice?: React.ReactNode;
   /** Finds a Library book's saved front cover; the dev preview passes a stand-in. */
   findCover?: (libraryId: string) => Promise<string | null>;
@@ -114,6 +118,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [sheet, setSheet] = useState(false);
   // The project's runs and results, reachable from every stage (spec §5.2), not only from the Claude panel in Write.
   const [activity, setActivity] = useState(false);
+  // Rebuild started before the book has a manuscript (from Plan's empty state).
+  const [rebuilding, setRebuilding] = useState(false);
   const lastRun = useRef<{ action: StudioAction; options: RunOptions } | null>(null);
   const abort = useRef<AbortController | null>(null);
   const rulesRef = useRef<HTMLTextAreaElement>(null);
@@ -131,7 +137,9 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   useEffect(() => { if (m && (!sectionId || !m.sections.some((s) => s.id === sectionId))) setSectionId(m.sections.find((s) => s.kind === "chapter")?.id ?? m.sections[0]?.id ?? null); }, [m, sectionId]);
   const section = m?.sections.find((s) => s.id === sectionId) ?? null;
   useEffect(() => { setSectionTitles(Object.fromEntries((m?.sections ?? []).map((s) => [s.id, s.title]))); }, [m?.sections]);
-  const wizard = useMemo(() => readWizardDraft(id), [id]);
+  // The Book wizard inside this project; its draft is read again when it closes.
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const wizard = useMemo(() => readWizardDraft(id), [id, wizardOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The Book wizard's engine (outline): the owner's Claude Code when it's in use, else the API.
   const bookEngine: BookEngine | null = useMemo(() => !engineId ? null : engineId === "claude-code" && backend === runnerBackend
@@ -304,8 +312,25 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
 
   const stage = (() => {
     if (place === "books" || place === "voice") return <Library place={place} p={p} onBooks={() => setPlace("books")} />;
+    if (wizardOpen) return (
+      <div className="mx-auto w-full max-w-[1080px]">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => { setWizardOpen(false); setPlace("plan"); }}>← Back to {thread.title}</Button>
+          <span className="text-[12.5px] text-[#64748B]">Book wizard · {bookEngine?.label ?? "no engine"} · its chapters come into this project's manuscript when you bring them in (Plan).</span>
+        </div>
+        <Suspense fallback={<p className="inline-flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Opening the Book wizard…</p>}>
+          {bookEngine ? <BookCreator engine={bookEngine} draftKey={`studio.book.${id}`} /> : <p className="text-sm">No engine is available: connect Claude Code or the API first.</p>}
+        </Suspense>
+      </div>
+    );
+    // Plan, Write and Finish before the book has a manuscript: say so, and offer every way to start (not the Sources page again).
+    if (m === null && (place === "plan" || place === "write" || place === "finish")) return (
+      <NoBookYet place={place} hasUploads={hasUploads} wizardChapters={wizard?.chapters?.length ?? 0} busy={busy}
+        onSplit={() => void startBook("uploads")} onBlank={() => void startBook("blank")} onBringWizard={() => void startBook("wizard")} onWizard={() => setWizardOpen(true)} onSources={() => setPlace("sources")}
+        onRebuild={bookEngine && hasUploads ? () => setRebuilding(true) : undefined} />
+    );
     if (place === "sources" || m === null) {
-      return <SourcesStage thread={thread} m={m} uploading={uploading} onUpload={upload} onRemove={removeFile} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
+      return <SourcesStage thread={thread} m={m} uploading={uploading} onUpload={upload} onRemove={removeFile} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)} onWizard={() => setWizardOpen(true)}
         onStart={startBook} wizardChapters={wizard?.chapters?.length ?? 0} onUpdate={update} onVoice={() => setPlace("voice")} busy={busy} rulesRef={rulesRef} readText={readSource} />;
     }
     if (place === "plan") {
@@ -316,7 +341,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           queue={sr.queue} onSeries={() => setTool({ initial: "series" })} onFinish={() => setPlace("finish")}
           onDesign={bookEngine ? designBook : undefined}
           onApplyDesign={(d, b) => { update(designToManuscript(d, m, b)); setApproach(b.approach); }}
-          onRestore={(i) => update(restoreArchived(m, i))} />
+          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} />
       </>;
     }
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}
@@ -326,6 +351,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
       onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); const next = m.sections[m.sections.findIndex((s) => s.id === section.id) + 1]; toast({ title: "Accepted", description: `Your previous text is kept in Version history.${next ? ` Next: “${next.title}”, at the end of the page.` : ""}` }); }}
       onDiscard={() => { sr.decide(section.id, "discard"); setView("writing"); }}
+      onAppend={proposal && section.body.trim() && proposal.op !== "rewrite" ? () => { sr.decide(section.id, "append"); setView("writing"); toast({ title: "Added below your text", description: "Your previous text is kept in Version history." }); } : undefined}
       onRedo={() => { const op = proposal?.op ?? "rewrite"; void runSection({ ...(proposal?.request ?? {}), sectionId: section.id, op, title: section.title, approach: proposal?.request?.approach ?? proposal?.approach }); }}
       onRestoreOriginal={() => { if (window.confirm("Put back the text from before Claude's rewrite? The current text becomes the earlier version.")) patchSection(section.id, { body: section.original!, original: section.body }); }} />;
   })();
@@ -369,7 +395,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       </span>
       {live && <button type="button" onClick={() => { if (section && m && !narrow) { setPlace("write"); setPanelOpen(true); setPanelMode("ask"); } else setActivity(true); }} className="hidden items-center gap-1.5 rounded-full bg-[#EFF6FF] px-2.5 py-1 text-[12px] font-medium text-[#1D4ED8] sm:flex dark:bg-[#172554] dark:text-[#93C5FD]"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> {live.job.label}</button>}
       {!live && p.busyElsewhere && <span className="hidden items-center gap-1.5 rounded-full bg-[#FFFBEB] px-2.5 py-1 text-[12px] font-medium text-[#92400E] sm:flex dark:bg-amber-500/15 dark:text-amber-300"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> Claude is busy in another project</span>}
-      {(thread.outputs.length > 0 || live) && <button type="button" onClick={() => setActivity(true)} aria-label={`Results: ${thread.outputs.length}${live ? `, ${live.job.label} running` : ""}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted sm:flex dark:text-[#CBD5E1]"><FileText className="h-4 w-4" /> Results <span className="text-[12px] text-[#94A3B8]">{thread.outputs.length}</span></button>}
+      {m?.libraryId && <Link to={`/library?open=${m.libraryId}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted md:flex dark:text-[#CBD5E1]" title="This project's book in your Library"><LibraryIcon className="h-4 w-4" /> In your Library</Link>}
+      {(thread.outputs.length > 0 || live || !section) && <button type="button" onClick={() => setActivity(true)} aria-label={`Results: ${thread.outputs.length}${live ? `, ${live.job.label} running` : ""}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted sm:flex dark:text-[#CBD5E1]"><FileText className="h-4 w-4" /> {section && m ? "Results" : "Ask Claude · Results"} <span className="text-[12px] text-[#94A3B8]">{thread.outputs.length}</span></button>}
       <button type="button" onClick={() => setPalette(true)} className="flex h-9 items-center gap-2 rounded-[8px] border border-[#E6E8ED] bg-white px-2.5 text-[13px] text-[#64748B] hover:border-[#CBD5E1] dark:border-white/10 dark:bg-white/5">
         <Search className="h-4 w-4" /><span className="hidden lg:inline">Tools and chapters</span><kbd className="rounded border border-[#E6E8ED] bg-[#F8FAFC] px-1.5 text-[11px] text-[#475569] dark:border-white/10 dark:bg-white/5">⌘K</kbd>
       </button>
@@ -427,13 +454,17 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[320px] p-0 sm:max-w-[320px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
 
       <Onboarding open={tour} onClose={() => setTour(false)} onGo={setPlace} />
+      {rebuilding && <BookDesignDialog sections={0} design={designBook} engineLabel={bookEngine?.label} onClose={() => setRebuilding(false)}
+        onApply={async (d, b) => { const next = designToManuscript(d, { title: thread.title === "Untitled project" ? "" : thread.title, sections: [], history: [] }, b); await replace(next); setApproach(b.approach); setRebuilding(false); setPlace("plan"); toast({ title: "The new book is laid out", description: `${d.sections.length} sections, each with its plan. Next: write them (chapters first).` }); }} />}
       <Sheet open={activity} onOpenChange={setActivity}>
         <SheetContent side="right" className="w-[360px] overflow-y-auto sm:max-w-[360px]">
-          <SheetTitle className="font-serif text-xl">Runs and results</SheetTitle>
+          <SheetTitle className="font-serif text-xl">Claude, runs and results</SheetTitle>
           <div className="mt-4 space-y-3">
             {live ? <LiveCard live={live} onStop={() => void backend.cancel(live.job)} /> : <p className="text-[13px] text-[#64748B]">Nothing is running.</p>}
-            {thread.outputs.length === 0 ? <p className="text-[13px] text-[#64748B]">No results yet.</p>
-              : <div className="space-y-1">{[...thread.outputs].sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt)).map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={(x) => { setActivity(false); setViewing(x); }} compact />)}</div>}
+            {section && m ? <p className="text-[12.5px] text-[#64748B]">The conversation with Claude is in Write → Claude panel → Ask.</p> : <ProjectChat thread={thread} busy={busy || !engineId} onSend={(message) => start("chat", { message })} onOpen={(x) => { setActivity(false); setViewing(x); }} />}
+            <p className="pt-2 text-[13px] font-medium">Results · {thread.outputs.length}</p>
+            {thread.outputs.length === 0 ? <p className="text-[13px] text-[#64748B]">What Claude writes appears here: summaries, rewritten books, references and reports.</p>
+              : <ResultsList outputs={thread.outputs} onOpen={(x) => { setActivity(false); setViewing(x); }} />}
           </div>
         </SheetContent>
       </Sheet>
@@ -579,5 +610,52 @@ function RecoveryBanner({ r, onRestore, onDiscard }: { r: import("./useManuscrip
         </div>
       </div>
     </section>
+  );
+}
+
+const NO_BOOK: Record<"plan" | "write" | "finish", { title: string; line: string }> = {
+  plan: { title: "Plan the book", line: "The plan is the book's contents: its parts, chapters, front and back matter, and the notes Claude follows. This project has no manuscript yet, so there is nothing to plan from. Start it one of these ways." },
+  write: { title: "Write", line: "Write works chapter by chapter on the manuscript. This project has no manuscript yet: start it first, then every chapter opens here." },
+  finish: { title: "Finish", line: "Finish turns the manuscript into the book: cover, interior, export, audiobook, translation, marketing, the AI Teacher. This project has no manuscript yet: start it first." },
+};
+
+/** Plan, Write and Finish before there is a manuscript: what the stage is for and every way to start. */
+function NoBookYet({ place, hasUploads, wizardChapters, busy, onSplit, onBlank, onBringWizard, onWizard, onRebuild, onSources }: {
+  place: "plan" | "write" | "finish"; hasUploads: boolean; wizardChapters: number; busy: boolean;
+  onSplit: () => void; onBlank: () => void; onBringWizard: () => void; onWizard: () => void; onRebuild?: () => void; onSources: () => void;
+}) {
+  const t = NO_BOOK[place];
+  const card = "rounded-[10px] border border-[#E6E8ED] bg-white p-4 dark:border-white/10 dark:bg-white/5";
+  return (
+    <section aria-label={t.title} className="mx-auto w-full max-w-[880px]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{t.title}</p>
+      <h1 className="mt-2 font-serif text-[30px] leading-tight">No manuscript yet</h1>
+      <p className="mt-2 max-w-[640px] text-[14px] text-[#475569] dark:text-[#CBD5E1]">{t.line}</p>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        {onRebuild && <div className={`${card} border-[#BFD3FF] bg-[#F5F8FF] dark:bg-[#1E3A8A]/20`}><p className="text-[14px] font-semibold">Rebuild as a professional book</p><p className="mt-1 text-[12.5px] text-[#64748B]">Tell Claude what the book must become; it designs it from your whole manuscript, you review the design, then it writes it.</p><Button size="sm" className="mt-3" disabled={busy} onClick={onRebuild}>Rebuild the book</Button></div>}
+        <div className={card}><p className="text-[14px] font-semibold">Split into chapters</p><p className="mt-1 text-[12.5px] text-[#64748B]">Your uploaded manuscript becomes the chapters, as written; then Claude works chapter by chapter.</p><Button size="sm" variant="outline" className="mt-3" disabled={busy || !hasUploads} onClick={onSplit}>Split into chapters</Button>{!hasUploads && <p className="mt-2 text-[12px] text-[#64748B]">Upload a manuscript in <button type="button" onClick={onSources} className="font-medium text-[#2563EB] hover:underline">Sources</button> first.</p>}</div>
+        <div className={card}><p className="text-[14px] font-semibold">Book wizard</p><p className="mt-1 text-[12.5px] text-[#64748B]">Quick, guided, restructure, improve or publishing-ready: outline, then write chapter by chapter, with your book's depth and voice.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" variant="outline" disabled={busy} onClick={onWizard}>Open the Book wizard</Button>{wizardChapters > 0 && <Button size="sm" variant="ghost" onClick={onBringWizard}>Bring in its {wizardChapters} chapters</Button>}</div></div>
+        <div className={card}><p className="text-[14px] font-semibold">A blank book</p><p className="mt-1 text-[12.5px] text-[#64748B]">Start with an empty first chapter and write it yourself or with Claude.</p><Button size="sm" variant="ghost" className="mt-3" disabled={busy} onClick={onBlank}>Start a blank book</Button></div>
+      </div>
+    </section>
+  );
+}
+
+/** The conversation with Claude for a project with no chapters yet (the Claude panel needs a chapter): as the Studio had it before the redesign. */
+function ProjectChat({ thread, busy, onSend, onOpen }: { thread: StudioThread; busy: boolean; onSend: (message: string) => void; onOpen: (p: string) => void }) {
+  const [message, setMessage] = useState("");
+  const send = () => { if (message.trim() && !busy) { onSend(message.trim()); setMessage(""); } };
+  return (
+    <div className="space-y-2">
+      <p className="text-[13px] font-medium">Ask Claude</p>
+      {thread.messages.length === 0 && <p className="text-[12.5px] text-[#64748B]">How it works: ask anything about your documents, for example “List every scripture quoted in chapter 3” or “Check the dates in chapter 5 and cite sources”. Claude reads your files, searches the web when needed, and remembers this project's conversation.</p>}
+      {thread.messages.slice(-20).map((x) => <MessageCard key={x.id} m={x} onOpen={onOpen} />)}
+      <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex items-end gap-2">
+        <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2} aria-label="Message to Claude" placeholder="Ask Claude about your book… (Ctrl + Enter to send)"
+          onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } }}
+          className="min-h-[60px] flex-1 rounded-[8px] border border-[#E6E8ED] bg-white px-2.5 py-2 text-[13px] dark:border-white/10 dark:bg-white/5" />
+        <Button type="submit" size="sm" disabled={!message.trim() || busy}>Send</Button>
+      </form>
+    </div>
   );
 }

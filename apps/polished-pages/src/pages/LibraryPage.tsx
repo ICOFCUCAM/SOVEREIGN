@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, setTemplateFlag, useTemplate as applyTemplate, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
+import { isAdmin, listDocuments, getDocument, deleteDocument, toggleFavorite, updateDocument, listVersions, getVersion, setShared, duplicateDocument, setTemplateFlag, useTemplate as applyTemplate, type DocSummary, type DocKind, type DocVersion } from "@/lib/documents";
 import { wankongListingsByDoc, publishAudiobookToWankong, WANKONG_STORE_URL, type WankongListing } from "@/lib/wankong";
 import { documentOrgMap, type DocOrgInfo } from "@/lib/organizations";
 import SpineMark from "@/components/brand/SpineMark";
@@ -61,6 +61,9 @@ const LibraryPage = () => {
   const [docs, setDocs] = useState<DocSummary[] | null>(null);
   const [opening, setOpening] = useState<string | null>(null);
   const [opened, setOpened] = useState<Opened | null>(null);
+  // The owner (an admin) can take any book into Claude Studio; customers never see it.
+  const [owner, setOwner] = useState(false);
+  useEffect(() => { isAdmin().then(setOwner).catch(() => setOwner(false)); }, []);
   const [openedId, setOpenedId] = useState<string | null>(null);
   const [savingDoc, setSavingDoc] = useState(false);
   const [versions, setVersions] = useState<DocVersion[] | null>(null);
@@ -302,6 +305,12 @@ const LibraryPage = () => {
                 )}
               </CardContent>
             </Card>
+          )}
+          {!bk.extra?.studioProject && owner && openedId && (
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm font-sans">
+              <span>Work on this book in Claude Studio: rebuild it, rewrite it, design the cover and interior, produce and publish it. The Studio project and this book stay linked, so saving there updates this book.</span>
+              <Button asChild variant="heroOutline" size="sm"><Link to={`/admin/claude?import=${encodeURIComponent(openedId)}`}>Work on it in Claude Studio</Link></Button>
+            </div>
           )}
           {bk.extra?.studioProject && (
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm font-sans">

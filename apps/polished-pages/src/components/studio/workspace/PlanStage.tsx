@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowDown, ArrowUp, ChevronDown, History, Layers3, ListTree, Loader2, PenLine, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BookOpen, ChevronDown, History, Layers3, ListTree, Loader2, PenLine, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +25,7 @@ const GROUPS = [{ id: "front", label: "Front matter" }, { id: "body", label: "Ch
 
 // Plan (design spec §2): the book's contents, with the plan and notes for each
 // chapter, its order, Claude's outline, and turning the book into a series.
-export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore }: {
+export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard }: {
   m: Manuscript; onUpdate: (m: Manuscript) => void; onOpen: (id: string) => void; engine: BookEngine | null; approach: ApproachId; hasUploads: boolean;
   onWriteAll: (ids: string[]) => void; queue: { done: number; total: number } | null; onSeries: () => void; busy: boolean;
   /** Finish joins every chapter into one book. */
@@ -35,6 +35,8 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
   onApplyDesign: (d: BookDesign, b: DesignBriefInput) => void;
   /** Puts back a manuscript a rebuild replaced. */
   onRestore: (index: number) => void;
+  /** Opens the Book wizard inside this project. */
+  onWizard?: () => void;
 }) {
   const { toast } = useToast();
   const [open, setOpen] = useState<string | null>(null);
@@ -182,6 +184,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
         </div>
 
         <div className="border-t border-[#E6E8ED] pt-6 dark:border-white/10">
+          {onWizard && <Button variant="outline" className="mb-2 w-full" onClick={onWizard} disabled={busy}><BookOpen className="h-4 w-4" /> Book wizard</Button>}
           <Button variant="outline" className="w-full" onClick={onSeries} disabled={busy}><Layers3 className="h-4 w-4" /> Turn into a series</Button>
         </div>
       </aside>

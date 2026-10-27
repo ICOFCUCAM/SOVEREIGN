@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import Markdown from "@/components/studio/Markdown";
 import { createSeriesInLibrary, readManifest, startPlannedBooks } from "@/lib/series-from-plan";
 import type { StudioBackend } from "@/lib/studio-backend";
-import { saveDocument } from "@/lib/documents";
+import { saveDocument, updateDocument } from "@/lib/documents";
 import { isBookResult, outputLabel, titleOf, type ResultHistory, type RunOptions, type StudioAction, type StudioJob, type StudioThread } from "@/lib/claude-studio";
 import { GRADIENT } from "./ui";
 import EditorialCheck from "./EditorialCheck";
@@ -161,6 +161,29 @@ export function LiveCard({ live, onStop }: { live: Live; onStop: () => void }) {
   );
 }
 
+// Results: main files first; by-products folded into named groups (as the Studio listed them before the redesign).
+const RESULT_GROUPS: { prefix: string; label: string }[] = [
+  { prefix: "rewrite/", label: "Rewritten chapters" }, { prefix: "volumes/", label: "Series volumes" }, { prefix: "planned/", label: "Planned books" },
+  { prefix: "book/", label: "Book wizard" }, { prefix: "translation/", label: "Translated chapters" }, { prefix: "sections/", label: "Manuscript suggestions" },
+];
+/** The project's results, newest first, with chapter files, volumes, wizard files and suggestions grouped. */
+export function ResultsList({ outputs, onOpen }: { outputs: StudioThread["outputs"]; onOpen: (p: string) => void }) {
+  const sorted = [...outputs].sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt));
+  const grouped = (p: string) => p === "series.json" || RESULT_GROUPS.some((g) => p.startsWith(g.prefix));
+  const groups = RESULT_GROUPS.map((g) => ({ ...g, items: outputs.filter((o) => o.path.startsWith(g.prefix)).sort((a, b) => a.path.localeCompare(b.path)) })).filter((g) => g.items.length);
+  return (
+    <div className="space-y-1">
+      {sorted.filter((o) => !grouped(o.path)).map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={onOpen} compact />)}
+      {groups.map((g) => (
+        <details key={g.prefix} className="rounded-xl border border-border px-2 py-1.5">
+          <summary className="cursor-pointer text-[13px] font-medium">{g.label} · {g.items.length}</summary>
+          <div className="mt-1.5 space-y-1">{g.items.map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={onOpen} compact />)}</div>
+        </details>
+      ))}
+    </div>
+  );
+}
+
 export function OutputRow({ path, bytes, at, onOpen, compact }: { path: string; bytes: number; at: string; onOpen: (p: string) => void; compact?: boolean }) {
   return (
     <button onClick={() => onOpen(path)} className={`flex w-full items-center gap-3 rounded-xl border border-border text-left transition hover:border-primary/40 hover:bg-muted/40 ${compact ? "px-2 py-1.5" : "px-3 py-2.5"}`}>
@@ -277,6 +300,13 @@ const JSON_NOTE: Record<string, string> = {
   "book-design.json": "The design of the rebuilt book.",
 };
 
+/** Which Library book each saved result became, on this device, so a second save updates it. */
+const libraryCopy = {
+  key: (t: string, p: string) => `studio.library.${t}.${p}`,
+  get(t: string, p: string): string | null { try { return localStorage.getItem(this.key(t, p)); } catch { return null; } },
+  set(t: string, p: string, id: string) { try { localStorage.setItem(this.key(t, p), id); } catch { /* storage blocked */ } },
+};
+
 export function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsTarget, check, onReview, reviewAt, onUseAsManuscript, onUseDesign }: {
   backend: StudioBackend; threadId: string; path: string; projectTitle: string; onClose: () => void;
   /** Rewrite this result, or correct it with the editorial check's findings filled in. */
@@ -332,7 +362,13 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
     try {
       // The Library copy says whether it is the approved book or a working draft, and which version.
       const state = versioned ? { status: approvedNow ? "approved" : "draft", version: latest?.n ?? null, approvedAt: approvedNow ? history!.approval!.at : null, approvedBy: approvedNow ? history!.approval!.by : null } : {};
-      const id = await saveDocument({ kind: "book", title: bookTitle, payload: { markdown: text, title: bookTitle, ...state, studioProject: threadId }, preview: text.replace(/^#.*$/m, "").trim().slice(0, 160) });
+      // Saving the same result again updates its Library book instead of adding another copy.
+      const payload = { markdown: text, title: bookTitle, ...state, studioProject: threadId };
+      const preview = text.replace(/^#.*$/m, "").trim().slice(0, 160);
+      const known = libraryCopy.get(threadId, path);
+      let id = known;
+      if (known) { try { await updateDocument(known, payload, preview); } catch { id = null; } }
+      if (!id) { id = await saveDocument({ kind: "book", title: bookTitle, payload, preview }); libraryCopy.set(threadId, path, id); }
       setSavedId(id);
       toast({ title: "Saved to your Library", description: versioned ? (approvedNow ? `“${bookTitle}”, version ${latest?.n}, approved for publication.` : `“${bookTitle}” is saved as a working draft (not approved for publication).`) : `“${bookTitle}” is ready for editing, export and publishing.` });
     } catch (e) { toast({ title: "Could not save", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
@@ -419,7 +455,7 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
             <Button asChild size="sm" variant="outline" className="rounded-full"><Link to="/publishing"><Rocket className="h-4 w-4" /> Publish</Link></Button>
           </>) : (<>
             {versioned && edited && <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || savingVersion} onClick={() => text && saveVersion(text, op)}>{savingVersion ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save as version {(latest?.n ?? 0) + 1}</Button>}
-            <Button size="sm" variant={versioned && edited ? "outline" : "default"} className={`rounded-full ${versioned && edited ? "" : GRADIENT}`} disabled={!text || saving || (versioned && edited)} title={versioned && edited ? "Save your edits as a version first" : undefined} onClick={save}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} {versioned ? (approvedNow ? "Save to Library (approved)" : "Save draft to Library") : "Save to Library as a book"}</Button>
+            <Button size="sm" variant={versioned && edited ? "outline" : "default"} className={`rounded-full ${versioned && edited ? "" : GRADIENT}`} disabled={!text || saving || (versioned && edited)} title={versioned && edited ? "Save your edits as a version first" : undefined} onClick={save}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} {libraryCopy.get(threadId, path) ? (versioned ? (approvedNow ? "Update in Library (approved)" : "Update the draft in Library") : "Update in Library") : versioned ? (approvedNow ? "Save to Library (approved)" : "Save draft to Library") : "Save to Library as a book"}</Button>
             {versioned && !edited && latest && !approvedNow && <Button size="sm" variant="outline" className="rounded-full" onClick={() => setApproving(true)} aria-label="Approve for publication"><BadgeCheck className="h-4 w-4" /> Approve…</Button>}
             {WHOLE_BOOK(path) && onUseAsManuscript && <Button size="sm" variant="outline" className="rounded-full" disabled={!text || edited} title={edited ? "Save your edits first" : "Make this the book's manuscript, so Finish works on it"} aria-label="Make this the book's manuscript" onClick={() => { if (text && window.confirm("Make this the book's manuscript?\n\nIts chapters replace the manuscript's, so the cover, interior design, production, audiobook, translation and AI Teacher in Finish work on it. The current manuscript is kept and can be restored from Plan.")) { onUseAsManuscript(text, outputLabel(path)); onClose(); } }}><BookOpen className="h-4 w-4" /> Use as the manuscript</Button>}
           </>)}

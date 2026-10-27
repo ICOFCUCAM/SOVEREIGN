@@ -225,4 +225,49 @@ describe("Claude Studio workspace", () => {
     fireEvent.click(within(start).getByRole("button", { name: /Rewrite the whole book/ }));
     expect(await screen.findByRole("dialog", { name: /Rewrite/ })).toBeTruthy();
   });
+
+  it("shows Plan, Write and Finish as their own pages before there is a manuscript, with every way to start, and opens the Book wizard", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: () => Promise<null> }).manuscript = async () => null;
+    localStorage.setItem("studio.place", "plan");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const plan = await screen.findByRole("region", { name: "Plan the book" });
+    expect(within(plan).getByText("No manuscript yet")).toBeTruthy();
+    expect(within(plan).getByRole("button", { name: "Rebuild the book" })).toBeTruthy();
+    expect(within(plan).getByRole("button", { name: "Split into chapters" })).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "Start the book" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^Write/ }));
+    expect(await screen.findByRole("region", { name: "Write" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /^Finish/ }));
+    const finish = await screen.findByRole("region", { name: "Finish" });
+    fireEvent.click(within(finish).getByRole("button", { name: "Open the Book wizard" }));
+    expect(await screen.findByText(/Creation Mode/, {}, { timeout: 10_000 })).toBeTruthy();
+    expect(screen.getByText(/Restructure/)).toBeTruthy();
+  }, 20_000);
+
+  it("keeps what the Studio had before the redesign: Add below, grouped results, and the conversation for a project with no chapters", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: () => Promise<null> }).manuscript = async () => null;
+    const t2 = { ...thread, outputs: [{ path: "rewrite.md", bytes: 10, modifiedAt: "2026-10-27T10:00:00Z" }, { path: "rewrite/01-one.md", bytes: 5, modifiedAt: "2026-10-27T09:00:00Z" }, { path: "sections/c1.md", bytes: 5, modifiedAt: "2026-10-27T09:00:00Z" }], messages: [] } as unknown as StudioThread;
+    (f.backend as unknown as { thread: () => Promise<unknown> }).thread = async () => ({ thread: t2, job: null });
+    localStorage.setItem("studio.place", "sources");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: /^Results: 3/ }));
+    expect(await screen.findByText(/How it works: ask anything/)).toBeTruthy();
+    expect(screen.getByLabelText("Message to Claude")).toBeTruthy();
+    expect(screen.getByText("Rewritten chapters · 1")).toBeTruthy();
+    expect(screen.getByText("Manuscript suggestions · 1")).toBeTruthy();
+  });
+
+  it("adds Claude's text below the section's own with Add below", async () => {
+    const f = fake();
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const panel = await screen.findByRole("complementary", { name: "Claude" });
+    fireEvent.click(within(panel).getByRole("radio", { name: /My book \+ cited sources/ }));
+    fireEvent.click(within(panel).getByRole("button", { name: /Rewrite with my idea/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Review the changes" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add below" }));
+    await waitFor(() => expect(f.saved().sections[0].body).toBe("God's people lived among nations.\n\nThese spirits had names.\n\nYahuah's people lived among many nations.\n\nThese spirits had names."), { timeout: 3000 });
+  }, 15_000);
 });
+
