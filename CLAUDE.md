@@ -4,7 +4,8 @@
 The owner has adopted these documents as binding. Read the relevant one before changing the area it covers, follow it exactly, and keep its checklist truthful (tick an item only when it is implemented and tested). Deviations need the owner's explicit approval, recorded in the document.
 
 - **Claude Studio** (owner-only workspace, `apps/polished-pages/src/pages/ClaudeStudio.tsx`, `src/components/studio/**`, `services/polished-claude-runner`): `apps/polished-pages/docs/claude-studio/DESIGN-SPEC.md`
-- **AI Teacher** (customer-facing book tutor): `apps/polished-pages/docs/ai-teacher/BLUEPRINT.md`
+- **AI Teacher** (customer-facing book tutor): `apps/polished-pages/docs/ai-teacher/BLUEPRINT.md` (content pipeline: `src/lib/teacher/`; course tables: `supabase/migrations/20261027100000_teacher_course_model.sql`)
+- Studio screenshots for review: `apps/polished-pages/docs/claude-studio/SCREENSHOTS.md`, taken from the dev-only preview at `/__studio` (`npx vite --host 127.0.0.1`; `?engine=api` previews API runs). Re-take them when a screen changes.
 
 ## Rules that always apply
 - The Claude Code runner (`services/polished-claude-runner`) is for the owner only. Never expose it to customers, never make it reachable through a customer-facing parameter, never use it as a fallback for a customer feature. Never pass `ANTHROPIC_API_KEY` to its child process.
