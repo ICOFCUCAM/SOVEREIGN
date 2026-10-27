@@ -309,7 +309,9 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       }
       if (sub === "files" && req.method === "POST" && !rest.length) {
         const name = url.searchParams.get("name");
-        const k = url.searchParams.get("kind") === "text" ? "text" : "original";
+        // "page": a page image the Studio rendered from a PDF in the browser (unlocked with the owner's password), for Read scanned pages.
+        const kk = url.searchParams.get("kind");
+        const k = kk === "text" ? "text" : kk === "page" ? "page" : "original";
         if (!name) return fail(res, 400, "Missing file name.");
         const buf = await body(req, cfg.maxUploadBytes);
         if (!buf.length) return fail(res, 400, "The file is empty.");
@@ -330,6 +332,13 @@ export function createServer(cfg = loadConfig(), deps = {}) {
           const b = JSON.parse((await body(req, 30 * 1024 * 1024)).toString("utf8") || "{}");
           return send(res, 200, { manuscript: await store.writeManuscript(id, b.manuscript) });
         }
+      }
+      // The uploaded file itself, so the Studio can open a password-protected PDF in the owner's browser.
+      if (sub === "files" && req.method === "GET" && rest.length === 1) {
+        const raw = await store.readSourceBytes(id, safeName(rest[0]));
+        if (!raw) return fail(res, 404, "File not found.");
+        res.writeHead(200, { "Content-Type": "application/octet-stream", "Content-Length": raw.length, "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" });
+        return res.end(raw);
       }
       if (sub === "sources" && req.method === "GET" && rest.length === 1) {
         const text = await store.readSource(id, safeName(rest[0]));

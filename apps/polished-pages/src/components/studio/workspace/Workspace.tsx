@@ -27,6 +27,7 @@ import StudioPalette from "./StudioPalette";
 import SourcesStage from "./SourcesStage";
 import PlanStage from "./PlanStage";
 import BookDesignDialog from "./BookDesignDialog";
+import OpenPdfDialog from "./OpenPdfDialog";
 // The Book Creator wizard, run inside the project on the engine in use (loaded on demand).
 const BookCreator = lazy(() => import("@/pages/BookCreator"));
 import FinishStage from "./FinishStage";
@@ -120,6 +121,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [activity, setActivity] = useState(false);
   // Rebuild started before the book has a manuscript (from Plan's empty state).
   const [rebuilding, setRebuilding] = useState(false);
+  // A PDF opened in the browser (password-protected or scanned), §18b.
+  const [pdfFile, setPdfFile] = useState<StudioThread["files"][number] | null>(null);
   const lastRun = useRef<{ action: StudioAction; options: RunOptions } | null>(null);
   const abort = useRef<AbortController | null>(null);
   const rulesRef = useRef<HTMLTextAreaElement>(null);
@@ -340,7 +343,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         onRebuild={bookEngine && hasUploads ? () => setRebuilding(true) : undefined} />
     );
     if (place === "sources" || m === null) {
-      return <SourcesStage thread={thread} m={m} uploading={uploading} onUpload={upload} onRemove={removeFile} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)} onWizard={() => setWizardOpen(true)}
+      return <SourcesStage thread={thread} m={m} uploading={uploading} onUpload={upload} onRemove={removeFile} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)} onWizard={() => setWizardOpen(true)} onOpenPdf={backend === runnerBackend ? setPdfFile : undefined}
         onStart={startBook} wizardChapters={wizard?.chapters?.length ?? 0} onUpdate={update} onVoice={() => setPlace("voice")} busy={busy} rulesRef={rulesRef} readText={readSource} />;
     }
     if (place === "plan") {
@@ -464,6 +467,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[320px] p-0 sm:max-w-[320px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
 
       <Onboarding open={tour} onClose={() => setTour(false)} onGo={setPlace} />
+      {pdfFile && <OpenPdfDialog threadId={id} file={pdfFile} onClose={() => setPdfFile(null)} onChanged={() => { reload().catch(() => {}); p.onChanged(); }} onReadPages={() => void start("tool", { tool: "ocr" } as RunOptions)} />}
       {rebuilding && <BookDesignDialog sections={0} design={designBook} engineLabel={bookEngine?.label} onClose={() => setRebuilding(false)}
         onApply={async (d, b) => { const next = designToManuscript(d, { title: thread.title === "Untitled project" ? "" : thread.title, sections: [], history: [] }, b); await replace(next); setApproach(b.approach); setRebuilding(false); setPlace("plan"); toast({ title: "The new book is laid out", description: `${d.sections.length} sections, each with its plan. Next: write them (chapters first).` }); }} />}
       <Sheet open={activity} onOpenChange={setActivity}>
