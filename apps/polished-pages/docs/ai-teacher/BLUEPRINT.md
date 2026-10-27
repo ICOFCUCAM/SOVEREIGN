@@ -52,6 +52,53 @@ Core relationships (introduced incrementally; the existing `documents` table sta
 
 Validation order: *Demonology* as the first reference implementation (author mode), then the same system with a private university lecture pack (course mode), before any larger institutional deployment. A single definitive product and technical specification covering the modes, ingestion, the Teacher Runtime, lessons/assessment/mastery, instructor and institution administration, permissions/privacy/security/metering, the React and Supabase plan (migrations, edge functions) and evaluation/rollout may supersede detail in this file once the owner adopts it.
 
+## 0.2 University-grade architecture (adopted)
+
+Polished Pages Academic Tutor is a new capability inside the **Educational Studio**: an institution-controlled AI teaching and learning environment connecting approved materials, course objectives, teaching activities, assessments, progress and instructor oversight — not a chatbot. The single-book teacher is its first teaching mode. It is an AI teaching layer that works on its own for a course and later integrates with an institution's LMS; it is **not** a replacement LMS. Study Khanmigo (guided learning), NotebookLM (grounded answers), Moodle and Canvas (course organisation, roles, records).
+
+**Principle:** the knowledge being taught, the teaching policy, the assessment policy and the institution's administration are **separate layers**, not one system prompt. A professor's terminology never overrides university privacy rules; a student's request never overrides exam settings; a book's theological position is taught faithfully without being presented as the university's position.
+
+### Existing components
+| Component | Decision | Upgrade |
+|---|---|---|
+| Book-specific teacher | Keep | One mode inside a course-level tutor |
+| Author Knowledge Base | Upgrade | Separate author preferences, course rules, approved terminology, institutional policies |
+| Markdown documents | Keep initially | Structured documents, versioning, reliable source locations |
+| Chapter splitter | Upgrade | Chapters, headings, learning objectives, figures, tables, footnotes, references |
+| Vector retrieval | Upgrade | Hybrid search, evidence validation, citations, retrieval evaluation |
+| Lesson generator | Upgrade | Aligned to course learning outcomes and approved readings |
+| Quiz/exam generator | Upgrade | Question banks, instructor approval, rubrics, assessment controls |
+| TTS narration | Keep | Accessible read-along; optional spoken tutoring later |
+| Progress tracking | Upgrade | Concepts, outcomes, attempts, review schedules |
+| Plan gating and metering | Keep | Institution, department, course and seat entitlements |
+| Claude API edge functions | Keep | A central Teacher Runtime with model routing and validated outputs |
+| Owner-only Claude Code tool | Keep separate | Never exposed to customers, never a customer fallback |
+
+### Six subsystems
+1. **Institution and governance**: institutions, departments; roles (administrator, instructor, teaching assistant, student); enrolment and permissions; course AI rules and approved source collections; retention and deletion; usage budgets and quotas; audit logs for consequential operations; assessment and academic-integrity policies. Configuring a course never grants access to every student's private conversations.
+2. **Academic Knowledge System**: textbooks and monographs, lecture notes and slides, papers and bibliographies, OCR scans, instructor notes, approved references, learning objectives and course outlines, editions and versioned reading lists — each with provenance, access rights, version and location. **The course's source policy decides what the tutor may use; the AI never decides on its own to search the web.**
+3. **AI Teacher Runtime** (one server-side orchestration layer, reusable across studios where appropriate): authenticate/authorise → resolve course, student, mode and policies → retrieve permitted evidence → structured context → model call through the server-side API → validate citations, terminology, structure → record usage and evaluation metadata → respond and update the learning record. **Model-independent** (Claude default).
+4. **Learning Studio**: modes **Learn** (lessons, objectives, concepts, worked passages, summaries, checks) · **Ask** (grounded, clickable citations, honest uncertainty) · **Practise** (retrieval practice, spaced repetition, quizzes) · **Prepare for assessment** (revision plans, practice exams aligned to approved criteria).
+5. **Assessment Engine**: practice and formal assessment kept separate. In formal assessment, instructor rules decide whether AI help is allowed; the tutor never gives answers in a restricted exam on request. Start with practice quizzes and approved question banks; advanced grading only after validation and with human review for consequential decisions.
+6. **Learning records and instructor dashboard**: outcomes students struggle with, misunderstood concepts, high-failure questions, lessons needing revision, students who may need support, AI cost per course and student. **Aggregated analytics by default**; individual activity only for a defined educational purpose under institutional permissions.
+
+### Platform layers
+Frontend: Vite/React/TS with role-specific views and accessible learning components. Auth: Supabase Auth + institution membership, enrolment, role-based authorisation. Database: Postgres with institution, course, source-version, learning-outcome and assessment schemas. Retrieval: pgvector + Postgres full-text, fusion, source spans, evaluation. Runtime: Deno edge functions with orchestration in reusable server modules. **Durable job worker** (retries, idempotency, progress, failure recovery) once ingestion, OCR, indexing or audio exceed edge-function limits. Storage: private buckets, policies, signed access. Usage: institution budgets, course quotas, student limits. Monitoring: request IDs, latency, model cost, retrieval quality, validation failures, privacy-aware logging. Integrations: LMS (LTI 1.3, learning-record interoperability) when a real pilot needs it — not a prerequisite.
+
+### Logical schema (combine some early; keep separate from the start: memberships, source versions, assessments, access-controlled student records)
+`institutions` · `institution_memberships` · `courses` · `course_enrollments` · `course_sources` · `source_versions` · `source_chunks` · `learning_outcomes` · `teacher_lessons` · `teacher_concepts` · `assessment_items` · `assessment_attempts` · `concept_mastery` · `teacher_conversations` · `ai_usage_events` · `audit_events`.
+**Authorisation is enforced in the database (RLS) and the server runtime, never only by hiding controls in React. RLS is tested against cross-institution and cross-course access.**
+
+### University readiness (before any production pilot)
+1. Institutional control (no access to another institution's records through a guessed ID or modified request). 2. Academic traceability (answers link to assigned sources; explicit claims vs explanation vs inference; authors and instructors can review material used for lessons and assessments). 3. Assessment integrity (instructor rules; AI grades validated, explainable, human-reviewed; no autonomous consequential decisions). 4. Privacy and accessibility (retention, deletion, disclosures, instructor permissions, incident response, model-provider data handling; keyboard, screen readers, captions, readable text; review applicable requirements). 5. Reliability and evaluation (retrieval accuracy, citation correctness, unsupported-answer rate, terminology compliance, latency, cost, learning outcomes; an evaluation set per supported configuration).
+
+### Rollout phases
+- **Phase 1 — Book Tutor** (start here): one book, one author, one learner or small group; verified retrieval and citations; approved lessons and quizzes; Ask the book, concept practice, progress; author terminology and teaching controls; cost limits; evaluation. (= build steps 1–6 in §9.)
+- **Phase 2 — Course Tutor**: several approved materials and an instructor; learning outcomes and course policies; instructor dashboard and question-bank approval; assignments, study plans, aggregated progress.
+- **Phase 3 — Institutional Tutor**: departments and delegated administration; LMS integration and rosters; institution budgets and audit; retention, governance, operational reporting.
+- **Phase 4 — Academic Learning Platform**: curriculum and course authoring; advanced assessment; research and study groups; cross-course concept maps and institution-wide analytics.
+The first pilot uses one real book and one instructor who reviews answers and assessments, and measures learning (students explain the material more accurately), not only satisfaction.
+
 ## 1. Teaching methods
 
 ### 1a. Lesson structure (eight parts, author-approved before students see it)
@@ -210,5 +257,8 @@ Later (not before the core works): real-time voice, complex adaptive algorithms,
 - [ ] Structured author rules with scope and precedence; course rules layered with conflict detection
 - [ ] Course mode with a private lecture pack validated after Demonology
 - [ ] Institution mode: courses, users, policies, budgets per department
+- [ ] Phase 2 Course Tutor · Phase 3 Institutional Tutor · Phase 4 Academic Learning Platform (§0.2)
+- [ ] RLS tests for cross-institution and cross-course access
+- [ ] Durable job worker for ingestion, OCR, indexing, audio
 - [ ] Privacy: retention, deletion, access separation for groups
 - [ ] Per-book cost accounting and usage alerts
