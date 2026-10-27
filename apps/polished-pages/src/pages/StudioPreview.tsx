@@ -36,15 +36,53 @@ const COVER = `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://
 <text x="300" y="830" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="#C9A55B" letter-spacing="4">AUTHOR NAME</text></svg>`)}`;
 const REWRITE = "### A world full of spirits\n\nThe people of the ancient world did not doubt that spirits were real. Yahuah's people lived among nations whose texts are full of them, and the language of those texts left its mark on Israel's own.\n\nIn Babylon, priests composed long incantations against the spirits believed to bring fever and plague, and guarded doorways with protective images (Black & Green, 1992).\n\n### Names and boundaries\n\nThese spirits had names and distinct roles. They were feared, warded off and bargained with, but not worshipped like the great gods.";
 
+// A whole-book rewrite with the defects the owner's October 2026 review found, to show the editorial check (DESIGN-SPEC.md §15).
+const SAMPLE_REWRITE = `# Demonology I
+
+## Course description
+
+This course forms part of a bachelor's programme in theology. It covers angelology, demonology and exorcism, and ends with the role of angels in Christian spirituality. Learning outcomes are listed below.
+
+### Course schedule
+
+1. The creation of angels
+2. Angelic hierarchies
+3. Angels in salvation history
+4. The Incarnation and the angels
+6. Spirits in the Ancient Near East
+
+## Part II Demonology
+
+### 19. Spirits in the Ancient Near East
+
+The people of the ancient world did not doubt that spirits were real. The origin of the Devil and his angels is clear from Scripture. Yahuah's people lived among nations whose texts are full of them.
+
+### 20. Sift
+
+In Babylon the priests wrote long incantations against the spirits that brought fever and plague [citation needed]. The Holy Ghost protects the believer.
+
+### 20. Devour
+
+The adversary seeks whom he may devour. The Holy Spirit is the believer's guard. The origin and identity of demons cannot be known for certain.
+
+### 21. Testimony
+
+In a dream I saw many people in chains, and many of them were Christians in church. Wherever I am, demons must pack and go out IN THE NAME OF Yahusha.
+
+Some teach that demons cause homosexual tendencies in certain people.
+
+## References
+`;
+
 function previewBackend(): StudioBackend {
   let m: Manuscript = JSON.parse(JSON.stringify(SAMPLE));
   const thread: StudioThread = {
     id: "demo", title: "Demonology", createdAt: "", updatedAt: "",
     files: [{ name: "DEMONOLOGY.pdf", storedAs: "DEMONOLOGY.pdf", kind: "original", bytes: 2_400_000, at: "2026-10-20T09:12:00Z" }, { name: "DEMONOLOGY.txt", storedAs: "DEMONOLOGY.txt", kind: "text", bytes: 600_000, at: "2026-10-20T09:13:00Z" }, { name: "Demonology notes.docx", storedAs: "Demonology notes.docx", kind: "original", bytes: 84_000, at: "2026-10-24T16:40:00Z" }],
-    outputs: [{ path: "summary.md", bytes: 4200, modifiedAt: new Date().toISOString() }, { path: "quotes-check.md", bytes: 9800, modifiedAt: new Date().toISOString() }],
+    outputs: [{ path: "rewrite.md", bytes: 3100, modifiedAt: new Date().toISOString() }, { path: "summary.md", bytes: 4200, modifiedAt: new Date().toISOString() }, { path: "quotes-check.md", bytes: 9800, modifiedAt: new Date().toISOString() }],
     messages: [{ id: "m1", role: "user", action: "chat", text: "List every scripture quoted in chapter 3.", at: "" }, { id: "m2", role: "assistant", action: "chat", text: "Saved as **Scripture in chapter 3**: 23 references, with the page of each.", at: "", engine: "claude-code", status: "done" }],
   } as unknown as StudioThread;
-  const out: Record<string, string> = { "summary.md": "# Demonology — Summary\n\nA faithful overview of the book.", "quotes-check.md": "# Quotations check\n\nAll quotations verified." };
+  const out: Record<string, string> = { "rewrite.md": SAMPLE_REWRITE, "summary.md": "# Demonology — Summary\n\nA faithful overview of the book.", "quotes-check.md": "# Quotations check\n\nAll quotations verified." };
   const runs: RunOptions[] = [];
   return {
     storage: "browser",

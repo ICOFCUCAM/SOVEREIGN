@@ -144,3 +144,24 @@ Unsaved changes found on this device: where the work is, both copies compared, R
 ### Sources phone
 
 ![Sources at phone width](screenshots/29-sources-phone.webp)
+
+### Editorial check (§15)
+A whole-book rewrite in the result viewer with the editorial check: what blocks publishing, the comparison with the original (scripture, quotations, qualifications, copied sentences, length), and each finding by area. The sample rewrite carries the defects from the owner's October 2026 review.
+
+![Editorial check on a rewrite (§15)](screenshots/30-rewrite-editorial-check.webp)
+
+Further down: references without entries, capitals for emphasis, certainty that changes on one subject, testimony, Holy Ghost / Holy Spirit, a sensitive claim for the author.
+
+![Editorial check details (§15)](screenshots/31-rewrite-check-details.webp)
+
+Targeted correction (§15e): the findings, editable, sent as a correction rather than a new rewrite.
+
+![Targeted correction (§15)](screenshots/32-targeted-correction.webp)
+
+Finish · Editorial check tab (§15e): the publication gate for every format; each place opens its section.
+
+![Finish editorial check (§15)](screenshots/33-finish-editorial-check.webp)
+
+A section suggestion checked against the author's text before it is accepted (§15e).
+
+![Suggestion checks (§15)](screenshots/34-suggestion-checks.webp)

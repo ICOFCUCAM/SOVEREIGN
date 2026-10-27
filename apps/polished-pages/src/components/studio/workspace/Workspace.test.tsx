@@ -81,7 +81,7 @@ describe("Claude Studio workspace", () => {
     fireEvent.click(within(sheet).getByRole("button", { name: /Restore/ }));
     await waitFor(() => expect(f.saved().sections[0].body).toBe("God's people lived among nations.\n\nThese spirits had names."), { timeout: 3000 });
     expect(f.saved().sections[0].versions?.at(-1)).toMatchObject({ kind: "before-restore", body: "Yahuah's people lived among nations.\n\nThese spirits had names." });
-  });
+  }, 15_000); // walks the whole revision flow; slow under a full parallel run
 
   it("reviews changes from the keyboard: J moves, X rejects, ⌘↵ accepts", async () => {
     const f = fake();

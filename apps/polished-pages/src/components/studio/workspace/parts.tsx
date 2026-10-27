@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle, ArrowLeft, BookOpen, Check, Copy, Download, FileText, Globe, Languages, Layers, Library, Loader2, MessageSquare,
-  PenLine, Plus, Quote, Rocket, ScrollText, Search, ShieldAlert, Sparkles, Square, Wand2, Wrench,
+  PenLine, Plus, Quote, Rocket, ScanSearch, ScrollText, Search, ShieldAlert, Sparkles, Square, Wand2, Wrench,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,8 @@ import type { StudioBackend } from "@/lib/studio-backend";
 import { saveDocument } from "@/lib/documents";
 import { outputLabel, titleOf, type RunOptions, type StudioAction, type StudioJob, type StudioThread } from "@/lib/claude-studio";
 import { GRADIENT } from "./ui";
+import EditorialCheck from "./EditorialCheck";
+import { auditBook } from "@/lib/editorial-audit";
 
 // The parts of Claude Studio that every view shares: the dialogs for the
 // whole-book actions, the result viewer (edit before saving), the
@@ -58,7 +60,9 @@ export const ACTIONS: { id: DialogAction; title: string; line: string; icon: typ
 ];
 
 let pendingTarget: string | null = null;
-export const setPendingTarget = (p: string | null) => { pendingTarget = p; };
+let pendingOptions: Partial<RunOptions> | null = null;
+/** Opens the next action dialog on a result, optionally filled in (a targeted correction from the editorial check). */
+export const setPendingTarget = (p: string | null, o: Partial<RunOptions> | null = null) => { pendingTarget = p; pendingOptions = o; };
 
 export function SeriesActions({ backend, threadId, onDone }: { backend: StudioBackend; threadId: string; onDone: () => void }) {
   const { toast } = useToast();
@@ -165,8 +169,10 @@ export function OutputRow({ path, bytes, at, onOpen, compact }: { path: string; 
 
 
 export function ActionDialog({ action, thread, styles, onClose, onRun }: { action: DialogAction; thread: StudioThread; styles: string[]; onClose: () => void; onRun: (o: RunOptions) => void }) {
-  const [target, setTarget] = useState<string>(() => { const p = pendingTarget; setPendingTarget(null); return p ?? (thread.files.length ? "source" : thread.outputs[0]?.path ?? "source"); });
-  const [o, setO] = useState<RunOptions>({ length: action === "rewrite" ? "same" : "standard", keepStructure: true, keepVoice: true, addCitations: false, citationStyle: styles[0] ?? "APA 7", scope: "claims" });
+  const [initial] = useState(() => { const t = pendingTarget, x = pendingOptions; setPendingTarget(null); return { target: t, options: x }; });
+  const [target, setTarget] = useState<string>(initial.target ?? (thread.files.length ? "source" : thread.outputs[0]?.path ?? "source"));
+  const [o, setO] = useState<RunOptions>({ length: action === "rewrite" ? "same" : "standard", keepStructure: true, keepVoice: true, addCitations: false, citationStyle: styles[0] ?? "APA 7", scope: "claims", ...(initial.options ?? {}) });
+  const correcting = action === "rewrite" && Boolean(o.correct);
   const [sending, setSending] = useState(false);
   const set = (p: Partial<RunOptions>) => setO((x) => ({ ...x, ...p }));
   const meta = ACTIONS.find((a) => a.id === action)!;
@@ -177,8 +183,8 @@ export function ActionDialog({ action, thread, styles, onClose, onRun }: { actio
     <Dialog open onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 font-serif text-2xl"><meta.icon className="h-5 w-5 text-primary" /> {meta.title}</DialogTitle>
-          <DialogDescription>{action === "rewrite" ? "Claude works chapter by chapter and re-reads your instructions before each one, so they hold across the whole book." : action === "cite" ? "Claude searches the web, opens the sources and cites only what it actually found. Anything unsupported is marked [citation needed]." : "A faithful summary of what the document says, with nothing added."}</DialogDescription>
+          <DialogTitle className="flex items-center gap-2 font-serif text-2xl"><meta.icon className="h-5 w-5 text-primary" /> {correcting ? "Correct the problems" : meta.title}</DialogTitle>
+          <DialogDescription>{correcting ? "A targeted correction: Claude fixes only the problems the editorial check found, keeps every passage that passes, and reports what needs you (a missing chapter, a claim without a source). The result is a separate “Corrected book”." : action === "rewrite" ? "Claude works chapter by chapter and re-reads your instructions before each one, so they hold across the whole book." : action === "cite" ? "Claude searches the web, opens the sources and cites only what it actually found. Anything unsupported is marked [citation needed]." : "A faithful summary of what the document says, with nothing added."}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
@@ -196,11 +202,17 @@ export function ActionDialog({ action, thread, styles, onClose, onRun }: { actio
             <div className="space-y-1.5"><Label htmlFor="focus">Focus (optional)</Label><Input id="focus" value={o.focus ?? ""} onChange={(e) => set({ focus: e.target.value })} placeholder="e.g. the main arguments and the scriptures used" /></div>
           </>)}
 
-          {action === "rewrite" && (<>
+          {correcting && (
+            <div className="space-y-1.5">
+              <Label htmlFor="ins">Problems to fix (from the editorial check; remove any you want to keep) <span className="text-destructive">*</span></Label>
+              <Textarea id="ins" rows={10} value={o.instructions ?? ""} onChange={(e) => set({ instructions: e.target.value })} className="font-mono text-[12.5px]" />
+            </div>
+          )}
+          {action === "rewrite" && !correcting && (<>
             <div className="space-y-1.5">
               <Label htmlFor="ins">Your instructions <span className="text-destructive">*</span></Label>
               <Textarea id="ins" rows={7} value={o.instructions ?? ""} onChange={(e) => set({ instructions: e.target.value })} autoFocus
-                placeholder={"Be precise; Claude follows these to the letter. For example:\n• Modern, warm English for adult readers; short paragraphs.\n• Keep every scripture reference exactly as written.\n• Do not add new arguments; fix grammar and flow only.\n• Each chapter opens with a one-sentence summary in italics."} />
+                placeholder={"Be precise; Claude follows these to the letter. Claude re-expresses every paragraph professionally and keeps your ideas, convictions, quotations and scripture. For example:\n• A university course textbook: precise, measured academic English.\n• Testimony stays clearly the author's testimony.\n• Each chapter opens with its learning objectives and ends with a summary."} />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <Toggle label="Keep chapter structure" checked={o.keepStructure !== false} onChange={(v) => set({ keepStructure: v })} />
@@ -228,7 +240,7 @@ export function ActionDialog({ action, thread, styles, onClose, onRun }: { actio
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button className={`rounded-full ${GRADIENT}`} disabled={!canRun || sending} onClick={() => { setSending(true); onRun({ ...o, target }); }}>
-            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <meta.icon className="h-4 w-4" />} Start {meta.title.toLowerCase()}
+            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <meta.icon className="h-4 w-4" />} {correcting ? "Start the correction" : `Start ${meta.title.toLowerCase()}`}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -248,7 +260,17 @@ export function StylePicker({ styles, value, onChange }: { styles: string[]; val
   );
 }
 
-export function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsTarget }: { backend: StudioBackend; threadId: string; path: string; projectTitle: string; onClose: () => void; onUseAsTarget: (p: string) => void }) {
+/** Whole-book results the editorial check applies to, and those it compares with the original (DESIGN-SPEC.md §15). */
+const BOOK_RESULT = (p: string) => /^(rewrite\.md|corrected\.md|voice\.md|cited\.md|rewrite\/.+\.md|book\/.+\.md|volumes\/.+\.md)$/.test(p) && !/-notes\.md$/.test(p);
+const REWRITE_RESULT = (p: string) => p === "rewrite.md" || p === "corrected.md" || p === "voice.md";
+
+export function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsTarget, check }: {
+  backend: StudioBackend; threadId: string; path: string; projectTitle: string; onClose: () => void;
+  /** Rewrite this result, or correct it with the editorial check's findings filled in. */
+  onUseAsTarget: (p: string, o?: Partial<RunOptions>) => void;
+  /** The book's rules and the author's original, for the editorial check. */
+  check?: { rules: string; original: () => Promise<string> };
+}) {
   const { toast } = useToast();
   const [text, setText] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
@@ -261,6 +283,7 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
   const save = async () => {
     if (!text) return;
     if (warning && !window.confirm(`${warning}\n\nSave it to your Library anyway?`)) return;
+    if (audit && audit.blockers && !window.confirm(`The editorial check found ${audit.blockers} ${audit.blockers === 1 ? "problem" : "problems"} to fix before publishing (open Editorial check to see them).\n\nSave it to your Library anyway?`)) return;
     setSaving(true);
     try {
       const id = await saveDocument({ kind: "book", title: bookTitle, payload: { markdown: text, title: bookTitle }, preview: text.replace(/^#.*$/m, "").trim().slice(0, 160) });
@@ -278,6 +301,9 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
   };
   const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
   const isJson = path.endsWith(".json");
+  const [checking, setChecking] = useState(false);
+  const checkable = Boolean(text) && BOOK_RESULT(path) && words >= 200;
+  const audit = useMemo(() => (checkable && text ? auditBook(text, { rules: check?.rules }) : null), [checkable, text, check?.rules]);
   // A rewrite that came back very short, or that says the source couldn't be read, is not a book yet.
   const warning = !text || isJson ? null
     : /\b(could ?n[o']t|can ?not|unable to|was not able to) (read|open|decode|extract)\b|\b(garbled|unreadable|not readable|encoding (problem|issue|error))\b/i.test(text) ? "Claude says it couldn't read part of the source, so this may be incomplete."
@@ -293,7 +319,16 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 py-5 sm:px-10">
           {warning && <div role="alert" className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">{warning}</div>}
-          {text === null ? <Loader2 className="mx-auto mt-10 h-6 w-6 animate-spin text-muted-foreground" /> : editing
+          {audit && !checking && (audit.blockers > 0 || audit.reviews > 0) && (
+            <div role="status" className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm">
+              <ScanSearch className="h-4 w-4 text-primary" aria-hidden />
+              <span>Editorial check: {audit.blockers ? `${audit.blockers} to fix before publishing` : "nothing blocks publishing"}{audit.reviews ? `, ${audit.reviews} to review` : ""}{check && REWRITE_RESULT(path) ? "; compare it with your original" : ""}.</span>
+              <Button size="sm" variant="outline" className="ml-auto rounded-full" onClick={() => setChecking(true)}>See the check</Button>
+            </div>
+          )}
+          {text === null ? <Loader2 className="mx-auto mt-10 h-6 w-6 animate-spin text-muted-foreground" /> : checking && text
+            ? <EditorialCheck text={text} rules={check?.rules} original={check && REWRITE_RESULT(path) ? check.original : undefined} onCorrect={edited ? undefined : (brief) => onUseAsTarget(path, { correct: true, instructions: brief })} />
+            : editing
             ? <Textarea value={text} onChange={(e) => { setText(e.target.value); setEdited(true); setSavedId(null); }} aria-label="Edit the result" className="min-h-[60vh] font-serif text-[15px] leading-relaxed" />
             : path.endsWith(".json") ? <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-[13px]">{prettyJson(text)}</pre> : <Markdown text={text} />}
         </div>
@@ -307,7 +342,8 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
             <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || saving} onClick={save}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} Save to Library as a book</Button>
           )}
           <div className="ml-auto flex gap-1">
-            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => setEditing((v) => !v)}><PenLine className="h-4 w-4" /> {editing ? "Preview" : "Edit before saving"}</Button>}
+            {checkable && <Button size="sm" variant={checking ? "secondary" : "outline"} className="rounded-full" onClick={() => setChecking((v) => !v)} aria-pressed={checking}><ScanSearch className="h-4 w-4" /> {checking ? "Back to the text" : "Editorial check"}</Button>}
+            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => { setChecking(false); setEditing((v) => !v); }}><PenLine className="h-4 w-4" /> {editing ? "Preview" : "Edit before saving"}</Button>}
             {path === "series-plan.md" && <SeriesActions backend={backend} threadId={threadId} onDone={onClose} />}
             {path === "voice-profile.md" && <Button size="sm" variant="ghost" disabled={!text} onClick={async () => { try { await backend.saveVoice(text ?? ""); toast({ title: "Saved as your voice profile", description: "“In my voice” and “Rewrite in my voice” now follow it." }); } catch (e) { toast({ title: "Couldn't save", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}><PenLine className="h-4 w-4" /> Use as my voice profile</Button>}
             {!isJson && <Button size="sm" variant="ghost" disabled={!text} onClick={() => onUseAsTarget(path)}><Wand2 className="h-4 w-4" /> Rewrite this</Button>}

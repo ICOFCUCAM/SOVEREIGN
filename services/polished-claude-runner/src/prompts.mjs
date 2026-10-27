@@ -5,6 +5,34 @@
 
 export const CITATION_STYLES = ["APA 7", "Chicago (notes and bibliography)", "Chicago (author-date)", "MLA 9", "Harvard", "SBL", "IEEE", "Vancouver"];
 
+// The editorial standard for whole-book rewrites (DESIGN-SPEC.md §15, from the
+// owner's October 2026 review of a rewrite). The API engine states the same
+// rules (src/lib/studio-tools.ts REWRITE_POLICY); a test keeps them identical.
+export const REWRITE_POLICY = [
+  "Rewrite, do not copy: re-express every paragraph in clear, professional prose suited to the book's purpose (sound structure, precise vocabulary, varied sentences, logical transitions, and synthesis where points accumulate). Keep the ideas, teaching, arguments and convictions, not the sentences; only direct quotations and scripture stay word for word. Do not add theological claims, historical assertions, sources, statistics, course outcomes, credentials or statements about what the book covers; list every idea that is not the author's under Additions in the notes.",
+  "Keep the author's level of certainty in professional wording: \"I suppose this speaks of\" may become \"this probably refers to\" or \"in the author's view\", but a qualification is never dropped; never turn an interpretation or a speculation into a settled fact, and never soften a conviction the author states firmly.",
+  "Keep each kind of writing for what it is: scriptural quotation, theological interpretation, personal testimony (dreams, visions and experiences are kept and clearly presented as the author's testimony, not as evidence), pastoral exhortation and course instruction. Analytical sections are measured; testimony keeps its force.",
+  "Quotations and scripture stay word for word, apart from what the book's rules change. Never paraphrase inside quotation marks.",
+  "Never leave [citation needed], [placeholder], TODO or notes to the editor in the book. A claim that needs a source stays as the author wrote it and is listed under Claims that need a source in the notes. Never write a References heading without entries.",
+  "Numbering: every number is used once at each level and runs in order with none missing; heading levels never skip (## then ###, never ## then ####).",
+  "Front matter (description, contents, course schedule, learning outcomes) must match the book. Never write missing material to fill a promise; keep the author's promise and list the gap under Promised but missing.",
+  "Use one term for one concept outside quotations, following the book's rules; where the author deliberately uses several names, keep them and say why in the plan.",
+  "Use the house style for emphasis (italics), not capital letters, while keeping the author's force.",
+  "Claims about groups of people (sexuality, mental illness, disability, health): keep the author's conviction as the author's teaching, worded with the certainty the author used, never stronger and never as medical or established fact unless the author cites evidence; list each under Sensitive claims for the author.",
+];
+
+// The same standard for rewriting one section, which returns only the text (no notes file).
+export const SECTION_POLICY = [
+  "Rewrite, do not copy: re-express every paragraph in clear, professional prose (sound structure, precise vocabulary, varied sentences, logical transitions). Keep the ideas, teaching and convictions, not the sentences; only direct quotations and scripture stay word for word. Do not add claims, historical assertions, sources, statistics or statements about what the book covers.",
+  "Keep the author's level of certainty in professional wording (\"I suppose\" may become \"probably\" or \"in the author's view\"), never dropping a qualification; never turn an interpretation into a settled fact, and never soften a conviction the author states firmly.",
+  "Present testimony clearly as the author's testimony, exhortation as exhortation, and keep analysis measured.",
+  "Quotations and scripture stay word for word, apart from what the book's rules change.",
+  "Never write [citation needed], [placeholder], TODO or notes to the editor into the text; leave an unsupported claim as the author wrote it.",
+  "Number sub-headings so they continue the book's scheme with none repeated or missing; never skip a heading level.",
+  "Use italics, not capital letters, for emphasis, keeping the author's force.",
+  "Claims about groups of people (sexuality, mental illness, disability, health) keep the author's wording and certainty, never stronger, and never as medical or established fact unless the author cites evidence.",
+];
+
 export const SYSTEM = `You are Claude Studio, the private writing and editing assistant of the owner of Polished Pages, working through Claude Code.
 
 Where you work
@@ -20,7 +48,7 @@ Trust
 Facts, citations and references
 - Cite only sources you actually found and opened in this session with WebSearch or WebFetch, or that appear in the source document. Never invent a source, author, quotation, page number, DOI or URL.
 - For every web source record: author or organisation, title, publisher or site, year, URL and the date you accessed it.
-- Where a claim needs support and you found none, mark it [citation needed] rather than guessing.
+- Where a claim needs support and you found none, mark it [citation needed] rather than guessing. (In a rewrite, ./INSTRUCTIONS.md overrides this: the claim stays as the author wrote it and is listed in the notes.)
 - Quote sources accurately and briefly; paraphrase otherwise.
 
 When you finish
@@ -46,6 +74,16 @@ Write ./out/summary.md with: the title; a one-paragraph overview; the key points
       };
     }
     case "rewrite": {
+      // Targeted correction (DESIGN-SPEC.md §15b stage 5 as its own action): fix the
+      // editorial check's findings and nothing else, keeping passages that pass.
+      if (opts.correct) return {
+        instructions: `# Correction instructions (follow strictly)\n\n## The problems to fix\n\n${String(opts.instructions || "").trim()}\n\n## Rules\n\n- Fix only the problems listed. Every passage that is not part of a listed problem stays exactly as it is.\n${REWRITE_POLICY.map((l) => `- ${l}`).join("\n")}\n`,
+        prompt: `Correct ${tgt} following ./INSTRUCTIONS.md strictly. This is a targeted correction, not a new rewrite.
+1. Read ./INSTRUCTIONS.md and the whole document.
+2. Fix each listed problem where it occurs, and nothing else. Where a fix needs the author (a missing chapter, a claim without a source, a sensitive claim), do not invent anything: leave the text and report it.
+3. Write the complete corrected book to ./out/corrected.md.
+4. Write ./out/corrected-notes.md: each listed problem, and what you changed or why you left it for the author.`,
+      };
       const lines = [
         "# Rewrite instructions (follow strictly)",
         "",
@@ -59,16 +97,20 @@ Write ./out/summary.md with: the title; a one-paragraph overview; the key points
         opts.audience ? `- Audience: ${opts.audience}.` : null,
         opts.language ? `- Language: write in ${opts.language}.` : null,
         "- Keep every fact, name, date, quotation and scripture or legal reference accurate. Do not drop content unless the instructions say so. Never summarise in place of rewriting.",
-        opts.addCitations ? `- Add citations and a References section in ${opts.citationStyle || "APA 7"} style, following the citation rules in your instructions.` : null,
+        opts.addCitations ? `- Add citations and a References section in ${opts.citationStyle || "APA 7"} style, following the citation rules in your instructions. List only sources you opened; if none support a claim, do not cite it and list it in the notes.` : null,
+        "",
+        "## Faithfulness and editorial standard (this is editing a book, not polishing sentences)",
+        ...REWRITE_POLICY.map((l) => `- ${l}`),
       ].filter((l) => l !== null);
       return {
         instructions: lines.join("\n") + "\n",
-        prompt: `Rewrite ${tgt} following ./INSTRUCTIONS.md strictly.
-Work in order, one chapter (or major section) at a time:
-1. Read ./INSTRUCTIONS.md, then identify the chapters or sections of the document.
-2. For each one: re-read ./INSTRUCTIONS.md, rewrite that chapter in full, and write it to ./out/rewrite/NN-short-title.md (NN = 01, 02, …).
-3. When every chapter is done, write the complete book to ./out/rewrite.md: "# Title" first, then the chapters in order.
-4. Write ./out/rewrite-notes.md: any instruction you could not follow and why, and anything the owner should check.
+        prompt: `Rewrite ${tgt} following ./INSTRUCTIONS.md strictly. Work in stages; do not skip any.
+1. Source analysis. Read ./INSTRUCTIONS.md and the whole document. Write ./out/rewrite-analysis.md: the chapters and sections in order with their headings and numbers exactly as found (marking duplicate or missing numbers); what the front matter (title page, description, contents, course schedule, learning outcomes) promises, and whether the book contains each item; the kinds of writing it uses (scriptural quotation, theological interpretation, personal testimony, exhortation, instruction); its terms and names for the same things; its references and quotations.
+2. Editorial plan. Write ./out/rewrite-plan.md: the book type and reader; the numbering scheme you will use; the terminology policy (one term per concept outside quotations, following the rules); what you may change and what you must keep; and every gap you found, which you will report, not fill.
+3. Controlled rewriting, one chapter (or major section) at a time: re-read ./INSTRUCTIONS.md and ./out/rewrite-plan.md, rewrite that chapter in full (re-expressed in professional prose, not copied), and write it to ./out/rewrite/NN-short-title.md (NN = 01, 02, …).
+4. Assemble the complete book in ./out/rewrite.md: "# Title" first, then the chapters in order.
+5. Editorial audit and targeted correction. Re-read ./out/rewrite.md against the original and correct only what fails: numbering unique and consecutive at every level, heading levels never skipped, no empty sections, no [citation needed], TODO or other placeholders in the book, no References heading without entries, quotations and scripture word for word, the author's qualifications kept, no new claims, front matter describing only what the book contains. Do not rewrite passages that already pass.
+6. Write ./out/rewrite-notes.md for the owner with these sections: "### Instructions I could not follow", "### Claims that need a source" (each claim with its chapter), "### Promised but missing" (front-matter items the book does not contain), "### Sensitive claims for the author" (claims about groups of people, health or disability, quoted with their chapter, for the author to decide on), "### Additions" (every sentence that is not a rewording of the author's, and why), "### Structure and numbering changes", and "### For you to check".
 Do not stop early and do not skip chapters. If the work is very long, keep going chapter by chapter until it is complete.`,
       };
     }
@@ -393,7 +435,10 @@ function section(o) {
     voice: `Rewrite this section in the owner's voice. Keep its meaning, facts, quotations and references.`,
     edit: `Revise this section as the owner asks: ${o.instructions || "improve clarity and flow"}. Keep facts, quotations and references accurate.`,
     explain: `Read this section and tell the owner what it says, in plain language: its main teaching in two or three sentences, then its key points as a short list, then the scriptures, quotations and sources it relies on. Report faithfully; do not rewrite, correct or judge it.`,
-    rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help). Keep every fact, scripture reference and quotation accurate apart from what the rules change.`,
+    rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help). Keep every fact, scripture reference and quotation accurate apart from what the rules change.
+Editorial standard:
+${SECTION_POLICY.map((l) => `- ${l}`).join("\n")}
+Numbering continues the book's scheme: read the neighbouring sections in ./manuscript/ first.`,
     compose: `${approach ? `${approach} The section's current text in ./manuscript/${file} is part of the owner's own book too.` : `Write this section new, from the plan in ./manuscript/INDEX.md, the other sections and the owner's notes. Never invent facts about the author; use [placeholders] where a fact is needed.`}
 Length: ${o.approach === "polish" ? "about as long as the author's own material on this subject" : DEPTH_CHAPTER[o.depth] || DEPTH_CHAPTER.standard}. Use "### " for sub-headings, short paragraphs with varied rhythm, no meta-commentary.`,
     improve: `${IMPROVE[o.improvementType] || IMPROVE.enhance} Keep the Markdown structure.`,

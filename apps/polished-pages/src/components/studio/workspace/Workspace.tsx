@@ -11,7 +11,7 @@ import { importText, insertSection, kindDef, words, type Manuscript } from "@/li
 import { readWizardDraft, wizardDraftToManuscript } from "@/lib/studio-merge";
 import { apiBookEngine, type BookEngine } from "@/lib/book-engine";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
-import { apiCoverCopyWriter, runnerBackend, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
+import { apiCoverCopyWriter, runnerBackend, sourceText, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
 import { StudioError, claudeBookEngine, type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioThread, type StudioThreadSummary } from "@/lib/claude-studio";
 import type { ToolId } from "@/lib/studio-tools";
 import JoinFiles from "@/components/studio/JoinFiles";
@@ -237,6 +237,11 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   };
 
   const readSource = useCallback((storedAs: string) => backend.source(id, storedAs), [backend, id]);
+  // The editorial check (DESIGN-SPEC.md §15) compares rewrites with the uploaded originals, under the book's rules.
+  const bookRules = [m?.rules, m?.knowledge?.terminology].filter(Boolean).join("\n");
+  const files = thread?.files;
+  const readOriginal = useCallback(async () => (await sourceText(files ?? [], readSource)).text, [files, readSource]);
+  const check = useMemo(() => ({ rules: bookRules, original: readOriginal }), [bookRules, readOriginal]);
   const openSection = (sid: string) => { if (!sid) return; setSectionId(sid); setPlace("write"); };
   const toggleTheme = () => { const order: Theme[] = ["light", "dark", "system"]; setTheme(order[(order.indexOf(getStoredTheme()) + 1) % 3]); };
 
@@ -401,7 +406,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
       {dialog && <ActionDialog action={dialog} thread={thread} styles={p.citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
-      {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => { setViewing(null); p.onChanged(); }} onUseAsTarget={(x) => { setViewing(null); setPendingTarget(x); setDialog("rewrite"); }} />}
+      {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => { setViewing(null); p.onChanged(); }} onUseAsTarget={(x, o) => { setViewing(null); setPendingTarget(x, o ?? null); setDialog("rewrite"); }} check={check} />}
       {/* Last, so it sits above a tool or action dialog that started the run. */}
       {cost.dialog}
     </>

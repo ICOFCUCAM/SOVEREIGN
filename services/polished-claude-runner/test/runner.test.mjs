@@ -377,3 +377,22 @@ test("the sandbox settings and helpers", () => {
   assert.equal(buildRun("nope"), null);
   assert.match(buildRun("cite", { citationStyle: "MLA 9" }).instructions, /MLA 9/);
 });
+
+test("whole-book rewrite runs in editorial stages under the faithfulness standard", () => {
+  const r = buildRun("rewrite", { instructions: "Academic register." });
+  // the standard is in ./INSTRUCTIONS.md, which Claude re-reads for every chapter
+  for (const rule of ["Rewrite, do not copy", "Keep the author's level of certainty", "Never leave [citation needed]", "every number is used once", "Front matter (description, contents, course schedule, learning outcomes) must match the book", "Sensitive claims for the author"]) assert.ok(r.instructions.includes(rule), rule);
+  // the stages: analysis, plan, chapter-by-chapter rewrite, assembly, audit with targeted correction, notes
+  for (const step of ["rewrite-analysis.md", "rewrite-plan.md", "./out/rewrite/NN-short-title.md", "./out/rewrite.md", "Editorial audit and targeted correction", "### Promised but missing", "### Claims that need a source"]) assert.ok(r.prompt.includes(step), step);
+  // a section rewrite carries the same standard without asking for a notes file
+  const s = buildRun("section", { op: "rewrite", sectionId: "s1", _file: "01-a.md" });
+  assert.ok(s.prompt.includes("never dropping a qualification") && s.prompt.includes("Rewrite, do not copy") && s.prompt.includes("Never write [citation needed]"));
+  assert.ok(!s.prompt.includes("in the notes"));
+});
+
+test("a targeted correction fixes the listed problems only and writes a separate corrected book", () => {
+  const r = buildRun("rewrite", { correct: true, target: "rewrite.md", instructions: "- Two headings share the number 20" });
+  assert.ok(r.instructions.includes("Two headings share the number 20") && r.instructions.includes("Fix only the problems listed"));
+  assert.ok(r.prompt.startsWith("Correct the file ./out/rewrite.md") && r.prompt.includes("./out/corrected.md") && r.prompt.includes("./out/corrected-notes.md"));
+  assert.ok(!r.prompt.includes("rewrite-analysis.md"));
+});
