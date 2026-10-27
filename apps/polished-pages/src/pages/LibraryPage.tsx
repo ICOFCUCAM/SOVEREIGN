@@ -320,7 +320,7 @@ const LibraryPage = () => {
               <Button asChild variant="hero" size="sm"><Link to={`/admin/claude?project=${encodeURIComponent(bk.extra.studioProject)}`}>Finish in Claude Studio</Link></Button>
             </div>
           )}
-          {owner && openedId && <Suspense fallback={null}><LibraryClaude docId={openedId} title={opened.title} markdown={opened.markdown} onChange={(s) => setOpened({ kind: "book", markdown: s, title: opened.title, extra: bk.extra })} /></Suspense>}
+          {owner && openedId && <Suspense fallback={null}><LibraryClaude docId={openedId} title={opened.title} markdown={opened.markdown} project={bk.extra?.studioProject} onChange={(s) => setOpened({ kind: "book", markdown: s, title: opened.title, extra: bk.extra })} /></Suspense>}
           <BookExportPanel bookTitle={opened.title} fullContent={opened.markdown} />
           <div className="mt-6">
             <BookReader

@@ -527,6 +527,32 @@ ${rules ? `Rules for the whole book (follow strictly):\n${rules}\n` : ""}${k ? `
   },
 };
 
+// Claude on a Library book (DESIGN-SPEC.md §18): the Library sends the passage (or the
+// whole book) with the request, so these run without uploads, on the owner's Claude Code.
+TOOLS["library-revise"] = {
+  title: "Correct a part of a Library book",
+  build: (o) => ({
+    output: "library/revised.md",
+    files: { "library/passage.md": String(o.text || ""), ...(o.context ? { "library/context.md": String(o.context) } : {}) },
+    prompt: `Work on a passage of the book "${String(o.title || "Untitled").replace(/"/g, "'")}".
+The passage is ./library/passage.md.${o.context ? " ./library/context.md has the text around it, for context only (do not return it)." : ""}
+The owner asks: ${String(o.instructions || "").trim() || "correct the English and make it read professionally"}
+Editorial standard:
+${SECTION_POLICY.map((l) => `- ${l}`).join("\n")}
+${String(o.rules || "").trim() ? `Rules for the whole book (follow strictly, everywhere, unless the rule says otherwise):\n${String(o.rules).trim()}\n` : ""}Keep the passage's Markdown headings and structure. Write only the new text of the passage to ./out/library/revised.md: no commentary, nothing before or after it.`,
+  }),
+};
+TOOLS["library-ask"] = {
+  title: "Question about a Library book",
+  build: (o) => ({
+    output: "library/answer.md",
+    files: { "library/book.md": String(o.text || "") },
+    prompt: `The book "${String(o.title || "Untitled").replace(/"/g, "'")}" is ./library/book.md. Read all of it.
+${String(o.rules || "").trim() ? `The book's rules: ${String(o.rules).trim()}\n` : ""}The owner asks: ${String(o.message || "").trim()}
+Answer from the book; quote it where that helps, and say where (heading). Do not rewrite the book. Write the answer to ./out/library/answer.md.`,
+  }),
+};
+
 // Voice: a profile from the owner's own writing, and rewriting in it.
 TOOLS["voice-profile"] = {
   title: "Learn my voice",

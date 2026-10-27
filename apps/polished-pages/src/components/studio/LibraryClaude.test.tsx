@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 const api = vi.hoisted(() => ({ revise: vi.fn(async (_i: { passage: string; instruction: string; rules?: string }) => "### Introduction\n\nMany Christians do not consciously grasp the reality of Satan."), ask: vi.fn(async () => "It repeats itself in the Introduction.") }));
-vi.mock("@/lib/studio-backend", () => ({ apiReviseInLibrary: api.revise, apiAskInLibrary: api.ask }));
+vi.mock("@/lib/claude-studio", () => ({ claudeReviseInLibrary: api.revise, claudeAskInLibrary: api.ask }));
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: () => {} }) }));
 import LibraryClaude, { bookParts } from "./LibraryClaude";
 
@@ -20,6 +20,7 @@ describe("Claude on a Library book", () => {
     await screen.findByRole("button", { name: /Accept into the book/ });
     expect(api.revise.mock.calls[0][0]).toMatchObject({ passage: expect.stringContaining("Many Christians has"), instruction: expect.stringContaining("Correct the English"), rules: expect.stringContaining("Yahusha") });
     expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByText(/On your Claude Code/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /Accept into the book/ }));
     await waitFor(() => expect(onChange).toHaveBeenCalled());
     const next = onChange.mock.calls[0][0] as string;

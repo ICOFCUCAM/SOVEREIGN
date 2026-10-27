@@ -476,3 +476,22 @@ test("Finish's tools work on the manuscript as it stands, not only on the upload
   const last = JSON.parse(await fs.readFile(path.join(dataDir, "threads", thread.id, "last-call.json"), "utf8"));
   assert.match(last.args[last.args.indexOf("-p") + 1], /the book's manuscript in \.\/manuscript\//);
 });
+
+test("Claude on a Library book runs on Claude Code with the text sent along, no upload needed", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Library corrections" } })).json();
+  let { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "library-revise", title: "Demonology I", text: "### Introduction\n\nMany Christians has no understanding.", instructions: "Correct the English", rules: "Write Yahusha instead of Jesus" } } })).json();
+  assert.equal(job.output, "library/revised.md");
+  await streamUntilDone(job.id, thread.id);
+  let last = JSON.parse(await fs.readFile(path.join(dataDir, "threads", thread.id, "last-call.json"), "utf8"));
+  let prompt = last.args[last.args.indexOf("-p") + 1];
+  assert.match(prompt, /Correct the English/);
+  assert.match(prompt, /Write Yahusha instead of Jesus/);
+  assert.equal(await fs.readFile(path.join(dataDir, "threads", thread.id, "work", "library", "passage.md"), "utf8"), "### Introduction\n\nMany Christians has no understanding.");
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "library-ask", title: "Demonology I", text: "# Demonology I\n\nText.", message: "Where does it repeat itself?" } } })).json());
+  assert.equal(job.output, "library/answer.md");
+  await streamUntilDone(job.id, thread.id);
+  last = JSON.parse(await fs.readFile(path.join(dataDir, "threads", thread.id, "last-call.json"), "utf8"));
+  assert.match(last.args[last.args.indexOf("-p") + 1], /Where does it repeat itself\?/);
+  // Without text it still needs a document.
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "library-ask", message: "x" } } })).status, 400);
+});
