@@ -3,6 +3,8 @@ import { useToast } from "@/hooks/use-toast";
 import type { Manuscript, Section } from "@/lib/manuscript";
 import type { RunOptions, StudioEvent, StudioJob } from "@/lib/claude-studio";
 import type { EngineId, StudioBackend } from "@/lib/studio-backend";
+import { addVersion } from "@/lib/section-versions";
+import { OP_LABEL } from "./approaches";
 
 export type SectionOp = NonNullable<RunOptions["op"]>;
 export interface Proposal {
@@ -15,6 +17,7 @@ export interface Proposal {
 }
 export interface Running { job: StudioJob; line: string; steps: string[]; sectionId: string; op: SectionOp }
 type SectionRun = RunOptions & { sectionId: string; op: SectionOp };
+const proposalsKey = (id: string) => `studio.proposals.${id}`;
 
 // Claude working on sections: one run at a time, its progress, and the
 // suggestion it leaves for each section. Nothing changes in the book until the
@@ -26,7 +29,9 @@ export function useSectionRun({ backend, id, engine, persist, patchSection, late
 }) {
   const { toast } = useToast();
   const [running, setRunning] = useState<Running | null>(null);
-  const [proposals, setProposals] = useState<Record<string, Proposal>>({});
+  // Suggestions not yet reviewed are kept on this device, so a reload or a closed tab doesn't lose them (spec §7 recovery).
+  const [proposals, setProposals] = useState<Record<string, Proposal>>(() => { try { return JSON.parse(localStorage.getItem(proposalsKey(id)) ?? "{}") as Record<string, Proposal>; } catch { return {}; } });
+  useEffect(() => { try { if (Object.keys(proposals).length) localStorage.setItem(proposalsKey(id), JSON.stringify(proposals)); else localStorage.removeItem(proposalsKey(id)); } catch { /* storage full or blocked */ } }, [id, proposals]);
   const [queue, setQueue] = useState<{ done: number; total: number } | null>(null);
   const abort = useRef<AbortController | null>(null);
   const accessed = useRef<string[]>([]);
@@ -91,7 +96,8 @@ export function useSectionRun({ backend, id, engine, persist, patchSection, late
     update({
       ...m,
       sections: m.sections.map((s) => (s.id !== sectionId || how === "discard" ? s : {
-        ...s,
+        // Every accepted change keeps the text before it in the section's history.
+        ...(s.body.trim() ? addVersion(s, "before-accept", OP_LABEL[proposal.op] ?? proposal.op) : s),
         body: how === "replace" ? t : `${s.body.trim()}\n\n${t}`.trim(),
         // The text before a rewrite is kept so it can be put back.
         ...((proposal.op === "rewrite" || proposal.op === "compose") && !s.original && s.body.trim() ? { original: s.body } : {}),
