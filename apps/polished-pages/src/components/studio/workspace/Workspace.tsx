@@ -53,6 +53,8 @@ export interface WorkspaceProps {
   onChanged: () => void; onDeleted: () => void;
   onWorkInStudio: (title: string, markdown: string) => Promise<void>; onLearnVoice: (books: { title: string; markdown: string }[]) => Promise<void>;
   notice?: React.ReactNode;
+  /** Finds a Library book's saved front cover; the dev preview passes a stand-in. */
+  findCover?: (libraryId: string) => Promise<string | null>;
 }
 
 export default function Workspace(p: WorkspaceProps) {
@@ -289,7 +291,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           queue={sr.queue} onSeries={() => setTool({ initial: "series" })} />
       </>;
     }
-    if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} />;
+    if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover} />;
     if (!section) return <EmptyWrite onAdd={() => { const r = insertSection(m, "chapter"); update(r.manuscript); setSectionId(r.id); }} onPlan={() => setPlace("plan")} />;
     return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")}
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
