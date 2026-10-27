@@ -255,7 +255,11 @@ Later (not before the core works): real-time voice, complex adaptive algorithms,
   - [x] Every §2a field: chapter id and number, heading path, paragraph and character offsets (exact into the source), text, tokens, normalised scripture references with the original wording, source type and location, content hash — tested
   - [x] Versions: content hash per version; chunk IDs stable for unchanged passages so citations survive edits; version diff — tested
   - [x] Author preview: chapters as detected, counts, scripture, issues, and whether anything blocks indexing — tested
-  - [ ] Database: migration `20261027100000_teacher_course_model.sql` written (courses, course_sources, source_versions, source_chunks, owner-only RLS); **not yet applied** (the database asked for confirmation, unanswered)
+  - [x] Database: `20261027100000_teacher_course_model.sql` (courses, course_sources, source_versions, source_chunks, owner-only RLS) and `20261027110000_teacher_rpcs.sql` (save/list/approve versions, author-mode course) applied; tested live in a rolled-back transaction: owner-only access, other users and signed-out callers refused, same text keeps one version
+- [ ] 2 Retrieval (in progress)
+  - [x] Hybrid retrieval RPC `polished_teacher_retrieve`: keyword leg (English stemming, stop words removed, any meaningful word, ranked by cover density) + vector leg, reciprocal rank fusion (k = 60), scoped to the course's non-excluded sources at their approved version, chapter filter (`20261027120000_teacher_retrieval_english.sql`); tested live: nothing searchable before approval, excluded sources never searched, natural questions rank the better passage first, filler-only questions match nothing
+  - [ ] Embeddings written server-side for each approved version (vector leg is inert until then)
+  - [ ] Evidence validation and exact-quote resolution in the Teacher Runtime (step 3)
   - [ ] Author preview screen and the "confirm chapters, then index" action; embeddings written server-side
 - [ ] 2 Hybrid retrieval, RRF, evidence validation, exact quotes
 - [ ] 3 Teacher Runtime: authorisation, rules resolution, structured output, citation and terminology validation, response classes, metering, logging

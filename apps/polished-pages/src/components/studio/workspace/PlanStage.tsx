@@ -24,9 +24,11 @@ const GROUPS = [{ id: "front", label: "Front matter" }, { id: "body", label: "Ch
 
 // Plan (design spec §2): the book's contents, with the plan and notes for each
 // chapter, its order, Claude's outline, and turning the book into a series.
-export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy }: {
+export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish }: {
   m: Manuscript; onUpdate: (m: Manuscript) => void; onOpen: (id: string) => void; engine: BookEngine | null; approach: ApproachId; hasUploads: boolean;
   onWriteAll: (ids: string[]) => void; queue: { done: number; total: number } | null; onSeries: () => void; busy: boolean;
+  /** Finish joins every chapter into one book. */
+  onFinish: () => void;
 }) {
   const { toast } = useToast();
   const [open, setOpen] = useState<string | null>(null);
@@ -37,6 +39,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
   const [genre, setGenre] = useState("");
   const [audience, setAudience] = useState("");
   const empty = m.sections.filter((s) => s.kind === "chapter" && !s.body.trim());
+  const written = m.sections.filter((s) => s.kind === "chapter" && s.body.trim());
 
   const outline = async () => {
     if (!engine) return;
@@ -130,6 +133,16 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
             {queue ? <><Loader2 className="h-4 w-4 animate-spin" /> Writing {queue.done + 1} of {queue.total}…</> : <><Sparkles className="h-4 w-4" /> Write the {empty.length || ""} empty {empty.length === 1 ? "chapter" : "chapters"}</>}
           </Button>
           <p className="text-[12px] text-[#64748B]">{approach !== "new" && !hasUploads ? "Upload your book in Sources, or choose “New from outline” in Write." : "One at a time, with the approach chosen in Write. Each one waits for you to review."}</p>
+        </div>
+
+        {/* Chapter-by-chapter rewrite of the whole book, then Finish merges it into one book. */}
+        <div className="space-y-2 rounded-[10px] border border-[#E6E8ED] bg-white p-4 dark:border-white/10 dark:bg-white/5">
+          <p className="text-[14px] font-semibold">Rewrite chapter by chapter</p>
+          <p className="text-[12.5px] text-[#64748B]">Claude rewrites each of the {written.length} written {written.length === 1 ? "chapter" : "chapters"} in turn, following your book rules, page notes and each chapter's idea. Every chapter waits for you to accept it.</p>
+          <Button variant="outline" className="h-9 w-full" disabled={!written.length || Boolean(queue) || busy} onClick={() => onWriteAll(written.map((s) => s.id))}>
+            <PenLine className="h-4 w-4" /> Rewrite all {written.length || ""} {written.length === 1 ? "chapter" : "chapters"}
+          </Button>
+          <p className="pt-1 text-[12.5px] text-[#64748B]">Then <button type="button" onClick={onFinish} className="font-medium text-[#2563EB] hover:underline">Finish</button> joins every chapter, front and back matter into one book: preview, export, or save it to your Library.</p>
         </div>
 
         <div className="border-t border-[#E6E8ED] pt-6 dark:border-white/10">

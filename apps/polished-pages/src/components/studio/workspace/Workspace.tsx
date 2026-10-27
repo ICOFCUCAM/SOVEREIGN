@@ -113,7 +113,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const abort = useRef<AbortController | null>(null);
   const rulesRef = useRef<HTMLTextAreaElement>(null);
   const titleRef = useRef("");
-  const { m, update, patchSection, replace, persist, saving, latest, undo, redo, canUndo, canRedo, recovery, recover } = useManuscript(backend, id);
+  const { m, update, patchSection, replace, persist, saving, latest, undo, redo, canUndo, canRedo, recovery, recover, kept, saveError } = useManuscript(backend, id);
   const [versions, setVersions] = useState(false);
   // First project: a short walkthrough, once per browser (spec §7).
   const [tour, setTour] = useState(() => !wasOnboarded());
@@ -236,6 +236,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     setPlace(from === "blank" ? "write" : "plan");
   };
 
+  const readSource = useCallback((storedAs: string) => backend.source(id, storedAs), [backend, id]);
   const openSection = (sid: string) => { if (!sid) return; setSectionId(sid); setPlace("write"); };
   const toggleTheme = () => { const order: Theme[] = ["light", "dark", "system"]; setTheme(order[(order.indexOf(getStoredTheme()) + 1) % 3]); };
 
@@ -284,14 +285,14 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (place === "books" || place === "voice") return <Library place={place} p={p} onBooks={() => setPlace("books")} />;
     if (place === "sources" || m === null) {
       return <SourcesStage thread={thread} m={m} uploading={uploading} onUpload={upload} onRemove={removeFile} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
-        onStart={startBook} wizardChapters={wizard?.chapters?.length ?? 0} onUpdate={update} onVoice={() => setPlace("voice")} busy={busy} rulesRef={rulesRef} />;
+        onStart={startBook} wizardChapters={wizard?.chapters?.length ?? 0} onUpdate={update} onVoice={() => setPlace("voice")} busy={busy} rulesRef={rulesRef} readText={readSource} />;
     }
     if (place === "plan") {
       return <>
         {wizard && !m.sections.some((s) => s.body.trim()) && <WizardBanner count={wizard.chapters?.length ?? 0} onBring={() => update(wizardDraftToManuscript(wizard, m))} />}
         <PlanStage m={m} onUpdate={update} onOpen={openSection} engine={bookEngine} approach={approach} hasUploads={hasUploads} busy={busy}
           onWriteAll={(ids) => void runSections(ids.map((sid) => ({ sectionId: sid, op: "compose" as const, approach, title: m.sections.find((s) => s.id === sid)?.title })))}
-          queue={sr.queue} onSeries={() => setTool({ initial: "series" })} />
+          queue={sr.queue} onSeries={() => setTool({ initial: "series" })} onFinish={() => setPlace("finish")} />
       </>;
     }
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover} />;
@@ -332,7 +333,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         </div>
       )}
       <span aria-live="polite" className="hidden min-w-[72px] text-right text-[12px] text-[#64748B] sm:block">
-        {saving === "error" ? <button type="button" onClick={() => void persist()} className="inline-flex items-center gap-1 font-medium text-[#B91C1C] hover:underline dark:text-[#FCA5A5]"><CloudOff className="h-3.5 w-3.5" /> Not saved · Retry</button>
+        {saving === "error" ? <button type="button" onClick={() => void persist()} title={saveError ?? undefined} aria-label={`Not saved${saveError ? `: ${saveError.replace(/[.\s]+$/, "")}` : ""}. Retry`} className="inline-flex items-center gap-1 font-medium text-[#B91C1C] hover:underline dark:text-[#FCA5A5]"><CloudOff className="h-3.5 w-3.5" /> Not saved · Retry</button>
           : saving === "saving" ? "Saving…" : saving === "saved" ? <span className="inline-flex items-center gap-1"><Check className="h-3 w-3" /> Saved</span> : ""}
       </span>
       {live && <button type="button" onClick={() => { setPlace("write"); setPanelOpen(true); setPanelMode("ask"); }} className="hidden items-center gap-1.5 rounded-full bg-[#EFF6FF] px-2.5 py-1 text-[12px] font-medium text-[#1D4ED8] sm:flex dark:bg-[#172554] dark:text-[#93C5FD]"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> {live.job.label}</button>}
@@ -358,11 +359,10 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           onRename={() => setRenaming(thread.title)}
           onDelete={busy ? undefined : async () => { if (!window.confirm(`Delete “${thread.title}” with its documents and results? Anything saved to your Library stays.`)) return; try { await backend.remove(id); p.onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}
           header={top} side={showPanel && !narrow ? panel : null} reduce={reduce}>
-          {recovery && (
-            <div role="alert" className="mx-auto mb-6 flex w-full max-w-[720px] flex-wrap items-center gap-3 rounded-[10px] border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-[13.5px] text-[#1E3A8A] dark:border-[#1E3A8A] dark:bg-[#172554] dark:text-[#BFDBFE]">
-              <LifeBuoy className="h-4 w-4" /><span className="flex-1">Changes from {new Date(recovery.at).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} were never saved to the server. They are kept on this device.</span>
-              <Button size="sm" className="h-8" onClick={() => recover(true)}>Put them back</Button>
-              <Button size="sm" variant="ghost" className="h-8" onClick={() => recover(false)}>Discard</Button>
+          {recovery && <RecoveryBanner r={recovery} onRestore={() => void recover(true)} onDiscard={() => { if (window.confirm(`Discard the changes from ${new Date(recovery.at).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}? They exist only on this device and cannot be recovered afterwards.`)) void recover(false); }} />}
+          {!kept && (
+            <div role="alert" className="mx-auto mb-6 flex w-full max-w-[1120px] items-center gap-3 rounded-[10px] border border-[#FCA5A5] bg-[#FEF2F2] px-4 py-3 text-[13.5px] text-[#7F1D1D] dark:border-[#7F1D1D] dark:bg-[#450A0A] dark:text-[#FECACA]">
+              <AlertTriangle className="h-4 w-4 shrink-0" /><span className="flex-1">This browser could not keep a backup copy (its storage is full or blocked). Your work is safe only once it shows “Saved”; don't close this tab before then.</span>
             </div>
           )}
           {!online && (
@@ -493,4 +493,37 @@ function useOnline() {
     return () => { window.removeEventListener("online", up); window.removeEventListener("offline", down); };
   }, []);
   return on;
+}
+
+/**
+ * Changes found on this device that the server never confirmed (spec §6/§7
+ * recovery). Says where the work is, compares the two copies, and stays until
+ * the restored book is confirmed saved.
+ */
+function RecoveryBanner({ r, onRestore, onDiscard }: { r: import("./useManuscript").Recovery; onRestore: () => void; onDiscard: () => void }) {
+  const when = (iso: string) => new Date(iso).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const busy = r.state === "restoring";
+  return (
+    <section role="alert" aria-labelledby="recovery-h" className="mx-auto mb-8 w-full max-w-[1120px] rounded-[12px] border border-[#F2D9A6] bg-[#FFFBF2] px-5 py-4 text-[#422006] dark:border-[#78350F] dark:bg-[#1C1408] dark:text-[#FDE68A]">
+      <div className="flex flex-wrap items-start gap-4">
+        <LifeBuoy className="mt-0.5 h-5 w-5 shrink-0 text-[#B45309] dark:text-[#FBBF24]" aria-hidden />
+        <div className="min-w-[260px] flex-1">
+          <h2 id="recovery-h" className="font-sans text-[14.5px] font-semibold">Unsaved changes found on this device</h2>
+          <p className="mt-1 text-[13.5px] leading-relaxed text-[#713F12] dark:text-[#FCD34D]/90">
+            Edits from {when(r.at)} never reached the server. They are not lost: this browser kept them, and you can restore them now.
+            {r.serverAt ? ` The server's copy was last saved ${when(r.serverAt)}.` : r.serverWords === null ? " The server has no copy of this book yet." : " The server has an earlier copy."}
+          </p>
+          <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[12.5px]">
+            <div className="flex gap-1.5"><dt className="text-[#92400E] dark:text-[#FBBF24]/80">On this device</dt><dd className="font-medium">{r.localWords.toLocaleString()} words · {r.manuscript.sections.length} {r.manuscript.sections.length === 1 ? "section" : "sections"}</dd></div>
+            <div className="flex gap-1.5"><dt className="text-[#92400E] dark:text-[#FBBF24]/80">On the server</dt><dd className="font-medium">{r.serverWords === null ? "no book yet" : `${r.serverWords.toLocaleString()} words`}</dd></div>
+          </dl>
+          {r.state === "failed" && <p className="mt-2 text-[13px] font-medium text-[#B91C1C] dark:text-[#FCA5A5]">{r.error}</p>}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button size="sm" className="h-9" onClick={onRestore} disabled={busy}>{busy ? <><Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> Restoring…</> : r.state === "failed" ? "Try again" : "Restore these changes"}</Button>
+          <Button size="sm" variant="ghost" className="h-9 text-[#92400E] hover:bg-[#FEF3C7] dark:text-[#FBBF24] dark:hover:bg-white/5" onClick={onDiscard} disabled={busy}>Discard…</Button>
+        </div>
+      </div>
+    </section>
+  );
 }

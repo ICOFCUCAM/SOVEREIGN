@@ -121,3 +121,26 @@ Walkthrough: Write.
 Walkthrough: the shortcuts (dark mode).
 
 ![Walkthrough: the shortcuts (dark mode)](screenshots/24-onboarding-keys.webp)
+
+### Plan rewrite all
+Plan (§2): "Rewrite all chapters" for written chapters, each waiting for review; Finish joins them into one book.
+
+![Plan with the chapter-by-chapter rewrite](screenshots/25-plan-rewrite-all.webp)
+
+### Sources (refined)
+Sources at 1920 px: one heading row with the primary action (Add a manuscript), a compact tools row (Summarise, Rewrite the whole book, Join, and More for scanned pages and compare), and each manuscript as a document: typographic cover, format, size, words (from its extracted text), date added, status, and its opening lines. Nothing is invented: a file without extracted text says “No text yet”.
+
+![Sources, refined](screenshots/26-sources.webp)
+
+### Sources recovery
+Unsaved changes found on this device: where the work is, both copies compared, Restore (the banner stays until the server confirms) or Discard (asks first).
+
+![Recovery banner](screenshots/27-sources-recovery.webp)
+
+### Sources dark
+
+![Sources in dark mode](screenshots/28-sources-dark.webp)
+
+### Sources phone
+
+![Sources at phone width](screenshots/29-sources-phone.webp)
