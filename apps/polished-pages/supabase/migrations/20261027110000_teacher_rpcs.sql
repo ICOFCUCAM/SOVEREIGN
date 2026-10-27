@@ -17,15 +17,16 @@ begin
   if v_id is null then
     insert into polished.source_versions(document_id, content_hash, structure, created_by) values (p_doc_id, p_content_hash, coalesce(p_structure, '{}'::jsonb), v_uid) returning id into v_id;
   else
+    -- Same content hash = same text = the same passages, so saving again updates them in place.
     update polished.source_versions set structure = coalesce(p_structure, structure) where id = v_id;
-    delete from polished.source_chunks where version_id = v_id;
   end if;
   for ch in select * from jsonb_array_elements(coalesce(p_chunks, '[]'::jsonb)) loop
     insert into polished.source_chunks(version_id, chunk_id, ordinal, chapter_id, chapter_number, heading_path, paragraph_start, paragraph_end, char_start, char_end, chunk_text, tokens, scripture_refs, source_type, source_location, content_hash)
     values (v_id, ch->>'id', (ch->>'ordinal')::int, ch->>'chapterId', nullif(ch->>'chapterNumber', '')::int,
       coalesce((select array_agg(x) from jsonb_array_elements_text(ch->'headingPath') x), '{}'),
       (ch->>'paragraphStart')::int, (ch->>'paragraphEnd')::int, (ch->>'charStart')::int, (ch->>'charEnd')::int,
-      ch->>'text', (ch->>'tokens')::int, coalesce(ch->'scriptureRefs', '[]'::jsonb), coalesce(ch->>'sourceType', 'published_book'), ch->>'sourceLocation', ch->>'contentHash');
+      ch->>'text', (ch->>'tokens')::int, coalesce(ch->'scriptureRefs', '[]'::jsonb), coalesce(ch->>'sourceType', 'published_book'), ch->>'sourceLocation', ch->>'contentHash')
+    on conflict (version_id, chunk_id) do update set ordinal = excluded.ordinal, heading_path = excluded.heading_path, source_location = excluded.source_location, scripture_refs = excluded.scripture_refs;
   end loop;
   update polished.source_versions set status = 'indexed' where id = v_id;
   return v_id;
@@ -104,7 +105,6 @@ language sql stable security definer set search_path to 'public', 'polished' as 
   order by f.score desc limit greatest(1, least(p_limit, 40));
 $$;
 
-revoke all on function public.polished_teacher_save_version(uuid, text, jsonb, jsonb), public.polished_teacher_versions(uuid), public.polished_teacher_approve_version(uuid),
-  public.polished_teacher_ensure_course(uuid, text), public.polished_teacher_retrieve(uuid, text, text, int, text) from public, anon;
+-- Every function checks auth.uid() itself: signed-out callers get an error or no rows.
 grant execute on function public.polished_teacher_save_version(uuid, text, jsonb, jsonb), public.polished_teacher_versions(uuid), public.polished_teacher_approve_version(uuid),
   public.polished_teacher_ensure_course(uuid, text), public.polished_teacher_retrieve(uuid, text, text, int, text) to authenticated;
