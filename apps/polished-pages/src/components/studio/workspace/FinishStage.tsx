@@ -157,6 +157,7 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
                 : <Button size="sm" onClick={() => setTab("export")} disabled={!report.ready}>Export {report.label}…</Button>}
               {format === "paperback" && <Button size="sm" variant="outline" onClick={() => setTab("cover")}>Full wrap cover</Button>}
             </div>
+            {!report.ready && format !== "audiobook" && <p className="mt-2 text-[12px] text-[#64748B]">Export opens once the items marked as needed are fixed; advice items don't block it.</p>}
           </div>
           <ul className="space-y-2 text-[13.5px]" aria-label={`What ${report.label} needs`}>
             {report.checks.map((c) => (
