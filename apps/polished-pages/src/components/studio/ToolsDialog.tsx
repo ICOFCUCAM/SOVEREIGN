@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, AudioLines, Layers3, BadgeCheck, Feather, BookMarked, Gauge, GitCompare, Globe, GraduationCap, Languages, ListTree, Megaphone, ScanText, SpellCheck2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { STUDIO_TOOLS, type StudioTool } from "@/lib/studio-tools";
+import { STUDIO_TOOLS, type StudioTool, type ToolId } from "@/lib/studio-tools";
 import { outputLabel, type RunOptions, type StudioThread } from "@/lib/claude-studio";
 import type { EngineId } from "@/lib/studio-backend";
 
@@ -15,7 +15,7 @@ import type { EngineId } from "@/lib/studio-backend";
 const ICONS: Record<StudioTool["icon"], typeof SpellCheck2> = { series: Layers3, voice: AudioLines, pen: Feather, spell: SpellCheck2, check: BadgeCheck, quote: BookMarked, languages: Languages, megaphone: Megaphone, graduation: GraduationCap, list: ListTree, diff: GitCompare, gauge: Gauge, scan: ScanText };
 const GRADIENT = "bg-gradient-to-r from-[hsl(221_83%_53%)] to-[hsl(262_83%_58%)] text-white shadow-[0_10px_28px_-12px_hsl(248_83%_55%/0.7)] hover:opacity-95";
 
-export default function ToolsDialog({ thread, engine, onClose, onRun }: { thread: StudioThread; engine: EngineId | null; onClose: () => void; onRun: (o: RunOptions & Record<string, unknown>) => void }) {
+export default function ToolsDialog({ thread, engine, initial, onClose, onRun }: { thread: StudioThread; engine: EngineId | null; initial?: ToolId; onClose: () => void; onRun: (o: RunOptions & Record<string, unknown>) => void }) {
   const [tool, setTool] = useState<StudioTool | null>(null);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [target, setTarget] = useState("source");
@@ -38,6 +38,8 @@ export default function ToolsDialog({ thread, engine, onClose, onRun }: { thread
     setValues(init); setTool(t); setTarget(targets[0]?.v ?? "source");
   };
   const set = (k: string, v: unknown) => setValues((x) => ({ ...x, [k]: v }));
+  // Opened for one tool (from the command palette or a panel): go straight to its options.
+  useEffect(() => { const t = initial && STUDIO_TOOLS.find((x) => x.id === initial); if (t) pick(t); /* eslint-disable-next-line react-hooks/exhaustive-deps -- once, on open */ }, []);
   const unavailable = tool?.claudeOnly && engine !== "claude-code";
   const missing = tool?.id === "translate" && !String(values.language ?? "").trim() ? "Say which language." : tool?.pair && (!values.a || !values.b || values.a === values.b) ? "Choose two different versions." : null;
 
