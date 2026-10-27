@@ -213,7 +213,8 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       delete t.runningJobId;
       await store.write(t);
       // A step with one expected file fails plainly if Claude didn't write it.
-      if (job.status === "done" && job.output && !changed.includes(job.output)) { job.status = "failed"; job.error = "Claude finished without writing the result. Try again."; }
+      // Claude's own last words say why (for example a PDF it could not open), so they go with the error.
+      if (job.status === "done" && job.output && !changed.includes(job.output)) { const why = String(r.result || job.text.at(-1) || "").trim().replace(/\s+/g, " ").slice(0, 400); job.status = "failed"; job.error = `Claude finished without writing the result.${why ? ` Claude said: “${why}”` : " Try again."}`; }
       emit(job, { type: "done", status: job.status, error: job.error, errorKind: job.status === "failed" ? r.errorKind ?? null : null, outputs: changed, output: job.output });
       for (const s of job.subscribers) s.end();
       job.subscribers.clear();

@@ -80,7 +80,10 @@ marked `[citation needed]`.
    Keep it secret.
 2. Deploy this folder's `Dockerfile` (DeployPro, Render, Fly or any Docker host)
    with a **persistent volume mounted at `/data`** (projects and Claude's
-   conversation history live there).
+   conversation history live there). The image includes `poppler-utils`
+   (`pdftoppm`), which Claude Code needs to read PDF pages; without it scanned
+   PDFs cannot be read. After a change to the Dockerfile, **rebuild** the image
+   (a restart keeps the old one).
 3. Set these environment variables on the service:
 
    | Variable | Value |

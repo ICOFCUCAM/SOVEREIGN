@@ -404,8 +404,8 @@ Write ./out/readability.md: the estimated reading level with your reasoning; ave
     title: "Read scanned pages",
     build: () => ({
       output: "scanned-text.md",
-      prompt: `The documents in ./source/ include scanned pages or images (PDFs without a text layer, JPG or PNG). Read each one directly, page by page, in file order, and transcribe the text exactly, keeping headings, paragraphs, lists and verse numbers. Mark anything unreadable as [illegible] and uncertain words as [word?]. Do not correct or modernise the text.
-Write ./out/scanned-text.md with "# <file name>" before each file's text and "<!-- page N -->" before each page. Also write each file's text on its own to ./out/scanned/<the file's name without its extension>.txt (for example ./out/scanned/onenessofgod.txt for ./source/onenessofgod.pdf), so it becomes that document's text in the Studio. ${LONG}`,
+      prompt: `The documents in ./source/ include scanned pages or images (PDFs without a text layer, JPG or PNG). Read each one directly, page by page, in file order (open a PDF with the Read tool's pages parameter, at most 20 pages at a time, until the last page), and transcribe the text exactly, keeping headings, paragraphs, lists and verse numbers. Mark anything unreadable as [illegible] and uncertain words as [word?]. Do not correct or modernise the text.
+Write ./out/scanned-text.md with "# <file name>" before each file's text and "<!-- page N -->" before each page. Also write each file's text on its own to ./out/scanned/<the file's name without its extension>.txt (for example ./out/scanned/onenessofgod.txt for ./source/onenessofgod.pdf), so it becomes that document's text in the Studio. Write the files as you go, so the pages read so far are kept. If a file cannot be opened at all, write ./out/scanned-text.md saying which file and the exact error, rather than nothing. ${LONG}`,
     }),
   },
   "cover-copy": {
