@@ -332,3 +332,10 @@ A scanned PDF (pictures of pages) has no text, so the rewrite had nothing to wor
 - [x] The transcription now becomes the scanned document's own text (runner: per-file `out/scanned/<name>.txt`, adopted as the upload's text copy), so the card shows "Text ready" and every action uses it (runner test "read scanned pages").
 - [x] A rewrite, summary, citation run, tool or rebuild on uploads that are all scans offers "Read the scanned pages now?" first instead of a run that fails (`scanned.test.ts`).
 - [x] Root cause of "Claude finished without writing the result" on onenessofgod.pdf: Claude Code reads PDF pages with `pdftoppm` (poppler-utils), which the runner image did not have, so it could not open the scanned PDF. The Dockerfile now installs poppler-utils; the scan prompt reads at most 20 pages at a time, writes as it goes, and reports a file it cannot open; a job that ends without its result now shows Claude's own last words.
+
+### 18b. Password-protected PDFs (27 October 2026: "can it open such that I insert password?")
+onenessofgod.pdf is password-protected: no tool on the runner can open it without the password. (DeployPro builds the runner's Dockerfile as written, so poppler is present from commit 452e015 on; the password was the real block.)
+- [x] On a PDF without text, Sources offers "open it (password or scanned pages)". The owner's browser fetches the PDF from the runner and opens it (pdf.js), asking for the password when it has one and saying when it is wrong. The password stays in the browser.
+- [x] A PDF with its own text: the text is saved as the upload's text copy at once ("Text ready"); nothing is scanned.
+- [x] A scan: each page is drawn as a JPEG in the browser and stored on the runner as a page image (`<name>-p001.jpg`…); Read scanned pages then reads those images, which needs no poppler; the transcription becomes the PDF's text (§18a). Removing the PDF removes its page images.
+- [x] Tested: `OpenPdfDialog.test.tsx`; runner test "a password-protected PDF"; pdf.js checked against a real encrypted PDF (no password: asks; wrong: says so; right: opens with its text).

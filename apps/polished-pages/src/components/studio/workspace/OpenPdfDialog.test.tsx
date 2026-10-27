@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const m = vi.hoisted(() => ({
-  bytes: vi.fn(async () => new ArrayBuffer(4)), saveText: vi.fn(async () => ({})), savePage: vi.fn(async () => ({})),
+  bytes: vi.fn(async () => new ArrayBuffer(4)), saveText: vi.fn(async (_t: string, _n: string, _x: string) => ({})), savePage: vi.fn(async (_t: string, _n: string, _b: Blob) => ({})),
   open: vi.fn(), text: vi.fn(), images: vi.fn(async () => [new Blob(["a"]), new Blob(["b"])]),
 }));
 vi.mock("@/lib/claude-studio", () => ({ pdfInStudio: { bytes: m.bytes, saveText: m.saveText, savePage: m.savePage } }));
