@@ -180,6 +180,15 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
 
   const start = useCallback(async (action: StudioAction, options: RunOptions, force?: "api") => {
     const use = force ?? engineId;
+    // A scanned PDF has no text until its pages are read: offer that first instead of a run that fails.
+    const onUploads = !options.target || options.target === "source";
+    const needsText = onUploads && (action === "rewrite" || action === "summarize" || action === "cite" || (action === "tool" && !["ocr", "compare", "cover-copy"].includes(String(options.tool))));
+    if (needsText && thread && scannedOnly(thread)) {
+      if (window.confirm("Your uploaded PDF has no text yet: it is scanned (pictures of pages).\n\nClaude Code reads the pages first and turns them into text (this can take a while for a long book). Read the scanned pages now? Then run this again.")) {
+        if (use !== "claude-code") { toast({ title: "Reading scanned pages needs Claude Code", description: "Switch the engine to Claude Code (bottom left), then try again.", variant: "destructive" }); return; }
+        options = { tool: "ocr" } as RunOptions; action = "tool";
+      } else return;
+    }
     if (!use) { toast({ title: "No engine available", description: decision.reason, variant: "destructive" }); return; }
     if (!navigator.onLine) { toast({ title: "You're offline", description: "Claude can run again when the connection returns.", variant: "destructive" }); return; }
     const bookWords = latest.current ? latest.current.sections.reduce((n, s) => n + words(s.body), 0) : undefined;
@@ -260,6 +269,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const check = useMemo(() => ({ rules: bookRules, original: readOriginal }), [bookRules, readOriginal]);
   // Rebuild as a professional book (DESIGN-SPEC.md §17): Claude Code reads the project itself; the API is given the manuscript, else the uploads.
   const designBook = async (b: DesignBriefInput) => {
+    if (thread && scannedOnly(thread)) throw new Error("Your uploaded PDF has no text yet (it is scanned). In Sources, press “read the scanned pages” first; then design the book.");
     if (p.designer) return p.designer(b);
     if (bookEngine?.design) return bookEngine.design(b);
     const written = m?.sections.filter((s) => s.body.trim()) ?? [];
@@ -658,4 +668,10 @@ function ProjectChat({ thread, busy, onSend, onOpen }: { thread: StudioThread; b
       </form>
     </div>
   );
+}
+
+/** Every uploaded manuscript is a scan with no text read from it yet (no text copy, not a text file). */
+export function scannedOnly(thread: StudioThread): boolean {
+  const originals = thread.files.filter((f) => f.kind === "original");
+  return originals.length > 0 && originals.every((f) => !/\.(txt|md|markdown)$/i.test(f.storedAs) && !thread.files.some((x) => x.kind === "text" && x.storedAs === `${f.storedAs.replace(/\.[^.]+$/, "")}.txt`));
 }

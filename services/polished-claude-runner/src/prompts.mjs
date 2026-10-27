@@ -405,7 +405,7 @@ Write ./out/readability.md: the estimated reading level with your reasoning; ave
     build: () => ({
       output: "scanned-text.md",
       prompt: `The documents in ./source/ include scanned pages or images (PDFs without a text layer, JPG or PNG). Read each one directly, page by page, in file order, and transcribe the text exactly, keeping headings, paragraphs, lists and verse numbers. Mark anything unreadable as [illegible] and uncertain words as [word?]. Do not correct or modernise the text.
-Write ./out/scanned-text.md with "# <file name>" before each file's text and "<!-- page N -->" before each page. ${LONG}`,
+Write ./out/scanned-text.md with "# <file name>" before each file's text and "<!-- page N -->" before each page. Also write each file's text on its own to ./out/scanned/<the file's name without its extension>.txt (for example ./out/scanned/onenessofgod.txt for ./source/onenessofgod.pdf), so it becomes that document's text in the Studio. ${LONG}`,
     }),
   },
   "cover-copy": {
