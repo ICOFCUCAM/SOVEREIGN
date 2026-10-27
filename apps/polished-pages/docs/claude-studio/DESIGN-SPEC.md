@@ -139,3 +139,31 @@ Pass 3 — Publishing
 - [ ] Export opens a format/settings dialog that validates first (today: export is disabled until the format is ready, and the export panel opens)
 - [ ] Motion refinement pass against §8 timings across every surface (frame, panel and revision timings are in; a full audit is pending)
 - [ ] Writing view renders Markdown headings as headings while editing (today the marks are visible in Writing and hidden in Changes, Clean and Book page)
+
+## 13. Quality bar (added on the owner's instruction to upgrade the specification, October 2026)
+Every screen meets these measurable targets before a pass is called complete. They add to §1–§11 and never relax them.
+
+| Area | Target | How it is checked |
+|---|---|---|
+| Responsiveness | Typing never waits on the network; a keystroke paints within one frame (16 ms) on a mid-range laptop | Manual check with the performance panel on a 60k-word book |
+| Open a project | Manuscript visible ≤ 1.5 s on a warm cache; skeleton within 100 ms | Timed in the preview and on the deployed site |
+| Book page view | First typeset page ≤ 3 s for a 6,000-word chapter; re-set ≤ 1 s after typing stops | Timed; pages capped at 60 per view |
+| Save durability | No accepted text is ever only in memory: local copy on every change, server save ≤ 1.2 s after typing stops, visible error and retry on failure | Tests "offers back changes", save-error path |
+| Reversibility | Every Claude change is a proposal; every accepted change and every restore leaves a version; undo covers every book change | Tests `section-versions`, workspace lifecycle |
+| Honesty | No "Ready", "verified" or "saved" unless true; estimates are labelled as estimates; placeholders are never counted as content | Tests `format-readiness`; review of every status string |
+| Accessibility | WCAG 2.2 AA: visible focus rings, every control labelled, state changes announced (`aria-live`), full keyboard operation, contrast ≥ 4.5:1 for text, reduced motion respected | Keyboard-only walkthrough of Sources → Finish; axe check per screen |
+| Typography | Manuscript measure 65–80 characters; Newsreader 18/1.7; interface Inter 13–15; no font-loading layout jump (text re-measured when the font loads) | Screenshots 01, 08, 10 |
+| Cost transparency | No API-billed run starts without the notice in §6; the engine in use is always visible | Test "asks before a run billed to the API" |
+| Security | The runner stays owner-only; no customer path reaches it; credentials never leave the server | CLAUDE.md rules; review of every new network call |
+
+## 14. Horizon to 2036 (direction, owner approval needed before any item becomes binding)
+The Studio is built so its core promises hold for a decade even as models, devices and publishing formats change.
+
+1. **Model independence.** Engines are adapters behind one interface (today Claude Code and the API). A new model or provider is a new adapter, never a redesign; each proposal records the engine that wrote it (already in the history) so provenance survives model changes.
+2. **Provenance as a standard, not a screen.** The source-use ledger and version history map onto open content-credential formats (for example C2PA manifests embedded in exported EPUB and PDF), so a reader, publisher or rights-holder can verify which text the author wrote, which Claude proposed and which the author accepted.
+3. **Local-first and collaboration.** The manuscript is already kept on the device until the server confirms it. The next step is a conflict-free merge model (CRDT) so the owner can write on two devices, offline, and later invite an editor with change-level review identical to Claude's (one review system for people and AI, no double features).
+4. **Accessible publishing by default.** Exports meet EPUB Accessibility 1.1 / WCAG for publications: semantic headings, image descriptions (already flagged in readiness), reading order, language tags, and audio that stays in sync with text (read-along). Readiness reports these as constraints, like page minimums today.
+5. **Archival durability.** Every book can be exported as plain Markdown plus a JSON record of versions and provenance (the `.md` and authorship-notes exports are the start), so the owner's work never depends on the Studio existing.
+6. **Voice and multimodal authoring.** Dictation and spoken review ("accept the second change") come only after the text review loop is trusted, with the same proposal-first rule: nothing spoken changes the book until accepted.
+7. **Measured quality.** A small, permanent evaluation set of the owner's own chapters (rules such as Yahusha/Yahuah, quotation fidelity, citation honesty) runs whenever a model, prompt or engine changes, mirroring the AI Teacher's release gates.
+8. **Cost and sustainability.** Per-run cost and token use are recorded per book, so the owner can see what a book cost to write and choose engines accordingly.
