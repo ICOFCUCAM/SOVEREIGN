@@ -24,7 +24,7 @@ const proposalsKey = (id: string) => `studio.proposals.${id}`;
 // owner accepts; "What this section says" is stored on the section at once.
 export function useSectionRun({ backend, id, engine, persist, patchSection, latest, update, onChanged }: {
   backend: StudioBackend; id: string; engine: EngineId | null;
-  persist: () => Promise<void>; patchSection: (sid: string, p: Partial<Section>) => void;
+  persist: () => Promise<unknown>; patchSection: (sid: string, p: Partial<Section>) => void;
   latest: React.MutableRefObject<Manuscript | null>; update: (m: Manuscript) => void; onChanged: () => void;
 }) {
   const { toast } = useToast();

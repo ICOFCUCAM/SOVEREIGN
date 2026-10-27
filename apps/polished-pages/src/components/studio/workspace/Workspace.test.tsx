@@ -122,14 +122,63 @@ describe("Claude Studio workspace", () => {
     await waitFor(() => expect(f.runs).toHaveLength(1));
   });
 
-  it("offers back changes kept on this device that the server never received", async () => {
+  it("offers back changes kept on this device that the server never received, and clears them only after the server confirms", async () => {
     const f = fake();
     const local = { ...f.saved(), sections: f.saved().sections.map((x) => (x.id === "c1" ? { ...x, body: "Written offline." } : x)) };
     localStorage.setItem("studio.unsaved.t1", JSON.stringify({ at: new Date().toISOString(), manuscript: local }));
     render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole("button", { name: "Put them back" }));
+    const banner = await screen.findByRole("alert", { name: "Unsaved changes found on this device" });
+    expect(within(banner).getByText(/On this device/).nextSibling?.textContent).toMatch(/^2 words/);
+    fireEvent.click(within(banner).getByRole("button", { name: "Restore these changes" }));
     await waitFor(() => expect(f.saved().sections[0].body).toBe("Written offline."), { timeout: 3000 });
-    await waitFor(() => expect(localStorage.getItem("studio.unsaved.t1")).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("alert", { name: "Unsaved changes found on this device" })).toBeNull());
+    expect(localStorage.getItem("studio.recovery.t1")).toBeNull();
+    expect(localStorage.getItem("studio.unsaved.t1")).toBeNull();
+  });
+
+  it("keeps the found copy if restoring fails, and never lets new edits overwrite it", async () => {
+    const f = fake();
+    const local = { ...f.saved(), sections: f.saved().sections.map((x) => (x.id === "c1" ? { ...x, body: "Written offline." } : x)) };
+    localStorage.setItem("studio.unsaved.t1", JSON.stringify({ at: new Date().toISOString(), manuscript: local }));
+    (f.backend as unknown as { saveManuscript: () => Promise<never> }).saveManuscript = async () => { throw new Error("The runner is offline."); };
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const banner = await screen.findByRole("alert", { name: "Unsaved changes found on this device" });
+    // typing elsewhere first: the found copy is set aside, not overwritten
+    fireEvent.change(await screen.findByLabelText("Spirits in the Ancient Near East text"), { target: { value: "A new line." } });
+    expect(JSON.parse(localStorage.getItem("studio.recovery.t1")!).manuscript.sections[0].body).toBe("Written offline.");
+    fireEvent.click(within(banner).getByRole("button", { name: "Restore these changes" }));
+    expect(await within(banner).findByText(/did not accept the restored book/)).toBeTruthy();
+    expect(within(banner).getByRole("button", { name: "Try again" })).toBeTruthy();
+    expect(localStorage.getItem("studio.recovery.t1")).not.toBeNull();
+    expect(screen.getByRole("button", { name: /Not saved: The runner is offline\. Retry/ })).toBeTruthy();
+  });
+
+  it("asks before discarding a found copy, and keeps it when the owner cancels", async () => {
+    const f = fake();
+    const local = { ...f.saved(), sections: f.saved().sections.map((x) => (x.id === "c1" ? { ...x, body: "Written offline." } : x)) };
+    localStorage.setItem("studio.unsaved.t1", JSON.stringify({ at: new Date().toISOString(), manuscript: local }));
+    const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const banner = await screen.findByRole("alert", { name: "Unsaved changes found on this device" });
+    fireEvent.click(within(banner).getByRole("button", { name: "Discard…" }));
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("alert", { name: "Unsaved changes found on this device" })).toBeTruthy();
+    fireEvent.click(within(banner).getByRole("button", { name: "Discard…" }));
+    await waitFor(() => expect(screen.queryByRole("alert", { name: "Unsaved changes found on this device" })).toBeNull());
+    expect(localStorage.getItem("studio.recovery.t1")).toBeNull();
+    expect(f.saved().sections[0].body).toBe("God's people lived among nations.\n\nThese spirits had names.");
+    confirm.mockRestore();
+  });
+
+  it("does not report a book the server saved and tidied as unsaved", async () => {
+    const f = fake();
+    // the same writing, stored differently (extra fields, timestamps, other key order)
+    const local = { history: [], sections: f.saved().sections.map((x) => ({ body: x.body, title: x.title, kind: x.kind, id: x.id, pageNotes: [{ page: "3", text: "  " }] })), rules: f.saved().rules, title: f.saved().title, meta: { draft: true } };
+    localStorage.setItem("studio.unsaved.t1", JSON.stringify({ at: new Date().toISOString(), manuscript: local }));
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    await screen.findByRole("complementary", { name: "Claude" });
+    expect(screen.queryByRole("alert", { name: "Unsaved changes found on this device" })).toBeNull();
+    expect(localStorage.getItem("studio.unsaved.t1")).toBeNull();
   });
 
   it("adds a note on a page in Notes, and opens focus mode and leaves it with Escape", async () => {
