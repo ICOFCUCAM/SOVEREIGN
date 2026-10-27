@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, Check, Cpu, Focus, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Pencil, Plus, Search, Sparkles, Trash2, X } from "lucide-react";
+import { AlertTriangle, Check, Cpu, Focus, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Search, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { getStoredTheme, setTheme, type Theme } from "@/lib/theme";
 import { importText, insertSection, kindDef, type Manuscript } from "@/lib/manuscript";
@@ -102,6 +103,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [viewing, setViewing] = useState<string | null>(null);
   const [retry, setRetry] = useState<{ action: StudioAction; options: RunOptions; why: string } | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
+  const [sheet, setSheet] = useState(false);
   const lastRun = useRef<{ action: StudioAction; options: RunOptions } | null>(null);
   const abort = useRef<AbortController | null>(null);
   const rulesRef = useRef<HTMLTextAreaElement>(null);
@@ -234,11 +236,12 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const pendingIds = Object.keys(sr.proposals);
   const hasUploads = thread.files.some((f) => f.kind === "original");
   const state = !section || place !== "write" ? null : proposal ? (view === "original" ? "Viewing the earlier version" : "Reviewing a suggestion") : view === "original" && section.original ? "Viewing the earlier version" : "Editing";
-  const showPanel = place === "write" && panelOpen && !focus && view !== "mine";
+  // On narrow screens the panel is a sheet the owner opens; it never covers the page by itself.
+  const showPanel = place === "write" && !focus && view !== "mine" && (narrow ? sheet : panelOpen);
   const busy = Boolean(live) || Boolean(sr.running);
 
   const panel = section && m ? (
-    <ClaudePanel mode={panelMode} onMode={setPanelMode} onClose={() => setPanelOpen(false)}
+    <ClaudePanel mode={panelMode} onMode={setPanelMode} onClose={() => (narrow ? setSheet(false) : setPanelOpen(false))}
       thread={thread} live={live} onStopLive={() => { if (live) void backend.cancel(live.job); }} onChat={(message) => start("chat", { message })} chatBusy={busy || !engineId}
       onOpenResult={setViewing} onAction={setDialog} onTool={(t) => setTool({ initial: t })} onJoin={() => setJoining(true)}
       m={m} section={section} hasUploads={hasUploads} engine={engineId} citationStyles={p.citationStyles}
@@ -295,7 +298,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       </button>
       {place === "write" && <button type="button" onClick={() => setFocus(true)} aria-label="Focus mode (⌘.)" title="Focus mode (⌘.)" className="grid h-9 w-9 place-items-center rounded-md text-[#475569] hover:bg-muted dark:text-[#CBD5E1]"><Focus className="h-4 w-4" /></button>}
       <button type="button" onClick={toggleTheme} aria-label="Light, dark or system theme" title="Theme" className="grid h-9 w-9 place-items-center rounded-md text-[#475569] hover:bg-muted dark:text-[#CBD5E1]"><Moon className="h-4 w-4" /></button>
-      {place === "write" && !panelOpen && <Button size="sm" variant="outline" className="h-9" onClick={() => setPanelOpen(true)} aria-label="Open the Claude panel (⌘\\)"><PanelRightOpen className="h-4 w-4" /> Claude</Button>}
+      {place === "write" && (narrow || !panelOpen) && <Button size="sm" variant="outline" className="h-9" onClick={() => (narrow ? setSheet(true) : setPanelOpen(true))} aria-label="Open the Claude panel (⌘\\)"><PanelRightOpen className="h-4 w-4" /><span className="hidden sm:inline">Claude</span></Button>}
     </header>
   );
 
@@ -309,6 +312,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       ) : (
         <Shell p={p} place={place} setPlace={setPlace} collapsed={collapsed} setCollapsed={setCollapsed} drawer={drawer} setDrawer={setDrawer}
           m={m} sectionId={sectionId} onSection={openSection} pending={pendingIds[0] ?? null} title={thread.title}
+          onRename={() => setRenaming(thread.title)}
+          onDelete={busy ? undefined : async () => { if (!window.confirm(`Delete “${thread.title}” with its documents and results? Anything saved to your Library stays.`)) return; try { await backend.remove(id); p.onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}
           header={top} side={showPanel && !narrow ? panel : null} reduce={reduce}>
           {retry && (
             <div role="alert" className="mx-auto mb-6 flex w-full max-w-[720px] flex-wrap items-center gap-3 rounded-[10px] border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-[13.5px]">
@@ -317,14 +322,21 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
               <Button size="sm" variant="ghost" onClick={() => setRetry(null)}>Dismiss</Button>
             </div>
           )}
-          {place !== "books" && place !== "voice" && <ProjectTitle thread={thread} renaming={renaming} setRenaming={setRenaming} onSave={async (t) => { setThread(await backend.rename(id, t)); titleRef.current = t; p.onChanged(); }}
-            onDelete={async () => { if (!window.confirm(`Delete “${thread.title}” with its documents and results? Anything saved to your Library stays.`)) return; try { await backend.remove(id); p.onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }} disabled={busy} />}
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={place} initial={reduce ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={reduce ? undefined : { opacity: 0 }} transition={{ duration: 0.16 }}>{stage}</motion.div>
           </AnimatePresence>
         </Shell>
       )}
-      {narrow && <Sheet open={showPanel} onOpenChange={(v) => setPanelOpen(v)}><SheetContent side="right" className="w-[320px] p-0 sm:max-w-[320px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
+      <Dialog open={renaming !== null} onOpenChange={(v) => { if (!v) setRenaming(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>Rename the project</DialogTitle></DialogHeader>
+          <form onSubmit={async (e) => { e.preventDefault(); const t = (renaming ?? "").trim(); if (t) { setThread(await backend.rename(id, t)); titleRef.current = t; p.onChanged(); } setRenaming(null); }} className="space-y-4">
+            <Input value={renaming ?? ""} onChange={(e) => setRenaming(e.target.value)} aria-label="Project name" autoFocus />
+            <DialogFooter><Button type="button" variant="ghost" onClick={() => setRenaming(null)}>Cancel</Button><Button type="submit">Save</Button></DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[320px] p-0 sm:max-w-[320px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
 
       <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
         onResult={setViewing} onView={(v) => { setPlace("write"); setView(v); }} onFocus={() => { setPlace("write"); setFocus(true); }} onPanel={() => setPanelOpen(!panelOpen)} onTheme={toggleTheme} />
@@ -337,15 +349,15 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
 }
 
 /** Frame + header + stage + optional Claude panel, laid out for the screen size (spec §3). */
-function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, reduce, children }: {
+function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, reduce, onRename, onDelete, children }: {
   p: WorkspaceProps; place: Place; setPlace: (x: Place) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; drawer: boolean; setDrawer: (v: boolean) => void;
   m: Manuscript | null | undefined; sectionId: string | null; onSection: (id: string) => void; pending: string | null; title: string;
-  header?: React.ReactNode; side?: React.ReactNode; reduce?: boolean; children: React.ReactNode;
+  header?: React.ReactNode; side?: React.ReactNode; reduce?: boolean; onRename?: () => void; onDelete?: () => void; children: React.ReactNode;
 }) {
   const frame = (rail: boolean) => (
     <Frame collapsed={rail} onCollapse={setCollapsed} place={place} onPlace={setPlace} threads={p.threads} activeId={p.id} onProject={(x) => { setDrawer(false); p.onProject(x); }}
       onNewProject={() => { setDrawer(false); void p.onNewProject(); }} ready={p.ready} title={title} m={m} sectionId={sectionId} onSection={(x) => { setDrawer(false); onSection(x); }} pending={pending}
-      decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} />
+      decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} onRename={onRename} onDelete={onDelete} />
   );
   return (
     <div className="fixed inset-0 z-[60] flex bg-[#F7F6F2] text-[#172033] dark:bg-[#0D1016] dark:text-[#E5E7EB]">
@@ -365,22 +377,6 @@ function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer,
         </div>
       </div>
     </div>
-  );
-}
-
-function ProjectTitle({ thread, renaming, setRenaming, onSave, onDelete, disabled }: { thread: StudioThread; renaming: string | null; setRenaming: (v: string | null) => void; onSave: (t: string) => Promise<void>; onDelete: () => void; disabled: boolean }) {
-  if (renaming === null) return (
-    <div className="mx-auto mb-2 flex w-full max-w-[1080px] items-center justify-end gap-1 text-[12px] text-[#64748B]">
-      <span className="mr-1 truncate">Project: {thread.title}</span>
-      <button type="button" onClick={() => setRenaming(thread.title)} aria-label="Rename the project" className="grid h-7 w-7 place-items-center rounded-md hover:bg-muted"><Pencil className="h-3.5 w-3.5" /></button>
-      <button type="button" onClick={onDelete} disabled={disabled} aria-label="Delete the project" className="grid h-7 w-7 place-items-center rounded-md hover:bg-muted disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" /></button>
-    </div>
-  );
-  return (
-    <form className="mx-auto mb-4 flex w-full max-w-[1080px] items-center justify-end gap-2" onSubmit={async (e) => { e.preventDefault(); if (renaming.trim()) await onSave(renaming.trim()); setRenaming(null); }}>
-      <Input value={renaming} onChange={(e) => setRenaming(e.target.value)} aria-label="Project name" className="h-8 max-w-xs text-[13px]" autoFocus />
-      <Button size="sm" type="submit" className="h-8">Save</Button><Button size="sm" type="button" variant="ghost" className="h-8" onClick={() => setRenaming(null)}>Cancel</Button>
-    </form>
   );
 }
 
