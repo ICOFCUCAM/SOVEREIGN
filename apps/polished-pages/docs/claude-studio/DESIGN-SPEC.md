@@ -313,3 +313,9 @@ Found by comparing every button and label of the Studio before the redesign (`Cl
 - [x] "Next chapter" in the guided rewrite: dropped in 0c6b15ef; restored (§17f).
 - Removed with notice, not restored: the Plan outline style "Restructure" (it added chapters beside the old ones instead of restructuring); restructuring is in Rebuild as a professional book and in the Book wizard's Restructure mode.
 - Renamed, not dropped (checked): Restore original → "Put this version back"; Put them back → "Restore these changes"; Correct these with Claude → "Correct N selected with Claude"; Delete project → "Delete this project"; drag-and-drop upload, Check again, Run it on the API, Lost the live view and the engine modes are all present.
+
+### 17i. Studio and Library, linked both ways (27 October 2026, owner: "there seems to be no connection from the Studio to the Library")
+- [x] Studio → Library: "In your Library" in the top bar opens the project's Library book; Finish → Save to Library updates that one book; a result saved to the Library is linked to its project, and saving it again updates the same Library book ("Update in Library") instead of adding a copy (`parts.test.tsx` "result viewer and the Library").
+- [x] Library → Studio: a book made in the Studio links to "Finish in Claude Studio" (its project); any other book offers the owner (admins only, never customers) "Work on it in Claude Studio" (`/admin/claude?import=<id>`).
+- [x] "Work in Studio" (My books and the Library) links both ways: the new project's manuscript records its Library book and the Library book records its project; a book that already has a project opens that project instead of creating another.
+- Limit: Library books saved before this change carry no project link; "Work on it in Claude Studio" makes a new project for them (and links it from then on).

@@ -9,6 +9,7 @@ import "@fontsource/newsreader/400.css";
 import "@fontsource/newsreader/500.css";
 import "@fontsource/newsreader/400-italic.css";
 import { importText } from "@/lib/manuscript";
+import { getDocument, updateDocument } from "@/lib/documents";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
 import { apiCoverCopyWriter, browserBackend, decideEngine, runnerBackend, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
 import { isAdmin } from "@/lib/documents";
@@ -88,6 +89,40 @@ function Studio() {
     loadThreads().then((t) => setActiveId((id) => (wanted && t.some((x) => x.id === wanted) ? wanted : id && t.some((x) => x.id === id) ? id : t[0]?.id ?? null)));
   }, [ready, loadThreads]);
 
+  /**
+   * A Library book in the Studio, linked both ways: the project's manuscript knows its Library book (Finish
+   * updates that book instead of adding another), and the Library book knows its project (its page links
+   * back). A book that already has a project opens that project.
+   */
+  const workInStudio = useCallback(async (title: string, markdown: string, docId?: string) => {
+    const doc = docId ? await getDocument(docId).catch(() => null) : null;
+    const payload = (doc?.payload ?? {}) as Record<string, unknown>;
+    const existing = typeof payload.studioProject === "string" ? payload.studioProject : null;
+    const all = await loadThreads();
+    if (existing && all.some((x) => x.id === existing)) { setActiveId(existing); try { localStorage.setItem("studio.place", "plan"); } catch { /* preference */ } return; }
+    const t = await backend.create(title);
+    await backend.upload(t.id, new File([markdown], `${title.replace(/[^\p{L}\p{N} _-]+/gu, "").trim() || "book"}.md`, { type: "text/markdown" }));
+    await backend.saveManuscript(t.id, { ...importText(title, markdown), ...(docId ? { libraryId: docId } : {}) });
+    if (docId && doc) await updateDocument(docId, { ...payload, studioProject: t.id }, typeof doc.preview === "string" ? doc.preview : undefined).catch(() => {});
+    await loadThreads();
+    setHandoff({ id: t.id, view: "manuscript" }); setActiveId(t.id);
+    try { localStorage.setItem("studio.place", "write"); } catch { /* preference */ }
+  }, [backend, loadThreads]);
+
+  // ?import=<Library book id> (the Library's "Work on it in Claude Studio") brings that book in once.
+  useEffect(() => {
+    if (!ready) return;
+    const q = new URLSearchParams(window.location.search);
+    const id = q.get("import");
+    if (!id) return;
+    q.delete("import"); window.history.replaceState(null, "", `${window.location.pathname}${q.toString() ? `?${q}` : ""}`);
+    getDocument(id).then((d) => {
+      if (!d || d.kind !== "book") throw new Error("That Library book wasn't found.");
+      const p = (d.payload ?? {}) as Record<string, unknown>;
+      return workInStudio(String(p.title ?? d.title), String(p.markdown ?? ""), id);
+    }).catch((e) => toast({ title: "Couldn't bring the book in", description: e instanceof Error ? e.message : "", variant: "destructive" }));
+  }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const newProject = async () => {
     try { const t = await backend.create("Untitled project"); await loadThreads(); setActiveId(t.id); }
     catch (e) { toast({ title: "Could not create the project", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
@@ -115,14 +150,7 @@ function Studio() {
         } catch (e) { toast({ title: "Couldn't check", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
         refreshMe();
       }}
-      onWorkInStudio={async (title, markdown) => {
-        const t = await backend.create(title);
-        await backend.upload(t.id, new File([markdown], `${title.replace(/[^\p{L}\p{N} _-]+/gu, "").trim() || "book"}.md`, { type: "text/markdown" }));
-        await backend.saveManuscript(t.id, importText(title, markdown));
-        await loadThreads();
-        setHandoff({ id: t.id, view: "manuscript" }); setActiveId(t.id);
-        try { localStorage.setItem("studio.place", "write"); } catch { /* preference */ }
-      }}
+      onWorkInStudio={workInStudio}
       onLearnVoice={async (books) => {
         if (!decision.active) throw new Error(decision.reason);
         const t = await backend.create("My voice samples");

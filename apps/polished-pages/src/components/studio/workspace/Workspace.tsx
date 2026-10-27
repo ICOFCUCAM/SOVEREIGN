@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, Check, CloudOff, FileText, Cpu, Focus, History, LifeBuoy, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Redo2, Search, Sparkles, Undo2, WifiOff, X } from "lucide-react";
+import { AlertTriangle, Check, CloudOff, FileText, Library as LibraryIcon, Cpu, Focus, History, LifeBuoy, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Redo2, Search, Sparkles, Undo2, WifiOff, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -56,7 +57,7 @@ export interface WorkspaceProps {
   threads: StudioThreadSummary[] | null; onProject: (id: string) => void; onNewProject: () => Promise<void>;
   handoff: { view?: "assistant" | "manuscript"; run?: { action: StudioAction; options: RunOptions } } | null; onHandoffUsed: () => void;
   onChanged: () => void; onDeleted: () => void;
-  onWorkInStudio: (title: string, markdown: string) => Promise<void>; onLearnVoice: (books: { title: string; markdown: string }[]) => Promise<void>;
+  onWorkInStudio: (title: string, markdown: string, docId?: string) => Promise<void>; onLearnVoice: (books: { title: string; markdown: string }[]) => Promise<void>;
   notice?: React.ReactNode;
   /** Finds a Library book's saved front cover; the dev preview passes a stand-in. */
   findCover?: (libraryId: string) => Promise<string | null>;
@@ -394,6 +395,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       </span>
       {live && <button type="button" onClick={() => { if (section && m && !narrow) { setPlace("write"); setPanelOpen(true); setPanelMode("ask"); } else setActivity(true); }} className="hidden items-center gap-1.5 rounded-full bg-[#EFF6FF] px-2.5 py-1 text-[12px] font-medium text-[#1D4ED8] sm:flex dark:bg-[#172554] dark:text-[#93C5FD]"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> {live.job.label}</button>}
       {!live && p.busyElsewhere && <span className="hidden items-center gap-1.5 rounded-full bg-[#FFFBEB] px-2.5 py-1 text-[12px] font-medium text-[#92400E] sm:flex dark:bg-amber-500/15 dark:text-amber-300"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> Claude is busy in another project</span>}
+      {m?.libraryId && <Link to={`/library?open=${m.libraryId}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted md:flex dark:text-[#CBD5E1]" title="This project's book in your Library"><LibraryIcon className="h-4 w-4" /> In your Library</Link>}
       {(thread.outputs.length > 0 || live || !section) && <button type="button" onClick={() => setActivity(true)} aria-label={`Results: ${thread.outputs.length}${live ? `, ${live.job.label} running` : ""}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted sm:flex dark:text-[#CBD5E1]"><FileText className="h-4 w-4" /> {section && m ? "Results" : "Ask Claude · Results"} <span className="text-[12px] text-[#94A3B8]">{thread.outputs.length}</span></button>}
       <button type="button" onClick={() => setPalette(true)} className="flex h-9 items-center gap-2 rounded-[8px] border border-[#E6E8ED] bg-white px-2.5 text-[13px] text-[#64748B] hover:border-[#CBD5E1] dark:border-white/10 dark:bg-white/5">
         <Search className="h-4 w-4" /><span className="hidden lg:inline">Tools and chapters</span><kbd className="rounded border border-[#E6E8ED] bg-[#F8FAFC] px-1.5 text-[11px] text-[#475569] dark:border-white/10 dark:bg-white/5">⌘K</kbd>

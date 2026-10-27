@@ -1,11 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { ActionDialog, setPendingTarget } from "./parts";
 
 // The toasts the viewer shows, so tests can read what the owner is told.
 const toasts = vi.hoisted(() => [] as { title?: string; description?: string }[]);
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: (t: { title?: string; description?: string }) => { toasts.push(t); } }) }));
 import type { ApprovalSummary, ResultHistory, StudioThread } from "@/lib/claude-studio";
+const docs = vi.hoisted(() => ({ save: vi.fn(async () => "doc-9"), update: vi.fn(async () => {}) }));
+vi.mock("@/lib/documents", () => ({ saveDocument: docs.save, updateDocument: docs.update }));
 
 const thread: StudioThread = { id: "t1", title: "Demonology I", createdAt: "", updatedAt: "", sessionId: null, messages: [],
   files: [{ name: "demonology.pdf", storedAs: "demonology.pdf", kind: "original", bytes: 10, at: "" }],
@@ -172,3 +175,21 @@ describe("review status", () => {
     expect(resultStatus({ path: "rewrite.md", versions: [v(1)], approval }, true).tone).toBe("unsaved");
   });
 });
+
+describe("result viewer and the Library", () => {
+  it("saves a result to the Library linked to its project, and a second save updates the same book", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    localStorage.clear();
+    const backend = fakeBackend("# Demonology I\n\n## One\n\n" + "Proofread text of the book, long enough to be a real chapter of prose. ".repeat(40));
+    const { unmount } = render(<MemoryRouter><ResultViewer backend={backend} threadId="t1" path="proofread.md" projectTitle="Demonology" onClose={() => {}} onUseAsTarget={() => {}} /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: /Save to Library as a book/ }));
+    await waitFor(() => expect(docs.save).toHaveBeenCalledTimes(1));
+    expect(docs.save.mock.calls[0][0]).toMatchObject({ kind: "book", payload: expect.objectContaining({ studioProject: "t1" }) });
+    unmount();
+    render(<MemoryRouter><ResultViewer backend={backend} threadId="t1" path="proofread.md" projectTitle="Demonology" onClose={() => {}} onUseAsTarget={() => {}} /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: /Update in Library/ }));
+    await waitFor(() => expect(docs.update).toHaveBeenCalledWith("doc-9", expect.objectContaining({ studioProject: "t1" }), expect.any(String)));
+    expect(docs.save).toHaveBeenCalledTimes(1);
+  });
+});
+
