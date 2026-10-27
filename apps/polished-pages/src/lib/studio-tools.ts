@@ -2,7 +2,7 @@
 // on Claude Code (the runner holds those prompts, file-based) and on the API
 // (the prompts below, applied chapter by chapter by studio-api.ts).
 
-export type ToolId = "series" | "voice-profile" | "voice" | "proofread" | "factcheck" | "quotes" | "translate" | "marketing" | "studyguide" | "index" | "compare" | "readability" | "ocr";
+export type ToolId = "series" | "voice-profile" | "voice" | "proofread" | "factcheck" | "quotes" | "translate" | "marketing" | "studyguide" | "index" | "compare" | "readability" | "editorial-review" | "ocr";
 
 export interface ToolField {
   key: string;
@@ -73,6 +73,7 @@ export const STUDIO_TOOLS: StudioTool[] = [
     fields: [{ key: "a", label: "Version A", type: "source" }, { key: "b", label: "Version B", type: "source" }] },
   { id: "readability", title: "Readability & audience review", line: "Reading level and what would help readers", icon: "gauge", output: () => "readability.md",
     fields: [{ key: "audience", label: "Intended readers", type: "text", placeholder: "e.g. teenagers, new believers" }] },
+  { id: "editorial-review", title: "Editorial review (Claude's judgement)", line: "Contradictions, unsupported conclusions, certainty, voice: what code can't check", icon: "check", output: () => "editorial-review.md", fields: [] },
   { id: "ocr", title: "Read scanned pages", line: "Scans and image PDFs into text", icon: "scan", claudeOnly: true, output: () => "scanned-text.md", fields: [] },
 ];
 
@@ -111,6 +112,9 @@ export const SECTION_POLICY = [
   "Use italics, not capital letters, for emphasis, keeping the author's force.",
   "Claims about groups of people (sexuality, mental illness, disability, health) keep the author's wording and certainty, never stronger, and never as medical or established fact unless the author cites evidence.",
 ];
+
+/** The judgement-level review's brief, word for word on both engines. */
+export const EDITORIAL_REVIEW = "Read the whole book and write an editorial review of the matters that need judgement, which code cannot check: contradictions between chapters (quote both places); conclusions the text does not support; claims stated with more certainty than their basis (scripture, interpretation, testimony, speculation); places where testimony, exhortation and analysis are mixed without the reader being told which is which; points that accumulate without synthesis, and weak transitions; claims about groups of people stated as fact; and whether the front matter describes the book that follows. For each finding give the chapter or heading, a short quotation, why it matters and a suggested correction that keeps the author's meaning and convictions. Do not rewrite the book, do not add new teaching, and do not judge the author's theology: report how it is presented.";
 
 type O = Record<string, unknown>;
 const s = (v: unknown, d = "") => (typeof v === "string" && v.trim() ? v.trim() : d);
@@ -168,6 +172,10 @@ ${t}`,
       return { part: (t, i, n) => (n > 1 ? `Summarise this part of a book in 200 words for a marketer: its themes, promise and best lines. ${where(i, n)}\n\n${t}` : t),
         finish: (p) => `Write a marketing pack for this book (${p.length > 1 ? "from these part summaries" : "full text below"}). Readers: ${s(o.audience, "the book's intended readers")}. Tone: ${s(o.tone, "warm and credible")}.
 Include: three title/subtitle options; a one-line hook; a 150-word blurb; back-cover copy (about 200 words); a store description (about 400 words); 7 keywords; 3 BISAC categories; an author bio template with [placeholders]; 5 social posts; a short press release. Never invent endorsements, sales or facts about the author. Start with "# Marketing pack".\n\n${p.join("\n\n")}` };
+    case "editorial-review":
+      // A judgement, labelled as such (DESIGN-SPEC.md §16): it never replaces the code checks.
+      return { part: (t, i, n) => (n > 1 ? `Note, for an editorial review of a whole book, what this part claims and how firmly, where it relies on scripture, interpretation, testimony or speculation, and any passage that contradicts itself or lacks support (quote briefly, with headings). ${where(i, n)}\n\n${t}` : t),
+        finish: (p) => `${EDITORIAL_REVIEW} ${p.length > 1 ? "Use these notes on each part of the book." : "The book is below."} Start with "# Editorial review (Claude's judgement)" and a one-line note that this is a model's reading for the author to weigh, not a check.\n\n${p.join("\n\n")}` };
     case "readability":
       return { part: (t, i, n) => (n > 1 ? `Assess the readability of this part for ${s(o.audience, "its intended readers")}: reading level, hardest passages (quoted, with simpler versions), jargon, pacing. ${where(i, n)}\n\n${t}` : t),
         finish: (p) => `Write a readability and audience review for ${s(o.audience, "the intended readers")} (${p.length > 1 ? "from these part assessments" : "full text below"}): estimated reading level with reasoning, sentence and paragraph length, hardest passages with simpler versions, jargon to explain, pacing by chapter, tone and sensitivity notes, and the ten most helpful changes. Start with "# Readability review".\n\n${p.join("\n\n")}` };

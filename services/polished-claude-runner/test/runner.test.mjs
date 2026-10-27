@@ -396,3 +396,34 @@ test("a targeted correction fixes the listed problems only and writes a separate
   assert.ok(r.prompt.startsWith("Correct the file ./out/rewrite.md") && r.prompt.includes("./out/corrected.md") && r.prompt.includes("./out/corrected-notes.md"));
   assert.ok(!r.prompt.includes("rewrite-analysis.md"));
 });
+
+test("book results keep numbered versions, refuse a save over a newer version, and record the owner's approval", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Versions" } })).json();
+  const rec = (text) => call(`/v1/threads/${thread.id}/record`, { method: "POST", body: { action: "rewrite", label: "Rewrite", text: "done", outputs: { "rewrite.md": text } } });
+  await rec("# Book\n\nFirst rewrite.");
+  await rec("# Book\n\nSecond rewrite.");
+  let h = (await (await call(`/v1/threads/${thread.id}/history/rewrite.md`)).json()).history;
+  assert.deepEqual(h.versions.map((v) => [v.n, v.op]), [[1, "Rewrite (API)"], [2, "Rewrite (API)"]]);
+  // the first rewrite is still readable
+  assert.equal((await (await call(`/v1/threads/${thread.id}/history/rewrite.md?n=1`)).json()).text, "# Book\n\nFirst rewrite.");
+  // a save based on an older version is refused, so newer work is never overwritten
+  const stale = await call(`/v1/threads/${thread.id}/outputs/rewrite.md`, { method: "PUT", body: { text: "# Book\n\nEdited.", base: 1 } });
+  assert.equal(stale.status, 409);
+  const ok = await call(`/v1/threads/${thread.id}/outputs/rewrite.md`, { method: "PUT", body: { text: "# Book\n\nEdited.", base: 2, op: "Edited by the owner" } });
+  h = (await ok.json()).history;
+  assert.deepEqual(h.versions.map((v) => v.n), [1, 2, 3]);
+  assert.equal((await (await call(`/v1/threads/${thread.id}/outputs/rewrite.md`)).json()).text, "# Book\n\nEdited.");
+  // only whole-book results are versioned this way
+  assert.equal((await call(`/v1/threads/${thread.id}/outputs/summary.md`, { method: "PUT", body: { text: "x" } })).status, 400);
+  // approval: latest version only, never with blockers, recorded with who and when
+  assert.equal((await call(`/v1/threads/${thread.id}/approve/rewrite.md`, { method: "POST", body: { version: 2, summary: { blockers: 0 } } })).status, 409);
+  assert.equal((await call(`/v1/threads/${thread.id}/approve/rewrite.md`, { method: "POST", body: { version: 3, summary: { blockers: 2 } } })).status, 400);
+  h = (await (await call(`/v1/threads/${thread.id}/approve/rewrite.md`, { method: "POST", body: { version: 3, summary: { blockers: 0, reviews: 2, decided: 2, checks: ["structure"] } } })).json()).history;
+  assert.equal(h.approval.version, 3);
+  assert.equal(h.approval.by, "owner@example.com");
+  // a new version leaves the approval on the old one, so the app shows it as lapsed
+  await rec("# Book\n\nThird rewrite.");
+  h = (await (await call(`/v1/threads/${thread.id}/history/rewrite.md`)).json()).history;
+  assert.equal(h.versions.at(-1).n, 4);
+  assert.equal(h.approval.version, 3);
+});

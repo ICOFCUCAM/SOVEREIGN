@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -168,5 +168,59 @@ export function createStore(dataDir) {
       if (!p) return null;
       try { return await fs.readFile(p, "utf8"); } catch { return null; }
     },
+    async writeOutput(id, rel, text) {
+      const p = inside(path.join(workDir(id), "out"), rel);
+      if (!p || !/\.(md|txt)$/i.test(rel)) return false;
+      await fs.mkdir(path.dirname(p), { recursive: true });
+      await fs.writeFile(p + ".tmp", String(text));
+      await fs.rename(p + ".tmp", p);
+      return true;
+    },
+    // Versions of whole-book results (DESIGN-SPEC.md §16): every content a result
+    // has had, numbered, kept outside ./out/ so Claude never reads or edits them,
+    // and the owner's approval of one version as publication-ready.
+    history: (id, rel) => readHistory(id, rel),
+    async recordVersion(id, rel, op, label) {
+      if (!isBookResult(rel)) return null;
+      const text = await this.readOutput(id, rel);
+      if (text == null) return readHistory(id, rel);
+      const h = await readHistory(id, rel);
+      const hash = createHash("sha256").update(text).digest("hex");
+      const last = h.versions[h.versions.length - 1];
+      if (last?.hash === hash) return h;
+      const n = (last?.n ?? 0) + 1;
+      const d = versionDir(id, rel);
+      await fs.mkdir(d, { recursive: true });
+      await fs.writeFile(path.join(d, `${n}.md`), text);
+      h.versions.push({ n, at: new Date().toISOString(), op: String(op || "Saved").slice(0, 80), ...(label ? { label: String(label).slice(0, 120) } : {}), bytes: Buffer.byteLength(text), words: (text.match(/\S+/g) ?? []).length, hash });
+      // Keep the newest 30; the numbers never repeat.
+      for (const old of h.versions.splice(0, Math.max(0, h.versions.length - 30))) await fs.rm(path.join(d, `${old.n}.md`), { force: true });
+      await writeHistory(id, rel, h);
+      return h;
+    },
+    async readVersion(id, rel, n) {
+      try { return await fs.readFile(path.join(versionDir(id, rel), `${Number(n)}.md`), "utf8"); } catch { return null; }
+    },
+    async approve(id, rel, approval) {
+      const h = await readHistory(id, rel);
+      h.approval = approval;
+      await writeHistory(id, rel, h);
+      return h;
+    },
   };
+
+  function versionDir(id, rel) { return path.join(dir(id), "versions", rel.replace(/[^\w.-]+/g, "_")); }
+  async function readHistory(id, rel) {
+    try { return { approval: null, ...JSON.parse(await fs.readFile(path.join(versionDir(id, rel), "index.json"), "utf8")), path: rel }; }
+    catch { return { path: rel, versions: [], approval: null }; }
+  }
+  async function writeHistory(id, rel, h) {
+    const d = versionDir(id, rel);
+    await fs.mkdir(d, { recursive: true });
+    await fs.writeFile(path.join(d, "index.json.tmp"), JSON.stringify(h));
+    await fs.rename(path.join(d, "index.json.tmp"), path.join(d, "index.json"));
+  }
 }
+
+/** Whole-book results that keep versions (the app has the same list in src/lib/claude-studio.ts). */
+export const isBookResult = (rel) => /^(rewrite|corrected|voice|cited)\.md$/.test(String(rel));

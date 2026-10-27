@@ -215,7 +215,7 @@ The rewrite against the uploaded originals, with the book's rules applied to the
 - [x] Check in the result viewer, on section suggestions and in Finish readiness (`EditorialCheck.test.tsx`; Finish export waits for problems to fix)
 - [x] Run on the owner's real Demonology I rewrite: it reported "nothing blocks publishing", which exposed the formats the audit did not read (fixed in §16a)
 - [x] Targeted correction: "Correct these with Claude" in the check opens the rewrite dialog as a correction with the findings filled in (editable); both engines fix only those and write a separate "Corrected book" with notes (runner test "a targeted correction…", `parts.test.tsx`, `EditorialCheck.test.tsx`)
-- [ ] Judgement-level review by a model as a separate, labelled pass (coherence of arguments, contradictions in meaning), never replacing the code checks
+- [x] Judgement-level review by a model as a separate, labelled pass (coherence of arguments, contradictions in meaning), never replacing the code checks (§16b)
 
 ## 16. Rewritten-book review workflow (adopted October 2026; governing source, verbatim: `source/2026-10-review-workflow-brief.md`)
 The owner showed the live preview of the real Demonology I rewrite reporting "nothing blocks publishing, 3 to review" on a book the §15 review had found full of defects, and forwarded a brief: keep the interface, but make the check an evidence-based report, add the comparison with the original, version history, and a publication approval separate from saving.
@@ -232,18 +232,23 @@ The audit read only Markdown headings and plain brackets. Real rewrites write se
 | Whole-manuscript validation (§2.3, instruction 4) | Headings only | Plus bold and stand-alone labels, escaped markers, references without usable entries, **cross-references** to numbers the book lacks; front/back matter in Finish readiness (§9) |
 | Meaning and fidelity (§2.4, instruction 5) | §15d | Unchanged, plus the paragraph-level comparison |
 | Targeted corrections (instruction 6) | Correct all findings | **Correct the selected findings** (each with its suggested correction); the result is a separate "Corrected book" checked again on opening, so nothing is marked resolved because a correction was generated. Sections: Write's section actions; a whole chapter: Plan/Write |
-| Version history for rewrite results (§2.5, instruction 7) | Manuscript sections have versions (§6); a rewrite result is overwritten by the next rewrite; a correction writes `corrected.md` beside it | **Open** (needs a runner endpoint to keep numbered result versions, with parity in browser storage) |
-| Publication approval separate from saving (§2.6, instruction 8) | Finish readiness gates export; saving to the Library asks when problems remain | **Open**: an "Approve as publication-ready" record with who and when, available only when the checks pass and the review items are decided |
-| AI review for judgement (instruction 4) | — | **Open** (§15f), labelled separately from the code checks |
+| Version history for rewrite results (§2.5, instruction 7) | Manuscript sections have versions (§6); a rewrite result is overwritten by the next rewrite; a correction writes `corrected.md` beside it | **Versions**: every content of `rewrite.md`, `corrected.md`, `voice.md` and `cited.md` is a numbered version (rerun, correction, API result, saved edit, restore; newest 30), kept by the runner outside `./out/` (so Claude never edits them) and in browser storage when the runner is offline; open any version read only or compared with the current text, restore it as a new version; edits are saved as a version with the version they were based on, and a save over a newer version is refused with the reason (runner test "book results keep numbered versions…", `parts.test.tsx`) |
+| Publication approval separate from saving (§2.6, instruction 8) | Finish readiness gates export; saving to the Library asks when problems remain | **Approve for publication**: a dialog runs every check (code and, with the original, faithfulness), lists what passed, refuses while anything blocks, and asks the author to decide each review item (dismissed items count); the runner records the version, who and when, and refuses approval of anything but the latest saved version or with blockers; the approval lapses when a newer version is saved, and the status says so. Status beside the title: Draft · version N, Edited (not saved as a version), Approved for publication, or the lapsed approval. Saving to the Library records draft or approved with the version; exports (.md, Word, EPUB) are named "draft" until approved |
+| AI review for judgement (instruction 4) | — | **Editorial review (Claude's judgement)**: a tool on both engines (same brief, test-enforced) reading the whole book for contradictions, unsupported conclusions, certainty against its basis, mixed voices, missing synthesis, claims about groups and front matter; labelled as a model's reading, not a check; never changes the text or replaces the code checks; reachable from the viewer (More) and the approval dialog, which records whether one exists for the version |
 
-### 16c. Checklist
+### 16c. Limits stated plainly
+- The approval gate is enforced by the app (the checks run in the browser) and recorded by the runner; the runner refuses an approval reported with blockers or for anything but the latest version, but does not run the checks itself.
+- Dismissals of review items are remembered on the device where they were made.
+- Versions cover whole-book results; manuscript sections keep their own versions (§6).
+
+### 16d. Checklist
 - [x] Brief recorded verbatim (`source/2026-10-review-workflow-brief.md`)
 - [x] Audit reads the formats real rewrites use; honest status wording; tests built from them (`editorial-audit.test.ts` "the formats real rewrites use")
 - [x] Detailed report: codes, suggested correction, dismiss (review only), what was checked, go to the passage, correct selected (`EditorialCheck.test.tsx`, `parts.test.tsx`)
 - [x] Cross-references checked
 - [x] Compare with original, with restore per paragraph (`compare-book.test.ts`, `parts.test.tsx`)
 - [x] Unsaved edits in the viewer ask before closing
-- [ ] Versions of rewrite results (numbered, compare, restore), kept by the runner and in browser storage
-- [ ] Approve as publication-ready, separate from saving and exporting, with the approval recorded
-- [ ] Export DOCX from the viewer (the pipeline exists in Finish → Interior and export)
-- [ ] Judgement-level AI review pass, labelled as such
+- [x] Versions of rewrite results (numbered, compare, restore), kept by the runner and in browser storage; a save over a newer version is refused
+- [x] Approve as publication-ready, separate from saving and exporting, with the approval recorded and lapsing on change
+- [x] Export Word (.docx) and EPUB from the viewer through the same helper as Finish (`src/lib/book-export.ts`); drafts named as drafts
+- [x] Judgement-level AI review pass, labelled as such, on both engines

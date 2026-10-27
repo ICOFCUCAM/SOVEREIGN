@@ -178,3 +178,20 @@ The detailed report: code, severity, explanation, suggested correction, dismiss 
 Compare with original: chapter by chapter, side by side, what changed and what needs a look, with the author's original wording one click away.
 
 ![Compare with original (§16)](screenshots/37-compare-with-original.webp)
+
+### Versions and approval (§16)
+The status beside the title: draft, version, edited, approved, or a lapsed approval. Actions in one row: save (as a version, then to the Library as a draft or the approved book), approve, check, compare, edit, versions, more.
+
+![Viewer status (§16)](screenshots/38-viewer-status.webp)
+
+Versions: every rewrite, correction, saved edit and restore; an earlier version compared with the current text, restorable as a new version.
+
+![Versions (§16)](screenshots/39-versions.webp)
+
+Approve for publication: every check listed, approval refused while anything blocks, each judgement item to decide, the AI editorial review offered (not required).
+
+![Approve (§16)](screenshots/40-approve.webp)
+
+More: Word and EPUB export (named as drafts until approved) and Claude's editorial review (judgement).
+
+![Export and review (§16)](screenshots/41-export-and-review.webp)
