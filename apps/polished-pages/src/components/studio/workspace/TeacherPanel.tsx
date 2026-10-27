@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Manuscript } from "@/lib/manuscript";
-import { ask, courseContext, courseFor, indexBook, prepare, type CourseSourceInfo, type IndexProgress, type TeacherAnswer } from "@/lib/teacher/client";
+import { ask, courseContext, courseFor, indexBook, prepare, saveSettings, usageSummary, type CourseSourceInfo, type IndexProgress, type TeacherAnswer, type TeacherSettings, type UsageSummary } from "@/lib/teacher/client";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import type { SourceVersion } from "@/lib/teacher/pipeline";
 import { EYEBROW, SERIF } from "./ui";
 
@@ -14,6 +16,7 @@ const STATUS_LABEL: Record<TeacherAnswer["status"], { text: string; tone: string
   partially_covered: { text: "Partly covered by the book", tone: "text-[#B45309]" },
   not_covered: { text: "Not covered by the book", tone: "text-[#64748B]" },
   pastoral: { text: "Personal question", tone: "text-[#7C3AED]" },
+  evidence: { text: "From the book's own words", tone: "text-[#047857] dark:text-emerald-400" },
 };
 
 // The AI Teacher for this book (BLUEPRINT.md build steps 1–3, author mode):
@@ -32,12 +35,22 @@ export default function TeacherPanel({ m, ensureSaved }: { m: Manuscript; ensure
   const [answer, setAnswer] = useState<TeacherAnswer | null>(null);
   const [askError, setAskError] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
+  const [usage, setUsage] = useState<UsageSummary | null>(null);
+  const [savingSettings, setSavingSettings] = useState(false);
 
   // An existing tutor for this book (once it has been indexed).
   const refresh = async (libraryId: string) => {
     const id = await courseFor(libraryId).catch(() => null);
     const ctx = id ? await courseContext(id).catch(() => null) : null;
     setCourse(id && ctx ? { id, sources: ctx.sources } : null);
+    setUsage(id ? await usageSummary(id).catch(() => null) : null);
+  };
+  const change = async (patch: Partial<TeacherSettings>) => {
+    if (!course) return;
+    setSavingSettings(true);
+    try { await saveSettings(course.id, patch); setUsage(await usageSummary(course.id)); }
+    catch (e) { setError(e instanceof Error ? e.message : "Couldn't save the settings."); }
+    finally { setSavingSettings(false); }
   };
   useEffect(() => { if (m.libraryId) void refresh(m.libraryId); }, [m.libraryId]);
 
@@ -65,7 +78,7 @@ export default function TeacherPanel({ m, ensureSaved }: { m: Manuscript; ensure
   const send = async () => {
     if (!course || question.trim().length < 2) return;
     setAsking(true); setAskError(null); setAnswer(null); setOpen(null);
-    try { setAnswer(await ask({ courseId: course.id, question: question.trim(), level })); }
+    try { setAnswer(await ask({ courseId: course.id, question: question.trim(), level })); if (course) setUsage(await usageSummary(course.id).catch(() => usage)); }
     catch (e) { setAskError(e instanceof Error ? e.message : "The tutor could not answer."); }
     finally { setAsking(false); }
   };
@@ -128,6 +141,36 @@ export default function TeacherPanel({ m, ensureSaved }: { m: Manuscript; ensure
         {error && <p role="alert" className="mt-4 text-[13px] text-[#B45309]">{error}</p>}
       </section>
 
+      {/* How the tutor answers (BLUEPRINT.md §12): from the book only by default; AI explanations only if turned on, within caps. */}
+      {course && usage && (
+        <section aria-labelledby="t-mode-h" className="rounded-[12px] border border-[#E6E8ED] bg-white p-5 dark:border-white/10 dark:bg-[#161A22]">
+          <h3 id="t-mode-h" className="font-sans text-[15px] font-semibold">How the tutor answers</h3>
+          <p className="mt-1 text-[13px] text-[#64748B]">By default the tutor answers from your book's own words and costs nothing per question. Questions the book doesn't cover get an honest "not covered".</p>
+          <div className="mt-4 space-y-4 text-[13.5px]">
+            <label className="flex items-start gap-3">
+              <Switch checked={usage.settings.ai_answers} disabled={savingSettings} onCheckedChange={(v) => void change({ ai_answers: v })} aria-label="AI explanations" />
+              <span><span className="font-medium">AI explanations</span> <span className="text-[#64748B]">· off by default. When on, the tutor may write an explanation in its own words from the book's passages, checked before it is shown. Uses the API, billed per use, within the caps below.</span></span>
+            </label>
+            {usage.settings.ai_answers && (
+              <div className="flex flex-wrap items-center gap-3 pl-12 text-[13px]">
+                <label className="flex items-center gap-2">At most <Input type="number" min={0} className="h-8 w-24" defaultValue={usage.settings.monthly_request_cap} aria-label="AI explanations per month" onBlur={(e) => void change({ monthly_request_cap: Number(e.target.value) || 0 })} /> explanations a month</label>
+                <label className="flex items-center gap-2">and <Input type="number" min={0} className="h-8 w-32" defaultValue={usage.settings.monthly_token_cap} aria-label="Tokens per month" onBlur={(e) => void change({ monthly_token_cap: Number(e.target.value) || 0 })} /> tokens</label>
+              </div>
+            )}
+            <label className="flex items-start gap-3">
+              <Switch checked={usage.settings.vector_search} disabled={savingSettings} onCheckedChange={(v) => void change({ vector_search: v })} aria-label="Meaning-based search" />
+              <span><span className="font-medium">Meaning-based search</span> <span className="text-[#64748B]">· off by default. Finds passages by meaning as well as by words; uses OpenAI once to index the book and once per question. Re-index after turning it on.</span></span>
+            </label>
+            <p className="text-[12.5px] text-[#64748B]">Fair use: {usage.settings.per_minute} questions a minute and {usage.settings.per_day} a day per person.</p>
+          </div>
+          <div className="mt-4 border-t border-[#E6E8ED] pt-3 text-[12.5px] text-[#475569] dark:border-white/10 dark:text-[#CBD5E1]">
+            <span className="font-medium">This month:</span> {usage.requests} {usage.requests === 1 ? "question" : "questions"}
+            {Object.keys(usage.by_path).length > 0 && <> ({Object.entries(usage.by_path).map(([k, n]) => `${n} ${k === "evidence_only" ? "from the book" : k === "not_covered" ? "not covered" : k === "model" ? "with AI" : k}`).join(", ")})</>}
+            {usage.model_calls.length > 0 ? <> · paid calls: {usage.model_calls.map((c) => `${c.calls} ${c.task.replace(/_/g, " ")} (${c.provider}, ${(c.tokens_in + c.tokens_out).toLocaleString()} tokens)`).join("; ")}</> : <> · no paid calls</>}
+          </div>
+        </section>
+      )}
+
       {/* Step 3: ask the book */}
       <section aria-labelledby="t-ask-h" className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
@@ -144,7 +187,7 @@ export default function TeacherPanel({ m, ensureSaved }: { m: Manuscript; ensure
               onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); } }} />
             <div className="flex items-center gap-3">
               <Button type="submit" disabled={asking || question.trim().length < 2}>{asking ? <><Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> Reading the book…</> : <><MessageSquareQuote className="h-4 w-4" /> Ask</>}</Button>
-              <span className="text-[12px] text-[#64748B]">Runs on the API (billed per use); counted against your plan's generations.</span>
+              <span className="text-[12px] text-[#64748B]">{usage?.settings.ai_answers ? "AI explanations are on: answers may use the API (billed per use, capped)." : "Answers come from the book: no AI cost."}</span>
             </div>
           </form>
         )}
@@ -154,6 +197,17 @@ export default function TeacherPanel({ m, ensureSaved }: { m: Manuscript; ensure
           <article aria-label="The tutor's answer" className="rounded-[12px] border border-[#E6E8ED] bg-white p-5 dark:border-white/10 dark:bg-[#161A22]">
             <p className={`text-[12.5px] font-medium ${STATUS_LABEL[answer.status].tone}`}>{STATUS_LABEL[answer.status].text}{answer.validation.repaired ? " · corrected once by the checks" : ""}</p>
             <p className={`${SERIF} mt-2 whitespace-pre-wrap text-[16.5px] leading-[1.65]`}>{answer.answer}</p>
+            {answer.notice && <p className="mt-2 text-[13px] text-[#92400E] dark:text-[#FBBF24]">{answer.notice}</p>}
+            {answer.passages && answer.passages.length > 0 && (
+              <ol className="mt-4 space-y-3" aria-label="Passages from the book">
+                {answer.passages.map((p) => (
+                  <li key={p.evidence_id}>
+                    <p className="text-[12px] font-medium text-[#1D4ED8] dark:text-[#93C5FD]">{p.source_title} · {p.source_location}</p>
+                    <blockquote className={`${SERIF} mt-1 border-l-2 border-[#93C5FD] pl-3 text-[15px] leading-[1.65] text-[#334155] dark:text-[#CBD5E1]`}>{p.text}</blockquote>
+                  </li>
+                ))}
+              </ol>
+            )}
             {answer.limitations.length > 0 && <ul className="mt-3 space-y-1 text-[13px] text-[#92400E] dark:text-[#FBBF24]">{answer.limitations.map((l) => <li key={l}>• {l}</li>)}</ul>}
             {answer.check_question && <p className="mt-3 text-[13.5px] text-[#475569] dark:text-[#CBD5E1]"><strong className="font-medium">Check yourself:</strong> {answer.check_question}</p>}
 
@@ -185,7 +239,7 @@ export default function TeacherPanel({ m, ensureSaved }: { m: Manuscript; ensure
               </div>
             )}
             <p className="mt-5 flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-[#64748B]">
-              <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Checked: {(() => { const q = answer.validation.citations_verified ?? 0; const e = answer.retrieval.evidence; return `${q} ${q === 1 ? "quotation" : "quotations"} verified, evidence from ${e} ${e === 1 ? "passage" : "passages"}`; })()}</span>
+              {answer.answered_by === "book" ? <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Answered from the book · no AI used</span> : <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Checked: {(() => { const q = answer.validation.citations_verified ?? 0; const e = answer.retrieval.evidence; return `${q} ${q === 1 ? "quotation" : "quotations"} verified, evidence from ${e} ${e === 1 ? "passage" : "passages"}`; })()}</span>}
               <span>{answer.retrieval.vector ? "keyword + meaning search" : <span className="inline-flex items-center gap-1"><CircleDashed className="h-3 w-3" /> keyword search only</span>}</span>
               {answer.usage && <span>{answer.usage.tokens_in.toLocaleString()} in · {answer.usage.tokens_out.toLocaleString()} out tokens</span>}
             </p>

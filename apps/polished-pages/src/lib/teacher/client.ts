@@ -57,7 +57,8 @@ export async function indexBook(opts: { libraryId: string; title: string; rules:
       onProgress({ step: "done", note: why });
       return { courseId, versionId, embeddingsReady: false, note: why };
     }
-    const r = data as { embedded: number; remaining: number };
+    const r = data as { embedded: number; remaining: number; skipped?: string };
+    if (r.skipped) { onProgress({ step: "done", note: r.skipped }); return { courseId, versionId, embeddingsReady: false, note: r.skipped }; }
     onProgress({ step: "embedding", embedded: r.embedded, remaining: r.remaining });
     if (!r.remaining) break;
   }
@@ -69,8 +70,22 @@ export const courseFor = (libraryId: string) => call<string | null>("polished_te
 export interface CourseSourceInfo { title: string; author: string | null; role: string; version_id: string | null; embedded: number; passages: number }
 export const courseContext = (courseId: string) => call<{ id: string; title: string; rules: CourseRule[]; sources: CourseSourceInfo[] } | null>("polished_teacher_course_context", { p_course_id: courseId });
 
+/** How a course's tutor may answer (BLUEPRINT.md §12): from the book only unless the owner turns AI on, within caps. */
+export interface TeacherSettings { ai_answers: boolean; vector_search: boolean; monthly_request_cap: number; monthly_token_cap: number; per_minute: number; per_day: number }
+export interface UsageSummary {
+  settings: TeacherSettings; requests: number; by_path: Record<string, number>;
+  model_calls: { provider: string; model: string; task: string; calls: number; tokens_in: number; tokens_out: number }[];
+}
+export const usageSummary = (courseId: string) => call<UsageSummary | null>("polished_teacher_usage_summary", { p_course_id: courseId });
+export const saveSettings = (courseId: string, settings: Partial<TeacherSettings>) => call<TeacherSettings>("polished_teacher_set_course_settings", { p_course_id: courseId, p_settings: settings });
+
 export interface TeacherAnswer {
-  status: "answered" | "partially_covered" | "not_covered" | "pastoral";
+  status: "answered" | "partially_covered" | "not_covered" | "pastoral" | "evidence";
+  /** "book": the book's own passages, no model; "model": an AI explanation that passed the checks. */
+  answered_by?: "book" | "model";
+  /** Why a book-only answer was given when AI explanations were expected (not set up, paused). */
+  notice?: string | null;
+  passages?: { evidence_id: string; source_title: string; source_location: string; chapter_id: string; text: string }[];
   answer: string;
   claims: { text: string; evidence: { evidence_id: string; source_title: string; source_location: string }[] }[];
   citations: { evidence_id: string; quote: string; source_title: string; source_location: string }[];
