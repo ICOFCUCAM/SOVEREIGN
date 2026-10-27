@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { BookOpen, Eye, FileText, Focus, History, Layers, ListTree, Moon, PanelRight, PenLine, Quote, Redo2, ScrollText, Undo2, Wand2, Wrench } from "lucide-react";
+import { BookOpen, Eye, FileText, Focus, HelpCircle, History, Layers, ListTree, Moon, PanelRight, PenLine, Quote, Redo2, ScrollText, Undo2, Wand2, Wrench } from "lucide-react";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from "@/components/ui/command";
 import { STUDIO_TOOLS, type ToolId } from "@/lib/studio-tools";
 import { kindDef, type Manuscript } from "@/lib/manuscript";
@@ -10,12 +10,13 @@ import { VIEWS } from "./Canvas";
 import type { DialogAction } from "./parts";
 
 // ⌘K (design spec §6): search tools, chapters, results and actions from anywhere in the Studio.
-export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, onSection, onTool, onAction, onJoin, onResult, onView, onFocus, onPanel, onTheme, onUndo, onRedo, onHistory }: {
+export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, onSection, onTool, onAction, onJoin, onResult, onView, onFocus, onPanel, onTheme, onUndo, onRedo, onHistory, onTour }: {
   open: boolean; onOpenChange: (v: boolean) => void; m: Manuscript | null | undefined; thread: StudioThread | null;
   onPlace: (p: Place) => void; onSection: (id: string) => void; onTool: (t: ToolId) => void; onAction: (a: DialogAction) => void; onJoin: () => void;
   onResult: (path: string) => void; onView: (v: CanvasView) => void; onFocus: () => void; onPanel: () => void; onTheme: () => void;
   /** Present only when there is something to undo or redo, or a section whose history to open. */
   onUndo?: () => void; onRedo?: () => void; onHistory?: () => void;
+  onTour?: () => void;
 }) {
   // ⌘K / Ctrl+K opens it; the site's own palette is not mounted inside the Studio.
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, 
           <CommandItem onSelect={run(onFocus)}><Focus className="mr-2" />Focus mode<CommandShortcut>⌘.</CommandShortcut></CommandItem>
           <CommandItem onSelect={run(onPanel)}><PanelRight className="mr-2" />Show or hide the Claude panel<CommandShortcut>⌘\</CommandShortcut></CommandItem>
           <CommandItem onSelect={run(onTheme)}><Moon className="mr-2" />Light, dark or system theme</CommandItem>
+          {onTour && <CommandItem onSelect={run(onTour)}><HelpCircle className="mr-2" />How the Studio works</CommandItem>}
         </CommandGroup>
         {thread && thread.outputs.length > 0 && (
           <CommandGroup heading="Results">

@@ -32,6 +32,7 @@ import { APPROACH_CARDS, type ApproachId } from "./approaches";
 import { GRADIENT } from "./ui";
 import VersionsSheet from "./VersionsSheet";
 import { useApiCostNotice } from "./ApiCostNotice";
+import Onboarding, { wasOnboarded } from "./Onboarding";
 
 // Claude Studio's workspace (design spec): the frame, a top bar, the stage in
 // the middle and the Claude panel. Every capability of the earlier project
@@ -114,6 +115,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const titleRef = useRef("");
   const { m, update, patchSection, replace, persist, saving, latest, undo, redo, canUndo, canRedo, recovery, recover } = useManuscript(backend, id);
   const [versions, setVersions] = useState(false);
+  // First project: a short walkthrough, once per browser (spec §7).
+  const [tour, setTour] = useState(() => !wasOnboarded());
   const online = useOnline();
   const cost = useApiCostNotice(engineId);
   // Back online after a failed save: save again.
@@ -390,9 +393,10 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       </Dialog>
       {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[320px] p-0 sm:max-w-[320px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
 
+      <Onboarding open={tour} onClose={() => setTour(false)} onGo={setPlace} />
       {m && section && <VersionsSheet open={versions} onOpenChange={setVersions} m={m} section={section} onUpdate={update} />}
       <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread}
-        onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
+        onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onTour={() => setTour(true)} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
         onResult={setViewing} onView={(v) => { setPlace("write"); setView(v); }} onFocus={() => { setPlace("write"); setFocus(true); }} onPanel={() => setPanelOpen(!panelOpen)} onTheme={toggleTheme} />
       {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />

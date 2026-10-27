@@ -47,7 +47,7 @@ const props = (backend: StudioBackend) => ({
   handoff: null, onHandoffUsed: () => {}, onChanged: () => {}, onDeleted: () => {}, onWorkInStudio: async () => {}, onLearnVoice: async () => {},
 });
 
-beforeEach(() => { Element.prototype.scrollIntoView = vi.fn(); localStorage.clear(); sessionStorage.clear(); localStorage.setItem("studio.place", "write"); window.matchMedia = ((q: string) => ({ matches: false, media: q, addEventListener: () => {}, removeEventListener: () => {} })) as never; });
+beforeEach(() => { Element.prototype.scrollIntoView = vi.fn(); localStorage.clear(); sessionStorage.clear(); localStorage.setItem("studio.onboarded", "1"); localStorage.setItem("studio.place", "write"); window.matchMedia = ((q: string) => ({ matches: false, media: q, addEventListener: () => {}, removeEventListener: () => {} })) as never; });
 
 describe("Claude Studio workspace", () => {
   it("revises a chapter with Claude: summary, idea, approach, change-by-change review, accept keeps the previous version", async () => {
@@ -146,5 +146,23 @@ describe("Claude Studio workspace", () => {
     expect(screen.queryByRole("complementary", { name: "Claude" })).toBeNull();
     act(() => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); });
     expect(await screen.findByRole("complementary", { name: "Claude" })).toBeTruthy();
+  });
+
+  it("walks a first-time owner through the four stages once, then never again", async () => {
+    localStorage.removeItem("studio.onboarded");
+    const f = fake();
+    const { unmount } = render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const tour = await screen.findByRole("dialog", { name: "From manuscript to published book" });
+    for (const stage of ["Sources", "Plan", "Write", "Finish"]) expect(within(tour).getByRole("button", { name: stage })).toBeTruthy();
+    for (let i = 0; i < 4; i++) fireEvent.click(within(tour).getByRole("button", { name: /^Next/ }));
+    expect(await within(tour).findByText("A few shortcuts", {}, { timeout: 3000 })).toBeTruthy();
+    fireEvent.click(within(tour).getByRole("button", { name: /Start with Sources/ }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(localStorage.getItem("studio.onboarded")).toBe("1");
+    expect(localStorage.getItem("studio.place")).toBe("sources");
+    unmount();
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    await screen.findByRole("heading", { name: "Sources and rules" });
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });
