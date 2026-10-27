@@ -360,7 +360,7 @@ function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer,
       decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} onRename={onRename} onDelete={onDelete} />
   );
   return (
-    <div className="fixed inset-0 z-[60] flex bg-[#F7F6F2] text-[#172033] dark:bg-[#0D1016] dark:text-[#E5E7EB]">
+    <div className="fixed inset-0 z-40 flex bg-[#F7F6F2] text-[#172033] dark:bg-[#0D1016] dark:text-[#E5E7EB]">
       <div className="hidden h-full shrink-0 lg:block">{frame(collapsed)}</div>
       <Sheet open={drawer} onOpenChange={setDrawer}><SheetContent side="left" className="w-[248px] border-0 p-0"><SheetTitle className="sr-only">Claude Studio</SheetTitle>{frame(false)}</SheetContent></Sheet>
       <div className="flex min-w-0 flex-1 flex-col">
