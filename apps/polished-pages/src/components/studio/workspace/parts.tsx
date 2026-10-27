@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  AlertTriangle, ArrowLeft, BookOpen, Check, Copy, Download, FileText, Globe, Languages, Layers, Library, Loader2, MessageSquare,
+  AlertTriangle, ArrowLeft, BookOpen, Check, Columns2, Copy, Download, FileText, Globe, Languages, Layers, Library, Loader2, MessageSquare, MoreHorizontal,
   PenLine, Plus, Quote, Rocket, ScanSearch, ScrollText, Search, ShieldAlert, Sparkles, Square, Wand2, Wrench,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import Markdown from "@/components/studio/Markdown";
@@ -19,6 +20,7 @@ import { saveDocument } from "@/lib/documents";
 import { outputLabel, titleOf, type RunOptions, type StudioAction, type StudioJob, type StudioThread } from "@/lib/claude-studio";
 import { GRADIENT } from "./ui";
 import EditorialCheck from "./EditorialCheck";
+import CompareView from "./CompareView";
 import { auditBook } from "@/lib/editorial-audit";
 
 // The parts of Claude Studio that every view shares: the dialogs for the
@@ -302,6 +304,26 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
   const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
   const isJson = path.endsWith(".json");
   const [checking, setChecking] = useState(false);
+  // "Go to the passage" from the check: open the text for editing with the line selected.
+  const editor = useRef<HTMLTextAreaElement>(null);
+  const [jump, setJump] = useState<number | null>(null);
+  const goTo = (line: number) => { setChecking(false); setComparing(false); setEditing(true); setJump(line); };
+  const [comparing, setComparing] = useState(false);
+  const comparable = Boolean(check) && REWRITE_RESULT(path) && Boolean(text);
+  // Edits here live only in this window until saved to the Library; closing asks first.
+  const close = () => { if (edited && !savedId && !window.confirm("Your changes to this result are not saved. Close and lose them?")) return; onClose(); };
+  const view = (v: "text" | "check" | "compare") => { setChecking(v === "check"); setComparing(v === "compare"); if (v !== "text") setEditing(false); };
+  useEffect(() => {
+    const el = editor.current;
+    if (jump === null || !el || text === null) return;
+    const lines = text.split("\n");
+    const start = lines.slice(0, jump - 1).reduce((n, l) => n + l.length + 1, 0);
+    el.focus();
+    el.setSelectionRange(start, start + (lines[jump - 1]?.length ?? 0));
+    el.scrollTop = Math.max(0, (el.scrollHeight * (jump - 1)) / Math.max(1, lines.length) - el.clientHeight / 3);
+    el.scrollIntoView?.({ block: "center" });
+    setJump(null);
+  }, [jump, editing, text]);
   const checkable = Boolean(text) && BOOK_RESULT(path) && words >= 200;
   const audit = useMemo(() => (checkable && text ? auditBook(text, { rules: check?.rules }) : null), [checkable, text, check?.rules]);
   // A rewrite that came back very short, or that says the source couldn't be read, is not a book yet.
@@ -311,25 +333,30 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
     : null;
 
   return (
-    <Dialog open onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="flex max-h-[92vh] max-w-4xl flex-col gap-0 p-0">
+    <Dialog open onOpenChange={(v) => { if (!v) close(); }}>
+      <DialogContent className={`flex max-h-[92vh] flex-col gap-0 p-0 ${comparing ? "max-w-6xl" : "max-w-4xl"}`}>
         <DialogHeader className="border-b border-border px-6 py-4 text-left">
-          <DialogTitle className="flex items-center gap-2 font-serif text-xl"><button onClick={onClose} className="text-muted-foreground hover:text-foreground sm:hidden" aria-label="Back"><ArrowLeft className="h-5 w-5" /></button>{outputLabel(path)}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2 font-serif text-xl"><button onClick={close} className="text-muted-foreground hover:text-foreground sm:hidden" aria-label="Back"><ArrowLeft className="h-5 w-5" /></button>{outputLabel(path)}</DialogTitle>
           <DialogDescription>{text === null ? "Opening…" : `${words.toLocaleString()} words · ${path}${edited ? " · edited" : ""}`}</DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 py-5 sm:px-10">
           {warning && <div role="alert" className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">{warning}</div>}
-          {audit && !checking && (audit.blockers > 0 || audit.reviews > 0) && (
+          {audit && !checking && !comparing && (audit.blockers > 0 || audit.reviews > 0) && (
             <div role="status" className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm">
               <ScanSearch className="h-4 w-4 text-primary" aria-hidden />
-              <span>Editorial check: {audit.blockers ? `${audit.blockers} to fix before publishing` : "nothing blocks publishing"}{audit.reviews ? `, ${audit.reviews} to review` : ""}{check && REWRITE_RESULT(path) ? "; compare it with your original" : ""}.</span>
-              <Button size="sm" variant="outline" className="ml-auto rounded-full" onClick={() => setChecking(true)}>See the check</Button>
+              <span>Editorial check: {audit.blockers ? `${audit.blockers} to fix before publishing` : "no blocking problems found by the code checks"}{audit.reviews ? `, ${audit.reviews} for your decision` : ""}{check && REWRITE_RESULT(path) ? "; the comparison with your original runs when you open it" : ""}.</span>
+              <Button size="sm" variant="outline" className="ml-auto rounded-full" onClick={() => view("check")}>See the check</Button>
+              {comparable && <Button size="sm" variant="ghost" className="rounded-full" onClick={() => view("compare")}>Compare with original</Button>}
             </div>
           )}
-          {text === null ? <Loader2 className="mx-auto mt-10 h-6 w-6 animate-spin text-muted-foreground" /> : checking && text
-            ? <EditorialCheck text={text} rules={check?.rules} original={check && REWRITE_RESULT(path) ? check.original : undefined} onCorrect={edited ? undefined : (brief) => onUseAsTarget(path, { correct: true, instructions: brief })} />
+          {text === null ? <Loader2 className="mx-auto mt-10 h-6 w-6 animate-spin text-muted-foreground" /> : comparing && text && check
+            ? <CompareView text={text} rules={check.rules} original={check.original} onChange={(next) => { setText(next); setEdited(true); setSavedId(null); toast({ title: "Your original wording is back", description: "Only that paragraph changed. Save to your Library to keep it." }); }} />
+            : checking && text
+            ? <EditorialCheck text={text} rules={check?.rules} original={check && REWRITE_RESULT(path) ? check.original : undefined} storageKey={`studio.review.${threadId}.${path}`}
+                placeLabel="Go to the passage" onPlace={(p) => goTo(p.line)}
+                onCorrect={edited ? undefined : (brief) => onUseAsTarget(path, { correct: true, instructions: brief })} />
             : editing
-            ? <Textarea value={text} onChange={(e) => { setText(e.target.value); setEdited(true); setSavedId(null); }} aria-label="Edit the result" className="min-h-[60vh] font-serif text-[15px] leading-relaxed" />
+            ? <Textarea ref={editor} value={text} onChange={(e) => { setText(e.target.value); setEdited(true); setSavedId(null); }} aria-label="Edit the result" className="min-h-[60vh] font-serif text-[15px] leading-relaxed" />
             : path.endsWith(".json") ? <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-[13px]">{prettyJson(text)}</pre> : <Markdown text={text} />}
         </div>
         <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 px-6 py-3">
@@ -342,13 +369,19 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
             <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || saving} onClick={save}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} Save to Library as a book</Button>
           )}
           <div className="ml-auto flex gap-1">
-            {checkable && <Button size="sm" variant={checking ? "secondary" : "outline"} className="rounded-full" onClick={() => setChecking((v) => !v)} aria-pressed={checking}><ScanSearch className="h-4 w-4" /> {checking ? "Back to the text" : "Editorial check"}</Button>}
-            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => { setChecking(false); setEditing((v) => !v); }}><PenLine className="h-4 w-4" /> {editing ? "Preview" : "Edit before saving"}</Button>}
+            {checkable && <Button size="sm" variant={checking ? "secondary" : "outline"} className="rounded-full" onClick={() => view(checking ? "text" : "check")} aria-pressed={checking}><ScanSearch className="h-4 w-4" /> {checking ? "Back to the text" : "Editorial check"}</Button>}
+            {comparable && <Button size="sm" variant={comparing ? "secondary" : "outline"} className="rounded-full" onClick={() => view(comparing ? "text" : "compare")} aria-pressed={comparing}><Columns2 className="h-4 w-4" /> {comparing ? "Back to the text" : "Compare with original"}</Button>}
+            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => { view("text"); setEditing((v) => !v); }}><PenLine className="h-4 w-4" /> {editing ? "Preview" : "Edit before saving"}</Button>}
             {path === "series-plan.md" && <SeriesActions backend={backend} threadId={threadId} onDone={onClose} />}
             {path === "voice-profile.md" && <Button size="sm" variant="ghost" disabled={!text} onClick={async () => { try { await backend.saveVoice(text ?? ""); toast({ title: "Saved as your voice profile", description: "“In my voice” and “Rewrite in my voice” now follow it." }); } catch (e) { toast({ title: "Couldn't save", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}><PenLine className="h-4 w-4" /> Use as my voice profile</Button>}
-            {!isJson && <Button size="sm" variant="ghost" disabled={!text} onClick={() => onUseAsTarget(path)}><Wand2 className="h-4 w-4" /> Rewrite this</Button>}
-            <Button size="sm" variant="ghost" disabled={!text} onClick={() => { navigator.clipboard.writeText(text ?? ""); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /> Copy</Button>
-            <Button size="sm" variant="ghost" disabled={!text} onClick={download}><Download className="h-4 w-4" /> .md</Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild><Button size="sm" variant="ghost" disabled={!text} aria-label="More actions"><MoreHorizontal className="h-4 w-4" /> More</Button></DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {!isJson && <DropdownMenuItem onSelect={() => onUseAsTarget(path)}><Wand2 className="h-4 w-4" /> Rewrite this</DropdownMenuItem>}
+                <DropdownMenuItem onSelect={() => { navigator.clipboard.writeText(text ?? ""); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /> Copy</DropdownMenuItem>
+                <DropdownMenuItem onSelect={download}><Download className="h-4 w-4" /> Download Markdown (.md)</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </DialogContent>

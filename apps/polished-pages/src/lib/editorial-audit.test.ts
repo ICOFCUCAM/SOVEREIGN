@@ -115,3 +115,39 @@ describe("targeted correction brief", () => {
     expect(b).not.toContain("personal testimony"); // notes are not sent for correction
   });
 });
+
+describe("the formats real rewrites use (October 2026: the live check missed them)", () => {
+  const ids = (md: string) => auditBook(md).findings.map((f) => f.id.replace(/-\d+$/, ""));
+  it("finds markers written with Markdown escapes or in brackets of another kind", () => {
+    expect(ids("# B\n\n## One\n\nLucifer fell \\[citation needed\\].\n")).toContain("placeholders");
+    expect(ids("# B\n\n## One\n\nA named medium (citation needed) said so.\n")).toContain("placeholders");
+  });
+  it("numbers bold labels and stand-alone numbered lines like headings", () => {
+    const bold = auditBook("# B\n\n## Part II\n\n**19. Names**\n\nText.\n\n**20. Sift**\n\nText.\n\n**20. Devour**\n\nText.\n\n**22. Wiles**\n\nText.\n");
+    expect(bold.findings.find((f) => f.id.startsWith("dup"))?.text).toBe("2 headings share the number 20: “20. Sift”, “20. Devour”");
+    expect(bold.findings.find((f) => f.id.startsWith("gap"))?.text).toContain("jumps from 20 to 22");
+    expect(bold.findings.find((f) => f.id.startsWith("dup"))?.places[0].excerpt).toBe("20. Sift");
+    expect(ids("# B\n\n## Part II\n\n19. Names\n\nText about names.\n\n20. Sift\n\nText about sifting.\n\n20. Devour\n\nText.\n")).toContain("dup");
+    // an ordinary numbered list is not a set of section labels
+    expect(ids("# B\n\n## One\n\n1. First step\n2. Second step\n3. Third step\n\nText.\n")).toEqual([]);
+  });
+  it("reads headings and bold labels as one sequence when a book mixes them", () => {
+    const r = auditBook("# B\n\n### 19. Names\n\nText.\n\n**20. Sift**\n\nText.\n\n**20. Devour**\n\nText.\n\n### 21. Wiles\n\nText.\n");
+    expect(r.findings.filter((f) => f.id.startsWith("gap"))).toEqual([]);
+    expect(r.findings.find((f) => f.id.startsWith("dup"))?.text).toContain("“20. Sift”, “20. Devour”");
+  });
+
+  it("does not count a note under References as a bibliography", () => {
+    expect(auditBook("# B\n\n## One\n\nText.\n\n## References\n\n*(To be completed.)*\n").findings.find((f) => f.id.startsWith("refs"))?.text).toContain("no usable entries");
+    expect(ids("# B\n\n## One\n\nText.\n\n## References\n\nKing James Bible (1611). London: Robert Barker.\n")).toEqual([]);
+  });
+});
+
+describe("cross-references", () => {
+  it("flags a reference to a section the book does not have", () => {
+    const r = auditBook("# B\n\n### 1. One\n\nAs we shall see in section 9, spirits deceive.\n\n### 2. Two\n\nSee section 1 again.\n");
+    const x = r.findings.find((f) => f.id === "xref")!;
+    expect(x.places).toHaveLength(1);
+    expect(x.places[0].excerpt).toContain("in section 9");
+  });
+});

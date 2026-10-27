@@ -57,11 +57,11 @@ This course forms part of a bachelor's programme in theology. It covers angelolo
 
 The people of the ancient world did not doubt that spirits were real. The origin of the Devil and his angels is clear from Scripture. Yahuah's people lived among nations whose texts are full of them.
 
-### 20. Sift
+**20. Sift**
 
-In Babylon the priests wrote long incantations against the spirits that brought fever and plague [citation needed]. The Holy Ghost protects the believer.
+In Babylon the priests wrote long incantations against the spirits that brought fever and plague \\[citation needed\\]. The Holy Ghost protects the believer.
 
-### 20. Devour
+**20. Devour**
 
 The adversary seeks whom he may devour. The Holy Spirit is the believer's guard. The origin and identity of demons cannot be known for certain.
 
@@ -72,6 +72,8 @@ In a dream I saw many people in chains, and many of them were Christians in chur
 Some teach that demons cause homosexual tendencies in certain people.
 
 ## References
+
+*(To be completed.)*
 `;
 
 function previewBackend(): StudioBackend {

@@ -165,3 +165,16 @@ Finish · Editorial check tab (§15e): the publication gate for every format; ea
 A section suggestion checked against the author's text before it is accepted (§15e).
 
 ![Suggestion checks (§15)](screenshots/34-suggestion-checks.webp)
+
+### Review workflow (§16)
+What was checked: each check passed, found something, or did not run, never shown as passed when it did not run; status says what code can and cannot judge.
+
+![What was checked (§16)](screenshots/35-report-what-was-checked.webp)
+
+The detailed report: code, severity, explanation, suggested correction, dismiss (review items only), places, and a checkbox to include each in the correction. The sample uses the formats a real rewrite uses (bold labels, an escaped marker, a note under References).
+
+![Detailed report (§16)](screenshots/36-report-findings.webp)
+
+Compare with original: chapter by chapter, side by side, what changed and what needs a look, with the author's original wording one click away.
+
+![Compare with original (§16)](screenshots/37-compare-with-original.webp)
