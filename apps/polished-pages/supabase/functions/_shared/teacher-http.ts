@@ -44,39 +44,53 @@ export async function rpcAsCaller<T>(req: Request, fn: string, args: Record<stri
 
 export function embeddingsConfigured(): boolean { return Boolean((Deno.env.get("OPENAI_API_KEY") ?? "").trim()); }
 
-export async function embed(inputs: string[]): Promise<number[][]> {
+/** Every provider call stops after this long (bounded work, phase 0). */
+export const CALL_TIMEOUT_MS = 30_000;
+
+export async function embed(inputs: string[]): Promise<number[][]> { return (await embedWithUsage(inputs)).vectors; }
+
+/** OpenAI embeddings, with the token count the provider reports (for the usage record). */
+export async function embedWithUsage(inputs: string[]): Promise<{ vectors: number[][]; model: string; tokens: number; ms: number }> {
+  const started = Date.now();
   const key = (Deno.env.get("OPENAI_API_KEY") ?? "").replace(/\s+/g, "");
   if (!key) throw new HttpError("Indexing is not configured (OPENAI_API_KEY missing).", 503);
   const r = await fetch("https://api.openai.com/v1/embeddings", {
     method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: "text-embedding-3-small", input: inputs }),
+    body: JSON.stringify({ model: "text-embedding-3-small", input: inputs }), signal: AbortSignal.timeout(CALL_TIMEOUT_MS),
   });
   if (!r.ok) { console.error("embeddings failed", r.status); throw new HttpError(`Embeddings request failed (${r.status}).`, 502); }
   const d = await r.json();
-  return (d.data as { embedding: number[] }[]).map((x) => x.embedding);
+  return { vectors: (d.data as { embedding: number[] }[]).map((x) => x.embedding), model: d.model ?? "text-embedding-3-small", tokens: d.usage?.total_tokens ?? 0, ms: Date.now() - started };
 }
+
+export function anthropicConfigured(): boolean { return Boolean((Deno.env.get("ANTHROPIC_API_KEY") ?? "").trim()); }
 
 /**
  * One Claude Messages API call for the Teacher Runtime (the customer-facing API,
- * billed per use; never the owner's Claude Code runner). Retries transient
- * errors twice.
+ * billed per use; never the owner's Claude Code runner). One retry on
+ * transient errors; each attempt times out after 30 seconds.
  */
-export async function askClaude(system: string, user: string, maxTokens = 1800): Promise<{ text: string; model: string; tokensIn: number; tokensOut: number }> {
+export async function askClaude(system: string, user: string, maxTokens = 1800): Promise<{ text: string; model: string; tokensIn: number; tokensOut: number; attempts: number; ms: number }> {
+  const started = Date.now();
   const key = (Deno.env.get("ANTHROPIC_API_KEY") ?? "").replace(/\s+/g, "");
   if (!key) throw new HttpError("The tutor is not configured (ANTHROPIC_API_KEY missing).", 503);
   const model = Deno.env.get("TEACHER_MODEL") || Deno.env.get("ANTHROPIC_MODEL") || "claude-opus-4-8";
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (attempt) await new Promise((r) => setTimeout(r, 700 * attempt));
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model, max_tokens: maxTokens, system, messages: [{ role: "user", content: user }] }),
-    });
+  // At most one retry, each attempt bounded by a timeout (phase 0).
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (attempt) await new Promise((r) => setTimeout(r, 800));
+    let r: Response;
+    try {
+      r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+        body: JSON.stringify({ model, max_tokens: maxTokens, system, messages: [{ role: "user", content: user }] }), signal: AbortSignal.timeout(CALL_TIMEOUT_MS),
+      });
+    } catch { if (attempt) throw new HttpError("The AI model did not answer in time.", 504); continue; }
     if (r.ok) {
       const d = await r.json();
       if (d.stop_reason === "refusal") throw new HttpError("The tutor declined to answer this question.", 422);
       const text = (d.content ?? []).filter((b: { type?: string }) => b.type === "text").map((b: { text?: string }) => b.text ?? "").join("");
-      return { text, model: d.model ?? model, tokensIn: d.usage?.input_tokens ?? 0, tokensOut: d.usage?.output_tokens ?? 0 };
+      return { text, model: d.model ?? model, tokensIn: d.usage?.input_tokens ?? 0, tokensOut: d.usage?.output_tokens ?? 0, attempts: attempt + 1, ms: Date.now() - started };
     }
     if (r.status === 401 || r.status === 403) throw new HttpError("The AI provider rejected the API key.", 502);
     if (![408, 409, 429, 500, 502, 503, 504, 529].includes(r.status)) { console.error("claude error", r.status); throw new HttpError("The tutor could not reach the AI model.", 502); }

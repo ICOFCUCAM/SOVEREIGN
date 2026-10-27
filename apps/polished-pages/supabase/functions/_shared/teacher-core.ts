@@ -221,3 +221,38 @@ export function selectEvidence<T extends { score: number }>(ranked: T[], max = 8
   // Keep passages within a reasonable distance of the best one; RRF scores are close together, so the floor is gentle.
   return ranked.filter((r, i) => i < 5 || r.score >= top * 0.6).slice(0, max);
 }
+
+// ── Knowledge-first answering (BLUEPRINT.md §12, phase 0) ─────────────────────
+// The tutor answers from the book first. A model is used only when the course
+// owner has turned AI explanations on, a provider is configured, and the
+// course's monthly cap allows it; otherwise the answer is the book's own
+// passages. There is no hidden fallback to another provider.
+
+export type AnswerPath = "not_covered" | "evidence_only" | "model";
+export interface PathDecision { path: AnswerPath; reason: "no_evidence" | "ai_off" | "not_configured" | "cap_reached" | "ai_on"; notice: string | null }
+
+export function decidePath(o: { evidence: number; aiAnswers: boolean; modelAllowed: boolean; providerConfigured: boolean }): PathDecision {
+  if (o.evidence <= 0) return { path: "not_covered", reason: "no_evidence", notice: null };
+  if (!o.aiAnswers) return { path: "evidence_only", reason: "ai_off", notice: null };
+  if (!o.providerConfigured) return { path: "evidence_only", reason: "not_configured", notice: "AI explanations are not set up for this course, so here is what the book itself says." };
+  if (!o.modelAllowed) return { path: "evidence_only", reason: "cap_reached", notice: "AI explanations are paused for this course until next month. Here is what the book itself says." };
+  return { path: "model", reason: "ai_on", notice: null };
+}
+
+export interface EvidenceAnswer {
+  status: "evidence"; answer: string;
+  passages: { evidence_id: string; source_title: string; source_location: string; chapter_id: string; text: string }[];
+}
+
+/** An answer built only from the book's own words: the best passages, in rank order, with where each comes from. */
+export function evidenceAnswer(evidence: Evidence[], max = 4): EvidenceAnswer {
+  const picked = evidence.slice(0, Math.max(1, max));
+  const titles = [...new Set(picked.map((e) => e.source_title))];
+  const places = [...new Set(picked.map((e) => e.source_location.split(" ¶")[0]))];
+  const where = places.length === 1 ? places[0] : `${places.slice(0, -1).join(", ")} and ${places[places.length - 1]}`;
+  return {
+    status: "evidence",
+    answer: `Here is what ${titles.length === 1 ? titles[0] : "the course's sources"} says about this, from ${where}. These are the author's own words; open a passage to read it in context.`,
+    passages: picked.map((e) => ({ evidence_id: e.chunk_id, source_title: e.source_title, source_location: e.source_location, chapter_id: e.chapter_id, text: e.text })),
+  };
+}

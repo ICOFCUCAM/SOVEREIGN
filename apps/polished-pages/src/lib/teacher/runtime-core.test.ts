@@ -72,3 +72,27 @@ describe("prompt and evidence", () => {
     expect(selectEvidence([])).toEqual([]);
   });
 });
+
+import { decidePath, evidenceAnswer } from "../../../supabase/functions/_shared/teacher-core";
+
+describe("knowledge-first answering (phase 0)", () => {
+  it("never chooses a model unless AI answers are on, a provider is configured and the cap allows it", () => {
+    const base = { evidence: 3, aiAnswers: true, modelAllowed: true, providerConfigured: true };
+    expect(decidePath(base).path).toBe("model");
+    expect(decidePath({ ...base, aiAnswers: false })).toMatchObject({ path: "evidence_only", reason: "ai_off", notice: null });
+    expect(decidePath({ ...base, providerConfigured: false })).toMatchObject({ path: "evidence_only", reason: "not_configured" });
+    expect(decidePath({ ...base, modelAllowed: false })).toMatchObject({ path: "evidence_only", reason: "cap_reached" });
+    expect(decidePath({ ...base, evidence: 0 })).toMatchObject({ path: "not_covered" });
+    // every combination with AI off avoids the model
+    for (const modelAllowed of [true, false]) for (const providerConfigured of [true, false]) for (const evidence of [0, 1, 8])
+      expect(decidePath({ evidence, aiAnswers: false, modelAllowed, providerConfigured }).path).not.toBe("model");
+  });
+
+  it("answers from the book's own words, saying where each passage comes from", () => {
+    const a = evidenceAnswer([...E, ev("E3", "A third passage.", { source_location: "Chapter 5 ¶2" }), ev("E4", "x"), ev("E5", "y")]);
+    expect(a.status).toBe("evidence");
+    expect(a.passages).toHaveLength(4);
+    expect(a.passages[0]).toMatchObject({ evidence_id: "book:ch-02:E1", text: E[0].text });
+    expect(a.answer).toBe("Here is what Demonology says about this, from Chapter 2 and Chapter 5. These are the author's own words; open a passage to read it in context.");
+  });
+});
