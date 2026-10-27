@@ -319,3 +319,10 @@ Found by comparing every button and label of the Studio before the redesign (`Cl
 - [x] Library → Studio: a book made in the Studio links to "Finish in Claude Studio" (its project); any other book offers the owner (admins only, never customers) "Work on it in Claude Studio" (`/admin/claude?import=<id>`).
 - [x] "Work in Studio" (My books and the Library) links both ways: the new project's manuscript records its Library book and the Library book records its project; a book that already has a project opens that project instead of creating another.
 - Limit: Library books saved before this change carry no project link; "Work on it in Claude Studio" makes a new project for them (and links it from then on).
+
+## 18. Claude on a Library book (owner only; adopted 27 October 2026 on the owner's request: "can Claude chat be added here so I can correct directly using Claude")
+- Shown on a Library book's page to the owner only (admin check in the page; `studio-api` refuses anyone else). Customers never see it.
+- **Correct a part:** choose a headed part of the book, or the text selected on the page; ask (correct the English / rewrite professionally / clearer and tighter / own words); the book's rules apply (default: Yahusha, Yahuah, never Jehovah or Yahweh; quotations unchanged otherwise; editable, kept per book). Claude's change is shown word by word; nothing changes until "Accept into the book"; then Save changes keeps the earlier text in History. The same editorial standard as a section rewrite (§15a SECTION_POLICY).
+- **Ask about the book:** answers from the book's text; the book is not changed.
+- Runs on the API (billed per use): a Library book has no Studio project for Claude Code. Whole-book work (rewrite, rebuild, editorial check, comparison with the original) stays in Claude Studio, one click away.
+- [x] Tested: `LibraryClaude.test.tsx`.

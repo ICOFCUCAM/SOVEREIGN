@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+// Claude on a Library book, for the owner only (loaded only for them).
+const LibraryClaude = lazy(() => import("@/components/studio/LibraryClaude"));
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FileText, Target, PenTool, BookOpen, BookHeart, Image as ImageIcon, Download, Trash2, Loader2, Library as LibraryIcon, ArrowRight, Star, Search, History, Save, Share2, Store, FolderPlus, Copy, Tag, X, LayoutTemplate, Plus, Eye, Check, ExternalLink, Building2, Sparkles, Languages, Headphones } from "lucide-react";
@@ -318,6 +320,7 @@ const LibraryPage = () => {
               <Button asChild variant="hero" size="sm"><Link to={`/admin/claude?project=${encodeURIComponent(bk.extra.studioProject)}`}>Finish in Claude Studio</Link></Button>
             </div>
           )}
+          {owner && openedId && <Suspense fallback={null}><LibraryClaude docId={openedId} title={opened.title} markdown={opened.markdown} onChange={(s) => setOpened({ kind: "book", markdown: s, title: opened.title, extra: bk.extra })} /></Suspense>}
           <BookExportPanel bookTitle={opened.title} fullContent={opened.markdown} />
           <div className="mt-6">
             <BookReader
