@@ -38,6 +38,8 @@ export interface BookTypeOptions {
   /** Credit line for the copyright page. */
   producedWith?: string;
   fetchFont?: FetchFont;
+  /** Number of the first chapter (a single chapter set on its own, e.g. a preview of chapter 4). */
+  chapterStart?: number;
 }
 
 /** Whether most of the book's letters run right to left. */
@@ -52,11 +54,49 @@ const CONTENTS: Partial<Record<ScriptId, string>> = {
   armenian: "Բովանդակություն", georgian: "სარჩევი", sc: "目录", tc: "目錄", jp: "目次", kr: "차례",
 };
 
-interface Block { kind: "h1" | "h2" | "h3" | "li" | "p" | "gap"; text: string }
+/**
+ * A whole book stored as "# Book title" with "## Chapter" sections (how Claude
+ * Studio, the Book wizard and the Library compile books) is set with those
+ * sections as chapters: the title and by-line belong on the title page, and a
+ * compiled "Contents" list gives way to the typeset contents. A manuscript
+ * that already uses "# " for its chapters is left as it is.
+ */
+export function asChapters(markdown: string): string {
+  const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+  const h1 = lines.filter((l) => /^#\s+/.test(l.trim()));
+  const first = lines.findIndex((l) => l.trim());
+  if (h1.length !== 1 || first < 0 || !/^#\s+/.test(lines[first].trim()) || !lines.some((l) => /^##\s+/.test(l.trim()))) return markdown;
+  const out: string[] = [];
+  let i = first + 1;
+  // Title-page lines between the title and the first section: a subtitle in *italics* and a "by …" line.
+  while (i < lines.length && !/^##\s+/.test(lines[i].trim())) {
+    const t = lines[i].trim();
+    if (t && !/^\*[^*].*\*$/.test(t) && !/^by\s/i.test(t)) out.push(lines[i]);
+    i++;
+  }
+  for (; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (/^##\s+contents\s*$/i.test(t)) { i++; while (i < lines.length && (!lines[i].trim() || /^[-*]\s+/.test(lines[i].trim()))) i++; i--; continue; }
+    out.push(lines[i].replace(/^(\s*)##(#*)\s+/, (_m, sp, more) => `${sp}#${more} `));
+  }
+  return out.join("\n");
+}
+
+// Sections that open like chapters but carry no chapter number.
+const UNNUMBERED = /^(preface|foreword|introduction|prologue|acknowledge?ments?|dedication|epigraph|conclusion|epilogue|afterword|bibliography|references|works cited|sources|glossary|index|appendix(\s.*)?|notes|endnotes|about the author|also by .*|author'?s note|a note on .*|contents)$/i;
+/** "{-}" after a chapter heading (as in Pandoc) sets it without a number. */
+export const unnumbered = (title: string) => `${title} {-}`;
+
+interface Block { kind: "h1" | "h2" | "h3" | "li" | "p" | "gap"; text: string; plain?: boolean }
 function parse(markdown: string): Block[] {
   return markdown.replace(/\r\n/g, "\n").split("\n").map((raw): Block => {
     const t = raw.trim();
-    if (/^#\s+/.test(t)) return { kind: "h1", text: strip(t.replace(/^#\s+/, "")) };
+    if (/^#\s+/.test(t)) {
+      const raw = t.replace(/^#\s+/, "");
+      const plain = /\s\{-\}\s*$/.test(raw);
+      const text = strip(raw.replace(/\s\{-\}\s*$/, ""));
+      return { kind: "h1", text, plain: plain || UNNUMBERED.test(text) };
+    }
     if (/^##\s+/.test(t)) return { kind: "h2", text: strip(t.replace(/^##\s+/, "")) };
     if (/^###\s+/.test(t)) return { kind: "h3", text: strip(t.replace(/^###\s+/, "")) };
     if (/^[-*]\s+/.test(t)) return { kind: "li", text: strip(t.replace(/^[-*]\s+/, "")) };
@@ -68,7 +108,7 @@ function parse(markdown: string): Block[] {
 async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   const S = styleById(o.style);
   const ingram = (o.layout ?? "standard") === "ingram";
-  const blocks = parse(markdown);
+  const blocks = parse(asChapters(markdown));
   const scripts = scriptsIn(`${o.title} ${o.author ?? ""} ${markdown}`, cjkFromLanguage(o.language));
   const dir = bookDirection(markdown);
   const main = dominantScript(markdown, cjkFromLanguage(o.language));
@@ -138,7 +178,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   const bodyFirst = pages.length;
   let y = H - top;
   let chapter = "";
-  let chapterNo = 0, h2No = 0;
+  let chapterNo = Math.max(0, (o.chapterStart ?? 1) - 1), h2No = 0;
   let opening = true;   // current page opens a chapter: no running head
   let dirty = false;
   let afterHeading = true; // the next paragraph isn't indented
@@ -189,13 +229,15 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     y -= o2.after ?? 0;
   };
 
-  const chapterOpening = (title: string) => {
-    chapterNo++; h2No = 0;
+  const chapterOpening = (title: string, plain = false) => {
+    if (!plain) chapterNo++;
+    h2No = 0;
     const n = pageNo();
     const x = colX(n), cx = x + colW / 2;
     const center = S.titleAlign === "center";
     y = H - top - textH * S.sink;
-    if (S.chapterLabel === "word") {
+    if (plain) { /* front and back matter: no chapter number */ }
+    else if (S.chapterLabel === "word") {
       const lab: TextStyle = { kind: "body", style: "regular", size: size * 0.95, gray: 0.35 };
       const text = latin ? `CHAPTER ${numberWord(chapterNo).toUpperCase()}` : String(chapterNo);
       y -= lab.size;
@@ -209,7 +251,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       y -= 14;
     }
     const tSt: TextStyle = { kind: "heading", style: S.titleStyle === "italic" ? "italic" : S.titleStyle === "bold" ? "bold" : "regular", size: S.titleSize };
-    const label = S.numberedHeadings ? `${chapterNo}  ${title}` : title;
+    const label = S.numberedHeadings && !plain ? `${chapterNo}  ${title}` : title;
     para(label, tSt, center ? "center" : "start", { lh: S.titleSize * 1.2 });
     if (S.ornament === "diamond") { y -= 8; ornament(pc, cx, y); y -= 22; }
     else if (S.ornament === "rule") { y -= 6; if (center) ts.rule(pc, cx - 28, y, cx + 28, y, 0.8); else ts.rule(pc, dir === "rtl" ? x + colW - 56 : x, y, dir === "rtl" ? x + colW : x + 56, y, 1.2, 0.2); y -= 22; }
@@ -228,8 +270,8 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       first = false;
       opening = true;
       chapter = b.text;
-      starts.push({ title: S.numberedHeadings ? `${chapterNo + 1}  ${b.text}` : b.text, folio: folioOf(pageNo()) });
-      chapterOpening(b.text);
+      starts.push({ title: S.numberedHeadings && !b.plain ? `${chapterNo + 1}  ${b.text}` : b.text, folio: folioOf(pageNo()) });
+      chapterOpening(b.text, b.plain);
     } else if (b.kind === "h2") {
       h2No++;
       if (y < bottom + textH * 0.22) nextPage();
