@@ -270,3 +270,45 @@ Later (not before the core works): real-time voice, complex adaptive algorithms,
 - [ ] Durable job worker for ingestion, OCR, indexing, audio
 - [ ] Privacy: retention, deletion, access separation for groups
 - [ ] Per-book cost accounting and usage alerts
+
+## 11. Engineering detail added on the owner's instruction to upgrade the blueprint (October 2026)
+Additions only; §0–§10 and the verbatim sources govern where anything here is shorter.
+
+### 11a. Structured author rules (implements §8 risk 2, "rules can conflict")
+Rules are records, not prose in a prompt. Precedence: safety and privacy → institution policy → assessment settings → course rules → book (author) rules → learner preferences. A conflict between two records at the same level is surfaced to the owner of that level, never resolved silently.
+```json
+{ "id": "rule-yahusha", "kind": "required_term", "term": "Yahusha", "replaces": ["Jesus"],
+  "applies_to": ["generated_prose", "lesson", "assessment"],
+  "exceptions": ["direct_quote", "historical_term_discussion"],
+  "scope": { "level": "book", "book_id": "…" }, "approved_by": "author", "version": 3 }
+```
+Text types follow §5b: `generated_prose` (rules apply), `direct_quote` (preserved exactly, labelled), `citation_metadata` (from database fields), `historical_term` (only where an approved exception allows it). The owner's books: Yahusha instead of Jesus, Yahuah instead of God, never Jehovah or Yahweh in generated prose.
+
+### 11b. Teacher Runtime request contract
+Input from the browser: `course_id`, `mode` (explain · guided · ask · exam), the question, the passage in view (chunk ID) and the learner level. Nothing else is trusted. The runtime loads rules, enrolment, permitted sources and versions itself, and returns the §2d output contract after validation, plus `request_id`, `model`, `tokens_in`, `tokens_out`, `cost_estimate` and `validation` (citations resolved, quotes matched, terminology result). A failed validation never reaches the learner as an answer; it is repaired once (§5b) or returned as a safe error.
+
+### 11c. Interoperability (when a pilot needs it, §0.2)
+LTI 1.3 / LTI Advantage for launch, roster and grade return; xAPI or cmi5 for learning records; QTI 3 for exporting approved question banks; Open Badges 3.0 / Comprehensive Learner Record for certificates once criteria are defined (§4c). None is a prerequisite for Phase 1.
+
+### 11d. Regulation and governance to review before institutional use
+Review, with counsel, before any school or university deployment: GDPR (lawful basis, data minimisation, retention, data-subject rights, processor terms with the model provider), children's-data rules where minors may use the tutor, and the EU AI Act — systems used in education to evaluate learning outcomes are listed among high-risk uses, which brings risk management, logging, human oversight and transparency duties for formal assessment. Practice-only tutoring and human-reviewed grading keep Phase 1 outside consequential decisions (§3b, §0.2 readiness 3). No claim of compliance is made until data flows, contracts and controls are reviewed (§8 risk 5).
+
+### 11e. Default retention (proposal for the owner to confirm)
+| Record | Default | Who can see it |
+|---|---|---|
+| Learner questions and tutor answers | 12 months, then deleted; learner can delete any time | The learner; aggregated only for authors and instructors |
+| Assessment attempts and mastery | For the life of the enrolment + 12 months | Learner; instructor for their course |
+| Usage and cost events | 24 months | Platform operations; aggregated for institutions |
+| Audit events | 6 years | Institution administrators, platform security |
+| Source versions and chunks | While the source is published or the course uses it | Owner of the source; never other courses or institutions |
+
+### 11f. Release engineering
+The 200-case suite (§5d) runs in CI against a fixed model snapshot whenever the model, prompt, chunking, retrieval, rules or versioning change; results are reported per category; release gates block a deploy. Every lesson, question and rubric records the source version, rule version and prompt version it was generated and approved against; a material change to a chapter marks its dependants for review (§3c).
+
+### 11g. Horizon to 2036 (direction; owner approval before any item becomes binding)
+1. **Model-independent runtime** with per-task routing chosen by evaluation, not by habit; the evaluation suite is the contract every model must pass.
+2. **Evidence you can verify outside Polished Pages**: citations resolve to stable chapter/heading/paragraph IDs that survive new editions (stable chunk IDs, §2d), and exported lessons carry content credentials showing which text is the author's, which the tutor's explanation, and which an inference.
+3. **Learning, measured**: mastery models are adopted only when they beat the simple schedule (§1c) on real learner data; pilots measure whether learners explain the material more accurately, not only satisfaction.
+4. **Accessible by default**: read-along narration in sync with text, captions, screen-reader-first lesson structure, and plain-language levels (§1d) for every lesson.
+5. **Spoken tutoring** after the text tutor meets its gates, with the same evidence and refusal rules and age-appropriate safeguards.
+6. **Institution scale** (Phase 3–4): delegated administration, LMS integration and cross-course concept maps, with private sources still isolated per institution and course.
