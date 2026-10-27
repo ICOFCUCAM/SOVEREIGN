@@ -136,6 +136,9 @@ export function createStore(dataDir) {
         ...(Array.isArray(m?.knowledgeDocIds) ? { knowledgeDocIds: m.knowledgeDocIds.slice(0, 50).map(String) } : {}),
         ...(m?.meta && typeof m.meta === "object" && !Array.isArray(m.meta) && JSON.stringify(m.meta).length <= 50_000 ? { meta: m.meta } : {}),
         ...(m?.libraryId ? { libraryId: String(m.libraryId).slice(0, 80) } : {}),
+        // A rebuilt book's design brief, and the manuscripts it replaced (kept to restore).
+        ...(m?.design && typeof m.design === "object" ? { design: { bookType: String(m.design.bookType ?? "custom").slice(0, 40), instructions: String(m.design.instructions ?? "").slice(0, 20_000), approach: String(m.design.approach ?? "mine").slice(0, 40), at: String(m.design.at ?? "").slice(0, 40) } } : {}),
+        ...(Array.isArray(m?.archive) && m.archive.length ? { archive: m.archive.slice(-5).map((a) => ({ at: String(a?.at ?? "").slice(0, 40), label: String(a?.label ?? "").slice(0, 200), sections: (Array.isArray(a?.sections) ? a.sections : []).slice(0, 500).map((x) => ({ id: String(x?.id ?? "").replace(/[^\w-]/g, "").slice(0, 64), kind: String(x?.kind ?? "chapter").slice(0, 40), title: String(x?.title ?? "").slice(0, 300), body: String(x?.body ?? ""), ...(x?.idea ? { idea: String(x.idea).slice(0, 20_000) } : {}) })) })) } : {}),
         history: Array.isArray(m?.history) ? m.history.slice(-2000) : [], updatedAt: new Date().toISOString() };
       await fs.writeFile(path.join(d, "manuscript.json.tmp"), JSON.stringify(clean));
       await fs.rename(path.join(d, "manuscript.json.tmp"), path.join(d, "manuscript.json"));
@@ -149,6 +152,9 @@ export function createStore(dataDir) {
         await fs.writeFile(path.join(md, file), `## ${x.title}\n\n${x.body}\n`);
       }
       await fs.writeFile(path.join(md, "INDEX.md"), index.join("\n") + "\n");
+      // After a rebuild the sections start empty; the manuscript it replaced is the author's latest material.
+      const before = clean.design && clean.archive?.at(-1);
+      if (before) await fs.writeFile(path.join(md, "BEFORE-REBUILD.md"), `# The manuscript before the rebuild (${before.at})\n\n${before.sections.map((x) => `## ${x.title}\n\n${x.body}`).join("\n\n")}\n`);
       return clean;
     },
     async readVoice() {

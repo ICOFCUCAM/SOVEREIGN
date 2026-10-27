@@ -36,6 +36,38 @@ export const SECTION_POLICY = [
 // The judgement-level review (DESIGN-SPEC.md §16), word for word as src/lib/studio-tools.ts EDITORIAL_REVIEW.
 export const EDITORIAL_REVIEW = "Read the whole book and write an editorial review of the matters that need judgement, which code cannot check: contradictions between chapters (quote both places); conclusions the text does not support; claims stated with more certainty than their basis (scripture, interpretation, testimony, speculation); places where testimony, exhortation and analysis are mixed without the reader being told which is which; points that accumulate without synthesis, and weak transitions; claims about groups of people stated as fact; and whether the front matter describes the book that follows. For each finding give the chapter or heading, a short quotation, why it matters and a suggested correction that keeps the author's meaning and convictions. Do not rewrite the book, do not add new teaching, and do not judge the author's theology: report how it is presented.";
 
+// Rebuilding the author's material as a professional book (DESIGN-SPEC.md §17):
+// the book a publisher would make from it, not a copy of the manuscript's order.
+// Word for word as src/lib/book-design.ts DESIGN_RULES and BOOK_TYPES; a test keeps them identical.
+export const DESIGN_RULES = [
+  "Design the book a professional publisher would make from this material, not a copy of the manuscript's order: decide who the reader is and the path the book takes them on, from foundations to application, and the parts and chapters that serve it. Merge material that is scattered, split chapters that do several jobs, move material to where the reader needs it, and remove repetition.",
+  "Every teaching, argument, scripture, example and testimony in the author's material has a place in the new book: for each section say which parts of the material it draws on (their headings or page numbers). Anything left out goes under Not placed with the reason; nothing is lost silently.",
+  "It stays the author's book: the author's teaching, convictions and level of certainty lead. Do not add claims, history, sources, statistics, people or testimony that are not in the material, except cited sources when the owner chose a book with cited sources.",
+  "Professional apparatus follows the book type and the owner's instructions (front matter, chapter openings and closings, summaries, key terms, questions, glossary) and is built from the book's own content. Front matter describes only what the book contains.",
+  "Chapters are written fresh, in professional prose, from the material they draw on: re-expressed, not copied. Quotations and scripture stay word for word apart from what the book's rules change; testimony stays clearly the author's testimony.",
+  "One numbering scheme for the whole book: every number used once and in order; heading levels never skip.",
+  "Gaps are reported, never filled: a promise the material cannot keep, or a section the design needs that the material does not support, goes under Missing for the author to supply.",
+];
+
+export const BOOK_TYPES = {
+  course: { label: "Course textbook", apparatus: "Each chapter opens with learning outcomes drawn from its own content and a short overview, uses numbered sections, defines key terms where they first appear, and ends with a summary, the key terms and review questions. Front matter: an introduction that says how to use the book (a course schedule only if the author gave one). Back matter: a glossary, and a bibliography only of works the book cites." },
+  trade: { label: "Non-fiction for general readers", apparatus: "Each chapter opens with a concrete hook from the author's material (a testimony, a scripture or a question; never \"In this chapter\"), develops one clear idea with transitions, and ends with its takeaways. An introduction that states the problem and maps the book; a conclusion that draws the threads together." },
+  academic: { label: "Academic study", apparatus: "A measured register. Each chapter states its question, sets out the evidence (scripture and the sources the author cites) and the argument, and keeps interpretation distinct from the text it interprets. An introduction with scope and method, a conclusion, and a bibliography of the works cited." },
+  ministry: { label: "Teaching and ministry book", apparatus: "Chapters move from scripture to explanation to application. Testimony is set apart and introduced as the author's testimony. Each chapter ends with reflection questions (and a prayer or response only where the author's material has one or the owner asks). An introduction, and a conclusion with the call to the reader." },
+  handbook: { label: "Practical handbook", apparatus: "Short chapters built around tasks, with numbered steps and checklists made from the author's own instructions, a summary box per chapter, cross-references between chapters, and a quick-reference appendix." },
+  custom: { label: "My instructions only", apparatus: "Follow the owner's instructions for the book's shape and apparatus." },
+};
+
+export function designBrief(d) {
+  if (!d || typeof d !== "object") return "";
+  const t = BOOK_TYPES[d.bookType] || BOOK_TYPES.custom;
+  return [
+    `Book type: ${t.label}. ${t.apparatus}`,
+    String(d.instructions || "").trim() ? `The owner's instructions for the whole book (follow them):\n${String(d.instructions).trim().slice(0, 8000)}` : "",
+    `Standard:\n${DESIGN_RULES.map((l) => `- ${l}`).join("\n")}`,
+  ].filter(Boolean).join("\n\n");
+}
+
 export const SYSTEM = `You are Claude Studio, the private writing and editing assistant of the owner of Polished Pages, working through Claude Code.
 
 Where you work
@@ -422,7 +454,9 @@ function bookContext(o) {
     .filter((n) => n && String(n.text ?? "").trim()).slice(0, 200)
     .map((n) => `- Page ${String(n.page ?? "").replace(/\s+/g, " ").slice(0, 20)}: ${String(n.text).replace(/\s+/g, " ").slice(0, 1000)}`).join("\n");
   const knowledge = knowledgeText(b.knowledge);
+  const design = designBrief(b.design);
   return [
+    design ? `This section belongs to a book the owner had rebuilt as a professional book. The design of the whole book (follow it):\n${design}` : "",
     pages ? `The owner's notes on particular pages of their book (highest priority; the page numbers refer to the owner's uploaded book):\n${pages}` : "",
     idea ? `The owner's idea for this section (follow it):\n${idea}` : "",
     rules ? `Rules for the whole book (follow strictly, everywhere, including quotations and material from other sources, unless the rule says otherwise):\n${rules}` : "",
@@ -450,8 +484,8 @@ function section(o) {
 Editorial standard:
 ${SECTION_POLICY.map((l) => `- ${l}`).join("\n")}
 Numbering continues the book's scheme: read the neighbouring sections in ./manuscript/ first.`,
-    compose: `${approach ? `${approach} The section's current text in ./manuscript/${file} is part of the owner's own book too.` : `Write this section new, from the plan in ./manuscript/INDEX.md, the other sections and the owner's notes. Never invent facts about the author; use [placeholders] where a fact is needed.`}
-Length: ${o.approach === "polish" ? "about as long as the author's own material on this subject" : DEPTH_CHAPTER[o.depth] || DEPTH_CHAPTER.standard}. Use "### " for sub-headings, short paragraphs with varied rhythm, no meta-commentary.`,
+    compose: `${approach ? `${approach} The section's current text in ./manuscript/${file} is part of the owner's own book too.${o._book?.design ? " So is ./manuscript/BEFORE-REBUILD.md, the manuscript as it was before the book was rebuilt: where it differs from ./source/, it is the author's latest text. Draw first on the parts this section's plan names under \"Draws on\"." : ""}` : `Write this section new, from the plan in ./manuscript/INDEX.md, the other sections and the owner's notes. Never invent facts about the author; use [placeholders] where a fact is needed.`}
+Length: ${o._book?.design ? "as long as the material this section draws on needs to be taught well; never pad" : o.approach === "polish" ? "about as long as the author's own material on this subject" : DEPTH_CHAPTER[o.depth] || DEPTH_CHAPTER.standard}. Use "### " for sub-headings, short paragraphs with varied rhythm, no meta-commentary.`,
     improve: `${IMPROVE[o.improvementType] || IMPROVE.enhance} Keep the Markdown structure.`,
     draft: `Write the "${o.title || "section"}" section of this book. Read the whole manuscript first so it fits the book. Guidance: ${o.guidance || "follow publishing convention for this section"}.${o.instructions ? ` The owner asks: ${o.instructions}` : ""} Never invent facts about the author; use [placeholders] where a fact is needed.`,
   };
@@ -469,6 +503,28 @@ ${o.op === "explain" ? `Write the summary to ./out/${out}.` : `Write only the ne
 Then write ./out/${notes} for the owner (not part of the book): "### From your book" (which parts of the documents in ./source/ you used, with their headings or page numbers), "### Added from other sources" (each addition and its source${o.approach === "polish" || o.approach === "mine" ? "; there should be none with this approach" : ""}), "### Your notes and rules" (how you followed the page notes, the idea and each rule), and "### For you to check" (anything uncertain, contradictory or left out).` : ""}`,
   };
 }
+
+// The design of a rebuilt book: its new table of contents, what each section draws on, and what is not placed.
+TOOLS["book-design"] = {
+  title: "Design the professional book",
+  build: (o) => {
+    const k = knowledgeText(o._book?.knowledge);
+    const rules = String(o._book?.rules || "").trim();
+    return {
+      output: "book-design.json",
+      prompt: `Design a new, professional book from the author's material: the book a publisher would make from it, not a copy of the manuscript's order.
+The material: the documents in ./source/${o._hasManuscript ? " and the manuscript in ./manuscript/ (./manuscript/INDEX.md lists its sections; where it differs from ./source/, the manuscript is the author's latest text)" : ""}. Read all of it.
+${designBrief({ bookType: o.bookType, instructions: o.instructions })}
+${o.approach === "mine-and-research" ? "The chapters will be written from the author's material and strengthened with cited sources." : "The chapters will be written from the author's material only."}
+${rules ? `Rules for the whole book (follow strictly):\n${rules}\n` : ""}${k ? `Knowledge base (obey strictly):\n${k}\n` : ""}
+1. Inventory. Write ./out/book-design-inventory.md: every distinct teaching, argument, scripture passage, example and testimony in the material, in the order found, each with where it is (heading or page number).
+2. Design. Write ./out/book-design.json: valid JSON only (no comments, no code fences) with exactly this shape:
+{"title": "", "subtitle": "", "reader": "who the book is for", "rationale": "why this structure serves that reader, and the main changes from the manuscript's order", "sections": [{"kind": "introduction", "title": "", "summary": "2-3 sentences: what this section teaches", "keyPoints": [""], "draws": "which parts of the material it draws on (headings or page numbers)", "apparatus": "what it includes besides prose (learning outcomes, summary, questions…)"}], "unplaced": [{"what": "", "where": "", "why": ""}], "missing": [""]}
+"kind" is one of: preface, introduction, part (a part divider), chapter, conclusion, appendix, discussion, glossary, bibliography. Sections are in reading order. Use part dividers only if the book falls naturally into parts. The number of chapters follows the material, not a fixed count.
+3. Check the design against the inventory: every item has a section whose "draws" covers it, or it is listed in "unplaced" with the reason. Re-read ./out/book-design.json and make sure it parses as JSON.`,
+    };
+  },
+};
 
 // Voice: a profile from the owner's own writing, and rewriting in it.
 TOOLS["voice-profile"] = {

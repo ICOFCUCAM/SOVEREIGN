@@ -2,6 +2,7 @@ import { authHeader } from "@/lib/session";
 import type { RuleSet } from "@/lib/knowledge";
 import { siteCoverCopyWriter, type CoverCopyWriter } from "@/lib/cover-copy";
 import type { BookDepth, BookMode, BookOutline, ImprovementType } from "@/types/book";
+import type { BookDesign, DesignBriefInput } from "@/lib/book-design";
 
 // The Book Creator's three AI steps behind one interface, so the same wizard can
 // be driven by the site's generation service (the default, metered per user) or
@@ -28,6 +29,8 @@ export interface BookEngine {
   chapterNotes?(chapterIndex: number): Promise<string | null>;
   /** Writes the cover copy (blurb, tagline, bio, art direction) in Cover Studio. */
   coverCopy?: CoverCopyWriter;
+  /** Designs the professional book from the project's material (Claude Studio only; DESIGN-SPEC.md §17). */
+  design?(brief: DesignBriefInput): Promise<BookDesign>;
 }
 
 async function post<T>(fn: string, body: unknown, fallback: string): Promise<T> {

@@ -33,6 +33,13 @@ if (prompt.includes("copy and art direction for its printed cover")) {
   out({ type: "result", subtype: "success", is_error: false, result: "done", session_id: sid });
   process.exit(0);
 }
+if (prompt.includes("Design a new, professional book")) {
+  const sources = fs.existsSync("source") ? fs.readdirSync("source") : [];
+  fs.writeFileSync("out/book-design-inventory.md", `# Inventory\n\n${sources.join(", ")}`);
+  fs.writeFileSync("out/book-design.json", JSON.stringify({ title: "Rebuilt", subtitle: "", reader: "Students", rationale: prompt.includes("Course textbook") ? "A course." : "A book.", sections: [{ kind: "introduction", title: "Introduction", summary: "Using the book.", keyPoints: [], draws: sources.join(", "), apparatus: "" }, { kind: "chapter", title: "One", summary: "First.", keyPoints: [], draws: prompt.includes("./manuscript/") ? "the manuscript" : "the source", apparatus: "Review questions" }], unplaced: [], missing: [] }));
+  out({ type: "result", subtype: "success", is_error: false, result: "Designed.", session_id: sid });
+  process.exit(0);
+}
 if (prompt.includes("turn it into a book series")) {
   fs.mkdirSync("out/volumes", { recursive: true }); fs.mkdirSync("out/planned", { recursive: true });
   fs.writeFileSync("out/volumes/01-beginnings.md", "# Beginnings\n\n## One\n\nFirst.");

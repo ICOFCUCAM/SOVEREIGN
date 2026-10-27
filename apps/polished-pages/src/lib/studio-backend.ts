@@ -8,6 +8,7 @@ import {
 import { API_SYSTEM, REWRITE_POLICY, SECTION_POLICY, VOICE_RULE, compareApiPrompt, toolApiPlan, toolById, type ToolId } from "@/lib/studio-tools";
 import { importText, kindDef, type Manuscript } from "@/lib/manuscript";
 import { coverCopyPrompt, parseCoverCopy, type CoverCopyWriter } from "@/lib/cover-copy";
+import { DESIGN_SHAPE, designBrief, parseDesign, type BookDesign, type DesignBriefInput } from "@/lib/book-design";
 
 // Which engine does the work, and where projects live.
 //   Engine: the owner's Claude Code (on the runner, their plan) or the API (billed per use).
@@ -59,6 +60,21 @@ async function callApi(user: string, opts: { system?: string; web?: boolean; max
     throw new Error(msg);
   }
   return body as { text: string; sources: { url: string; title: string }[] };
+}
+
+/** The design of a rebuilt book on the API (DESIGN-SPEC.md §17): the same brief and shape as Claude Code, the material in one request. */
+export async function apiDesignBook(material: string, brief: DesignBriefInput & { rules?: string }): Promise<BookDesign> {
+  if (!material.trim()) throw new Error("Upload your book (or write the manuscript) first, so Claude has material to design the book from.");
+  const text = material.length <= 400_000 ? material : `${material.slice(0, 400_000)}\n\n[The rest of the material is not included on the API: it is longer than one request allows. Claude Code reads all of it.]`;
+  const r = await callApi(`The author's material:\n\n${text}\n\n---\n\nDesign a new, professional book from this material: the book a publisher would make from it, not a copy of the manuscript's order.
+${designBrief(brief)}
+${brief.approach === "mine-and-research" ? "The chapters will be written from the author's material and strengthened with cited sources." : "The chapters will be written from the author's material only."}
+${brief.rules?.trim() ? `Rules for the whole book (follow strictly):\n${brief.rules.trim()}\n` : ""}
+First list for yourself every distinct teaching, argument, scripture passage, example and testimony in the material; then check that each has a section whose "draws" covers it or is listed in "unplaced" with the reason.
+"kind" is one of: preface, introduction, part (a part divider), chapter, conclusion, appendix, discussion, glossary, bibliography. Sections are in reading order. Use part dividers only if the book falls naturally into parts. The number of chapters follows the material, not a fixed count.
+Reply with valid JSON only (no comments, no code fences), exactly this shape:
+${DESIGN_SHAPE}`, { maxTokens: 16000 });
+  return parseDesign(r.text);
 }
 
 /** Cover copy on the API (billed per use), from the book's opening, headings and close when it's long. */
@@ -150,8 +166,10 @@ export function sectionContext(m: Manuscript, sec: Manuscript["sections"][number
   const idea = (sec.idea || o.idea || "").trim();
   const rules = (m.rules || o.rules || "").trim();
   const k = m.knowledge;
+  const design = designBrief(m.design as DesignBriefInput | undefined);
   const knowledge = k ? [k.rules?.trim() && `Rules (highest priority):\n${k.rules.trim()}`, k.terminology?.trim() && `Required terminology:\n${k.terminology.trim()}`, k.forbidden?.trim() && `Forbidden: never use or mention\n${k.forbidden.trim()}`].filter(Boolean).join("\n\n") : "";
   return [
+    design && `This section belongs to a book the owner had rebuilt as a professional book. The design of the whole book (follow it):\n${design}`,
     pages && `The owner's notes on particular pages of their book (highest priority):\n${pages}`,
     idea && `The owner's idea for this section (follow it):\n${idea}`,
     rules && `Rules for the whole book (follow strictly, everywhere, including quotations and material from other sources, unless the rule says otherwise):\n${rules}`,
@@ -207,14 +225,16 @@ export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions
           edit: `Revise this section as the owner asks: ${o.instructions || "improve clarity and flow"}. Keep facts, quotations and references accurate.`,
           explain: "Tell the owner what this section says, in plain language: its main teaching in two or three sentences, then its key points as a short list, then the scriptures, quotations and sources it relies on. Report faithfully; do not rewrite, correct or judge it.",
           rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help). Keep every fact, scripture reference and quotation accurate apart from what the rules change.\nEditorial standard:\n${SECTION_POLICY.map((l) => `- ${l}`).join("\n")}\nNumbering continues the book's scheme: see the neighbouring sections.`,
-          compose: `${API_APPROACHES[String(o.approach)] ?? "Write this section new, from the book's plan, the other sections and the owner's notes. Never invent facts about the author; use [placeholders] where a fact is needed."} Use "### " for sub-headings, short paragraphs, no meta-commentary.`,
+          compose: `${API_APPROACHES[String(o.approach)] ?? "Write this section new, from the book's plan, the other sections and the owner's notes. Never invent facts about the author; use [placeholders] where a fact is needed."} ${m.design ? " Length: as long as the material this section draws on needs to be taught well; never pad." : ""} Use "### " for sub-headings, short paragraphs, no meta-commentary.`,
           improve: `${API_IMPROVE[String(o.improvementType)] ?? API_IMPROVE.enhance} Keep the Markdown structure.`,
           draft: `Write the "${sec.title}" section of this book. Guidance: ${o.guidance || def.guidance}.${o.instructions ? ` The owner asks: ${o.instructions}` : ""} Never invent facts about the author; use [placeholders] where a fact is needed.`,
         };
         if (!ops[String(o.op)]) throw new Error("Unknown section action.");
         // The owner's own book, for the approaches that build on it.
         const usesBook = o.op === "compose" && String(o.approach) in API_APPROACHES;
-        const owner = usesBook ? (await documentText(ctx)).text : "";
+        // After a rebuild, the manuscript it replaced is the author's latest material too.
+        const before = m.design && m.archive?.at(-1);
+        const owner = usesBook ? `${(await documentText(ctx)).text}${before ? `\n\n---\n\nThe manuscript before the book was rebuilt (where it differs from the documents above, it is the author's latest text):\n\n${before.sections.map((x) => `## ${x.title}\n\n${x.body}`).join("\n\n")}` : ""}` : "";
         if (usesBook && !owner.trim()) throw new Error("Upload your book to this project first, so Claude can build on it.");
         const context = o.op === "explain" ? "" : sectionContext(m, sec, o);
         say(`${label} (${o.op === "draft" && def.wholeBook ? "reading the whole book" : "reading the section and its neighbours"})`);

@@ -49,7 +49,7 @@ const EducationalReaders = () => {
           </div>
         </div>
         <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
-          <BookExportPanel bookTitle={title} fullContent={content} chapterCount={0} />
+          <BookExportPanel bookTitle={title} fullContent={content} />
           <div className="mt-6"><BookReader content={content} title={title} onContentChange={setContent} /></div>
         </div>
       </div>

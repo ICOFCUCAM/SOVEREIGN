@@ -4,6 +4,7 @@ import type { BookEngine } from "@/lib/book-engine";
 import { bookExcerpt, parseCoverCopy, type CoverCopyWriter } from "@/lib/cover-copy";
 import type { BookOutline } from "@/types/book";
 import type { Manuscript } from "@/lib/manuscript";
+import { parseDesign } from "@/lib/book-design";
 
 // Client for the Claude Studio runner (services/polished-claude-runner): the
 // owner's own Claude Code, reached over HTTPS. Every call carries the signed-in
@@ -188,6 +189,8 @@ export function titleOf(markdown: string, fallback: string): string {
 }
 
 export const OUTPUT_NAMES: Record<string, string> = {
+  "book-design.json": "Design of the professional book",
+  "book-design-inventory.md": "Design · inventory of your material",
   "book/outline.json": "Book wizard · outline",
   "proofread.md": "Proofread text",
   "proofread-changes.md": "Proofreading changes",
@@ -255,6 +258,7 @@ export function claudeBookEngine(threadId: string, onOutline?: (o: BookOutline) 
     chapter: ({ previousChapters: _previous, ...i }) => runToFile(threadId, "book-chapter", { ...i }),
     improve: (i) => runToFile(threadId, "book-improve", { ...i }),
     coverCopy: claudeCoverCopyWriter(() => Promise.resolve(threadId)),
+    design: async (b) => parseDesign(await runToFile(threadId, "tool", { tool: "book-design", bookType: b.bookType, instructions: b.instructions, approach: b.approach })),
   };
 }
 

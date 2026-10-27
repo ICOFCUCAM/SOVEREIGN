@@ -14,6 +14,8 @@ export interface Proposal {
   approach?: RunOptions["approach"];
   /** What the run actually opened, from its event log. */
   ledger?: string[];
+  /** The whole request, so Redo repeats it exactly (instructions, improvement, factor, style, voice). */
+  request?: RunOptions;
 }
 export interface Running { job: StudioJob; line: string; steps: string[]; sectionId: string; op: SectionOp }
 type SectionRun = RunOptions & { sectionId: string; op: SectionOp };
@@ -66,7 +68,7 @@ export function useSectionRun({ backend, id, engine, persist, patchSection, late
         try {
           const text = (await backend.output(id, e.output ?? `sections/${sid}.md`)).trim();
           const notes = options.op === "compose" && (e.outputs ?? []).includes(`sections/${sid}-notes.md`) ? await backend.output(id, `sections/${sid}-notes.md`).catch(() => null) : null;
-          setProposals((p) => ({ ...p, [sid]: { sectionId: sid, op: options.op, text, engine, notes, approach: options.op === "compose" ? options.approach : undefined, ledger: accessed.current } }));
+          setProposals((p) => ({ ...p, [sid]: { sectionId: sid, op: options.op, text, engine, notes, approach: options.op === "compose" ? options.approach : undefined, ledger: accessed.current, request: options } }));
           ok = true;
         } catch { toast({ title: "Couldn't open Claude's suggestion", variant: "destructive" }); }
       }, ctl.signal);

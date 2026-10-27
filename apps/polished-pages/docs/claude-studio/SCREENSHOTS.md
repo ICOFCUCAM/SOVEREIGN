@@ -195,3 +195,29 @@ Approve for publication: every check listed, approval refused while anything blo
 More: Word and EPUB export (named as drafts until approved) and Claude's editorial review (judgement).
 
 ![Export and review (§16)](screenshots/41-export-and-review.webp)
+
+## Rebuild as a professional book (§17)
+
+Plan: the Rebuild card, above writing and rewriting.
+
+![Rebuild card (§17)](screenshots/42-rebuild-card.webp)
+
+The owner's instructions: book type, instructions for the whole book, where chapters come from.
+
+![Rebuild instructions (§17)](screenshots/43-rebuild-instructions.webp)
+
+Claude's design to review: reader, why this shape, parts and chapters, what each draws on and includes, what is not placed and what is missing.
+
+![The design (§17)](screenshots/44-rebuild-design.webp)
+
+The design applied: the new contents with each section's plan, "Write the 8 empty sections", and the earlier manuscript to restore.
+
+![Design applied (§17)](screenshots/45-rebuild-applied.webp)
+
+Runs and results from every stage, with Stop for a running job.
+
+![Runs and results (§17)](screenshots/46-runs-and-results.webp)
+
+A whole-book result can become the book's manuscript, so Finish works on it.
+
+![Use as the manuscript (§17)](screenshots/47-use-as-manuscript.webp)

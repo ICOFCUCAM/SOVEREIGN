@@ -7,6 +7,7 @@ import type { ResultHistory } from "@/lib/claude-studio";
 import type { Manuscript } from "@/lib/manuscript";
 import type { RunOptions, StudioEvent, StudioJob, StudioThread } from "@/lib/claude-studio";
 import type { EngineDecision, StudioBackend } from "@/lib/studio-backend";
+import { parseDesign } from "@/lib/book-design";
 
 // Development only (not routed in production builds): the real Claude Studio
 // workspace against an in-memory stand-in engine, for visual review and
@@ -77,6 +78,26 @@ Some teach that demons cause homosexual tendencies in certain people.
 *(To be completed.)*
 `;
 
+
+// A stand-in design for "Rebuild as a professional book" (sample text only).
+const DESIGN = JSON.stringify({
+  title: "Demonology", subtitle: "A course on spirits in scripture and tradition", reader: "Bible-school and university students meeting the subject for the first time",
+  rationale: "The manuscript moves between definitions, history and testimony. The course builds from terms and method, through the scriptural witness in order, to the author's teaching on deliverance, with testimony placed in the chapters it illustrates.",
+  sections: [
+    { kind: "introduction", title: "Introduction: How to Use This Course", summary: "What the course covers, how each chapter is built, and how to study it.", keyPoints: [], draws: "Preface; Chapter 1 (opening)", apparatus: "Course map" },
+    { kind: "part", title: "Part One: Foundations", summary: "Terms, method and the ancient setting." },
+    { kind: "chapter", title: "Terms, Method and Sources", summary: "The words the book uses and how scripture and tradition are weighed.", keyPoints: ["Definitions", "Method"], draws: "Chapter 1; pp. 3–12", apparatus: "Learning outcomes, key terms, summary, review questions" },
+    { kind: "chapter", title: "Spirits in the Ancient Near East", summary: "Mesopotamian, Egyptian and Canaanite beliefs, and Israel's difference.", keyPoints: [], draws: "Chapter 2; pp. 14–22, 87–90", apparatus: "Learning outcomes, summary, review questions" },
+    { kind: "part", title: "Part Two: The Scriptural Witness", summary: "" },
+    { kind: "chapter", title: "Evil Spirits in the Hebrew Bible", summary: "The passages in canonical order, with the author's reading of each.", keyPoints: [], draws: "Chapter 3; scattered notes on pp. 40–55", apparatus: "Learning outcomes, summary, review questions" },
+    { kind: "chapter", title: "The Second Temple Period", summary: "How the traditions grew between the testaments.", keyPoints: [], draws: "Chapter 4", apparatus: "Learning outcomes, summary, review questions" },
+    { kind: "conclusion", title: "Conclusion", summary: "The threads drawn together, and the call to the reader.", keyPoints: [], draws: "Closing pages", apparatus: "" },
+    { kind: "glossary", title: "Glossary", summary: "Every key term as the book uses it.", keyPoints: [], draws: "The whole book", apparatus: "" },
+  ],
+  unplaced: [{ what: "A second list of the names of spirits", where: "p. 61", why: "Repeats the list in Terms, Method and Sources word for word" }],
+  missing: ["The preface promises a course schedule; the material has none."],
+});
+
 function previewBackend(): StudioBackend {
   let m: Manuscript = JSON.parse(JSON.stringify(SAMPLE));
   const thread: StudioThread = {
@@ -138,6 +159,7 @@ export default function StudioPreview() {
     <Workspace id="demo" backend={backend} decision={decision} mode="auto" onMode={() => {}} onCheckEngine={async () => {}} busy={false} busyElsewhere={false} ready
       citationStyles={["APA 7", "Chicago (notes and bibliography)", "SBL"]} threads={[{ id: "demo", title: "Demonology", files: 2, outputs: 2 }] as never}
       onProject={() => {}} onNewProject={async () => {}} handoff={null} onHandoffUsed={() => {}} onChanged={() => {}} onDeleted={() => {}}
-      onWorkInStudio={async () => {}} onLearnVoice={async () => {}} findCover={async () => COVER} />
+      onWorkInStudio={async () => {}} onLearnVoice={async () => {}} findCover={async () => COVER}
+      designer={async () => { await new Promise((r) => setTimeout(r, 600)); return parseDesign(DESIGN); }} />
   );
 }

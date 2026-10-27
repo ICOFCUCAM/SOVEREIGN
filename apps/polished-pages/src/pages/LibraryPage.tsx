@@ -294,7 +294,7 @@ const LibraryPage = () => {
               </CardContent>
             </Card>
           )}
-          <BookExportPanel bookTitle={opened.title} fullContent={opened.markdown} chapterCount={0} />
+          <BookExportPanel bookTitle={opened.title} fullContent={opened.markdown} />
           <div className="mt-6">
             <BookReader
               content={opened.markdown}

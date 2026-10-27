@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowDown, ArrowUp, ChevronDown, Layers3, ListTree, Loader2, PenLine, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, History, Layers3, ListTree, Loader2, PenLine, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,9 +12,10 @@ import type { BookEngine } from "@/lib/book-engine";
 import type { BookDepth, BookMode } from "@/types/book";
 import { EYEBROW, GRADIENT, PAPER, SERIF } from "./ui";
 import type { ApproachId } from "./approaches";
+import BookDesignDialog from "./BookDesignDialog";
+import { BOOK_TYPES, sectionsToWrite, type BookDesign, type BookTypeId, type DesignBriefInput } from "@/lib/book-design";
 
 const MODES: { id: BookMode; label: string; line: string }[] = [
-  { id: "restructure", label: "Restructure", line: "A better structure for your existing book" },
   { id: "improve", label: "Improve", line: "An outline for an improved version" },
   { id: "guided", label: "Guided", line: "A thorough outline with chapter summaries" },
   { id: "quick", label: "Quick", line: "A complete outline, bold decisions" },
@@ -24,21 +25,28 @@ const GROUPS = [{ id: "front", label: "Front matter" }, { id: "body", label: "Ch
 
 // Plan (design spec §2): the book's contents, with the plan and notes for each
 // chapter, its order, Claude's outline, and turning the book into a series.
-export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish }: {
+export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore }: {
   m: Manuscript; onUpdate: (m: Manuscript) => void; onOpen: (id: string) => void; engine: BookEngine | null; approach: ApproachId; hasUploads: boolean;
   onWriteAll: (ids: string[]) => void; queue: { done: number; total: number } | null; onSeries: () => void; busy: boolean;
   /** Finish joins every chapter into one book. */
   onFinish: () => void;
+  /** Rebuild as a professional book (DESIGN-SPEC.md §17): Claude's design, then applying it. */
+  onDesign?: (b: DesignBriefInput) => Promise<BookDesign>;
+  onApplyDesign: (d: BookDesign, b: DesignBriefInput) => void;
+  /** Puts back a manuscript a rebuild replaced. */
+  onRestore: (index: number) => void;
 }) {
   const { toast } = useToast();
   const [open, setOpen] = useState<string | null>(null);
   const [outlining, setOutlining] = useState(false);
   const [showOutline, setShowOutline] = useState(!m.sections.length);
-  const [mode, setMode] = useState<BookMode>(hasUploads ? "restructure" : "guided");
+  const [mode, setMode] = useState<BookMode>("guided");
+  const [designing, setDesigning] = useState(false);
   const [depth, setDepth] = useState<BookDepth>("standard");
   const [genre, setGenre] = useState("");
   const [audience, setAudience] = useState("");
-  const empty = m.sections.filter((s) => s.kind === "chapter" && !s.body.trim());
+  // After a rebuild every designed section with a plan is written (chapters first); otherwise the empty chapters.
+  const empty = sectionsToWrite(m);
   const written = m.sections.filter((s) => s.kind === "chapter" && s.body.trim());
 
   const outline = async () => {
@@ -127,10 +135,24 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
           <p className="mt-2 text-[13.5px] text-[#64748B]">Open a chapter to rename it, move it, or add the notes Claude follows when it writes.</p>
         </div>
 
+        <div className="space-y-2 rounded-[10px] border border-[#BFD3FF] bg-[#F5F8FF] p-4 dark:border-[#1E3A8A] dark:bg-[#1E3A8A]/20">
+          <p className="flex items-center gap-2 text-[14px] font-semibold"><Sparkles className="h-4 w-4 text-[#2563EB]" /> Rebuild as a professional book</p>
+          <p className="text-[12.5px] text-[#475569] dark:text-[#CBD5E1]">Tell Claude what the book must become (a course textbook, a book for general readers…). Claude designs it from the whole of your material, not in the manuscript's order: parts, chapters, openings, summaries, questions. You review the design before anything changes.</p>
+          {m.design && <p className="text-[12px] text-[#64748B]">Rebuilt as: {BOOK_TYPES[m.design.bookType as BookTypeId]?.label ?? m.design.bookType} · {m.design.approach === "mine-and-research" ? "my book + cited sources" : "from my book only"} · {new Date(m.design.at).toLocaleDateString()}</p>}
+          <Button variant="outline" className="h-9 w-full" disabled={!onDesign || busy || Boolean(queue) || !hasUploads} onClick={() => setDesigning(true)}>
+            <Sparkles className="h-4 w-4" /> {m.design ? "Design it again" : "Rebuild the book"}
+          </Button>
+          {!hasUploads && <p className="text-[12px] text-[#64748B]">Upload your book in Sources first: Claude writes the new chapters from it.</p>}
+          {(m.archive ?? []).map((a, i) => (
+            <button key={`${a.at}-${i}`} type="button" onClick={() => { if (window.confirm(`Put back the manuscript from ${new Date(a.at).toLocaleString()} (${a.sections.length} sections)?\n\nThe current manuscript is kept too, so you can switch back.`)) onRestore(i); }}
+              className="flex w-full items-center gap-1.5 text-left text-[12.5px] font-medium text-[#2563EB] hover:underline"><History className="h-3.5 w-3.5 shrink-0" /> Restore: {a.label.toLowerCase()} ({new Date(a.at).toLocaleDateString()}, {a.sections.length} sections)</button>
+          ))}
+        </div>
+
         <div className="space-y-2">
           <Button className={`h-11 w-full ${GRADIENT}`} disabled={!empty.length || Boolean(queue) || busy || (approach !== "new" && !hasUploads)}
-            onClick={() => onWriteAll(empty.map((s) => s.id))}>
-            {queue ? <><Loader2 className="h-4 w-4 animate-spin" /> Writing {queue.done + 1} of {queue.total}…</> : <><Sparkles className="h-4 w-4" /> Write the {empty.length || ""} empty {empty.length === 1 ? "chapter" : "chapters"}</>}
+            onClick={() => onWriteAll(empty)}>
+            {queue ? <><Loader2 className="h-4 w-4 animate-spin" /> Writing {queue.done + 1} of {queue.total}…</> : <><Sparkles className="h-4 w-4" /> Write the {empty.length || ""} empty {m.design ? (empty.length === 1 ? "section" : "sections") : empty.length === 1 ? "chapter" : "chapters"}</>}
           </Button>
           <p className="text-[12px] text-[#64748B]">{approach !== "new" && !hasUploads ? "Upload your book in Sources, or choose “New from outline” in Write." : "One at a time, with the approach chosen in Write. Each one waits for you to review."}</p>
         </div>
@@ -163,6 +185,9 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
           <Button variant="outline" className="w-full" onClick={onSeries} disabled={busy}><Layers3 className="h-4 w-4" /> Turn into a series</Button>
         </div>
       </aside>
+      {designing && onDesign && <BookDesignDialog initial={m.design as Partial<DesignBriefInput> | undefined} sections={m.sections.length} design={onDesign} engineLabel={engine?.label}
+        onClose={() => setDesigning(false)}
+        onApply={(d, b) => { onApplyDesign(d, b); setDesigning(false); toast({ title: "The new book is laid out", description: `${d.sections.length} sections, each with its plan. Next: write them (chapters first). Your earlier manuscript can be restored here.` }); }} />}
     </div>
   );
 }
