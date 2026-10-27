@@ -20,15 +20,15 @@ export const VIEWS: { id: CanvasView; label: string; needsProposal?: boolean }[]
   { id: "clean", label: "Clean" }, { id: "original", label: "Original" }, { id: "side", label: "Side by side", needsProposal: true }, { id: "mine", label: "Write myself" },
 ];
 
-const TITLE = "font-['Newsreader',Georgia,serif] text-[36px] leading-[1.15] font-medium tracking-[-0.01em]";
+const TITLE = "font-['Newsreader',Georgia,serif] text-[30px] sm:text-[36px] leading-[1.15] font-medium tracking-[-0.01em]";
 const PROSE = "font-['Newsreader',Georgia,serif] text-[18px] leading-[1.7]";
 const COLUMN = "mx-auto w-full max-w-[720px]";
 
 /** A textarea that grows with its text, so the page reads as one continuous manuscript. */
-function GrowingText({ value, onChange, label, placeholder, className }: { value: string; onChange: (v: string) => void; label: string; placeholder?: string; className?: string }) {
+function GrowingText({ value, onChange, label, placeholder, className, min = 360, single }: { value: string; onChange: (v: string) => void; label: string; placeholder?: string; className?: string; min?: number; single?: boolean }) {
   const ref = useRef<HTMLTextAreaElement>(null);
-  useLayoutEffect(() => { const t = ref.current; if (!t) return; t.style.height = "auto"; t.style.height = `${Math.max(t.scrollHeight, 360)}px`; }, [value]);
-  return <textarea ref={ref} value={value} onChange={(e) => onChange(e.target.value)} aria-label={label} placeholder={placeholder}
+  useLayoutEffect(() => { const t = ref.current; if (!t) return; t.style.height = "auto"; t.style.height = `${Math.max(t.scrollHeight, min)}px`; }, [value, min]);
+  return <textarea ref={ref} value={value} onChange={(e) => onChange(single ? e.target.value.replace(/\n/g, " ") : e.target.value)} aria-label={label} placeholder={placeholder} rows={1}
     className={`block w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-[#172033] placeholder:text-[#94A3B8] focus:outline-none focus-visible:ring-0 dark:text-[#E5E7EB] ${className ?? ""}`} />;
 }
 
@@ -72,7 +72,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
     <header className="mb-10">
       <p className="mb-2 text-[12px] font-medium text-[#64748B]">{def.label}</p>
       {view === "writing" || view === "mine"
-        ? <input value={section.title} onChange={(e) => onTitle(e.target.value)} aria-label="Section title" className={`w-full border-0 bg-transparent p-0 text-[#172033] focus:outline-none dark:text-white ${TITLE}`} />
+        ? <GrowingText value={section.title} onChange={onTitle} label="Section title" single min={0} className={`text-[#172033] dark:text-white ${TITLE}`} />
         : <h1 className={`text-[#172033] dark:text-white ${TITLE}`}>{section.title}</h1>}
     </header>
   );
@@ -117,11 +117,14 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
         ) : (
           <div className={`${PROSE} text-[#172033] dark:text-[#E5E7EB]`}>
             {blocks.map((b, bi) => {
-              const head = b.length === 1 && b[0].kind === "same" && /^#{2,4}\s/.test(b[0].text);
+              // A heading (old or new) reads as a heading, without its Markdown marks.
+              const head = /^#{1,6}\s/.test(b.map((x) => x.text).join(""));
+              let stripped = false;
               return (
                 <p key={bi} className={head ? "mb-3 mt-8 font-['Newsreader',Georgia,serif] text-[24px] font-medium" : "mb-5"}>
                   {b.map((p, pi) => {
-                    if (p.kind === "same") return <span key={pi}>{head ? p.text.replace(/^#+\s*/, "") : p.text}</span>;
+                    const text = head && !stripped && /^#/.test(p.text) ? (stripped = true, p.text.replace(/^#+\s*/, "")) : p.text;
+                    if (p.kind === "same") return <span key={pi}>{text}</span>;
                     const off = rejected.has(p.change);
                     const shown = p.kind === "add" ? !off : off;
                     const label = `${p.kind === "add" ? "Added" : "Removed"}: change ${p.change + 1} of ${total}, ${off ? "rejected" : "accepted"}. Press to ${off ? "accept" : "reject"}.`;
@@ -131,7 +134,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
                         className={`inline rounded-[3px] px-0.5 text-left align-baseline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] ${at === p.change ? "ring-1 ring-[#2563EB]/50" : ""} ${p.kind === "add"
                           ? shown ? "bg-[#EAF1FF] underline decoration-[#2563EB] decoration-[1.5px] underline-offset-[5px] dark:bg-[#1E3A8A]/40" : "text-[#94A3B8] line-through decoration-[#94A3B8]"
                           : shown ? "bg-transparent text-[#172033] dark:text-[#E5E7EB]" : "text-[#9F1239]/70 line-through decoration-[#9F1239]/60 dark:text-[#FDA4AF]/70"}`}>
-                        {p.kind === "add" ? p.text.replace(CITE, (_s, c) => `[${citations.indexOf(c) + 1}]`) : p.text}
+                        {p.kind === "add" ? text.replace(CITE, (_s, c) => `[${citations.indexOf(c) + 1}]`) : text}
                       </button>
                     );
                   })}
@@ -151,12 +154,13 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
       {/* Review bar: only while there's a suggestion for this section (spec §5.4). */}
       {mine && !running && (effective === "changes" || effective === "side" || effective === "clean") && (
         <motion.div initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.16 }}
-          className="sticky bottom-6 z-20 mt-12 flex flex-wrap items-center gap-2 rounded-[12px] bg-[#172033] px-4 py-2.5 text-[13px] text-[#E5E7EB] shadow-[0_20px_40px_-16px_rgba(15,23,42,.55)]">
-          <span className="mr-2 min-w-0 flex-1">
+          className="sticky bottom-6 z-20 mt-12 rounded-[12px] bg-[#172033] px-4 py-3 text-[13px] text-[#E5E7EB] shadow-[0_20px_40px_-16px_rgba(15,23,42,.55)]">
+          <p className="mb-2.5 truncate text-[12.5px] text-[#CBD5E1]">
             <strong className="font-semibold text-white">{OP_LABEL[mine.op] ?? "Suggestion"}</strong>
-            {card && <> · {card.label} · <span className="text-[#CBD5E1]">source policy: {card.policy}</span></>}
+            {card && <> · {card.label} · source policy: {card.policy}</>}
             {" "}· {words(editing ?? accepted).toLocaleString()} words{total ? ` · ${total - rejected.size} of ${total} changes kept` : ""}
-          </span>
+          </p>
+          <div className="flex flex-wrap items-center gap-1.5">
           {effective === "changes" && editing === null && total > 1 && <>
             <button type="button" aria-label="Previous change" onClick={() => go(-1)} className="grid h-8 w-8 place-items-center rounded-md hover:bg-white/10"><ArrowUp className="h-4 w-4" /></button>
             <button type="button" aria-label="Next change" onClick={() => go(1)} className="grid h-8 w-8 place-items-center rounded-md hover:bg-white/10"><ArrowDown className="h-4 w-4" /></button>
@@ -166,6 +170,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
           {effective === "changes" && <Button size="sm" variant="ghost" className="h-8 text-white hover:bg-white/10 hover:text-white" onClick={() => setEditing(editing === null ? accepted : null)}>{editing === null ? <><PenLine className="h-4 w-4" /> Edit first</> : <><CornerDownLeft className="h-4 w-4" /> Back to changes</>}</Button>}
           <Button size="sm" variant="ghost" className="h-8 text-white hover:bg-white/10 hover:text-white" onClick={onRedo}><RotateCcw className="h-4 w-4" /> Redo</Button>
           <Button size="sm" variant="ghost" className="h-8 text-[#CBD5E1] hover:bg-white/10 hover:text-white" onClick={onDiscard}><X className="h-4 w-4" /> Discard</Button>
+          </div>
         </motion.div>
       )}
     </div>
