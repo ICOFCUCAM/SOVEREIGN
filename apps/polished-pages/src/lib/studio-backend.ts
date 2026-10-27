@@ -2,7 +2,7 @@ import { authHeader } from "@/lib/session";
 import { splitBook } from "@/lib/book-split";
 import { extractFileText } from "@/lib/extract-file-text";
 import {
-  RUNNER_URL, decodeText, followJob, studio, uploadToStudio,
+  RUNNER_URL, decodeText, followJob, isBookResult, studio, uploadToStudio, type ApprovalSummary, type ResultHistory, type SaveVersion,
   type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioMe, type StudioThread, type StudioThreadSummary,
 } from "@/lib/claude-studio";
 import { API_SYSTEM, REWRITE_POLICY, SECTION_POLICY, VOICE_RULE, compareApiPrompt, toolApiPlan, toolById, type ToolId } from "@/lib/studio-tools";
@@ -392,6 +392,11 @@ export interface StudioBackend {
   saveManuscript(id: string, m: Manuscript): Promise<Manuscript>;
   voice(): Promise<string>;
   saveVoice(v: string): Promise<unknown>;
+  /** Versions of a whole-book result, and its approval as publication-ready (DESIGN-SPEC.md §16). */
+  history(id: string, path: string): Promise<ResultHistory>;
+  version(id: string, path: string, n: number): Promise<string>;
+  saveOutput(id: string, path: string, text: string, o: SaveVersion): Promise<ResultHistory>;
+  approve(id: string, path: string, a: { version: number; summary: ApprovalSummary }): Promise<ResultHistory>;
 }
 
 const runnerApiCtx = async (id: string): Promise<ApiContext> => {
@@ -424,6 +429,10 @@ export const runnerBackend: StudioBackend = {
   saveManuscript: (id, m) => studio.saveManuscript(id, m),
   voice: () => studio.voice(),
   saveVoice: (v) => studio.saveVoice(v),
+  history: (id, p) => studio.history(id, p),
+  version: (id, p, n) => studio.version(id, p, n),
+  saveOutput: (id, p, t, o) => studio.saveOutput(id, p, t, o),
+  approve: (id, p, a) => studio.approve(id, p, a),
 };
 
 // Browser storage for when the runner is offline: projects, files' text and
@@ -459,6 +468,24 @@ const bkey = (id: string, kind: "src" | "out", name: string) => `${id}|${kind}|$
 
 async function saveLocal(t: StudioThread) { t.updatedAt = new Date().toISOString(); await threadsDb.put(t); return t; }
 async function localThread(id: string) { const t = await threadsDb.get<StudioThread>(id); if (!t) throw new Error("Project not found."); return t; }
+
+// Versions of whole-book results in this browser, as the runner keeps them (DESIGN-SPEC.md §16).
+async function localHistory(id: string, p: string): Promise<ResultHistory> {
+  return (await blobsDb.get<ResultHistory>(`${id}|hist|${p}`)) ?? { path: p, versions: [], approval: null };
+}
+async function localRecord(id: string, p: string, op: string, label?: string): Promise<ResultHistory> {
+  const h = await localHistory(id, p);
+  const text = await blobsDb.get<string>(bkey(id, "out", p));
+  if (text == null) return h;
+  const last = h.versions.at(-1);
+  if (last && (await blobsDb.get<string>(`${id}|ver|${p}|${last.n}`)) === text) return h;
+  const n = (last?.n ?? 0) + 1;
+  await blobsDb.put(text, `${id}|ver|${p}|${n}`);
+  h.versions.push({ n, at: new Date().toISOString(), op, ...(label ? { label } : {}), bytes: text.length, words: (text.match(/\S+/g) ?? []).length });
+  for (const old of h.versions.splice(0, Math.max(0, h.versions.length - 30))) await blobsDb.del(`${id}|ver|${p}|${old.n}`);
+  await blobsDb.put(h, `${id}|hist|${p}`);
+  return h;
+}
 
 export const browserBackend: StudioBackend = {
   storage: "browser",
@@ -502,7 +529,9 @@ export const browserBackend: StudioBackend = {
         const at = new Date().toISOString(); const jobId = crypto.randomUUID();
         if (r.userText) t.messages.push({ id: crypto.randomUUID(), role: "user", engine: "api", action: r.action, text: r.userText, at, jobId });
         for (const [p, text] of Object.entries(r.outputs)) {
+          if (isBookResult(p)) await localRecord(id, p, "Earlier result");
           await blobsDb.put(text, bkey(id, "out", p));
+          if (isBookResult(p)) await localRecord(id, p, `${r.action === "rewrite" ? "Rewrite" : r.action} (API)`);
           t.outputs = [{ path: p, bytes: text.length, modifiedAt: at }, ...t.outputs.filter((o) => o.path !== p)];
         }
         t.messages.push({ id: crypto.randomUUID(), role: "assistant", engine: "api", action: r.action, text: r.text, at, jobId, status: r.status, outputs: Object.keys(r.outputs) });
@@ -518,4 +547,26 @@ export const browserBackend: StudioBackend = {
   saveManuscript: async (id, m) => { const v = { ...m, updatedAt: new Date().toISOString() }; await blobsDb.put(v, `${id}|ms`); return v; },
   voice: async () => (await blobsDb.get<string>("voice")) ?? "",
   saveVoice: async (v) => blobsDb.put(v, "voice"),
+  history: (id, p) => localHistory(id, p),
+  version: async (id, p, n) => (await blobsDb.get<string>(`${id}|ver|${p}|${n}`)) ?? "",
+  saveOutput: async (id, p, text, o) => {
+    if (!isBookResult(p)) throw new Error("Only whole-book results keep versions.");
+    const h0 = await localHistory(id, p);
+    const latest = h0.versions.at(-1)?.n ?? 0;
+    if (o.base != null && o.base !== latest) throw new Error(`A newer version (${latest}) was saved after the one you edited (${o.base}). Open the latest and apply your change there.`);
+    await localRecord(id, p, "Earlier result");
+    await blobsDb.put(text, bkey(id, "out", p));
+    const t = await localThread(id);
+    t.outputs = [{ path: p, bytes: text.length, modifiedAt: new Date().toISOString() }, ...t.outputs.filter((x) => x.path !== p)];
+    await saveLocal(t);
+    return localRecord(id, p, o.op, o.label);
+  },
+  approve: async (id, p, a) => {
+    const h = await localHistory(id, p);
+    if (!h.versions.length || a.version !== h.versions.at(-1)!.n) throw new Error("Only the latest saved version can be approved. Save your edits first.");
+    if (a.summary.blockers > 0) throw new Error("Fix the problems that block publishing before approving.");
+    h.approval = { version: a.version, at: new Date().toISOString(), by: null, summary: { ...a.summary, blockers: 0 } };
+    await blobsDb.put(h, `${id}|hist|${p}`);
+    return h;
+  },
 };

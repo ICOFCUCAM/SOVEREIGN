@@ -105,7 +105,22 @@ export const studio = {
   record: (id: string, r: { action: StudioAction; userText: string; text: string; outputs: Record<string, string>; status: "done" | "failed" }) => call<{ thread: StudioThread }>(`/v1/threads/${id}/record`, { method: "POST", body: JSON.stringify(r) }).then((x) => x.thread),
   output: (id: string, path: string) => call<{ path: string; text: string }>(`/v1/threads/${id}/outputs/${path.split("/").map(encodeURIComponent).join("/")}`).then((r) => r.text),
   cancel: (jobId: string) => call<{ job: StudioJob }>(`/v1/jobs/${jobId}/cancel`, { method: "POST" }),
+  history: (id: string, path: string) => call<{ history: ResultHistory }>(`/v1/threads/${id}/history/${encPath(path)}`).then((r) => r.history),
+  version: (id: string, path: string, n: number) => call<{ text: string }>(`/v1/threads/${id}/history/${encPath(path)}?n=${n}`).then((r) => r.text),
+  saveOutput: (id: string, path: string, text: string, o: SaveVersion) => call<{ history: ResultHistory }>(`/v1/threads/${id}/outputs/${encPath(path)}`, { method: "PUT", body: JSON.stringify({ text, ...o }) }).then((r) => r.history),
+  approve: (id: string, path: string, a: { version: number; summary: ApprovalSummary }) => call<{ history: ResultHistory }>(`/v1/threads/${id}/approve/${encPath(path)}`, { method: "POST", body: JSON.stringify(a) }).then((r) => r.history),
 };
+const encPath = (p: string) => p.split("/").map(encodeURIComponent).join("/");
+
+// Versions of whole-book results and their approval (DESIGN-SPEC.md §16). The
+// runner keeps the same list of results (services/polished-claude-runner/src/store.mjs).
+export const isBookResult = (p: string) => /^(rewrite|corrected|voice|cited)\.md$/.test(p);
+export interface ResultVersion { n: number; at: string; op: string; label?: string; bytes: number; words: number }
+export interface ApprovalSummary { blockers: number; reviews: number; decided: number; checks: string[]; aiReview?: boolean }
+export interface Approval { version: number; at: string; by: string | null; summary: ApprovalSummary }
+export interface ResultHistory { path: string; versions: ResultVersion[]; approval: Approval | null }
+/** A save of a new version: what was done, and the version it was based on (a newer one makes the save fail rather than overwrite). */
+export interface SaveVersion { op: string; label?: string; base?: number }
 
 const put = (threadId: string, name: string, kind: "original" | "text", body: Blob) =>
   call<{ thread: StudioThread }>(`/v1/threads/${threadId}/files?name=${encodeURIComponent(name)}&kind=${kind}`, { method: "POST", body }).then((r) => r.thread);
@@ -199,6 +214,7 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "rewrite-analysis.md": "Rewrite · source analysis",
   "rewrite-plan.md": "Rewrite · editorial plan",
   "corrected.md": "Corrected book",
+  "editorial-review.md": "Editorial review (Claude's judgement)",
   "corrected-notes.md": "Correction notes",
   "cited.md": "Text with citations",
   "references.md": "References",

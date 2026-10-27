@@ -29,6 +29,30 @@ const STOP = new Set("a an and are as at be but by for from has have he her his 
 export const contentWords = (s: string) => s.toLowerCase().replace(/[’']s\b/g, "").split(/[^a-zÀ-ɏ]+/).filter((w) => w.length > 2 && !STOP.has(w));
 export const stem = (w: string) => w.replace(/(ings?|ions?|ments?|ness|ed|es|s)$/, "").slice(0, 7);
 
+/** A heading or label without its emphasis marks ("**20. Sift**" → "20. Sift"). */
+const plainLabel = (t: string) => t.replace(/(\*\*|__)/g, "").replace(/^[*_]|[*_]$/g, "").replace(/:\s*$/, "").trim();
+/** Markdown escapes removed, so "\\[citation needed\\]" is found like "[citation needed]"; line numbers are unchanged. */
+const unescape = (md: string) => md.replace(/\\([\\`*_{}[\]()#+\-.!|>~])/g, "$1");
+
+/**
+ * Section labels that are not Markdown headings, as books often have them: a
+ * line that is bold on its own ("**20. Sift**") or a short numbered line
+ * standing alone before prose ("20. Sift" then a paragraph).
+ */
+function labelsOf(lines: string[]): Heading[] {
+  const out: Heading[] = [];
+  lines.forEach((raw, i) => {
+    if (/^#/.test(raw)) return;
+    const bold = /^\s*(\*\*|__)(.+?)\1\s*:?\s*$/.exec(raw);
+    if (bold && bold[2].split(/\s+/).length <= 14) { out.push({ level: 7, text: plainLabel(bold[2]), line: i + 1 }); return; }
+    const item = /^\s{0,3}(\d{1,3})[.)]\s+(\S.{0,90})$/.exec(raw);
+    const next = lines.slice(i + 1).find((l) => l.trim());
+    if (item && item[2].split(/\s+/).length <= 10 && !/[.;,]$/.test(item[2].trim()) && !lines[i + 1]?.trim() && next && !/^\s{0,3}(\d{1,3}[.)]|[-*+])\s/.test(next) && !/^#/.test(next))
+      out.push({ level: 7, text: plainLabel(`${item[1]}. ${item[2]}`), line: i + 1 });
+  });
+  return out;
+}
+
 function parse(md: string): { lines: string[]; headings: Heading[]; paras: Para[] } {
   const lines = md.replace(/\r\n?/g, "\n").split("\n");
   const headings: Heading[] = [];
@@ -40,7 +64,7 @@ function parse(md: string): { lines: string[]; headings: Heading[]; paras: Para[
     if (/^\s*```/.test(raw)) { fence = !fence; flush(); return; }
     if (fence) return;
     const h = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(raw);
-    if (h) { flush(); const text = h[2].replace(/\s*\{[^}]*\}\s*$/, "").trim(); headings.push({ level: h[1].length, text, line: i + 1 }); current = text; return; }
+    if (h) { flush(); const text = plainLabel(h[2].replace(/\s*\{[^}]*\}\s*$/, "")); headings.push({ level: h[1].length, text, line: i + 1 }); current = text; return; }
     if (!raw.trim()) { flush(); return; }
     if (!buf.length) start = i;
     buf.push(raw.trim());
@@ -81,7 +105,7 @@ function sequenceProblems<T>(items: { n: number; item: T }[]): { dup: T[][]; gap
   return { dup, gaps };
 }
 
-const PLACEHOLDER = /\[\[YOURS:[^\]]*\]\]|\[(?:citation needed|source needed|cite|ref(?:erence)? needed|placeholder|insert[^\]]*|add[^\]]*|todo|tbd|tk|\?+|x{2,})\]|\b(?:TODO|TBD|FIXME|XXX)\b|lorem ipsum/gi;
+const PLACEHOLDER = /\[\[YOURS:[^\]]*\]\]|\[(?:citation needed|source needed|sources? \??|cite|ref(?:erence)?s? needed|placeholder|insert[^\]]*|add[^\]]*|todo|tbd|tk|\?+|x{2,}|verify[^\]]*|check[^\]]*)\]|\((?:citation needed|source needed|reference needed|to be (?:completed|added|supplied|confirmed|inserted))[^)]*\)|\{\{[^}]*\}\}|\b(?:TODO|TBD|FIXME|XXX)\b|lorem ipsum/gi;
 const isPlaceholder = (s: string) => new RegExp(PLACEHOLDER.source, "i").test(s);
 const ARTIFACT = /^(?:here is|here's) (?:the|your) (?:rewritten|revised|edited|improved)|^(?:certainly|sure)[!,.]|\bas an ai\b|\bi hope this helps\b|\bnote to (?:self|editor)\b|\[(?:rewritten|revised|continued)[^\]]*\]|\(rewritten\)/i;
 const REFS_HEADING = /^(?:references|bibliography|works cited|sources|notes and references|endnotes)$/i;
@@ -94,17 +118,27 @@ const SPIRIT = /\b(?:demon\w*|devil\w*|satan\w*|evil spirits?|unclean spirits?|p
 const GROUP = /\b(?:homosexual\w*|gay|lesbian\w*|same[- ]sex|transgender\w*|bisexual\w*|mental(?:ly)? ill\w*|mental illness\w*|depress\w*|schizophreni\w*|bipolar|autis\w*|epilep\w*|disabilit\w*|disabled|deaf|blind(?:ness)?|insan\w*|madness|psychiatric)\b/i;
 const VARIANTS: [string, string][] = [["Holy Ghost", "Holy Spirit"], ["colour", "color"], ["honour", "honor"], ["saviour", "savior"], ["judgement", "judgment"], ["centre", "center"], ["baptise", "baptize"], ["realise", "realize"], ["organise", "organize"], ["behaviour", "behavior"], ["favour", "favor"], ["neighbour", "neighbor"], ["worshipping", "worshiping"], ["recognise", "recognize"]];
 
-export function auditBook(markdown: string, opts: { rules?: string } = {}): AuditReport {
-  const { lines, headings, paras } = parse(markdown ?? "");
+export function auditBook(source: string, opts: { rules?: string } = {}): AuditReport {
+  const markdown = unescape(source ?? "");
+  const { lines, headings, paras } = parse(markdown);
+  const labels = labelsOf(lines);
   const findings: AuditFinding[] = [];
   const add = (f: Omit<AuditFinding, "places"> & { places?: AuditPlace[] }) => findings.push({ ...f, places: (f.places ?? []).slice(0, MAX_PLACES) });
-  const placeOfHeading = (h: Heading): AuditPlace => ({ heading: h.text, line: h.line, excerpt: `${"#".repeat(h.level)} ${h.text}` });
+  const placeOfHeading = (h: Heading): AuditPlace => ({ heading: h.text, line: h.line, excerpt: h.level > 6 ? h.text : `${"#".repeat(h.level)} ${h.text}` });
   const placeOfPara = (p: Para, excerpt = p.text): AuditPlace => ({ heading: p.heading, line: p.line, excerpt: clip(excerpt) });
   const unquoted = (s: string) => s.replace(/“[^”]*”|"[^"\n]*"|«[^»]*»/g, " ");
 
   // ── Structure ────────────────────────────────────────────────────────────
   const groups = new Map<string, { n: number; item: Heading }[]>();
-  headings.forEach((h) => { const num = headingNumber(h.text); if (num) { const k = `${h.level}|${num.key}`; groups.set(k, [...(groups.get(k) ?? []), { n: num.n, item: h }]); } });
+  // Headings by level; bold and stand-alone numbered labels as one more level.
+  // A label joins the numbering of the headings it sits among ("### 19", "**20. Sift**", "### 21" are one sequence).
+  const levelOfKey = new Map<string, number>();
+  [...headings, ...labels].sort((a, b) => a.line - b.line).forEach((h) => {
+    const num = headingNumber(h.text); if (!num) return;
+    const level = h.level > 6 ? levelOfKey.get(num.key) ?? 7 : h.level;
+    if (h.level <= 6) levelOfKey.set(num.key, h.level);
+    const k = `${level}|${num.key}`; groups.set(k, [...(groups.get(k) ?? []), { n: num.n, item: h }]);
+  });
   groups.forEach((items) => {
     const { dup, gaps } = sequenceProblems(items);
     dup.forEach((hs) => add({ id: `dup-${hs[0].line}`, area: "structure", level: "blocker", text: `${hs.length} headings share the number ${headingNumber(hs[0].text)!.n}: ${hs.map((h) => `“${clip(h.text, 60)}”`).join(", ")}`, places: hs.map(placeOfHeading) }));
@@ -127,6 +161,24 @@ export function auditBook(markdown: string, opts: { rules?: string } = {}): Audi
     else if (raw.trim() && !/^\s{2,}\S/.test(raw)) closeList();
   });
   closeList();
+  // Cross-references ("see chapter 7", "section 31 below") must point to a number the book has.
+  const have = new Map<string, Set<number>>();
+  [...headings, ...labels].forEach((h) => {
+    const num = headingNumber(h.text); if (!num) return;
+    const k = num.key.startsWith("#") ? "section" : num.key;
+    have.set(k, (have.get(k) ?? new Set()).add(num.n));
+    if (k === "section") have.set("chapter", (have.get("chapter") ?? new Set()).add(num.n));
+  });
+  const broken: AuditPlace[] = [];
+  paras.forEach((p) => {
+    for (const m of p.text.matchAll(/\b(?:see|in|cf\.?|refer to)\s+(chapter|section|part|lesson)\s+(\d{1,3}|[ivxlc]{1,6})\b/gi)) {
+      const k = m[1].toLowerCase(); const n = /^\d+$/.test(m[2]) ? Number(m[2]) : roman(m[2]);
+      const set = have.get(k) ?? (k === "chapter" ? have.get("section") : undefined);
+      if (n && set && set.size >= 2 && !set.has(n)) broken.push(placeOfPara(p, `${m[0]} · ${p.text}`));
+    }
+  });
+  if (broken.length) add({ id: "xref", area: "structure", level: "review", text: `${broken.length} cross-${broken.length === 1 ? "reference points" : "references point"} to a chapter or section number the book does not have`, places: broken });
+
   for (let i = 1; i < headings.length; i++) {
     const a = headings[i - 1], b = headings[i];
     if (b.level > a.level + 1) add({ id: `skip-${b.line}`, area: "structure", level: "review", text: `Heading level jumps from ${"#".repeat(a.level)} to ${"#".repeat(b.level)} under “${clip(a.text, 60)}”`, places: [placeOfHeading(b)] });
@@ -146,8 +198,10 @@ export function auditBook(markdown: string, opts: { rules?: string } = {}): Audi
   if (artifacts.length) add({ id: "artifacts", area: "completeness", level: "blocker", text: `${artifacts.length} drafting ${artifacts.length === 1 ? "remark" : "remarks"} from the rewriting tool left in the book`, places: artifacts.map((p) => placeOfPara(p)) });
   headings.filter((h) => REFS_HEADING.test(h.text)).forEach((h) => {
     const i = headings.indexOf(h); const next = headings.slice(i + 1).find((x) => x.level <= h.level);
-    const entries = lines.slice(h.line, next ? next.line - 1 : lines.length).filter((l) => l.trim() && !/^#/.test(l) && !isPlaceholder(l)).length;
-    if (!entries) add({ id: `refs-${h.line}`, area: "completeness", level: "blocker", text: `“${h.text}” has no entries`, places: [placeOfHeading(h)] });
+    // An entry names a work: a year, a URL or DOI, or a page reference. A note such as "(To be completed)" is not one.
+    const body = lines.slice(h.line, next ? next.line - 1 : lines.length).filter((l) => l.trim() && !/^#/.test(l));
+    const entries = body.filter((l) => !isPlaceholder(l) && /\b(1[5-9]\d{2}|20\d{2})[a-z]?\b|https?:\/\/|\bdoi\b|\bpp?\.\s*\d/i.test(l)).length;
+    if (!entries) add({ id: `refs-${h.line}`, area: "completeness", level: "blocker", text: body.length ? `“${h.text}” has no usable entries (${body.length} ${body.length === 1 ? "line" : "lines"} without an author, title and year)` : `“${h.text}” has no entries`, places: [placeOfHeading(h)] });
   });
   const quotes = paras.filter((p) => { const o = (p.text.match(/“/g) ?? []).length, c = (p.text.match(/”/g) ?? []).length, s = (p.text.match(/"/g) ?? []).length; return o !== c || s % 2 === 1; });
   if (quotes.length) add({ id: "quotes", area: "completeness", level: "review", text: `${quotes.length} ${quotes.length === 1 ? "paragraph has" : "paragraphs have"} an opening quotation mark without its closing one (or the reverse)`, places: quotes.map((p) => placeOfPara(p)) });
@@ -260,9 +314,64 @@ export function auditMarkdown(r: AuditReport, title = "Editorial check"): string
 export function correctionBrief(findings: AuditFinding[], max = 7000): string {
   const lines: string[] = [];
   for (const f of findings.filter((x) => x.level !== "note")) {
-    lines.push(`- ${f.level === "blocker" ? "FIX" : "REVIEW (fix only if it can be done without changing the author's meaning; otherwise report it)"}: ${f.text}`);
+    lines.push(`- ${f.level === "blocker" ? "FIX" : "REVIEW (fix only if it can be done without changing the author's meaning; otherwise report it)"}: ${f.text}`, `  Suggested correction: ${suggestedFix(f)}`);
     f.places.forEach((p) => lines.push(`  - ${p.line ? `line ${p.line}${p.heading ? ` (${clip(p.heading, 50)})` : ""}: ` : ""}${p.excerpt}`));
   }
   const out = lines.join("\n");
   return out.length > max ? `${out.slice(0, max)}\n- (more problems: run the check again after this correction)` : out;
+}
+
+/** A short code for each area, so a finding can be referred to ("S2", "F1"). */
+export const AREA_CODE: Record<AuditArea, string> = { fidelity: "F", structure: "S", completeness: "C", style: "L", coherence: "G", terminology: "T", sensitive: "X", coverage: "V" };
+
+/** The checks the report ran, for "what was checked" (a check that did not run is never shown as passed). */
+export const CHECKS: { area: AuditArea; what: string }[] = [
+  { area: "structure", what: "numbering (headings, bold and numbered labels, lists), heading levels, empty sections, cross-references" },
+  { area: "completeness", what: "unfinished markers, drafting remarks, references with entries, quotation marks, academic apparatus" },
+  { area: "style", what: "capitals for emphasis, repeated words and openings, rhetorical questions, spelling variants" },
+  { area: "coherence", what: "certainty on the same subject, repeated paragraphs, testimony" },
+  { area: "terminology", what: "the book's rules outside quotations, one name per concept" },
+  { area: "sensitive", what: "claims linking groups of people with spiritual causes" },
+  { area: "coverage", what: "contents and course schedule against the chapters" },
+  { area: "fidelity", what: "scripture, quotations, qualifications, certainty, new names and numbers, headings, length, copied sentences" },
+];
+
+/** What would correct a finding, in a sentence; for the author's judgement items it says what to decide. */
+export function suggestedFix(f: AuditFinding): string {
+  const id = f.id;
+  const by: [RegExp, string][] = [
+    [/^dup-/, "Renumber so each number is used once: the second becomes the next number, and the following sections move up in order."],
+    [/^gap-/, "Either restore the missing section or renumber the following ones so the sequence has no gap."],
+    [/^ldup-|^lgap-/, "Renumber the list in order, or add the missing item if one was dropped."],
+    [/^xref$/, "Point the reference to the right number, or remove it if that part is not in this book."],
+    [/^skip-/, "Use the next heading level down (## then ###), or promote this heading."],
+    [/^empty-/, "Write the section, merge it with its neighbour, or remove the heading."],
+    [/^placeholders$/, "Find a source for each claim and cite it, or keep the claim as the author wrote it without the marker and list it in the editorial notes."],
+    [/^artifacts$/, "Delete the tool's remark; it is not part of the book."],
+    [/^refs-\d/, "Add complete entries (author, title, publisher, year), or remove the heading until there are sources to list."],
+    [/^quotes$/, "Close the quotation, or remove the stray mark."],
+    [/^apparatus$/, "Add a bibliography of the works the book relies on, or describe the book as notes rather than an academic course."],
+    [/^caps$/, "Use italics for emphasis and normal capitals, keeping the sentence's force."],
+    [/^doubled$/, "Delete the repeated word."],
+    [/^open-/, "Vary the openings, or join the paragraphs where they make one point."],
+    [/^rq-/, "Turn most questions into statements; keep the ones that guide the reader."],
+    [/^var-/, "Choose one form, or explain in the introduction when each is used."],
+    [/^cert-/, "State the same level of certainty in both places, or explain why one matter is clear and the other uncertain."],
+    [/^repeat-/, "Keep one copy of the paragraph."],
+    [/^testimony$/, "Introduce each as the author's testimony (\"The author recounts…\"), so the reader does not take it as evidence."],
+    [/^rules$/, "Apply the book's rule in the author's own prose; quotations keep their wording."],
+    [/^sensitive$/, "Your decision: keep the conviction, worded as the author's theological belief, with no medical or factual claim the author cannot support."],
+    [/^cover-/, "Your decision: add the missing chapters, or change the contents or schedule to match what the book contains."],
+    [/^refs-lost$/, "Put each missing reference back where the original had it."],
+    [/^refs-added$/, "Confirm each new reference is intended; remove any the author did not give."],
+    [/^quotes-lost$/, "Restore each quotation word for word from the original."],
+    [/^hedges$/, "Restore the qualification in professional wording (\"probably\", \"in the author's view\")."],
+    [/^certainty$/, "Return to the original's level of certainty."],
+    [/^new-details$/, "Remove any name, date or number the author did not give, or confirm it."],
+    [/^heads-lost$/, "Find where the material went; restore it if it was dropped."],
+    [/^shorter$/, "Compare chapter by chapter and restore dropped teaching."],
+    [/^longer$/, "Check that additions explain the author's points and add no new claims."],
+    [/^copied$/, "Rewrite these sentences: keep the idea and re-express it professionally."],
+  ];
+  return by.find(([re]) => re.test(id))?.[1] ?? "Review the passage.";
 }

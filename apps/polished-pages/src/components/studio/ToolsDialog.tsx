@@ -15,7 +15,7 @@ import type { EngineId } from "@/lib/studio-backend";
 const ICONS: Record<StudioTool["icon"], typeof SpellCheck2> = { series: Layers3, voice: AudioLines, pen: Feather, spell: SpellCheck2, check: BadgeCheck, quote: BookMarked, languages: Languages, megaphone: Megaphone, graduation: GraduationCap, list: ListTree, diff: GitCompare, gauge: Gauge, scan: ScanText };
 const GRADIENT = "bg-gradient-to-r from-[hsl(221_83%_53%)] to-[hsl(262_83%_58%)] text-white shadow-[0_10px_28px_-12px_hsl(248_83%_55%/0.7)] hover:opacity-95";
 
-export default function ToolsDialog({ thread, engine, initial, onClose, onRun }: { thread: StudioThread; engine: EngineId | null; initial?: ToolId; onClose: () => void; onRun: (o: RunOptions & Record<string, unknown>) => void }) {
+export default function ToolsDialog({ thread, engine, initial, initialTarget, onClose, onRun }: { thread: StudioThread; engine: EngineId | null; initial?: ToolId; /** A result to work on (the viewer's "Editorial review by Claude"). */ initialTarget?: string; onClose: () => void; onRun: (o: RunOptions & Record<string, unknown>) => void }) {
   const [tool, setTool] = useState<StudioTool | null>(null);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [target, setTarget] = useState("source");
@@ -35,7 +35,7 @@ export default function ToolsDialog({ thread, engine, initial, onClose, onRun }:
     const init: Record<string, unknown> = {};
     for (const f of t.fields) if (f.initial !== undefined) init[f.key] = f.initial;
     if (t.pair) { init.a = sources[0]?.v; init.b = sources[1]?.v ?? sources[0]?.v; }
-    setValues(init); setTool(t); setTarget(targets[0]?.v ?? "source");
+    setValues(init); setTool(t); setTarget(initialTarget && targets.some((x) => x.v === initialTarget) ? initialTarget : targets[0]?.v ?? "source");
   };
   const set = (k: string, v: unknown) => setValues((x) => ({ ...x, [k]: v }));
   // Opened for one tool (from the command palette or a panel): go straight to its options.

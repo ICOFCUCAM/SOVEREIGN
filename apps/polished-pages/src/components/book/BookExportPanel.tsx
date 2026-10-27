@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { authHeader } from "@/lib/session";
+import { bookFile, saveFile, type BookFormat } from "@/lib/book-export";
 import { Download, FileText, BookOpen, Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -15,46 +15,11 @@ const BookExportPanel = ({ bookTitle, fullContent, chapterCount }: BookExportPan
 
   const wordCount = fullContent.split(/\s+/).length;
 
-  const handleExport = async (format: "md" | "docx" | "epub") => {
-    if (format === "md") {
-      const blob = new Blob([fullContent], { type: "text/markdown" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${bookTitle || "book"}.md`;
-      a.click();
-      URL.revokeObjectURL(url);
-      return;
-    }
-
-    setExporting(format);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/export-book`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: await authHeader(),
-          },
-          body: JSON.stringify({ content: fullContent, title: bookTitle, format }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Export failed");
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${(bookTitle || "book").replace(/[^a-zA-Z0-9]/g, "_")}.${format}`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Export error:", error);
-    } finally {
-      setExporting(null);
-    }
+  const handleExport = async (format: BookFormat) => {
+    setExporting(format === "md" ? null : format);
+    try { saveFile(await bookFile(fullContent, bookTitle, format), format === "md" ? `${bookTitle || "book"}.md` : `${(bookTitle || "book").replace(/[^a-zA-Z0-9]/g, "_")}.${format}`); }
+    catch (error) { console.error("Export error:", error); }
+    finally { setExporting(null); }
   };
 
   const formats = [

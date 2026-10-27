@@ -3,6 +3,7 @@ import Workspace from "@/components/studio/workspace/Workspace";
 import "@fontsource/newsreader/400.css";
 import "@fontsource/newsreader/500.css";
 import "@fontsource/newsreader/400-italic.css";
+import type { ResultHistory } from "@/lib/claude-studio";
 import type { Manuscript } from "@/lib/manuscript";
 import type { RunOptions, StudioEvent, StudioJob, StudioThread } from "@/lib/claude-studio";
 import type { EngineDecision, StudioBackend } from "@/lib/studio-backend";
@@ -57,11 +58,11 @@ This course forms part of a bachelor's programme in theology. It covers angelolo
 
 The people of the ancient world did not doubt that spirits were real. The origin of the Devil and his angels is clear from Scripture. Yahuah's people lived among nations whose texts are full of them.
 
-### 20. Sift
+**20. Sift**
 
-In Babylon the priests wrote long incantations against the spirits that brought fever and plague [citation needed]. The Holy Ghost protects the believer.
+In Babylon the priests wrote long incantations against the spirits that brought fever and plague \\[citation needed\\]. The Holy Ghost protects the believer.
 
-### 20. Devour
+**20. Devour**
 
 The adversary seeks whom he may devour. The Holy Spirit is the believer's guard. The origin and identity of demons cannot be known for certain.
 
@@ -72,6 +73,8 @@ In a dream I saw many people in chains, and many of them were Christians in chur
 Some teach that demons cause homosexual tendencies in certain people.
 
 ## References
+
+*(To be completed.)*
 `;
 
 function previewBackend(): StudioBackend {
@@ -84,6 +87,9 @@ function previewBackend(): StudioBackend {
   } as unknown as StudioThread;
   const out: Record<string, string> = { "rewrite.md": SAMPLE_REWRITE, "summary.md": "# Demonology — Summary\n\nA faithful overview of the book.", "quotes-check.md": "# Quotations check\n\nAll quotations verified." };
   const runs: RunOptions[] = [];
+  const hist: Record<string, ResultHistory> = { "rewrite.md": { path: "rewrite.md", versions: [
+    { n: 1, at: "2026-10-26T18:02:00Z", op: "Rewrite", bytes: 3000, words: 210 }, { n: 2, at: "2026-10-27T09:40:00Z", op: "Rewrite", bytes: 3100, words: 215 }], approval: null } };
+  const vers: Record<string, string> = { "rewrite.md|1": SAMPLE_REWRITE.replace("**20. Devour**", "**21. Devour**"), "rewrite.md|2": SAMPLE_REWRITE };
   return {
     storage: "browser",
     threads: async () => [{ id: "demo", title: "Demonology", files: 2, outputs: 2 }] as never,
@@ -108,6 +114,18 @@ function previewBackend(): StudioBackend {
     source: async (_id, storedAs) => (storedAs === "DEMONOLOGY.txt" ? `# Demonology\n\n${SAMPLE.sections.map((x) => x.body).join("\n\n").repeat(40)}` : null),
     manuscript: async () => m, saveManuscript: async (_id, x) => { m = x; return x; },
     voice: async () => "", saveVoice: async () => ({}),
+    // Versions in memory, as the runner keeps them.
+    history: async (_id, p) => hist[p] ?? { path: p, versions: [], approval: null },
+    version: async (_id, p, n) => vers[`${p}|${n}`] ?? "",
+    saveOutput: async (_id, p, text, o) => {
+      const h = hist[p] ??= { path: p, versions: [], approval: null };
+      const latest = h.versions.at(-1)?.n ?? 0;
+      if (o.base != null && o.base !== latest) throw new Error(`A newer version (${latest}) was saved after the one you edited (${o.base}).`);
+      out[p] = text; const n = latest + 1; vers[`${p}|${n}`] = text;
+      h.versions.push({ n, at: new Date().toISOString(), op: o.op, bytes: text.length, words: text.split(/\s+/).length });
+      return h;
+    },
+    approve: async (_id, p, a) => { const h = hist[p]; h.approval = { version: a.version, at: new Date().toISOString(), by: "owner@polishedpages.example", summary: a.summary }; return h; },
   };
 }
 

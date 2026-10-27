@@ -14,7 +14,7 @@ const TOKEN_HELP = {
   subscription: `The subscription token was refused (expired, revoked or mistyped). ${FIX}`,
 };
 import { createAuth } from "./auth.mjs";
-import { createStore, safeName, inside, manuscriptFile } from "./store.mjs";
+import { createStore, safeName, inside, isBookResult, manuscriptFile } from "./store.mjs";
 import { USES_BOOK, buildRun, CITATION_STYLES } from "./prompts.mjs";
 import { runClaude } from "./claude.mjs";
 
@@ -31,6 +31,9 @@ import { runClaude } from "./claude.mjs";
 //   DELETE /v1/threads/:id/files/:storedAs
 //   POST   /v1/threads/:id/run              {action: chat|summarize|rewrite|cite, options}
 //   GET    /v1/threads/:id/outputs/<path>   a file Claude wrote (text)
+//   PUT    /v1/threads/:id/outputs/<path>   {text, op, label, base} save a new version of a book result (409 if newer exists)
+//   GET    /v1/threads/:id/history/<path>   versions of a book result and its approval; ?n= one version's text
+//   POST   /v1/threads/:id/approve/<path>   {version, summary} approve the current version as publication-ready
 //   GET    /v1/jobs/:id/stream              server-sent events: replay + live
 //   POST   /v1/jobs/:id/cancel
 // One run at a time: this is one person's Claude plan, not a shared service.
@@ -152,6 +155,8 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     const resume = thread.sessionId || null;
     const sessionId = resume ? null : randomUUID();
     const before = new Map((await store.scanOutputs(thread.id)).map((o) => [o.path, o.modifiedAt]));
+    // Book results this run may replace keep their current content as a version first.
+    for (const rel of before.keys()) if (isBookResult(rel)) await store.recordVersion(thread.id, rel, "Earlier result").catch(() => {});
     emit(job, { type: "status", status: "running", line: "Claude Code is starting…" });
 
     const run = runClaude({
@@ -177,6 +182,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       if (action === "rewrite") await mergeChapters(cwd).catch(() => {});
       const after = await store.scanOutputs(thread.id);
       const changed = after.filter((o) => before.get(o.path) !== o.modifiedAt).map((o) => o.path);
+      for (const rel of changed) if (isBookResult(rel)) await store.recordVersion(thread.id, rel, options?.correct ? "Targeted correction" : job.label).catch(() => {});
       t.outputs = after;
       job.status = job.cancelled ? "cancelled" : r.ok ? "done" : "failed";
       job.error = job.cancelled ? null : r.error ?? null;
@@ -314,7 +320,9 @@ export function createServer(cfg = loadConfig(), deps = {}) {
         const files = Object.entries(b.outputs || {});
         const outRoot = path.join(store.workDir(id), "out");
         for (const [rel] of files) if (!inside(outRoot, rel) || !/\.(md|txt|json)$/i.test(rel)) return fail(res, 400, "Results must be Markdown, text or JSON inside the project.");
+        for (const [rel] of files) if (isBookResult(rel)) await store.recordVersion(id, rel, "Earlier result").catch(() => {});
         for (const [rel, text] of files) { const p = inside(outRoot, rel); await fs.mkdir(path.dirname(p), { recursive: true }); await fs.writeFile(p, String(text)); }
+        for (const [rel] of files) if (isBookResult(rel)) await store.recordVersion(id, rel, `${String(b.label || b.action || "Result")} (API)`).catch(() => {});
         const t = await store.read(id);
         const at = new Date().toISOString();
         const jobId = randomUUID();
@@ -322,6 +330,42 @@ export function createServer(cfg = loadConfig(), deps = {}) {
         t.messages.push({ id: randomUUID(), role: "assistant", engine: "api", action: String(b.action || "chat"), text: String(b.text || "").slice(0, 200000), at, jobId, status: b.status === "failed" ? "failed" : "done", outputs: files.map(([rel]) => rel) });
         t.outputs = await store.scanOutputs(id);
         return send(res, 200, { thread: await store.write(t) });
+      }
+      if (sub === "outputs" && req.method === "PUT" && rest.length) {
+        // A new version of a book result: the owner's edits, a restored version or a restored paragraph.
+        const rel = rest.join("/");
+        if (!isBookResult(rel)) return fail(res, 400, "Only whole-book results keep versions.");
+        if (running?.threadId === id) return fail(res, 409, "Claude is working in this project right now; save again when it finishes.");
+        const b = JSON.parse((await body(req, 30 * 1024 * 1024)).toString("utf8") || "{}");
+        const h0 = await store.history(id, rel);
+        const latest = h0.versions[h0.versions.length - 1]?.n ?? 0;
+        if (b.base != null && Number(b.base) !== latest) return fail(res, 409, `A newer version (${latest}) was saved after the one you edited (${b.base}). Open the latest and apply your change there.`);
+        await store.recordVersion(id, rel, "Earlier result");
+        if (!(await store.writeOutput(id, rel, String(b.text ?? "")))) return fail(res, 400, "That result can't be written.");
+        const h = await store.recordVersion(id, rel, String(b.op || "Edited by the owner"), b.label);
+        const t = await store.read(id); t.outputs = await store.scanOutputs(id); await store.write(t);
+        return send(res, 200, { history: h });
+      }
+      if (sub === "history" && req.method === "GET" && rest.length) {
+        const rel = rest.join("/");
+        const n = url.searchParams.get("n");
+        if (n) { const text = await store.readVersion(id, rel, n); return text == null ? fail(res, 404, "Version not found.") : send(res, 200, { text }); }
+        return send(res, 200, { history: await store.history(id, rel) });
+      }
+      if (sub === "approve" && req.method === "POST" && rest.length) {
+        // The owner's approval of one version as publication-ready. The app runs the checks and only
+        // offers approval when nothing blocks and every review item is decided; the runner records
+        // who approved which version and when, and the approval lapses when a newer version exists.
+        const rel = rest.join("/");
+        const b = JSON.parse((await body(req, 1024 * 1024)).toString("utf8") || "{}");
+        const h = await store.history(id, rel);
+        const latest = h.versions[h.versions.length - 1]?.n ?? 0;
+        if (!latest || Number(b.version) !== latest) return fail(res, 409, "Only the latest saved version can be approved. Save your edits first.");
+        const sum = b.summary && typeof b.summary === "object" ? b.summary : {};
+        if (Number(sum.blockers) > 0) return fail(res, 400, "Fix the problems that block publishing before approving.");
+        const approval = { version: latest, at: new Date().toISOString(), by: who.user?.email ?? who.user?.id ?? null,
+          summary: { blockers: 0, reviews: Number(sum.reviews) || 0, decided: Number(sum.decided) || 0, checks: Array.isArray(sum.checks) ? sum.checks.slice(0, 20).map(String) : [], aiReview: Boolean(sum.aiReview) } };
+        return send(res, 200, { history: await store.approve(id, rel, approval) });
       }
       if (sub === "outputs" && req.method === "GET" && rest.length) {
         const text = await store.readOutput(id, rest.join("/"));

@@ -103,7 +103,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [live, setLive] = useState<Live | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
   const [dialog, setDialog] = useState<DialogAction | null>(null);
-  const [tool, setTool] = useState<{ initial?: ToolId } | null>(null);
+  const [tool, setTool] = useState<{ initial?: ToolId; target?: string } | null>(null);
   const [joining, setJoining] = useState(false);
   const [viewing, setViewing] = useState<string | null>(null);
   const [retry, setRetry] = useState<{ action: StudioAction; options: RunOptions; why: string } | null>(null);
@@ -403,10 +403,11 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread}
         onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onTour={() => setTour(true)} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
         onResult={setViewing} onView={(v) => { setPlace("write"); setView(v); }} onFocus={() => { setPlace("write"); setFocus(true); }} onPanel={() => setPanelOpen(!panelOpen)} onTheme={toggleTheme} />
-      {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
+      {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} initialTarget={tool.target} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
       {dialog && <ActionDialog action={dialog} thread={thread} styles={p.citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
-      {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => { setViewing(null); p.onChanged(); }} onUseAsTarget={(x, o) => { setViewing(null); setPendingTarget(x, o ?? null); setDialog("rewrite"); }} check={check} />}
+      {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => { setViewing(null); p.onChanged(); }} onUseAsTarget={(x, o) => { setViewing(null); setPendingTarget(x, o ?? null); setDialog("rewrite"); }} check={check}
+        onReview={(x) => { setViewing(null); setTool({ initial: "editorial-review", target: x }); }} reviewAt={thread.outputs.find((o) => o.path === "editorial-review.md")?.modifiedAt ?? null} />}
       {/* Last, so it sits above a tool or action dialog that started the run. */}
       {cost.dialog}
     </>

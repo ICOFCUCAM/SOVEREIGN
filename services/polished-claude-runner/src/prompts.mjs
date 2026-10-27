@@ -33,6 +33,9 @@ export const SECTION_POLICY = [
   "Claims about groups of people (sexuality, mental illness, disability, health) keep the author's wording and certainty, never stronger, and never as medical or established fact unless the author cites evidence.",
 ];
 
+// The judgement-level review (DESIGN-SPEC.md §16), word for word as src/lib/studio-tools.ts EDITORIAL_REVIEW.
+export const EDITORIAL_REVIEW = "Read the whole book and write an editorial review of the matters that need judgement, which code cannot check: contradictions between chapters (quote both places); conclusions the text does not support; claims stated with more certainty than their basis (scripture, interpretation, testimony, speculation); places where testimony, exhortation and analysis are mixed without the reader being told which is which; points that accumulate without synthesis, and weak transitions; claims about groups of people stated as fact; and whether the front matter describes the book that follows. For each finding give the chapter or heading, a short quotation, why it matters and a suggested correction that keeps the author's meaning and convictions. Do not rewrite the book, do not add new teaching, and do not judge the author's theology: report how it is presented.";
+
 export const SYSTEM = `You are Claude Studio, the private writing and editing assistant of the owner of Polished Pages, working through Claude Code.
 
 Where you work
@@ -346,6 +349,14 @@ ${LONG}`,
       output: "compare.md",
       prompt: `Compare two versions of a document: A is ${o.a ? `./${o.a}` : "the first file in ./source/"} and B is ${o.b ? `./${o.b}` : "the second file in ./source/"}.
 Write ./out/compare.md: what changed overall; then chapter by chapter, the substantive differences (added, removed, reworded, moved), quoting short passages; then changes in facts, names, numbers or scripture; and anything in A that B lost. Ignore pure formatting.`,
+    }),
+  },
+  "editorial-review": {
+    title: "Editorial review (Claude's judgement)",
+    build: (o, tgt) => ({
+      output: "editorial-review.md",
+      prompt: `${EDITORIAL_REVIEW} The book: ${tgt}.
+Write ./out/editorial-review.md, starting with "# Editorial review (Claude's judgement)" and a one-line note that this is a model's reading for the author to weigh, not a check.`,
     }),
   },
   readability: {

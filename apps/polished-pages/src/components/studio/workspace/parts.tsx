@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  AlertTriangle, ArrowLeft, BookOpen, Check, Copy, Download, FileText, Globe, Languages, Layers, Library, Loader2, MessageSquare,
+  AlertTriangle, ArrowLeft, BadgeCheck, BookOpen, Check, Columns2, Copy, Download, FileText, Globe, History, Languages, Layers, Library, Loader2, MessageSquare, MoreHorizontal,
   PenLine, Plus, Quote, Rocket, ScanSearch, ScrollText, Search, ShieldAlert, Sparkles, Square, Wand2, Wrench,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,15 +10,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import Markdown from "@/components/studio/Markdown";
 import { createSeriesInLibrary, readManifest, startPlannedBooks } from "@/lib/series-from-plan";
 import type { StudioBackend } from "@/lib/studio-backend";
 import { saveDocument } from "@/lib/documents";
-import { outputLabel, titleOf, type RunOptions, type StudioAction, type StudioJob, type StudioThread } from "@/lib/claude-studio";
+import { isBookResult, outputLabel, titleOf, type ResultHistory, type RunOptions, type StudioAction, type StudioJob, type StudioThread } from "@/lib/claude-studio";
 import { GRADIENT } from "./ui";
 import EditorialCheck from "./EditorialCheck";
+import CompareView from "./CompareView";
+import { ApproveDialog, STATUS_TONE, VersionsPanel, resultStatus } from "./ResultVersions";
+import { bookFile, bookFileName, saveFile, type BookFormat } from "@/lib/book-export";
 import { auditBook } from "@/lib/editorial-audit";
 
 // The parts of Claude Studio that every view shares: the dialogs for the
@@ -264,12 +268,14 @@ export function StylePicker({ styles, value, onChange }: { styles: string[]; val
 const BOOK_RESULT = (p: string) => /^(rewrite\.md|corrected\.md|voice\.md|cited\.md|rewrite\/.+\.md|book\/.+\.md|volumes\/.+\.md)$/.test(p) && !/-notes\.md$/.test(p);
 const REWRITE_RESULT = (p: string) => p === "rewrite.md" || p === "corrected.md" || p === "voice.md";
 
-export function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsTarget, check }: {
+export function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsTarget, check, onReview, reviewAt }: {
   backend: StudioBackend; threadId: string; path: string; projectTitle: string; onClose: () => void;
   /** Rewrite this result, or correct it with the editorial check's findings filled in. */
   onUseAsTarget: (p: string, o?: Partial<RunOptions>) => void;
   /** The book's rules and the author's original, for the editorial check. */
   check?: { rules: string; original: () => Promise<string> };
+  /** Ask Claude for the judgement-level editorial review of this result, and when the last one was written. */
+  onReview?: (p: string) => void; reviewAt?: string | null;
 }) {
   const { toast } = useToast();
   const [text, setText] = useState<string | null>(null);
@@ -278,6 +284,31 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
   const [editing, setEditing] = useState(false);
   const [edited, setEdited] = useState(false);
   useEffect(() => { backend.output(threadId, path).then(setText).catch((e) => { setText(""); toast({ title: "Could not open the result", description: e instanceof Error ? e.message : "", variant: "destructive" }); }); }, [backend, threadId, path, toast]);
+  // Versions and approval of a whole-book result (DESIGN-SPEC.md §16).
+  const versioned = isBookResult(path);
+  const [history, setHistory] = useState<ResultHistory | null>(null);
+  const [base, setBase] = useState<number | null>(null);
+  const [op, setOp] = useState("Edited by the owner");
+  const [approving, setApproving] = useState(false);
+  const [savingVersion, setSavingVersion] = useState(false);
+  useEffect(() => {
+    if (!versioned) return;
+    backend.history(threadId, path).then((h) => { setHistory(h); setBase(h.versions.at(-1)?.n ?? 0); }).catch(() => setHistory(null));
+  }, [backend, threadId, path, versioned]);
+  const latest = history?.versions.at(-1) ?? null;
+  const status = versioned ? resultStatus(history, edited) : null;
+  const approvedNow = Boolean(history?.approval && latest && history.approval.version === latest.n && !edited);
+  const aiReview = Boolean(reviewAt && latest && reviewAt > latest.at);
+  const saveVersion = async (body: string, how: string) => {
+    setSavingVersion(true);
+    try {
+      const h = await backend.saveOutput(threadId, path, body, { op: how, base: base ?? undefined });
+      setHistory(h); setBase(h.versions.at(-1)?.n ?? null); setText(body); setEdited(false); setOp("Edited by the owner");
+      toast({ title: `Saved as version ${h.versions.at(-1)?.n}`, description: "The earlier versions are kept." });
+      return true;
+    } catch (e) { toast({ title: "Not saved", description: e instanceof Error ? e.message : "", variant: "destructive" }); return false; }
+    finally { setSavingVersion(false); }
+  };
 
   const bookTitle = text ? titleOf(text, projectTitle) : projectTitle;
   const save = async () => {
@@ -286,22 +317,47 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
     if (audit && audit.blockers && !window.confirm(`The editorial check found ${audit.blockers} ${audit.blockers === 1 ? "problem" : "problems"} to fix before publishing (open Editorial check to see them).\n\nSave it to your Library anyway?`)) return;
     setSaving(true);
     try {
-      const id = await saveDocument({ kind: "book", title: bookTitle, payload: { markdown: text, title: bookTitle }, preview: text.replace(/^#.*$/m, "").trim().slice(0, 160) });
+      // The Library copy says whether it is the approved book or a working draft, and which version.
+      const state = versioned ? { status: approvedNow ? "approved" : "draft", version: latest?.n ?? null, approvedAt: approvedNow ? history!.approval!.at : null, approvedBy: approvedNow ? history!.approval!.by : null } : {};
+      const id = await saveDocument({ kind: "book", title: bookTitle, payload: { markdown: text, title: bookTitle, ...state }, preview: text.replace(/^#.*$/m, "").trim().slice(0, 160) });
       setSavedId(id);
-      toast({ title: "Saved to your Library", description: `“${bookTitle}” is ready for editing, export and publishing.` });
+      toast({ title: "Saved to your Library", description: versioned ? (approvedNow ? `“${bookTitle}”, version ${latest?.n}, approved for publication.` : `“${bookTitle}” is saved as a working draft (not approved for publication).`) : `“${bookTitle}” is ready for editing, export and publishing.` });
     } catch (e) { toast({ title: "Could not save", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
     finally { setSaving(false); }
   };
-  const download = () => {
+  const [exporting, setExporting] = useState<BookFormat | null>(null);
+  // Exports of a whole-book result are named as drafts until the version is approved.
+  const download = async (format: BookFormat = "md") => {
     if (!text) return;
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
-    a.download = `${bookTitle.replace(/[^\p{L}\p{N} _-]+/gu, "").trim() || "result"}.md`;
-    a.click(); URL.revokeObjectURL(a.href);
+    setExporting(format);
+    try { saveFile(await bookFile(text, bookTitle, format), bookFileName(bookTitle, format, { draft: versioned && !approvedNow })); }
+    catch (e) { toast({ title: "Export failed", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+    finally { setExporting(null); }
   };
   const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
   const isJson = path.endsWith(".json");
   const [checking, setChecking] = useState(false);
+  // "Go to the passage" from the check: open the text for editing with the line selected.
+  const editor = useRef<HTMLTextAreaElement>(null);
+  const [jump, setJump] = useState<number | null>(null);
+  const goTo = (line: number) => { setChecking(false); setComparing(false); setEditing(true); setJump(line); };
+  const [comparing, setComparing] = useState(false);
+  const comparable = Boolean(check) && REWRITE_RESULT(path) && Boolean(text);
+  // Edits here live only in this window until saved to the Library; closing asks first.
+  const close = () => { if (edited && !savedId && !window.confirm(versioned ? "Your changes are not saved as a version. Close and lose them?" : "Your changes to this result are not saved. Close and lose them?")) return; onClose(); };
+  const [versionsOpen, setVersionsOpen] = useState(false);
+  const view = (v: "text" | "check" | "compare" | "versions") => { setChecking(v === "check"); setComparing(v === "compare"); setVersionsOpen(v === "versions"); if (v !== "text") setEditing(false); };
+  useEffect(() => {
+    const el = editor.current;
+    if (jump === null || !el || text === null) return;
+    const lines = text.split("\n");
+    const start = lines.slice(0, jump - 1).reduce((n, l) => n + l.length + 1, 0);
+    el.focus();
+    el.setSelectionRange(start, start + (lines[jump - 1]?.length ?? 0));
+    el.scrollTop = Math.max(0, (el.scrollHeight * (jump - 1)) / Math.max(1, lines.length) - el.clientHeight / 3);
+    el.scrollIntoView?.({ block: "center" });
+    setJump(null);
+  }, [jump, editing, text]);
   const checkable = Boolean(text) && BOOK_RESULT(path) && words >= 200;
   const audit = useMemo(() => (checkable && text ? auditBook(text, { rules: check?.rules }) : null), [checkable, text, check?.rules]);
   // A rewrite that came back very short, or that says the source couldn't be read, is not a book yet.
@@ -311,25 +367,33 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
     : null;
 
   return (
-    <Dialog open onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="flex max-h-[92vh] max-w-4xl flex-col gap-0 p-0">
+    <Dialog open onOpenChange={(v) => { if (!v) close(); }}>
+      <DialogContent className={`flex max-h-[92vh] flex-col gap-0 p-0 ${comparing ? "max-w-6xl" : "max-w-4xl"}`}>
         <DialogHeader className="border-b border-border px-6 py-4 text-left">
-          <DialogTitle className="flex items-center gap-2 font-serif text-xl"><button onClick={onClose} className="text-muted-foreground hover:text-foreground sm:hidden" aria-label="Back"><ArrowLeft className="h-5 w-5" /></button>{outputLabel(path)}</DialogTitle>
-          <DialogDescription>{text === null ? "Opening…" : `${words.toLocaleString()} words · ${path}${edited ? " · edited" : ""}`}</DialogDescription>
+          <DialogTitle className="flex items-center gap-2 font-serif text-xl"><button onClick={close} className="text-muted-foreground hover:text-foreground sm:hidden" aria-label="Back"><ArrowLeft className="h-5 w-5" /></button>{outputLabel(path)}</DialogTitle>
+          <DialogDescription className="flex flex-wrap items-center gap-2">{text === null ? "Opening…" : `${words.toLocaleString()} words · ${path}${edited ? " · edited" : ""}`}
+            {status && text !== null && <span role="status" aria-label="Review status" className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${STATUS_TONE[status.tone]}`}>{status.label}</span>}</DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 py-5 sm:px-10">
           {warning && <div role="alert" className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">{warning}</div>}
-          {audit && !checking && (audit.blockers > 0 || audit.reviews > 0) && (
+          {audit && !checking && !comparing && (audit.blockers > 0 || audit.reviews > 0) && (
             <div role="status" className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm">
               <ScanSearch className="h-4 w-4 text-primary" aria-hidden />
-              <span>Editorial check: {audit.blockers ? `${audit.blockers} to fix before publishing` : "nothing blocks publishing"}{audit.reviews ? `, ${audit.reviews} to review` : ""}{check && REWRITE_RESULT(path) ? "; compare it with your original" : ""}.</span>
-              <Button size="sm" variant="outline" className="ml-auto rounded-full" onClick={() => setChecking(true)}>See the check</Button>
+              <span>Editorial check: {audit.blockers ? `${audit.blockers} to fix before publishing` : "no blocking problems found by the code checks"}{audit.reviews ? `, ${audit.reviews} for your decision` : ""}{check && REWRITE_RESULT(path) ? "; the comparison with your original runs when you open it" : ""}.</span>
+              <Button size="sm" variant="outline" className="ml-auto rounded-full" onClick={() => view("check")}>See the check</Button>
+              {comparable && <Button size="sm" variant="ghost" className="rounded-full" onClick={() => view("compare")}>Compare with original</Button>}
             </div>
           )}
-          {text === null ? <Loader2 className="mx-auto mt-10 h-6 w-6 animate-spin text-muted-foreground" /> : checking && text
-            ? <EditorialCheck text={text} rules={check?.rules} original={check && REWRITE_RESULT(path) ? check.original : undefined} onCorrect={edited ? undefined : (brief) => onUseAsTarget(path, { correct: true, instructions: brief })} />
+          {text === null ? <Loader2 className="mx-auto mt-10 h-6 w-6 animate-spin text-muted-foreground" /> : versionsOpen && history
+            ? <VersionsPanel history={history} current={text} read={(n) => backend.version(threadId, path, n)} onRestore={async (n, old) => { if (edited && !window.confirm("Your unsaved changes will be replaced by this version. Continue?")) return; if (await saveVersion(old, `Restored version ${n}`)) view("text"); }} />
+            : comparing && text && check
+            ? <CompareView text={text} rules={check.rules} original={check.original} onChange={(next) => { setText(next); setEdited(true); setSavedId(null); setOp("Original wording restored in a paragraph"); toast({ title: "Your original wording is back", description: versioned ? "Only that paragraph changed. Save it as a version to keep it." : "Only that paragraph changed. Save to your Library to keep it." }); }} />
+            : checking && text
+            ? <EditorialCheck text={text} rules={check?.rules} original={check && REWRITE_RESULT(path) ? check.original : undefined} storageKey={`studio.review.${threadId}.${path}`}
+                placeLabel="Go to the passage" onPlace={(p) => goTo(p.line)}
+                onCorrect={edited ? undefined : (brief) => onUseAsTarget(path, { correct: true, instructions: brief })} />
             : editing
-            ? <Textarea value={text} onChange={(e) => { setText(e.target.value); setEdited(true); setSavedId(null); }} aria-label="Edit the result" className="min-h-[60vh] font-serif text-[15px] leading-relaxed" />
+            ? <Textarea ref={editor} value={text} onChange={(e) => { setText(e.target.value); setEdited(true); setSavedId(null); }} aria-label="Edit the result" className="min-h-[60vh] font-serif text-[15px] leading-relaxed" />
             : path.endsWith(".json") ? <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-[13px]">{prettyJson(text)}</pre> : <Markdown text={text} />}
         </div>
         <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 px-6 py-3">
@@ -338,20 +402,36 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
             <Button asChild size="sm" className={`rounded-full ${GRADIENT}`}><Link to={`/library?open=${savedId}`}><Library className="h-4 w-4" /> Open: edit, export EPUB / PDF / print</Link></Button>
             <Button asChild size="sm" variant="outline" className="rounded-full"><Link to="/translate"><Languages className="h-4 w-4" /> Translate</Link></Button>
             <Button asChild size="sm" variant="outline" className="rounded-full"><Link to="/publishing"><Rocket className="h-4 w-4" /> Publish</Link></Button>
-          </>) : (
-            <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || saving} onClick={save}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} Save to Library as a book</Button>
-          )}
+          </>) : (<>
+            {versioned && edited && <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || savingVersion} onClick={() => text && saveVersion(text, op)}>{savingVersion ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save as version {(latest?.n ?? 0) + 1}</Button>}
+            <Button size="sm" variant={versioned && edited ? "outline" : "default"} className={`rounded-full ${versioned && edited ? "" : GRADIENT}`} disabled={!text || saving || (versioned && edited)} title={versioned && edited ? "Save your edits as a version first" : undefined} onClick={save}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} {versioned ? (approvedNow ? "Save to Library (approved)" : "Save draft to Library") : "Save to Library as a book"}</Button>
+            {versioned && !edited && latest && !approvedNow && <Button size="sm" variant="outline" className="rounded-full" onClick={() => setApproving(true)} aria-label="Approve for publication"><BadgeCheck className="h-4 w-4" /> Approve…</Button>}
+          </>)}
           <div className="ml-auto flex gap-1">
-            {checkable && <Button size="sm" variant={checking ? "secondary" : "outline"} className="rounded-full" onClick={() => setChecking((v) => !v)} aria-pressed={checking}><ScanSearch className="h-4 w-4" /> {checking ? "Back to the text" : "Editorial check"}</Button>}
-            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => { setChecking(false); setEditing((v) => !v); }}><PenLine className="h-4 w-4" /> {editing ? "Preview" : "Edit before saving"}</Button>}
+            {checkable && <Button size="sm" variant={checking ? "secondary" : "outline"} className="rounded-full" onClick={() => view(checking ? "text" : "check")} aria-pressed={checking} aria-label={checking ? "Back to the text" : "Editorial check"}><ScanSearch className="h-4 w-4" /> {checking ? "Text" : "Check"}</Button>}
+            {comparable && <Button size="sm" variant={comparing ? "secondary" : "outline"} className="rounded-full" onClick={() => view(comparing ? "text" : "compare")} aria-pressed={comparing} aria-label={comparing ? "Back to the text" : "Compare with original"}><Columns2 className="h-4 w-4" /> {comparing ? "Text" : "Compare"}</Button>}
+            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => { view("text"); setEditing((v) => !v); }}><PenLine className="h-4 w-4" /> {editing ? "Preview" : versioned ? "Edit" : "Edit before saving"}</Button>}
+            {versioned && history && <Button size="sm" variant={versionsOpen ? "secondary" : "outline"} className="rounded-full" onClick={() => view(versionsOpen ? "text" : "versions")} aria-pressed={versionsOpen} aria-label={versionsOpen ? "Back to the text" : `Versions (${history.versions.length})`}><History className="h-4 w-4" /> {versionsOpen ? "Text" : `Versions (${history.versions.length})`}</Button>}
             {path === "series-plan.md" && <SeriesActions backend={backend} threadId={threadId} onDone={onClose} />}
             {path === "voice-profile.md" && <Button size="sm" variant="ghost" disabled={!text} onClick={async () => { try { await backend.saveVoice(text ?? ""); toast({ title: "Saved as your voice profile", description: "“In my voice” and “Rewrite in my voice” now follow it." }); } catch (e) { toast({ title: "Couldn't save", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}><PenLine className="h-4 w-4" /> Use as my voice profile</Button>}
-            {!isJson && <Button size="sm" variant="ghost" disabled={!text} onClick={() => onUseAsTarget(path)}><Wand2 className="h-4 w-4" /> Rewrite this</Button>}
-            <Button size="sm" variant="ghost" disabled={!text} onClick={() => { navigator.clipboard.writeText(text ?? ""); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /> Copy</Button>
-            <Button size="sm" variant="ghost" disabled={!text} onClick={download}><Download className="h-4 w-4" /> .md</Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild><Button size="sm" variant="ghost" disabled={!text} aria-label="More actions"><MoreHorizontal className="h-4 w-4" /> More</Button></DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {!isJson && <DropdownMenuItem className="gap-2" onSelect={() => onUseAsTarget(path)}><Wand2 className="h-4 w-4" /> Rewrite this</DropdownMenuItem>}
+                <DropdownMenuItem className="gap-2" onSelect={() => { navigator.clipboard.writeText(text ?? ""); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /> Copy</DropdownMenuItem>
+                {versioned && onReview && <DropdownMenuItem className="gap-2" onSelect={() => onReview(path)}><ScanSearch className="h-4 w-4" /> Editorial review by Claude (judgement)</DropdownMenuItem>}
+                <DropdownMenuItem className="gap-2" onSelect={() => download("md")}><Download className="h-4 w-4" /> Download Markdown (.md)</DropdownMenuItem>
+                {!isJson && <DropdownMenuItem className="gap-2" disabled={exporting !== null} onSelect={() => download("docx")}><FileText className="h-4 w-4" /> {exporting === "docx" ? "Exporting Word…" : "Export Word (.docx)"}</DropdownMenuItem>}
+                {!isJson && <DropdownMenuItem className="gap-2" disabled={exporting !== null} onSelect={() => download("epub")}><BookOpen className="h-4 w-4" /> {exporting === "epub" ? "Exporting EPUB…" : "Export EPUB"}</DropdownMenuItem>}
+                {versioned && !approvedNow && <p className="px-2 py-1.5 text-[11.5px] text-muted-foreground">Exports are named “draft” until this version is approved.</p>}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </DialogContent>
+      {approving && text && latest && <ApproveDialog text={text} rules={check?.rules} original={check && REWRITE_RESULT(path) ? check.original : undefined} version={latest.n}
+        dismissedKey={`studio.review.${threadId}.${path}`} aiReview={aiReview} onReview={onReview ? () => { setApproving(false); onReview(path); } : undefined} onClose={() => setApproving(false)}
+        onApprove={async (summary) => { try { const h = await backend.approve(threadId, path, { version: latest.n, summary }); setHistory(h); setApproving(false); toast({ title: `Version ${latest.n} approved for publication`, description: "Recorded with your name and the time. It lapses if a newer version is saved." }); } catch (e) { toast({ title: "Not approved", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }} />}
     </Dialog>
   );
 }
