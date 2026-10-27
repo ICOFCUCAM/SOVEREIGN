@@ -11,7 +11,7 @@ import type { RunOptions, StudioThread } from "@/lib/claude-studio";
 import type { EngineId } from "@/lib/studio-backend";
 import type { ToolId } from "@/lib/studio-tools";
 import { APPROACH_CARDS, OP_LABEL, type ApproachId } from "./approaches";
-import { LiveCard, MessageCard, OutputRow, type DialogAction, type Live } from "./parts";
+import { LiveCard, MessageCard, ResultsList, type DialogAction, type Live } from "./parts";
 import type { Proposal, Running, SectionOp } from "./useSectionRun";
 import { GRADIENT } from "./ui";
 
@@ -285,7 +285,7 @@ export default function ClaudePanel(p: {
             {outputs.length > 0 && (
               <details className="rounded-[10px] border border-[#E6E8ED] px-3 py-2 dark:border-white/10">
                 <summary className="cursor-pointer text-[13px] font-medium">Results · {outputs.length}</summary>
-                <div className="mt-2 space-y-1">{outputs.map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={p.onOpenResult} compact />)}</div>
+                <div className="mt-2"><ResultsList outputs={outputs} onOpen={p.onOpenResult} /></div>
               </details>
             )}
           </div>

@@ -303,3 +303,13 @@ Publisher's design, not the manuscript's order; everything placed or listed; the
 - Plan, Write and Finish showed the Sources page whenever the project had no manuscript yet, so the four stages looked identical. Each now has its own page saying what it is for and offering every way to start: Rebuild as a professional book (straight from the upload), Split into chapters, the Book wizard, a blank book.
 - The Book wizard (Book Creator: quick, guided, restructure, improve, publishing-ready; depth; writing voice) was part of Claude Studio until the workspace redesign (commit 49dc52be), which dropped it without telling the owner. It is back inside the project, on the engine in use: Plan (Book wizard), Sources ("Or start from the Book wizard") and the no-manuscript pages; its chapters come into the manuscript with "Bring them in".
 - [x] Tested: `Workspace.test.tsx` "shows Plan, Write and Finish as their own pages before there is a manuscript… and opens the Book wizard"
+
+### 17h. Everything the redesign dropped, found and restored (27 October 2026, owner: "look all those you dropped without telling me and restored")
+Found by comparing every button and label of the Studio before the redesign (`ClaudeStudio.tsx` before commit 49dc52be, `ManuscriptEditor.tsx` before 0c6b15ef) with today's code.
+- [x] Book wizard (quick, guided, restructure, improve, publishing-ready) inside the project: dropped in 49dc52be; restored (§17g).
+- [x] "Add below" (keep your text and add Claude's suggestion beneath it): dropped in 0c6b15ef; restored in the review bar (Write).
+- [x] Results grouped (main results first; rewritten chapters, series volumes, planned books, Book wizard files, translated chapters and manuscript suggestions folded into groups): dropped in 49dc52be; restored in the Claude panel and in Ask Claude · Results.
+- [x] The conversation with Claude ("How it works", Ctrl + Enter to send) for a project with no chapters yet: lost in 49dc52be (the Claude panel needs a chapter); restored in Ask Claude · Results on every stage.
+- [x] "Next chapter" in the guided rewrite: dropped in 0c6b15ef; restored (§17f).
+- Removed with notice, not restored: the Plan outline style "Restructure" (it added chapters beside the old ones instead of restructuring); restructuring is in Rebuild as a professional book and in the Book wizard's Restructure mode.
+- Renamed, not dropped (checked): Restore original → "Put this version back"; Put them back → "Restore these changes"; Correct these with Claude → "Correct N selected with Claude"; Delete project → "Delete this project"; drag-and-drop upload, Check again, Run it on the API, Lost the live view and the engine modes are all present.

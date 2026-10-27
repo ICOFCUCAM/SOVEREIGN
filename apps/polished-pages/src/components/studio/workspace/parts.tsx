@@ -161,6 +161,29 @@ export function LiveCard({ live, onStop }: { live: Live; onStop: () => void }) {
   );
 }
 
+// Results: main files first; by-products folded into named groups (as the Studio listed them before the redesign).
+const RESULT_GROUPS: { prefix: string; label: string }[] = [
+  { prefix: "rewrite/", label: "Rewritten chapters" }, { prefix: "volumes/", label: "Series volumes" }, { prefix: "planned/", label: "Planned books" },
+  { prefix: "book/", label: "Book wizard" }, { prefix: "translation/", label: "Translated chapters" }, { prefix: "sections/", label: "Manuscript suggestions" },
+];
+/** The project's results, newest first, with chapter files, volumes, wizard files and suggestions grouped. */
+export function ResultsList({ outputs, onOpen }: { outputs: StudioThread["outputs"]; onOpen: (p: string) => void }) {
+  const sorted = [...outputs].sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt));
+  const grouped = (p: string) => p === "series.json" || RESULT_GROUPS.some((g) => p.startsWith(g.prefix));
+  const groups = RESULT_GROUPS.map((g) => ({ ...g, items: outputs.filter((o) => o.path.startsWith(g.prefix)).sort((a, b) => a.path.localeCompare(b.path)) })).filter((g) => g.items.length);
+  return (
+    <div className="space-y-1">
+      {sorted.filter((o) => !grouped(o.path)).map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={onOpen} compact />)}
+      {groups.map((g) => (
+        <details key={g.prefix} className="rounded-xl border border-border px-2 py-1.5">
+          <summary className="cursor-pointer text-[13px] font-medium">{g.label} · {g.items.length}</summary>
+          <div className="mt-1.5 space-y-1">{g.items.map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={onOpen} compact />)}</div>
+        </details>
+      ))}
+    </div>
+  );
+}
+
 export function OutputRow({ path, bytes, at, onOpen, compact }: { path: string; bytes: number; at: string; onOpen: (p: string) => void; compact?: boolean }) {
   return (
     <button onClick={() => onOpen(path)} className={`flex w-full items-center gap-3 rounded-xl border border-border text-left transition hover:border-primary/40 hover:bg-muted/40 ${compact ? "px-2 py-1.5" : "px-3 py-2.5"}`}>

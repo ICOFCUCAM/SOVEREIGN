@@ -29,7 +29,7 @@ import BookDesignDialog from "./BookDesignDialog";
 // The Book Creator wizard, run inside the project on the engine in use (loaded on demand).
 const BookCreator = lazy(() => import("@/pages/BookCreator"));
 import FinishStage from "./FinishStage";
-import { ActionDialog, LiveCard, OutputRow, ResultViewer, setPendingTarget, type DialogAction, type Live } from "./parts";
+import { ActionDialog, LiveCard, MessageCard, ResultsList, ResultViewer, setPendingTarget, type DialogAction, type Live } from "./parts";
 import { useManuscript } from "./useManuscript";
 import { useSectionRun } from "./useSectionRun";
 import { APPROACH_CARDS, type ApproachId } from "./approaches";
@@ -350,6 +350,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
       onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); const next = m.sections[m.sections.findIndex((s) => s.id === section.id) + 1]; toast({ title: "Accepted", description: `Your previous text is kept in Version history.${next ? ` Next: “${next.title}”, at the end of the page.` : ""}` }); }}
       onDiscard={() => { sr.decide(section.id, "discard"); setView("writing"); }}
+      onAppend={proposal && section.body.trim() && proposal.op !== "rewrite" ? () => { sr.decide(section.id, "append"); setView("writing"); toast({ title: "Added below your text", description: "Your previous text is kept in Version history." }); } : undefined}
       onRedo={() => { const op = proposal?.op ?? "rewrite"; void runSection({ ...(proposal?.request ?? {}), sectionId: section.id, op, title: section.title, approach: proposal?.request?.approach ?? proposal?.approach }); }}
       onRestoreOriginal={() => { if (window.confirm("Put back the text from before Claude's rewrite? The current text becomes the earlier version.")) patchSection(section.id, { body: section.original!, original: section.body }); }} />;
   })();
@@ -393,7 +394,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       </span>
       {live && <button type="button" onClick={() => { if (section && m && !narrow) { setPlace("write"); setPanelOpen(true); setPanelMode("ask"); } else setActivity(true); }} className="hidden items-center gap-1.5 rounded-full bg-[#EFF6FF] px-2.5 py-1 text-[12px] font-medium text-[#1D4ED8] sm:flex dark:bg-[#172554] dark:text-[#93C5FD]"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> {live.job.label}</button>}
       {!live && p.busyElsewhere && <span className="hidden items-center gap-1.5 rounded-full bg-[#FFFBEB] px-2.5 py-1 text-[12px] font-medium text-[#92400E] sm:flex dark:bg-amber-500/15 dark:text-amber-300"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> Claude is busy in another project</span>}
-      {(thread.outputs.length > 0 || live) && <button type="button" onClick={() => setActivity(true)} aria-label={`Results: ${thread.outputs.length}${live ? `, ${live.job.label} running` : ""}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted sm:flex dark:text-[#CBD5E1]"><FileText className="h-4 w-4" /> Results <span className="text-[12px] text-[#94A3B8]">{thread.outputs.length}</span></button>}
+      {(thread.outputs.length > 0 || live || !section) && <button type="button" onClick={() => setActivity(true)} aria-label={`Results: ${thread.outputs.length}${live ? `, ${live.job.label} running` : ""}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted sm:flex dark:text-[#CBD5E1]"><FileText className="h-4 w-4" /> {section && m ? "Results" : "Ask Claude · Results"} <span className="text-[12px] text-[#94A3B8]">{thread.outputs.length}</span></button>}
       <button type="button" onClick={() => setPalette(true)} className="flex h-9 items-center gap-2 rounded-[8px] border border-[#E6E8ED] bg-white px-2.5 text-[13px] text-[#64748B] hover:border-[#CBD5E1] dark:border-white/10 dark:bg-white/5">
         <Search className="h-4 w-4" /><span className="hidden lg:inline">Tools and chapters</span><kbd className="rounded border border-[#E6E8ED] bg-[#F8FAFC] px-1.5 text-[11px] text-[#475569] dark:border-white/10 dark:bg-white/5">⌘K</kbd>
       </button>
@@ -455,11 +456,13 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         onApply={async (d, b) => { const next = designToManuscript(d, { title: thread.title === "Untitled project" ? "" : thread.title, sections: [], history: [] }, b); await replace(next); setApproach(b.approach); setRebuilding(false); setPlace("plan"); toast({ title: "The new book is laid out", description: `${d.sections.length} sections, each with its plan. Next: write them (chapters first).` }); }} />}
       <Sheet open={activity} onOpenChange={setActivity}>
         <SheetContent side="right" className="w-[360px] overflow-y-auto sm:max-w-[360px]">
-          <SheetTitle className="font-serif text-xl">Runs and results</SheetTitle>
+          <SheetTitle className="font-serif text-xl">Claude, runs and results</SheetTitle>
           <div className="mt-4 space-y-3">
             {live ? <LiveCard live={live} onStop={() => void backend.cancel(live.job)} /> : <p className="text-[13px] text-[#64748B]">Nothing is running.</p>}
-            {thread.outputs.length === 0 ? <p className="text-[13px] text-[#64748B]">No results yet.</p>
-              : <div className="space-y-1">{[...thread.outputs].sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt)).map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={(x) => { setActivity(false); setViewing(x); }} compact />)}</div>}
+            {section && m ? <p className="text-[12.5px] text-[#64748B]">The conversation with Claude is in Write → Claude panel → Ask.</p> : <ProjectChat thread={thread} busy={busy || !engineId} onSend={(message) => start("chat", { message })} onOpen={(x) => { setActivity(false); setViewing(x); }} />}
+            <p className="pt-2 text-[13px] font-medium">Results · {thread.outputs.length}</p>
+            {thread.outputs.length === 0 ? <p className="text-[13px] text-[#64748B]">What Claude writes appears here: summaries, rewritten books, references and reports.</p>
+              : <ResultsList outputs={thread.outputs} onOpen={(x) => { setActivity(false); setViewing(x); }} />}
           </div>
         </SheetContent>
       </Sheet>
@@ -633,5 +636,24 @@ function NoBookYet({ place, hasUploads, wizardChapters, busy, onSplit, onBlank, 
         <div className={card}><p className="text-[14px] font-semibold">A blank book</p><p className="mt-1 text-[12.5px] text-[#64748B]">Start with an empty first chapter and write it yourself or with Claude.</p><Button size="sm" variant="ghost" className="mt-3" disabled={busy} onClick={onBlank}>Start a blank book</Button></div>
       </div>
     </section>
+  );
+}
+
+/** The conversation with Claude for a project with no chapters yet (the Claude panel needs a chapter): as the Studio had it before the redesign. */
+function ProjectChat({ thread, busy, onSend, onOpen }: { thread: StudioThread; busy: boolean; onSend: (message: string) => void; onOpen: (p: string) => void }) {
+  const [message, setMessage] = useState("");
+  const send = () => { if (message.trim() && !busy) { onSend(message.trim()); setMessage(""); } };
+  return (
+    <div className="space-y-2">
+      <p className="text-[13px] font-medium">Ask Claude</p>
+      {thread.messages.length === 0 && <p className="text-[12.5px] text-[#64748B]">How it works: ask anything about your documents, for example “List every scripture quoted in chapter 3” or “Check the dates in chapter 5 and cite sources”. Claude reads your files, searches the web when needed, and remembers this project's conversation.</p>}
+      {thread.messages.slice(-20).map((x) => <MessageCard key={x.id} m={x} onOpen={onOpen} />)}
+      <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex items-end gap-2">
+        <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2} aria-label="Message to Claude" placeholder="Ask Claude about your book… (Ctrl + Enter to send)"
+          onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } }}
+          className="min-h-[60px] flex-1 rounded-[8px] border border-[#E6E8ED] bg-white px-2.5 py-2 text-[13px] dark:border-white/10 dark:bg-white/5" />
+        <Button type="submit" size="sm" disabled={!message.trim() || busy}>Send</Button>
+      </form>
+    </div>
   );
 }
