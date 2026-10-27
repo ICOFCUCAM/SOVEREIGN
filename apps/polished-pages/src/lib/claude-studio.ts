@@ -190,6 +190,8 @@ export function titleOf(markdown: string, fallback: string): string {
 
 export const OUTPUT_NAMES: Record<string, string> = {
   "book-design.json": "Design of the professional book",
+  "library/revised.md": "Library book · Claude's correction",
+  "library/answer.md": "Library book · Claude's answer",
   "book-design-inventory.md": "Design · inventory of your material",
   "book/outline.json": "Book wizard · outline",
   "proofread.md": "Proofread text",
@@ -248,6 +250,32 @@ async function runToFile(threadId: string, action: "book-outline" | "book-chapte
   if (!done || done.status !== "done") throw new Error(done?.error || "Claude couldn't finish this step.");
   if (!job.output) throw new Error("The runner did not say where the result is.");
   return studio.output(threadId, job.output);
+}
+
+// ── Claude on a Library book (DESIGN-SPEC.md §18), on the owner's Claude Code ───
+// A Library book has no upload in the runner, so its text goes with the request.
+// It runs in the book's own Studio project when it has one, else in one project
+// kept for Library corrections (so the owner's other projects stay as they are).
+const LIBRARY_PROJECT = "Library corrections";
+async function libraryProject(preferred?: string): Promise<string> {
+  const list = await studio.threads();
+  if (preferred && list.some((t) => t.id === preferred)) return preferred;
+  let kept: string | null = null;
+  try { kept = localStorage.getItem("studio.library.project"); } catch { /* storage blocked */ }
+  const id = (kept && list.some((t) => t.id === kept) ? kept : null) ?? list.find((t) => t.title === LIBRARY_PROJECT)?.id ?? (await studio.create(LIBRARY_PROJECT)).id;
+  try { localStorage.setItem("studio.library.project", id); } catch { /* storage blocked */ }
+  return id;
+}
+/** Revises one passage of a Library book as the owner asks (same standard as a section rewrite). */
+export async function claudeReviseInLibrary(i: { title: string; passage: string; instruction: string; rules?: string; context?: string; project?: string }): Promise<string> {
+  if (!i.passage.trim()) throw new Error("Choose a part of the book first.");
+  const id = await libraryProject(i.project);
+  return (await runToFile(id, "tool", { tool: "library-revise", title: i.title, text: i.passage, context: i.context, instructions: i.instruction, rules: i.rules })).trim();
+}
+/** Answers a question about a Library book from its text; the book is not changed. */
+export async function claudeAskInLibrary(i: { title: string; book: string; question: string; rules?: string; project?: string }): Promise<string> {
+  const id = await libraryProject(i.project);
+  return (await runToFile(id, "tool", { tool: "library-ask", title: i.title, text: i.book, message: i.question, rules: i.rules })).trim();
 }
 
 export function claudeBookEngine(threadId: string, onOutline?: (o: BookOutline) => void): BookEngine {

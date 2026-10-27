@@ -3,13 +3,14 @@ import { Check, Loader2, MessageSquare, Sparkles, TextSelect, X } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { apiAskInLibrary, apiReviseInLibrary } from "@/lib/studio-backend";
+import { claudeAskInLibrary, claudeReviseInLibrary } from "@/lib/claude-studio";
 import { diffText } from "@/lib/word-diff";
 
 // Claude on a book in the Library, for the owner only (DESIGN-SPEC.md §18): correct or
 // rewrite one part of the book as the owner asks, review the change word by word, and
 // accept it into the book (Save changes keeps the earlier text in History); or ask a
-// question about the book. Whole-book rewriting and rebuilding stay in Claude Studio.
+// question about the book. Runs on the owner's Claude Code (the runner), never the API.
+// Whole-book rewriting and rebuilding stay in Claude Studio.
 
 /** The book's parts: each heading with the text under it, and where it sits in the Markdown. */
 export function bookParts(md: string): { title: string; start: number; end: number }[] {
@@ -27,7 +28,7 @@ const ASKS = [
 const DEFAULT_RULES = "Write Yahusha instead of Jesus and Yahuah instead of God; never Jehovah or Yahweh. Do not change direct quotations except for these names.";
 const rulesKey = (id: string) => `library.claude.rules.${id}`;
 
-export default function LibraryClaude({ docId, title, markdown, onChange }: { docId: string; title: string; markdown: string; onChange: (md: string) => void }) {
+export default function LibraryClaude({ docId, title, markdown, onChange, project }: { docId: string; title: string; markdown: string; onChange: (md: string) => void; /** The book's Studio project, where Claude Code runs (else the Library corrections project). */ project?: string }) {
   const { toast } = useToast();
   const [mode, setMode] = useState<"correct" | "ask">("correct");
   const parts = useMemo(() => bookParts(markdown), [markdown]);
@@ -55,7 +56,7 @@ export default function LibraryClaude({ docId, title, markdown, onChange }: { do
     try {
       const before = markdown.slice(range.start, range.end);
       const context = `${markdown.slice(Math.max(0, range.start - 2500), range.start)}\n[…the passage…]\n${markdown.slice(range.end, range.end + 2500)}`;
-      const after = await apiReviseInLibrary({ title, passage: before, instruction, rules, context });
+      const after = await claudeReviseInLibrary({ title, passage: before, instruction, rules, context, project });
       setResult({ ...range, before, after });
     } catch (e) { toast({ title: "Claude couldn't finish", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
     finally { setBusy(false); }
@@ -71,7 +72,7 @@ export default function LibraryClaude({ docId, title, markdown, onChange }: { do
   };
   const ask = async () => {
     setBusy(true); setAnswer(null);
-    try { setAnswer(await apiAskInLibrary({ title, book: markdown, question, rules })); }
+    try { setAnswer(await claudeAskInLibrary({ title, book: markdown, question, rules, project })); }
     catch (e) { toast({ title: "Claude couldn't answer", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
     finally { setBusy(false); }
   };
@@ -84,7 +85,7 @@ export default function LibraryClaude({ docId, title, markdown, onChange }: { do
         <div role="tablist" aria-label="Claude" className="ml-2 flex rounded-lg border border-border p-0.5 text-[12.5px]">
           {(["correct", "ask"] as const).map((m) => <button key={m} type="button" role="tab" aria-selected={mode === m} onClick={() => setMode(m)} className={`rounded-md px-2.5 py-1 ${mode === m ? "bg-muted font-medium" : ""}`}>{m === "correct" ? "Correct a part" : "Ask about the book"}</button>)}
         </div>
-        <span className="ml-auto text-[11.5px] text-muted-foreground">On the API · billed per use · only you see this</span>
+        <span className="ml-auto text-[11.5px] text-muted-foreground">On your Claude Code · only you see this</span>
       </div>
 
       {mode === "correct" ? (
@@ -124,7 +125,7 @@ export default function LibraryClaude({ docId, title, markdown, onChange }: { do
           {answer && <div className="whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-3 text-sm">{answer}</div>}
         </div>
       )}
-      <p className="mt-3 text-[12px] text-muted-foreground">For the whole book at once (rewrite, rebuild as a professional book, editorial check, compare with the original) and to run on your Claude Code, open it in Claude Studio.</p>
+      <p className="mt-3 text-[12px] text-muted-foreground">For the whole book at once (rewrite, rebuild as a professional book, editorial check, compare with the original), open it in Claude Studio. Claude Code runs one job at a time: if Claude is busy in the Studio, wait for it to finish.</p>
     </section>
   );
 }
