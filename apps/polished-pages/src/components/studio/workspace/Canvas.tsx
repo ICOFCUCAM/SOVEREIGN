@@ -27,7 +27,17 @@ const COLUMN = "mx-auto w-full max-w-[720px]";
 /** A textarea that grows with its text, so the page reads as one continuous manuscript. */
 function GrowingText({ value, onChange, label, placeholder, className, min = 360, single }: { value: string; onChange: (v: string) => void; label: string; placeholder?: string; className?: string; min?: number; single?: boolean }) {
   const ref = useRef<HTMLTextAreaElement>(null);
-  useLayoutEffect(() => { const t = ref.current; if (!t) return; t.style.height = "auto"; t.style.height = `${Math.max(t.scrollHeight, min)}px`; }, [value, min]);
+  // Measured again when the text changes, when the book font has loaded and when the width changes.
+  useLayoutEffect(() => {
+    const t = ref.current; if (!t) return;
+    const fit = () => { t.style.height = "auto"; t.style.height = `${Math.max(t.scrollHeight, min)}px`; };
+    fit();
+    let live = true;
+    document.fonts?.ready.then(() => { if (live) fit(); });
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fit) : null;
+    ro?.observe(t);
+    return () => { live = false; ro?.disconnect(); };
+  }, [value, min]);
   return <textarea ref={ref} value={value} onChange={(e) => onChange(single ? e.target.value.replace(/\n/g, " ") : e.target.value)} aria-label={label} placeholder={placeholder} rows={1}
     className={`block w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-[#172033] placeholder:text-[#94A3B8] focus:outline-none focus-visible:ring-0 dark:text-[#E5E7EB] ${className ?? ""}`} />;
 }
