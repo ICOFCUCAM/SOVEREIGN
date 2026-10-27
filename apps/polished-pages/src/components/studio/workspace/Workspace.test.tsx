@@ -165,4 +165,15 @@ describe("Claude Studio workspace", () => {
     await screen.findByRole("heading", { name: "Sources and rules" });
     expect(screen.queryByRole("dialog")).toBeNull();
   });
+
+  it("offers both ways to rewrite a new book: chapter by chapter (then Finish merges) or the whole book in one run", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: () => Promise<null> }).manuscript = async () => null;
+    localStorage.setItem("studio.place", "sources");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const start = await screen.findByRole("region", { name: "Start the book" });
+    expect(within(start).getByText(/Finish joins all chapters back into one book/)).toBeTruthy();
+    fireEvent.click(within(start).getByRole("button", { name: /Rewrite the whole book/ }));
+    expect(await screen.findByRole("dialog", { name: /Rewrite/ })).toBeTruthy();
+  });
 });

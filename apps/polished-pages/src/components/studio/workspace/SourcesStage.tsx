@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { AudioLines, BookOpen, FileText, GitCompare, Layers, Loader2, Lock, Plus, ScanText, ScrollText, Upload, X } from "lucide-react";
+import { AudioLines, BookOpen, FileText, GitCompare, Layers, Loader2, Lock, Plus, ScanText, ScrollText, Upload, Wand2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -61,18 +61,35 @@ export default function SourcesStage({ thread, m, uploading, onUpload, onRemove,
           <Button size="sm" variant="outline" onClick={() => onTool("ocr")} disabled={busy || !originals.length}><ScanText className="h-4 w-4" /> Read scanned pages</Button>
           <Button size="sm" variant="outline" onClick={() => onTool("compare")} disabled={busy || originals.length + thread.outputs.length < 2}><GitCompare className="h-4 w-4" /> Compare two versions</Button>
           <Button size="sm" variant="outline" onClick={() => onAction("summarize")} disabled={busy || !originals.length}><ScrollText className="h-4 w-4" /> Summarise the whole book</Button>
+          <Button size="sm" variant="outline" onClick={() => onAction("rewrite")} disabled={busy || !originals.length}><Wand2 className="h-4 w-4" /> Rewrite the whole book</Button>
         </div>
       </section>
 
-      {/* Start the book */}
+      {/* Start the book: the two ways to rewrite it (spec §2, §10 "whole-book rewrite" and "guided rewrite … next chapter") */}
       {m === null && (
         <section aria-labelledby="start-h" className="rounded-[12px] border border-[#E6E8ED] bg-white p-6 dark:border-white/10 dark:bg-[#161A22]">
           <h2 id="start-h" className={`${SERIF} text-[24px] font-medium`}>Start the book</h2>
-          <p className="mt-1 text-[14px] text-[#64748B]">The book you write here is one manuscript of front matter, chapters and back matter.</p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <Button onClick={() => onStart("uploads")} disabled={!originals.length}><BookOpen className="h-4 w-4" /> From my manuscripts</Button>
-            {wizardChapters > 0 && <Button variant="outline" onClick={() => onStart("wizard")}><FileText className="h-4 w-4" /> Bring in my Book wizard draft ({wizardChapters} chapters)</Button>}
-            <Button variant="outline" onClick={() => onStart("blank")}><Plus className="h-4 w-4" /> A blank book</Button>
+          <p className="mt-1 text-[14px] text-[#64748B]">Choose how Claude works on your manuscript. Either way your original stays untouched until you accept the new text.</p>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="flex flex-col rounded-[10px] border border-[#BFDBFE] bg-[#EFF6FF]/50 p-5 dark:border-[#1E3A8A] dark:bg-[#172554]/40">
+              <p className="text-[15px] font-semibold">Chapter by chapter <span className="ml-1 rounded-full bg-[#2563EB] px-2 py-0.5 text-[11px] font-medium text-white">Recommended</span></p>
+              <ol className="mt-2 flex-1 list-decimal space-y-1 pl-5 text-[13px] text-[#475569] dark:text-[#CBD5E1]">
+                <li>Your manuscript is split into its chapters.</li>
+                <li>Claude rewrites each chapter with your idea, rules and page notes; you accept or reject every change.</li>
+                <li>Finish joins all chapters back into one book.</li>
+              </ol>
+              <Button className="mt-4" onClick={() => onStart("uploads")} disabled={!originals.length}><BookOpen className="h-4 w-4" /> Split into chapters</Button>
+            </div>
+            <div className="flex flex-col rounded-[10px] border border-[#E6E8ED] p-5 dark:border-white/10">
+              <p className="text-[15px] font-semibold">The whole book in one run</p>
+              <p className="mt-2 flex-1 text-[13px] text-[#475569] dark:text-[#CBD5E1]">Claude rewrites the entire manuscript under your strict instructions, re-reading them before each chapter, and returns one rewritten book as a result you can open, edit and save.</p>
+              <Button variant="outline" className="mt-4" onClick={() => onAction("rewrite")} disabled={busy || !originals.length}><Wand2 className="h-4 w-4" /> Rewrite the whole book</Button>
+            </div>
+          </div>
+          <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-[#E6E8ED] pt-4 text-[13px] dark:border-white/10">
+            <span className="text-[#64748B]">Or start from</span>
+            {wizardChapters > 0 && <Button size="sm" variant="ghost" onClick={() => onStart("wizard")}><FileText className="h-4 w-4" /> my Book wizard draft ({wizardChapters} chapters)</Button>}
+            <Button size="sm" variant="ghost" onClick={() => onStart("blank")}><Plus className="h-4 w-4" /> a blank book</Button>
           </div>
         </section>
       )}

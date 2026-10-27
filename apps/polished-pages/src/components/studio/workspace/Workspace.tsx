@@ -291,7 +291,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         {wizard && !m.sections.some((s) => s.body.trim()) && <WizardBanner count={wizard.chapters?.length ?? 0} onBring={() => update(wizardDraftToManuscript(wizard, m))} />}
         <PlanStage m={m} onUpdate={update} onOpen={openSection} engine={bookEngine} approach={approach} hasUploads={hasUploads} busy={busy}
           onWriteAll={(ids) => void runSections(ids.map((sid) => ({ sectionId: sid, op: "compose" as const, approach, title: m.sections.find((s) => s.id === sid)?.title })))}
-          queue={sr.queue} onSeries={() => setTool({ initial: "series" })} />
+          queue={sr.queue} onSeries={() => setTool({ initial: "series" })} onFinish={() => setPlace("finish")} />
       </>;
     }
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover} />;
