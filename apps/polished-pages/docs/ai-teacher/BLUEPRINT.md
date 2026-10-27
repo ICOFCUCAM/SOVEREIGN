@@ -267,7 +267,7 @@ Later (not before the core works): real-time voice, complex adaptive algorithms,
   - [x] Book rules parsed into structured term rules (Yahusha / Yahuah, never Jehovah or Yahweh) and stored on the course
   - [ ] Live end-to-end answer on the real Demonology book (needs the owner to index it from the AI Teacher tab)
   - [ ] Student access (enrolment) — retrieval and runtime are owner-only until then
-  - [ ] Usage events table and per-book cost reporting (today: logs and the plan's generation quota)
+  - [x] Usage events table and per-course usage summary (§12, phase 0)
 - [ ] 4 Demonology chapter package generated, approved by the author
 - [ ] 5 Learner experience: five destinations, onboarding, practice, mastery and spaced review, read-along narration, caps
 - [ ] 6 200-case evaluation suite with release gates; pilot
@@ -278,7 +278,7 @@ Later (not before the core works): real-time voice, complex adaptive algorithms,
 - [ ] RLS tests for cross-institution and cross-course access
 - [ ] Durable job worker for ingestion, OCR, indexing, audio
 - [ ] Privacy: retention, deletion, access separation for groups
-- [ ] Per-book cost accounting and usage alerts
+- [ ] Per-book cost accounting and usage alerts (ledger and monthly caps done in §12 phase 0; money estimates and alerts open)
 
 ## 11. Engineering detail added on the owner's instruction to upgrade the blueprint (October 2026)
 Additions only; §0–§10 and the verbatim sources govern where anything here is shorter.
@@ -321,3 +321,100 @@ The 200-case suite (§5d) runs in CI against a fixed model snapshot whenever the
 4. **Accessible by default**: read-along narration in sync with text, captions, screen-reader-first lesson structure, and plain-language levels (§1d) for every lesson.
 5. **Spoken tutoring** after the text tutor meets its gates, with the same evidence and refusal rules and age-appropriate safeguards.
 6. **Institution scale** (Phase 3–4): delegated administration, LMS integration and cross-course concept maps, with private sources still isolated per institution and course.
+
+## 12. Knowledge first (adopted by the owner, 28 October 2026; source: `source/04-knowledge-first.md`)
+**Principle.** The teacher teaches from the book and the approved knowledge library. It does not depend on an external AI provider for every student question. A paid model is an optional, metered, capped capability that the course owner switches on; it is never the default and never a hidden fallback.
+
+### 12a. Answer paths (decided on the server for every question)
+| Path | When | Paid calls |
+|---|---|---|
+| `not_covered` | Retrieval finds no evidence in the course's approved sources | None |
+| `evidence_only` | Evidence exists and AI explanations are off, not configured, or past the course's cap | None (keyword search); a question vector only if meaning search is on |
+| `model` | Evidence exists, AI explanations on, provider configured, within the cap | One answer call, at most one repair; validated before it is shown |
+| `out_of_scope` (phase 1) | The question is outside the course's subject | None |
+| `approved_answer` (phase 2) | A stored, approved explanation, lesson or answer matches | None |
+
+A model answer that fails validation is never shown; the learner gets the book's passages with a notice. There is no switch to another provider when one is unavailable, and the owner-only Claude Code runner is never used.
+
+### 12b. Phase plan
+- **Phase 0 — guard rails (done):** usage ledger (`polished.ai_usage_events`, no question or answer text), per-minute and per-day limits, monthly request and token caps per course, AI answers and meaning search **off** by default, configuration checked before any quota is consumed, book-only answers. Migration `20261028100000_teacher_phase0_guard.sql` (applied); `teacher-runtime` and `teacher-index` deployed; settings and this month's usage in Studio → Finish → AI Teacher.
+- **Phase 1 — subject gate and sufficiency:** classify a question as in scope, out of scope or unsupported using the course's chapters, glossary and retrieval scores (deterministic first); separate messages for "outside this course" and "the book does not say enough"; tests for each.
+- **Phase 2 — prepared materials:** chapter explanations, key terms, misconceptions, question banks and answer keys generated once per approved source version (§13), stored, and served before any model; invalidated when the source version changes.
+- **Phase 3 — provider-independent model layer:** one adapter interface (hosted API or a self-hosted OpenAI-compatible server such as vLLM) chosen by configuration per task; candidate models must pass the evaluation suite (§5d, §11f) on the owner's books before use. Self-hosted embeddings likewise, with a full re-index and retrieval tests.
+- **Phase 4 — money:** cost estimates per request from the ledger, per-book and per-institution budgets, alerts.
+
+## 13. Learning Studio: audiobook, lecture series and learning pathways (adopted; source: `source/05-learning-studio.md`)
+The owner's idea, upgraded: every approved book becomes a course with three products that share the same approved source but are never confused with one another.
+
+| Product | What it is | Fidelity |
+|---|---|---|
+| **Audiobook** (faithful reading edition) | The book narrated as written, chapter by chapter | The author's exact words and order; no summarising, rewriting or added explanation |
+| **Lecture Series** (adapted teaching edition) | The book's ideas rewritten as lectures: objectives, explanations, examples, transitions, recaps, key terms, quick checks | Labelled "Adapted teaching edition"; every lecture cites its source passages; never presented as the author's verbatim text |
+| **Interactive AI Teacher** | Guides the learner through the pathway, asks questions, checks understanding, decides progression | Knowledge first (§12); answers cite the book |
+
+### 13a. Owner decisions recorded here
+1. **Claude Code writes the lectures, as a private authoring tool.** Lecture scripts are drafted in Claude Studio by the owner (the runner or the API engine the owner chooses), validated, reviewed and approved by the owner, then narrated and stored. Students only ever receive stored, approved, versioned assets. The runner stays owner-only and is never a student runtime (CLAUDE.md).
+2. **Mandatory author review** for any script that changes how an argument is presented, and for every lecture of a book with doctrinal rules (the owner's books: Yahusha instead of Jesus, Yahuah instead of God, never Jehovah or Yahweh; quotations untouched).
+3. **Progression rules belong to the author or lecturer**, never invented by the AI: pass thresholds, retries, required assignments and what each completion unlocks.
+
+### 13b. Lecture production pipeline
+1. Extract the approved source version (the §1 pipeline; chapters, passages, stable IDs).
+2. Lecture outline per chapter: objectives, concepts, the passages each concept rests on, prerequisites.
+3. Draft the script in Studio (Claude Code or the API, owner's choice) from the outline and the passages.
+4. Validate automatically: every claim cites passage IDs that exist; quotations match the source exactly; terminology rules hold outside quotations; length and reading level within the author's settings.
+5. Owner (and author, §13a.2) reviews the script beside its passages; changes are versioned; approval is recorded with who and when.
+6. Narrate the approved script; store the audio privately with its transcript and section timings.
+7. Publish the lecture asset (script version + audio version) to the course.
+
+### 13c. Learning pathway (the owner's "tunnels")
+Six stages per session, adaptive rather than rigid:
+1. **Orientation** — why this session matters, objectives, link to what came before.
+2. **Lecture and study** — listen, read the transcript, open the cited passages.
+3. **Interactive questioning** — targeted questions with hints; the learner explains in their own words.
+4. **Knowledge check** — recall, interpretation and application; feedback cites the book.
+5. **Assignment** — a longer task with a rubric (where the course requires one).
+6. **Progression decision** — against the author's rules: unlock the next item or assign focused revision.
+
+Adaptation: a missed definition gets a short explanation and a recall question; a known definition that cannot be applied gets a worked example and a new application problem; first-time success moves on to a harder question; repeated difficulty points to the lecture segment and the passages. Nobody is simply told "failed".
+
+Assessment hierarchy: quick checks (during the lecture) → session quiz → chapter assessment → module assignment → final assessment. Next lecture, next chapter, next module and next course are separate unlocks; finishing a lecture never unlocks a course unless the curriculum says so. Formal grades and progression decisions in institutions stay under the institution's policy and human oversight (§3b, §11d); the AI gives formative feedback.
+
+### 13d. Source and derived content
+| Asset | Must record | Flagged for review when |
+|---|---|---|
+| Lecture outline and script | Source version, passage IDs, rule version, prompt version, approver | The source version changes any cited passage, or the rules change |
+| Lecture audio | Script version, voice, provider, transcript and timings | Its script version changes |
+| Audiobook track | Source version and chapter ID, voice, provider | The chapter's text changes |
+| Question bank, answer key, rubric | Objectives, passage IDs, source and rule versions, approver | Any of those change |
+| Learner progress | Asset versions the learner used | Never rewritten; new versions start a new record |
+
+An outdated asset is never shown as if it reflected the new edition: it is marked "needs review" for the owner and withheld or labelled for learners as the owner decides.
+
+### 13e. Logical services (inside the current React + Supabase app, not new microservices)
+Course Builder · Lecture Studio · Audio Production · Knowledge Engine · Learning Pathway Engine · Assessment Engine · AI Runtime (optional, §12) · Progress and Usage.
+
+### 13f. Costs
+Preparation (once per version, owner-triggered): lecture drafting, narration, question banks, indexing. Delivery (per learner): storage, streaming, database. Dynamic intelligence (optional, capped): new explanations and nuanced feedback (§12). Narration and lecture drafting record usage in the same ledger.
+
+### 13g. Reuse audit (28 October 2026, read-only; nothing changed)
+| Existing | Where | Reuse | Gap for the Learning Studio |
+|---|---|---|---|
+| Narration | `supabase/functions/generate-narration` (OpenAI `tts-1`, 6 voices, splits at 4,000 characters, at most 24,000 per call, plan-gated) and `src/lib/audiobook.ts` | **Reuse** as the Audio Production engine for both audiobook tracks and lecture audio | Not recorded in the usage ledger; no link to a source or script version; no transcript timings; returns a data URL (large chapters need several calls) |
+| Audiobook panel and saved audiobook | `src/components/book/AudiobookPanel.tsx` (Studio Finish → Audio, My Books, Book Creator); "audiobook" documents | **Reuse** for the faithful audiobook | Tracks are not tied to a teacher source version; no bookmarks or resume |
+| Audio storage | `uploadAudioDataUrl` → `polished-media` bucket, **public URLs** | Fine for a published, sold audiobook | Private course and lecture audio needs private storage with signed URLs |
+| Audiobook publishing | `publish-audiobook-to-wankong` | **Keep** for selling the audiobook | — |
+| Teacher pipeline, retrieval, runtime, phase 0 guard | `src/lib/teacher/`, `teacher-index`, `teacher-runtime`, `_shared/teacher-core.ts` | **Reuse** as the Knowledge Engine and AI Runtime; stable passage IDs are what lectures and questions cite | No lecture, pathway or assessment tables yet |
+| Whole-book and chapter rewriting in Studio | Claude Studio runs (runner or API), versions, review keys, before-accept snapshots | **Reuse** as Lecture Studio's drafting and review surface | Needs a "lecture" output kind with citations to passage IDs and a validation step |
+| Study guide tool | `studio-tools.ts` "studyguide" (summaries, questions, key terms, quiz) | **Reuse** to seed question banks | Output is Markdown; questions are not tied to objectives or passage IDs |
+| School-content engine | `generate-school-content` (workbook, teacher guide, quiz, answer key) | **Reuse** prompts for assignments and rubrics | Same: not tied to passages or versions |
+| Knowledge-base retrieval | `embed-knowledge-doc`, `knowledge-retrieve` (900-character chunks, vector only) | Overlaps the teacher's Knowledge Engine | **Duplicate to resolve**: the owner decides whether to move it onto the teacher pipeline (no removal without approval) |
+
+### 13h. Pilot (one Demonology One chapter) and checklist
+- [ ] Owner indexes Demonology One from Studio → Finish → AI Teacher (needed by everything below)
+- [ ] Tables: lecture outlines, lecture scripts (versioned, approvals), audio assets (kind audiobook/lecture, version links, private storage), pathways and stages, questions and rubrics, learner attempts and progress; invalidation flags — owner-only RLS, tested
+- [ ] Lecture Studio: outline and script for one chapter drafted in Studio, validated (citations, quotations, terminology), reviewed and approved
+- [ ] Audio Production: faithful audiobook segment and lecture audio as separate assets, private storage, transcript, usage recorded
+- [ ] Pathway: orientation → lecture → questioning → knowledge check → assignment → progression, with the author's thresholds and retries
+- [ ] Assessment: one session quiz (stored, marked without a model) and one assignment with a rubric (formative feedback)
+- [ ] Invalidation: changing a cited passage flags the script, audio and questions
+- [ ] Verification: terminology, source fidelity, permissions, audio quality and costs on the pilot chapter; expand only after it passes
