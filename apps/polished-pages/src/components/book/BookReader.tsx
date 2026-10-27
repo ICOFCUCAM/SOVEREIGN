@@ -19,18 +19,23 @@ import BookPaper from "@/components/book/BookPaper";
 // designed PDF. When onContentChange is provided, edits flow back to the parent
 // (used for export and saving the final copy).
 const BookReader = ({
-  content, title, onContentChange,
+  content, title, onContentChange, author: initialAuthor, trim: initialTrim, epub: showEpub = true,
 }: {
   content: string;
   title: string;
   onContentChange?: (s: string) => void;
+  /** The book's own author and trim size, when it has them (a book finished in Claude Studio). */
+  author?: string;
+  trim?: string;
+  /** Off where the page already offers EPUB export (one EPUB button per page). */
+  epub?: boolean;
 }) => {
   const { toast } = useToast();
   const [themeId, setThemeId] = useState(BOOK_THEMES[0].id);
   const [mode, setMode] = useState<"read" | "edit">("read");
   const [pdf, setPdf] = useState(false);
-  const [trimId, setTrimId] = useState("a4");
-  const [author, setAuthor] = useState("");
+  const [trimId, setTrimId] = useState(() => (initialTrim && TRIM_SIZES.some((t) => t.id === initialTrim) ? initialTrim : "a4"));
+  const [author, setAuthor] = useState(initialAuthor ?? "");
   const paperRef = useRef<HTMLDivElement>(null);
   const theme = getBookTheme(themeId);
   const editable = typeof onContentChange === "function";
@@ -117,9 +122,9 @@ const BookReader = ({
           <Button variant="heroOutline" size="sm" disabled={pdf || mode === "edit"} onClick={themedPdf} title="Designed proof PDF (image of the themed interior)">
             {pdf ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Design PDF
           </Button>
-          <Button variant="heroOutline" size="sm" disabled={epub} onClick={exportEpub}>
+          {showEpub && <Button variant="heroOutline" size="sm" disabled={epub} onClick={exportEpub}>
             {epub ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <BookOpen className="w-4 h-4 mr-1" />} EPUB
-          </Button>
+          </Button>}
         </div>
       </div>
 

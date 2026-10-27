@@ -39,10 +39,18 @@ const KIND_META: Record<DocKind, { label: string; icon: typeof FileText }> = {
   audiobook: { label: "Audiobook", icon: Headphones },
 };
 
+/** What a saved book carries besides its text (from Claude Studio): kept when the book is edited here. */
+interface BookExtra { author?: string; trimSize?: string; studioProject?: string; status?: string; version?: number | null; approvedAt?: string | null; approvedBy?: string | null }
+const bookExtra = (p: Record<string, unknown>): BookExtra => {
+  const s = (k: string) => (typeof p[k] === "string" && (p[k] as string).trim() ? (p[k] as string) : undefined);
+  return { author: s("author"), trimSize: s("trimSize"), studioProject: s("studioProject"), status: s("status"),
+    ...(p.version !== undefined ? { version: p.version as number | null } : {}), ...(p.approvedAt !== undefined ? { approvedAt: p.approvedAt as string | null, approvedBy: (p.approvedBy ?? null) as string | null } : {}) };
+};
+
 type Opened =
   | { kind: "cv"; data: CvData; template?: string }
   | { kind: "letter"; markdown: string; fullName: string; email?: string; phone?: string }
-  | { kind: "book"; markdown: string; title: string }
+  | { kind: "book"; markdown: string; title: string; extra?: BookExtra }
   | { kind: "cover"; front?: string; back?: string; title: string }
   | { kind: "image"; src: string; title: string }
   | { kind: "picturebook"; book: PictureBookData; pageAspect: string; showText: boolean; title: string }
@@ -126,7 +134,7 @@ const LibraryPage = () => {
       if (d.kind === "cover-letter") {
         setOpened({ kind: "letter", markdown: String(p.markdown ?? ""), fullName: String(p.fullName ?? d.title), email: p.email as string | undefined, phone: p.phone as string | undefined });
       } else if (d.kind === "book") {
-        setOpened({ kind: "book", markdown: String(p.markdown ?? ""), title: String(p.title ?? d.title) });
+        setOpened({ kind: "book", markdown: String(p.markdown ?? ""), title: String(p.title ?? d.title), extra: bookExtra(p) });
       } else if (d.kind === "cover") {
         setOpened({ kind: "cover", front: p.front as string | undefined, back: p.back as string | undefined, title: String(p.title ?? d.title) });
       } else if (d.kind === "illustration") {
@@ -230,7 +238,8 @@ const LibraryPage = () => {
       if (!openedId) return;
       setSavingDoc(true);
       try {
-        await updateDocument(openedId, { markdown: bk.markdown, title: bk.title }, bk.markdown.slice(0, 160));
+        // The book's other details (author, trim, Studio project, draft or approved status) are kept.
+        await updateDocument(openedId, { ...(bk.extra ?? {}), markdown: bk.markdown, title: bk.title }, bk.markdown.slice(0, 160));
         setDocs((prev) => prev?.map((d) => (d.id === openedId ? { ...d, title: bk.title } : d)) ?? null);
         toast({ title: "Changes saved", description: "Previous version kept in history." });
         setVersions(null);
@@ -247,7 +256,7 @@ const LibraryPage = () => {
     const restore = async (v: DocVersion) => {
       try {
         const payload = (await getVersion(v.id)) as { markdown?: string; title?: string } | null;
-        if (payload?.markdown != null) setOpened({ kind: "book", markdown: String(payload.markdown), title: String(payload.title ?? bk.title) });
+        if (payload?.markdown != null) setOpened({ kind: "book", markdown: String(payload.markdown), title: String(payload.title ?? bk.title), extra: bk.extra });
       } catch (e) { toast({ title: "Could not restore", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
     };
     return (
@@ -294,12 +303,21 @@ const LibraryPage = () => {
               </CardContent>
             </Card>
           )}
-          <BookExportPanel bookTitle={opened.title} fullContent={opened.markdown} chapterCount={0} />
+          {bk.extra?.studioProject && (
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm font-sans">
+              <span>This book was made in Claude Studio{bk.extra.status === "draft" ? " (a working draft, not approved for publication)" : bk.extra.status === "approved" ? " (approved for publication)" : ""}. Its cover, interior, ISBN and production details, audiobook and translations are finished there.</span>
+              <Button asChild variant="hero" size="sm"><Link to={`/admin/claude?project=${encodeURIComponent(bk.extra.studioProject)}`}>Finish in Claude Studio</Link></Button>
+            </div>
+          )}
+          <BookExportPanel bookTitle={opened.title} fullContent={opened.markdown} />
           <div className="mt-6">
             <BookReader
               content={opened.markdown}
               title={opened.title}
-              onContentChange={(s) => setOpened({ kind: "book", markdown: s, title: opened.title })}
+              author={bk.extra?.author}
+              trim={bk.extra?.trimSize}
+              epub={false}
+              onContentChange={(s) => setOpened({ kind: "book", markdown: s, title: opened.title, extra: bk.extra })}
             />
           </div>
         </div>

@@ -189,7 +189,7 @@ const SchoolStudioPage = ({ config }: { config: SchoolStudioConfig }) => {
           </div>
         </div>
         <div className="container max-w-4xl mx-auto px-6 pt-8 pb-16">
-          <BookExportPanel bookTitle={docTitle} fullContent={current} chapterCount={0} />
+          <BookExportPanel bookTitle={docTitle} fullContent={current} />
           <div className="mt-6"><BookReader content={current} title={docTitle} onContentChange={(s) => setDocs((d) => (d ? { ...d, [tab]: s } : d))} /></div>
 
           <div className="mt-10 border-t border-border/60 pt-8">

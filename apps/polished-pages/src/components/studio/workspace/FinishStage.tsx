@@ -30,10 +30,15 @@ const ProductionPanel = lazy(() => import("@/components/book/ProductionPanel"));
 const BookPublishingPackage = lazy(() => import("@/components/book/BookPublishingPackage"));
 const TeacherPanel = lazy(() => import("./TeacherPanel"));
 
-type Tab = "preview" | "check" | "cover" | "export" | "audio" | "translate" | "repurpose" | "production" | "publish" | "library" | "teacher";
+type Tab = "preview" | "check" | "cover" | "export" | "audio" | "translate" | "repurpose" | "marketing" | "studyguide" | "production" | "publish" | "library" | "teacher";
+/** Finish tabs that run a Studio tool on the manuscript and open its result (DESIGN-SPEC.md §2: marketing and study guide belong to Finish). */
+const TOOL_TABS: Record<"marketing" | "studyguide", { output: string; title: string; line: string; run: string }> = {
+  marketing: { output: "marketing-pack.md", title: "Marketing pack", line: "Title and subtitle options, a hook, the blurb, back-cover copy, the store description, keywords, categories, an author bio template, social posts and a press release, from the book as it stands. Never invented endorsements or facts about the author.", run: "Write the marketing pack" },
+  studyguide: { output: "study-guide.md", title: "Study guide", line: "Chapter summaries, discussion questions, key terms and a quiz for readers, classes and small groups, from the book as it stands.", run: "Write the study guide" },
+};
 const TABS: { id: Tab; label: string }[] = [
   { id: "preview", label: "Preview" }, { id: "check", label: "Editorial check" }, { id: "cover", label: "Cover" }, { id: "export", label: "Interior and export" }, { id: "audio", label: "Audiobook" },
-  { id: "translate", label: "Translate" }, { id: "repurpose", label: "Repurpose" }, { id: "production", label: "Production" }, { id: "publish", label: "Publishing package" }, { id: "library", label: "Save to Library" }, { id: "teacher", label: "AI Teacher" },
+  { id: "translate", label: "Translate" }, { id: "repurpose", label: "Repurpose" }, { id: "marketing", label: "Marketing" }, { id: "studyguide", label: "Study guide" }, { id: "production", label: "Production" }, { id: "publish", label: "Publishing package" }, { id: "library", label: "Save to Library" }, { id: "teacher", label: "AI Teacher" },
 ];
 const download = (name: string, text: string) => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
 
@@ -44,10 +49,16 @@ const keep = (k: string, v: string) => { try { localStorage.setItem(k, v); } cat
 // Finish (design spec §9): readiness that links to its fix, the real cover
 // (flat, or as a book), a format switcher showing what each format needs, and
 // every finishing tool working on the manuscript as it is now.
-export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCover = savedFrontCover }: {
+export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCover = savedFrontCover, projectId, onTool, outputs, onOpenResult }: {
   m: Manuscript; onUpdate: (m: Manuscript) => void; onOpen: (sectionId: string) => void; coverWriter?: CoverCopyWriter;
   /** Finds the saved front cover of the Library book (the Studio preview passes a stand-in). */
   findCover?: (libraryId: string) => Promise<string | null>;
+  /** The Studio project, so the Library copy can link back to it. */
+  projectId?: string;
+  /** Runs a tool on the manuscript (Marketing, Study guide), and the project's results to open. */
+  onTool?: (tool: "marketing" | "studyguide") => void;
+  outputs?: { path: string; modifiedAt: string }[];
+  onOpenResult?: (path: string) => void;
 }) {
   const { toast } = useToast();
   const [tab, setTab] = useState<Tab>("preview");
@@ -72,7 +83,8 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
   /** Saves the book to the Library (updating the same book after the first time) and returns its id. */
   const ensureSaved = async (): Promise<string | null> => {
     try {
-      const payload = { markdown: md, title };
+      // The Library copy keeps the book's author, trim size and its Studio project, so it isn't a thinner copy.
+      const payload = { markdown: md, title, ...(m.author?.trim() ? { author: m.author.trim() } : {}), ...(meta.trimSize ? { trimSize: String(meta.trimSize) } : {}), ...(projectId ? { studioProject: projectId } : {}) };
       const preview = md.replace(/^#.*$/m, "").trim().slice(0, 160);
       if (m.libraryId) { await updateDocument(m.libraryId, payload, preview); return m.libraryId; }
       const id = await saveDocument({ kind: "book", title, payload, preview });
@@ -201,6 +213,22 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
           {tab === "repurpose" && <BookRepurposePanel bookTitle={title} fullContent={md} />}
           {tab === "production" && <ProductionPanel meta={meta} setMeta={(x) => onUpdate({ ...m, meta: x as Record<string, unknown> })} bookTitle={title} manuscriptComplete={chapters.length > 0 && chapters.every((s) => s.body.trim())} coverDone={Boolean(cover)} parentId={m.libraryId ?? null} content={md} />}
           {tab === "publish" && <BookPublishingPackage outline={outline} />}
+          {(tab === "marketing" || tab === "studyguide") && (() => {
+            const t = TOOL_TABS[tab];
+            const done = outputs?.find((o) => o.path === t.output);
+            return (
+              <div className="max-w-xl space-y-4">
+                <p className={`${SERIF} text-[22px]`}>{t.title}</p>
+                <p className="text-[14px] text-[#475569] dark:text-[#CBD5E1]">{t.line}</p>
+                {done && <p className="text-[13px] text-[#64748B]">Last written {new Date(done.modifiedAt).toLocaleString()}. Writing it again keeps nothing of the old one, so open it first if you want to keep anything.</p>}
+                <div className="flex flex-wrap gap-2">
+                  {done && onOpenResult && <Button onClick={() => onOpenResult(t.output)}><FileText className="h-4 w-4" /> Open the {t.title.toLowerCase()}</Button>}
+                  <Button variant={done ? "outline" : "default"} disabled={!onTool || !m.sections.some((s) => s.body.trim())} onClick={() => onTool?.(tab)}>{done ? `${t.run} again` : t.run}</Button>
+                </div>
+                {!m.sections.some((s) => s.body.trim()) && <p className="text-[12.5px] text-[#64748B]">Write the manuscript first: these are written from the book as it stands.</p>}
+              </div>
+            );
+          })()}
           {tab === "teacher" && <TeacherPanel m={m} ensureSaved={ensureSaved} />}
           {tab === "library" && (
             <div className="max-w-xl space-y-5">

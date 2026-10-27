@@ -7,13 +7,16 @@ import { useState } from "react";
 interface BookExportPanelProps {
   bookTitle: string;
   fullContent: string;
-  chapterCount: number;
+  /** Counted from the book's "## " headings when not given. */
+  chapterCount?: number;
 }
 
 const BookExportPanel = ({ bookTitle, fullContent, chapterCount }: BookExportPanelProps) => {
   const [exporting, setExporting] = useState<string | null>(null);
 
-  const wordCount = fullContent.split(/\s+/).length;
+  const wordCount = fullContent.split(/\s+/).filter(Boolean).length;
+  // Books put chapters under "## " (the title is "# "); a book with only "# " headings counts those.
+  const chapters = chapterCount ?? ((fullContent.match(/^##\s+\S/gm) ?? []).length || (fullContent.match(/^#\s+\S/gm) ?? []).length);
 
   const handleExport = async (format: BookFormat) => {
     setExporting(format === "md" ? null : format);
@@ -32,7 +35,7 @@ const BookExportPanel = ({ bookTitle, fullContent, chapterCount }: BookExportPan
     <div className="space-y-4">
       <div>
         <h2 className="text-lg font-bold font-serif">Export Your Book</h2>
-        <p className="text-sm text-muted-foreground">{chapterCount} chapters · {wordCount.toLocaleString()} words</p>
+        <p className="text-sm text-muted-foreground">{chapters} {chapters === 1 ? "chapter" : "chapters"} · {wordCount.toLocaleString()} words</p>
       </div>
 
       <div className="grid gap-3">

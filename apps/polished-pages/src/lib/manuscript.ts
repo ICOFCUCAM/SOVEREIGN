@@ -72,6 +72,10 @@ export interface Manuscript {
   /** Production details (ISBN, trim, publisher…) and the Library book this manuscript was last saved as. */
   meta?: Record<string, unknown>;
   libraryId?: string;
+  /** A rebuilt book's design brief (DESIGN-SPEC.md §17): book type, the owner's instructions, where chapters come from. */
+  design?: { bookType: string; instructions: string; approach: string; at: string };
+  /** Manuscripts a rebuild replaced, kept to restore (newest last, at most five). */
+  archive?: { at: string; label: string; sections: Pick<Section, "id" | "kind" | "title" | "body" | "idea">[] }[];
 }
 
 export const newId = () => `s-${Math.random().toString(36).slice(2, 10)}`;

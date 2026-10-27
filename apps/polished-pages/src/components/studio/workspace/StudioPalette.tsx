@@ -10,13 +10,15 @@ import { VIEWS } from "./Canvas";
 import type { DialogAction } from "./parts";
 
 // ⌘K (design spec §6): search tools, chapters, results and actions from anywhere in the Studio.
-export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, onSection, onTool, onAction, onJoin, onResult, onView, onFocus, onPanel, onTheme, onUndo, onRedo, onHistory, onTour }: {
+export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, onSection, onTool, onAction, onJoin, onResult, onView, onFocus, onPanel, onTheme, onUndo, onRedo, onHistory, onTour, hasProposal }: {
   open: boolean; onOpenChange: (v: boolean) => void; m: Manuscript | null | undefined; thread: StudioThread | null;
   onPlace: (p: Place) => void; onSection: (id: string) => void; onTool: (t: ToolId) => void; onAction: (a: DialogAction) => void; onJoin: () => void;
   onResult: (path: string) => void; onView: (v: CanvasView) => void; onFocus: () => void; onPanel: () => void; onTheme: () => void;
   /** Present only when there is something to undo or redo, or a section whose history to open. */
   onUndo?: () => void; onRedo?: () => void; onHistory?: () => void;
   onTour?: () => void;
+  /** Changes and Side by side need a suggestion to show. */
+  hasProposal?: boolean;
 }) {
   // ⌘K / Ctrl+K opens it; the site's own palette is not mounted inside the Studio.
   useEffect(() => {
@@ -58,7 +60,7 @@ export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, 
           </CommandGroup>
         )}
         <CommandGroup heading="View">
-          {VIEWS.map((v) => <CommandItem key={v.id} value={`view ${v.label}`} onSelect={run(() => onView(v.id))}><Eye className="mr-2" />{v.label}</CommandItem>)}
+          {VIEWS.filter((v) => !v.needsProposal || hasProposal).map((v) => <CommandItem key={v.id} value={`view ${v.label}`} onSelect={run(() => onView(v.id))}><Eye className="mr-2" />{v.label}</CommandItem>)}
           <CommandItem onSelect={run(onFocus)}><Focus className="mr-2" />Focus mode<CommandShortcut>⌘.</CommandShortcut></CommandItem>
           <CommandItem onSelect={run(onPanel)}><PanelRight className="mr-2" />Show or hide the Claude panel<CommandShortcut>⌘\</CommandShortcut></CommandItem>
           <CommandItem onSelect={run(onTheme)}><Moon className="mr-2" />Light, dark or system theme</CommandItem>

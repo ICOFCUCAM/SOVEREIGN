@@ -252,3 +252,49 @@ The audit read only Markdown headings and plain brackets. Real rewrites write se
 - [x] Approve as publication-ready, separate from saving and exporting, with the approval recorded and lapsing on change
 - [x] Export Word (.docx) and EPUB from the viewer through the same helper as Finish (`src/lib/book-export.ts`); drafts named as drafts
 - [x] Judgement-level AI review pass, labelled as such, on both engines
+
+## 17. Rebuild as a professional book (adopted October 2026, on the owner's instruction)
+The owner, 27 October 2026: "Here Claude was supposed to have a place where you can instruct it to reorganise all as a true professional book and not just follow the manuscripts only." The whole-book rewrite (§15) keeps the manuscript's order and re-expresses it; the Plan stage's old "Restructure" outline took no instructions and added its chapters beside the old ones instead of replacing them. Rebuild is the one place for a new structure; "Restructure" is removed from the outline styles (the other outline styles stay).
+
+### 17a. The flow (Plan → Rebuild as a professional book)
+1. The owner chooses a book type (course textbook, non-fiction for general readers, academic study, teaching and ministry book, practical handbook, or their instructions only), writes instructions for the whole book, and chooses where chapters come from (from my book only, or my book + cited sources).
+2. Claude reads the whole of the material (uploads, and the manuscript on Claude Code) and writes an inventory, then a design: reader, rationale, sections in reading order (parts only where natural, number of chapters set by the material), for each section its summary, key points, **what it draws on** and its apparatus; **not placed** material with the reason; **missing** items for the author.
+3. The owner reviews the design. Nothing changes until "Use this design". The manuscript's sections are then replaced by the designed ones, each with its plan; the replaced manuscript is kept (newest five) and can be restored from Plan; the rebuilt one is kept in turn when restoring. Undo also works.
+4. "Write the N empty sections" writes chapters first, then the front and back matter that summarise them, each a suggestion the owner accepts. Every section is given the book's design (type, apparatus, the owner's instructions, the standard), its own plan, and the manuscript before the rebuild as the author's latest material; length follows the material, never padded.
+5. Finish (cover, interior, production, audiobook, translation, AI Teacher, Library) works on the rebuilt manuscript, as on any manuscript.
+
+### 17b. The standard (word for word on both engines: `src/lib/book-design.ts` DESIGN_RULES and BOOK_TYPES, runner `src/prompts.mjs`; `book-design.test.ts` keeps them identical)
+Publisher's design, not the manuscript's order; everything placed or listed; the author's teaching, convictions and certainty lead, nothing added; apparatus from the book's own content; chapters re-expressed, quotations and scripture word for word; one numbering scheme; gaps reported, never filled.
+
+### 17c. Results reach the book (from the audit of what was built but not shown, 27 October 2026)
+- A whole-book result (rewrite, corrected, voice, cited, proofread, translation) can become the book's manuscript ("Use as the manuscript"), so Finish works on it; the earlier manuscript is kept to restore.
+- A saved design (`book-design.json`) can be applied again from the result viewer; other JSON results say what they are for.
+- Runs and results open from every stage (Results in the top bar), with Stop for a running whole-book job, also for projects with no chapters yet.
+- Redo repeats the whole request (instructions, improvement type, factor, citation style, voice), not only the action.
+- "Claude is busy in another project" is shown; the palette offers Changes and Side by side only when there is a suggestion.
+- The Library's book view counts chapters from the book's headings (it said "0 chapters").
+
+### 17d. Limits stated plainly
+- Rebuild needs the book uploaded in Sources (chapters are written from it).
+- On the API the design reads at most about 400,000 characters of material in one request; Claude Code reads all of it.
+- "Draws on" and "Not placed" are Claude's account; the comparison with the original (§16) is the check of what the rewrite kept.
+- The Book Creator wizard's chapter and improve steps on Claude Code are not used by Claude Studio (Studio writes through manuscript sections); they remain for the wizard.
+- The Library page is used by every customer, so its export and interior tools stay; for a book made in Claude Studio it is a companion, not a second Finish (§17f).
+
+### 17f. Added on "add those left" (27 October 2026)
+- Library: a book saved from Claude Studio keeps its author, trim size, draft or approved status and its Studio project (kept when edited in the Library); its page says so and links to "Finish in Claude Studio" (`/admin/claude?project=…` opens that project); the interior tools start with the book's author and trim; one EPUB export per page (the reader's own EPUB button is off where the export list has one).
+- Finish: Marketing and Study guide tabs, written from the manuscript as it stands. Every tool can now work on "The book's manuscript, as it stands" (both engines), not only on the upload or a result.
+- Write: previous and next section at the end of each page, and "Next: …" after accepting a suggestion, for working through the book chapter by chapter.
+- Results: each suggestion is named after its section ("Suggestion · …", "What it says · …", "What Claude used · …").
+- Narrow screens: the page views are a menu.
+
+### 17e. Checklist
+- [x] Owner's instruction recorded (above)
+- [x] Book types, instructions and source choice; design with draws-on, not placed and missing (`BookDesignDialog.test.tsx`)
+- [x] Same standard on both engines (`book-design.test.ts`, runner test "rebuild as a professional book")
+- [x] Design replaces the manuscript only when the owner applies it; replaced manuscript kept and restorable (`book-design.test.ts`)
+- [x] Designed sections written with the design, their plan and the manuscript before the rebuild (runner test; `sectionContext`)
+- [x] Old "Restructure" outline removed (it appended instead of restructuring)
+- [x] Whole-book result → manuscript; saved design re-applied; runs and results from every stage; full Redo; busy elsewhere shown; chapter count in the Library
+- [x] Every stage, Finish tab and card clicked through in the preview with no page errors; screenshots 42–47
+- [x] §17f: Library keeps the book's details and links to the Studio; Marketing and Study guide in Finish on the manuscript (runner test "Finish's tools work on the manuscript"); previous/next section; suggestions named after their section (`output-label.test.ts`); view menu on narrow screens

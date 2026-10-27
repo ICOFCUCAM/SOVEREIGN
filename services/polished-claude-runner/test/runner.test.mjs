@@ -427,3 +427,52 @@ test("book results keep numbered versions, refuse a save over a newer version, a
   assert.equal(h.versions.at(-1).n, 4);
   assert.equal(h.approval.version, 3);
 });
+
+test("rebuild as a professional book: a design from the whole material, then chapters that read the manuscript it replaced", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Rebuild" } })).json();
+  // Nothing to design from yet.
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "book-design", bookType: "course" } } })).status, 400);
+  await call(`/v1/threads/${thread.id}/files?name=demonology.txt&kind=original`, { method: "POST", raw: Buffer.from("My teaching on spirits.") });
+  await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", body: { manuscript: { title: "Demonology I", rules: "Write Yahusha instead of Jesus", sections: [{ id: "s-1", kind: "chapter", title: "Old", body: "The author's latest text." }] } } });
+  let { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "book-design", bookType: "course", instructions: "A university course", approach: "mine" } } })).json();
+  assert.equal(job.output, "book-design.json");
+  assert.equal(job.label, "Design the professional book");
+  assert.equal((await streamUntilDone(job.id, thread.id)).at(-1).status, "done");
+  const design = JSON.parse((await (await call(`/v1/threads/${thread.id}/outputs/book-design.json`)).json()).text);
+  assert.equal(design.rationale, "A course.");
+  assert.equal(design.sections[1].draws, "the manuscript", "the design reads the manuscript as well as the uploads");
+  const last = JSON.parse(await fs.readFile(path.join(dataDir, "threads", thread.id, "last-call.json"), "utf8"));
+  const prompt = last.args[last.args.indexOf("-p") + 1];
+  assert.match(prompt, /Write Yahusha instead of Jesus/);
+  assert.match(prompt, /A university course/);
+
+  // The design applied: empty designed sections, the brief, and the replaced manuscript kept.
+  const rebuilt = { title: "Demonology I", rules: "Write Yahusha instead of Jesus", design: { bookType: "course", instructions: "A university course", approach: "mine", at: "2026-10-27T10:00:00Z", extra: "dropped" },
+    archive: [{ at: "2026-10-27T10:00:00Z", label: "Before the rebuild", sections: [{ id: "s-1", kind: "chapter", title: "Old", body: "The author's latest text.", versions: [{ id: "v" }] }] }],
+    sections: [{ id: "s-a", kind: "chapter", title: "One", body: "", idea: "First.\nDraws on: the manuscript" }] };
+  const kept = (await (await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", body: { manuscript: rebuilt } })).json()).manuscript;
+  assert.deepEqual(kept.design, { bookType: "course", instructions: "A university course", approach: "mine", at: "2026-10-27T10:00:00Z" });
+  assert.deepEqual(kept.archive[0].sections[0], { id: "s-1", kind: "chapter", title: "Old", body: "The author's latest text." });
+  const before = await fs.readFile(path.join(dataDir, "threads", thread.id, "work", "manuscript", "BEFORE-REBUILD.md"), "utf8");
+  assert.match(before, /## Old\n\nThe author's latest text\./);
+  ({ job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "section", options: { sectionId: "s-a", op: "compose", approach: "mine" } } })).json());
+  assert.equal((await streamUntilDone(job.id, thread.id)).at(-1).status, "done");
+  const call2 = JSON.parse(await fs.readFile(path.join(dataDir, "threads", thread.id, "last-call.json"), "utf8"));
+  const p2 = call2.args[call2.args.indexOf("-p") + 1];
+  assert.match(p2, /BEFORE-REBUILD\.md/);
+  assert.match(p2, /rebuilt as a professional book/);
+  assert.match(p2, /Course textbook/);
+  assert.match(p2, /never pad/);
+});
+
+test("Finish's tools work on the manuscript as it stands, not only on the upload", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Finish tools" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=book.txt&kind=original`, { method: "POST", raw: Buffer.from("The original.") });
+  assert.equal((await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "marketing", target: "manuscript" } } })).status, 400, "an empty manuscript is refused");
+  await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", body: { manuscript: { title: "Rebuilt", sections: [{ id: "s-1", kind: "chapter", title: "One", body: "The rebuilt chapter." }] } } });
+  const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "marketing", target: "manuscript" } } })).json();
+  assert.equal(job.output, "marketing-pack.md");
+  await streamUntilDone(job.id, thread.id);
+  const last = JSON.parse(await fs.readFile(path.join(dataDir, "threads", thread.id, "last-call.json"), "utf8"));
+  assert.match(last.args[last.args.indexOf("-p") + 1], /the book's manuscript in \.\/manuscript\//);
+});

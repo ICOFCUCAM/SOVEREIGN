@@ -222,6 +222,7 @@ export function ActionDialog({ action, thread, styles, onClose, onRun }: { actio
               <Toggle label="Keep chapter structure" checked={o.keepStructure !== false} onChange={(v) => set({ keepStructure: v })} />
               <Toggle label="Keep the author's voice" checked={o.keepVoice !== false} onChange={(v) => set({ keepVoice: v })} />
             </div>
+            {o.keepStructure === false && <p className="rounded-[10px] bg-muted/50 px-3 py-2 text-[12.5px] text-muted-foreground">This rewrite may reorganise where your instructions say so. To give the whole book a new professional structure (parts, chapters in the reader's order, openings, summaries, questions), use <span className="font-medium text-foreground">Plan → Rebuild as a professional book</span>: you review Claude's design before anything changes.</p>}
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="space-y-1.5"><Label>Length</Label>
                 <Select value={o.length} onValueChange={(v) => set({ length: v })}><SelectTrigger><SelectValue /></SelectTrigger>
@@ -267,8 +268,16 @@ export function StylePicker({ styles, value, onChange }: { styles: string[]; val
 /** Whole-book results the editorial check applies to, and those it compares with the original (DESIGN-SPEC.md §15). */
 const BOOK_RESULT = (p: string) => /^(rewrite\.md|corrected\.md|voice\.md|cited\.md|rewrite\/.+\.md|book\/.+\.md|volumes\/.+\.md)$/.test(p) && !/-notes\.md$/.test(p);
 const REWRITE_RESULT = (p: string) => p === "rewrite.md" || p === "corrected.md" || p === "voice.md";
+/** Whole-book results that can become the book's manuscript. */
+const WHOLE_BOOK = (p: string) => /^(rewrite|corrected|voice|cited|proofread|translation)\.md$/.test(p);
+const JSON_NOTE: Record<string, string> = {
+  "book/outline.json": "An outline from Plan → Outline with Claude; it was added to your plan when it was made.",
+  "cover-copy.json": "Cover copy Claude wrote; Cover uses it.",
+  "series.json": "The series plan as data; Turn into a series uses it.",
+  "book-design.json": "The design of the rebuilt book.",
+};
 
-export function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsTarget, check, onReview, reviewAt }: {
+export function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsTarget, check, onReview, reviewAt, onUseAsManuscript, onUseDesign }: {
   backend: StudioBackend; threadId: string; path: string; projectTitle: string; onClose: () => void;
   /** Rewrite this result, or correct it with the editorial check's findings filled in. */
   onUseAsTarget: (p: string, o?: Partial<RunOptions>) => void;
@@ -276,6 +285,10 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
   check?: { rules: string; original: () => Promise<string> };
   /** Ask Claude for the judgement-level editorial review of this result, and when the last one was written. */
   onReview?: (p: string) => void; reviewAt?: string | null;
+  /** Makes a whole-book result the book's manuscript (the current one is kept to restore), so Finish works on it. */
+  onUseAsManuscript?: (text: string, label: string) => void;
+  /** Lays the manuscript out to a saved design of the rebuilt book. */
+  onUseDesign?: (raw: string) => void;
 }) {
   const { toast } = useToast();
   const [text, setText] = useState<string | null>(null);
@@ -319,7 +332,7 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
     try {
       // The Library copy says whether it is the approved book or a working draft, and which version.
       const state = versioned ? { status: approvedNow ? "approved" : "draft", version: latest?.n ?? null, approvedAt: approvedNow ? history!.approval!.at : null, approvedBy: approvedNow ? history!.approval!.by : null } : {};
-      const id = await saveDocument({ kind: "book", title: bookTitle, payload: { markdown: text, title: bookTitle, ...state }, preview: text.replace(/^#.*$/m, "").trim().slice(0, 160) });
+      const id = await saveDocument({ kind: "book", title: bookTitle, payload: { markdown: text, title: bookTitle, ...state, studioProject: threadId }, preview: text.replace(/^#.*$/m, "").trim().slice(0, 160) });
       setSavedId(id);
       toast({ title: "Saved to your Library", description: versioned ? (approvedNow ? `“${bookTitle}”, version ${latest?.n}, approved for publication.` : `“${bookTitle}” is saved as a working draft (not approved for publication).`) : `“${bookTitle}” is ready for editing, export and publishing.` });
     } catch (e) { toast({ title: "Could not save", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
@@ -397,7 +410,9 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
             : path.endsWith(".json") ? <pre className="overflow-x-auto rounded-lg bg-muted p-4 font-mono text-[13px]">{prettyJson(text)}</pre> : <Markdown text={text} />}
         </div>
         <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/30 px-6 py-3">
-          {isJson ? <span className="text-sm text-muted-foreground">The outline the Book wizard uses. Edit it in the wizard.</span> : savedId ? (<>
+          {isJson ? (path === "book-design.json" && onUseDesign
+            ? <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text} onClick={() => { if (text && window.confirm("Lay your manuscript out to this design?\n\nThe manuscript's sections are replaced by the designed ones, each with its plan. The current manuscript is kept and can be restored from Plan.")) { onUseDesign(text); onClose(); } }}><Sparkles className="h-4 w-4" /> Use this design</Button>
+            : <span className="text-sm text-muted-foreground">{JSON_NOTE[path] ?? "Data Claude wrote for the Studio, used where it was made."}</span>) : savedId ? (<>
             <span className="mr-1 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400"><Check className="h-4 w-4" /> In your Library</span>
             <Button asChild size="sm" className={`rounded-full ${GRADIENT}`}><Link to={`/library?open=${savedId}`}><Library className="h-4 w-4" /> Open: edit, export EPUB / PDF / print</Link></Button>
             <Button asChild size="sm" variant="outline" className="rounded-full"><Link to="/translate"><Languages className="h-4 w-4" /> Translate</Link></Button>
@@ -406,6 +421,7 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
             {versioned && edited && <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || savingVersion} onClick={() => text && saveVersion(text, op)}>{savingVersion ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save as version {(latest?.n ?? 0) + 1}</Button>}
             <Button size="sm" variant={versioned && edited ? "outline" : "default"} className={`rounded-full ${versioned && edited ? "" : GRADIENT}`} disabled={!text || saving || (versioned && edited)} title={versioned && edited ? "Save your edits as a version first" : undefined} onClick={save}>{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} {versioned ? (approvedNow ? "Save to Library (approved)" : "Save draft to Library") : "Save to Library as a book"}</Button>
             {versioned && !edited && latest && !approvedNow && <Button size="sm" variant="outline" className="rounded-full" onClick={() => setApproving(true)} aria-label="Approve for publication"><BadgeCheck className="h-4 w-4" /> Approve…</Button>}
+            {WHOLE_BOOK(path) && onUseAsManuscript && <Button size="sm" variant="outline" className="rounded-full" disabled={!text || edited} title={edited ? "Save your edits first" : "Make this the book's manuscript, so Finish works on it"} aria-label="Make this the book's manuscript" onClick={() => { if (text && window.confirm("Make this the book's manuscript?\n\nIts chapters replace the manuscript's, so the cover, interior design, production, audiobook, translation and AI Teacher in Finish work on it. The current manuscript is kept and can be restored from Plan.")) { onUseAsManuscript(text, outputLabel(path)); onClose(); } }}><BookOpen className="h-4 w-4" /> Use as the manuscript</Button>}
           </>)}
           <div className="ml-auto flex gap-1">
             {checkable && <Button size="sm" variant={checking ? "secondary" : "outline"} className="rounded-full" onClick={() => view(checking ? "text" : "check")} aria-pressed={checking} aria-label={checking ? "Back to the text" : "Editorial check"}><ScanSearch className="h-4 w-4" /> {checking ? "Text" : "Check"}</Button>}

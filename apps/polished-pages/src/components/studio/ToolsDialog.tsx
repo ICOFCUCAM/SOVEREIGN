@@ -15,7 +15,7 @@ import type { EngineId } from "@/lib/studio-backend";
 const ICONS: Record<StudioTool["icon"], typeof SpellCheck2> = { series: Layers3, voice: AudioLines, pen: Feather, spell: SpellCheck2, check: BadgeCheck, quote: BookMarked, languages: Languages, megaphone: Megaphone, graduation: GraduationCap, list: ListTree, diff: GitCompare, gauge: Gauge, scan: ScanText };
 const GRADIENT = "bg-gradient-to-r from-[hsl(221_83%_53%)] to-[hsl(262_83%_58%)] text-white shadow-[0_10px_28px_-12px_hsl(248_83%_55%/0.7)] hover:opacity-95";
 
-export default function ToolsDialog({ thread, engine, initial, initialTarget, onClose, onRun }: { thread: StudioThread; engine: EngineId | null; initial?: ToolId; /** A result to work on (the viewer's "Editorial review by Claude"). */ initialTarget?: string; onClose: () => void; onRun: (o: RunOptions & Record<string, unknown>) => void }) {
+export default function ToolsDialog({ thread, engine, initial, initialTarget, onClose, onRun, hasManuscript }: { thread: StudioThread; engine: EngineId | null; initial?: ToolId; /** A result to work on (the viewer's "Editorial review by Claude"), or "manuscript". */ initialTarget?: string; onClose: () => void; onRun: (o: RunOptions & Record<string, unknown>) => void; /** The project has a written manuscript to work on. */ hasManuscript?: boolean }) {
   const [tool, setTool] = useState<StudioTool | null>(null);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [target, setTarget] = useState("source");
@@ -29,7 +29,7 @@ export default function ToolsDialog({ thread, engine, initial, initialTarget, on
     const outs = thread.outputs.filter((o) => !o.path.endsWith(".json")).map((o) => ({ v: `out/${o.path}`, l: `Result · ${outputLabel(o.path)}` }));
     return [...originals, ...outs];
   }, [thread]);
-  const targets = useMemo(() => [...(thread.files.length ? [{ v: "source", l: "My uploaded documents" }] : []), ...thread.outputs.filter((x) => !x.path.startsWith("rewrite/") && !x.path.endsWith(".json")).map((x) => ({ v: x.path, l: `Result · ${outputLabel(x.path)}` }))], [thread]);
+  const targets = useMemo(() => [...(thread.files.length ? [{ v: "source", l: "My uploaded documents" }] : []), ...(hasManuscript ? [{ v: "manuscript", l: "The book's manuscript, as it stands" }] : []), ...thread.outputs.filter((x) => !x.path.startsWith("rewrite/") && !x.path.endsWith(".json")).map((x) => ({ v: x.path, l: `Result · ${outputLabel(x.path)}` }))], [thread, hasManuscript]);
 
   const pick = (t: StudioTool) => {
     const init: Record<string, unknown> = {};

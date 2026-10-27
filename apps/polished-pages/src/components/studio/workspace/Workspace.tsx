@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, Check, CloudOff, Cpu, Focus, History, LifeBuoy, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Redo2, Search, Sparkles, Undo2, WifiOff, X } from "lucide-react";
+import { AlertTriangle, Check, CloudOff, FileText, Cpu, Focus, History, LifeBuoy, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Redo2, Search, Sparkles, Undo2, WifiOff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -11,9 +11,10 @@ import { importText, insertSection, kindDef, words, type Manuscript } from "@/li
 import { readWizardDraft, wizardDraftToManuscript } from "@/lib/studio-merge";
 import { apiBookEngine, type BookEngine } from "@/lib/book-engine";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
-import { apiCoverCopyWriter, runnerBackend, sourceText, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
-import { StudioError, claudeBookEngine, type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioThread, type StudioThreadSummary } from "@/lib/claude-studio";
+import { apiCoverCopyWriter, apiDesignBook, runnerBackend, sourceText, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
+import { StudioError, claudeBookEngine, setSectionTitles, type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioThread, type StudioThreadSummary } from "@/lib/claude-studio";
 import type { ToolId } from "@/lib/studio-tools";
+import { designToManuscript, parseDesign, restoreArchived, resultToManuscript, type BookDesign, type BookTypeId, type DesignApproach, type DesignBriefInput } from "@/lib/book-design";
 import JoinFiles from "@/components/studio/JoinFiles";
 import ToolsDialog from "@/components/studio/ToolsDialog";
 import MyBooks from "@/components/studio/MyBooks";
@@ -25,7 +26,7 @@ import StudioPalette from "./StudioPalette";
 import SourcesStage from "./SourcesStage";
 import PlanStage from "./PlanStage";
 import FinishStage from "./FinishStage";
-import { ActionDialog, ResultViewer, setPendingTarget, type DialogAction, type Live } from "./parts";
+import { ActionDialog, LiveCard, OutputRow, ResultViewer, setPendingTarget, type DialogAction, type Live } from "./parts";
 import { useManuscript } from "./useManuscript";
 import { useSectionRun } from "./useSectionRun";
 import { APPROACH_CARDS, type ApproachId } from "./approaches";
@@ -56,6 +57,8 @@ export interface WorkspaceProps {
   notice?: React.ReactNode;
   /** Finds a Library book's saved front cover; the dev preview passes a stand-in. */
   findCover?: (libraryId: string) => Promise<string | null>;
+  /** Designs a rebuilt book in place of the engine (the development preview only). */
+  designer?: (b: DesignBriefInput) => Promise<BookDesign>;
 }
 
 export default function Workspace(p: WorkspaceProps) {
@@ -109,6 +112,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [retry, setRetry] = useState<{ action: StudioAction; options: RunOptions; why: string } | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const [sheet, setSheet] = useState(false);
+  // The project's runs and results, reachable from every stage (spec §5.2), not only from the Claude panel in Write.
+  const [activity, setActivity] = useState(false);
   const lastRun = useRef<{ action: StudioAction; options: RunOptions } | null>(null);
   const abort = useRef<AbortController | null>(null);
   const rulesRef = useRef<HTMLTextAreaElement>(null);
@@ -125,6 +130,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [sectionId, setSectionId] = useState<string | null>(null);
   useEffect(() => { if (m && (!sectionId || !m.sections.some((s) => s.id === sectionId))) setSectionId(m.sections.find((s) => s.kind === "chapter")?.id ?? m.sections[0]?.id ?? null); }, [m, sectionId]);
   const section = m?.sections.find((s) => s.id === sectionId) ?? null;
+  useEffect(() => { setSectionTitles(Object.fromEntries((m?.sections ?? []).map((s) => [s.id, s.title]))); }, [m?.sections]);
   const wizard = useMemo(() => readWizardDraft(id), [id]);
 
   // The Book wizard's engine (outline): the owner's Claude Code when it's in use, else the API.
@@ -172,11 +178,13 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (!(await cost.confirm({ what: action === "chat" ? "Your message to Claude" : action === "tool" ? "This tool" : "This whole-book run", words: bookWords || undefined }, use))) return;
     try {
       setRetry(null); lastRun.current = { action, options };
+      // A run on the manuscript reads the saved one.
+      if (options.target === "manuscript") await persist();
       const job = await backend.run(id, action, options, use);
       setDialog(null); setTool(null);
       await reload(); follow(job);
     } catch (e) { toast({ title: e instanceof StudioError && e.status === 409 ? "Claude is busy" : "Could not start", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
-  }, [engineId, backend, id, reload, follow, toast, decision.reason, cost, latest]);
+  }, [engineId, backend, id, reload, follow, toast, decision.reason, cost, latest, persist]);
 
   // Section runs ask about API billing first, like every other run.
   const runSection = async (o: Parameters<typeof sr.run>[0]) => {
@@ -242,6 +250,14 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const files = thread?.files;
   const readOriginal = useCallback(async () => (await sourceText(files ?? [], readSource)).text, [files, readSource]);
   const check = useMemo(() => ({ rules: bookRules, original: readOriginal }), [bookRules, readOriginal]);
+  // Rebuild as a professional book (DESIGN-SPEC.md §17): Claude Code reads the project itself; the API is given the manuscript, else the uploads.
+  const designBook = async (b: DesignBriefInput) => {
+    if (p.designer) return p.designer(b);
+    if (bookEngine?.design) return bookEngine.design(b);
+    const written = m?.sections.filter((s) => s.body.trim()) ?? [];
+    const material = written.length ? written.map((s) => `## ${s.title}\n\n${s.body}`).join("\n\n") : await readOriginal();
+    return apiDesignBook(material, { ...b, rules: [m?.rules, m?.knowledge?.rules, m?.knowledge?.terminology].filter(Boolean).join("\n") });
+  };
   const openSection = (sid: string) => { if (!sid) return; setSectionId(sid); setPlace("write"); };
   const toggleTheme = () => { const order: Theme[] = ["light", "dark", "system"]; setTheme(order[(order.indexOf(getStoredTheme()) + 1) % 3]); };
 
@@ -297,16 +313,20 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         {wizard && !m.sections.some((s) => s.body.trim()) && <WizardBanner count={wizard.chapters?.length ?? 0} onBring={() => update(wizardDraftToManuscript(wizard, m))} />}
         <PlanStage m={m} onUpdate={update} onOpen={openSection} engine={bookEngine} approach={approach} hasUploads={hasUploads} busy={busy}
           onWriteAll={(ids) => void runSections(ids.map((sid) => ({ sectionId: sid, op: "compose" as const, approach, title: m.sections.find((s) => s.id === sid)?.title })))}
-          queue={sr.queue} onSeries={() => setTool({ initial: "series" })} onFinish={() => setPlace("finish")} />
+          queue={sr.queue} onSeries={() => setTool({ initial: "series" })} onFinish={() => setPlace("finish")}
+          onDesign={bookEngine ? designBook : undefined}
+          onApplyDesign={(d, b) => { update(designToManuscript(d, m, b)); setApproach(b.approach); }}
+          onRestore={(i) => update(restoreArchived(m, i))} />
       </>;
     }
-    if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover} />;
+    if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}
+      projectId={id} outputs={thread.outputs} onOpenResult={setViewing} onTool={(t) => setTool({ initial: t, target: "manuscript" })} />;
     if (!section) return <EmptyWrite onAdd={() => { const r = insertSection(m, "chapter"); update(r.manuscript); setSectionId(r.id); }} onPlan={() => setPlace("plan")} />;
-    return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")}
+    return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")} onSection={openSection}
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
-      onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); toast({ title: "Accepted", description: "Your previous text is kept in Version history." }); }}
+      onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); const next = m.sections[m.sections.findIndex((s) => s.id === section.id) + 1]; toast({ title: "Accepted", description: `Your previous text is kept in Version history.${next ? ` Next: “${next.title}”, at the end of the page.` : ""}` }); }}
       onDiscard={() => { sr.decide(section.id, "discard"); setView("writing"); }}
-      onRedo={() => { const op = proposal?.op ?? "rewrite"; void runSection({ sectionId: section.id, op, title: section.title, approach: proposal?.approach }); }}
+      onRedo={() => { const op = proposal?.op ?? "rewrite"; void runSection({ ...(proposal?.request ?? {}), sectionId: section.id, op, title: section.title, approach: proposal?.request?.approach ?? proposal?.approach }); }}
       onRestoreOriginal={() => { if (window.confirm("Put back the text from before Claude's rewrite? The current text becomes the earlier version.")) patchSection(section.id, { body: section.original!, original: section.body }); }} />;
   })();
 
@@ -322,6 +342,12 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         </p>
         {state && <span className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11.5px] ${proposal ? "bg-[#EFF6FF] text-[#1D4ED8] dark:bg-[#172554] dark:text-[#93C5FD]" : "bg-[#F1F5F9] text-[#475569] dark:bg-white/10 dark:text-[#CBD5E1]"}`}>{state}</span>}
       </div>
+      {place === "write" && section && (
+        // On narrow screens the views are a menu (the tabs need the width).
+        <select aria-label="Page view" value={view} onChange={(e) => setView(e.target.value as CanvasView)} className="h-9 rounded-[8px] border border-[#E6E8ED] bg-white px-2 text-[13px] md:hidden dark:border-white/10 dark:bg-white/5">
+          {VIEWS.filter((v) => !v.needsProposal || proposal).map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}
+        </select>
+      )}
       {place === "write" && section && (
         <div role="tablist" aria-label="Page view" className="hidden items-center gap-0.5 rounded-[9px] bg-[#F1F5F9] p-[3px] md:flex dark:bg-white/5">
           {VIEWS.filter((v) => !v.needsProposal || proposal).map((v) => (
@@ -341,7 +367,9 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         {saving === "error" ? <button type="button" onClick={() => void persist()} title={saveError ?? undefined} aria-label={`Not saved${saveError ? `: ${saveError.replace(/[.\s]+$/, "")}` : ""}. Retry`} className="inline-flex items-center gap-1 font-medium text-[#B91C1C] hover:underline dark:text-[#FCA5A5]"><CloudOff className="h-3.5 w-3.5" /> Not saved · Retry</button>
           : saving === "saving" ? "Saving…" : saving === "saved" ? <span className="inline-flex items-center gap-1"><Check className="h-3 w-3" /> Saved</span> : ""}
       </span>
-      {live && <button type="button" onClick={() => { setPlace("write"); setPanelOpen(true); setPanelMode("ask"); }} className="hidden items-center gap-1.5 rounded-full bg-[#EFF6FF] px-2.5 py-1 text-[12px] font-medium text-[#1D4ED8] sm:flex dark:bg-[#172554] dark:text-[#93C5FD]"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> {live.job.label}</button>}
+      {live && <button type="button" onClick={() => { if (section && m && !narrow) { setPlace("write"); setPanelOpen(true); setPanelMode("ask"); } else setActivity(true); }} className="hidden items-center gap-1.5 rounded-full bg-[#EFF6FF] px-2.5 py-1 text-[12px] font-medium text-[#1D4ED8] sm:flex dark:bg-[#172554] dark:text-[#93C5FD]"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> {live.job.label}</button>}
+      {!live && p.busyElsewhere && <span className="hidden items-center gap-1.5 rounded-full bg-[#FFFBEB] px-2.5 py-1 text-[12px] font-medium text-[#92400E] sm:flex dark:bg-amber-500/15 dark:text-amber-300"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> Claude is busy in another project</span>}
+      {(thread.outputs.length > 0 || live) && <button type="button" onClick={() => setActivity(true)} aria-label={`Results: ${thread.outputs.length}${live ? `, ${live.job.label} running` : ""}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted sm:flex dark:text-[#CBD5E1]"><FileText className="h-4 w-4" /> Results <span className="text-[12px] text-[#94A3B8]">{thread.outputs.length}</span></button>}
       <button type="button" onClick={() => setPalette(true)} className="flex h-9 items-center gap-2 rounded-[8px] border border-[#E6E8ED] bg-white px-2.5 text-[13px] text-[#64748B] hover:border-[#CBD5E1] dark:border-white/10 dark:bg-white/5">
         <Search className="h-4 w-4" /><span className="hidden lg:inline">Tools and chapters</span><kbd className="rounded border border-[#E6E8ED] bg-[#F8FAFC] px-1.5 text-[11px] text-[#475569] dark:border-white/10 dark:bg-white/5">⌘K</kbd>
       </button>
@@ -399,15 +427,35 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[320px] p-0 sm:max-w-[320px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
 
       <Onboarding open={tour} onClose={() => setTour(false)} onGo={setPlace} />
+      <Sheet open={activity} onOpenChange={setActivity}>
+        <SheetContent side="right" className="w-[360px] overflow-y-auto sm:max-w-[360px]">
+          <SheetTitle className="font-serif text-xl">Runs and results</SheetTitle>
+          <div className="mt-4 space-y-3">
+            {live ? <LiveCard live={live} onStop={() => void backend.cancel(live.job)} /> : <p className="text-[13px] text-[#64748B]">Nothing is running.</p>}
+            {thread.outputs.length === 0 ? <p className="text-[13px] text-[#64748B]">No results yet.</p>
+              : <div className="space-y-1">{[...thread.outputs].sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt)).map((o) => <OutputRow key={o.path} path={o.path} bytes={o.bytes} at={o.modifiedAt} onOpen={(x) => { setActivity(false); setViewing(x); }} compact />)}</div>}
+          </div>
+        </SheetContent>
+      </Sheet>
       {m && section && <VersionsSheet open={versions} onOpenChange={setVersions} m={m} section={section} onUpdate={update} />}
-      <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread}
+      <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread} hasProposal={Boolean(proposal)}
         onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onTour={() => setTour(true)} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
         onResult={setViewing} onView={(v) => { setPlace("write"); setView(v); }} onFocus={() => { setPlace("write"); setFocus(true); }} onPanel={() => setPanelOpen(!panelOpen)} onTheme={toggleTheme} />
-      {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} initialTarget={tool.target} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
+      {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} initialTarget={tool.target} hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
       {dialog && <ActionDialog action={dialog} thread={thread} styles={p.citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
       {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => { setViewing(null); p.onChanged(); }} onUseAsTarget={(x, o) => { setViewing(null); setPendingTarget(x, o ?? null); setDialog("rewrite"); }} check={check}
-        onReview={(x) => { setViewing(null); setTool({ initial: "editorial-review", target: x }); }} reviewAt={thread.outputs.find((o) => o.path === "editorial-review.md")?.modifiedAt ?? null} />}
+        onReview={(x) => { setViewing(null); setTool({ initial: "editorial-review", target: x }); }} reviewAt={thread.outputs.find((o) => o.path === "editorial-review.md")?.modifiedAt ?? null}
+        onUseAsManuscript={(text, label) => {
+          try { update(resultToManuscript(text, m ?? { title: thread.title, sections: [], history: [] }, label)); setPlace("plan"); toast({ title: "This is now the book's manuscript", description: "Finish works on it: cover, interior, production, audiobook and more. The earlier manuscript can be restored from Plan." }); }
+          catch (e) { toast({ title: "Couldn't use it", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+        }}
+        onUseDesign={(raw) => {
+          try {
+            const brief = { bookType: (m?.design?.bookType ?? "custom") as BookTypeId, instructions: m?.design?.instructions ?? "", approach: (m?.design?.approach ?? "mine") as DesignApproach };
+            update(designToManuscript(parseDesign(raw), m ?? { title: thread.title, sections: [], history: [] }, brief)); setApproach(brief.approach); setPlace("plan");
+          } catch (e) { toast({ title: "Couldn't use the design", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+        }} />}
       {/* Last, so it sits above a tool or action dialog that started the run. */}
       {cost.dialog}
     </>
