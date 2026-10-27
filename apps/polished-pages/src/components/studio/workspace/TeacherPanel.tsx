@@ -15,6 +15,7 @@ const STATUS_LABEL: Record<TeacherAnswer["status"], { text: string; tone: string
   answered: { text: "Answered from the book", tone: "text-[#047857] dark:text-emerald-400" },
   partially_covered: { text: "Partly covered by the book", tone: "text-[#B45309]" },
   not_covered: { text: "Not covered by the book", tone: "text-[#64748B]" },
+  out_of_scope: { text: "Outside this course", tone: "text-[#64748B]" },
   pastoral: { text: "Personal question", tone: "text-[#7C3AED]" },
   evidence: { text: "From the book's own words", tone: "text-[#047857] dark:text-emerald-400" },
 };
@@ -165,7 +166,7 @@ export default function TeacherPanel({ m, ensureSaved }: { m: Manuscript; ensure
           </div>
           <div className="mt-4 border-t border-[#E6E8ED] pt-3 text-[12.5px] text-[#475569] dark:border-white/10 dark:text-[#CBD5E1]">
             <span className="font-medium">This month:</span> {usage.requests} {usage.requests === 1 ? "question" : "questions"}
-            {Object.keys(usage.by_path).length > 0 && <> ({Object.entries(usage.by_path).map(([k, n]) => `${n} ${k === "evidence_only" ? "from the book" : k === "not_covered" ? "not covered" : k === "model" ? "with AI" : k}`).join(", ")})</>}
+            {Object.keys(usage.by_path).length > 0 && <> ({Object.entries(usage.by_path).map(([k, n]) => `${n} ${k === "evidence_only" ? "from the book" : k === "not_covered" ? "not covered" : k === "out_of_scope" ? "outside the course" : k === "insufficient" ? "not enough in the book" : k === "model" ? "with AI" : k}`).join(", ")})</>}
             {usage.model_calls.length > 0 ? <> · paid calls: {usage.model_calls.map((c) => `${c.calls} ${c.task.replace(/_/g, " ")} (${c.provider}, ${(c.tokens_in + c.tokens_out).toLocaleString()} tokens)`).join("; ")}</> : <> · no paid calls</>}
           </div>
         </section>

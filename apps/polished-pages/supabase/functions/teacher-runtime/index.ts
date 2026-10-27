@@ -1,8 +1,10 @@
 import { consumeOrThrow, getUserId, EntitlementError } from "../_shared/entitlements.ts";
 import { HttpError, anthropicConfigured, askClaude, corsHeaders, embedWithUsage, embeddingsConfigured, json, rpcAsCaller } from "../_shared/teacher-http.ts";
-import { decidePath, evidenceAnswer, parseAnswer, selectEvidence, systemPrompt, userPrompt, validateAnswer, type CourseRule, type Evidence, type LearnerLevel, type TeachMode } from "../_shared/teacher-core.ts";
+import { assessScope, decidePath, evidenceAnswer, insufficientAnswer, outOfScopeMessage, parseAnswer, selectEvidence, systemPrompt, userPrompt, validateAnswer, type CourseRule, type Evidence, type LearnerLevel, type ScopeFacts, type TeachMode } from "../_shared/teacher-core.ts";
 
-// The Teacher Runtime (BLUEPRINT.md §5a, §11b, §12). Knowledge first: every
+// The Teacher Runtime (BLUEPRINT.md §5a, §11b, §12). Knowledge first: a
+// question outside the course's subject is declined, and one the book does not
+// say enough about gets the related passages, both without a model; every other
 // question is answered from the book's own passages unless the course owner has
 // turned AI explanations on, a provider is configured and the course's monthly
 // cap allows it. The caller's token decides which course they may use (the
@@ -56,7 +58,16 @@ Deno.serve(async (req) => {
     if (!ctx) return json({ error: "Course not found.", request_id: requestId }, 404);
     const rules = Array.isArray(ctx.rules) ? ctx.rules : [];
 
-    // 2. Evidence. Meaning search (a paid OpenAI call per question) only when the course has chosen it.
+    // 2. Subject gate, before any paid work: enough of what is asked must appear in the course's approved passages.
+    const scopeFacts = (ids: string[]) => rpcAsCaller<ScopeFacts>(req, "polished_teacher_scope", { p_course_id: courseId, p_query: question, p_chunk_ids: ids });
+    const gate = assessScope(await scopeFacts([]), 0);
+    if (gate.verdict === "out_of_scope") {
+      await record("request", "ask", { path: "out_of_scope", ms: Date.now() - started });
+      return json({ status: "out_of_scope", answer: outOfScopeMessage(ctx.title), claims: [], citations: [], limitations: [], check_question: null, passages: [], request_id: requestId,
+        retrieval: { candidates: 0, evidence: 0, vector: false }, scope: gate, answered_by: "book", validation: { ok: true, repaired: false } });
+    }
+
+    // 3. Evidence. Meaning search (a paid OpenAI call per question) only when the course has chosen it.
     let vector: string | null = null;
     if (settings.vector_search && embeddingsConfigured() && ctx.sources.some((s) => s.embedded > 0)) {
       const e = await embedWithUsage([question]);
@@ -66,13 +77,19 @@ Deno.serve(async (req) => {
     const rows = await rpcAsCaller<Row[]>(req, "polished_teacher_retrieve", { p_course_id: courseId, p_query: question, p_embedding: vector, p_limit: 30, p_chapter: chapterId });
     const evidence: Evidence[] = selectEvidence(rows).map((r, i) => ({ handle: `E${i + 1}`, chunk_id: r.chunk_id, version_id: r.version_id, text: r.chunk_text, source_title: r.source_title, source_location: r.source_location,
       chapter_id: r.chapter_id, chapter_number: r.chapter_number, heading_path: r.heading_path, char_start: r.char_start, char_end: r.char_end, source_role: r.source_role }));
-    const meta = { request_id: requestId, retrieval: { candidates: rows.length, evidence: evidence.length, vector: Boolean(vector) } };
+    // 4. Sufficiency: the evidence must contain most of what is asked, and one passage a good part of it.
+    const scope = evidence.length ? assessScope(await scopeFacts(evidence.map((e) => e.chunk_id)), evidence.length) : gate;
+    const meta = { request_id: requestId, retrieval: { candidates: rows.length, evidence: evidence.length, vector: Boolean(vector) }, scope };
+    if (evidence.length && scope.verdict === "insufficient") {
+      await record("request", "ask", { path: "insufficient", ms: Date.now() - started });
+      return json({ ...insufficientAnswer(evidence), claims: [], citations: [], limitations: [], check_question: null, ...meta, answered_by: "book", validation: { ok: true, repaired: false } });
+    }
 
-    // 3. Knowledge first: decide whether a model may be used at all.
+    // 5. Knowledge first: decide whether a model may be used at all.
     const decision = decidePath({ evidence: evidence.length, aiAnswers: settings.ai_answers, modelAllowed: Boolean(guard.model_allowed), providerConfigured: anthropicConfigured() });
     if (decision.path === "not_covered") {
       await record("request", "ask", { path: "not_covered", ms: Date.now() - started });
-      return json({ status: "not_covered", answer: "The book material available to this course does not address that question. Try naming a chapter, a term or a passage.", claims: [], citations: [], limitations: [], check_question: null, passages: [], ...meta, answered_by: "book", validation: { ok: true, repaired: false } });
+      return json({ status: "not_covered", answer: chapterId ? "This chapter does not address that question. Try asking without choosing a chapter, or name a term or a passage." : "The book material available to this course does not address that question. Try naming a chapter, a term or a passage.", claims: [], citations: [], limitations: [], check_question: null, passages: [], ...meta, answered_by: "book", validation: { ok: true, repaired: false } });
     }
     if (decision.path === "evidence_only") {
       const a = evidenceAnswer(evidence);
@@ -80,7 +97,7 @@ Deno.serve(async (req) => {
       return json({ ...a, claims: [], citations: [], limitations: [], check_question: null, notice: decision.notice, ...meta, answered_by: "book", validation: { ok: true, repaired: false } });
     }
 
-    // 4. AI explanation (allowed, configured, within the cap): metered, validated, repaired at most once.
+    // 6. AI explanation (allowed, configured, within the cap): metered, validated, repaired at most once.
     await consumeOrThrow(userId, "text");
     const system = systemPrompt({ courseTitle: ctx.title, sources: ctx.sources, rules, level, mode });
     const user = userPrompt(evidence, question);

@@ -80,7 +80,7 @@ export const usageSummary = (courseId: string) => call<UsageSummary | null>("pol
 export const saveSettings = (courseId: string, settings: Partial<TeacherSettings>) => call<TeacherSettings>("polished_teacher_set_course_settings", { p_course_id: courseId, p_settings: settings });
 
 export interface TeacherAnswer {
-  status: "answered" | "partially_covered" | "not_covered" | "pastoral" | "evidence";
+  status: "answered" | "partially_covered" | "not_covered" | "out_of_scope" | "pastoral" | "evidence";
   /** "book": the book's own passages, no model; "model": an AI explanation that passed the checks. */
   answered_by?: "book" | "model";
   /** Why a book-only answer was given when AI explanations were expected (not set up, paused). */
@@ -93,6 +93,8 @@ export interface TeacherAnswer {
   check_question: string | null;
   evidence?: { evidence_id: string; source_title: string; source_location: string; text: string }[];
   retrieval: { candidates: number; evidence: number; vector: boolean };
+  /** The subject gate and sufficiency check (BLUEPRINT.md §12b): how many of the question's words the course and the evidence contain. */
+  scope?: { verdict: "out_of_scope" | "insufficient" | "sufficient"; terms: number; in_course: number; in_evidence: number; best_passage: number };
   validation: { ok: boolean; repaired: boolean; citations_verified?: number };
   usage?: { model: string; tokens_in: number; tokens_out: number };
   request_id: string;

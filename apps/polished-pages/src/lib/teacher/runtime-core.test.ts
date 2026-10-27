@@ -96,3 +96,46 @@ describe("knowledge-first answering (phase 0)", () => {
     expect(a.answer).toBe("Here is what Demonology says about this, from Chapter 2 and Chapter 5. These are the author's own words; open a passage to read it in context.");
   });
 });
+
+import { assessScope, insufficientAnswer, outOfScopeMessage } from "../../../supabase/functions/_shared/teacher-core";
+
+describe("subject gate and sufficiency (phase 1)", () => {
+  const t = (lexeme: string, in_course: number, in_evidence = 0) => ({ lexeme, in_course, in_evidence });
+
+  it("declines a question whose words the course never uses, or that has no meaningful words", () => {
+    // "What is the capital of France?" in a book that mentions neither
+    expect(assessScope({ terms: [t("capit", 0), t("franc", 0)], best_passage_terms: 0 }, 0).verdict).toBe("out_of_scope");
+    // one incidental word among many is not enough to make it the course's subject
+    expect(assessScope({ terms: [t("capit", 2), t("franc", 0), t("popul", 0), t("paris", 0), t("europ", 0)], best_passage_terms: 0 }, 0).verdict).toBe("out_of_scope");
+    expect(assessScope({ terms: [], best_passage_terms: 0 }, 0).verdict).toBe("out_of_scope");
+  });
+
+  it("tells an in-course question the book does not answer apart from an unrelated one", () => {
+    const facts = { terms: [t("spirit", 40, 4), t("unclean", 12, 3), t("gadarene", 3, 0), t("swine", 2, 0)], best_passage_terms: 2 };
+    expect(assessScope(facts, 5)).toMatchObject({ verdict: "insufficient", terms: 4, in_course: 4, in_evidence: 2 });
+    // the words are spread across passages, but no single passage holds enough of them
+    expect(assessScope({ terms: [t("a1", 1, 1), t("b2", 1, 1), t("c3", 1, 1), t("d4", 1, 1), t("e5", 1, 1)], best_passage_terms: 1 }, 5).verdict).toBe("insufficient");
+    expect(assessScope({ terms: [t("spirit", 40, 4), t("unclean", 12, 3)], best_passage_terms: 2 }, 0).verdict).toBe("insufficient");
+  });
+
+  it("treats an on-topic story the book does not tell as not enough evidence, not as off-topic (live counts)", () => {
+    // "Why were the swine of the Gadarenes drowned by spirits?" against a chapter on unclean spirits
+    const facts = { terms: [t("drown", 0), t("gadaren", 0), t("spirit", 2, 2), t("swine", 0)], best_passage_terms: 1 };
+    expect(assessScope(facts, 2).verdict).toBe("insufficient");
+  });
+
+  it("lets a well-supported question through", () => {
+    // live counts for "What does chapter 1 teach about unclean spirits being cast out?" ("chapter", "teach" and "1" are ignored)
+    expect(assessScope({ terms: [t("cast", 1, 1), t("spirit", 2, 1), t("unclean", 1, 1)], best_passage_terms: 3 }, 1).verdict).toBe("sufficient");
+    expect(assessScope({ terms: [t("spirit", 40, 4), t("unclean", 12, 3), t("cast", 9, 2)], best_passage_terms: 2 }, 6).verdict).toBe("sufficient");
+    expect(assessScope({ terms: [t("demon", 50, 6)], best_passage_terms: 1 }, 6).verdict).toBe("sufficient");
+  });
+
+  it("words the two refusals differently", () => {
+    expect(outOfScopeMessage("Demonology")).toBe("I am your tutor for Demonology. I can help with the book and the approved course materials, but this question falls outside the subject I am teaching. Please ask me about a concept from the course.");
+    const a = insufficientAnswer(E);
+    expect(a.status).toBe("partially_covered");
+    expect(a.answer).toBe("I found related material in Chapter 2, but the approved sources do not provide enough information to establish a complete answer. Here are the relevant passages you can review.");
+    expect(a.passages).toHaveLength(E.length);
+  });
+});

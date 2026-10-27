@@ -228,7 +228,7 @@ export function selectEvidence<T extends { score: number }>(ranked: T[], max = 8
 // course's monthly cap allows it; otherwise the answer is the book's own
 // passages. There is no hidden fallback to another provider.
 
-export type AnswerPath = "not_covered" | "evidence_only" | "model";
+export type AnswerPath = "not_covered" | "out_of_scope" | "insufficient" | "evidence_only" | "model";
 export interface PathDecision { path: AnswerPath; reason: "no_evidence" | "ai_off" | "not_configured" | "cap_reached" | "ai_on"; notice: string | null }
 
 export function decidePath(o: { evidence: number; aiAnswers: boolean; modelAllowed: boolean; providerConfigured: boolean }): PathDecision {
@@ -255,4 +255,46 @@ export function evidenceAnswer(evidence: Evidence[], max = 4): EvidenceAnswer {
     answer: `Here is what ${titles.length === 1 ? titles[0] : "the course's sources"} says about this, from ${where}. These are the author's own words; open a passage to read it in context.`,
     passages: picked.map((e) => ({ evidence_id: e.chunk_id, source_title: e.source_title, source_location: e.source_location, chapter_id: e.chapter_id, text: e.text })),
   };
+}
+
+// ── Subject gate and sufficiency (BLUEPRINT.md §12b, phase 1) ─────────────────
+// Deterministic, no model. `terms` are the question's meaningful words (stems,
+// from polished_teacher_scope) with how many approved passages of the course
+// and of the selected evidence contain each.
+export interface ScopeTerm { lexeme: string; in_course: number; in_evidence: number }
+export interface ScopeFacts { terms: ScopeTerm[]; best_passage_terms: number }
+export type ScopeVerdict = "out_of_scope" | "insufficient" | "sufficient";
+export interface ScopeAssessment { verdict: ScopeVerdict; terms: number; in_course: number; in_evidence: number; best_passage: number }
+
+/**
+ * Below these shares the course does not teach the subject, or its passages do
+ * not say enough. The subject bar is low on purpose: telling a learner an
+ * on-topic question is "outside the course" is worse than showing related
+ * passages for an off-topic one, and neither path uses a model.
+ */
+export const SCOPE_MIN_COURSE_SHARE = 0.25;
+export const SCOPE_MIN_EVIDENCE_SHARE = 0.6;
+export const SCOPE_MIN_PASSAGE_SHARE = 0.4;
+
+export function assessScope(f: ScopeFacts, evidence: number): ScopeAssessment {
+  const terms = f.terms.length;
+  const inCourse = f.terms.filter((t) => t.in_course > 0).length;
+  const inEvidence = f.terms.filter((t) => t.in_evidence > 0).length;
+  const out = { terms, in_course: inCourse, in_evidence: inEvidence, best_passage: f.best_passage_terms };
+  // Nothing to look for, or too little of what is asked ever appears in the course.
+  if (!terms || !inCourse || inCourse / terms < SCOPE_MIN_COURSE_SHARE) return { verdict: "out_of_scope", ...out };
+  if (!evidence || inEvidence / terms < SCOPE_MIN_EVIDENCE_SHARE || f.best_passage_terms / terms < SCOPE_MIN_PASSAGE_SHARE) return { verdict: "insufficient", ...out };
+  return { verdict: "sufficient", ...out };
+}
+
+export function outOfScopeMessage(courseTitle: string): string {
+  return `I am your tutor for ${courseTitle}. I can help with the book and the approved course materials, but this question falls outside the subject I am teaching. Please ask me about a concept from the course.`;
+}
+
+/** In the course's subject, but the passages found do not establish a complete answer: say so and show them. */
+export function insufficientAnswer(evidence: Evidence[], max = 4): { status: "partially_covered"; answer: string; passages: EvidenceAnswer["passages"] } {
+  const base = evidenceAnswer(evidence, max);
+  const places = [...new Set(base.passages.map((p) => p.source_location.split(" ¶")[0]))];
+  const where = places.length <= 1 ? (places[0] ?? "the course") : `${places.slice(0, -1).join(", ")} and ${places[places.length - 1]}`;
+  return { status: "partially_covered", answer: `I found related material in ${where}, but the approved sources do not provide enough information to establish a complete answer. Here are the relevant passages you can review.`, passages: base.passages };
 }
