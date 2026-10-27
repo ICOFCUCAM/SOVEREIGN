@@ -104,6 +104,38 @@ Projects (create, rename, delete, switch) · uploads (PDF, Word, text, Markdown,
 - **Pass 3 — Publishing**: Sources and Plan in the system, Finish with real previews and format switcher, actionable readiness, dark-mode tuning, motion refinement, onboarding.
 
 ## 12. Checklist
-- [ ] Pass 1 complete (§3, §4, §5.1–5.3, §6 autosave + focus, §7 empty/loading, §10 all reachable)
-- [ ] Pass 2 complete (§5.4, §5.5, §6 remaining, §7 failure/recovery)
-- [ ] Pass 3 complete (§2 Sources/Plan, §9, dark mode, §8, onboarding)
+- [x] Pass 1 complete (§3, §4, §5.1–5.3, §6 autosave + focus, §7 empty/loading, §10 all reachable)
+- [x] Pass 2 complete (§5.4, §5.5, §6 remaining, §7 failure/recovery)
+- [ ] Pass 3 complete (§2 Sources/Plan, §9, dark mode, §8, onboarding) — open items below
+
+Itemised (ticked only when implemented and covered by a test or a reviewed screenshot; see `SCREENSHOTS.md`):
+
+Pass 1 — Workspace
+- [x] Frame 248px / 64px rail, navy `#172033`, one active-state treatment; project switcher with rename and delete; engine reads "Claude Code · Automatic" (screens 01, 08)
+- [x] Top bar: chapter name and state (editing / reviewing / viewing an earlier version) that never truncates; view switcher; saved state (01, 02)
+- [x] Canvas views: Writing (default), Book page (real typeset pages), Changes, Clean, Original, Side by side, Write myself (01, 02, 04)
+- [x] Claude panel: Ask, Revise, Research, Notes; remembers the last mode; collapsible; a sheet below 1280px opened only by the owner (01, 11, 12)
+- [x] Five approach cards with source policy, repeated on the review bar; selection kept per project (01, 02; test "revises a chapter")
+- [x] Autosave with saving / saved, and focus mode with Esc (10; test "focus mode")
+- [x] Empty and loading states for project, Write, Book page and Finish
+- [x] Every feature in §10 reachable from the frame, a stage, the panel or ⌘K (09)
+
+Pass 2 — Trustworthy writing
+- [x] Per-change accept/reject, navigation, accept all / reject all, edit before accepting; Accept keeps the previous version (02, 14; tests)
+- [x] Provenance ledger from the run's own event log, separate from Claude's account (Research mode)
+- [x] Version history per section: named snapshots, autosaved revisions (at most every 10 min), before every accepted change and every restore; restore never loses newer work (15, 16; tests `section-versions`, "version restore")
+- [x] Undo/redo of book changes independent of Claude's history (⌘Z / ⌘⇧Z outside text fields; buttons) (test "undoes and redoes")
+- [x] Keyboard system: ⌘K palette with an Edit group, ⌘. focus, ⌘\ panel, J/K/X/⌘↵ review (09, 14; test "keyboard")
+- [x] Failure and recovery: save error with Retry; unsaved changes kept on the device and offered back; unreviewed suggestions survive a reload; offline banner and no runs offline (17; test "offers back changes")
+- [x] Cost notice and engine before every API-billed run (section, whole book, tools, chat), with "don't ask again this session" (21; test "asks before a run billed to the API")
+- [x] Cancel and retry for long tasks; "Run it on the API" when the plan's limit is reached
+
+Pass 3 — Publishing
+- [x] Sources and Plan inside the system (05, 06)
+- [x] Finish: format switcher EPUB · Print PDF · Paperback · Audiobook with each format's constraints; readiness per format, each check linked to its fix (07, 18–20; tests `format-readiness`)
+- [x] Real front cover from Cover Studio, with the optional dimensional view (spine from page count and paper) (18)
+- [x] Dark mode tuned (08, 19, 24)
+- [x] First-project onboarding, reopened from ⌘K (22–24; test "walks a first-time owner")
+- [ ] Export opens a format/settings dialog that validates first (today: export is disabled until the format is ready, and the export panel opens)
+- [ ] Motion refinement pass against §8 timings across every surface (frame, panel and revision timings are in; a full audit is pending)
+- [ ] Writing view renders Markdown headings as headings while editing (today the marks are visible in Writing and hidden in Changes, Clean and Book page)
