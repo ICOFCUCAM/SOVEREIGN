@@ -1,6 +1,10 @@
 # Claude Studio runner: the owner's Claude Code behind an admin-only API.
 FROM node:22-slim
 
+# poppler-utils (pdftoppm): Claude Code needs it to read PDF pages, above all scanned ones
+# ("Read scanned pages"); without it Claude cannot open a scanned PDF at all.
+RUN apt-get update && apt-get install -y --no-install-recommends poppler-utils && rm -rf /var/lib/apt/lists/*
+
 # The Claude Code version this runner was tested against. Upgrade deliberately.
 RUN npm install -g @anthropic-ai/claude-code@2.1.310 && npm cache clean --force
 
