@@ -26,11 +26,12 @@ const LocalizePanel = lazy(() => import("@/components/app/LocalizePanel"));
 const BookRepurposePanel = lazy(() => import("@/components/book/BookRepurposePanel"));
 const ProductionPanel = lazy(() => import("@/components/book/ProductionPanel"));
 const BookPublishingPackage = lazy(() => import("@/components/book/BookPublishingPackage"));
+const TeacherPanel = lazy(() => import("./TeacherPanel"));
 
-type Tab = "preview" | "cover" | "export" | "audio" | "translate" | "repurpose" | "production" | "publish" | "library";
+type Tab = "preview" | "cover" | "export" | "audio" | "translate" | "repurpose" | "production" | "publish" | "library" | "teacher";
 const TABS: { id: Tab; label: string }[] = [
   { id: "preview", label: "Preview" }, { id: "cover", label: "Cover" }, { id: "export", label: "Interior and export" }, { id: "audio", label: "Audiobook" },
-  { id: "translate", label: "Translate" }, { id: "repurpose", label: "Repurpose" }, { id: "production", label: "Production" }, { id: "publish", label: "Publishing package" }, { id: "library", label: "Save to Library" },
+  { id: "translate", label: "Translate" }, { id: "repurpose", label: "Repurpose" }, { id: "production", label: "Production" }, { id: "publish", label: "Publishing package" }, { id: "library", label: "Save to Library" }, { id: "teacher", label: "AI Teacher" },
 ];
 const download = (name: string, text: string) => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
 
@@ -187,6 +188,7 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
           {tab === "repurpose" && <BookRepurposePanel bookTitle={title} fullContent={md} />}
           {tab === "production" && <ProductionPanel meta={meta} setMeta={(x) => onUpdate({ ...m, meta: x as Record<string, unknown> })} bookTitle={title} manuscriptComplete={chapters.length > 0 && chapters.every((s) => s.body.trim())} coverDone={Boolean(cover)} parentId={m.libraryId ?? null} content={md} />}
           {tab === "publish" && <BookPublishingPackage outline={outline} />}
+          {tab === "teacher" && <TeacherPanel m={m} ensureSaved={ensureSaved} />}
           {tab === "library" && (
             <div className="max-w-xl space-y-5">
               <p className="text-[14px] text-[#475569] dark:text-[#CBD5E1]">Compiles every section in publishing order into one book in your Library. Saving again updates the same book.</p>
