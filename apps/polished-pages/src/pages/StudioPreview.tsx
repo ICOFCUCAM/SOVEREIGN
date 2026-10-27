@@ -14,7 +14,7 @@ import type { EngineDecision, StudioBackend } from "@/lib/studio-backend";
 const SAMPLE: Manuscript = {
   title: "Demonology", subtitle: "A study of spirits in scripture and tradition", author: "[Author name]",
   rules: "Write Yahusha instead of Jesus\nWrite Yahuah instead of God (never Jehovah or Yahweh)",
-  history: [],
+  history: [], libraryId: "demo-book", meta: { trimSize: "6x9", paper: "Cream", language: "English" },
   sections: [
     { id: "pre", kind: "preface", title: "Preface", body: "This book began as a set of lectures. [[YOURS: why you wrote it]]" },
     { id: "c1", kind: "chapter", title: "Defining the Subject: Terms, Methods and Sources", body: "Before we can speak about spirits we must define our terms. This chapter sets out the words the book uses, the method it follows, and the sources it draws on.\n\nThe study proceeds from the texts themselves, reading each in its own setting before comparing it with others." },
@@ -27,6 +27,13 @@ const SAMPLE: Manuscript = {
     { id: "bib", kind: "bibliography", title: "Bibliography", body: "" },
   ],
 };
+// A stand-in front cover (the real one comes from Cover Studio).
+const COVER = `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2438"/><stop offset="1" stop-color="#0B1020"/></linearGradient></defs>
+<rect width="600" height="900" fill="url(#g)"/><circle cx="300" cy="380" r="150" fill="none" stroke="#C9A55B" stroke-width="2" opacity=".7"/><circle cx="300" cy="380" r="110" fill="none" stroke="#C9A55B" stroke-width="1" opacity=".5"/>
+<text x="300" y="640" text-anchor="middle" font-family="Georgia,serif" font-size="74" fill="#F3E7C9" letter-spacing="6">DEMONOLOGY</text>
+<text x="300" y="700" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="24" fill="#D8C9A3">A study of spirits in scripture and tradition</text>
+<text x="300" y="830" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="#C9A55B" letter-spacing="4">AUTHOR NAME</text></svg>`)}`;
 const REWRITE = "### A world full of spirits\n\nThe people of the ancient world did not doubt that spirits were real. Yahuah's people lived among nations whose texts are full of them, and the language of those texts left its mark on Israel's own.\n\nIn Babylon, priests composed long incantations against the spirits believed to bring fever and plague, and guarded doorways with protective images (Black & Green, 1992).\n\n### Names and boundaries\n\nThese spirits had names and distinct roles. They were feared, warded off and bargained with, but not worshipped like the great gods.";
 
 function previewBackend(): StudioBackend {
@@ -66,11 +73,13 @@ function previewBackend(): StudioBackend {
 
 export default function StudioPreview() {
   const backend = useMemo(previewBackend, []);
-  const decision = { active: "claude-code", tone: "ok", reason: "Claude Code is signed in (preview).", fix: null } as unknown as EngineDecision;
+  // ?engine=api previews the API engine (and its cost notice).
+  const api = new URLSearchParams(window.location.search).get("engine") === "api";
+  const decision = { active: api ? "api" : "claude-code", tone: "ok", reason: api ? "Using the API (preview)." : "Claude Code is signed in (preview).", fix: null } as unknown as EngineDecision;
   return (
     <Workspace id="demo" backend={backend} decision={decision} mode="auto" onMode={() => {}} onCheckEngine={async () => {}} busy={false} busyElsewhere={false} ready
       citationStyles={["APA 7", "Chicago (notes and bibliography)", "SBL"]} threads={[{ id: "demo", title: "Demonology", files: 2, outputs: 2 }] as never}
       onProject={() => {}} onNewProject={async () => {}} handoff={null} onHandoffUsed={() => {}} onChanged={() => {}} onDeleted={() => {}}
-      onWorkInStudio={async () => {}} onLearnVoice={async () => {}} />
+      onWorkInStudio={async () => {}} onLearnVoice={async () => {}} findCover={async () => COVER} />
   );
 }
