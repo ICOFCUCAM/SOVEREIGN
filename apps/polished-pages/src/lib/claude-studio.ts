@@ -73,14 +73,28 @@ async function token(): Promise<string> {
   return t;
 }
 
+/** JSON over this size is sent gzipped, so a whole book passes proxies that cap request size (about 1 MB is common). */
+const GZIP_OVER = 256 * 1024;
+async function gzip(text: string): Promise<Blob | null> {
+  if (typeof CompressionStream === "undefined") return null;
+  try { return await new Response(new Blob([text]).stream().pipeThrough(new CompressionStream("gzip"))).blob(); } catch { return null; }
+}
+
 async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!RUNNER_URL) throw new StudioError("Claude Studio is not connected to a runner yet.", 0);
   let r: Response;
+  const json = typeof init.body === "string" ? init.body : null;
+  const packed = json && json.length > GZIP_OVER ? await gzip(json) : null;
   try {
-    r = await fetch(RUNNER_URL + path, { ...init, headers: { Authorization: `Bearer ${await token()}`, ...(typeof init.body === "string" ? { "Content-Type": "application/json" } : {}), ...init.headers } });
+    const send = (body: BodyInit | null | undefined, gz: boolean) => fetch(RUNNER_URL + path, { ...init, body, headers: { Authorization: `Bearer ${token_}`, ...(json !== null ? { "Content-Type": "application/json" } : {}), ...(gz ? { "Content-Encoding": "gzip" } : {}), ...init.headers } });
+    const token_ = await token();
+    // A runner from before gzip support refuses it (or its preflight): send it as it was.
+    if (packed) { try { r = await send(packed, true); if (r.status === 400) r = await send(json, false); } catch { r = await send(json, false); } }
+    else r = await send(init.body, false);
   } catch (e) {
     if (e instanceof StudioError) throw e;
-    throw new StudioError("The Claude Studio runner can't be reached. Check that it is running.", 0);
+    const mb = json ? json.length / 1024 / 1024 : 0;
+    throw new StudioError(mb > 0.9 ? `The Claude Studio runner didn't answer this ${mb.toFixed(1)} MB save: it may be restarting, or something in front of it refuses large requests. Your changes are kept on this device; press Retry in a minute.` : "The Claude Studio runner can't be reached. Check that it is running.", 0);
   }
   const body = await r.json().catch(() => ({}));
   if (!r.ok) throw new StudioError((body as { error?: string }).error || `The runner answered ${r.status}.`, r.status);

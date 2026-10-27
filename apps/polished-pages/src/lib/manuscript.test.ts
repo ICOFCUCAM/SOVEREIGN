@@ -50,3 +50,11 @@ describe("manuscript", () => {
     expect(authorshipNotes(m)).toMatch(/\| The First Step \| expand \| Claude Code \| accepted \|/);
   });
 });
+
+import { isChapterLine } from "./manuscript";
+describe("chapter headings in plain text from a PDF", () => {
+  it("takes real headings and leaves sentences that start with the word", () => {
+    for (const ok of ["CHAPTER 1", "Chapter 3", "Chapter 3: The Name of God", "CHAPTER 12 THE NEW BIRTH", "Part II", "Chapter Four", "Chapter 2 — Baptism"]) expect(isChapterLine(ok)).toBe(true);
+    for (const no of ["chapter 9.) In short, the Book of Revelation tells us", "Chapter 4 affirmed that Jesus is God. In this chap-", "Chapter 4 discussed the biblical concept of the", "Chapter 5, we saw that", "Part of the problem is this"]) expect(isChapterLine(no)).toBe(false);
+  });
+});
