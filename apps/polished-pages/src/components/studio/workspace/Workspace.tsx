@@ -162,6 +162,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const start = useCallback(async (action: StudioAction, options: RunOptions, force?: "api") => {
     const use = force ?? engineId;
     if (!use) { toast({ title: "No engine available", description: decision.reason, variant: "destructive" }); return; }
+    if (!navigator.onLine) { toast({ title: "You're offline", description: "Claude can run again when the connection returns.", variant: "destructive" }); return; }
     const bookWords = latest.current ? latest.current.sections.reduce((n, s) => n + words(s.body), 0) : undefined;
     if (!(await cost.confirm({ what: action === "chat" ? "Your message to Claude" : action === "tool" ? "This tool" : "This whole-book run", words: bookWords || undefined }, use))) return;
     try {
@@ -174,10 +175,12 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
 
   // Section runs ask about API billing first, like every other run.
   const runSection = async (o: Parameters<typeof sr.run>[0]) => {
+    if (!online) { toast({ title: "You're offline", description: "Claude can run again when the connection returns. Your text is safe.", variant: "destructive" }); return; }
     const sec = latest.current?.sections.find((x) => x.id === o.sectionId);
     if (await cost.confirm({ what: `Claude working on “${sec?.title || "this section"}”`, words: sec ? words(sec.body) || undefined : undefined })) void sr.run(o);
   };
   const runSections = async (list: Parameters<typeof sr.runAll>[0]) => {
+    if (!online) { toast({ title: "You're offline", description: "Claude can run again when the connection returns.", variant: "destructive" }); return; }
     const all = latest.current?.sections.filter((x) => list.some((o) => o.sectionId === x.id)) ?? [];
     if (await cost.confirm({ what: `Claude writing ${list.length} ${list.length === 1 ? "section" : "sections"}`, words: all.reduce((n, x) => n + words(x.body), 0) || undefined })) void sr.runAll(list);
   };
@@ -290,7 +293,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (!section) return <EmptyWrite onAdd={() => { const r = insertSection(m, "chapter"); update(r.manuscript); setSectionId(r.id); }} onPlan={() => setPlace("plan")} />;
     return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")}
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
-      onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); toast({ title: "Accepted", description: "Your previous text is kept: see Original to put it back." }); }}
+      onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); toast({ title: "Accepted", description: "Your previous text is kept in Version history." }); }}
       onDiscard={() => { sr.decide(section.id, "discard"); setView("writing"); }}
       onRedo={() => { const op = proposal?.op ?? "rewrite"; void runSection({ sectionId: section.id, op, title: section.title, approach: proposal?.approach }); }}
       onRestoreOriginal={() => { if (window.confirm("Put back the text from before Claude's rewrite? The current text becomes the earlier version.")) patchSection(section.id, { body: section.original!, original: section.body }); }} />;
@@ -299,12 +302,14 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const top = (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-[#E6E8ED] bg-white/90 px-4 backdrop-blur dark:border-white/10 dark:bg-[#11151C]/90">
       <button type="button" onClick={() => setDrawer(true)} aria-label="Open the sidebar" className="grid h-9 w-9 place-items-center rounded-md hover:bg-muted lg:hidden"><Menu className="h-5 w-5" /></button>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] text-[#64748B]">
-          {STAGES.find((s) => s.id === place)?.label ?? (place === "books" ? "My books" : "My voice")}
-          {place === "write" && section && <> <span className="text-[#CBD5E1]">/</span> <span className="font-medium text-[#172033] dark:text-white">{section.title || kindDef(section.kind).label}</span></>}
-          {state && <span className={`ml-2 rounded-full px-2 py-0.5 text-[11.5px] ${proposal ? "bg-[#EFF6FF] text-[#1D4ED8] dark:bg-[#172554] dark:text-[#93C5FD]" : "bg-[#F1F5F9] text-[#475569] dark:bg-white/10 dark:text-[#CBD5E1]"}`}>{state}</span>}
+      {/* Which chapter, and whether the owner is editing, reviewing or viewing an earlier version (spec §5.1): the state never truncates. */}
+      <div className="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
+        <p className="min-w-0 truncate text-[#64748B]" title={place === "write" && section ? section.title : undefined}>
+          {place === "write" && section
+            ? <span className="font-medium text-[#172033] dark:text-white">{section.title || kindDef(section.kind).label}</span>
+            : STAGES.find((s) => s.id === place)?.label ?? (place === "books" ? "My books" : "My voice")}
         </p>
+        {state && <span className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11.5px] ${proposal ? "bg-[#EFF6FF] text-[#1D4ED8] dark:bg-[#172554] dark:text-[#93C5FD]" : "bg-[#F1F5F9] text-[#475569] dark:bg-white/10 dark:text-[#CBD5E1]"}`}>{state}</span>}
       </div>
       {place === "write" && section && (
         <div role="tablist" aria-label="Page view" className="hidden items-center gap-0.5 rounded-[9px] bg-[#F1F5F9] p-[3px] md:flex dark:bg-white/5">
