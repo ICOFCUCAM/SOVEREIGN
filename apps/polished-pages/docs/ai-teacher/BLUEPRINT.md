@@ -1,6 +1,6 @@
 # Polished Pages AI Teacher — Product and Technical Blueprint (binding)
 
-Status: **binding specification**. Source: external design review commissioned by the owner (October 2026), adopted by the owner with the instruction "document and strictly implement". Every requirement below is mandatory unless this file records an owner-approved change. Track progress in the checklist at the end; never tick an item that is not implemented and tested.
+Status: **binding specification**. **Governing sources (verbatim, in `source/`)**: `01-ai-teacher-blueprint.md`, `02-university-academic-tutor.md`, `03-course-model.md`. This file organises them into one working specification and adds implementation detail; it never removes or weakens anything they say. Where this file is shorter, vaguer or silent, the source text governs; where they differ, the later owner decision governs (03 over 02 over 01). Source: external design review commissioned by the owner (October 2026), adopted by the owner with the instruction "document and strictly implement". Every requirement below is mandatory unless this file records an owner-approved change. Track progress in the checklist at the end; never tick an item that is not implemented and tested.
 
 Planning figures (costs, prices, percentages, intervals, targets) are **starting values to validate**, not facts. Where a figure is used in code it must be a named, adjustable setting.
 

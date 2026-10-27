@@ -1,6 +1,6 @@
 # Claude Studio — Design Specification (binding)
 
-Status: **binding specification** for the owner-only Claude Studio (`/admin/claude`). Source: the owner's brief, the clickable mock-up (Claude Studio redesign artifact), and an external senior design review (October 2026, scored the proposal 78/100, target 92), adopted by the owner with the instruction "document and strictly implement". Mandatory unless this file records an owner-approved change.
+Status: **binding specification** for the owner-only Claude Studio (`/admin/claude`). **Governing source (verbatim)**: `source/2026-10-design-review.md`. This file organises it with the owner's brief and the mock-up, and adds implementation detail; it never removes or weakens anything the source says. Where this file is shorter, vaguer or silent, the source text governs. Source: the owner's brief, the clickable mock-up (Claude Studio redesign artifact), and an external senior design review (October 2026, scored the proposal 78/100, target 92), adopted by the owner with the instruction "document and strictly implement". Mandatory unless this file records an owner-approved change.
 
 Principle: **the manuscript is the product, Claude is the editorial partner, the interface disappears when the author wants to write.** Calm of iA Writer when writing, the structure of Scrivener when managing a book, the publishing confidence of Vellum when finishing — with Claude's contribution contextual, transparent and reversible.
 
