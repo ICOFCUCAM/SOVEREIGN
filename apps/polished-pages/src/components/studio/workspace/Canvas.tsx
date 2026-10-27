@@ -77,7 +77,8 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
     </header>
   );
 
-  if (view === "book") return <BookPageView bookTitle={m.title} author={m.author} chapterTitle={section.title} text={section.body} trimId={bookTrim} />;
+  if (view === "book") return <BookPageView bookTitle={m.title} author={m.author} chapterTitle={section.title} text={section.body} trimId={bookTrim}
+    plain={section.kind !== "chapter"} chapterNumber={section.kind === "chapter" ? m.sections.filter((s) => s.kind === "chapter").findIndex((s) => s.id === section.id) + 1 : undefined} />;
 
   // Changes, side by side and clean need a proposal; without one they fall back to the writing view.
   const effective: CanvasView = (view === "changes" || view === "side") && !mine ? "writing" : view;
