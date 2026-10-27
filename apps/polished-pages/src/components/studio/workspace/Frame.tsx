@@ -37,7 +37,7 @@ export default function Frame({
 }) {
   const [tree, setTree] = useState(true);
   const [checking, setChecking] = useState(false);
-  const item = (on: boolean) => `group flex w-full items-center gap-3 rounded-lg text-left text-[13.5px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD] ${collapsed ? "h-10 justify-center" : "h-9 px-2.5"} ${on ? "bg-white/[0.09] font-semibold text-white" : "font-medium text-[#CBD5E1] hover:bg-white/[0.05] hover:text-white"}`;
+  const item = (on: boolean) => `group flex w-full items-center gap-3 rounded-lg text-left text-[13.5px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD] ${collapsed ? "h-10 justify-center" : "h-9 px-2.5"} relative ${on ? "bg-white/[0.08] font-semibold text-white before:absolute before:inset-y-2 before:left-0 before:w-[2px] before:rounded-full before:bg-[#93C5FD]" : "font-medium text-[#B6C2D3] hover:bg-white/[0.05] hover:text-white"}`;
   const engineName = decision.active === "claude-code" ? "Claude Code" : decision.active === "api" ? "API" : "No engine";
   const groups = m ? (["front", "body", "back"] as const).map((g) => ({ g, list: m.sections.filter((s) => kindDef(s.kind).group === g) })).filter((x) => x.list.length) : [];
 
@@ -85,7 +85,8 @@ export default function Frame({
       </DropdownMenu>
 
       {/* 2 · Stages */}
-      <div className="mt-4 space-y-0.5" role="list" aria-label="Book stages">
+      {!collapsed && <p className="mt-6 px-2.5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7C8BA1]">Book</p>}
+      <div className={`${collapsed ? "mt-4" : ""} space-y-0.5`} role="list" aria-label="Book stages">
         {STAGES.map((s) => (
           <div role="listitem" key={s.id}>
             <button type="button" onClick={() => onPlace(s.id)} aria-current={place === s.id ? "page" : undefined} title={collapsed ? s.label : undefined} className={item(place === s.id)}>
@@ -99,9 +100,9 @@ export default function Frame({
 
       {/* 3 · Manuscript tree */}
       {!collapsed && m && m.sections.length > 0 && (
-        <div className="mt-5 min-h-0 flex-1 overflow-y-auto">
+        <div className="mt-6 min-h-0 flex-1 overflow-y-auto">
           <button type="button" onClick={() => setTree(!tree)} aria-expanded={tree}
-            className="flex w-full items-center gap-1.5 px-2.5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#94A3B8] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]">
+            className="flex w-full items-center gap-1.5 px-2.5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7C8BA1] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]">
             {tree ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />} Manuscript
           </button>
           {tree && groups.map(({ g, list }) => (
@@ -126,8 +127,9 @@ export default function Frame({
       )}
       {(collapsed || !m || !m.sections.length) && <div className="flex-1" />}
 
-      {/* 4 · Library and voice */}
-      <div className="mt-3 space-y-0.5 border-t border-white/[0.08] pt-3">
+      {/* 4 · Library and voice: shared by every project, kept apart from this book's stages */}
+      <div className="mt-4 space-y-0.5 border-t border-white/[0.08] pt-4">
+        {!collapsed && <p className="px-2.5 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7C8BA1]">All projects</p>}
         <button type="button" onClick={() => onPlace("books")} aria-current={place === "books" ? "page" : undefined} title={collapsed ? "My books" : undefined} className={item(place === "books")}><Library className="h-[17px] w-[17px] shrink-0" aria-hidden />{!collapsed && "My books"}</button>
         <button type="button" onClick={() => onPlace("voice")} aria-current={place === "voice" ? "page" : undefined} title={collapsed ? "My voice" : undefined} className={item(place === "voice")}><AudioLines className="h-[17px] w-[17px] shrink-0" aria-hidden />{!collapsed && "My voice"}</button>
       </div>
@@ -136,7 +138,7 @@ export default function Frame({
       <Popover>
         <PopoverTrigger asChild>
           <button type="button" data-testid="engine-badge" aria-label={`Engine: ${engineName}, ${MODE_LABEL[mode]}. Change`}
-            className={`mt-2 flex w-full items-center gap-2.5 rounded-[10px] border border-white/[0.08] bg-white/[0.03] text-left hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD] ${collapsed ? "justify-center p-2.5" : "px-3 py-2.5"}`}>
+            className={`mt-3 flex w-full items-center gap-2.5 rounded-[10px] border border-white/[0.08] bg-white/[0.03] text-left hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD] ${collapsed ? "justify-center p-2.5" : "px-3 py-2.5"}`}>
             {busy ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-[#93C5FD] motion-reduce:animate-none" aria-hidden /> : <Cpu className={`h-4 w-4 shrink-0 ${decision.tone === "ok" ? "text-[#6EE7B7]" : decision.tone === "warn" ? "text-[#FCD34D]" : "text-[#FCA5A5]"}`} aria-hidden />}
             {!collapsed && <span className="min-w-0 flex-1"><span className="block truncate text-[13px] font-medium">{engineName} · {MODE_LABEL[mode]}</span>{busy && <span className="block text-[11px] text-[#94A3B8]">Working…</span>}</span>}
           </button>
