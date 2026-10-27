@@ -40,7 +40,7 @@ function previewBackend(): StudioBackend {
   let m: Manuscript = JSON.parse(JSON.stringify(SAMPLE));
   const thread: StudioThread = {
     id: "demo", title: "Demonology", createdAt: "", updatedAt: "",
-    files: [{ name: "DEMONOLOGY.pdf", storedAs: "DEMONOLOGY.pdf", kind: "original", bytes: 2_400_000, at: "" }, { name: "DEMONOLOGY.txt", storedAs: "DEMONOLOGY.txt", kind: "text", bytes: 600_000, at: "" }, { name: "Demonology notes.docx", storedAs: "Demonology notes.docx", kind: "original", bytes: 84_000, at: "" }],
+    files: [{ name: "DEMONOLOGY.pdf", storedAs: "DEMONOLOGY.pdf", kind: "original", bytes: 2_400_000, at: "2026-10-20T09:12:00Z" }, { name: "DEMONOLOGY.txt", storedAs: "DEMONOLOGY.txt", kind: "text", bytes: 600_000, at: "2026-10-20T09:13:00Z" }, { name: "Demonology notes.docx", storedAs: "Demonology notes.docx", kind: "original", bytes: 84_000, at: "2026-10-24T16:40:00Z" }],
     outputs: [{ path: "summary.md", bytes: 4200, modifiedAt: new Date().toISOString() }, { path: "quotes-check.md", bytes: 9800, modifiedAt: new Date().toISOString() }],
     messages: [{ id: "m1", role: "user", action: "chat", text: "List every scripture quoted in chapter 3.", at: "" }, { id: "m2", role: "assistant", action: "chat", text: "Saved as **Scripture in chapter 3**: 23 references, with the page of each.", at: "", engine: "claude-code", status: "done" }],
   } as unknown as StudioThread;
@@ -65,7 +65,9 @@ function previewBackend(): StudioBackend {
       on({ type: "done", status: "done", outputs: [`sections/${sid}.md`, `sections/${sid}-notes.md`], output: o.op === "explain" ? `sections/${sid}-summary.md` : `sections/${sid}.md`, at: "" } as StudioEvent);
     },
     output: async (_id, p) => out[p] ?? "",
-    cancel: async () => ({}), source: async () => null,
+    cancel: async () => ({}),
+    // Stand-in extracted text for the sample PDF (the notes file has none, to show that state).
+    source: async (_id, storedAs) => (storedAs === "DEMONOLOGY.txt" ? `# Demonology\n\n${SAMPLE.sections.map((x) => x.body).join("\n\n").repeat(40)}` : null),
     manuscript: async () => m, saveManuscript: async (_id, x) => { m = x; return x; },
     voice: async () => "", saveVoice: async () => ({}),
   };
