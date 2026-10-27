@@ -55,7 +55,9 @@ export function formatReport(id: FormatId, m: Manuscript, opts: { cover: boolean
 
   if (id === "epub") {
     add({ ok: Boolean(m.title.trim()), level: "required", text: m.title.trim() ? "Title set" : "No title (Sources → Book details)" });
-    add({ ok: Boolean(m.author?.trim()), level: "required", text: m.author?.trim() ? `Author: ${m.author}` : "No author name (Sources → Book details)" });
+    const author = m.author?.trim() ?? "";
+    const named = Boolean(author) && !/^\[.*\]$/.test(author);
+    add({ ok: named, level: "required", text: named ? `Author: ${author}` : author ? `The author is still a placeholder (${author})` : "No author name (Sources → Book details)" });
     add({ ok: opts.cover, level: "required", text: opts.cover ? "Front cover image" : "No front cover image (stores require one; KDP's ideal is 1,600 × 2,560 px)", fix: opts.cover ? undefined : "cover" });
     const noAlt = count(m, /!\[\s*\]\(/g);
     if (noAlt.length) add({ ok: false, level: "advised", text: `${plural(noAlt.reduce((t, x) => t + x.n, 0), "image has", "images have")} no description for screen readers`, fix: "section", sectionId: noAlt[0].id });

@@ -25,6 +25,7 @@ describe("format readiness", () => {
     expect(r.checks.find((c) => /front cover image/.test(c.text))).toMatchObject({ ok: false, fix: "cover" });
     expect(r.checks.find((c) => /no description for screen readers/.test(c.text))).toMatchObject({ level: "advised", sectionId: "c1" });
     expect(formatReport("epub", book({ meta: { language: "English" } }), { cover: true }).ready).toBe(true);
+    expect(formatReport("epub", book({ author: "[Author name]" }), { cover: true }).checks.find((c) => /placeholder \(\[Author name\]\)/.test(c.text))?.ok).toBe(false);
   });
 
   it("paperback: page minimum, ISBN, cover, and the spine from the page count and paper", () => {
