@@ -34,7 +34,7 @@ export default function SourcesStage({ thread, m, uploading, onUpload, onRemove,
 
       {/* Manuscripts */}
       <section aria-labelledby="ms-h">
-        <h2 id="ms-h" className="mb-4 text-[14px] font-semibold text-[#172033] dark:text-white">Manuscripts</h2>
+        <h2 id="ms-h" className="font-sans mb-4 text-[14px] font-semibold text-[#172033] dark:text-white">Manuscripts</h2>
         <div onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={(e) => { e.preventDefault(); setDrag(false); if (e.dataTransfer.files.length) onUpload(e.dataTransfer.files); }}
           className={`grid grid-cols-2 gap-4 rounded-[12px] p-1 sm:grid-cols-3 lg:grid-cols-4 ${drag ? "bg-[#EFF6FF] ring-2 ring-[#2563EB] dark:bg-[#172554]" : ""}`}>
           {originals.map((f) => (
@@ -80,13 +80,13 @@ export default function SourcesStage({ thread, m, uploading, onUpload, onRemove,
       {m && (
         <div className="grid gap-12 lg:grid-cols-2">
           <section aria-labelledby="details-h" className="space-y-3">
-            <h2 id="details-h" className="text-[14px] font-semibold">Book details</h2>
+            <h2 id="details-h" className="font-sans text-[14px] font-semibold">Book details</h2>
             <Input value={m.title} onChange={(e) => onUpdate({ ...m, title: e.target.value })} placeholder="Title" aria-label="Book title" className={`${SERIF} h-11 text-[18px]`} />
             <Input value={m.subtitle ?? ""} onChange={(e) => onUpdate({ ...m, subtitle: e.target.value })} placeholder="Subtitle" aria-label="Subtitle" />
             <Input value={m.author ?? ""} onChange={(e) => onUpdate({ ...m, author: e.target.value })} placeholder="Author" aria-label="Author" />
           </section>
           <section aria-labelledby="rules-h">
-            <h2 id="rules-h" className="text-[14px] font-semibold">Rules for the whole book</h2>
+            <h2 id="rules-h" className="font-sans text-[14px] font-semibold">Rules for the whole book</h2>
             <p className="mb-3 mt-1 text-[13px] text-[#64748B]">One per line. Every action follows them, including material from other sources.</p>
             <Textarea ref={rulesRef} value={m.rules ?? ""} onChange={(e) => onUpdate({ ...m, rules: e.target.value })} rows={5} aria-labelledby="rules-h"
               placeholder={"Write Yahusha instead of Jesus\nWrite Yahuah instead of God (never Jehovah or Yahweh)"} className="rounded-[8px] text-[14px]" />
@@ -96,7 +96,7 @@ export default function SourcesStage({ thread, m, uploading, onUpload, onRemove,
 
       {m && (
         <section aria-labelledby="kb-h">
-          <h2 id="kb-h" className="mb-1 text-[14px] font-semibold">Knowledge</h2>
+          <h2 id="kb-h" className="font-sans mb-1 text-[14px] font-semibold">Knowledge</h2>
           <p className="mb-4 text-[13px] text-[#64748B]">Required terminology, forbidden words and reference documents from your Library.</p>
           <KnowledgePanel knowledge={m.knowledge ?? { rules: "", terminology: "", forbidden: "" }} setKnowledge={(k) => onUpdate({ ...m, knowledge: k })}
             activeDocIds={m.knowledgeDocIds ?? []} onActiveDocsChange={(ids) => onUpdate({ ...m, knowledgeDocIds: ids })} />
@@ -105,12 +105,12 @@ export default function SourcesStage({ thread, m, uploading, onUpload, onRemove,
 
       <section className="flex flex-wrap items-start gap-10 border-t border-[#E6E8ED] pt-8 dark:border-white/10">
         <div className="min-w-[240px] flex-1">
-          <h2 className="flex items-center gap-2 text-[14px] font-semibold"><AudioLines className="h-4 w-4 text-[#2563EB]" /> Your voice</h2>
+          <h2 className="font-sans flex items-center gap-2 text-[14px] font-semibold"><AudioLines className="h-4 w-4 text-[#2563EB]" /> Your voice</h2>
           <p className="mt-1 text-[13px] text-[#64748B]">"In my voice" follows your voice profile, learned from your own writing.</p>
           <div className="mt-3 flex gap-2"><Button size="sm" variant="outline" onClick={onVoice}>Open My voice</Button><Button size="sm" variant="ghost" onClick={() => onTool("voice-profile")} disabled={busy || !originals.length}>Learn it from these files</Button></div>
         </div>
         <div className="min-w-[240px] flex-1">
-          <h2 className="flex items-center gap-2 text-[14px] font-semibold"><Lock className="h-4 w-4 text-[#2563EB]" /> Private and contained</h2>
+          <h2 className="font-sans flex items-center gap-2 text-[14px] font-semibold"><Lock className="h-4 w-4 text-[#2563EB]" /> Private and contained</h2>
           <p className="mt-1 text-[13px] text-[#64748B]">Claude works only inside this project: it reads your files, searches and opens web pages, and writes results. It cannot run programs or reach anything else on the server.</p>
         </div>
       </section>
