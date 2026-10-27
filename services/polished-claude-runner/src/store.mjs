@@ -85,7 +85,11 @@ export function createStore(dataDir) {
       if (!t) return null;
       const p = inside(path.join(workDir(id), "source"), storedAs);
       if (p) await fs.rm(p, { force: true });
-      t.files = t.files.filter((f) => f.storedAs !== storedAs);
+      // An original takes its rendered page images with it.
+      const base = storedAs.replace(/\.[^.]+$/, "");
+      const pages = t.files.filter((f) => f.kind === "page" && f.storedAs.startsWith(`${base}-p`));
+      for (const f of pages) { const q = inside(path.join(workDir(id), "source"), f.storedAs); if (q) await fs.rm(q, { force: true }); }
+      t.files = t.files.filter((f) => f.storedAs !== storedAs && !pages.includes(f));
       return write(t);
     },
     /** Every Markdown/text file Claude has written under out/, newest first. */
@@ -168,6 +172,11 @@ export function createStore(dataDir) {
       const p = inside(path.join(workDir(id), "source"), storedAs);
       if (!p) return null;
       try { return await fs.readFile(p, "utf8"); } catch { return null; }
+    },
+    async readSourceBytes(id, storedAs) {
+      const p = inside(path.join(workDir(id), "source"), storedAs);
+      if (!p) return null;
+      try { return await fs.readFile(p); } catch { return null; }
     },
     async readOutput(id, rel) {
       const p = inside(path.join(workDir(id), "out"), rel);

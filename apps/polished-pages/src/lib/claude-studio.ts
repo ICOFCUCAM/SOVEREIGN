@@ -13,7 +13,7 @@ export const RUNNER_URL = ((import.meta.env.VITE_CLAUDE_RUNNER_URL as string | u
 
 export type StudioAction = "chat" | "summarize" | "rewrite" | "cite" | "tool" | "section" | "book-outline" | "book-chapter" | "book-improve";
 
-export interface StudioFile { name: string; storedAs: string; kind: "original" | "text"; bytes: number; at: string }
+export interface StudioFile { name: string; storedAs: string; kind: "original" | "text" | "page"; bytes: number; at: string }
 export interface StudioOutput { path: string; bytes: number; modifiedAt: string }
 export interface StudioMessage { id: string; role: "user" | "assistant"; engine?: "claude-code" | "api"; action: StudioAction; text: string; at: string; jobId: string; status?: "done" | "failed" | "cancelled"; outputs?: string[] }
 export interface StudioThread { id: string; title: string; createdAt: string; updatedAt: string; sessionId: string | null; files: StudioFile[]; messages: StudioMessage[]; outputs: StudioOutput[]; runningJobId?: string }
@@ -123,8 +123,23 @@ export interface ResultHistory { path: string; versions: ResultVersion[]; approv
 /** A save of a new version: what was done, and the version it was based on (a newer one makes the save fail rather than overwrite). */
 export interface SaveVersion { op: string; label?: string; base?: number }
 
-const put = (threadId: string, name: string, kind: "original" | "text", body: Blob) =>
+const put = (threadId: string, name: string, kind: "original" | "text" | "page", body: Blob) =>
   call<{ thread: StudioThread }>(`/v1/threads/${threadId}/files?name=${encodeURIComponent(name)}&kind=${kind}`, { method: "POST", body }).then((r) => r.thread);
+
+/**
+ * A PDF opened in the owner's browser (DESIGN-SPEC.md §18b): its text becomes the
+ * upload's text copy, or its pages are stored as images for Read scanned pages.
+ */
+export const pdfInStudio = {
+  bytes: async (threadId: string, storedAs: string): Promise<ArrayBuffer> => {
+    if (!RUNNER_URL) throw new StudioError("Claude Studio is not connected to a runner yet.", 0);
+    const r = await fetch(`${RUNNER_URL}/v1/threads/${threadId}/files/${encodeURIComponent(storedAs)}`, { headers: { Authorization: `Bearer ${await token()}` } });
+    if (!r.ok) throw new StudioError("The PDF couldn't be fetched from the runner.", r.status);
+    return r.arrayBuffer();
+  },
+  saveText: (threadId: string, name: string, text: string) => put(threadId, name, "text", new Blob([text], { type: "text/plain;charset=utf-8" })),
+  savePage: (threadId: string, name: string, jpeg: Blob) => put(threadId, name, "page", jpeg),
+};
 
 export const STUDIO_ACCEPT = ".pdf,.docx,.txt,.md,.markdown,.rtf,.html,.htm,.csv,.json,.jpg,.jpeg,.png,.webp";
 

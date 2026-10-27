@@ -13,13 +13,15 @@ import { EYEBROW, SERIF } from "./ui";
 
 // Sources (design spec §2): what Claude builds the book from and the rules it
 // never breaks: manuscripts, file tools, book details, rules, knowledge, voice.
-export default function SourcesStage({ thread, m, uploading, onUpload, onRemove, onTool, onAction, onJoin, onStart, wizardChapters, onUpdate, onVoice, busy, rulesRef, readText, onWizard }: {
+export default function SourcesStage({ thread, m, uploading, onUpload, onRemove, onTool, onAction, onJoin, onStart, wizardChapters, onUpdate, onVoice, busy, rulesRef, readText, onWizard, onOpenPdf }: {
   thread: StudioThread; m: Manuscript | null | undefined; uploading: string | null;
   onUpload: (files: FileList | File[]) => void; onRemove: (storedAs: string) => void;
   onTool: (t: ToolId) => void; onAction: (a: DialogAction) => void; onJoin: () => void;
   onStart: (from: "uploads" | "blank" | "wizard") => void; wizardChapters: number;
   /** Opens the Book wizard inside this project. */
   onWizard?: () => void;
+  /** Opens a PDF the runner can't read in the owner's browser (password, scans). */
+  onOpenPdf?: (f: StudioFile) => void;
   onUpdate: (m: Manuscript) => void; onVoice: () => void; busy: boolean; rulesRef: React.RefObject<HTMLTextAreaElement>;
   /** Reads a file's extracted text (for the word count and preview); null when there is none. */
   readText: (storedAs: string) => Promise<string | null>;
@@ -65,7 +67,7 @@ export default function SourcesStage({ thread, m, uploading, onUpload, onRemove,
           className={`rounded-[12px] transition-colors ${drag ? "bg-[#EFF6FF] ring-2 ring-[#2563EB] dark:bg-[#172554]" : ""}`}>
           {originals.length ? (
             <ul className="grid gap-3 lg:grid-cols-2">
-              {originals.map((f) => <ManuscriptCard key={f.storedAs} f={f} text={textCopy(f)} readText={readText} busy={busy} onRemove={() => { if (window.confirm(`Remove “${f.name}” from this project? The uploaded file and its extracted text are deleted; your book and results stay.`)) onRemove(f.storedAs); }} onOcr={() => onTool("ocr")} />)}
+              {originals.map((f) => <ManuscriptCard key={f.storedAs} f={f} text={textCopy(f)} readText={readText} busy={busy} onRemove={() => { if (window.confirm(`Remove “${f.name}” from this project? The uploaded file and its extracted text are deleted; your book and results stay.`)) onRemove(f.storedAs); }} onOcr={() => (onOpenPdf && /\.pdf$/i.test(f.storedAs) ? onOpenPdf(f) : onTool("ocr"))} />)}
             </ul>
           ) : (
             <button type="button" onClick={() => file.current?.click()} disabled={Boolean(uploading)}
@@ -183,7 +185,7 @@ function ManuscriptCard({ f, text, readText, busy, onRemove, onOcr }: { f: Studi
         <p className="mt-2 text-[12.5px]">
           {body === undefined ? <span className="inline-flex items-center gap-1.5 text-[#64748B]"><Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> Reading the text…</span>
             : body ? <span className="inline-flex items-center gap-1.5 text-[#047857] dark:text-emerald-400"><CheckCircle2 className="h-3.5 w-3.5" /> Text ready for Claude</span>
-            : <span className="inline-flex items-center gap-1.5 text-[#B45309]"><CircleDashed className="h-3.5 w-3.5" /> No text yet{/\.(pdf|png|jpe?g|tiff?|heic|webp)$/i.test(f.name) && <> · <button type="button" onClick={onOcr} disabled={busy} className="font-medium underline-offset-2 hover:underline">read the scanned pages</button></>}</span>}
+            : <span className="inline-flex items-center gap-1.5 text-[#B45309]"><CircleDashed className="h-3.5 w-3.5" /> No text yet{/\.(pdf|png|jpe?g|tiff?|heic|webp)$/i.test(f.name) && <> · <button type="button" onClick={onOcr} disabled={busy} className="font-medium underline-offset-2 hover:underline">{/\.pdf$/i.test(f.name) ? "open it (password or scanned pages)" : "read the scanned pages"}</button></>}</span>}
         </p>
         {opening && <p className={`${SERIF} mt-2 line-clamp-2 text-[13.5px] leading-[1.5] text-[#475569] dark:text-[#94A3B8]`}>{opening}…</p>}
       </div>

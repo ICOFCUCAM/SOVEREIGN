@@ -507,3 +507,17 @@ test("read scanned pages: the transcription becomes the scanned document's text"
   assert.ok(copy, "the scanned PDF now has its text copy");
   assert.match(await fs.readFile(path.join(dataDir, "threads", thread.id, "work", "source", "onenessofgod.txt"), "utf8"), /oneness of God/);
 });
+
+test("a password-protected PDF: the Studio's page images are stored with it, read by Claude, and removed with it", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Locked" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=onenessofgod.pdf&kind=original`, { method: "POST", raw: Buffer.from("%PDF-1.4 encrypted") });
+  const raw = await call(`/v1/threads/${thread.id}/files/onenessofgod.pdf`);
+  assert.equal(raw.status, 200);
+  assert.equal(Buffer.from(await raw.arrayBuffer()).toString(), "%PDF-1.4 encrypted");
+  let t = (await (await call(`/v1/threads/${thread.id}/files?name=onenessofgod-p001.jpg&kind=page`, { method: "POST", raw: Buffer.from("jpeg") })).json()).thread;
+  assert.equal(t.files.find((f) => f.storedAs === "onenessofgod-p001.jpg").kind, "page");
+  const run = buildRun("tool", { tool: "ocr" });
+  assert.match(run.prompt, /-p001\.jpg/);
+  t = (await (await call(`/v1/threads/${thread.id}/files/onenessofgod.pdf`, { method: "DELETE" })).json()).thread;
+  assert.equal(t.files.length, 0, "the page images go with their PDF");
+});
