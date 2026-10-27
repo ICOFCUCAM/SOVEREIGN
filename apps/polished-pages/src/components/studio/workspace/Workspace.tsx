@@ -236,6 +236,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     setPlace(from === "blank" ? "write" : "plan");
   };
 
+  const readSource = useCallback((storedAs: string) => backend.source(id, storedAs), [backend, id]);
   const openSection = (sid: string) => { if (!sid) return; setSectionId(sid); setPlace("write"); };
   const toggleTheme = () => { const order: Theme[] = ["light", "dark", "system"]; setTheme(order[(order.indexOf(getStoredTheme()) + 1) % 3]); };
 
@@ -284,7 +285,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (place === "books" || place === "voice") return <Library place={place} p={p} onBooks={() => setPlace("books")} />;
     if (place === "sources" || m === null) {
       return <SourcesStage thread={thread} m={m} uploading={uploading} onUpload={upload} onRemove={removeFile} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
-        onStart={startBook} wizardChapters={wizard?.chapters?.length ?? 0} onUpdate={update} onVoice={() => setPlace("voice")} busy={busy} rulesRef={rulesRef} />;
+        onStart={startBook} wizardChapters={wizard?.chapters?.length ?? 0} onUpdate={update} onVoice={() => setPlace("voice")} busy={busy} rulesRef={rulesRef} readText={readSource} />;
     }
     if (place === "plan") {
       return <>
@@ -510,10 +511,10 @@ function RecoveryBanner({ r, onRestore, onDiscard }: { r: import("./useManuscrip
           <h2 id="recovery-h" className="font-sans text-[14.5px] font-semibold">Unsaved changes found on this device</h2>
           <p className="mt-1 text-[13.5px] leading-relaxed text-[#713F12] dark:text-[#FCD34D]/90">
             Edits from {when(r.at)} never reached the server. They are not lost: this browser kept them, and you can restore them now.
-            {r.serverAt ? ` The server's copy was last saved ${when(r.serverAt)}.` : " The server has no copy of this book yet."}
+            {r.serverAt ? ` The server's copy was last saved ${when(r.serverAt)}.` : r.serverWords === null ? " The server has no copy of this book yet." : " The server has an earlier copy."}
           </p>
           <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[12.5px]">
-            <div className="flex gap-1.5"><dt className="text-[#92400E] dark:text-[#FBBF24]/80">On this device</dt><dd className="font-medium">{r.localWords.toLocaleString()} words · {r.manuscript.sections.length} sections</dd></div>
+            <div className="flex gap-1.5"><dt className="text-[#92400E] dark:text-[#FBBF24]/80">On this device</dt><dd className="font-medium">{r.localWords.toLocaleString()} words · {r.manuscript.sections.length} {r.manuscript.sections.length === 1 ? "section" : "sections"}</dd></div>
             <div className="flex gap-1.5"><dt className="text-[#92400E] dark:text-[#FBBF24]/80">On the server</dt><dd className="font-medium">{r.serverWords === null ? "no book yet" : `${r.serverWords.toLocaleString()} words`}</dd></div>
           </dl>
           {r.state === "failed" && <p className="mt-2 text-[13px] font-medium text-[#B91C1C] dark:text-[#FCA5A5]">{r.error}</p>}

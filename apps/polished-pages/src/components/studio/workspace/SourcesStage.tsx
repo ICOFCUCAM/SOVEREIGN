@@ -1,10 +1,11 @@
-import { useRef, useState } from "react";
-import { AudioLines, BookOpen, FileText, GitCompare, Layers, Loader2, Lock, Plus, ScanText, ScrollText, Upload, Wand2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AudioLines, BookOpen, CheckCircle2, CircleDashed, FileText, GitCompare, Layers, Loader2, Lock, MoreHorizontal, Plus, ScanText, ScrollText, Upload, Wand2, X } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import KnowledgePanel from "@/components/book/KnowledgePanel";
-import { STUDIO_ACCEPT, type StudioThread } from "@/lib/claude-studio";
+import { STUDIO_ACCEPT, type StudioFile, type StudioThread } from "@/lib/claude-studio";
 import type { Manuscript } from "@/lib/manuscript";
 import type { ToolId } from "@/lib/studio-tools";
 import { formatBytes, type DialogAction } from "./parts";
@@ -12,56 +13,65 @@ import { EYEBROW, SERIF } from "./ui";
 
 // Sources (design spec §2): what Claude builds the book from and the rules it
 // never breaks: manuscripts, file tools, book details, rules, knowledge, voice.
-export default function SourcesStage({ thread, m, uploading, onUpload, onRemove, onTool, onAction, onJoin, onStart, wizardChapters, onUpdate, onVoice, busy, rulesRef }: {
+export default function SourcesStage({ thread, m, uploading, onUpload, onRemove, onTool, onAction, onJoin, onStart, wizardChapters, onUpdate, onVoice, busy, rulesRef, readText }: {
   thread: StudioThread; m: Manuscript | null | undefined; uploading: string | null;
   onUpload: (files: FileList | File[]) => void; onRemove: (storedAs: string) => void;
   onTool: (t: ToolId) => void; onAction: (a: DialogAction) => void; onJoin: () => void;
   onStart: (from: "uploads" | "blank" | "wizard") => void; wizardChapters: number;
   onUpdate: (m: Manuscript) => void; onVoice: () => void; busy: boolean; rulesRef: React.RefObject<HTMLTextAreaElement>;
+  /** Reads a file's extracted text (for the word count and preview); null when there is none. */
+  readText: (storedAs: string) => Promise<string | null>;
 }) {
   const file = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   const originals = thread.files.filter((f) => f.kind === "original");
-  const hasText = (storedAs: string) => thread.files.some((x) => x.kind === "text" && x.storedAs === storedAs.replace(/\.[^.]+$/, "") + ".txt");
+  const textCopy = (f: StudioFile) => /\.(txt|md|markdown)$/i.test(f.name) ? f.storedAs : thread.files.find((x) => x.kind === "text" && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt")?.storedAs ?? null;
 
   return (
-    <div className="mx-auto w-full max-w-[960px] space-y-12">
-      <header>
-        <p className={EYEBROW}>Sources</p>
-        <h1 className={`${SERIF} mt-2 text-[36px] font-medium leading-[1.15] text-[#172033] dark:text-white`}>Sources and rules</h1>
-        <p className="mt-2 text-[15px] text-[#64748B]">What Claude builds your book from, and the rules it never breaks.</p>
+    <div className="mx-auto w-full max-w-[1120px] space-y-12">
+      <header className="flex flex-wrap items-end gap-6">
+        <div className="min-w-[280px] flex-1">
+          <p className={EYEBROW}>Sources</p>
+          <h1 className={`${SERIF} mt-2 text-[34px] font-medium leading-[1.15] text-[#172033] dark:text-white`}>Sources and rules</h1>
+          <p className="mt-2 max-w-[60ch] text-[15px] text-[#64748B]">What Claude builds your book from, and the rules it never breaks.</p>
+        </div>
+        <Button className="h-10 px-4" onClick={() => file.current?.click()} disabled={Boolean(uploading)}>
+          {uploading ? <><Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> Uploading…</> : <><Upload className="h-4 w-4" /> Add a manuscript</>}
+        </Button>
+        <input ref={file} type="file" accept={STUDIO_ACCEPT} multiple hidden onChange={(e) => { if (e.target.files?.length) onUpload(e.target.files); e.target.value = ""; }} />
       </header>
 
-      {/* Manuscripts */}
+      {/* Manuscripts: each one as a real document (spec §2): title, format, words, status, when it arrived, its opening lines. */}
       <section aria-labelledby="ms-h">
-        <h2 id="ms-h" className="font-sans mb-4 text-[14px] font-semibold text-[#172033] dark:text-white">Manuscripts</h2>
-        <div onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={(e) => { e.preventDefault(); setDrag(false); if (e.dataTransfer.files.length) onUpload(e.dataTransfer.files); }}
-          className={`grid grid-cols-2 gap-4 rounded-[12px] p-1 sm:grid-cols-3 lg:grid-cols-4 ${drag ? "bg-[#EFF6FF] ring-2 ring-[#2563EB] dark:bg-[#172554]" : ""}`}>
-          {originals.map((f) => (
-            <div key={f.storedAs} className="group relative">
-              <div aria-hidden className="flex h-[150px] flex-col gap-1.5 rounded-[6px] bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,.06),0_12px_24px_-14px_rgba(15,23,42,.25)] dark:bg-[#161A22]">
-                <span className="h-1.5 w-3/5 rounded bg-[#E6E8ED] dark:bg-white/10" />
-                {[100, 92, 96, 70, 88].map((w, i) => <span key={i} className="h-1 rounded bg-[#F1F5F9] dark:bg-white/5" style={{ width: `${w}%`, marginTop: i ? 0 : 8 }} />)}
-                <span className="mt-auto self-start rounded bg-[#F1F5F9] px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-[#475569] dark:bg-white/10 dark:text-[#CBD5E1]">{(f.name.split(".").pop() ?? "").toUpperCase()}</span>
-              </div>
-              <p className="mt-2.5 truncate text-[13px] font-medium" title={f.name}>{f.name}</p>
-              <p className="text-[12px] text-[#64748B]">{formatBytes(f.bytes)}{hasText(f.storedAs) ? " · text read" : /\.(txt|md|markdown)$/i.test(f.name) ? " · text" : ""}</p>
-              <button type="button" disabled={busy} onClick={() => onRemove(f.storedAs)} aria-label={`Remove ${f.name}`}
-                className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-md bg-white/90 text-[#475569] opacity-0 shadow-sm transition-opacity hover:text-[#172033] focus-visible:opacity-100 group-hover:opacity-100 disabled:hidden dark:bg-[#1F2430]"><X className="h-3.5 w-3.5" /></button>
-            </div>
-          ))}
-          <button type="button" onClick={() => file.current?.click()} disabled={Boolean(uploading)}
-            className="flex h-[150px] flex-col items-center justify-center gap-1.5 rounded-[6px] border-[1.5px] border-dashed border-[#CBD5E1] text-[13px] text-[#475569] transition-colors hover:border-[#2563EB] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] dark:border-white/20 dark:text-[#CBD5E1]">
-            {uploading ? <><Loader2 className="h-5 w-5 animate-spin" /> <span className="max-w-[90%] truncate">Uploading {uploading}…</span></> : <><Upload className="h-5 w-5" /> Add a manuscript<span className="text-[12px] text-[#64748B]">PDF, Word, text, Markdown or scans</span></>}
-          </button>
-          <input ref={file} type="file" accept={STUDIO_ACCEPT} multiple hidden onChange={(e) => { if (e.target.files?.length) onUpload(e.target.files); e.target.value = ""; }} />
+        <div className="mb-3 flex flex-wrap items-center gap-3 border-b border-[#E6E8ED] pb-3 dark:border-white/10">
+          <h2 id="ms-h" className="font-sans text-[14px] font-semibold text-[#172033] dark:text-white">Manuscripts <span className="ml-1 font-normal text-[#64748B]">{originals.length || ""}</span></h2>
+          {/* Processing actions: one compact toolbar; the main one first, the rest in More. */}
+          <div role="toolbar" aria-label="Manuscript tools" className="ml-auto flex flex-wrap items-center gap-1">
+            <Button size="sm" variant="ghost" className="h-8" onClick={() => onAction("summarize")} disabled={busy || !originals.length}><ScrollText className="h-4 w-4" /> Summarise</Button>
+            <Button size="sm" variant="ghost" className="h-8" onClick={() => onAction("rewrite")} disabled={busy || !originals.length}><Wand2 className="h-4 w-4" /> Rewrite the whole book</Button>
+            <Button size="sm" variant="ghost" className="h-8" onClick={onJoin} disabled={busy}><Layers className="h-4 w-4" /> Join</Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild><Button size="sm" variant="ghost" className="h-8 w-8 p-0" aria-label="More manuscript tools"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem disabled={busy || !originals.length} onSelect={() => onTool("ocr")}><ScanText className="mr-2 h-4 w-4" /> Read scanned pages</DropdownMenuItem>
+                <DropdownMenuItem disabled={busy || originals.length + thread.outputs.length < 2} onSelect={() => onTool("compare")}><GitCompare className="mr-2 h-4 w-4" /> Compare two versions</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button size="sm" variant="outline" onClick={onJoin} disabled={busy}><Layers className="h-4 w-4" /> Join into one</Button>
-          <Button size="sm" variant="outline" onClick={() => onTool("ocr")} disabled={busy || !originals.length}><ScanText className="h-4 w-4" /> Read scanned pages</Button>
-          <Button size="sm" variant="outline" onClick={() => onTool("compare")} disabled={busy || originals.length + thread.outputs.length < 2}><GitCompare className="h-4 w-4" /> Compare two versions</Button>
-          <Button size="sm" variant="outline" onClick={() => onAction("summarize")} disabled={busy || !originals.length}><ScrollText className="h-4 w-4" /> Summarise the whole book</Button>
-          <Button size="sm" variant="outline" onClick={() => onAction("rewrite")} disabled={busy || !originals.length}><Wand2 className="h-4 w-4" /> Rewrite the whole book</Button>
+        <div onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={(e) => { e.preventDefault(); setDrag(false); if (e.dataTransfer.files.length) onUpload(e.dataTransfer.files); }}
+          className={`rounded-[12px] transition-colors ${drag ? "bg-[#EFF6FF] ring-2 ring-[#2563EB] dark:bg-[#172554]" : ""}`}>
+          {originals.length ? (
+            <ul className="grid gap-3 lg:grid-cols-2">
+              {originals.map((f) => <ManuscriptCard key={f.storedAs} f={f} text={textCopy(f)} readText={readText} busy={busy} onRemove={() => { if (window.confirm(`Remove “${f.name}” from this project? The uploaded file and its extracted text are deleted; your book and results stay.`)) onRemove(f.storedAs); }} onOcr={() => onTool("ocr")} />)}
+            </ul>
+          ) : (
+            <button type="button" onClick={() => file.current?.click()} disabled={Boolean(uploading)}
+              className="flex w-full flex-col items-center justify-center gap-1.5 rounded-[12px] border-[1.5px] border-dashed border-[#CBD5E1] py-12 text-[14px] text-[#475569] transition-colors hover:border-[#2563EB] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] dark:border-white/20 dark:text-[#CBD5E1]">
+              <Upload className="h-5 w-5" /> Drop your manuscript here, or choose a file
+              <span className="text-[12.5px] text-[#64748B]">PDF, Word, text, Markdown or scanned pages</span>
+            </button>
+          )}
         </div>
       </section>
 
@@ -132,5 +142,50 @@ export default function SourcesStage({ thread, m, uploading, onUpload, onRemove,
         </div>
       </section>
     </div>
+  );
+}
+
+/** The cover title's size: the longest word fits the 72px measure (Newsreader capitals are about 0.8em wide). */
+const coverSize = (title: string) => Math.max(9, Math.min(13, Math.floor(72 / (Math.max(...title.split(/\s+/).map((w) => w.length)) * (title === title.toUpperCase() ? 0.8 : 0.55)))));
+
+/**
+ * One manuscript as a document: a typographic cover (its title set in the book
+ * face), the facts the Studio actually has (format, size, words once its text
+ * is read, when it arrived) and its opening lines. Nothing is invented: a scan
+ * whose text has not been read says so.
+ */
+function ManuscriptCard({ f, text, readText, busy, onRemove, onOcr }: { f: StudioFile; text: string | null; readText: (s: string) => Promise<string | null>; busy: boolean; onRemove: () => void; onOcr: () => void }) {
+  const [body, setBody] = useState<string | null | undefined>(text ? undefined : null);
+  useEffect(() => { let live = true; if (text) readText(text).then((t) => { if (live) setBody(t ?? null); }).catch(() => { if (live) setBody(null); }); return () => { live = false; }; }, [text, readText]);
+  const title = f.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").replace(/\s+(ms|word|final|draft)\b.*$/i, "").trim() || f.name;
+  const ext = (f.name.split(".").pop() ?? "").toUpperCase();
+  const words = body ? body.trim().split(/\s+/).filter(Boolean).length : null;
+  const opening = body ? body.replace(/^\s*#.*$/m, "").replace(/\s+/g, " ").trim().slice(0, 220) : "";
+  const arrived = f.at ? new Date(f.at).toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" }) : null;
+  return (
+    <li className="group relative flex gap-4 rounded-[12px] border border-[#E6E8ED] bg-white p-4 transition-colors hover:border-[#CBD5E1] dark:border-white/10 dark:bg-[#161A22] dark:hover:border-white/20">
+      <div aria-hidden className="relative flex h-[132px] w-[96px] shrink-0 flex-col justify-between overflow-hidden rounded-[3px] bg-[#1B2438] px-3 py-3.5 text-[#F3E7C9] shadow-[inset_3px_0_0_rgba(0,0,0,.25),0_1px_2px_rgba(15,23,42,.12)] dark:ring-1 dark:ring-white/10">
+        <span className="h-px w-6 bg-[#C9A55B]/70" />
+        <span className={`${SERIF} line-clamp-4 leading-[1.2] [overflow-wrap:anywhere]`} style={{ fontSize: coverSize(title) }}>{title}</span>
+        <span className="text-[9px] font-semibold tracking-[0.18em] text-[#C9A55B]">{ext}</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[14.5px] font-semibold text-[#172033] dark:text-white" title={f.name}>{title}</p>
+        <p className="mt-0.5 truncate text-[12.5px] text-[#64748B]">{f.name}</p>
+        <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-[#475569] dark:text-[#CBD5E1]">
+          <span>{ext}</span><span aria-hidden>·</span><span>{formatBytes(f.bytes)}</span>
+          {words !== null && <><span aria-hidden>·</span><span>{words.toLocaleString()} words</span></>}
+          {arrived && <><span aria-hidden>·</span><span>Added {arrived}</span></>}
+        </p>
+        <p className="mt-2 text-[12.5px]">
+          {body === undefined ? <span className="inline-flex items-center gap-1.5 text-[#64748B]"><Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> Reading the text…</span>
+            : body ? <span className="inline-flex items-center gap-1.5 text-[#047857] dark:text-emerald-400"><CheckCircle2 className="h-3.5 w-3.5" /> Text ready for Claude</span>
+            : <span className="inline-flex items-center gap-1.5 text-[#B45309]"><CircleDashed className="h-3.5 w-3.5" /> No text yet{/\.(pdf|png|jpe?g|tiff?|heic|webp)$/i.test(f.name) && <> · <button type="button" onClick={onOcr} disabled={busy} className="font-medium underline-offset-2 hover:underline">read the scanned pages</button></>}</span>}
+        </p>
+        {opening && <p className={`${SERIF} mt-2 line-clamp-2 text-[13.5px] leading-[1.5] text-[#475569] dark:text-[#94A3B8]`}>{opening}…</p>}
+      </div>
+      <button type="button" disabled={busy} onClick={onRemove} aria-label={`Remove ${f.name}`}
+        className="absolute right-2.5 top-2.5 grid h-8 w-8 place-items-center rounded-md text-[#64748B] opacity-0 transition-opacity hover:bg-[#F1F5F9] hover:text-[#172033] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] group-hover:opacity-100 disabled:hidden dark:hover:bg-white/10 dark:hover:text-white"><X className="h-4 w-4" /></button>
+    </li>
   );
 }
