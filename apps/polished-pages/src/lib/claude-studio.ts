@@ -139,6 +139,8 @@ export const pdfInStudio = {
   },
   saveText: (threadId: string, name: string, text: string) => put(threadId, name, "text", new Blob([text], { type: "text/plain;charset=utf-8" })),
   savePage: (threadId: string, name: string, jpeg: Blob) => put(threadId, name, "page", jpeg),
+  /** Removes the PDF's text copy before its pages are read again (its page images stay). */
+  removeText: (threadId: string, pdfStoredAs: string) => call<{ thread: StudioThread }>(`/v1/threads/${threadId}/files/${encodeURIComponent(`${pdfStoredAs.replace(/\.[^.]+$/, "")}.txt`)}`, { method: "DELETE" }).then((r) => r.thread),
 };
 
 export const STUDIO_ACCEPT = ".pdf,.docx,.txt,.md,.markdown,.rtf,.html,.htm,.csv,.json,.jpg,.jpeg,.png,.webp";

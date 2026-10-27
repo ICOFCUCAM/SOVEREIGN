@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const m = vi.hoisted(() => ({
-  bytes: vi.fn(async () => new ArrayBuffer(4)), saveText: vi.fn(async (_t: string, _n: string, _x: string) => ({})), savePage: vi.fn(async (_t: string, _n: string, _b: Blob) => ({})),
+  bytes: vi.fn(async () => new ArrayBuffer(4)), saveText: vi.fn(async (_t: string, _n: string, _x: string) => ({})), savePage: vi.fn(async (_t: string, _n: string, _b: Blob) => ({})), removeText: vi.fn(async () => ({})),
   open: vi.fn(), text: vi.fn(), images: vi.fn(async () => [new Blob(["a"]), new Blob(["b"])]),
 }));
-vi.mock("@/lib/claude-studio", () => ({ pdfInStudio: { bytes: m.bytes, saveText: m.saveText, savePage: m.savePage } }));
+vi.mock("@/lib/claude-studio", () => ({ pdfInStudio: { bytes: m.bytes, saveText: m.saveText, savePage: m.savePage, removeText: m.removeText } }));
 const P = vi.hoisted(() => class PdfPasswordError extends Error { wrong: boolean; constructor(wrong: boolean) { super("pw"); this.wrong = wrong; } });
 vi.mock("@/lib/pdf-unlock", () => {
   return { PdfPasswordError: P, openPdf: m.open, pdfText: m.text, pdfPageImages: m.images, hasTextLayer: (t: string) => t.split(/\s+/).length >= 50, pageName: (s: string, n: number) => `${s.replace(/\.[^.]+$/, "")}-p${String(n).padStart(3, "0")}.jpg` };
@@ -35,6 +35,7 @@ describe("opening a PDF the runner can't read", () => {
     const onReadPages = vi.fn();
     render(<OpenPdfDialog threadId="t1" file={file} onClose={() => {}} onChanged={() => {}} onReadPages={onReadPages} />);
     await waitFor(() => expect(onReadPages).toHaveBeenCalled());
+    expect(m.removeText).toHaveBeenCalledWith("t1", "onenessofgod.pdf");
     expect(m.savePage.mock.calls.map((c) => c[1])).toEqual(["onenessofgod-p001.jpg", "onenessofgod-p002.jpg"]);
     expect(await screen.findByText(/All 2 pages are with Claude Code/)).toBeTruthy();
   });

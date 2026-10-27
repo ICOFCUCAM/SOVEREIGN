@@ -521,3 +521,17 @@ test("a password-protected PDF: the Studio's page images are stored with it, rea
   t = (await (await call(`/v1/threads/${thread.id}/files/onenessofgod.pdf`, { method: "DELETE" })).json()).thread;
   assert.equal(t.files.length, 0, "the page images go with their PDF");
 });
+
+test("a report that a PDF could not be opened is never taken as its text", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Locked report" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=locked.pdf&kind=original`, { method: "POST", raw: Buffer.from("%PDF-1.4 encrypted") });
+  const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "ocr" } } })).json();
+  await streamUntilDone(job.id, thread.id);
+  const t = (await (await call(`/v1/threads/${thread.id}`)).json()).thread;
+  assert.equal(t.files.some((f) => f.kind === "text"), false, "the locked PDF still has no text");
+  // Removing a text copy keeps the page images of its PDF.
+  await call(`/v1/threads/${thread.id}/files?name=locked-p001.jpg&kind=page`, { method: "POST", raw: Buffer.from("jpeg") });
+  await call(`/v1/threads/${thread.id}/files?name=locked.pdf&kind=text`, { method: "POST", raw: Buffer.from("x") });
+  const after = (await (await call(`/v1/threads/${thread.id}/files/locked.txt`, { method: "DELETE" })).json()).thread;
+  assert.ok(after.files.some((f) => f.storedAs === "locked-p001.jpg"));
+});

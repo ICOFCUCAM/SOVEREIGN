@@ -36,7 +36,8 @@ export default function OpenPdfDialog({ threadId, file, onClose, onChanged, onRe
         setStep({ kind: "done", line: `The PDF has its own text: ${text.split(/\s+/).length.toLocaleString()} words from ${pdf.numPages} pages. It is ready for Claude; nothing had to be scanned.` });
         return;
       }
-      // A scan: every page as an image, in order, then Claude Code reads them.
+      // A scan: every page as an image, in order, then Claude Code reads them. An earlier (wrong) text copy goes first.
+      await pdfInStudio.removeText(threadId, file.storedAs).catch(() => {});
       const pages = await pdfPageImages(pdf, (n, of) => setStep({ kind: "working", line: `It is a scan. Preparing page ${n} of ${of} for Claude…` }));
       for (let i = 0; i < pages.length; i++) {
         setStep({ kind: "working", line: `Sending page ${i + 1} of ${pages.length} to your Claude Code…` });

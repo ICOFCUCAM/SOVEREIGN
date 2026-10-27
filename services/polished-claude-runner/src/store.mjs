@@ -87,7 +87,8 @@ export function createStore(dataDir) {
       if (p) await fs.rm(p, { force: true });
       // An original takes its rendered page images with it.
       const base = storedAs.replace(/\.[^.]+$/, "");
-      const pages = t.files.filter((f) => f.kind === "page" && f.storedAs.startsWith(`${base}-p`));
+      const removed = t.files.find((f) => f.storedAs === storedAs);
+      const pages = removed?.kind === "original" ? t.files.filter((f) => f.kind === "page" && f.storedAs.startsWith(`${base}-p`)) : [];
       for (const f of pages) { const q = inside(path.join(workDir(id), "source"), f.storedAs); if (q) await fs.rm(q, { force: true }); }
       t.files = t.files.filter((f) => f.storedAs !== storedAs && !pages.includes(f));
       return write(t);
