@@ -5,7 +5,7 @@ import {
   RUNNER_URL, decodeText, followJob, studio, uploadToStudio,
   type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioMe, type StudioThread, type StudioThreadSummary,
 } from "@/lib/claude-studio";
-import { API_SYSTEM, VOICE_RULE, compareApiPrompt, toolApiPlan, toolById, type ToolId } from "@/lib/studio-tools";
+import { API_SYSTEM, REWRITE_POLICY, SECTION_POLICY, VOICE_RULE, compareApiPrompt, toolApiPlan, toolById, type ToolId } from "@/lib/studio-tools";
 import { importText, kindDef, type Manuscript } from "@/lib/manuscript";
 import { coverCopyPrompt, parseCoverCopy, type CoverCopyWriter } from "@/lib/cover-copy";
 
@@ -99,14 +99,19 @@ export function followApiJob(jobId: string, onEvent: (e: StudioEvent) => void, s
 
 async function documentText(ctx: ApiContext, target?: string): Promise<{ text: string; skipped: string[] }> {
   if (target && target !== "source") return { text: (await ctx.readOutput(target)) ?? "", skipped: [] };
+  return sourceText(ctx.thread.files, ctx.readSource);
+}
+
+/** The text of the project's uploaded documents (their extracted copies), in order; files with no readable text are listed. */
+export async function sourceText(files: StudioThread["files"], read: (storedAs: string) => Promise<string | null>): Promise<{ text: string; skipped: string[] }> {
   const skipped: string[] = [];
   const parts: string[] = [];
-  const originals = ctx.thread.files.filter((f) => f.kind === "original");
+  const originals = files.filter((f) => f.kind === "original");
   for (const f of originals) {
-    const copy = ctx.thread.files.find((x) => x.kind === "text" && x.storedAs !== f.storedAs && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt");
+    const copy = files.find((x) => x.kind === "text" && x.storedAs !== f.storedAs && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt");
     let text: string | null = null;
-    if (copy) text = await ctx.readSource(copy.storedAs);
-    else if (/\.(txt|md|markdown|csv|json|html?)$/i.test(f.storedAs)) text = await ctx.readSource(f.storedAs);
+    if (copy) text = await read(copy.storedAs);
+    else if (/\.(txt|md|markdown|csv|json|html?)$/i.test(f.storedAs)) text = await read(f.storedAs);
     if (text && text.trim()) parts.push(originals.length > 1 ? `# ${f.name.replace(/\.[^.]+$/, "")}\n\n${text.trim()}` : text.trim());
     else skipped.push(f.name);
   }
@@ -156,7 +161,7 @@ export function sectionContext(m: Manuscript, sec: Manuscript["sections"][number
 
 export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions & Record<string, unknown>): StudioJob {
   const SECTION_OPS: Record<string, string> = { explain: "What this section says", rewrite: "Rewrite section", compose: "Write section", improve: "Improve section", expand: "Expand section", cite: "Add citations to section", voice: "Section in my voice", edit: "Edit section", draft: "Draft" };
-  const label = action === "section" ? `${SECTION_OPS[String(o.op)] ?? "Section"} · ${o.title ?? ""}` : action === "tool" ? toolById(String(o.tool))?.title ?? "Tool" : ({ chat: "Chat", summarize: "Summarise", rewrite: "Rewrite", cite: "Citations & references" } as Record<string, string>)[action] ?? action;
+  const label = action === "section" ? `${SECTION_OPS[String(o.op)] ?? "Section"} · ${o.title ?? ""}` : action === "tool" ? toolById(String(o.tool))?.title ?? "Tool" : ({ chat: "Chat", summarize: "Summarise", rewrite: o.correct ? "Correct the problems" : "Rewrite", cite: "Citations & references" } as Record<string, string>)[action] ?? action;
   const job: StudioJob = { id: crypto.randomUUID(), threadId: ctx.thread.id, action, label, output: null, status: "running", startedAt: new Date().toISOString(), endedAt: null, error: null };
   const j: LocalJob = { job, events: [], subs: new Set(), cancelled: false };
   apiJobs.set(job.id, j);
@@ -201,7 +206,7 @@ export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions
           voice: "Rewrite this section in the owner's voice. Keep its meaning, facts, quotations and references.",
           edit: `Revise this section as the owner asks: ${o.instructions || "improve clarity and flow"}. Keep facts, quotations and references accurate.`,
           explain: "Tell the owner what this section says, in plain language: its main teaching in two or three sentences, then its key points as a short list, then the scriptures, quotations and sources it relies on. Report faithfully; do not rewrite, correct or judge it.",
-          rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help). Keep every fact, scripture reference and quotation accurate apart from what the rules change.`,
+          rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help). Keep every fact, scripture reference and quotation accurate apart from what the rules change.\nEditorial standard:\n${SECTION_POLICY.map((l) => `- ${l}`).join("\n")}\nNumbering continues the book's scheme: see the neighbouring sections.`,
           compose: `${API_APPROACHES[String(o.approach)] ?? "Write this section new, from the book's plan, the other sections and the owner's notes. Never invent facts about the author; use [placeholders] where a fact is needed."} Use "### " for sub-headings, short paragraphs, no meta-commentary.`,
           improve: `${API_IMPROVE[String(o.improvementType)] ?? API_IMPROVE.enhance} Keep the Markdown structure.`,
           draft: `Write the "${sec.title}" section of this book. Guidance: ${o.guidance || def.guidance}.${o.instructions ? ` The owner asks: ${o.instructions}` : ""} Never invent facts about the author; use [placeholders] where a fact is needed.`,
@@ -237,6 +242,13 @@ export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions
             outputs["summary.md"] = (await callApi(`${ask}\n\nThe document, as part summaries:\n\n${notes.join("\n\n")}`)).text;
           }
           reply = "Summary written.";
+        } else if (action === "rewrite" && o.correct) {
+          // Targeted correction of the editorial check's findings (DESIGN-SPEC.md §15b, stage 5): fix those, keep the rest.
+          const rules = `The problems to fix:\n${String(o.instructions ?? "").trim()}\n\nFix only these problems where they occur in this part; every other passage stays exactly as it is. Where a fix needs the author (a missing chapter, a claim without a source, a sensitive claim), change nothing there.\nEditorial standard:\n${REWRITE_POLICY.map((l) => `- ${l}`).join("\n")}`;
+          const parts = await per(text, (t, i, n) => `Correct this text (part ${i + 1} of ${n}) following the rules, and reply with the complete corrected text only.\n\n${rules}\n\n---\n\n${t}`, false, "Correcting");
+          outputs["corrected.md"] = parts.join("\n\n") + "\n";
+          outputs["corrected-notes.md"] = `# Correction notes\n\nCorrected on the API in ${parts.length} part${parts.length === 1 ? "" : "s"}. Open the corrected book and run the Editorial check again to see what remains.\n\n## The problems given\n\n${String(o.instructions ?? "").trim()}\n`;
+          reply = `Corrected the listed problems in ${parts.length} part${parts.length === 1 ? "" : "s"}.`;
         } else if (action === "rewrite") {
           const rules = [`Owner's instructions (follow strictly):\n${String(o.instructions ?? "").trim()}`,
             o.keepStructure === false ? "You may reorganise where the instructions call for it." : "Keep every chapter and section, in order, with the same headings unless told otherwise.",
@@ -244,10 +256,12 @@ export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions
             ({ shorter: "Make it noticeably shorter.", longer: "Expand where it adds value." } as Record<string, string>)[String(o.length)] ?? "Keep about the same length.",
             o.audience ? `Audience: ${o.audience}.` : "", o.language ? `Write in ${o.language}.` : "",
             "Keep every fact, name, date, quotation and reference accurate. Never summarise in place of rewriting.",
-            o.addCitations ? `Add in-text citations in ${o.citationStyle || "APA 7"} style from sources you find, ending with "## References".` : ""].filter(Boolean).join("\n");
-          const parts = await per(text, (t, i, n) => `Rewrite this text following the rules. This is part ${i + 1} of ${n}; rewrite it in full and reply with the rewritten text only.\n\n${rules}\n\n---\n\n${t}`, Boolean(o.addCitations), "Rewriting");
+            o.addCitations ? `Add in-text citations in ${o.citationStyle || "APA 7"} style from sources you find, ending with "## References". List only sources you used; never cite a claim no source supports.` : "",
+            `Editorial standard (this is editing a book, not polishing sentences):\n${SECTION_POLICY.map((l) => `- ${l}`).join("\n")}`].filter(Boolean).join("\n");
+          const parts = await per(text, (t, i, n) => `Rewrite this text following the rules. This is part ${i + 1} of ${n}; rewrite it in full and reply with the rewritten text only.${i ? " Continue the numbering of the earlier parts." : ""}\n\n${rules}\n\n---\n\n${t}`, Boolean(o.addCitations), "Rewriting");
           outputs["rewrite.md"] = parts.join("\n\n") + "\n";
-          outputs["rewrite-notes.md"] = `# Rewrite notes\n\nRewritten on the API in ${parts.length} part${parts.length === 1 ? "" : "s"}, each with the same instructions:\n\n${rules}\n`;
+          // The API returns text only, so the editorial report is the app's own check (open the rewrite: Editorial check).
+          outputs["rewrite-notes.md"] = `# Rewrite notes\n\nRewritten on the API in ${parts.length} part${parts.length === 1 ? "" : "s"}, each with the same instructions. Open the rewrite and choose Editorial check: it compares the rewrite with your original (scripture, quotations, qualifications, additions) and checks numbering, placeholders, references, front matter and terminology.\n\n## The instructions\n\n${rules}\n\n## The full editorial standard\n\n${REWRITE_POLICY.map((l) => `- ${l}`).join("\n")}\n`;
           reply = `Rewrote the document in ${parts.length} part${parts.length === 1 ? "" : "s"}.`;
         } else if (action === "cite") {
           const style = o.citationStyle || "APA 7";

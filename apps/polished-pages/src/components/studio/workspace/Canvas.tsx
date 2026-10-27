@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, ArrowUp, Check, CornerDownLeft, PenLine, RotateCcw, Undo2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SuggestionChecks } from "./EditorialCheck";
 import Markdown from "@/components/studio/Markdown";
 import { kindDef, words, type Manuscript, type Section } from "@/lib/manuscript";
 import { diffText, type DiffBlock } from "@/lib/word-diff";
@@ -141,7 +142,8 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
       ) : mine ? (
         editing !== null ? (
           <GrowingText value={editing} onChange={setEditing} label="Edit Claude's suggestion before accepting it" className={PROSE} />
-        ) : (
+        ) : (<>
+          <SuggestionChecks before={section.body} after={mine.text} rules={[m.rules, m.knowledge?.terminology].filter(Boolean).join("\n")} rewrite={mine.op === "rewrite" || mine.op === "voice"} />
           <div className={`${PROSE} text-[#172033] dark:text-[#E5E7EB]`}>
             {blocks.map((b, bi) => {
               // A heading (old or new) reads as a heading, without its Markdown marks.
@@ -175,7 +177,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
               </aside>
             )}
           </div>
-        )
+        </>)
       ) : null}
 
       {/* Review bar: only while there's a suggestion for this section (spec §5.4). */}

@@ -14,6 +14,8 @@ import type { CoverCopyWriter } from "@/lib/cover-copy";
 import type { BookOutline } from "@/types/book";
 import type { BookMeta } from "@/components/book/ProductionPanel";
 import { FORMATS, estimatePages, formatReport, type FixTarget, type FormatId } from "@/lib/format-readiness";
+import { auditBook } from "@/lib/editorial-audit";
+import EditorialCheck from "./EditorialCheck";
 import { coverSpec, getTrim } from "@/lib/print-sizes";
 import { EYEBROW, SERIF } from "./ui";
 import BookCover3D from "./BookCover3D";
@@ -28,9 +30,9 @@ const ProductionPanel = lazy(() => import("@/components/book/ProductionPanel"));
 const BookPublishingPackage = lazy(() => import("@/components/book/BookPublishingPackage"));
 const TeacherPanel = lazy(() => import("./TeacherPanel"));
 
-type Tab = "preview" | "cover" | "export" | "audio" | "translate" | "repurpose" | "production" | "publish" | "library" | "teacher";
+type Tab = "preview" | "check" | "cover" | "export" | "audio" | "translate" | "repurpose" | "production" | "publish" | "library" | "teacher";
 const TABS: { id: Tab; label: string }[] = [
-  { id: "preview", label: "Preview" }, { id: "cover", label: "Cover" }, { id: "export", label: "Interior and export" }, { id: "audio", label: "Audiobook" },
+  { id: "preview", label: "Preview" }, { id: "check", label: "Editorial check" }, { id: "cover", label: "Cover" }, { id: "export", label: "Interior and export" }, { id: "audio", label: "Audiobook" },
   { id: "translate", label: "Translate" }, { id: "repurpose", label: "Repurpose" }, { id: "production", label: "Production" }, { id: "publish", label: "Publishing package" }, { id: "library", label: "Save to Library" }, { id: "teacher", label: "AI Teacher" },
 ];
 const download = (name: string, text: string) => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
@@ -65,7 +67,7 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
   useEffect(() => { let live = true; if (m.libraryId) findCover(m.libraryId).then((c) => { if (live) setCover(c); }).catch(() => {}); return () => { live = false; }; }, [m.libraryId, tab, findCover]);
   const trim = getTrim(String(meta.trimSize || "6x9"));
   const spineMm = coverSpec(trim, Number(meta.pageCount) || estimatePages(m, trim.id), String(meta.paper || "Cream")).spineMm;
-  const fix = (t?: FixTarget, sectionId?: string) => { if (t === "section") { if (sectionId) onOpen(sectionId); } else if (t) setTab(t === "audio" ? "audio" : t); };
+  const fix = (t?: FixTarget, sectionId?: string) => { if (t === "section") { if (sectionId) onOpen(sectionId); } else if (t) setTab(t); };
 
   /** Saves the book to the Library (updating the same book after the first time) and returns its id. */
   const ensureSaved = async (): Promise<string | null> => {
@@ -80,7 +82,17 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
   };
 
   // Readiness, per format (spec §9): only true facts, each with the place to fix it.
-  const reports = useMemo(() => FORMATS.map((f) => formatReport(f.id, m, { cover: Boolean(cover) })), [m, cover]);
+  // The editorial check of the whole book, once, for every format (DESIGN-SPEC.md §15).
+  const bookRules = [m.rules, m.knowledge?.terminology].filter(Boolean).join("\n");
+  const plain = useMemo(() => compile(m), [m]);
+  const audit = useMemo(() => auditBook(plain, { rules: bookRules }), [plain, bookRules]);
+  const reports = useMemo(() => FORMATS.map((f) => formatReport(f.id, m, { cover: Boolean(cover), audit })), [m, cover, audit]);
+  /** The section a place in the compiled book belongs to: the nearest section heading at or above it. */
+  const sectionAt = (line: number) => {
+    const heads = plain.split("\n").slice(0, line).map((l, i) => ({ l, i })).filter((x) => /^##\s/.test(x.l)).map((x) => x.l.replace(/^##\s+/, "").replace(/\s*\{[^}]*\}\s*$/, "").trim());
+    const title = heads[heads.length - 1];
+    return m.sections.find((s) => s.title.trim() === title)?.id;
+  };
   const report = reports.find((r) => r.id === format)!;
 
   const outline: BookOutline = {
@@ -179,6 +191,7 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
       <div className="mt-6 min-h-[40vh]">
         <Suspense fallback={<div className="grid min-h-[30vh] place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
           {tab === "preview" && <BookReader content={md} title={title} />}
+          {tab === "check" && <EditorialCheck text={plain} rules={bookRules} title="Editorial check of the book" placeLabel="Open the section" onPlace={(p) => { const sid = sectionAt(p.line); if (sid) onOpen(sid); }} />}
           {tab === "cover" && <CoverGenerator title={title} subtitle={m.subtitle} author={m.author} isbn={meta.isbn} publisher={meta.publisher || meta.imprint} pageCount={meta.pageCount} paper={meta.paper} trimSize={meta.trimSize}
             bookText={() => compile(m, { contents: false })} copyWriter={coverWriter} bookId={m.libraryId ?? null} ensureSaved={ensureSaved} onSaved={() => m.libraryId && findCover(m.libraryId).then(setCover)} />}
           {tab === "export" && <BookExportPanel bookTitle={title} fullContent={md} chapterCount={chapters.filter((s) => s.body.trim()).length} />}

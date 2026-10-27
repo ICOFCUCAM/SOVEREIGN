@@ -29,6 +29,8 @@ export type StudioEvent =
   | { type: "done"; status: StudioJob["status"] | "unknown"; error?: string | null; errorKind?: "auth" | "limit" | "other" | "stopped" | null; outputs?: string[]; output?: string | null; at: string };
 
 export interface RunOptions {
+  /** rewrite: a targeted correction of the editorial check's findings, not a new rewrite (DESIGN-SPEC.md §15). */
+  correct?: boolean;
   tool?: string;
   sectionId?: string;
   op?: "expand" | "cite" | "voice" | "edit" | "draft" | "explain" | "rewrite" | "compose" | "improve";
@@ -194,6 +196,10 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "summary.md": "Summary",
   "rewrite.md": "Rewritten book",
   "rewrite-notes.md": "Rewrite notes",
+  "rewrite-analysis.md": "Rewrite · source analysis",
+  "rewrite-plan.md": "Rewrite · editorial plan",
+  "corrected.md": "Corrected book",
+  "corrected-notes.md": "Correction notes",
   "cited.md": "Text with citations",
   "references.md": "References",
   "citation-report.md": "Citation report",

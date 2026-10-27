@@ -7,7 +7,7 @@ import { SPINE_TEXT_MIN_PAGES } from "@/lib/cover-design";
 import { coverSpec, getTrim } from "@/lib/print-sizes";
 
 export type FormatId = "epub" | "print" | "paperback" | "audiobook";
-export type FixTarget = "cover" | "export" | "production" | "audio" | "section";
+export type FixTarget = "cover" | "export" | "production" | "audio" | "section" | "check";
 export interface FormatCheck { ok: boolean; level: "required" | "advised"; text: string; fix?: FixTarget; sectionId?: string }
 export interface FormatReport { id: FormatId; label: string; line: string; facts: string[]; checks: FormatCheck[]; ready: boolean }
 
@@ -35,7 +35,7 @@ export function estimatePages(m: Manuscript, trimId: string): number {
 const count = (m: Manuscript, re: RegExp) => m.sections.map((s) => ({ id: s.id, n: (s.body.match(re) ?? []).length })).filter((x) => x.n);
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-export function formatReport(id: FormatId, m: Manuscript, opts: { cover: boolean }): FormatReport {
+export function formatReport(id: FormatId, m: Manuscript, opts: { cover: boolean; /** The editorial check of the whole book (DESIGN-SPEC.md §15). */ audit?: { blockers: number; reviews: number } }): FormatReport {
   const meta = (m.meta ?? {}) as Record<string, string | undefined>;
   const def = FORMATS.find((f) => f.id === id)!;
   const chapters = m.sections.filter((s) => s.kind === "chapter");
@@ -52,6 +52,10 @@ export function formatReport(id: FormatId, m: Manuscript, opts: { cover: boolean
     const n = [...yours, ...holes].reduce((t, x) => t + x.n, 0);
     add({ ok: false, level: "required", text: `${plural(n, "marker", "markers")} still in the text ([[YOURS]], [citation needed], placeholders)`, fix: "section", sectionId: (yours[0] ?? holes[0]).id });
   }
+
+  if (opts.audit) add(opts.audit.blockers
+    ? { ok: false, level: "required", text: `Editorial check: ${plural(opts.audit.blockers, "problem", "problems")} to fix (numbering, unfinished markers, references, front matter, rules)`, fix: "check" }
+    : { ok: true, level: "required", text: `Editorial check passed${opts.audit.reviews ? `; ${plural(opts.audit.reviews, "point", "points")} to review` : ""}`, fix: opts.audit.reviews ? "check" : undefined });
 
   if (id === "epub") {
     add({ ok: Boolean(m.title.trim()), level: "required", text: m.title.trim() ? "Title set" : "No title (Sources → Book details)" });
