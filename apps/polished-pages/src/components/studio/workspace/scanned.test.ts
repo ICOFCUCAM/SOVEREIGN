@@ -13,3 +13,11 @@ describe("scanned uploads", () => {
     expect(scannedOnly(t([]))).toBe(false);
   });
 });
+
+import { readFailure } from "./SourcesStage";
+describe("a note that a file could not be read", () => {
+  it("is not taken for the book's text", () => {
+    expect(readFailure("# onenessofgod.pdf\n\nThis file could not be opened, so no text has been transcribed. Exact error: PDF is password-protected.")).toBe(true);
+    expect(readFailure("# The Oneness of God\n\nThe oneness of God is taught throughout the scriptures.")).toBe(false);
+  });
+});

@@ -164,8 +164,12 @@ function ManuscriptCard({ f, text, readText, busy, onRemove, onOcr }: { f: Studi
   useEffect(() => { let live = true; if (text) readText(text).then((t) => { if (live) setBody(t ?? null); }).catch(() => { if (live) setBody(null); }); return () => { live = false; }; }, [text, readText]);
   const title = f.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").replace(/\s+(ms|word|final|draft)\b.*$/i, "").trim() || f.name;
   const ext = (f.name.split(".").pop() ?? "").toUpperCase();
-  const words = body ? body.trim().split(/\s+/).filter(Boolean).length : null;
-  const opening = body ? body.replace(/^\s*#.*$/m, "").replace(/\s+/g, " ").trim().slice(0, 220) : "";
+  // A note that the file could not be read (kept by an earlier scan) is not the book's text.
+  const failed = Boolean(body && readFailure(body));
+  const words = body && !failed ? body.trim().split(/\s+/).filter(Boolean).length : null;
+  const openable = /\.(pdf|png|jpe?g|tiff?|heic|webp)$/i.test(f.name);
+  const openLabel = /\.pdf$/i.test(f.name) ? "open it (password or scanned pages)" : "read the scanned pages";
+  const opening = body && !failed ? body.replace(/^\s*#.*$/m, "").replace(/\s+/g, " ").trim().slice(0, 220) : "";
   const arrived = f.at ? new Date(f.at).toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" }) : null;
   return (
     <li className="group relative flex gap-4 rounded-[12px] border border-[#E6E8ED] bg-white p-4 transition-colors hover:border-[#CBD5E1] dark:border-white/10 dark:bg-[#161A22] dark:hover:border-white/20">
@@ -184,8 +188,9 @@ function ManuscriptCard({ f, text, readText, busy, onRemove, onOcr }: { f: Studi
         </p>
         <p className="mt-2 text-[12.5px]">
           {body === undefined ? <span className="inline-flex items-center gap-1.5 text-[#64748B]"><Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> Reading the text…</span>
-            : body ? <span className="inline-flex items-center gap-1.5 text-[#047857] dark:text-emerald-400"><CheckCircle2 className="h-3.5 w-3.5" /> Text ready for Claude</span>
-            : <span className="inline-flex items-center gap-1.5 text-[#B45309]"><CircleDashed className="h-3.5 w-3.5" /> No text yet{/\.(pdf|png|jpe?g|tiff?|heic|webp)$/i.test(f.name) && <> · <button type="button" onClick={onOcr} disabled={busy} className="font-medium underline-offset-2 hover:underline">{/\.pdf$/i.test(f.name) ? "open it (password or scanned pages)" : "read the scanned pages"}</button></>}</span>}
+            : failed ? <span className="inline-flex flex-wrap items-center gap-1.5 text-[#B45309]"><CircleDashed className="h-3.5 w-3.5" /> No text yet: Claude couldn't open this file{openable && <> · <button type="button" onClick={onOcr} disabled={busy} className="font-medium underline-offset-2 hover:underline">{openLabel}</button></>}</span>
+            : body ? <span className="inline-flex flex-wrap items-center gap-1.5 text-[#047857] dark:text-emerald-400"><CheckCircle2 className="h-3.5 w-3.5" /> Text ready for Claude{/\.pdf$/i.test(f.name) && <span className="text-[#64748B]"> · text wrong or incomplete? <button type="button" onClick={onOcr} disabled={busy} className="font-medium underline-offset-2 hover:underline">open it again</button></span>}</span>
+            : <span className="inline-flex items-center gap-1.5 text-[#B45309]"><CircleDashed className="h-3.5 w-3.5" /> No text yet{openable && <> · <button type="button" onClick={onOcr} disabled={busy} className="font-medium underline-offset-2 hover:underline">{openLabel}</button></>}</span>}
         </p>
         {opening && <p className={`${SERIF} mt-2 line-clamp-2 text-[13.5px] leading-[1.5] text-[#475569] dark:text-[#94A3B8]`}>{opening}…</p>}
       </div>
@@ -194,3 +199,6 @@ function ManuscriptCard({ f, text, readText, busy, onRemove, onOcr }: { f: Studi
     </li>
   );
 }
+
+/** A note that a file could not be read (from an earlier scan), not the book's text; the runner refuses such notes too. */
+export const readFailure = (text: string) => /could not be (opened|read)|password[- ]protected|no page was read|pdftoppm is not installed/i.test(text.slice(0, 600));

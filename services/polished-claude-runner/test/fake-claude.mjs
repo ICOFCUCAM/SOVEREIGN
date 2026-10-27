@@ -33,6 +33,11 @@ if (prompt.includes("copy and art direction for its printed cover")) {
   out({ type: "result", subtype: "success", is_error: false, result: "done", session_id: sid });
   process.exit(0);
 }
+if (prompt.includes("include scanned pages or images") && fs.readdirSync("source").some((x) => x.includes("locked"))) {
+  fs.writeFileSync("out/scanned-text.md", "# locked.pdf\n\nThis file could not be opened, so no text has been transcribed. Exact error: PDF is password-protected. Please provide an unprotected version. No page was read, so nothing here is a transcription of anything at all in the book.");
+  out({ type: "result", subtype: "success", is_error: false, result: "Locked.", session_id: sid });
+  process.exit(0);
+}
 if (prompt.includes("include scanned pages or images")) {
   fs.mkdirSync("out/scanned", { recursive: true });
   const words = "The oneness of God is taught throughout the scriptures from Genesis to Revelation, and this book sets out that teaching plainly for every reader. ";

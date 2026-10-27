@@ -102,15 +102,23 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     for (const s of job.subscribers) s.write(`data: ${JSON.stringify(e)}\n\n`);
   }
 
+  const isReadFailure = (text) => /could not be (opened|read)|password[- ]protected|no page was read|pdftoppm is not installed/i.test(String(text).slice(0, 600));
+
   async function adoptScannedText(id, cwd) {
     const t = await store.read(id);
     if (!t) return;
-    const needs = t.files.filter((f) => f.kind === "original" && !/\.(txt|md|markdown)$/i.test(f.storedAs) && !t.files.some((x) => x.kind === "text" && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt"));
+    // Documents with no text yet, and documents the Studio sent page images for (a re-read replaces their text).
+    const base = (f) => f.storedAs.replace(/\.[^.]+$/, "");
+    const needs = t.files.filter((f) => f.kind === "original" && !/\.(txt|md|markdown)$/i.test(f.storedAs) && (!t.files.some((x) => x.kind === "text" && x.storedAs === `${base(f)}.txt`) || t.files.some((x) => x.kind === "page" && x.storedAs.startsWith(`${base(f)}-p`))));
     for (const f of needs) {
-      const base = f.storedAs.replace(/\.[^.]+$/, "");
-      let text = await fs.readFile(path.join(cwd, "out", "scanned", `${base}.txt`), "utf8").catch(() => "");
-      // One scanned document and no per-file copy: the combined transcription is its text.
-      if (!text.trim() && needs.length === 1) text = (await fs.readFile(path.join(cwd, "out", "scanned-text.md"), "utf8").catch(() => "")).replace(/<!--\s*page\s+\d+\s*-->\n?/gi, "");
+      let text = await fs.readFile(path.join(cwd, "out", "scanned", `${base(f)}.txt`), "utf8").catch(() => "");
+      // One scanned document and no per-file copy: the combined transcription is its text, but only a real one (with its page markers).
+      if (!text.trim() && needs.length === 1) {
+        const all = await fs.readFile(path.join(cwd, "out", "scanned-text.md"), "utf8").catch(() => "");
+        if (/<!--\s*page\s+\d+\s*-->/i.test(all)) text = all.replace(/<!--\s*page\s+\d+\s*-->\n?/gi, "");
+      }
+      // A report that the file could not be read is never the book's text.
+      if (isReadFailure(text)) continue;
       if (text.trim().split(/\s+/).length >= 20) await store.addFile(id, f.name, "text", Buffer.from(text));
     }
   }
