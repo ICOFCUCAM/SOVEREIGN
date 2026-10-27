@@ -60,6 +60,7 @@ const ClaudeStudio = lazy(() => import("./pages/ClaudeStudio.tsx"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Gallery = lazy(() => import("./pages/Gallery.tsx"));
+const StudioPreview = lazy(() => import("./pages/StudioPreview.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -128,6 +129,8 @@ const App = () => (
           <Route path="/publishing" element={<AuthGate><PublishingPrep /></AuthGate>} />
           {/* internal visual-QA gallery (not linked); development builds only */}
           {import.meta.env.DEV && <Route path="/__gallery" element={<Gallery />} />}
+          {/* Claude Studio against a stand-in engine, for visual review; development builds only */}
+          {import.meta.env.DEV && <Route path="/__studio" element={<StudioPreview />} />}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

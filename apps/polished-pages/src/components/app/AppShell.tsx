@@ -32,6 +32,9 @@ const AppShell = ({ email, children }: { email: string; children: ReactNode }) =
   const [admin, setAdmin] = useState(false);
   useEffect(() => { fetchPlanStatus().then(setStatus); isAdmin().then(setAdmin).catch(() => {}); }, []);
 
+  // Claude Studio is a full-screen workspace with its own frame and ⌘K palette.
+  if (pathname.startsWith("/admin/claude")) return <main id="main">{children}</main>;
+
   const isPro = !!status && status.plan !== "free"; // any paid tier
   const usageLabel = status
     ? (isPro ? `${planDisplayName(status.plan)} · ${status.imagesUsed}/${status.imagesLim} image credits` : `${status.used}/${status.lim} generations this month`)

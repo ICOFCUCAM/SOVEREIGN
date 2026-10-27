@@ -122,8 +122,40 @@ async function pathText(ctx: ApiContext, p: string) {
 const ONE_CALL = 120_000;
 
 /** Runs one Studio action on the API, chapter by chapter where needed, and records the result in the project. */
+// The approaches to writing a section on the API: the owner's book is sent with the request.
+const FIND_API = "find every part of the owner's book (below) that belongs to this section's subject";
+const API_APPROACHES: Record<string, string> = {
+  polish: `Polish the owner's own book: ${FIND_API} and keep the author's own words wherever they work. Only fix order, clarity, grammar and flow and join the scattered parts into one well-ordered section. Do not add new material or change the author's arguments.`,
+  mine: `Build this section only from the owner's own book: ${FIND_API} and carry over all of the author's teaching, arguments, facts, scriptures and examples, reorganised and improved in better prose. Add nothing from outside the book.`,
+  "mine-and-research": `Build this section from the owner's own book first: ${FIND_API} and carry over all of the author's teaching, reorganised and improved. Then strengthen it with other scholarly and primary sources found on the web. The author's position leads; present other views as other views. Cite every added fact or quotation (author, year) and end with "### Sources".`,
+  research: `Write this section mainly from research on the web, building a thorough, well-evidenced section on its subject, arguing the owner's viewpoint from their book (below), which it must not contradict. Cite every fact or quotation (author, year) and end with "### Sources".`,
+};
+const API_IMPROVE: Record<string, string> = {
+  enhance: "Enhance the writing quality: improve prose, strengthen arguments, add vivid examples and make it more engaging. Keep the same structure and key points.",
+  expand: "Expand this content with more detail, examples, case studies and practical insights. Double the depth without adding fluff.",
+  tighten: "Tighten this content: remove redundancy, sharpen arguments, improve clarity. Reduce length by 20-30% while keeping all key points.",
+  hooks: "Rewrite the opening with a powerful hook, add compelling transitions, and make the ending memorable.",
+  examples: "Add real-world examples, case studies and practical applications throughout.",
+  consistency: "Enforce consistency in tone, terminology, formatting and style.",
+};
+
+/** What the owner has said about the book and this section, in priority order (the same order the runner uses). */
+export function sectionContext(m: Manuscript, sec: Manuscript["sections"][number], o: { idea?: string; rules?: string } = {}): string {
+  const pages = (sec.pageNotes ?? []).filter((n) => n.text.trim()).map((n) => `- Page ${n.page}: ${n.text.replace(/\s+/g, " ")}`).join("\n");
+  const idea = (sec.idea || o.idea || "").trim();
+  const rules = (m.rules || o.rules || "").trim();
+  const k = m.knowledge;
+  const knowledge = k ? [k.rules?.trim() && `Rules (highest priority):\n${k.rules.trim()}`, k.terminology?.trim() && `Required terminology:\n${k.terminology.trim()}`, k.forbidden?.trim() && `Forbidden: never use or mention\n${k.forbidden.trim()}`].filter(Boolean).join("\n\n") : "";
+  return [
+    pages && `The owner's notes on particular pages of their book (highest priority):\n${pages}`,
+    idea && `The owner's idea for this section (follow it):\n${idea}`,
+    rules && `Rules for the whole book (follow strictly, everywhere, including quotations and material from other sources, unless the rule says otherwise):\n${rules}`,
+    knowledge && `Knowledge base for the whole book (obey strictly):\n${knowledge}`,
+  ].filter(Boolean).join("\n\n");
+}
+
 export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions & Record<string, unknown>): StudioJob {
-  const SECTION_OPS: Record<string, string> = { explain: "What this section says", rewrite: "Rewrite section", expand: "Expand section", cite: "Add citations to section", voice: "Section in my voice", edit: "Edit section", draft: "Draft" };
+  const SECTION_OPS: Record<string, string> = { explain: "What this section says", rewrite: "Rewrite section", compose: "Write section", improve: "Improve section", expand: "Expand section", cite: "Add citations to section", voice: "Section in my voice", edit: "Edit section", draft: "Draft" };
   const label = action === "section" ? `${SECTION_OPS[String(o.op)] ?? "Section"} · ${o.title ?? ""}` : action === "tool" ? toolById(String(o.tool))?.title ?? "Tool" : ({ chat: "Chat", summarize: "Summarise", rewrite: "Rewrite", cite: "Citations & references" } as Record<string, string>)[action] ?? action;
   const job: StudioJob = { id: crypto.randomUUID(), threadId: ctx.thread.id, action, label, output: null, status: "running", startedAt: new Date().toISOString(), endedAt: null, error: null };
   const j: LocalJob = { job, events: [], subs: new Set(), cancelled: false };
@@ -169,13 +201,20 @@ export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions
           voice: "Rewrite this section in the owner's voice. Keep its meaning, facts, quotations and references.",
           edit: `Revise this section as the owner asks: ${o.instructions || "improve clarity and flow"}. Keep facts, quotations and references accurate.`,
           explain: "Tell the owner what this section says, in plain language: its main teaching in two or three sentences, then its key points as a short list, then the scriptures, quotations and sources it relies on. Report faithfully; do not rewrite, correct or judge it.",
-          rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help).${o.idea ? `\nThe owner's idea for this section (follow it): ${o.idea}` : ""}${o.rules ? `\nRules for the whole book (follow strictly, everywhere, including quotations unless the rule says otherwise): ${o.rules}` : ""}\nKeep every fact, scripture reference and quotation accurate apart from what the rules change.`,
+          rewrite: `Rewrite this section so it keeps all of the author's knowledge and teaching but is well organised, clear and arranged in a logical order (with "### " sub-headings where they help). Keep every fact, scripture reference and quotation accurate apart from what the rules change.`,
+          compose: `${API_APPROACHES[String(o.approach)] ?? "Write this section new, from the book's plan, the other sections and the owner's notes. Never invent facts about the author; use [placeholders] where a fact is needed."} Use "### " for sub-headings, short paragraphs, no meta-commentary.`,
+          improve: `${API_IMPROVE[String(o.improvementType)] ?? API_IMPROVE.enhance} Keep the Markdown structure.`,
           draft: `Write the "${sec.title}" section of this book. Guidance: ${o.guidance || def.guidance}.${o.instructions ? ` The owner asks: ${o.instructions}` : ""} Never invent facts about the author; use [placeholders] where a fact is needed.`,
         };
         if (!ops[String(o.op)]) throw new Error("Unknown section action.");
+        // The owner's own book, for the approaches that build on it.
+        const usesBook = o.op === "compose" && String(o.approach) in API_APPROACHES;
+        const owner = usesBook ? (await documentText(ctx)).text : "";
+        if (usesBook && !owner.trim()) throw new Error("Upload your book to this project first, so Claude can build on it.");
+        const context = o.op === "explain" ? "" : sectionContext(m, sec, o);
         say(`${label} (${o.op === "draft" && def.wholeBook ? "reading the whole book" : "reading the section and its neighbours"})`);
-        const prompt = `Book: ${m.title || "Untitled"}\nSections:\n${outline}\n\n${o.op === "draft" && def.wholeBook ? `The manuscript:\n\n${book}\n\n` : near}---\n\nThe section to work on: "${sec.title}" (${def.label})\n\n${sec.body || "(empty)"}\n\n---\n\n${ops[String(o.op)]}${needsVoice ? `\n${VOICE_RULE}\nVoice profile:\n${voice}` : ""}\n${o.op === "explain" ? "Reply with only the summary." : 'Reply with only the new text of this section: no "## " heading, no commentary.'}`;
-        const r = await callApi(prompt, { web: o.op === "cite" });
+        const prompt = `Book: ${m.title || "Untitled"}\nSections:\n${outline}\n\n${o.op === "draft" && def.wholeBook ? `The manuscript:\n\n${book}\n\n` : near}${owner ? `The owner's own book (their uploaded documents):\n\n${owner.slice(0, 300_000)}\n\n` : ""}---\n\nThe section to work on: "${sec.title}" (${def.label})\n\n${sec.body || "(empty)"}\n\n---\n\n${ops[String(o.op)]}${context ? `\n\n${context}` : ""}${needsVoice ? `\n${VOICE_RULE}\nVoice profile:\n${voice}` : ""}\n${o.op === "explain" ? "Reply with only the summary." : 'Reply with only the new text of this section: no "## " heading, no commentary.'}`;
+        const r = await callApi(prompt, { web: o.op === "cite" || (o.op === "compose" && (o.approach === "mine-and-research" || o.approach === "research")) });
         outputs[o.op === "explain" ? `sections/${sec.id}-summary.md` : `sections/${sec.id}.md`] = r.text.trim();
         reply = `${label}: suggestion ready.`;
       } else if (action === "chat") {

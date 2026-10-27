@@ -31,7 +31,10 @@ export type StudioEvent =
 export interface RunOptions {
   tool?: string;
   sectionId?: string;
-  op?: "expand" | "cite" | "voice" | "edit" | "draft" | "explain" | "rewrite";
+  op?: "expand" | "cite" | "voice" | "edit" | "draft" | "explain" | "rewrite" | "compose" | "improve";
+  /** compose: where the material comes from; improve: which improvement. */
+  approach?: "polish" | "mine" | "mine-and-research" | "research" | "new";
+  improvementType?: "enhance" | "expand" | "tighten" | "hooks" | "examples" | "consistency";
   /** Guided rewrite: the owner's idea for this section, and rules for the whole book. */
   idea?: string;
   rules?: string;

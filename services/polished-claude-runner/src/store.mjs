@@ -9,6 +9,7 @@ import path from "node:path";
 //     out/      everything Claude writes
 //   <data>/threads/<id>/jobs/<job>.jsonl   the event log of each run, for replay
 const ID = /^[0-9a-f-]{36}$/;
+const VERSION_KINDS = new Set(["snapshot", "autosave", "before-accept", "before-restore"]);
 
 export function safeName(name) {
   const base = path.basename(String(name || "file")).normalize("NFKC").replace(/[^\p{L}\p{N}._ -]+/gu, "_").replace(/^[.\s]+/, "").slice(0, 120);
@@ -121,7 +122,21 @@ export function createStore(dataDir) {
         id: String(x.id).replace(/[^\w-]/g, "").slice(0, 64), kind: String(x.kind ?? "chapter").slice(0, 40), title: String(x.title ?? "").slice(0, 300), body: String(x.body ?? ""),
         // Guided rewrite: Claude's summary, the owner's idea, and the text before the rewrite.
         ...(x.summary ? { summary: String(x.summary).slice(0, 20_000) } : {}), ...(x.idea ? { idea: String(x.idea).slice(0, 20_000) } : {}), ...(x.original ? { original: String(x.original) } : {}),
-      })), rules: String(m?.rules ?? "").slice(0, 20_000), history: Array.isArray(m?.history) ? m.history.slice(-2000) : [], updatedAt: new Date().toISOString() };
+        ...(Array.isArray(x.pageNotes) && x.pageNotes.length ? { pageNotes: x.pageNotes.slice(0, 500).map((n) => ({ page: String(n?.page ?? "").slice(0, 20), text: String(n?.text ?? "").slice(0, 2000) })).filter((n) => n.text.trim()) } : {}),
+        // Version history: snapshots, autosaved revisions, the text before accepted changes and restores.
+        ...(Array.isArray(x.versions) && x.versions.length ? { versions: x.versions.slice(-40).map((v) => ({
+          id: String(v?.id ?? "").replace(/[^\w-]/g, "").slice(0, 40), at: String(v?.at ?? "").slice(0, 40),
+          kind: VERSION_KINDS.has(v?.kind) ? v.kind : "snapshot", title: String(v?.title ?? "").slice(0, 300), body: String(v?.body ?? ""),
+          ...(v?.label ? { label: String(v.label).slice(0, 120) } : {}),
+        })).filter((v) => v.id) } : {}),
+      })),
+        rules: String(m?.rules ?? "").slice(0, 20_000),
+        // The book's knowledge base, production details and the Library book it was saved as.
+        ...(m?.knowledge && typeof m.knowledge === "object" ? { knowledge: { rules: String(m.knowledge.rules ?? "").slice(0, 20_000), terminology: String(m.knowledge.terminology ?? "").slice(0, 20_000), forbidden: String(m.knowledge.forbidden ?? "").slice(0, 20_000) } } : {}),
+        ...(Array.isArray(m?.knowledgeDocIds) ? { knowledgeDocIds: m.knowledgeDocIds.slice(0, 50).map(String) } : {}),
+        ...(m?.meta && typeof m.meta === "object" && !Array.isArray(m.meta) && JSON.stringify(m.meta).length <= 50_000 ? { meta: m.meta } : {}),
+        ...(m?.libraryId ? { libraryId: String(m.libraryId).slice(0, 80) } : {}),
+        history: Array.isArray(m?.history) ? m.history.slice(-2000) : [], updatedAt: new Date().toISOString() };
       await fs.writeFile(path.join(d, "manuscript.json.tmp"), JSON.stringify(clean));
       await fs.rename(path.join(d, "manuscript.json.tmp"), path.join(d, "manuscript.json"));
       const md = path.join(workDir(id), "manuscript");
@@ -130,7 +145,7 @@ export function createStore(dataDir) {
       const index = [`# ${clean.title || "Untitled book"}`, ""];
       for (const [i, x] of clean.sections.entries()) {
         const file = manuscriptFile(i, x);
-        index.push(`${i + 1}. ${file} · ${x.kind} · ${x.title}`);
+        index.push(`${i + 1}. ${file} · ${x.kind} · ${x.title}${x.idea ? ` · plan: ${x.idea.replace(/\s+/g, " ").slice(0, 400)}` : ""}`);
         await fs.writeFile(path.join(md, file), `## ${x.title}\n\n${x.body}\n`);
       }
       await fs.writeFile(path.join(md, "INDEX.md"), index.join("\n") + "\n");

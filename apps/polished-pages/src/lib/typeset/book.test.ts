@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import { PDFDocument } from "pdf-lib";
-import { typesetBook, bookDirection } from "@/lib/typeset/book";
+import { typesetBook, bookDirection, asChapters } from "@/lib/typeset/book";
 import { getTrim } from "@/lib/print-sizes";
 import { nodeFetchFont } from "@/lib/typeset/test-fonts";
 
@@ -43,4 +43,30 @@ describe("book typesetting", () => {
       }, 60_000);
     }
   }
+});
+
+describe("whole books compiled with \"# Title\" and \"## Chapter\"", () => {
+  it("sets the sections as chapters, with the title and by-line on the title page and the typeset contents", () => {
+    const compiled = "# Demonology\n\n*A study*\n\nby T\n\n## Contents\n\n- Preface\n- Spirits\n\n## Preface\n\nWhy.\n\n## Spirits\n\nText.\n\n### Names\n\nMore.";
+    expect(asChapters(compiled)).toBe("# Preface\n\nWhy.\n\n# Spirits\n\nText.\n\n## Names\n\nMore.");
+  });
+  it("leaves a manuscript that already uses \"# \" for its chapters alone", () => {
+    expect(asChapters(BOOKS.english)).toBe(BOOKS.english);
+    expect(asChapters("# One\n\nText.")).toBe("# One\n\nText.");
+  });
+});
+
+describe("front and back matter", () => {
+  it("opens prefaces and bibliographies like chapters but without a number, and can start numbering later", async () => {
+    const md = "# Preface\n\nWhy.\n\n# Spirits\n\nText.\n\n# Bibliography\n\nBooks.";
+    const { bytes } = await typesetBook(md, { title: "Demonology", trim: getTrim("6x9"), fetchFont: nodeFetchFont, chapterStart: 2, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: bytes.slice(), useSystemFonts: false }).promise;
+    const pages: string[] = [];
+    for (let n = 1; n <= doc.numPages; n++) pages.push((await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ").replace(/\s+/g, " "));
+    const at = (word: string) => pages.findIndex((t, i) => i > 1 && t.includes(word) && !/contents/i.test(t));
+    expect(pages[at("hy.")]).not.toMatch(/CHAPTER/);
+    expect(pages[at("ext.")]).toMatch(/C\s*H\s*A\s*P\s*T\s*E\s*R\s*T\s*W\s*O/);
+    expect(pages[at("ooks.")]).not.toMatch(/CHAPTER/);
+  }, 60_000);
 });

@@ -1,0 +1,123 @@
+# Claude Studio — screenshots
+
+Captured from the real workspace (`/__studio`, the development-only preview with sample *Demonology* text and a stand-in engine) at 1440 px unless noted. Each caption names the design-spec section it shows. Sample text only; the draft sentence using “God” is deliberate, to show the book rule (Yahuah) being applied by Claude's suggestion.
+
+### Write
+Write · Writing view (§5.1). Frame, top bar with chapter and state, Claude panel in Revise mode with the five approach cards (§5.2, §5.3).
+
+![Write · Writing view (§5](screenshots/01-write.webp)
+
+### Changes
+Changes view (§5.4). Numbered additions and removals, each accepted or rejected on its own; review bar with the source policy; citations marked unverified.
+
+![Changes view (§5](screenshots/02-changes.webp)
+
+### Running
+Proposal in progress (§5.4 step 3). Named stages in the panel, never over the page; cancel.
+
+![Proposal in progress (§5](screenshots/03-running.webp)
+
+### Book page
+Book page view (§5.1). The real typeset page from the print engine, chapter number and running heads.
+
+![Book page view (§5](screenshots/04-book-page.webp)
+
+### Plan
+Plan (§2). Contents, chapter ideas and order; write all chapters with the chosen approach.
+
+![Plan (§2)](screenshots/05-plan.webp)
+
+### Sources
+Sources (§2). Manuscripts, file tools, book details, rules for the whole book, knowledge, voice.
+
+![Sources (§2)](screenshots/06-sources.webp)
+
+### Finish
+Finish (§9). Cover, readiness per format, format switcher and finishing tools.
+
+![Finish (§9)](screenshots/07-finish.webp)
+
+### Dark
+Dark mode (§4). A tuned writing theme, not inverted colours.
+
+![Dark mode (§4)](screenshots/08-dark.webp)
+
+### Palette
+⌘K palette (§6). Tools, chapters, results and actions with shortcuts.
+
+![⌘K palette (§6)](screenshots/09-palette.webp)
+
+### Focus
+Focus mode (§6). Frame, panel and toolbars hidden; one floating control; Esc leaves.
+
+![Focus mode (§6)](screenshots/10-focus.webp)
+
+### Notes
+Notes (§5.2, §5.6). Page notes Claude follows first, then chapter notes, then book rules.
+
+![Notes (§5](screenshots/11-notes.webp)
+
+### Phone
+Phone width (§3). The panel is a sheet the owner opens; the page stays readable.
+
+![Phone width (§3)](screenshots/12-phone.webp)
+
+### Phone drawer
+Phone navigation drawer (§3).
+
+![Phone navigation drawer (§3)](screenshots/13-phone-drawer.webp)
+
+### Review keys
+Keyboard review (§6). J/K move between changes, X keeps or rejects, ⌘↵ accepts.
+
+![Keyboard review (§6)](screenshots/14-review-keys.webp)
+
+### History
+Version history (§6). Named snapshots, autosaved revisions, the text before each accepted change; Claude's history listed separately.
+
+![Version history (§6)](screenshots/15-history.webp)
+
+### History read
+Reading an earlier version before restoring it. Restoring keeps the current text as a version first.
+
+![Reading an earlier version before restoring it](screenshots/16-history-read.webp)
+
+### Offline
+Offline state (§7). Writing continues; changes stay on the device and save when the connection returns; Claude does not run.
+
+![Offline state (§7)](screenshots/17-offline.webp)
+
+### Finish 3d
+Cover as a book (§9, dimensional view optional and secondary). Spine width from the page count and paper; paperback constraints.
+
+![Cover as a book (§9, dimensional view optional and secondary)](screenshots/18-finish-3d.webp)
+
+### Finish epub dark
+EPUB readiness in dark mode (§9). A placeholder author is reported, not accepted.
+
+![EPUB readiness in dark mode (§9)](screenshots/19-finish-epub-dark.webp)
+
+### Finish audio
+Audiobook readiness (§9). Narration time, one file per chapter, what reads badly aloud.
+
+![Audiobook readiness (§9)](screenshots/20-finish-audio.webp)
+
+### Api cost
+Cost notice before an API-billed run (§6). Engine, billing and how much of the book is sent.
+
+![Cost notice before an API-billed run (§6)](screenshots/21-api-cost.webp)
+
+### Onboarding
+First-project walkthrough (§7): Sources.
+
+![First-project walkthrough (§7): Sources](screenshots/22-onboarding.webp)
+
+### Onboarding write
+Walkthrough: Write.
+
+![Walkthrough: Write](screenshots/23-onboarding-write.webp)
+
+### Onboarding keys
+Walkthrough: the shortcuts (dark mode).
+
+![Walkthrough: the shortcuts (dark mode)](screenshots/24-onboarding-keys.webp)

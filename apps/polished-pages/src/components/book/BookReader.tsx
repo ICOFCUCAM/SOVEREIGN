@@ -97,7 +97,7 @@ const BookReader = ({
         </select>
         <span className="hidden sm:inline text-xs text-muted-foreground font-sans">{theme.blurb}</span>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
           {editable && (
             <Button variant={mode === "edit" ? "hero" : "heroOutline"} size="sm" onClick={() => setMode(mode === "edit" ? "read" : "edit")}>
               {mode === "edit" ? <><Check className="w-4 h-4 mr-1" /> Done editing</> : <><Pencil className="w-4 h-4 mr-1" /> Edit</>}
