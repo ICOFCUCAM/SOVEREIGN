@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowDown, ArrowUp, BookOpen, ChevronDown, History, Layers3, ListTree, Loader2, PenLine, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BookOpen, ChevronDown, History, Layers3, ListTree, Loader2, PenLine, Plus, Replace, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +25,7 @@ const GROUPS = [{ id: "front", label: "Front matter" }, { id: "body", label: "Ch
 
 // Plan (design spec §2): the book's contents, with the plan and notes for each
 // chapter, its order, Claude's outline, and turning the book into a series.
-export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard, onResplit, onOrganise }: {
+export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard, onResplit, onOrganise, onFind }: {
   m: Manuscript; onUpdate: (m: Manuscript) => void; onOpen: (id: string) => void; engine: BookEngine | null; approach: ApproachId; hasUploads: boolean;
   onWriteAll: (ids: string[]) => void; queue: { done: number; total: number } | null; onSeries: () => void; busy: boolean;
   /** Finish joins every chapter into one book. */
@@ -41,6 +41,8 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
   onResplit?: () => void;
   /** Organise a book (uploaded here, in Sources, or the manuscript as it is) into chapters and sections. */
   onOrganise?: () => void;
+  /** Find and replace across the book (§21). */
+  onFind?: () => void;
 }) {
   const { toast } = useToast();
   const [open, setOpen] = useState<string | null>(null);
@@ -139,7 +141,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
             </section>
           );
         })}
-        <div className="mt-6">{addMenu}</div>
+        <div className="mt-6 flex flex-wrap gap-2">{addMenu}{onFind && m.sections.length > 0 && <Button size="sm" variant="outline" onClick={onFind}><Replace className="h-4 w-4" /> Find and replace</Button>}</div>
       </article>
 
       <aside className="flex-[0_1_280px] space-y-8">

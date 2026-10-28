@@ -103,6 +103,23 @@ describe("Claude Studio workspace", () => {
     expect(await screen.findByRole("dialog")).toBeTruthy();
   });
 
+  it("finds and replaces across the book from Plan, leaving quotations unless chosen, and keeps the earlier text", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: unknown }).manuscript = async () => ({ title: "B", history: [], sections: [
+      { id: "c1", kind: "chapter", title: "One", body: "Jesus taught them.\n\nHe said, “Jesus wept.”" },
+      { id: "c2", kind: "chapter", title: "Two", body: "And Jesus went on." },
+    ] });
+    localStorage.setItem("studio.place", "plan");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: /Find and replace/ }));
+    fireEvent.change(screen.getByLabelText("Find"), { target: { value: "Jesus" } });
+    fireEvent.change(screen.getByLabelText("Replace with"), { target: { value: "Yahusha" } });
+    expect(screen.getByText(/3 matches · 2 chosen/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Replace 2 matches" }));
+    await waitFor(() => expect(f.saved().sections.map((s) => s.body)).toEqual(["Yahusha taught them.\n\nHe said, “Jesus wept.”", "And Yahusha went on."]), { timeout: 3000 });
+    expect(f.saved().sections[0].versions?.at(-1)?.body).toBe("Jesus taught them.\n\nHe said, “Jesus wept.”");
+  });
+
   it("reviews changes from the keyboard: J moves, X rejects, ⌘↵ accepts", async () => {
     const f = fake();
     render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);

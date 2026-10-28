@@ -24,6 +24,7 @@ import Frame, { STAGES, type Place } from "./Frame";
 import Canvas, { VIEWS, type CanvasView } from "./Canvas";
 import ClaudePanel, { type PanelMode } from "./ClaudePanel";
 import StudioPalette from "./StudioPalette";
+import FindReplaceDialog from "./FindReplaceDialog";
 import SourcesStage from "./SourcesStage";
 import PlanStage from "./PlanStage";
 import BookDesignDialog from "./BookDesignDialog";
@@ -129,6 +130,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [pdfFile, setPdfFile] = useState<StudioThread["files"][number] | null>(null);
   // Organise into chapters and sections (§19).
   const [organising, setOrganising] = useState(false);
+  // Find and replace across the book (§21).
+  const [finding, setFinding] = useState(false);
   // A long job that stopped and can be continued (§21): the latest whole-book run's message says so.
   const [dismissed, setDismissed] = useState<string | null>(null);
   const stopped = useMemo(() => { const last = [...(thread?.messages ?? [])].reverse().find((x) => x.role === "assistant" && x.action !== "chat"); return last?.resume && last.id !== dismissed ? last : null; }, [thread?.messages, dismissed]);
@@ -318,6 +321,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       const typing = Boolean(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)));
       // ⌘Z / ⌘⇧Z undo and redo book changes; inside a text field the field's own undo applies.
       if ((e.metaKey || e.ctrlKey) && !typing && (e.key.toLowerCase() === "z" || e.key.toLowerCase() === "y")) { e.preventDefault(); if (e.shiftKey || e.key.toLowerCase() === "y") redo(); else undo(); }
+      else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "h") { e.preventDefault(); if (m) setFinding(true); }
       else if ((e.metaKey || e.ctrlKey) && e.key === ".") { e.preventDefault(); setFocus(!focus); }
       else if ((e.metaKey || e.ctrlKey) && e.key === "\\") { e.preventDefault(); setPanelOpen(!panelOpen); }
       else if (e.key === "Escape" && focus) setFocus(false);
@@ -383,7 +387,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           queue={sr.queue} onSeries={() => setTool({ initial: "series" })} onFinish={() => setPlace("finish")}
           onDesign={bookEngine ? designBook : undefined}
           onApplyDesign={(d, b) => { update(designToManuscript(d, m, b)); setApproach(b.approach); }}
-          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} onResplit={hasUploads ? () => void resplit() : undefined} onOrganise={engineId ? () => setOrganising(true) : undefined} />
+          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} onResplit={hasUploads ? () => void resplit() : undefined} onOrganise={engineId ? () => setOrganising(true) : undefined} onFind={() => setFinding(true)} />
       </>;
     }
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}
@@ -509,6 +513,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         upload={async (files) => { await upload(files); }}
         onClose={() => setOrganising(false)}
         onApply={async (o) => { const next = organisedToManuscript(o, m ?? { title: thread.title === "Untitled project" ? "" : thread.title, sections: [], history: [] }); if (m) update(next); else await replace(next); setOrganising(false); setPlace("plan"); toast({ title: "Organised into chapters and sections", description: `${o.sections.length} parts. The earlier chapters can be restored from Plan.` }); }} />}
+      {finding && m && <FindReplaceDialog m={m} onClose={() => setFinding(false)} onOpenSection={(sid) => { setFinding(false); openSection(sid); }}
+        onApply={(next, n) => { update(next); setFinding(false); toast({ title: `Replaced ${n} ${n === 1 ? "match" : "matches"}`, description: "Undo puts it back; each changed section keeps its earlier text in its version history." }); }} />}
       {pdfFile && <OpenPdfDialog threadId={id} file={pdfFile} onClose={() => setPdfFile(null)} onChanged={() => { reload().catch(() => {}); p.onChanged(); }} onReadPages={() => void start("tool", { tool: "ocr" } as RunOptions)} />}
       {rebuilding && <BookDesignDialog sections={0} design={designBook} engineLabel={bookEngine?.label} onClose={() => setRebuilding(false)}
         onApply={async (d, b) => { const next = designToManuscript(d, { title: thread.title === "Untitled project" ? "" : thread.title, sections: [], history: [] }, b); await replace(next); setApproach(b.approach); setRebuilding(false); setPlace("plan"); toast({ title: "The new book is laid out", description: `${d.sections.length} sections, each with its plan. Next: write them (chapters first).` }); }} />}
@@ -526,7 +532,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       </Sheet>
       {m && section && <VersionsSheet open={versions} onOpenChange={setVersions} m={m} section={section} onUpdate={update} />}
       <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread} hasProposal={Boolean(proposal)}
-        onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onTour={() => setTour(true)} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
+        onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onTour={() => setTour(true)} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)} onFind={m?.sections.length ? () => setFinding(true) : undefined}
         onResult={setViewing} onView={(v) => { setPlace("write"); setView(v); }} onFocus={() => { setPlace("write"); setFocus(true); }} onPanel={() => setPanelOpen(!panelOpen)} onTheme={toggleTheme} />
       {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} initialTarget={tool.target} hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
