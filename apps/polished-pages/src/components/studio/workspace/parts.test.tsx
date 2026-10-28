@@ -65,6 +65,19 @@ describe("result viewer", () => {
     vi.restoreAllMocks();
   });
 
+  it("shows what the checks found before exporting Word, and leads to the check", async () => {
+    render(<ResultViewer backend={backend} threadId="t1" path="rewrite.md" projectTitle="Demonology" onClose={() => {}} onUseAsTarget={() => {}} check={{ rules: "", original: async () => ORIGINAL }} />);
+    await screen.findByText(/to fix before publishing/);
+    const more = screen.getByRole("button", { name: "More actions" });
+    fireEvent.keyDown(more, { key: "Enter" });
+    fireEvent.click(await screen.findByRole("menuitem", { name: /Export Word/ }));
+    const dlg = await screen.findByRole("dialog", { name: /Export Word/ });
+    expect(dlg).toHaveTextContent(/The editorial check found \d+ problems? to fix before publishing/);
+    expect(dlg).toHaveTextContent(/named as a draft/);
+    fireEvent.click(screen.getByRole("button", { name: "See the check" }));
+    expect(await screen.findByText(/2 headings share the number 20/)).toBeInTheDocument();
+  });
+
   it("goes from a finding to its passage in the text", async () => {
     render(<ResultViewer backend={backend} threadId="t1" path="rewrite.md" projectTitle="Demonology" onClose={() => {}} onUseAsTarget={() => {}} check={{ rules: "", original: async () => ORIGINAL }} />);
     fireEvent.click(await screen.findByRole("button", { name: "See the check" }));

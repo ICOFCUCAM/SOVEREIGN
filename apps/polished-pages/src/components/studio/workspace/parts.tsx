@@ -406,6 +406,8 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
     catch (e) { toast({ title: "Export failed", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
     finally { setExporting(null); }
   };
+  // Word and EPUB exports show what the checks found first (§21), the same checks as Finish.
+  const [exportAsk, setExportAsk] = useState<BookFormat | null>(null);
   const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
   const isJson = path.endsWith(".json");
   const [checking, setChecking] = useState(false);
@@ -498,14 +500,32 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
                 <DropdownMenuItem className="gap-2" onSelect={() => { navigator.clipboard.writeText(text ?? ""); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /> Copy</DropdownMenuItem>
                 {versioned && onReview && <DropdownMenuItem className="gap-2" onSelect={() => onReview(path)}><ScanSearch className="h-4 w-4" /> Editorial review by Claude (judgement)</DropdownMenuItem>}
                 <DropdownMenuItem className="gap-2" onSelect={() => download("md")}><Download className="h-4 w-4" /> Download Markdown (.md)</DropdownMenuItem>
-                {!isJson && <DropdownMenuItem className="gap-2" disabled={exporting !== null} onSelect={() => download("docx")}><FileText className="h-4 w-4" /> {exporting === "docx" ? "Exporting Word…" : "Export Word (.docx)"}</DropdownMenuItem>}
-                {!isJson && <DropdownMenuItem className="gap-2" disabled={exporting !== null} onSelect={() => download("epub")}><BookOpen className="h-4 w-4" /> {exporting === "epub" ? "Exporting EPUB…" : "Export EPUB"}</DropdownMenuItem>}
+                {!isJson && <DropdownMenuItem className="gap-2" disabled={exporting !== null} onSelect={() => setExportAsk("docx")}><FileText className="h-4 w-4" /> {exporting === "docx" ? "Exporting Word…" : "Export Word (.docx)"}</DropdownMenuItem>}
+                {!isJson && <DropdownMenuItem className="gap-2" disabled={exporting !== null} onSelect={() => setExportAsk("epub")}><BookOpen className="h-4 w-4" /> {exporting === "epub" ? "Exporting EPUB…" : "Export EPUB"}</DropdownMenuItem>}
                 {versioned && !approvedNow && <p className="px-2 py-1.5 text-[11.5px] text-muted-foreground">Exports are named “draft” until this version is approved.</p>}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </DialogContent>
+      {exportAsk && text && (
+        <Dialog open onOpenChange={(v) => { if (!v) setExportAsk(null); }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader><DialogTitle>Export {exportAsk === "docx" ? "Word (.docx)" : "EPUB"}</DialogTitle><DialogDescription>“{bookTitle}”, {words.toLocaleString()} words. What the checks found before you export:</DialogDescription></DialogHeader>
+            <ul className="space-y-1.5 text-[13.5px]">
+              {warning && <li className="flex gap-2 text-amber-800 dark:text-amber-200"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />{warning}</li>}
+              {audit ? <li className="flex gap-2">{audit.blockers ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" /> : <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />}{audit.blockers ? `The editorial check found ${audit.blockers} ${audit.blockers === 1 ? "problem" : "problems"} to fix before publishing.` : "The editorial check found nothing that blocks publishing."}{audit.reviews ? ` ${audit.reviews} for your decision.` : ""}</li>
+                : <li className="text-muted-foreground">The editorial check runs on whole books of 200 words or more.</li>}
+              {versioned && <li className="flex gap-2">{approvedNow ? <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /> : <History className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />}{approvedNow ? `Version ${latest?.n} is approved for publication.` : "This version is not approved for publication, so the file is named as a draft."}</li>}
+              {edited && <li className="text-muted-foreground">Your unsaved edits are included in the export.</li>}
+            </ul>
+            <DialogFooter className="gap-2 sm:gap-0">
+              {audit && audit.blockers > 0 && <Button variant="ghost" onClick={() => { setExportAsk(null); view("check"); }}>See the check</Button>}
+              <Button className={`rounded-full ${GRADIENT}`} onClick={() => { const f = exportAsk; setExportAsk(null); void download(f); }}>{audit?.blockers || warning ? "Export anyway" : "Export"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
       {approving && text && latest && <ApproveDialog text={text} rules={check?.rules} original={check && REWRITE_RESULT(path) ? check.original : undefined} version={latest.n}
         dismissedKey={`studio.review.${threadId}.${path}`} aiReview={aiReview} onReview={onReview ? () => { setApproving(false); onReview(path); } : undefined} onClose={() => setApproving(false)}
         onApprove={async (summary) => { try { const h = await backend.approve(threadId, path, { version: latest.n, summary }); setHistory(h); setApproving(false); toast({ title: `Version ${latest.n} approved for publication`, description: "Recorded with your name and the time. It lapses if a newer version is saved." }); } catch (e) { toast({ title: "Not approved", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }} />}
