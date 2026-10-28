@@ -93,6 +93,16 @@ describe("Claude Studio workspace", () => {
     await waitFor(() => expect(f.runs.at(-1)).toEqual({ continueRun: true }));
   });
 
+  it("warns in Plan about a very long chapter and offers to organise it", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: unknown }).manuscript = async () => ({ title: "Oneness", history: [], sections: [{ id: "c1", kind: "chapter", title: "The_Oneness_of_God", body: "word ".repeat(74_770) }] });
+    localStorage.setItem("studio.place", "plan");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    expect(await screen.findByText(/“The_Oneness_of_God” is very long \(over 15,000 words: 74,770\)/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Organise into chapters and sections/ }));
+    expect(await screen.findByRole("dialog")).toBeTruthy();
+  });
+
   it("reviews changes from the keyboard: J moves, X rejects, ⌘↵ accepts", async () => {
     const f = fake();
     render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);

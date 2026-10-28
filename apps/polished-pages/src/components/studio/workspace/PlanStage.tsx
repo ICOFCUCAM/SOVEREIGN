@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { SECTION_KINDS, insertSection, kindDef, moveSection, words, type Manuscript } from "@/lib/manuscript";
+import { LARGE_CHAPTER_WORDS, SECTION_KINDS, insertSection, kindDef, largeSections, moveSection, words, type Manuscript } from "@/lib/manuscript";
 import { outlineToManuscript } from "@/lib/studio-merge";
 import type { BookEngine } from "@/lib/book-engine";
 import type { BookDepth, BookMode } from "@/types/book";
@@ -54,6 +54,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
   // After a rebuild every designed section with a plan is written (chapters first); otherwise the empty chapters.
   const empty = sectionsToWrite(m);
   const written = m.sections.filter((s) => s.kind === "chapter" && s.body.trim());
+  const large = largeSections(m);
 
   const outline = async () => {
     if (!engine) return;
@@ -89,6 +90,13 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
     <div className="mx-auto flex w-full max-w-[1080px] flex-wrap items-start justify-center gap-10">
       <article className={`min-w-0 flex-[1_1_620px] px-6 py-12 sm:px-16 ${PAPER}`}>
         <h1 className={`${SERIF} mb-10 text-center text-[36px] font-medium`}>Contents</h1>
+        {large.length > 0 && (
+          <div role="status" className="mb-8 rounded-[10px] border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-[13.5px]">
+            <p className="font-medium">{large.length === 1 ? `“${large[0].title || "One section"}” is` : `${large.length} sections are`} very long (over {LARGE_CHAPTER_WORDS.toLocaleString()} words{large.length === 1 ? `: ${words(large[0].body).toLocaleString()}` : ""}).</p>
+            <p className="mt-1 text-[12.5px] opacity-90">Claude works less reliably on a section this long, and readers expect shorter chapters. Organise finds the chapters and sections inside it and titles them, without changing a word.</p>
+            {onOrganise && <Button size="sm" variant="outline" className="mt-2" disabled={busy} onClick={onOrganise}><ListTree className="h-4 w-4" /> Organise into chapters and sections</Button>}
+          </div>
+        )}
         {!m.sections.length && <p className="text-center text-[14px] text-[#64748B]">No sections yet. Outline the book with Claude, or add sections yourself.</p>}
         {GROUPS.map((g) => {
           const list = m.sections.filter((s) => kindDef(s.kind).group === g.id);
@@ -106,7 +114,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
                         <span className={`${SERIF} w-6 shrink-0 text-[16px] tabular-nums text-[#64748B]`}>{n || ""}</span>
                         <button type="button" onClick={() => setOpen(isOpen ? null : s.id)} aria-expanded={isOpen} className={`${SERIF} min-w-0 text-left text-[18px] text-[#172033] hover:text-[#1D4ED8] dark:text-[#E5E7EB]`}>{s.title || kindDef(s.kind).label}</button>
                         <span aria-hidden className="mb-1 min-w-[24px] flex-1 border-b border-dotted border-[#CBD5E1] dark:border-white/15" />
-                        <span className="shrink-0 text-[12px] text-[#64748B]">{words(s.body) ? `${words(s.body).toLocaleString()} words` : "not written"}</span>
+                        <span className={`shrink-0 text-[12px] ${words(s.body) > LARGE_CHAPTER_WORDS ? "font-medium text-[#B45309] dark:text-amber-300" : "text-[#64748B]"}`}>{words(s.body) ? `${words(s.body).toLocaleString()} words` : "not written"}</span>
                       </div>
                       <div className="ml-9 mt-1 flex flex-wrap gap-x-3 text-[12px]">
                         <span className="text-[#475569] dark:text-[#94A3B8]">{s.idea?.trim() ? `Plan: ${s.idea.split("\n")[0].slice(0, 90)}${s.idea.length > 90 ? "…" : ""}` : "+ Chapter notes"}</span>
