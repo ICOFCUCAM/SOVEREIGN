@@ -59,8 +59,7 @@ export default function ChapterChat({ m, sectionId, engineLabel, busy, running, 
           {Rec && <button type="button" onClick={dictate} aria-pressed={listening} aria-label={listening ? "Stop dictating" : "Dictate"} title="Dictate" className={`grid h-10 w-10 shrink-0 place-items-center rounded-full hover:bg-[#F1F5F9] dark:hover:bg-white/10 ${listening ? "text-[#DC2626]" : "text-[#475569] dark:text-[#CBD5E1]"}`}><Mic className="h-4.5 w-4.5" /></button>}
           <button type="submit" aria-label="Send" disabled={!text.trim() || busy} className={`grid h-10 w-10 shrink-0 place-items-center rounded-full disabled:opacity-40 ${GRADIENT}`}><Send className="h-4 w-4" /></button>
         </div>
-      </div>
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 px-2 text-[12.5px] text-[#64748B]">
+        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[#F1F5F9] px-1.5 pt-1.5 text-[12.5px] text-[#64748B] dark:border-white/5">
         <select aria-label="What the question is about" value={about} onChange={(e) => setAbout(e.target.value)} className="h-7 max-w-[260px] truncate rounded-md border-0 bg-transparent pr-1 font-medium text-[#4F46E5] hover:bg-[#EEF2FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] dark:text-[#A5B4FC] dark:hover:bg-white/5">
           {m.sections.map((s) => <option key={s.id} value={s.id}>{label(s.id)}</option>)}
           <option value="book">The whole book</option>
@@ -68,6 +67,7 @@ export default function ChapterChat({ m, sectionId, engineLabel, busy, running, 
         <span className="inline-flex items-center gap-1"><Paperclip className="h-3.5 w-3.5" /> {about === "book" ? "The whole book" : "Current section attached"}</span>
         <button type="button" onClick={onConversation} className="font-medium text-[#2563EB] hover:underline">Conversation</button>
         <span className="ml-auto">{engineLabel}</span>
+        </div>
       </div>
     </form>
   );

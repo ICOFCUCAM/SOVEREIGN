@@ -602,7 +602,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
 }
 
 /** Frame + header + stage + optional Claude panel, laid out for the screen size (spec §3). */
-const PANEL_MIN = 320, PANEL_MAX = 520;
+const PANEL_MIN = 320, PANEL_MAX = 640;
 const clampPanel = (v: number) => Math.round(Math.min(PANEL_MAX, Math.max(PANEL_MIN, v)));
 
 function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, reduce, onRename, onDelete, onBackup, onCover, onContents, children }: {
@@ -615,8 +615,8 @@ function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer,
       onNewProject={() => { setDrawer(false); void p.onNewProject(); }} ready={p.ready} title={title} m={m} sectionId={sectionId} onSection={(x) => { setDrawer(false); onSection(x); }} pending={pending}
       decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} onRename={onRename} onDelete={onDelete} onBackup={onBackup} onCover={onCover} onContents={onContents} />
   );
-  // The panel's width: 400px on a wide screen, 360px on a laptop, 320px below; dragged between 320 and 520; remembered.
-  const [panelW, setPanelW] = useState(() => { try { const v = Number(localStorage.getItem("studio.panelWidth")); if (v) return clampPanel(v); } catch { /* storage blocked */ } const w = typeof window !== "undefined" ? window.innerWidth : 0; return w >= 1600 ? 400 : w >= 1366 ? 360 : PANEL_MIN; });
+  // The panel's width: 460px on a wide screen, 380px on a laptop, 320px below; dragged between 320 and 640; remembered.
+  const [panelW, setPanelW] = useState(() => { try { const v = Number(localStorage.getItem("studio.panelWidth")); if (v) return clampPanel(v); } catch { /* storage blocked */ } const w = typeof window !== "undefined" ? window.innerWidth : 0; return w >= 1600 ? 460 : w >= 1366 ? 380 : PANEL_MIN; });
   const [dragging, setDragging] = useState(false);
   const keepPanelW = (v: number) => { const w = clampPanel(v); setPanelW(w); try { localStorage.setItem("studio.panelWidth", String(w)); } catch { /* storage blocked */ } };
   const startDrag = (e: React.PointerEvent) => {
@@ -633,16 +633,16 @@ function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer,
       <div className="flex min-w-0 flex-1 flex-col">
         {header ?? <header className="flex h-14 shrink-0 items-center gap-3 border-b border-[#E6E8ED] px-4 dark:border-white/10"><button type="button" onClick={() => setDrawer(true)} aria-label="Open the sidebar" className="grid h-9 w-9 place-items-center rounded-md hover:bg-muted lg:hidden"><Menu className="h-5 w-5" /></button><span className="text-[13px] text-[#64748B]">Claude Studio</span></header>}
         {p.notice}
-        {/* The page and the Claude panel sit together, centred, rather than the panel at the far edge (§21). */}
-        <div className={`flex min-h-0 flex-1 ${side ? "justify-center" : ""}`}>
-          <main id="studio-main" className={`min-w-0 flex-1 overflow-y-auto px-5 pb-24 pt-10 sm:px-10 xl:px-16 ${side ? "2xl:max-w-[980px]" : ""}`}>{children}</main>
+        {/* The Claude panel runs nearly to the right edge, full height, with a small gap (the owner's request, §21). */}
+        <div className="flex min-h-0 flex-1">
+          <main id="studio-main" className="min-w-0 flex-1 overflow-y-auto px-5 pb-24 pt-10 sm:px-10 xl:px-16">{children}</main>
           <AnimatePresence initial={false}>
             {side && (
-              <motion.div key="panel" initial={reduce ? false : { width: 0, opacity: 0 }} animate={{ width: panelW + 16, opacity: 1 }} exit={reduce ? undefined : { width: 0, opacity: 0 }} transition={{ duration: dragging ? 0 : 0.2 }}
-                className="relative h-full shrink-0 overflow-hidden py-3 pr-4">
+              <motion.div key="panel" initial={reduce ? false : { width: 0, opacity: 0 }} animate={{ width: panelW + 8, opacity: 1 }} exit={reduce ? undefined : { width: 0, opacity: 0 }} transition={{ duration: dragging ? 0 : 0.2 }}
+                className="relative h-full shrink-0 overflow-hidden py-2 pr-2">
                 <div role="separator" aria-orientation="vertical" aria-label="Resize the Claude panel" aria-valuemin={PANEL_MIN} aria-valuemax={PANEL_MAX} aria-valuenow={panelW} tabIndex={0}
                   onPointerDown={startDrag} onKeyDown={(e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); keepPanelW(panelW + (e.key === "ArrowLeft" ? 20 : -20)); } }}
-                  className="absolute inset-y-3 left-0 z-10 w-2 cursor-col-resize rounded-full hover:bg-[#2563EB]/25 focus-visible:bg-[#2563EB]/40 focus-visible:outline-none" />
+                  className="absolute inset-y-2 left-0 z-10 w-1.5 cursor-col-resize rounded-full hover:bg-[#2563EB]/25 focus-visible:bg-[#2563EB]/40 focus-visible:outline-none" />
                 <div className="h-full overflow-hidden rounded-[12px] border border-[#E6E8ED] dark:border-white/10" style={{ width: panelW }}>{side}</div>
               </motion.div>
             )}
