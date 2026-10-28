@@ -30,7 +30,9 @@ import PlanStage from "./PlanStage";
 import BookDesignDialog from "./BookDesignDialog";
 import OpenPdfDialog from "./OpenPdfDialog";
 import OrganiseDialog from "./OrganiseDialog";
-import { claudeOrganise } from "@/lib/claude-studio";
+import { claudeOrganise, pdfInStudio } from "@/lib/claude-studio";
+import { buildBackup } from "@/lib/project-backup";
+import { saveFile } from "@/lib/book-export";
 import { manuscriptText, organisedToManuscript } from "@/lib/organise";
 import { announce, askToNotify } from "@/lib/notify";
 // The Book Creator wizard, run inside the project on the engine in use (loaded on demand).
@@ -195,6 +197,18 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     reload().then(({ job }) => { if (job?.status === "running" || job?.status === "queued") follow(job); }).catch((e) => toast({ title: "Could not open the project", description: e instanceof Error ? e.message : "", variant: "destructive" }));
     return () => abort.current?.abort();
   }, [reload, follow, toast]);
+
+  // A complete copy of the project on the owner's computer (§21).
+  const backup = async () => {
+    toast({ title: "Preparing the backup…", description: "The manuscript, documents and every result, with their versions." });
+    try {
+      await persist();
+      const { blob, report } = await buildBackup(backend, id, backend === runnerBackend ? (s) => pdfInStudio.bytes(id, s) : undefined);
+      const name = (thread?.title || "project").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 60) || "project";
+      saveFile(blob, `${name}-backup-${new Date().toISOString().slice(0, 10)}.zip`);
+      toast({ title: "Backup downloaded", description: report.skipped.length ? `${report.files} files. Not included (see README.txt): ${report.skipped.length}.` : `${report.files} files.` });
+    } catch (e) { toast({ title: "The backup couldn't be made", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+  };
 
   const start = useCallback(async (action: StudioAction, options: RunOptions, force?: "api") => {
     const use = force ?? engineId;
@@ -463,6 +477,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         <Shell p={p} place={place} setPlace={setPlace} collapsed={collapsed} setCollapsed={setCollapsed} drawer={drawer} setDrawer={setDrawer}
           m={m} sectionId={sectionId} onSection={openSection} pending={pendingIds[0] ?? null} title={thread.title}
           onRename={() => setRenaming(thread.title)}
+          onBackup={() => void backup()}
           onDelete={busy ? undefined : async () => { if (!window.confirm(`Delete “${thread.title}” with its documents and results? Anything saved to your Library stays.`)) return; try { await backend.remove(id); p.onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}
           header={top} side={showPanel && !narrow ? panel : null} reduce={reduce}>
           {recovery && <RecoveryBanner r={recovery} onRestore={() => void recover(true)} onDiscard={() => { if (window.confirm(`Discard the changes from ${new Date(recovery.at).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}? They exist only on this device and cannot be recovered afterwards.`)) void recover(false); }} />}
@@ -562,15 +577,15 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
 }
 
 /** Frame + header + stage + optional Claude panel, laid out for the screen size (spec §3). */
-function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, reduce, onRename, onDelete, children }: {
+function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, reduce, onRename, onDelete, onBackup, children }: {
   p: WorkspaceProps; place: Place; setPlace: (x: Place) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; drawer: boolean; setDrawer: (v: boolean) => void;
   m: Manuscript | null | undefined; sectionId: string | null; onSection: (id: string) => void; pending: string | null; title: string;
-  header?: React.ReactNode; side?: React.ReactNode; reduce?: boolean; onRename?: () => void; onDelete?: () => void; children: React.ReactNode;
+  header?: React.ReactNode; side?: React.ReactNode; reduce?: boolean; onRename?: () => void; onDelete?: () => void; onBackup?: () => void; children: React.ReactNode;
 }) {
   const frame = (rail: boolean) => (
     <Frame collapsed={rail} onCollapse={setCollapsed} place={place} onPlace={setPlace} threads={p.threads} activeId={p.id} onProject={(x) => { setDrawer(false); p.onProject(x); }}
       onNewProject={() => { setDrawer(false); void p.onNewProject(); }} ready={p.ready} title={title} m={m} sectionId={sectionId} onSection={(x) => { setDrawer(false); onSection(x); }} pending={pending}
-      decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} onRename={onRename} onDelete={onDelete} />
+      decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} onRename={onRename} onDelete={onDelete} onBackup={onBackup} />
   );
   return (
     <div className="fixed inset-0 z-40 flex bg-[#F7F6F2] text-[#172033] dark:bg-[#0D1016] dark:text-[#E5E7EB]">
