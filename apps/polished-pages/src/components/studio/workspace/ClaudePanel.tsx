@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, BookOpen, Check, ChevronDown, CircleDashed, Eye, FileText, Layers, Loader2, Maximize2, MessageSquare, NotebookPen, Paperclip, PanelRightClose, Plus, Quote, Route, ScrollText, Search, Send, ShieldCheck, SlidersHorizontal, Sparkles, Square, Trash2, Wand2, Wrench, X } from "lucide-react";
+import { AlertTriangle, BookOpen, Check, ChevronDown, CircleDashed, Eye, FileText, Layers, Loader2, MessageSquare, NotebookPen, PanelRightClose, Plus, Quote, Route, ScrollText, Search, Send, ShieldCheck, SlidersHorizontal, Sparkles, Square, Trash2, Wand2, Wrench, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,8 @@ import type { Proposal, Running, SectionOp } from "./useSectionRun";
 import { GRADIENT } from "./ui";
 
 // The Claude panel (design spec §5.2, upgraded in §21): one persistent, collapsible panel with
-// Revise, Research, Notes and Citations, and Ask docked at its foot. It remembers the last mode
-// and never switches by itself.
+// Revise, Research, Notes and Citations; questions are asked in the chat bar at the foot of the page,
+// and their conversation opens here (Ask). It remembers the last mode and never switches by itself.
 export type PanelMode = "ask" | "revise" | "research" | "notes" | "citations";
 // The tabs (§21): Ask is the box docked at the foot of the panel, which opens the whole conversation.
 const MODES: { id: PanelMode; label: string; icon: typeof Sparkles }[] = [
@@ -67,7 +67,6 @@ export default function ClaudePanel(p: {
   const [settings, setSettingsState] = useState<ReviseSettings>(() => loadSettings());
   const setSettings = (x: ReviseSettings) => { setSettingsState(x); keepSettings(x); };
   const chapterNo = section && section.kind === "chapter" ? p.m.sections.filter((x) => x.kind === "chapter").findIndex((x) => x.id === section.id) + 1 : 0;
-  const [ask, setAsk] = useState("");
   const [factor, setFactor] = useState("2");
   const [instructions, setInstructions] = useState("");
   const [improve, setImprove] = useState<NonNullable<RunOptions["improvementType"]>>("enhance");
@@ -79,12 +78,6 @@ export default function ClaudePanel(p: {
   useEffect(() => { if (p.mode === "ask") feedEnd.current?.scrollIntoView({ block: "end" }); }, [p.mode, p.thread.messages.length, p.live?.steps.length]);
 
   const found = useMemo(() => findCitations(section?.body ?? ""), [section?.body]);
-  // A question about this section: it names the section, whose text Claude reads in ./manuscript/, then shows the conversation.
-  const sendAsk = () => {
-    if (!ask.trim() || p.chatBusy) return;
-    p.onChat(section ? `About the section “${section.title}”${chapterNo ? ` (chapter ${chapterNo})` : ""}: ${ask.trim()}` : ask.trim());
-    setAsk(""); p.onMode("ask");
-  };
   const busyHere = Boolean(p.running && section && p.running.sectionId === section.id);
   const card = APPROACH_CARDS.find((a) => a.id === p.approach)!;
   const empty = !section?.body.trim();
@@ -400,22 +393,6 @@ export default function ClaudePanel(p: {
             <Button type="submit" size="icon" aria-label="Send" disabled={!message.trim() || p.chatBusy} className="h-9 w-9 shrink-0 rounded-[8px] bg-[#172033] hover:bg-[#172033]/90"><Send className="h-4 w-4" /></Button>
           </div>
           {billed && <p className="mt-1.5 px-1 text-[11.5px] text-[#64748B]">Runs on the API: billed per use.</p>}
-        </form>
-      )}
-      {/* Ask Claude about this chapter: always at the foot of the panel; the section goes with the question. */}
-      {p.mode !== "ask" && (
-        <form onSubmit={(e) => { e.preventDefault(); sendAsk(); }} className="border-t border-[#E6E8ED] bg-[#F8F9FF] p-3 dark:border-white/10 dark:bg-white/5">
-          <div className="mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-[#4F46E5]" aria-hidden /><p className="text-[14px] font-semibold">Ask Claude about this {section?.kind === "chapter" ? "chapter" : "section"}</p>
-            <button type="button" onClick={() => p.onMode("ask")} aria-label="Open the whole conversation" className="ml-auto grid h-7 w-7 place-items-center rounded-md text-[#64748B] hover:bg-white dark:hover:bg-white/10"><Maximize2 className="h-3.5 w-3.5" /></button></div>
-          <div className="rounded-[10px] border border-[#E6E8ED] bg-white p-2 dark:border-white/10 dark:bg-[#11151C]">
-            <Textarea value={ask} onChange={(e) => setAsk(e.target.value)} rows={2} aria-label="Ask Claude about this section" placeholder="Ask a question, discuss this section, or request a revision…"
-              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendAsk(); } }}
-              className="min-h-[48px] resize-none border-0 bg-transparent p-1 text-[14px] shadow-none focus-visible:ring-0" />
-            <div className="flex items-center gap-2">
-              {section && <span className="inline-flex min-w-0 items-center gap-1 truncate text-[12.5px] text-[#64748B]"><Paperclip className="h-3.5 w-3.5 shrink-0" /> “{section.title}” attached</span>}
-              <Button type="submit" size="icon" aria-label="Send" disabled={!ask.trim() || p.chatBusy} className={`ml-auto h-9 w-9 shrink-0 rounded-full ${GRADIENT}`}><Send className="h-4 w-4" /></Button>
-            </div>
-          </div>
         </form>
       )}
       {!engine && <p role="alert" className="flex items-center gap-2 border-t border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[12.5px] text-amber-800 dark:text-amber-300"><AlertTriangle className="h-3.5 w-3.5" /> No engine is available: see the engine menu at the bottom of the sidebar.</p>}

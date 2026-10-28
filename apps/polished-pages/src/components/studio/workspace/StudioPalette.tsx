@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Eye, FileText, Focus, HelpCircle, History, Layers, ListTree, Moon, PanelRight, PenLine, Quote, Redo2, ScrollText, Undo2, Wand2, Wrench, Replace } from "lucide-react";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from "@/components/ui/command";
+import { findMatches } from "@/lib/find-replace";
 import { STUDIO_TOOLS, type ToolId } from "@/lib/studio-tools";
 import { kindDef, type Manuscript } from "@/lib/manuscript";
 import { outputLabel, type StudioThread } from "@/lib/claude-studio";
@@ -10,7 +11,7 @@ import { VIEWS } from "./Canvas";
 import type { DialogAction } from "./parts";
 
 // ⌘K (design spec §6): search tools, chapters, results and actions from anywhere in the Studio.
-export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, onSection, onTool, onAction, onJoin, onFind, onResult, onView, onFocus, onPanel, onTheme, onUndo, onRedo, onHistory, onTour, hasProposal }: {
+export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, onSection, onTool, onAction, onJoin, onFind, onResult, onView, onFocus, onPanel, onTheme, onUndo, onRedo, onHistory, onTour, hasProposal, onHit }: {
   open: boolean; onOpenChange: (v: boolean) => void; m: Manuscript | null | undefined; thread: StudioThread | null;
   onPlace: (p: Place) => void; onSection: (id: string) => void; onTool: (t: ToolId) => void; onAction: (a: DialogAction) => void; onJoin: () => void; onFind?: () => void;
   onResult: (path: string) => void; onView: (v: CanvasView) => void; onFocus: () => void; onPanel: () => void; onTheme: () => void;
@@ -19,7 +20,11 @@ export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, 
   onTour?: () => void;
   /** Changes and Side by side need a suggestion to show. */
   hasProposal?: boolean;
+  /** Search in book (§21): a place in a section's text, to open with the words selected. */
+  onHit?: (sectionId: string, start: number, end: number) => void;
 }) {
+  const [query, setQuery] = useState("");
+  const hits = useMemo(() => (m && query.trim().length >= 3 ? findMatches(m, query.trim(), { titles: false }).slice(0, 30) : []), [m, query]);
   // ⌘K / Ctrl+K opens it; the site's own palette is not mounted inside the Studio.
   useEffect(() => {
     const down = (e: KeyboardEvent) => { if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); onOpenChange(!open); } };
@@ -30,9 +35,19 @@ export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, 
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange} title="Claude Studio: tools, chapters and results">
-      <CommandInput placeholder="Search tools, chapters and results…" />
+      <CommandInput placeholder="Search in book, tools, chapters and results…" value={query} onValueChange={setQuery} />
       <CommandList className="max-h-[60vh]">
         <CommandEmpty>Nothing matches.</CommandEmpty>
+        {hits.length > 0 && (
+          <CommandGroup heading={`In the book · ${hits.length}${hits.length === 30 ? "+" : ""}`}>
+            {hits.map((h) => (
+              <CommandItem key={h.id} value={`${query} ${h.id}`} onSelect={run(() => onHit?.(h.sectionId, h.index, h.index + h.length))}>
+                <FileText className="mr-2 shrink-0" />
+                <span className="min-w-0 flex-1 truncate"><span className="text-xs opacity-70">{m?.sections.find((s) => s.id === h.sectionId)?.title} · </span>…{h.before.slice(-22)}<mark className="bg-amber-200 dark:bg-amber-500/40">{h.text}</mark>{h.after.slice(0, 50)}…</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
         <CommandGroup heading="Go to">
           {STAGES.map((s) => <CommandItem key={s.id} onSelect={run(() => onPlace(s.id))}><s.icon className="mr-2" />{s.label}<span className="ml-2 truncate text-xs opacity-70">{s.line}</span></CommandItem>)}
           <CommandItem onSelect={run(() => onPlace("books"))}><BookOpen className="mr-2" />My books</CommandItem>

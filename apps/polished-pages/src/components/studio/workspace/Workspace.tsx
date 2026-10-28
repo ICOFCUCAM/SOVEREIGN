@@ -26,6 +26,7 @@ import ClaudePanel, { type PanelMode } from "./ClaudePanel";
 import StudioPalette from "./StudioPalette";
 import FindReplaceDialog from "./FindReplaceDialog";
 import PageDesignPanel from "./PageDesignPanel";
+import ChapterChat from "./ChapterChat";
 import SourcesStage from "./SourcesStage";
 import PlanStage from "./PlanStage";
 import BookDesignDialog from "./BookDesignDialog";
@@ -137,6 +138,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const setBookPanel = (v: "design" | "claude") => { setBookPanelState(v); try { localStorage.setItem("studio.bookPanel", v); } catch { /* storage blocked */ } };
   // Find and replace across the book (§21).
   const [finding, setFinding] = useState(false);
+  // A place to select in the Writing text (search in book, comments, edit on the page).
+  const [selectReq, setSelectReq] = useState<{ sectionId: string; start: number; end: number; at: number } | null>(null);
   // A long job that stopped and can be continued (§21): the latest whole-book run's message says so.
   const [dismissed, setDismissed] = useState<string | null>(null);
   const stopped = useMemo(() => { const last = [...(thread?.messages ?? [])].reverse().find((x) => x.role === "assistant" && x.action !== "chat"); return last?.resume && last.id !== dismissed ? last : null; }, [thread?.messages, dismissed]);
@@ -415,7 +418,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}
       projectId={id} outputs={thread.outputs} onOpenResult={setViewing} onTool={(t) => setTool({ initial: t, target: "manuscript" })} />;
     if (!section) return <EmptyWrite onAdd={() => { const r = insertSection(m, "chapter"); update(r.manuscript); setSectionId(r.id); }} onPlan={() => setPlace("plan")} />;
-    return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")} onTrim={setTrim} designInPanel={showPanel && designPanel} onSection={openSection}
+    return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")} onTrim={setTrim} designInPanel={showPanel && designPanel} select={selectReq?.sectionId === section.id ? selectReq : null} onSection={openSection}
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
       onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); const next = m.sections[m.sections.findIndex((s) => s.id === section.id) + 1]; toast({ title: "Accepted", description: `Your previous text is kept in Version history.${next ? ` Next: “${next.title}”, at the end of the page.` : ""}` }); }}
       onDiscard={() => { sr.decide(section.id, "discard"); setView("writing"); }}
@@ -466,7 +469,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       {m?.libraryId && <Link to={`/library?open=${m.libraryId}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted md:flex dark:text-[#CBD5E1]" title="This project's book in your Library"><LibraryIcon className="h-4 w-4" /> In your Library</Link>}
       {(thread.outputs.length > 0 || live || !section) && <button type="button" onClick={() => setActivity(true)} aria-label={`Results: ${thread.outputs.length}${live ? `, ${live.job.label} running` : ""}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted sm:flex dark:text-[#CBD5E1]"><FileText className="h-4 w-4" /> {section && m ? "Results" : "Ask Claude · Results"} <span className="text-[12px] text-[#94A3B8]">{thread.outputs.length}</span></button>}
       <button type="button" onClick={() => setPalette(true)} className="flex h-9 items-center gap-2 rounded-[8px] border border-[#E6E8ED] bg-white px-2.5 text-[13px] text-[#64748B] hover:border-[#CBD5E1] dark:border-white/10 dark:bg-white/5">
-        <Search className="h-4 w-4" /><span className="hidden lg:inline">Tools and chapters</span><kbd className="rounded border border-[#E6E8ED] bg-[#F8FAFC] px-1.5 text-[11px] text-[#475569] dark:border-white/10 dark:bg-white/5">⌘K</kbd>
+        <Search className="h-4 w-4" /><span className="hidden lg:inline">Search in book…</span><kbd className="rounded border border-[#E6E8ED] bg-[#F8FAFC] px-1.5 text-[11px] text-[#475569] dark:border-white/10 dark:bg-white/5">⌘K</kbd>
       </button>
       {place === "write" && <button type="button" onClick={() => setFocus(true)} aria-label="Focus mode (⌘.)" title="Focus mode (⌘.)" className="grid h-9 w-9 place-items-center rounded-md text-[#475569] hover:bg-muted dark:text-[#CBD5E1]"><Focus className="h-4 w-4" /></button>}
       <button type="button" onClick={toggleTheme} aria-label="Light, dark or system theme" title="Theme" className="grid h-9 w-9 place-items-center rounded-md text-[#475569] hover:bg-muted dark:text-[#CBD5E1]"><Moon className="h-4 w-4" /></button>
@@ -516,6 +519,12 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={place} initial={reduce ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={reduce ? undefined : { opacity: 0 }} transition={{ duration: 0.16 }}>{stage}</motion.div>
           </AnimatePresence>
+          {/* Ask Claude about this chapter, at the foot of the page (§21); the answer opens in the panel's conversation. */}
+          {place === "write" && section && m && (
+            <ChapterChat m={m} sectionId={section.id} engineLabel={engineId === "claude-code" ? "Claude Code · your plan" : engineId === "api" ? "Claude API · billed per use" : "No engine"} busy={busy || !engineId} running={Boolean(live)}
+              onStop={() => { if (live) void backend.cancel(live.job); }} onSend={(message) => { void start("chat", { message }); setPanelMode("ask"); if (narrow) setSheet(true); else setPanelOpen(true); }}
+              onAction={setDialog} onJoin={() => setJoining(true)} onTool={() => setTool({})} onConversation={() => { setPanelMode("ask"); if (narrow) setSheet(true); else setPanelOpen(true); }} />
+          )}
         </Shell>
       )}
       <Dialog open={renaming !== null} onOpenChange={(v) => { if (!v) setRenaming(null); }}>
@@ -556,6 +565,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       {m && section && <VersionsSheet open={versions} onOpenChange={setVersions} m={m} section={section} onUpdate={update} />}
       <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread} hasProposal={Boolean(proposal)}
         onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onTour={() => setTour(true)} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)} onFind={m?.sections.length ? () => setFinding(true) : undefined}
+        onHit={(sid, a, b) => { setPlace("write"); setView("writing"); openSection(sid); setSelectReq({ sectionId: sid, start: a, end: b, at: Date.now() }); }}
         onResult={setViewing} onView={(v) => { setPlace("write"); setView(v); }} onFocus={() => { setPlace("write"); setFocus(true); }} onPanel={() => setPanelOpen(!panelOpen)} onTheme={toggleTheme} />
       {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} initialTarget={tool.target} hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />

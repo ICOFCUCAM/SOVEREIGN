@@ -58,10 +58,12 @@ function numberChanges(blocks: DiffBlock[]) {
   }));
 }
 
-export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onTrim, designInPanel, onSection, onAppend }: {
+export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onTrim, designInPanel, select, onSection, onAppend }: {
   m: Manuscript; section: Section; view: CanvasView; proposal: Proposal | null; running: boolean;
   onBody: (t: string) => void; onTitle: (t: string) => void;
   onAccept: (text: string) => void; onDiscard: () => void; onRedo: () => void; onRestoreOriginal: () => void; onView: (v: CanvasView) => void; bookTrim?: string; onTrim?: (id: string) => void; designInPanel?: boolean;
+  /** Words to select in the text (a search hit, a comment), with when it was asked. */
+  select?: { start: number; end: number; at: number } | null;
   /** Moves to another section: the previous and next ones, for working through the book chapter by chapter. */
   onSection?: (id: string) => void;
   /** Adds Claude's text below the section's own, instead of replacing it (as the Manuscript editor offered). */
@@ -102,6 +104,18 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
 
   const card = mine ? APPROACH_CARDS.find((a) => a.id === mine.approach) : null;
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (!select) return;
+    const t = window.setTimeout(() => {
+      const el = bodyRef.current; if (!el) return;
+      el.focus(); el.setSelectionRange(select.start, select.end);
+      // Scroll the selection into view: measure how far down the text it starts.
+      const lines = el.value.slice(0, select.start).split("\n").length;
+      const total = Math.max(1, el.value.split("\n").length);
+      document.getElementById("studio-main")?.scrollTo({ top: el.offsetTop + (el.scrollHeight * (lines - 1)) / total - 200, behavior: "smooth" });
+    }, 120);
+    return () => window.clearTimeout(t);
+  }, [select?.at]); // eslint-disable-line react-hooks/exhaustive-deps
   // Writing shows the text formatted or as written (with its Markdown marks); the choice is kept on this device.
   const [formatted, setFormattedState] = useState(() => { try { return localStorage.getItem("studio.formatted") === "1"; } catch { return false; } });
   const setFormatted = (v: boolean) => { setFormattedState(v); try { localStorage.setItem("studio.formatted", v ? "1" : "0"); } catch { /* storage blocked */ } };
