@@ -164,7 +164,7 @@ export function LiveCard({ live, onStop }: { live: Live; onStop: () => void }) {
 
 // Results: main files first; by-products folded into named groups (as the Studio listed them before the redesign).
 const RESULT_GROUPS: { prefix: string; label: string }[] = [
-  { prefix: "rewrite/", label: "Rewritten chapters" }, { prefix: "rewrite-earlier-", label: "Earlier rewritten chapters" }, { prefix: "volumes/", label: "Series volumes" }, { prefix: "planned/", label: "Planned books" },
+  { prefix: "rewrite/", label: "Rewritten chapters" }, { prefix: "rewrite-earlier-", label: "Earlier rewritten chapters" }, { prefix: "scanned/", label: "Scanned pages, as text" }, { prefix: "scanned-earlier-", label: "Earlier readings of scanned pages" }, { prefix: "volumes/", label: "Series volumes" }, { prefix: "planned/", label: "Planned books" },
   { prefix: "book/", label: "Book wizard" }, { prefix: "translation/", label: "Translated chapters" }, { prefix: "sections/", label: "Manuscript suggestions" },
 ];
 /** The project's results, newest first, with chapter files, volumes, wizard files and suggestions grouped. */

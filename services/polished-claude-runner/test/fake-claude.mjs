@@ -33,6 +33,30 @@ if (prompt.includes("copy and art direction for its printed cover")) {
   out({ type: "result", subtype: "success", is_error: false, result: "done", session_id: sid });
   process.exit(0);
 }
+const batch = /^Read pages (\d+) to (\d+) \(of (\d+)\)/.exec(prompt);
+if (batch) {
+  const file = /\.\/out\/scanned\/(\S+?\.txt)/.exec(prompt)[1];
+  fs.mkdirSync("out/scanned", { recursive: true });
+  let text = Number(batch[1]) > 1 ? fs.readFileSync(`out/scanned/${file}`, "utf8") : "";
+  for (let i = Number(batch[1]); i <= Number(batch[2]); i++) text += `<!-- page ${i} -->\nPage ${i} of the oneness of God, read from the scanned book, with all the words that the page holds in it.\n\n`;
+  fs.writeFileSync(`out/scanned/${file}`, text);
+  out({ type: "result", subtype: "success", is_error: false, result: "Read.", session_id: sid });
+  process.exit(0);
+}
+if (prompt.startsWith("Continue the rewrite")) {
+  fs.writeFileSync("out/rewrite/03-home.md", "## Home\n\nThe third chapter, written by the run that continued.");
+  const parts = fs.readdirSync("out/rewrite").sort().map((n) => fs.readFileSync(`out/rewrite/${n}`, "utf8"));
+  fs.writeFileSync("out/rewrite.md", "# The Long Road\n\n" + parts.join("\n\n"));
+  out({ type: "result", subtype: "success", is_error: false, result: "Continued.", session_id: sid });
+  process.exit(0);
+}
+if (prompt.startsWith("Rewrite") && fs.existsSync("INSTRUCTIONS.md") && fs.readFileSync("INSTRUCTIONS.md", "utf8").includes("STOPAFTERTWO")) {
+  fs.mkdirSync("out/rewrite", { recursive: true });
+  fs.writeFileSync("out/rewrite/01-beginnings.md", "## Beginnings\n\nOne.");
+  fs.writeFileSync("out/rewrite/02-the-journey.md", "## The Journey\n\nTwo.");
+  out({ type: "result", subtype: "error_max_turns", is_error: true, result: "Stopped: the session ran out of room.", session_id: sid });
+  process.exit(1);
+}
 if (prompt.includes("include scanned pages or images") && fs.readdirSync("source").some((x) => x.includes("locked"))) {
   fs.writeFileSync("out/scanned-text.md", "# locked.pdf\n\nThis file could not be opened, so no text has been transcribed. Exact error: PDF is password-protected. Please provide an unprotected version. No page was read, so nothing here is a transcription of anything at all in the book.");
   out({ type: "result", subtype: "success", is_error: false, result: "Locked.", session_id: sid });

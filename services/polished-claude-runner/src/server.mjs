@@ -19,6 +19,7 @@ import { createStore, safeName, inside, isBookResult, manuscriptFile } from "./s
 import { USES_BOOK, buildRun, CITATION_STYLES } from "./prompts.mjs";
 import { runClaude } from "./claude.mjs";
 import { capabilities } from "./version.mjs";
+import { nextBatch, rewriteDone, scanProgress, stripPageMarks } from "./progress.mjs";
 
 // Claude Studio runner. A small HTTP API in front of the owner's Claude Code:
 //   GET    /health                          liveness (no data)
@@ -131,12 +132,12 @@ export function createServer(cfg = loadConfig(), deps = {}) {
 
   const isReadFailure = (text) => /could not be (opened|read)|password[- ]protected|no page was read|pdftoppm is not installed/i.test(String(text).slice(0, 600));
 
-  async function adoptScannedText(id, cwd) {
+  async function adoptScannedText(id, cwd, reading = null) {
     const t = await store.read(id);
     if (!t) return;
     // Documents with no text yet, and documents the Studio sent page images for (a re-read replaces their text).
     const base = (f) => f.storedAs.replace(/\.[^.]+$/, "");
-    const needs = t.files.filter((f) => f.kind === "original" && !/\.(txt|md|markdown)$/i.test(f.storedAs) && (!t.files.some((x) => x.kind === "text" && x.storedAs === `${base(f)}.txt`) || t.files.some((x) => x.kind === "page" && x.storedAs.startsWith(`${base(f)}-p`))));
+    const needs = t.files.filter((f) => f.kind === "original" && !/\.(txt|md|markdown)$/i.test(f.storedAs) && (!t.files.some((x) => x.kind === "text" && x.storedAs === `${base(f)}.txt`) || t.files.some((x) => x.kind === "page" && x.storedAs.startsWith(`${base(f)}-p`)) || base(f) === reading));
     for (const f of needs) {
       let text = await fs.readFile(path.join(cwd, "out", "scanned", `${base(f)}.txt`), "utf8").catch(() => "");
       // One scanned document and no per-file copy: the combined transcription is its text, but only a real one (with its page markers).
@@ -146,6 +147,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       }
       // A report that the file could not be read is never the book's text.
       if (isReadFailure(text)) continue;
+      text = stripPageMarks(text);
       if (text.trim().split(/\s+/).length >= 20) await store.addFile(id, f.name, "text", Buffer.from(text));
     }
   }
@@ -167,12 +169,20 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       if (!thread.files.length && !hasManuscript) return { status: 400, error: "Upload your book (or write the manuscript) first, so Claude has material to design the book from." };
       options = { ...options, _hasManuscript: hasManuscript, _book: { rules: m?.rules, knowledge: m?.knowledge } };
     }
+    // Continuing: the rewrite's chapters already written, or the next pages of a scan (DESIGN-SPEC.md §21).
+    if (action === "rewrite" && options?.continueRun) options = { ...options, _done: await rewriteDone(store.workDir(thread.id)) };
+    if (action === "tool" && options?.tool === "ocr") {
+      // A fresh read (not a continuation) starts from page 1.
+      const b = nextBatch(await scanProgress(thread, store.workDir(thread.id), { fresh: !options.continueRun }));
+      if (b) options = { ...options, _batch: b };
+      else if (options.continueRun) return { status: 400, error: "Every scanned page has been read already." };
+    }
     const spec = buildRun(action, options);
     if (!spec) return { status: 400, error: "Unknown action." };
     if (spec.error) return { status: 400, error: spec.error };
     const isBook = action.startsWith("book-");
     if (action === "chat" && !String(options?.message || "").trim()) return { status: 400, error: "Write a message first." };
-    if (action === "rewrite" && !String(options?.instructions || "").trim()) return { status: 400, error: "Give the rewrite instructions." };
+    if (action === "rewrite" && !options?.continueRun && !String(options?.instructions || "").trim()) return { status: 400, error: "Give the rewrite instructions." };
     if (isBook && action !== "book-improve" && ["polish", "mine", "mine-and-research", "research"].includes(options?.approach) && thread.files.length === 0) return { status: 400, error: "Upload your book to this project first, so Claude can build on it." };
     if (action !== "chat" && action !== "section" && !isBook && thread.files.length === 0 && !options?.target && !(action === "tool" && options?.tool === "compare" && options?.a) && !(action === "tool" && ["cover-copy", "library-revise", "library-ask", "organise"].includes(options?.tool) && String(options?.text || "").trim()) && !(action === "tool" && options?.tool === "book-design")) return { status: 400, error: "Upload a document first." };
     if (options?.target === "manuscript" && !(await store.readManuscript(thread.id))?.sections?.some((x) => String(x.body || "").trim())) return { status: 400, error: "The manuscript is empty: write or import it first." };
@@ -192,9 +202,12 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     if (tokenShape(cfg.claudeToken) === "api-key") return { status: 503, error: TOKEN_HELP["api-key"] };
 
     const cwd = store.workDir(thread.id);
+    // A fresh read of scanned pages sets the earlier transcriptions aside (a continuation adds to them).
+    if (options?._batch && !options.continueRun) await fs.rename(path.join(cwd, "out", "scanned"), path.join(cwd, "out", `scanned-earlier-${Date.now()}`)).catch(() => {});
     // A rewrite from an approved plan starts with no chapter files left from an earlier rewrite (they are kept aside).
-    if (action === "rewrite" && options?.planApproved) await fs.rename(path.join(cwd, "out", "rewrite"), path.join(cwd, "out", `rewrite-earlier-${Date.now()}`)).catch(() => {});
-    if (spec.instructions) await fs.writeFile(path.join(cwd, "INSTRUCTIONS.md"), spec.instructions);
+    if (action === "rewrite" && options?.planApproved && !options?.continueRun) await fs.rename(path.join(cwd, "out", "rewrite"), path.join(cwd, "out", `rewrite-earlier-${Date.now()}`)).catch(() => {});
+    const keep = spec.keepInstructions && (await fs.access(path.join(cwd, "INSTRUCTIONS.md")).then(() => true, () => false));
+    if (spec.instructions && !keep) await fs.writeFile(path.join(cwd, "INSTRUCTIONS.md"), spec.instructions);
     if (spec.needsVoice) {
       const voice = await store.readVoice();
       if (!voice.trim()) return { status: 400, error: "Create your voice profile first (Learn my voice), then save it as your profile." };
@@ -237,7 +250,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
 
     run.done.then(async (r) => {
       // Read scanned pages: each transcription becomes its document's text, so the upload is "Text ready" for everything else.
-      if (action === "tool" && options?.tool === "ocr") await adoptScannedText(thread.id, cwd).catch(() => {});
+      if (action === "tool" && options?.tool === "ocr") await adoptScannedText(thread.id, cwd, options._batch?.base).catch(() => {});
       const t = (await store.read(thread.id)) || thread;
       if (r.sessionId) t.sessionId = r.sessionId;
       if (r.ok) setStatus({ state: "ok" });
@@ -247,7 +260,11 @@ export function createServer(cfg = loadConfig(), deps = {}) {
         setStatus({ state: "limit", message: r.error, resetsAt: reset ? new Date(typeof reset === "number" ? reset * (reset < 1e12 ? 1000 : 1) : reset).toISOString() : null });
       }
       // A rewrite that finished its chapters but not the merged book still gives the owner a whole book.
-      if (action === "rewrite" && !(options?.approval && !options?.planApproved) && !options?.auditOnly) await mergeChapters(cwd).catch(() => {});
+      if (action === "rewrite" && !(options?.approval && !options?.planApproved) && !options?.auditOnly) {
+        // An earlier, incomplete book that this run did not replace is merged again from all the chapters.
+        const stale = before.has("rewrite.md") && (await store.scanOutputs(thread.id)).find((o) => o.path === "rewrite.md")?.modifiedAt === before.get("rewrite.md");
+        await mergeChapters(cwd, stale).catch(() => {});
+      }
       const after = await store.scanOutputs(thread.id);
       const changed = after.filter((o) => before.get(o.path) !== o.modifiedAt).map((o) => o.path);
       for (const rel of changed) if (isBookResult(rel)) await store.recordVersion(thread.id, rel, options?.correct ? "Targeted correction" : job.label).catch(() => {});
@@ -255,13 +272,29 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       job.status = job.cancelled ? "cancelled" : r.ok ? "done" : "failed";
       job.error = job.cancelled ? null : r.error ?? null;
       job.endedAt = new Date().toISOString();
-      t.messages.push({ id: randomUUID(), role: "assistant", engine: "claude-code", errorKind: r.ok ? null : r.errorKind ?? null, action, text: r.result || job.text.join("\n\n") || (job.cancelled ? "Stopped." : job.error || ""), at: job.endedAt, jobId: job.id, status: job.status, outputs: changed });
-      delete t.runningJobId;
-      await store.write(t);
       // A step with one expected file fails plainly if Claude didn't write it.
       // Claude's own last words say why (for example a PDF it could not open), so they go with the error.
       if (job.status === "done" && job.output && !changed.includes(job.output)) { const why = String(r.result || job.text.at(-1) || "").trim().replace(/\s+/g, " ").slice(0, 400); job.status = "failed"; job.error = `Claude finished without writing the result.${why ? ` Claude said: “${why}”` : " Try again."}`; }
-      emit(job, { type: "done", status: job.status, error: job.error, errorKind: job.status === "failed" ? r.errorKind ?? null : null, outputs: changed, output: job.output });
+      // A long job that stopped says how to continue it (DESIGN-SPEC.md §21); a finished scan batch queues the next pages.
+      let resume = null, next = null;
+      if (action === "rewrite" && job.status !== "done" && !options?.auditOnly && !(options?.approval && !options?.planApproved)) {
+        const done = await rewriteDone(cwd);
+        if (done.length) resume = { action: "rewrite", options: { continueRun: true, ...(options?.target ? { target: options.target } : {}) }, what: `${done.length} ${done.length === 1 ? "chapter" : "chapters"} written` };
+      }
+      if (options?._batch) {
+        const b = nextBatch(await scanProgress((await store.read(thread.id)) || t, cwd));
+        const moved = b && (b.base !== options._batch.base || b.done > options._batch.done);
+        if (b && moved && job.status === "done" && queue.length < QUEUE_MAX) {
+          next = { id: randomUUID(), threadId: thread.id, action, label: `Read scanned pages · ${b.name} · pages ${b.from}–${b.to} of ${b.total}`, output: null, status: "queued", startedAt: new Date().toISOString(), events: [], subscribers: new Set(), text: [] };
+          jobs.set(next.id, next);
+          queue.unshift({ job: next, threadId: thread.id, action, options: { tool: "ocr", continueRun: true } });
+        } else if (b) resume = { action: "tool", options: { tool: "ocr", continueRun: true }, what: `${b.name}: pages 1–${b.done} of ${b.total} read` };
+      }
+      t.messages.push({ id: randomUUID(), role: "assistant", engine: "claude-code", resume, errorKind: r.ok ? null : r.errorKind ?? null, action, text: r.result || job.text.join("\n\n") || (job.cancelled ? "Stopped." : job.error || ""), at: job.endedAt, jobId: job.id, status: job.status, outputs: changed });
+      // The next batch of a scan is this project's job now, so a reload follows it.
+      if (next) t.runningJobId = next.id; else delete t.runningJobId;
+      await store.write(t);
+      emit(job, { type: "done", status: job.status, error: job.error, errorKind: job.status === "failed" ? r.errorKind ?? null : null, outputs: changed, output: job.output, ...(next ? { next: publicJob(next) } : {}) });
       for (const s of job.subscribers) s.end();
       job.subscribers.clear();
       running = null;
@@ -272,10 +305,10 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     return { status: 202, job: publicJob(job) };
   }
 
-  async function mergeChapters(cwd) {
+  async function mergeChapters(cwd, again = false) {
     const dir = path.join(cwd, "out", "rewrite");
     const full = path.join(cwd, "out", "rewrite.md");
-    try { await fs.access(full); return; } catch { /* not written: merge */ }
+    if (!again) try { await fs.access(full); return; } catch { /* not written: merge */ }
     const names = (await fs.readdir(dir)).filter((n) => /^\d+.*\.md$/i.test(n)).sort();
     if (!names.length) return;
     const parts = await Promise.all(names.map((n) => fs.readFile(path.join(dir, n), "utf8")));
@@ -465,6 +498,14 @@ export function createServer(cfg = loadConfig(), deps = {}) {
         if (job?.status === "queued") {
           job.cancelled = true; job.status = "cancelled"; job.endedAt = new Date().toISOString();
           const at = queue.findIndex((q) => q.job === job); if (at >= 0) queue.splice(at, 1);
+          // The next batch of a scan, stopped before it began: the project says how far the reading got.
+          const t = await store.read(job.threadId);
+          if (t?.runningJobId === job.id) {
+            delete t.runningJobId;
+            const b = nextBatch(await scanProgress(t, store.workDir(t.id)));
+            t.messages.push({ id: randomUUID(), role: "assistant", engine: "claude-code", action: job.action, text: "Stopped.", at: job.endedAt, jobId: job.id, status: "cancelled", outputs: [], resume: b ? { action: "tool", options: { tool: "ocr", continueRun: true }, what: `${b.name}: pages 1–${b.done} of ${b.total} read` } : null });
+            await store.write(t);
+          }
           emit(job, { type: "done", status: "cancelled", error: null, outputs: [], output: job.output });
           for (const s of job.subscribers) s.end();
           job.subscribers.clear();

@@ -83,6 +83,16 @@ describe("Claude Studio workspace", () => {
     expect(f.saved().sections[0].versions?.at(-1)).toMatchObject({ kind: "before-restore", body: "Yahuah's people lived among nations.\n\nThese spirits had names." });
   }, 15_000); // walks the whole revision flow; slow under a full parallel run
 
+  it("offers to continue a rewrite that stopped, where it stopped", async () => {
+    const f = fake();
+    const stoppedThread = { ...thread, messages: [{ id: "m1", role: "assistant", action: "rewrite", text: "Stopped.", at: "", jobId: "j0", status: "failed", resume: { action: "rewrite", options: { continueRun: true }, what: "2 chapters written" } }] } as unknown as StudioThread;
+    (f.backend as unknown as { thread: unknown }).thread = async () => ({ thread: stoppedThread, job: null });
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    expect(await screen.findByText(/Claude stopped before finishing \(2 chapters written\)/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Continue where Claude stopped" }));
+    await waitFor(() => expect(f.runs.at(-1)).toEqual({ continueRun: true }));
+  });
+
   it("reviews changes from the keyboard: J moves, X rejects, ⌘↵ accepts", async () => {
     const f = fake();
     render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);

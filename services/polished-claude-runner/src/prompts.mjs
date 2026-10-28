@@ -148,6 +148,25 @@ Write ./out/summary.md with: the title; a one-paragraph overview; the key points
 2. Do every check the instructions list and write every report they list under ./out/.
 3. Write ./out/rewrite-audit.md: a summary of what you checked (and what you could not), the main findings, and which report holds the details.`,
       };
+      // Continue a rewrite that stopped (DESIGN-SPEC.md §21): the instructions of the run that stopped stay, finished chapters are kept.
+      if (opts.continueRun) {
+        const done = opts._done || [];
+        return {
+          instructions: lines.join("\n") + "\n",
+          keepInstructions: true,
+          output: "rewrite.md",
+          title: "Rewrite · continued",
+          prompt: `Continue the rewrite of ${tgt} following ./INSTRUCTIONS.md strictly. An earlier run stopped before it finished; do not start again.
+${done.length ? `Already written in ./out/rewrite/: ${done.map((d) => `${d.name} (${d.words} words)`).join(", ")}.` : "No chapter file was written yet."}
+1. Read ./INSTRUCTIONS.md, ./out/rewrite-analysis.md and ./out/rewrite-plan.md (if either is missing, write it first, as the instructions describe), ./out/rewrite-progress.md if it exists, and the whole original.
+2. Check the last chapter file written: if it is cut off, complete it from the original. Do not rewrite chapters that are complete.
+3. Rewrite the remaining chapters of the plan one at a time, in full, writing each to ./out/rewrite/NN-short-title.md with the next numbers. Keep ./out/rewrite-progress.md up to date.
+4. Assemble the complete book in ./out/rewrite.md ("# Title" first, then every chapter in order), replacing any earlier, incomplete one.
+5. Integration and audit: numbering, transitions, cross-references, terminology; compare with the original so that no argument, testimony or reference is lost and nothing unsupported is added; correct only what fails.
+6. Write every report ./INSTRUCTIONS.md lists, and ./out/rewrite-notes.md with "### Instructions I could not follow", "### Claims that need a source", "### Promised but missing", "### Sensitive claims for the author", "### Additions", "### Structure and numbering changes" and "### For you to check".
+Do not stop early and do not skip chapters.`,
+        };
+      }
       if (opts.approval && !opts.planApproved) return {
         instructions: lines.join("\n") + "\n",
         output: "rewrite-plan.md",
@@ -333,7 +352,22 @@ Keep the "## " chapter heading and Markdown structure. Write the complete improv
 
 const LONG = "If the document is long, work one chapter or major section at a time and keep going until the whole document is done; never stop early or sample.";
 
-export const TOOLS = {
+export // One batch of a long scan (DESIGN-SPEC.md §21): a short run reads a few pages and adds them to what is already read.
+function scanBatch(b) {
+  const where = b.images
+    ? `the page images ./source/${b.base}-p${String(b.from).padStart(3, "0")}.jpg to ./source/${b.base}-p${String(b.to).padStart(3, "0")}.jpg (the Studio rendered and unlocked them from ${b.name})`
+    : `./source/${b.storedAs}, pages ${b.from} to ${b.to} (open it with the Read tool's pages parameter: "${b.from}-${b.to}")`;
+  return {
+    output: `scanned/${b.base}.txt`,
+    title: `Read scanned pages · ${b.name} · pages ${b.from}–${b.to} of ${b.total}`,
+    prompt: `Read pages ${b.from} to ${b.to} (of ${b.total}) of the scanned document ${b.name}: ${where}. Read only these pages in this run.
+Transcribe the text exactly, keeping headings, paragraphs, lists and verse numbers. Mark anything unreadable as [illegible] and uncertain words as [word?]. Do not correct or modernise the text.
+${b.from > 1 ? `./out/scanned/${b.base}.txt already holds pages 1 to ${b.from - 1}: keep everything in it and add the new pages at its end.` : `Write ./out/scanned/${b.base}.txt (replace any earlier file).`} Put "<!-- page N -->" (the page's number in the document) on its own line before each page's text. Write after every few pages, so the pages read are kept.
+If the document cannot be opened at all (for example it is password-protected), do not change ./out/scanned/; write ./out/scanned-text.md saying which file and the exact error, and that the owner can open it in Sources with "open it (password or scanned pages)".`,
+  };
+}
+
+const TOOLS = {
   proofread: {
     title: "Proofread & copy-edit",
     build: (o, tgt) => ({
@@ -433,10 +467,10 @@ Write ./out/readability.md: the estimated reading level with your reasoning; ave
   },
   ocr: {
     title: "Read scanned pages",
-    build: () => ({
+    build: (o) => o._batch ? scanBatch(o._batch) : ({
       output: "scanned-text.md",
       prompt: `The documents in ./source/ include scanned pages or images (PDFs without a text layer, JPG or PNG). Read each one directly, page by page, in file order (open a PDF with the Read tool's pages parameter, at most 20 pages at a time, until the last page; where ./source/ has page images named <file name without extension>-p001.jpg, -p002.jpg and so on, those are that PDF's pages, already opened and unlocked by the Studio: read those images in order instead of the PDF), and transcribe the text exactly, keeping headings, paragraphs, lists and verse numbers. Mark anything unreadable as [illegible] and uncertain words as [word?]. Do not correct or modernise the text.
-Write ./out/scanned-text.md with "# <file name>" before each file's text and "<!-- page N -->" before each page. Also write each file's text on its own to ./out/scanned/<the file's name without its extension>.txt (for example ./out/scanned/onenessofgod.txt for ./source/onenessofgod.pdf), so it becomes that document's text in the Studio. Write the files as you go, so the pages read so far are kept. If a file cannot be opened at all (for example it is password-protected), do not write ./out/scanned/ for it; write ./out/scanned-text.md saying which file and the exact error, and that the owner can open it in Sources with "open it (password or scanned pages)". ${LONG}`,
+Write ./out/scanned-text.md with "# <file name>" before each file's text and "<!-- page N -->" before each page. Also write each file's text on its own, with the same "<!-- page N -->" markers, to ./out/scanned/<the file's name without its extension>.txt (for example ./out/scanned/onenessofgod.txt for ./source/onenessofgod.pdf), so it becomes that document's text in the Studio. Write the files as you go, so the pages read so far are kept. If a file cannot be opened at all (for example it is password-protected), do not write ./out/scanned/ for it; write ./out/scanned-text.md saying which file and the exact error, and that the owner can open it in Sources with "open it (password or scanned pages)". ${LONG}`,
     }),
   },
   "cover-copy": {
@@ -467,7 +501,7 @@ function tool(o) {
   const t = TOOLS[o.tool];
   if (!t) return { error: "Unknown tool." };
   const built = t.build(o, target(o));
-  return { ...built, title: t.title };
+  return { ...built, title: built.title || t.title };
 }
 
 // ── Manuscript sections ──────────────────────────────────────────────────────

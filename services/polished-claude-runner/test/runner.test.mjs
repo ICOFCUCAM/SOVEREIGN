@@ -52,7 +52,7 @@ async function streamUntilDone(jobId, threadId) {
 test("health needs no sign-in and reveals nothing", async () => {
   const r = await fetch(base + "/health");
   assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { ok: true, level: 3 });
+  assert.deepEqual(await r.json(), { ok: true, level: 4 });
 });
 
 test("only the listed owner who is also a Polished Pages admin gets in", async () => {
@@ -572,7 +572,51 @@ test("the rewrite control panel: plan first for approval, then the rewrite from 
 
 test("the runner says what it can do, so the Studio can tell an old runner", async () => {
   const me = await (await call("/v1/me")).json();
-  assert.equal(me.runner.level, 3);
+  assert.equal(me.runner.level, 4);
   assert.ok(me.runner.features.includes("organise"));
   assert.equal(typeof me.runner.poppler, "boolean");
 });
+
+test("a long scan is read in batches of pages, each batch queuing the next, and the text grows as it goes", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Long scan" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=bigscan.pdf&kind=original`, { method: "POST", raw: Buffer.from("%PDF-1.4\n" + "<< /Type /Page >>\n".repeat(45) + "<< /Type /Pages >>") });
+  let { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "ocr" } } })).json();
+  assert.equal(job.output, "scanned/bigscan.txt");
+  const labels = [job.label];
+  for (;;) {
+    const done = (await streamUntilDone(job.id, thread.id)).at(-1);
+    assert.equal(done.status, "done");
+    if (!done.next) break;
+    job = done.next; labels.push(job.label);
+  }
+  assert.deepEqual(labels, ["Read scanned pages · bigscan.pdf · pages 1–20 of 45", "Read scanned pages · bigscan.pdf · pages 21–40 of 45", "Read scanned pages · bigscan.pdf · pages 41–45 of 45"]);
+  const text = await fs.readFile(path.join(dataDir, "threads", thread.id, "work", "source", "bigscan.txt"), "utf8");
+  assert.match(text, /Page 1 of/); assert.match(text, /Page 45 of/);
+  assert.doesNotMatch(text, /<!-- page/, "the page markers stay out of the document's text");
+  const again = await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "ocr", continueRun: true } } });
+  assert.equal(again.status, 400, "nothing left to continue");
+});
+
+test("a rewrite that stopped can be continued: finished chapters are kept and the book is completed", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Stopped rewrite" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=book.txt&kind=original`, { method: "POST", raw: Buffer.from("# The Long Road\n\nOne. Two. Three.") });
+  const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "rewrite", options: { instructions: "STOPAFTERTWO make it modern" } } })).json();
+  assert.equal((await streamUntilDone(job.id, thread.id)).at(-1).status, "failed");
+  let t = (await (await call(`/v1/threads/${thread.id}`)).json()).thread;
+  const resume = t.messages.at(-1).resume;
+  assert.deepEqual(resume, { action: "rewrite", options: { continueRun: true }, what: "2 chapters written" });
+  const work = path.join(dataDir, "threads", thread.id, "work");
+  const instructions = await fs.readFile(path.join(work, "INSTRUCTIONS.md"), "utf8");
+  const next = (await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "rewrite", options: resume.options } })).json()).job;
+  assert.equal(next.label, "Rewrite · continued");
+  assert.equal((await streamUntilDone(next.id, thread.id)).at(-1).status, "done");
+  assert.equal(await fs.readFile(path.join(work, "INSTRUCTIONS.md"), "utf8"), instructions, "the stopped run's instructions are kept");
+  const book = await fs.readFile(path.join(work, "out", "rewrite.md"), "utf8");
+  assert.match(book, /Beginnings[\s\S]*Journey[\s\S]*Home/);
+  t = (await (await call(`/v1/threads/${thread.id}`)).json()).thread;
+  assert.equal(t.messages.at(-1).resume, null);
+  const run = buildRun("rewrite", { continueRun: true, _done: [{ name: "01-a.md", words: 900 }] });
+  assert.match(run.prompt, /01-a\.md \(900 words\)/);
+  assert.match(run.prompt, /Do not rewrite chapters that are complete/);
+});
+

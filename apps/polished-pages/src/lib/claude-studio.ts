@@ -16,7 +16,9 @@ export type StudioAction = "chat" | "summarize" | "rewrite" | "cite" | "tool" | 
 
 export interface StudioFile { name: string; storedAs: string; kind: "original" | "text" | "page"; bytes: number; at: string }
 export interface StudioOutput { path: string; bytes: number; modifiedAt: string }
-export interface StudioMessage { id: string; role: "user" | "assistant"; engine?: "claude-code" | "api"; action: StudioAction; text: string; at: string; jobId: string; status?: "done" | "failed" | "cancelled"; outputs?: string[] }
+export interface StudioMessage { id: string; role: "user" | "assistant"; engine?: "claude-code" | "api"; action: StudioAction; text: string; at: string; jobId: string; status?: "done" | "failed" | "cancelled"; outputs?: string[];
+  /** A long job that stopped: how to continue it where it stopped (DESIGN-SPEC.md §21). */
+  resume?: { action: StudioAction; options: RunOptions; what: string } | null }
 export interface StudioThread { id: string; title: string; createdAt: string; updatedAt: string; sessionId: string | null; files: StudioFile[]; messages: StudioMessage[]; outputs: StudioOutput[]; runningJobId?: string }
 export interface StudioThreadSummary { id: string; title: string; createdAt: string; updatedAt: string; files: number; outputs: number }
 export interface StudioJob { id: string; threadId: string; action: StudioAction; label: string; output: string | null; status: "queued" | "running" | "done" | "failed" | "cancelled"; startedAt: string; endedAt: string | null; error: string | null }
@@ -24,7 +26,7 @@ export interface ClaudeStatus { state: "ok" | "unknown" | "signed_out" | "limit"
 export interface RunnerInfo { level: number; features: string[]; poppler: boolean; node?: string }
 export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; claude?: ClaudeStatus; busy: StudioJob | null; citationStyles: string[]; /** Absent on a runner older than level 3. */ runner?: RunnerInfo }
 /** The runner level this site relies on (runner src/version.mjs RUNNER_LEVEL; a test keeps it no higher). DESIGN-SPEC.md §21. */
-export const RUNNER_LEVEL_NEEDED = 3;
+export const RUNNER_LEVEL_NEEDED = 4;
 /** Why the runner is not right for this site, in the owner's words, or null when it is. */
 export function runnerProblem(me: StudioMe | null): string | null {
   if (!me) return null;
@@ -38,9 +40,11 @@ export type StudioEvent =
   | { type: "tool"; name: string; line: string; at: string }
   | { type: "denied"; line: string; at: string }
   | { type: "notice"; line: string; at: string }
-  | { type: "done"; status: StudioJob["status"] | "unknown"; error?: string | null; errorKind?: "auth" | "limit" | "other" | "stopped" | null; outputs?: string[]; output?: string | null; at: string };
+  | { type: "done"; status: StudioJob["status"] | "unknown"; error?: string | null; errorKind?: "auth" | "limit" | "other" | "stopped" | null; outputs?: string[]; output?: string | null; next?: StudioJob; at: string };
 
 export interface RunOptions {
+  /** Continue a rewrite or a scan that stopped, keeping what is done (DESIGN-SPEC.md §21). */
+  continueRun?: boolean;
   /** rewrite: a targeted correction of the editorial check's findings, not a new rewrite (DESIGN-SPEC.md §15). */
   correct?: boolean;
   tool?: string;

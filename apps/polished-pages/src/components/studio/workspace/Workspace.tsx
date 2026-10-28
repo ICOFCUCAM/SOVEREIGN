@@ -129,6 +129,9 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [pdfFile, setPdfFile] = useState<StudioThread["files"][number] | null>(null);
   // Organise into chapters and sections (§19).
   const [organising, setOrganising] = useState(false);
+  // A long job that stopped and can be continued (§21): the latest whole-book run's message says so.
+  const [dismissed, setDismissed] = useState<string | null>(null);
+  const stopped = useMemo(() => { const last = [...(thread?.messages ?? [])].reverse().find((x) => x.role === "assistant" && x.action !== "chat"); return last?.resume && last.id !== dismissed ? last : null; }, [thread?.messages, dismissed]);
   const lastRun = useRef<{ action: StudioAction; options: RunOptions } | null>(null);
   const abort = useRef<AbortController | null>(null);
   const rulesRef = useRef<HTMLTextAreaElement>(null);
@@ -164,6 +167,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     setLive({ job, steps: [], text: [] });
     backend.follow(job, (e: StudioEvent) => {
       if (e.type === "done") {
+        // The next batch of a long scan starts by itself: follow it.
+        if (e.next) { reload().catch(() => {}); p.onChanged(); follow(e.next); return; }
         setLive(null);
         if (e.status === "done" || e.status === "failed") announce(e.status === "done", job.label, e.status === "failed" ? e.error ?? "" : "The result is open in Claude Studio.");
         reload().then(({ thread: t }) => {
@@ -184,7 +189,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   }, [backend, reload, toast, p]);
 
   useEffect(() => {
-    reload().then(({ job }) => { if (job?.status === "running") follow(job); }).catch((e) => toast({ title: "Could not open the project", description: e instanceof Error ? e.message : "", variant: "destructive" }));
+    reload().then(({ job }) => { if (job?.status === "running" || job?.status === "queued") follow(job); }).catch((e) => toast({ title: "Could not open the project", description: e instanceof Error ? e.message : "", variant: "destructive" }));
     return () => abort.current?.abort();
   }, [reload, follow, toast]);
 
@@ -465,6 +470,13 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           {!online && (
             <div role="status" className="mx-auto mb-6 flex w-full max-w-[720px] items-center gap-3 rounded-[10px] border border-[#E6E8ED] bg-white px-4 py-3 text-[13.5px] text-[#475569] dark:border-white/10 dark:bg-white/5 dark:text-[#CBD5E1]">
               <WifiOff className="h-4 w-4" /><span className="flex-1">You're offline. Keep writing: changes stay on this device and are saved when the connection returns. Claude can't run until then.</span>
+            </div>
+          )}
+          {stopped && !live && (
+            <div role="status" className="mx-auto mb-6 flex w-full max-w-[720px] flex-wrap items-center gap-3 rounded-[10px] border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-[13.5px]">
+              <AlertTriangle className="h-4 w-4 text-amber-600" /><span className="flex-1">Claude stopped before finishing ({stopped.resume!.what}). What was done is kept.</span>
+              <Button size="sm" className={GRADIENT} disabled={engineId !== "claude-code"} title={engineId !== "claude-code" ? "Continuing runs on Claude Code" : undefined} onClick={() => void start(stopped.resume!.action, stopped.resume!.options)}>Continue where Claude stopped</Button>
+              <Button size="sm" variant="ghost" onClick={() => setDismissed(stopped.id)}>Dismiss</Button>
             </div>
           )}
           {retry && (
