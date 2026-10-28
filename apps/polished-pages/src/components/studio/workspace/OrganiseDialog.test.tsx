@@ -27,6 +27,19 @@ describe("organise dialog", () => {
     expect(onApply.mock.calls[0][0].sections.map((s: { title: string }) => s.title)).toEqual(["Preface", "The One God", "The Name"]);
   });
 
+  it("lets the owner correct the division before applying it: rename, change the kind, join to the part before", async () => {
+    const onApply = vi.fn();
+    render(<OrganiseDialog hasManuscript hasUploads readText={async () => BOOK} organise={async () => PLAN} upload={async () => {}} onApply={onApply} onClose={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: /Organise the book/ }));
+    fireEvent.change(await screen.findByLabelText("Title of part 2"), { target: { value: "One God" } });
+    fireEvent.change(screen.getByLabelText("Kind of part 1"), { target: { value: "introduction" } });
+    fireEvent.click(screen.getByRole("button", { name: "Join part 3 to the part before" }));
+    fireEvent.click(screen.getByRole("button", { name: "Use these chapters" }));
+    const parts = onApply.mock.calls[0][0].sections as { kind: string; title: string; body: string }[];
+    expect(parts.map((s) => [s.kind, s.title])).toEqual([["introduction", "Preface"], ["chapter", "One God"]]);
+    expect(parts[1].body).toMatch(/every part of scripture[\s\S]*### The Name[\s\S]*apostles baptised in it/);
+  });
+
   it("says when the uploaded book has no text yet", async () => {
     render(<OrganiseDialog hasManuscript={false} hasUploads readText={async () => null} organise={vi.fn()} upload={async () => {}} onApply={() => {}} onClose={() => {}} />);
     fireEvent.click(screen.getByRole("button", { name: /Organise the book/ }));

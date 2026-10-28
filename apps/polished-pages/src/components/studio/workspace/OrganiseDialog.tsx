@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { applyOrganise, type Organised, type OrganiseOptions, type OrganisePlan } from "@/lib/organise";
-import { kindDef, words } from "@/lib/manuscript";
+import { applyOrganise, editPart, joinToPrevious, type Organised, type OrganiseOptions, type OrganisePlan } from "@/lib/organise";
+import { SECTION_KINDS, kindDef, words } from "@/lib/manuscript";
+import { Input } from "@/components/ui/input";
 import { STUDIO_ACCEPT } from "@/lib/claude-studio";
 import { EYEBROW, GRADIENT } from "./ui";
 
@@ -113,6 +114,14 @@ export default function OrganiseDialog({ hasManuscript, hasUploads, readText, or
                 return (
                   <li key={i} className="rounded-[10px] border border-[#E6E8ED] px-3 py-2 dark:border-white/10">
                     <p className="flex items-baseline justify-between gap-3"><span><span className="text-[12px] text-[#64748B]">{label} · </span><span className="text-[14px] font-medium">{s.title}</span></span><span className="shrink-0 text-[12px] text-[#64748B]">{words(s.body).toLocaleString()} words</span></p>
+                    {/* The owner corrects Claude's division before applying it: title, kind, or join to the part before. */}
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <Input value={s.title} onChange={(e) => setResult(editPart(result, i, { title: e.target.value }))} aria-label={`Title of part ${i + 1}`} className="h-8 min-w-[180px] flex-1 text-[13px]" />
+                      <select value={s.kind} onChange={(e) => setResult(editPart(result, i, { kind: e.target.value }))} aria-label={`Kind of part ${i + 1}`} className="h-8 rounded-md border border-input bg-background px-2 text-[12.5px]">
+                        {SECTION_KINDS.map((k) => <option key={k.kind} value={k.kind}>{k.label}</option>)}
+                      </select>
+                      {i > 0 && <Button size="sm" variant="ghost" className="h-8 text-[12.5px]" aria-label={`Join part ${i + 1} to the part before`} onClick={() => setResult(joinToPrevious(result, i))}>Join to the part before</Button>}
+                    </div>
                     {subs.length > 0 && <p className="mt-0.5 text-[12.5px] text-[#475569] dark:text-[#CBD5E1]">{subs.join(" · ")}</p>}
                   </li>
                 );

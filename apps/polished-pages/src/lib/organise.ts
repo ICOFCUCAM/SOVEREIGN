@@ -122,3 +122,14 @@ export function organisedToManuscript(o: Organised, m: Manuscript, at = new Date
   return { ...m, sections: o.sections, ...(archive ? { archive } : {}) };
 }
 
+/** The owner's corrections to Claude's division (DESIGN-SPEC.md §21): a part's title or kind. */
+export function editPart(o: Organised, i: number, patch: Partial<Pick<Section, "title" | "kind">>): Organised {
+  return { ...o, sections: o.sections.map((s, j) => (j === i ? { ...s, ...patch } : s)) };
+}
+/** Joins a part to the one before it; its title becomes a section heading there, so no word is lost. */
+export function joinToPrevious(o: Organised, i: number): Organised {
+  if (i <= 0 || i >= o.sections.length) return o;
+  const prev = o.sections[i - 1], cur = o.sections[i];
+  const body = [prev.body.trim(), cur.title.trim() ? `### ${cur.title.trim()}` : "", cur.body.trim()].filter(Boolean).join("\n\n");
+  return { ...o, sections: [...o.sections.slice(0, i - 1), { ...prev, body }, ...o.sections.slice(i + 1)] };
+}
