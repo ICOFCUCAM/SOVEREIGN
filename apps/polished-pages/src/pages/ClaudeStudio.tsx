@@ -13,7 +13,7 @@ import { getDocument, updateDocument } from "@/lib/documents";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
 import { apiCoverCopyWriter, browserBackend, decideEngine, runnerBackend, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
 import { isAdmin } from "@/lib/documents";
-import { RUNNER_URL, claudeCoverCopyWriter, studio, type RunOptions, type StudioAction, type StudioMe, type StudioThreadSummary } from "@/lib/claude-studio";
+import { RUNNER_URL, claudeCoverCopyWriter, runnerProblem, studio, type RunOptions, type StudioAction, type StudioMe, type StudioThreadSummary } from "@/lib/claude-studio";
 
 // Claude Studio — the owner's own Claude Code inside Polished Pages: a
 // full-screen editorial workspace (docs/claude-studio/DESIGN-SPEC.md) where
@@ -133,6 +133,8 @@ function Studio() {
       <AlertTriangle className="h-4 w-4 shrink-0" />
       <span>{RUNNER_URL ? "The Claude Code runner isn't answering, so" : "The Claude Code runner isn't set up yet, so"} projects are kept in this browser and every run uses the API (billed per use). {RUNNER_URL ? <button className="font-semibold underline underline-offset-2" onClick={refreshMe}>Check again</button> : <SetupHint />}</span>
     </div>
+  ) : runnerProblem(me) ? (
+    <div role="alert" className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 px-5 py-2 text-[13px] text-amber-800 dark:text-amber-300"><AlertTriangle className="h-4 w-4 shrink-0" /> {runnerProblem(me)} <button className="font-semibold underline underline-offset-2" onClick={refreshMe}>Check again</button></div>
   ) : mode === "claude" && !decision.active ? (
     <div role="alert" className="flex items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 px-5 py-2 text-[13px] text-amber-800 dark:text-amber-300"><AlertTriangle className="h-4 w-4 shrink-0" /> {decision.reason} Choose Automatic or API only in the engine menu to keep working on the API.</div>
   ) : null;

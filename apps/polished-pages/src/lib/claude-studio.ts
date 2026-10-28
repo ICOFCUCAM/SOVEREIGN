@@ -21,7 +21,17 @@ export interface StudioThread { id: string; title: string; createdAt: string; up
 export interface StudioThreadSummary { id: string; title: string; createdAt: string; updatedAt: string; files: number; outputs: number }
 export interface StudioJob { id: string; threadId: string; action: StudioAction; label: string; output: string | null; status: "running" | "done" | "failed" | "cancelled"; startedAt: string; endedAt: string | null; error: string | null }
 export interface ClaudeStatus { state: "ok" | "unknown" | "signed_out" | "limit" | "not_configured"; at: string | null; resetsAt: string | null; message: string | null }
-export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; claude?: ClaudeStatus; busy: StudioJob | null; citationStyles: string[] }
+export interface RunnerInfo { level: number; features: string[]; poppler: boolean; node?: string }
+export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; claude?: ClaudeStatus; busy: StudioJob | null; citationStyles: string[]; /** Absent on a runner older than level 3. */ runner?: RunnerInfo }
+/** The runner level this site relies on (runner src/version.mjs RUNNER_LEVEL; a test keeps it no higher). DESIGN-SPEC.md §21. */
+export const RUNNER_LEVEL_NEEDED = 3;
+/** Why the runner is not right for this site, in the owner's words, or null when it is. */
+export function runnerProblem(me: StudioMe | null): string | null {
+  if (!me) return null;
+  if (!me.runner || me.runner.level < RUNNER_LEVEL_NEEDED) return `Your Claude Code runner is older than the Studio${me.runner ? ` (level ${me.runner.level}, the Studio needs ${RUNNER_LEVEL_NEEDED})` : ""}, so newer features fail on it. In DeployPro, open Claude Studio Runner and press Deploy main (not Redeploy on an old deployment).`;
+  if (!me.runner.poppler) return "Your Claude Code runner can't read PDF pages (poppler is missing from its image). Rebuild it from main in DeployPro. Until then, open PDFs with “open it (password or scanned pages)” on their card in Sources.";
+  return null;
+}
 export type StudioEvent =
   | { type: "status"; status: string; line: string; at: string }
   | { type: "text"; text: string; at: string }
@@ -98,6 +108,9 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
     else r = await send(init.body, false);
   } catch (e) {
     if (e instanceof StudioError) throw e;
+    // Tell "the runner is down" from "this request was refused on the way" (the runner answers /health).
+    const up = await fetch(`${RUNNER_URL}/health`, { signal: AbortSignal.timeout?.(6000) }).then((r) => r.ok).catch(() => false);
+    if (up) throw new StudioError(`The runner is running, but this ${json ? `${(json.length / 1024 / 1024).toFixed(1)} MB ` : ""}request didn't get through: it may have restarted midway, or something in front of it (the hosting's proxy) refused it. Your changes are kept on this device; press Retry. If it keeps failing, tell Claude what this says.`, 0);
     const mb = json ? json.length / 1024 / 1024 : 0;
     throw new StudioError(mb > 0.9 ? `The Claude Studio runner didn't answer this ${mb.toFixed(1)} MB save: it may be restarting, or something in front of it refuses large requests. Your changes are kept on this device; press Retry in a minute.` : "The Claude Studio runner can't be reached. Check that it is running.", 0);
   }

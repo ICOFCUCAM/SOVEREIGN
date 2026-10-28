@@ -18,6 +18,7 @@ import { createAuth } from "./auth.mjs";
 import { createStore, safeName, inside, isBookResult, manuscriptFile } from "./store.mjs";
 import { USES_BOOK, buildRun, CITATION_STYLES } from "./prompts.mjs";
 import { runClaude } from "./claude.mjs";
+import { capabilities } from "./version.mjs";
 
 // Claude Studio runner. A small HTTP API in front of the owner's Claude Code:
 //   GET    /health                          liveness (no data)
@@ -274,7 +275,8 @@ export function createServer(cfg = loadConfig(), deps = {}) {
   async function route(req, res) {
     const url = new URL(req.url, "http://runner");
     const parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent);
-    if (req.method === "GET" && url.pathname === "/health") return send(res, 200, { ok: true });
+    // Liveness and the runner's level (no data): the Studio uses it to tell "down" from "refused", and old from current.
+    if (req.method === "GET" && url.pathname === "/health") return send(res, 200, { ok: true, level: capabilities().level });
     if (parts[0] !== "v1") return fail(res, 404, "Not found.");
 
     const who = await auth.verify(req.headers.authorization);
@@ -282,7 +284,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
 
     const [, kind, id, sub, ...rest] = parts;
     if (kind === "me" && req.method === "GET") {
-      return send(res, 200, { user: who.user, claudeConnected: Boolean(cfg.claudeToken), token: tokenShape(cfg.claudeToken), claude: currentStatus(), busy: publicJob(running), citationStyles: CITATION_STYLES });
+      return send(res, 200, { user: who.user, claudeConnected: Boolean(cfg.claudeToken), token: tokenShape(cfg.claudeToken), claude: currentStatus(), busy: publicJob(running), citationStyles: CITATION_STYLES, runner: capabilities() });
     }
     // "Check again": a tiny Claude Code run with no tools, to learn whether the token works now.
     if (kind === "claude" && id === "check" && req.method === "POST") {
