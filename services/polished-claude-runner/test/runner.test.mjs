@@ -546,3 +546,17 @@ test("a large save may arrive gzipped and is read the same", async () => {
   const bad = await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", raw: Buffer.from("not gzip"), headers: { "Content-Encoding": "gzip" } });
   assert.equal(bad.status, 400);
 });
+
+test("the rewrite control panel: plan first for approval, then the rewrite from the approved plan; or an audit only", () => {
+  const plan = buildRun("rewrite", { instructions: "Complete Book Transformation", approval: true });
+  assert.equal(plan.output, "rewrite-plan.md");
+  assert.match(plan.prompt, /stop for the owner's approval/);
+  assert.doesNotMatch(plan.prompt, /\.\/out\/rewrite\.md/);
+  const go = buildRun("rewrite", { instructions: "Complete Book Transformation", approval: true, planApproved: true });
+  assert.equal(go.output, "rewrite.md");
+  assert.match(go.prompt, /approved the editorial plan in \.\/out\/rewrite-plan\.md/);
+  const audit = buildRun("rewrite", { instructions: "Scripture audit", auditOnly: true });
+  assert.equal(audit.output, "rewrite-audit.md");
+  assert.match(audit.prompt, /do not write \.\/out\/rewrite\.md/);
+  assert.match(audit.instructions, /Scripture audit/);
+});

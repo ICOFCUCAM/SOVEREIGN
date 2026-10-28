@@ -280,6 +280,8 @@ export function startApiRun(ctx: ApiContext, action: StudioAction, o: RunOptions
           outputs["corrected.md"] = parts.join("\n\n") + "\n";
           outputs["corrected-notes.md"] = `# Correction notes\n\nCorrected on the API in ${parts.length} part${parts.length === 1 ? "" : "s"}. Open the corrected book and run the Editorial check again to see what remains.\n\n## The problems given\n\n${String(o.instructions ?? "").trim()}\n`;
           reply = `Corrected the listed problems in ${parts.length} part${parts.length === 1 ? "" : "s"}.`;
+        } else if (action === "rewrite" && (o.approval || o.planApproved || o.auditOnly)) {
+          throw new Error(o.auditOnly ? "An audit without rewriting runs on Claude Code: switch the engine to Claude Code." : "Approval mode (plan first, then the rewrite from the approved plan) runs on Claude Code: switch the engine to Claude Code.");
         } else if (action === "rewrite") {
           const rules = [`Owner's instructions (follow strictly):\n${String(o.instructions ?? "").trim()}`,
             o.keepStructure === false ? "You may reorganise where the instructions call for it." : "Keep every chapter and section, in order, with the same headings unless told otherwise.",

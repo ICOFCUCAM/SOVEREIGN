@@ -221,3 +221,13 @@ Runs and results from every stage, with Stop for a running job.
 A whole-book result can become the book's manuscript, so Finish works on it.
 
 ![Use as the manuscript (§17)](screenshots/47-use-as-manuscript.webp)
+
+## Book Rewrite Control Panel (§20)
+
+The Rewrite dialog opens the control panel.
+
+![Rewrite dialog (§20)](screenshots/48-rewrite-dialog.webp)
+
+Project, workflow, presets, every operation by group, and the instruction Claude will follow.
+
+![Control panel (§20)](screenshots/49-rewrite-control-panel.webp)

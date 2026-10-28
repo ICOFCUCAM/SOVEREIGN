@@ -53,6 +53,10 @@ export interface RunOptions {
   length?: string;
   focus?: string;
   instructions?: string;
+  /** rewrite (control panel, DESIGN-SPEC.md §20): the plan first for approval; the rewrite from the approved plan; reports only. */
+  approval?: boolean;
+  planApproved?: boolean;
+  auditOnly?: boolean;
   keepStructure?: boolean;
   keepVoice?: boolean;
   audience?: string;
@@ -223,6 +227,15 @@ export function titleOf(markdown: string, fallback: string): string {
 export const OUTPUT_NAMES: Record<string, string> = {
   "book-design.json": "Design of the professional book",
   "organise.json": "Chapters and sections found by Claude",
+  "rewrite-plan.md": "Rewrite · plan for your approval",
+  "rewrite-audit.md": "Audit · summary",
+  "rewrite-contents.md": "Rewrite · contents",
+  "rewrite-traceability.md": "Rewrite · traceability",
+  "rewrite-style-sheet.md": "Rewrite · style sheet",
+  "rewrite-citations.md": "Rewrite · citations and Scripture",
+  "rewrite-queries.md": "Rewrite · queries for the author",
+  "rewrite-fidelity.md": "Rewrite · fidelity and completeness",
+  "rewrite-progress.md": "Rewrite · progress record",
   "library/revised.md": "Library book · Claude's correction",
   "library/answer.md": "Library book · Claude's answer",
   "book-design-inventory.md": "Design · inventory of your material",
@@ -250,7 +263,6 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "rewrite.md": "Rewritten book",
   "rewrite-notes.md": "Rewrite notes",
   "rewrite-analysis.md": "Rewrite · source analysis",
-  "rewrite-plan.md": "Rewrite · editorial plan",
   "corrected.md": "Corrected book",
   "editorial-review.md": "Editorial review (Claude's judgement)",
   "corrected-notes.md": "Correction notes",

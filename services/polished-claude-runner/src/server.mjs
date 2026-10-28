@@ -164,6 +164,8 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     if (tokenShape(cfg.claudeToken) === "api-key") return { status: 503, error: TOKEN_HELP["api-key"] };
 
     const cwd = store.workDir(thread.id);
+    // A rewrite from an approved plan starts with no chapter files left from an earlier rewrite (they are kept aside).
+    if (action === "rewrite" && options?.planApproved) await fs.rename(path.join(cwd, "out", "rewrite"), path.join(cwd, "out", `rewrite-earlier-${Date.now()}`)).catch(() => {});
     if (spec.instructions) await fs.writeFile(path.join(cwd, "INSTRUCTIONS.md"), spec.instructions);
     if (spec.needsVoice) {
       const voice = await store.readVoice();
@@ -216,7 +218,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
         setStatus({ state: "limit", message: r.error, resetsAt: reset ? new Date(typeof reset === "number" ? reset * (reset < 1e12 ? 1000 : 1) : reset).toISOString() : null });
       }
       // A rewrite that finished its chapters but not the merged book still gives the owner a whole book.
-      if (action === "rewrite") await mergeChapters(cwd).catch(() => {});
+      if (action === "rewrite" && !(options?.approval && !options?.planApproved) && !options?.auditOnly) await mergeChapters(cwd).catch(() => {});
       const after = await store.scanOutputs(thread.id);
       const changed = after.filter((o) => before.get(o.path) !== o.modifiedAt).map((o) => o.path);
       for (const rel of changed) if (isBookResult(rel)) await store.recordVersion(thread.id, rel, options?.correct ? "Targeted correction" : job.label).catch(() => {});

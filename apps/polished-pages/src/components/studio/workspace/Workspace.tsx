@@ -515,12 +515,18 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         onResult={setViewing} onView={(v) => { setPlace("write"); setView(v); }} onFocus={() => { setPlace("write"); setFocus(true); }} onPanel={() => setPanelOpen(!panelOpen)} onTheme={toggleTheme} />
       {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} initialTarget={tool.target} hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
-      {dialog && <ActionDialog action={dialog} thread={thread} styles={p.citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
+      {dialog && <ActionDialog action={dialog} thread={thread} styles={p.citationStyles} rules={[m?.rules, m?.knowledge?.terminology].filter(Boolean).join("\n")} claudeCode={engineId === "claude-code"} onClose={() => setDialog(null)}
+        onRun={(o) => { if (dialog === "rewrite" && o.approval && !o.planApproved) { try { localStorage.setItem(`studio.rewrite.pending.${id}`, JSON.stringify(o)); } catch { /* storage blocked */ } } void start(dialog, o); }} />}
       {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => { setViewing(null); p.onChanged(); }} onUseAsTarget={(x, o) => { setViewing(null); setPendingTarget(x, o ?? null); setDialog("rewrite"); }} check={check}
         onReview={(x) => { setViewing(null); setTool({ initial: "editorial-review", target: x }); }} reviewAt={thread.outputs.find((o) => o.path === "editorial-review.md")?.modifiedAt ?? null}
         onUseAsManuscript={(text, label) => {
           try { update(resultToManuscript(text, m ?? { title: thread.title, sections: [], history: [] }, label)); setPlace("plan"); toast({ title: "This is now the book's manuscript", description: "Finish works on it: cover, interior, production, audiobook and more. The earlier manuscript can be restored from Plan." }); }
           catch (e) { toast({ title: "Couldn't use it", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+        }}
+        onApprovePlan={() => {
+          let pending: RunOptions | null = null;
+          try { pending = JSON.parse(localStorage.getItem(`studio.rewrite.pending.${id}`) ?? "null") as RunOptions | null; } catch { /* none */ }
+          void start("rewrite", { ...(pending ?? { instructions: "Rewrite the book following the approved editorial plan in ./out/rewrite-plan.md, under the Studio's rewriting standard.", keepStructure: false }), approval: true, planApproved: true });
         }}
         onUseDesign={(raw) => {
           try {

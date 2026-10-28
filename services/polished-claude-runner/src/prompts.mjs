@@ -138,6 +138,37 @@ Write ./out/summary.md with: the title; a one-paragraph overview; the key points
         "## Faithfulness and editorial standard (this is editing a book, not polishing sentences)",
         ...REWRITE_POLICY.map((l) => `- ${l}`),
       ].filter((l) => l !== null);
+      // The Book Rewrite Control Panel (DESIGN-SPEC.md §20): an audit with no rewriting, or the plan first for the owner's approval.
+      if (opts.auditOnly) return {
+        instructions: lines.join("\n") + "\n",
+        output: "rewrite-audit.md",
+        title: "Audit (no rewriting)",
+        prompt: `Audit ${tgt} following ./INSTRUCTIONS.md strictly. This is an audit: do not rewrite the book or change its structure, and do not write ./out/rewrite.md.
+1. Read ./INSTRUCTIONS.md and the whole document.
+2. Do every check the instructions list and write every report they list under ./out/.
+3. Write ./out/rewrite-audit.md: a summary of what you checked (and what you could not), the main findings, and which report holds the details.`,
+      };
+      if (opts.approval && !opts.planApproved) return {
+        instructions: lines.join("\n") + "\n",
+        output: "rewrite-plan.md",
+        title: "Rewrite · plan for your approval",
+        prompt: `Prepare the rewrite of ${tgt} following ./INSTRUCTIONS.md strictly, and stop for the owner's approval before rewriting anything.
+1. Source analysis. Read ./INSTRUCTIONS.md and the whole document. Write ./out/rewrite-analysis.md: its purpose and central thesis, its position, the chapters and sections in order with their headings and numbers exactly as found (marking duplicate or missing numbers), the major arguments with their evidence, the testimonies, repeated and overlapping material, incomplete sections and missing references, what the front matter promises and whether the book contains it, its terms and names.
+2. Editorial plan. Write ./out/rewrite-plan.md: the proposed table of contents (parts, chapters and main sections, with new titles), and for each chapter a short explanation of its purpose and which parts of the original it draws on; then the numbering scheme, the terminology policy, what you will consolidate or remove and why, and the gaps you will report, not fill.
+Then stop. Do not rewrite any chapter: the owner reads and approves the plan first.`,
+      };
+      if (opts.planApproved) return {
+        instructions: lines.join("\n") + "\n",
+        output: "rewrite.md",
+        title: "Rewrite · from the approved plan",
+        prompt: `Rewrite ${tgt} following ./INSTRUCTIONS.md strictly. The owner has approved the editorial plan in ./out/rewrite-plan.md (with the analysis in ./out/rewrite-analysis.md): follow it.
+1. Read ./INSTRUCTIONS.md, ./out/rewrite-analysis.md, ./out/rewrite-plan.md and the whole original.
+2. Controlled rewriting, one chapter of the plan at a time: re-read ./INSTRUCTIONS.md and the plan, rewrite that chapter in full from the original material it draws on (re-expressed in professional prose, not copied), and write it to ./out/rewrite/NN-short-title.md (NN = 01, 02, …). Keep ./out/rewrite-progress.md up to date.
+3. Assemble the complete book in ./out/rewrite.md: "# Title" first, then the chapters in the plan's order.
+4. Integration and audit: numbering, transitions, cross-references, terminology; compare with the original so that no argument, testimony or reference is lost and nothing unsupported is added; correct only what fails.
+5. Write every report ./INSTRUCTIONS.md lists, and ./out/rewrite-notes.md with "### Instructions I could not follow", "### Claims that need a source", "### Promised but missing", "### Sensitive claims for the author", "### Additions", "### Structure and numbering changes" and "### For you to check".
+Do not stop early and do not skip chapters.`,
+      };
       return {
         instructions: lines.join("\n") + "\n",
         prompt: `Rewrite ${tgt} following ./INSTRUCTIONS.md strictly. Work in stages; do not skip any.
