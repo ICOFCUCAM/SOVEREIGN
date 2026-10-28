@@ -386,6 +386,14 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       patchSection={patchSection} onEditRules={() => { setPlace("sources"); setTimeout(() => rulesRef.current?.focus(), 250); }} approach={approach} onApproach={setApproach} />
   )) : null;
 
+  // Ask Claude about this chapter: docked at the foot of the page area, like Claude Code's input (§21);
+  // the answer opens in the panel's conversation.
+  const chat = place === "write" && section && m ? (
+            <ChapterChat m={m} sectionId={section.id} engineLabel={engineId === "claude-code" ? "Claude Code · your plan" : engineId === "api" ? "Claude API · billed per use" : "No engine"} busy={busy || !engineId} running={Boolean(live)}
+              onStop={() => { if (live) void backend.cancel(live.job); }} onSend={(message) => { void start("chat", { message }); setPanelMode("ask"); if (narrow) setSheet(true); else setPanelOpen(true); }}
+              onAction={setDialog} onJoin={() => setJoining(true)} onTool={() => setTool({})} onConversation={() => { setPanelMode("ask"); if (narrow) setSheet(true); else setPanelOpen(true); }} />
+  ) : null;
+
   const stage = (() => {
     if (place === "books" || place === "voice") return <Library place={place} p={p} onBooks={() => setPlace("books")} />;
     if (wizardOpen) return (
@@ -497,7 +505,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           onCover={() => { try { sessionStorage.setItem("studio.finish.tab", "cover"); } catch { /* storage blocked */ } setPlace("finish"); }}
           onContents={() => { const first = m?.sections.find((x) => x.kind === "introduction" || x.kind === "chapter") ?? m?.sections[0]; if (first) { openSection(first.id); setPlace("write"); setView("book"); setShowContents(Date.now()); } }}
           onDelete={busy ? undefined : async () => { if (!window.confirm(`Delete “${thread.title}” with its documents and results? Anything saved to your Library stays.`)) return; try { await backend.remove(id); p.onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}
-          header={top} side={showPanel && !narrow ? panel : null} reduce={reduce}>
+          header={top} side={showPanel && !narrow ? panel : null} footer={chat} reduce={reduce}>
           {recovery && <RecoveryBanner r={recovery} onRestore={() => void recover(true)} onDiscard={() => { if (window.confirm(`Discard the changes from ${new Date(recovery.at).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}? They exist only on this device and cannot be recovered afterwards.`)) void recover(false); }} />}
           {!kept && (
             <div role="alert" className="mx-auto mb-6 flex w-full max-w-[1120px] items-center gap-3 rounded-[10px] border border-[#FCA5A5] bg-[#FEF2F2] px-4 py-3 text-[13.5px] text-[#7F1D1D] dark:border-[#7F1D1D] dark:bg-[#450A0A] dark:text-[#FECACA]">
@@ -526,12 +534,6 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={place} initial={reduce ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={reduce ? undefined : { opacity: 0 }} transition={{ duration: 0.16 }}>{stage}</motion.div>
           </AnimatePresence>
-          {/* Ask Claude about this chapter, at the foot of the page (§21); the answer opens in the panel's conversation. */}
-          {place === "write" && section && m && (
-            <ChapterChat m={m} sectionId={section.id} engineLabel={engineId === "claude-code" ? "Claude Code · your plan" : engineId === "api" ? "Claude API · billed per use" : "No engine"} busy={busy || !engineId} running={Boolean(live)}
-              onStop={() => { if (live) void backend.cancel(live.job); }} onSend={(message) => { void start("chat", { message }); setPanelMode("ask"); if (narrow) setSheet(true); else setPanelOpen(true); }}
-              onAction={setDialog} onJoin={() => setJoining(true)} onTool={() => setTool({})} onConversation={() => { setPanelMode("ask"); if (narrow) setSheet(true); else setPanelOpen(true); }} />
-          )}
         </Shell>
       )}
       <Dialog open={renaming !== null} onOpenChange={(v) => { if (!v) setRenaming(null); }}>
@@ -605,10 +607,10 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
 const PANEL_MIN = 320, PANEL_MAX = 640;
 const clampPanel = (v: number) => Math.round(Math.min(PANEL_MAX, Math.max(PANEL_MIN, v)));
 
-function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, reduce, onRename, onDelete, onBackup, onCover, onContents, children }: {
+function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, footer, reduce, onRename, onDelete, onBackup, onCover, onContents, children }: {
   p: WorkspaceProps; place: Place; setPlace: (x: Place) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; drawer: boolean; setDrawer: (v: boolean) => void;
   m: Manuscript | null | undefined; sectionId: string | null; onSection: (id: string) => void; pending: string | null; title: string;
-  header?: React.ReactNode; side?: React.ReactNode; reduce?: boolean; onRename?: () => void; onDelete?: () => void; onBackup?: () => void; onCover?: () => void; onContents?: () => void; children: React.ReactNode;
+  header?: React.ReactNode; side?: React.ReactNode; footer?: React.ReactNode; reduce?: boolean; onRename?: () => void; onDelete?: () => void; onBackup?: () => void; onCover?: () => void; onContents?: () => void; children: React.ReactNode;
 }) {
   const frame = (rail: boolean) => (
     <Frame collapsed={rail} onCollapse={setCollapsed} place={place} onPlace={setPlace} threads={p.threads} activeId={p.id} onProject={(x) => { setDrawer(false); p.onProject(x); }}
@@ -635,7 +637,10 @@ function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer,
         {p.notice}
         {/* The Claude panel runs nearly to the right edge, full height, with a small gap (the owner's request, §21). */}
         <div className="flex min-h-0 flex-1">
-          <main id="studio-main" className="min-w-0 flex-1 overflow-y-auto px-5 pb-24 pt-10 sm:px-10 xl:px-16">{children}</main>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <main id="studio-main" className={`min-h-0 min-w-0 flex-1 overflow-y-auto px-5 pt-10 sm:px-10 xl:px-16 ${footer ? "pb-10" : "pb-24"}`}>{children}</main>
+            {footer && <div className="shrink-0 border-t border-[#E6E8ED] bg-[#F7F6F2] px-5 pb-3 pt-3 sm:px-10 xl:px-16 dark:border-white/10 dark:bg-[#0D1016]">{footer}</div>}
+          </div>
           <AnimatePresence initial={false}>
             {side && (
               <motion.div key="panel" initial={reduce ? false : { width: 0, opacity: 0 }} animate={{ width: panelW + 8, opacity: 1 }} exit={reduce ? undefined : { width: 0, opacity: 0 }} transition={{ duration: dragging ? 0 : 0.2 }}

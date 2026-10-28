@@ -40,7 +40,7 @@ export default function ChapterChat({ m, sectionId, engineLabel, busy, running, 
     rec.current = r; setListening(true); r.start();
   };
   return (
-    <form onSubmit={(e) => { e.preventDefault(); send(); }} aria-label="Ask Claude" className="sticky bottom-0 z-20 mx-auto mt-10 w-full max-w-[860px] pb-3 pt-2">
+    <form onSubmit={(e) => { e.preventDefault(); send(); }} aria-label="Ask Claude" className="mx-auto w-full max-w-[920px]">
       <div className="rounded-[16px] border border-[#E6E8ED] bg-white p-2 shadow-[0_8px_30px_-12px_rgba(15,23,42,.25)] dark:border-white/10 dark:bg-[#11151C]">
         <div className="flex items-end gap-2">
           <DropdownMenu>
@@ -52,7 +52,7 @@ export default function ChapterChat({ m, sectionId, engineLabel, busy, running, 
               <DropdownMenuItem className="gap-2" onSelect={onTool}><Wrench className="h-4 w-4" /> More tools</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={1} aria-label="Ask Claude about this chapter" placeholder="Ask Claude about this chapter, request a revision, or discuss an argument…"
+          <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={1} aria-label="Ask Claude about this chapter" placeholder="Ask Claude about this chapter, or request a revision…"
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }}
             className="max-h-40 min-h-[40px] flex-1 resize-none border-0 bg-transparent px-1 py-2.5 text-[15px] shadow-none focus-visible:ring-0" />
           {running && <button type="button" onClick={onStop} aria-label="Stop Claude" title="Stop" className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-[#172033] hover:bg-[#F1F5F9] dark:text-white dark:hover:bg-white/10"><Square className="h-4 w-4 fill-current" /></button>}
