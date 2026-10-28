@@ -553,6 +553,31 @@ Answer from the book; quote it where that helps, and say where (heading). Do not
   }),
 };
 
+// Organise into chapters and sections (DESIGN-SPEC.md §19): Claude finds where each part of the
+// book begins and names it; the Studio splits the text there itself, so no word of the book changes.
+export const ORGANISE_SHAPE = `{"sections": [{"kind": "chapter", "title": "", "starts": "", "headings": [{"title": "", "starts": ""}]}], "notes": ""}`;
+export function organisePrompt(o, where) {
+  const improve = o.titles === "improve";
+  return `Organise ${where} into a book's chapters and sections. Do not change, add or remove any text of the book: you only say where each part begins and what it is called.
+1. Read all of it. Find the front matter (title page, copyright, dedication, contents, foreword, preface, acknowledgements, introduction), the parts (if the book has parts), every chapter, and the back matter (conclusion, epilogue, appendices, notes, bibliography, glossary, index, about the author).
+2. Within each chapter, find its sections: places where a new subject begins, with or without a heading in the text.
+3. For each one give "starts": the first 8 to 15 words where it begins, copied character for character from the book (with its punctuation and capitals), so the place can be found again. If it begins with a heading line, start "starts" at that heading line.
+4. Titles: ${improve ? "write clear, professional titles that say what each chapter and section is about, in the book's own terms; for a chapter the author already titled, keep the author's title unless it is only a number." : "use the author's own heading text where there is one (without the word \"Chapter\" and its number); where there is none, write a short title from the content."}${o.instructions ? `\n5. The owner adds: ${String(o.instructions).trim()}` : ""}
+"kind" is one of: title-page, copyright, dedication, epigraph, foreword, preface, acknowledgments, introduction, prologue, part, chapter, epilogue, afterword, conclusion, appendix, notes, bibliography, glossary, index, about-author. List them in the order of the book; leave out a table of contents page (it is made from the chapters).
+Valid JSON only (no comments, no code fences), exactly this shape:
+${ORGANISE_SHAPE}
+"notes": anything the owner should know (duplicated text, a chapter that seems missing, numbering the book skips).`;
+}
+TOOLS.organise = {
+  title: "Organise into chapters and sections",
+  build: (o) => ({
+    output: "organise.json",
+    files: { "organise/book.md": String(o.text || "") },
+    prompt: `${organisePrompt(o, "the book in ./organise/book.md")}
+Write the JSON to ./out/organise.json, then re-read it and make sure it parses.`,
+  }),
+};
+
 // Voice: a profile from the owner's own writing, and rewriting in it.
 TOOLS["voice-profile"] = {
   title: "Learn my voice",

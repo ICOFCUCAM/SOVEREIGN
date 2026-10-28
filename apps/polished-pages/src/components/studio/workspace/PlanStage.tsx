@@ -25,7 +25,7 @@ const GROUPS = [{ id: "front", label: "Front matter" }, { id: "body", label: "Ch
 
 // Plan (design spec §2): the book's contents, with the plan and notes for each
 // chapter, its order, Claude's outline, and turning the book into a series.
-export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard, onResplit }: {
+export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard, onResplit, onOrganise }: {
   m: Manuscript; onUpdate: (m: Manuscript) => void; onOpen: (id: string) => void; engine: BookEngine | null; approach: ApproachId; hasUploads: boolean;
   onWriteAll: (ids: string[]) => void; queue: { done: number; total: number } | null; onSeries: () => void; busy: boolean;
   /** Finish joins every chapter into one book. */
@@ -39,6 +39,8 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
   onWizard?: () => void;
   /** Splits the uploaded manuscript into chapters again (when the first split found the wrong headings). */
   onResplit?: () => void;
+  /** Organise a book (uploaded here, in Sources, or the manuscript as it is) into chapters and sections. */
+  onOrganise?: () => void;
 }) {
   const { toast } = useToast();
   const [open, setOpen] = useState<string | null>(null);
@@ -152,6 +154,14 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
               className="flex w-full items-center gap-1.5 text-left text-[12.5px] font-medium text-[#2563EB] hover:underline"><History className="h-3.5 w-3.5 shrink-0" /> Restore: {a.label.toLowerCase()} ({new Date(a.at).toLocaleDateString()}, {a.sections.length} sections)</button>
           ))}
         </div>
+
+        {onOrganise && (
+          <div className="space-y-2 rounded-[10px] border border-[#E6E8ED] bg-white p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="flex items-center gap-2 text-[14px] font-semibold"><ListTree className="h-4 w-4 text-[#2563EB]" /> Organise into chapters and sections</p>
+            <p className="text-[12.5px] text-[#64748B]">Upload a book here, or use the manuscript as it is (a rewritten book too): Claude finds its chapters and sections and titles them. Not a word of the text changes.</p>
+            <Button variant="outline" className="h-9 w-full" disabled={busy || Boolean(queue)} onClick={onOrganise}><ListTree className="h-4 w-4" /> Organise the book</Button>
+          </div>
+        )}
 
         <div className="space-y-2">
           <Button className={`h-11 w-full ${GRADIENT}`} disabled={!empty.length || Boolean(queue) || busy || (approach !== "new" && !hasUploads)}

@@ -12,7 +12,7 @@ import { importText, insertSection, kindDef, words, type Manuscript } from "@/li
 import { readWizardDraft, wizardDraftToManuscript } from "@/lib/studio-merge";
 import { apiBookEngine, type BookEngine } from "@/lib/book-engine";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
-import { apiCoverCopyWriter, apiDesignBook, runnerBackend, sourceText, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
+import { apiCoverCopyWriter, apiDesignBook, apiOrganise, runnerBackend, sourceText, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
 import { StudioError, claudeBookEngine, setSectionTitles, type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioThread, type StudioThreadSummary } from "@/lib/claude-studio";
 import type { ToolId } from "@/lib/studio-tools";
 import { designToManuscript, parseDesign, restoreArchived, resultToManuscript, type BookDesign, type BookTypeId, type DesignApproach, type DesignBriefInput } from "@/lib/book-design";
@@ -28,6 +28,9 @@ import SourcesStage from "./SourcesStage";
 import PlanStage from "./PlanStage";
 import BookDesignDialog from "./BookDesignDialog";
 import OpenPdfDialog from "./OpenPdfDialog";
+import OrganiseDialog from "./OrganiseDialog";
+import { claudeOrganise } from "@/lib/claude-studio";
+import { manuscriptText, organisedToManuscript } from "@/lib/organise";
 // The Book Creator wizard, run inside the project on the engine in use (loaded on demand).
 const BookCreator = lazy(() => import("@/pages/BookCreator"));
 import FinishStage from "./FinishStage";
@@ -123,6 +126,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [rebuilding, setRebuilding] = useState(false);
   // A PDF opened in the browser (password-protected or scanned), §18b.
   const [pdfFile, setPdfFile] = useState<StudioThread["files"][number] | null>(null);
+  // Organise into chapters and sections (§19).
+  const [organising, setOrganising] = useState(false);
   const lastRun = useRef<{ action: StudioAction; options: RunOptions } | null>(null);
   const abort = useRef<AbortController | null>(null);
   const rulesRef = useRef<HTMLTextAreaElement>(null);
@@ -247,15 +252,15 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   };
 
   /** The uploaded manuscripts' text, in order (their text copies, or the files themselves when they are text). */
-  const uploadsText = async (): Promise<string | null> => {
-    if (!thread) return null;
+  const uploadsText = async (files = thread?.files, quiet = false): Promise<string | null> => {
+    if (!files) return null;
     const texts: string[] = [];
-    for (const f of thread.files.filter((x) => x.kind === "original")) {
-      const copy = thread.files.find((x) => x.kind === "text" && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt");
+    for (const f of files.filter((x) => x.kind === "original")) {
+      const copy = files.find((x) => x.kind === "text" && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt");
       const t = copy ? await backend.source(id, copy.storedAs) : /\.(txt|md|markdown)$/i.test(f.storedAs) ? await backend.source(id, f.storedAs) : null;
       if (t?.trim()) texts.push(t);
     }
-    if (!texts.length) { toast({ title: "No readable text in the manuscripts", description: "On the PDF's card in Sources, use “open it (password or scanned pages)” first.", variant: "destructive" }); return null; }
+    if (!texts.length) { if (quiet) return null; toast({ title: "No readable text in the manuscripts", description: "On the PDF's card in Sources, use “open it (password or scanned pages)” first.", variant: "destructive" }); return null; }
     return texts.join("\n\n");
   };
   /** Splits the uploads into chapters again (the current chapters are kept to restore). */
@@ -356,7 +361,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (m === null && (place === "plan" || place === "write" || place === "finish")) return (
       <NoBookYet place={place} hasUploads={hasUploads} wizardChapters={wizard?.chapters?.length ?? 0} busy={busy}
         onSplit={() => void startBook("uploads")} onBlank={() => void startBook("blank")} onBringWizard={() => void startBook("wizard")} onWizard={() => setWizardOpen(true)} onSources={() => setPlace("sources")}
-        onRebuild={bookEngine && hasUploads ? () => setRebuilding(true) : undefined} />
+        onRebuild={bookEngine && hasUploads ? () => setRebuilding(true) : undefined} onOrganise={engineId ? () => setOrganising(true) : undefined} />
     );
     if (place === "sources" || m === null) {
       return <SourcesStage thread={thread} m={m} uploading={uploading} onUpload={upload} onRemove={removeFile} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)} onWizard={() => setWizardOpen(true)} onOpenPdf={backend === runnerBackend ? setPdfFile : undefined}
@@ -370,7 +375,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           queue={sr.queue} onSeries={() => setTool({ initial: "series" })} onFinish={() => setPlace("finish")}
           onDesign={bookEngine ? designBook : undefined}
           onApplyDesign={(d, b) => { update(designToManuscript(d, m, b)); setApproach(b.approach); }}
-          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} onResplit={hasUploads ? () => void resplit() : undefined} />
+          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} onResplit={hasUploads ? () => void resplit() : undefined} onOrganise={engineId ? () => setOrganising(true) : undefined} />
       </>;
     }
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}
@@ -483,6 +488,12 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[320px] p-0 sm:max-w-[320px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
 
       <Onboarding open={tour} onClose={() => setTour(false)} onGo={setPlace} />
+      {organising && <OrganiseDialog hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} hasUploads={hasUploads} engineLabel={bookEngine?.label}
+        readText={async (s) => (s === "manuscript" ? (m ? manuscriptText(m) : null) : uploadsText((await backend.thread(id)).thread.files, true))}
+        organise={(text, o) => (engineId === "claude-code" && backend === runnerBackend ? claudeOrganise(id, text, o) : apiOrganise(text, o))}
+        upload={async (files) => { await upload(files); }}
+        onClose={() => setOrganising(false)}
+        onApply={async (o) => { const next = organisedToManuscript(o, m ?? { title: thread.title === "Untitled project" ? "" : thread.title, sections: [], history: [] }); if (m) update(next); else await replace(next); setOrganising(false); setPlace("plan"); toast({ title: "Organised into chapters and sections", description: `${o.sections.length} parts. The earlier chapters can be restored from Plan.` }); }} />}
       {pdfFile && <OpenPdfDialog threadId={id} file={pdfFile} onClose={() => setPdfFile(null)} onChanged={() => { reload().catch(() => {}); p.onChanged(); }} onReadPages={() => void start("tool", { tool: "ocr" } as RunOptions)} />}
       {rebuilding && <BookDesignDialog sections={0} design={designBook} engineLabel={bookEngine?.label} onClose={() => setRebuilding(false)}
         onApply={async (d, b) => { const next = designToManuscript(d, { title: thread.title === "Untitled project" ? "" : thread.title, sections: [], history: [] }, b); await replace(next); setApproach(b.approach); setRebuilding(false); setPlace("plan"); toast({ title: "The new book is laid out", description: `${d.sections.length} sections, each with its plan. Next: write them (chapters first).` }); }} />}
@@ -650,9 +661,9 @@ const NO_BOOK: Record<"plan" | "write" | "finish", { title: string; line: string
 };
 
 /** Plan, Write and Finish before there is a manuscript: what the stage is for and every way to start. */
-function NoBookYet({ place, hasUploads, wizardChapters, busy, onSplit, onBlank, onBringWizard, onWizard, onRebuild, onSources }: {
+function NoBookYet({ place, hasUploads, wizardChapters, busy, onSplit, onBlank, onBringWizard, onWizard, onRebuild, onSources, onOrganise }: {
   place: "plan" | "write" | "finish"; hasUploads: boolean; wizardChapters: number; busy: boolean;
-  onSplit: () => void; onBlank: () => void; onBringWizard: () => void; onWizard: () => void; onRebuild?: () => void; onSources: () => void;
+  onSplit: () => void; onBlank: () => void; onBringWizard: () => void; onWizard: () => void; onRebuild?: () => void; onSources: () => void; onOrganise?: () => void;
 }) {
   const t = NO_BOOK[place];
   const card = "rounded-[10px] border border-[#E6E8ED] bg-white p-4 dark:border-white/10 dark:bg-white/5";
@@ -663,6 +674,7 @@ function NoBookYet({ place, hasUploads, wizardChapters, busy, onSplit, onBlank, 
       <p className="mt-2 max-w-[640px] text-[14px] text-[#475569] dark:text-[#CBD5E1]">{t.line}</p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {onRebuild && <div className={`${card} border-[#BFD3FF] bg-[#F5F8FF] dark:bg-[#1E3A8A]/20`}><p className="text-[14px] font-semibold">Rebuild as a professional book</p><p className="mt-1 text-[12.5px] text-[#64748B]">Tell Claude what the book must become; it designs it from your whole manuscript, you review the design, then it writes it.</p><Button size="sm" className="mt-3" disabled={busy} onClick={onRebuild}>Rebuild the book</Button></div>}
+        {onOrganise && <div className={card}><p className="text-[14px] font-semibold">Organise into chapters and sections</p><p className="mt-1 text-[12.5px] text-[#64748B]">Upload a book (or use the one in Sources): Claude finds its chapters and sections and titles them, without changing a word.</p><Button size="sm" variant="outline" className="mt-3" disabled={busy} onClick={onOrganise}>Organise the book</Button></div>}
         <div className={card}><p className="text-[14px] font-semibold">Split into chapters</p><p className="mt-1 text-[12.5px] text-[#64748B]">Your uploaded manuscript becomes the chapters, as written; then Claude works chapter by chapter.</p><Button size="sm" variant="outline" className="mt-3" disabled={busy || !hasUploads} onClick={onSplit}>Split into chapters</Button>{!hasUploads && <p className="mt-2 text-[12px] text-[#64748B]">Upload a manuscript in <button type="button" onClick={onSources} className="font-medium text-[#2563EB] hover:underline">Sources</button> first.</p>}</div>
         <div className={card}><p className="text-[14px] font-semibold">Book wizard</p><p className="mt-1 text-[12.5px] text-[#64748B]">Quick, guided, restructure, improve or publishing-ready: outline, then write chapter by chapter, with your book's depth and voice.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" variant="outline" disabled={busy} onClick={onWizard}>Open the Book wizard</Button>{wizardChapters > 0 && <Button size="sm" variant="ghost" onClick={onBringWizard}>Bring in its {wizardChapters} chapters</Button>}</div></div>
         <div className={card}><p className="text-[14px] font-semibold">A blank book</p><p className="mt-1 text-[12.5px] text-[#64748B]">Start with an empty first chapter and write it yourself or with Claude.</p><Button size="sm" variant="ghost" className="mt-3" disabled={busy} onClick={onBlank}>Start a blank book</Button></div>

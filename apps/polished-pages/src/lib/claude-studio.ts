@@ -5,6 +5,7 @@ import { bookExcerpt, parseCoverCopy, type CoverCopyWriter } from "@/lib/cover-c
 import type { BookOutline } from "@/types/book";
 import type { Manuscript } from "@/lib/manuscript";
 import { parseDesign } from "@/lib/book-design";
+import { parseOrganise, type OrganiseOptions, type OrganisePlan } from "@/lib/organise";
 
 // Client for the Claude Studio runner (services/polished-claude-runner): the
 // owner's own Claude Code, reached over HTTPS. Every call carries the signed-in
@@ -221,6 +222,7 @@ export function titleOf(markdown: string, fallback: string): string {
 
 export const OUTPUT_NAMES: Record<string, string> = {
   "book-design.json": "Design of the professional book",
+  "organise.json": "Chapters and sections found by Claude",
   "library/revised.md": "Library book · Claude's correction",
   "library/answer.md": "Library book · Claude's answer",
   "book-design-inventory.md": "Design · inventory of your material",
@@ -307,6 +309,11 @@ export async function claudeReviseInLibrary(i: { title: string; passage: string;
 export async function claudeAskInLibrary(i: { title: string; book: string; question: string; rules?: string; project?: string }): Promise<string> {
   const id = await libraryProject(i.project);
   return (await runToFile(id, "tool", { tool: "library-ask", title: i.title, text: i.book, message: i.question, rules: i.rules })).trim();
+}
+
+/** Organise into chapters and sections on the owner's Claude Code (the book's text goes with the request). */
+export async function claudeOrganise(threadId: string, text: string, o: OrganiseOptions): Promise<OrganisePlan> {
+  return parseOrganise(await runToFile(threadId, "tool", { tool: "organise", text, titles: o.titles, instructions: o.instructions }));
 }
 
 export function claudeBookEngine(threadId: string, onOutline?: (o: BookOutline) => void): BookEngine {

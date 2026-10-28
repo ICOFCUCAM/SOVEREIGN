@@ -9,6 +9,7 @@ import { API_SYSTEM, REWRITE_POLICY, SECTION_POLICY, VOICE_RULE, compareApiPromp
 import { compile, importText, kindDef, type Manuscript } from "@/lib/manuscript";
 import { coverCopyPrompt, parseCoverCopy, type CoverCopyWriter } from "@/lib/cover-copy";
 import { DESIGN_SHAPE, designBrief, parseDesign, type BookDesign, type DesignBriefInput } from "@/lib/book-design";
+import { organisePrompt, parseOrganise, type OrganiseOptions, type OrganisePlan } from "@/lib/organise";
 
 // Which engine does the work, and where projects live.
 //   Engine: the owner's Claude Code (on the runner, their plan) or the API (billed per use).
@@ -60,6 +61,14 @@ async function callApi(user: string, opts: { system?: string; web?: boolean; max
     throw new Error(msg);
   }
   return body as { text: string; sources: { url: string; title: string }[] };
+}
+
+/** Organise into chapters and sections on the API: the same question as on Claude Code, the book in one request. */
+export async function apiOrganise(text: string, o: OrganiseOptions): Promise<OrganisePlan> {
+  if (!text.trim()) throw new Error("There's no text to organise yet.");
+  const book = text.length <= 600_000 ? text : text.slice(0, 600_000);
+  const r = await callApi(`The book:\n\n${book}\n\n---\n\n${organisePrompt(o, "the book above")}\nReply with the JSON only.`, { maxTokens: 16000 });
+  return parseOrganise(r.text);
 }
 
 /** The design of a rebuilt book on the API (DESIGN-SPEC.md §17): the same brief and shape as Claude Code, the material in one request. */
