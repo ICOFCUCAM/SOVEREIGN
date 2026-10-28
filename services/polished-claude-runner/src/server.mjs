@@ -444,6 +444,15 @@ export function createServer(cfg = loadConfig(), deps = {}) {
         t.outputs = await store.scanOutputs(id);
         return send(res, 200, { thread: await store.write(t) });
       }
+      // A project restored from its backup (DESIGN-SPEC.md §21): a result goes back only where none exists yet.
+      if (sub === "restore" && req.method === "PUT" && rest.length) {
+        const rel = rest.join("/");
+        if ((await store.readOutput(id, rel)) != null) return fail(res, 409, "That result already exists in this project.");
+        const b = JSON.parse((await body(req, 30 * 1024 * 1024)).toString("utf8") || "{}");
+        if (!(await store.writeOutput(id, rel, String(b.text ?? "")))) return fail(res, 400, "That result can't be restored.");
+        const t = await store.read(id); t.outputs = await store.scanOutputs(id); await store.write(t);
+        return send(res, 200, { thread: t });
+      }
       if (sub === "outputs" && req.method === "PUT" && rest.length) {
         // A new version of a book result: the owner's edits, a restored version or a restored paragraph.
         const rel = rest.join("/");

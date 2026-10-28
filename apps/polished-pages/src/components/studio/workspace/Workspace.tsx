@@ -27,12 +27,16 @@ import StudioPalette from "./StudioPalette";
 import FindReplaceDialog from "./FindReplaceDialog";
 import PageDesignPanel from "./PageDesignPanel";
 import ChapterChat from "./ChapterChat";
+import ReviewQueue from "./ReviewQueue";
 import SourcesStage from "./SourcesStage";
 import PlanStage from "./PlanStage";
 import BookDesignDialog from "./BookDesignDialog";
 import OpenPdfDialog from "./OpenPdfDialog";
 import OrganiseDialog from "./OrganiseDialog";
-import { claudeOrganise, claudeResearch, pdfInStudio } from "@/lib/claude-studio";
+import { claudeOrganise, claudeResearch, pdfInStudio, studio } from "@/lib/claude-studio";
+import { readBackup, splitDocuments } from "@/lib/project-restore";
+import { findParagraph, type Found } from "@/lib/page-edit";
+import { Textarea } from "@/components/ui/textarea";
 import { searchSources } from "@/lib/research";
 import { figuresOf } from "@/lib/figures";
 import { insertBlock } from "@/lib/markdown-format";
@@ -144,6 +148,10 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   // A place to select in the Writing text (search in book, comments, edit on the page).
   // The sidebar's "Table of contents": the Book page opens with the front pages shown.
   const [showContents, setShowContents] = useState(0);
+  // Every suggestion waiting, for the whole book (§21).
+  const [reviewing, setReviewing] = useState(false);
+  // Edit on the Book page (§21): the paragraph clicked, as it stands in the manuscript.
+  const [pageEdit, setPageEdit] = useState<(Found & { text: string }) | null>(null);
   const [selectReq, setSelectReq] = useState<{ sectionId: string; start: number; end: number; at: number } | null>(null);
   // A long job that stopped and can be continued (§21): the latest whole-book run's message says so.
   const [dismissed, setDismissed] = useState<string | null>(null);
@@ -219,6 +227,26 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       saveFile(blob, `${name}-backup-${new Date().toISOString().slice(0, 10)}.zip`);
       toast({ title: "Backup downloaded", description: report.skipped.length ? `${report.files} files. Not included (see README.txt): ${report.skipped.length}.` : `${report.files} files.` });
     } catch (e) { toast({ title: "The backup couldn't be made", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+  };
+
+  // A new project from a backup .zip (§21); the project it came from is never touched.
+  const restoreInput = useRef<HTMLInputElement>(null);
+  const restoreFrom = async (f: File | undefined) => {
+    if (!f) return;
+    toast({ title: "Restoring the project…", description: "Its manuscript, documents and results go into a new project." });
+    try {
+      const b = await readBackup(f);
+      const t = await backend.create(`${b.title} (restored)`);
+      const { originals, texts } = splitDocuments(b.documents);
+      for (const d of originals) await backend.upload(t.id, new File([d.bytes], d.name));
+      const runner = backend === runnerBackend;
+      if (runner) for (const d of texts) { const of = originals.find((o) => o.name.replace(/\.[^.]+$/, "") === d.name.replace(/\.txt$/i, "")); if (of) await pdfInStudio.saveText(t.id, of.name, new TextDecoder().decode(d.bytes)).catch(() => {}); }
+      if (b.manuscript) await backend.saveManuscript(t.id, b.manuscript);
+      let kept = 0;
+      if (runner) for (const r of b.results) { try { await studio.restoreOutput(t.id, r.path, r.text); kept++; } catch { /* that result stays in the backup */ } }
+      p.onChanged(); p.onProject(t.id);
+      toast({ title: "Project restored", description: `“${t.title}”: ${originals.length} ${originals.length === 1 ? "document" : "documents"}${b.manuscript ? ", the manuscript" : ""}${runner ? `, ${kept} results` : " (results stay in the backup in this browser)"}.` });
+    } catch (e) { toast({ title: "The project couldn't be restored", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
   };
 
   const start = useCallback(async (action: StudioAction, options: RunOptions, force?: "api") => {
@@ -436,6 +464,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (!section) return <EmptyWrite onAdd={() => { const r = insertSection(m, "chapter"); update(r.manuscript); setSectionId(r.id); }} onPlan={() => setPlace("plan")} />;
     return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")} onTrim={setTrim} designInPanel={showPanel && designPanel} showContents={showContents}
       onFigure={(url, caption, at) => { const fid = `f${Date.now().toString(36)}`; update({ ...m, meta: { ...(m.meta ?? {}), figures: { ...figuresOf(m), [fid]: url } }, sections: m.sections.map((x) => (x.id === section.id ? { ...x, body: insertBlock(x.body, at, `![${caption.replace(/[[\]]/g, "")}](figure:${fid})`).text } : x)) }); toast({ title: "Image added", description: "It is kept with the book and printed at the text width with its caption." }); }}
+      onEditParagraph={(t) => { const f = findParagraph(m, t); if (f) setPageEdit({ ...f, text: f.raw }); else toast({ title: "That paragraph couldn't be found in the manuscript", description: "It may be generated (contents, notes). Edit it in Writing." }); }}
       onComment={(quote, text) => patchSection(section.id, { comments: [...(section.comments ?? []), { id: `c${Date.now().toString(36)}`, quote, text, at: new Date().toISOString() }] })} select={selectReq?.sectionId === section.id ? selectReq : null} onSection={openSection}
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
       onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); const next = m.sections[m.sections.findIndex((s) => s.id === section.id) + 1]; toast({ title: "Accepted", description: `Your previous text is kept in Version history.${next ? ` Next: “${next.title}”, at the end of the page.` : ""}` }); }}
@@ -484,6 +513,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       </span>
       {live && <button type="button" onClick={() => { if (section && m && !narrow) { setPlace("write"); setPanelOpen(true); setPanelMode("ask"); } else setActivity(true); }} className="hidden items-center gap-1.5 rounded-full bg-[#EFF6FF] px-2.5 py-1 text-[12px] font-medium text-[#1D4ED8] sm:flex dark:bg-[#172554] dark:text-[#93C5FD]"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> {live.job.label}</button>}
       {!live && p.busyElsewhere && <span className="hidden items-center gap-1.5 rounded-full bg-[#FFFBEB] px-2.5 py-1 text-[12px] font-medium text-[#92400E] sm:flex dark:bg-amber-500/15 dark:text-amber-300"><Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> Claude is busy in another project</span>}
+      {pendingIds.length > 0 && <button type="button" onClick={() => setReviewing(true)} className="hidden h-9 items-center gap-1.5 rounded-[8px] bg-[#EFF6FF] px-2.5 text-[13px] font-medium text-[#1D4ED8] hover:bg-[#DBEAFE] sm:flex dark:bg-[#172554] dark:text-[#93C5FD]">Suggestions waiting · {pendingIds.length}</button>}
       {m?.libraryId && <Link to={`/library?open=${m.libraryId}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted md:flex dark:text-[#CBD5E1]" title="This project's book in your Library"><LibraryIcon className="h-4 w-4" /> In your Library</Link>}
       {(thread.outputs.length > 0 || live || !section) && <button type="button" onClick={() => setActivity(true)} aria-label={`Results: ${thread.outputs.length}${live ? `, ${live.job.label} running` : ""}`} className="hidden h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-[#475569] hover:bg-muted sm:flex dark:text-[#CBD5E1]"><FileText className="h-4 w-4" /> {section && m ? "Results" : "Ask Claude · Results"} <span className="text-[12px] text-[#94A3B8]">{thread.outputs.length}</span></button>}
       <button type="button" onClick={() => setPalette(true)} className="flex h-9 items-center gap-2 rounded-[8px] border border-[#E6E8ED] bg-white px-2.5 text-[13px] text-[#64748B] hover:border-[#CBD5E1] dark:border-white/10 dark:bg-white/5">
@@ -507,6 +537,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           m={m} sectionId={sectionId} onSection={openSection} pending={pendingIds[0] ?? null} title={thread.title}
           onRename={() => setRenaming(thread.title)}
           onBackup={() => void backup()}
+          onRestore={() => restoreInput.current?.click()}
           onCover={() => { try { sessionStorage.setItem("studio.finish.tab", "cover"); } catch { /* storage blocked */ } setPlace("finish"); }}
           onContents={() => { const first = m?.sections.find((x) => x.kind === "introduction" || x.kind === "chapter") ?? m?.sections[0]; if (first) { openSection(first.id); setPlace("write"); setView("book"); setShowContents(Date.now()); } }}
           onDelete={busy ? undefined : async () => { if (!window.confirm(`Delete “${thread.title}” with its documents and results? Anything saved to your Library stays.`)) return; try { await backend.remove(id); p.onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}
@@ -559,6 +590,22 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         upload={async (files) => { await upload(files); }}
         onClose={() => setOrganising(false)}
         onApply={async (o) => { const next = organisedToManuscript(o, m ?? { title: thread.title === "Untitled project" ? "" : thread.title, sections: [], history: [] }); if (m) update(next); else await replace(next); setOrganising(false); setPlace("plan"); toast({ title: "Organised into chapters and sections", description: `${o.sections.length} parts. The earlier chapters can be restored from Plan.` }); }} />}
+      {pageEdit && m && (
+        <Dialog open onOpenChange={(v) => { if (!v) setPageEdit(null); }}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader><DialogTitle>Correct this paragraph</DialogTitle></DialogHeader>
+            <p className="text-[13px] text-[#64748B]">In “{m.sections.find((x) => x.id === pageEdit.sectionId)?.title}”. The page is set again when you save; Undo puts it back.</p>
+            <Textarea autoFocus value={pageEdit.text} onChange={(e) => setPageEdit({ ...pageEdit, text: e.target.value })} aria-label="The paragraph" className="min-h-[200px] font-serif text-[16px] leading-relaxed" />
+            <DialogFooter><Button variant="ghost" onClick={() => setPageEdit(null)}>Cancel</Button>
+              <Button onClick={() => { const s = m.sections.find((x) => x.id === pageEdit.sectionId); if (s && s.body.slice(pageEdit.start, pageEdit.end) === pageEdit.raw) patchSection(s.id, { body: s.body.slice(0, pageEdit.start) + pageEdit.text + s.body.slice(pageEdit.end) }); setPageEdit(null); }}>Save the paragraph</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+      <input ref={restoreInput} type="file" accept=".zip,application/zip" hidden onChange={(e) => { void restoreFrom(e.target.files?.[0]); e.target.value = ""; }} />
+      {reviewing && m && <ReviewQueue m={m} proposals={sr.proposals} onClose={() => setReviewing(false)}
+        onOpen={(sid) => { setReviewing(false); openSection(sid); setPlace("write"); setView("changes"); }}
+        onAccept={(sid, text) => { sr.decide(sid, "replace", text); toast({ title: "Accepted", description: "The text before is kept in the section's version history." }); }}
+        onDiscard={(sid) => sr.decide(sid, "discard")} />}
       {finding && m && <FindReplaceDialog m={m} onClose={() => setFinding(false)} onOpenSection={(sid) => { setFinding(false); openSection(sid); }}
         onApply={(next, n) => { update(next); setFinding(false); toast({ title: `Replaced ${n} ${n === 1 ? "match" : "matches"}`, description: "Undo puts it back; each changed section keeps its earlier text in its version history." }); }} />}
       {pdfFile && <OpenPdfDialog threadId={id} file={pdfFile} onClose={() => setPdfFile(null)} onChanged={() => { reload().catch(() => {}); p.onChanged(); }} onReadPages={() => void start("tool", { tool: "ocr" } as RunOptions)} />}
@@ -612,15 +659,15 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
 const PANEL_MIN = 320, PANEL_MAX = 640;
 const clampPanel = (v: number) => Math.round(Math.min(PANEL_MAX, Math.max(PANEL_MIN, v)));
 
-function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, footer, reduce, onRename, onDelete, onBackup, onCover, onContents, children }: {
+function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, footer, reduce, onRename, onDelete, onBackup, onRestore, onCover, onContents, children }: {
   p: WorkspaceProps; place: Place; setPlace: (x: Place) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; drawer: boolean; setDrawer: (v: boolean) => void;
   m: Manuscript | null | undefined; sectionId: string | null; onSection: (id: string) => void; pending: string | null; title: string;
-  header?: React.ReactNode; side?: React.ReactNode; footer?: React.ReactNode; reduce?: boolean; onRename?: () => void; onDelete?: () => void; onBackup?: () => void; onCover?: () => void; onContents?: () => void; children: React.ReactNode;
+  header?: React.ReactNode; side?: React.ReactNode; footer?: React.ReactNode; reduce?: boolean; onRename?: () => void; onDelete?: () => void; onBackup?: () => void; onRestore?: () => void; onCover?: () => void; onContents?: () => void; children: React.ReactNode;
 }) {
   const frame = (rail: boolean) => (
     <Frame collapsed={rail} onCollapse={setCollapsed} place={place} onPlace={setPlace} threads={p.threads} activeId={p.id} onProject={(x) => { setDrawer(false); p.onProject(x); }}
       onNewProject={() => { setDrawer(false); void p.onNewProject(); }} ready={p.ready} title={title} m={m} sectionId={sectionId} onSection={(x) => { setDrawer(false); onSection(x); }} pending={pending}
-      decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} onRename={onRename} onDelete={onDelete} onBackup={onBackup} onCover={onCover} onContents={onContents} />
+      decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} onRename={onRename} onDelete={onDelete} onBackup={onBackup} onRestore={onRestore} onCover={onCover} onContents={onContents} />
   );
   // The panel's width: 460px on a wide screen, 380px on a laptop, 320px below; dragged between 320 and 640; remembered.
   const [panelW, setPanelW] = useState(() => { try { const v = Number(localStorage.getItem("studio.panelWidth")); if (v) return clampPanel(v); } catch { /* storage blocked */ } const w = typeof window !== "undefined" ? window.innerWidth : 0; return w >= 1600 ? 460 : w >= 1366 ? 380 : PANEL_MIN; });

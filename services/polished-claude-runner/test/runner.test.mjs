@@ -643,3 +643,12 @@ test("research this section: Claude researches the question for the section it i
   assert.match(r.prompt, /"angel of the LORD"[\s\S]*Find scripture\.[\s\S]*never invent/);
   assert.match(buildRun("tool", { tool: "research", query: "x", scope: "everything" }).prompt, /Find scripture, topics and scholars/);
 });
+
+test("a project restored from its backup gets its results back, never over an existing one", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Restored" } })).json();
+  const r = await call(`/v1/threads/${thread.id}/restore/rewrite/01-one.md`, { method: "PUT", body: { text: "## One\n\nText." } });
+  assert.equal(r.status, 200);
+  assert.ok((await r.json()).thread.outputs.some((o) => o.path === "rewrite/01-one.md"));
+  assert.equal((await call(`/v1/threads/${thread.id}/restore/rewrite/01-one.md`, { method: "PUT", body: { text: "other" } })).status, 409);
+  assert.equal((await call(`/v1/threads/${thread.id}/restore/../escape.md`, { method: "PUT", body: { text: "x" } })).status === 200, false);
+});

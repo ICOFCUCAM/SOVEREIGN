@@ -295,3 +295,29 @@ Book page view: the page design at full size in the panel.
 On a laptop screen.
 
 ![Laptop (§21)](screenshots/65-panel-laptop.webp)
+
+## The second mockup and the ten additions (§21)
+
+The chat docked at the foot of the page area, the panel with a gap at the right edge, Front, Main and Back Matter in the sidebar.
+
+![Chat docked (§21)](screenshots/66-chat-docked.webp)
+
+Search in book (⌘K).
+
+![Search in book (§21)](screenshots/67-search-in-book.webp)
+
+Research this section, with My sources.
+
+![Research (§21)](screenshots/68-research.webp)
+
+The toolbar: footnote, image, scripture verse, comment.
+
+![Toolbar (§21)](screenshots/69-toolbar-verse.webp)
+
+Edit on the Book page.
+
+![Edit on the page (§21)](screenshots/70-edit-on-page.webp)
+
+The publishing package for KDP and IngramSpark.
+
+![Publishing package (§21)](screenshots/71-publishing-package.webp)

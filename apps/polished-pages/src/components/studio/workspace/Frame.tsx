@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  AudioLines, BookMarked, Check, Pencil, Trash2, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Cpu, FolderOpen, Library, ListTree, Loader2, PenLine, Plus, Rocket, Sparkles, Download,
+  AudioLines, BookMarked, Check, Pencil, Trash2, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Cpu, FolderOpen, Library, ListTree, Loader2, PenLine, Plus, Rocket, Sparkles, Download, Upload,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -25,7 +25,7 @@ const MODE_LABEL: Record<EngineMode, string> = { auto: "Automatic", claude: "Cla
 
 export default function Frame({
   collapsed, onCollapse, place, onPlace, threads, activeId, onProject, onNewProject, ready, title,
-  m, sectionId, onSection, pending, decision, mode, onMode, onCheckEngine, busy, onRename, onDelete, onBackup, onCover, onContents,
+  m, sectionId, onSection, pending, decision, mode, onMode, onCheckEngine, busy, onRename, onDelete, onBackup, onRestore, onCover, onContents,
 }: {
   collapsed: boolean; onCollapse: (v: boolean) => void;
   place: Place; onPlace: (p: Place) => void;
@@ -36,6 +36,8 @@ export default function Frame({
   onRename?: () => void; onDelete?: () => void;
   /** Downloads a complete copy of the project (§21). */
   onBackup?: () => void;
+  /** A new project from a backup .zip (§21). */
+  onRestore?: () => void;
   /** The front matter's book cover (made in Finish, apart from the interior) and the contents (made automatically). */
   onCover?: () => void; onContents?: () => void;
 }) {
@@ -83,6 +85,7 @@ export default function Frame({
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onNewProject}><Plus className="mr-2 h-4 w-4" /> New project</DropdownMenuItem>
+          {onRestore && <DropdownMenuItem onClick={onRestore}><Upload className="mr-2 h-4 w-4" /> Restore a project from a backup</DropdownMenuItem>}
           {onRename && <DropdownMenuItem onClick={onRename}><Pencil className="mr-2 h-4 w-4" /> Rename this project</DropdownMenuItem>}
           {onBackup && <DropdownMenuItem onClick={onBackup}><Download className="mr-2 h-4 w-4" /> Download a backup of this project</DropdownMenuItem>}
           {onDelete && <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete this project</DropdownMenuItem>}

@@ -334,6 +334,14 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   };
   defs = chapterDefs(-1);
   let first = true;
+  // Where each paragraph lands (page and height), so the Book page can open one for editing.
+  const placed: { page: number; top: number; bottom: number; text: string }[] = [];
+  const track = (text: string, set: () => void) => {
+    const p0 = pageNo(), y0 = y;
+    set();
+    const p1 = pageNo();
+    for (let n = p0; n <= p1; n++) placed.push({ page: n, top: n === p0 ? y0 : H - top, bottom: n === p1 ? y : bottom, text });
+  };
   for (const [bi, b] of blocks.entries()) {
     if (b.kind === "fn") continue;
     if (b.kind === "h1") { flushNotes(); defs = chapterDefs(bi); }
@@ -367,12 +375,12 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       para(b.text, { kind: "heading", style: S.numberedHeadings ? "bold" : "italic", size: Math.round(size * 1.12) }, "start", { before: lead * 0.6, after: lead * 0.2, keep: lead * 2.5 });
       afterHeading = true;
     } else if (b.kind === "li") {
-      para(b.text, body, "start", { hang: size * 1.4, bullet: "•", after: lead * 0.15 });
+      track(b.text, () => para(b.text, body, "start", { hang: size * 1.4, bullet: "•", after: lead * 0.15 }));
       afterHeading = false;
     } else if (b.kind === "quote") {
       // Set apart from the author's own words: indented on both sides, a little smaller, space around it.
       const qSize = Math.max(8, size * 0.92);
-      para(b.text, { kind: "body", style: "regular", size: qSize }, S.justify ? "justify" : "start", { hang: size * 1.8, right: size * 1.8, before: lead * 0.45, after: lead * 0.55, lh: qSize * leading });
+      track(b.text, () => para(b.text, { kind: "body", style: "regular", size: qSize }, S.justify ? "justify" : "start", { hang: size * 1.8, right: size * 1.8, before: lead * 0.45, after: lead * 0.55, lh: qSize * leading }));
       afterHeading = true;
     } else if (b.kind === "img" && b.src) {
       // A figure: scaled to the text width (and at most 60% of the page's height), its caption below.
@@ -393,7 +401,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       if (S.paragraphs === "block") y -= lead * 0.15;
     } else {
       const indented = S.paragraphs === "indent" && !afterHeading;
-      para(b.text, body, S.justify ? "justify" : "start", { indent: indented ? size * 1.5 : 0, drop: dropNext ? S.dropCap : 0, after: S.paragraphs === "block" ? lead * 0.5 : 0 });
+      track(b.text, () => para(b.text, body, S.justify ? "justify" : "start", { indent: indented ? size * 1.5 : 0, drop: dropNext ? S.dropCap : 0, after: S.paragraphs === "block" ? lead * 0.5 : 0 }));
       afterHeading = false; dropNext = false;
     }
   }
@@ -463,20 +471,22 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
 
   ts.finish();
   // Where each chapter (and front or back matter section) opens, as a physical page number.
-  return { doc, pages: pages.length, sections: starts.map((x) => ({ title: x.title, page: x.folio + bodyFirst - 1 })), bodyFirst, contents: tocCount ? [tocFirst, tocFirst + tocCount - 1] as [number, number] : null };
+  return { doc, pages: pages.length, sections: starts.map((x) => ({ title: x.title, page: x.folio + bodyFirst - 1 })), bodyFirst, contents: tocCount ? [tocFirst, tocFirst + tocCount - 1] as [number, number] : null, placed, pageHeight: H };
 }
 export interface SetSection { title: string; page: number }
+/** A paragraph's place on a page (PDF points from the bottom), with its text as set. */
+export interface Placed { page: number; top: number; bottom: number; text: string }
 
 /** Typesets a Markdown book into a print-ready PDF and returns its bytes and page count. */
-export async function typesetBook(markdown: string, o: BookTypeOptions): Promise<{ bytes: Uint8Array; pages: number; sections: SetSection[]; bodyFirst: number; contents: [number, number] | null }> {
+export async function typesetBook(markdown: string, o: BookTypeOptions): Promise<{ bytes: Uint8Array; pages: number; sections: SetSection[]; bodyFirst: number; contents: [number, number] | null; placed: Placed[]; pageHeight: number }> {
   if (o.layout === "ingram") {
     // Measure once with a provisional gutter, then set it for the real page count.
     const probe = await build(markdown, o, 15.875);
     const final = await build(markdown, o, ingramGutterMm(probe.pages));
-    return { bytes: await final.doc.save(), pages: final.pages, sections: final.sections, bodyFirst: final.bodyFirst, contents: final.contents };
+    return { bytes: await final.doc.save(), pages: final.pages, sections: final.sections, bodyFirst: final.bodyFirst, contents: final.contents, placed: final.placed, pageHeight: final.pageHeight };
   }
   const r = await build(markdown, o, 0);
-  return { bytes: await r.doc.save(), pages: r.pages, sections: r.sections, bodyFirst: r.bodyFirst, contents: r.contents };
+  return { bytes: await r.doc.save(), pages: r.pages, sections: r.sections, bodyFirst: r.bodyFirst, contents: r.contents, placed: r.placed, pageHeight: r.pageHeight };
 }
 
 export function downloadPdf(bytes: Uint8Array, filename: string) {

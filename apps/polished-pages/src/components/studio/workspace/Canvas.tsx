@@ -61,12 +61,13 @@ function numberChanges(blocks: DiffBlock[]) {
   }));
 }
 
-export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onTrim, designInPanel, showContents, select, onFigure, onComment, onSection, onAppend }: {
+export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onTrim, designInPanel, showContents, select, onFigure, onComment, onEditParagraph, onSection, onAppend }: {
   m: Manuscript; section: Section; view: CanvasView; proposal: Proposal | null; running: boolean;
   onBody: (t: string) => void; onTitle: (t: string) => void;
   onAccept: (text: string) => void; onDiscard: () => void; onRedo: () => void; onRestoreOriginal: () => void; onView: (v: CanvasView) => void; bookTrim?: string; onTrim?: (id: string) => void; designInPanel?: boolean; showContents?: number;
   /** An image placed at the cursor (kept with the book), and a comment on the selected words (§21). */
   onFigure?: (dataUrl: string, caption: string, at: number) => void; onComment?: (quote: string, text: string) => void;
+  onEditParagraph?: (setText: string) => void;
   /** Words to select in the text (a search hit, a comment), with when it was asked. */
   select?: { start: number; end: number; at: number } | null;
   /** Moves to another section: the previous and next ones, for working through the book chapter by chapter. */
@@ -133,7 +134,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
     </header>
   );
 
-  if (view === "book") return <BookPageView m={m} section={section} trimId={bookTrim} onTrim={onTrim} designInPanel={designInPanel} showContents={showContents} />;
+  if (view === "book") return <BookPageView m={m} section={section} trimId={bookTrim} onTrim={onTrim} designInPanel={designInPanel} showContents={showContents} onEditParagraph={onEditParagraph} />;
 
   // Changes, side by side and clean need a proposal; without one they fall back to the writing view.
   const effective: CanvasView = (view === "changes" || view === "side") && !mine ? "writing" : view;

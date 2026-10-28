@@ -19,7 +19,7 @@ export function openingIndex(m: Manuscript, section: Section): number {
   return ordered.findIndex((s) => s.id === section.id);
 }
 
-export default function BookPageView({ m, section, trimId, onTrim, designInPanel, showContents }: {
+export default function BookPageView({ m, section, trimId, onTrim, designInPanel, showContents, onEditParagraph }: {
   m: Manuscript; section: Section; trimId?: string;
   /** The book's format (trim size), kept with the book as Finish keeps it. */
   onTrim?: (id: string) => void;
@@ -27,12 +27,15 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
   designInPanel?: boolean;
   /** When the sidebar asks for the contents: show the front pages. */
   showContents?: number;
+  /** A paragraph clicked on a page, by its text as set (§21). */
+  onEditParagraph?: (setText: string) => void;
 }) {
   const [pages, setPages] = useState<{ url: string; n: number }[] | null>(null);
   const [front, setFront] = useState<{ url: string; n: number }[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [setting, setSetting] = useState(true);
   const [pdf, setPdf] = useState<Uint8Array | null>(null);
+  const placed = useRef<{ list: { page: number; top: number; bottom: number; text: string }[]; H: number }>({ list: [], H: 0 });
   const [info, setInfo] = useState<{ total: number; from: number; to: number; bodyFirst: number; contents: [number, number] | null } | null>(null);
   const [design, setDesign] = useState(0);
   const [showFront, setShowFront] = useState(Boolean(showContents));
@@ -77,6 +80,7 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
         const to = at < 0 ? Math.max(1, r.bodyFirst - 1) : Math.min(((r.sections[at + 1]?.page ?? r.pages + 1) - 1), from + MAX_PAGES - 1);
         const out = await render(doc as never, from, Math.max(from, to));
         if (!live) return;
+        placed.current = { list: r.placed, H: r.pageHeight };
         setPdf(r.bytes); setPages(out); setInfo({ total: r.pages, from, to: Math.max(from, to), bodyFirst: r.bodyFirst, contents: r.contents }); setFront(null); setError(null);
       } catch (e) { if (live) setError(e instanceof Error ? e.message : "The pages couldn't be set."); }
       finally { if (live) setSetting(false); }
@@ -104,7 +108,15 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
   const label = (n: number) => (info?.contents && n >= info.contents[0] && n <= info.contents[1] ? "Contents" : !info || n >= info.bodyFirst ? `Page ${info ? n - info.bodyFirst + 1 : n}` : "Front page");
   const sheet = (p: { url: string; n: number }) => (
     <figure key={p.n} className="mx-auto" style={{ maxWidth: `${Math.round((trim.wmm / trim.hmm) * 860)}px` }}>
-      <img src={p.url} alt={label(p.n)} className="w-full rounded-[2px] bg-white shadow-[0_1px_2px_rgba(15,23,42,.08),0_24px_48px_-28px_rgba(15,23,42,.35)]" />
+      <img src={p.url} alt={label(p.n)} title={onEditParagraph ? "Click a paragraph to correct it" : undefined}
+        onClick={onEditParagraph ? (e) => {
+          // Where on the page: PDF points from the bottom, then the paragraph set there.
+          const r = e.currentTarget.getBoundingClientRect();
+          const y = placed.current.H * (1 - (e.clientY - r.top) / r.height);
+          const hit = placed.current.list.find((x) => x.page === p.n && y <= x.top + 2 && y >= x.bottom - 2);
+          if (hit) onEditParagraph(hit.text);
+        } : undefined}
+        className={`w-full rounded-[2px] bg-white shadow-[0_1px_2px_rgba(15,23,42,.08),0_24px_48px_-28px_rgba(15,23,42,.35)] ${onEditParagraph ? "cursor-text" : ""}`} />
       <figcaption className="mt-2 text-center text-[11px] text-[#64748B]">{label(p.n)}</figcaption>
     </figure>
   );

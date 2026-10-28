@@ -145,6 +145,8 @@ export const studio = {
   cancel: (jobId: string) => call<{ job: StudioJob }>(`/v1/jobs/${jobId}/cancel`, { method: "POST" }),
   history: (id: string, path: string) => call<{ history: ResultHistory }>(`/v1/threads/${id}/history/${encPath(path)}`).then((r) => r.history),
   version: (id: string, path: string, n: number) => call<{ text: string }>(`/v1/threads/${id}/history/${encPath(path)}?n=${n}`).then((r) => r.text),
+  /** A result put back into a project restored from its backup (never over an existing one). */
+  restoreOutput: (id: string, path: string, text: string) => call<{ thread: StudioThread }>(`/v1/threads/${id}/restore/${encPath(path)}`, { method: "PUT", body: JSON.stringify({ text }) }).then((r) => r.thread),
   saveOutput: (id: string, path: string, text: string, o: SaveVersion) => call<{ history: ResultHistory }>(`/v1/threads/${id}/outputs/${encPath(path)}`, { method: "PUT", body: JSON.stringify({ text, ...o }) }).then((r) => r.history),
   approve: (id: string, path: string, a: { version: number; summary: ApprovalSummary }) => call<{ history: ResultHistory }>(`/v1/threads/${id}/approve/${encPath(path)}`, { method: "POST", body: JSON.stringify(a) }).then((r) => r.history),
 };
