@@ -96,7 +96,9 @@ const UNNUMBERED = /^(preface|foreword|introduction|prologue|acknowledge?ments?|
 /** "{-}" after a chapter heading (as in Pandoc) sets it without a number. */
 export const unnumbered = (title: string) => `${title} {-}`;
 
-interface Block { kind: "h1" | "h2" | "h3" | "li" | "p" | "gap"; text: string; plain?: boolean }
+interface Block { kind: "h1" | "h2" | "h3" | "li" | "p" | "quote" | "gap"; text: string; plain?: boolean }
+/** A quotation the author introduces with a colon and closes with its source, "(Dyrness, 1979, pp. 41-42)". */
+const CITED_END = /\((?:[^()]*\b(?:1[5-9]|20)\d\d\b[^()]*|[^()]*\bp{1,2}\.\s*\d[^()]*)\)\s*\.?$/;
 function parse(markdown: string): Block[] {
   return markdown.replace(/\r\n/g, "\n").split("\n").map((raw): Block => {
     const t = raw.trim();
@@ -109,8 +111,13 @@ function parse(markdown: string): Block[] {
     if (/^##\s+/.test(t)) return { kind: "h2", text: strip(t.replace(/^##\s+/, "")) };
     if (/^###\s+/.test(t)) return { kind: "h3", text: strip(t.replace(/^###\s+/, "")) };
     if (/^[-*]\s+/.test(t)) return { kind: "li", text: strip(t.replace(/^[-*]\s+/, "")) };
+    if (/^>\s?/.test(t)) return { kind: "quote", text: strip(t.replace(/^>\s?/, "")) };
     if (!t) return { kind: "gap", text: "" };
     return { kind: "p", text: strip(t) };
+  }).map((b, i, all) => {
+    if (b.kind !== "p" || !CITED_END.test(b.text)) return b;
+    let j = i - 1; while (j >= 0 && all[j].kind === "gap") j--;
+    return j >= 0 && all[j].kind === "p" && /:\s*$/.test(all[j].text) && b.text.length > 80 ? { ...b, kind: "quote" as const } : b;
   });
 }
 
@@ -209,7 +216,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   const room = (h: number) => { if (y - h < bottom) nextPage(); };
 
   /** Sets a paragraph. indent: first-line indent; bullet; drop cap on the first letter. */
-  const para = (text: string, st: TextStyle, align: "justify" | "center" | "start", o2: { before?: number; after?: number; indent?: number; hang?: number; bullet?: string; drop?: number; lh?: number; keep?: number } = {}) => {
+  const para = (text: string, st: TextStyle, align: "justify" | "center" | "start", o2: { before?: number; after?: number; indent?: number; hang?: number; bullet?: string; drop?: number; lh?: number; keep?: number; right?: number } = {}) => {
     const lh = o2.lh ?? st.size * (st.kind === "heading" ? 1.25 : leading);
     const pDir = paragraphDir(text);
     const hang = o2.hang ?? 0;
@@ -225,8 +232,10 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       }
     }
     const indent = o2.indent ?? 0;
-    const firstW = colW - hang - indent;
-    const lines = ts.wrap(rest, st, colW - hang, (i) => (cap && i < (o2.drop ?? 0) ? colW - hang - capW : i === 0 ? firstW : colW - hang));
+    const right = o2.right ?? 0;
+    const inner = colW - hang - right;
+    const firstW = inner - indent;
+    const lines = ts.wrap(rest, st, inner, (i) => (cap && i < (o2.drop ?? 0) ? inner - capW : i === 0 ? firstW : inner));
     // A heading stays with at least two lines of what follows it; a paragraph never leaves
     // its first line alone at the foot of a page (orphan) or its last line alone at the top (widow).
     if (o2.keep !== undefined) { if (y - (o2.before ?? 0) - lines.length * lh - (o2.after ?? 0) - o2.keep < bottom) nextPage(); else y -= o2.before ?? 0; }
@@ -238,8 +247,8 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       room(lh);
       const base = y - st.size * 1.02;
       const n = pageNo();
-      let x = colX(n) + (pDir === "rtl" ? 0 : hang);
-      let w = colW - hang;
+      let x = colX(n) + (pDir === "rtl" ? right : hang);
+      let w = inner;
       if (cap && i < (o2.drop ?? 0)) { if (i === 0) ts.text(pc, cap, x, base - lh * ((o2.drop ?? 1) - 1), { kind: "heading", style: "regular", size: capSize }, "left"); x += capW; w -= capW; }
       else if (i === 0 && indent) { if (pDir === "rtl") w -= indent; else { x += indent; w -= indent; } }
       if (o2.bullet && i === 0) ts.text(pc, o2.bullet, pDir === "rtl" ? colX(n) + colW - hang + 5 : colX(n) + 3, base, st, "left");
@@ -303,6 +312,11 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     } else if (b.kind === "li") {
       para(b.text, body, "start", { hang: size * 1.4, bullet: "•", after: lead * 0.15 });
       afterHeading = false;
+    } else if (b.kind === "quote") {
+      // Set apart from the author's own words: indented on both sides, a little smaller, space around it.
+      const qSize = Math.max(8, size * 0.92);
+      para(b.text, { kind: "body", style: "regular", size: qSize }, S.justify ? "justify" : "start", { hang: size * 1.8, right: size * 1.8, before: lead * 0.45, after: lead * 0.55, lh: qSize * leading });
+      afterHeading = true;
     } else if (b.kind === "gap") {
       if (S.paragraphs === "block") y -= lead * 0.15;
     } else {

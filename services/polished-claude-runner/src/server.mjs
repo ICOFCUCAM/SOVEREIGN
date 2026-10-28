@@ -160,7 +160,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       if (i < 0) return { status: 400, error: "Save the manuscript first, then try again." };
       const sec = m.sections[i];
       // The owner's notes and rules come from the saved manuscript, so every action sees the same ones.
-      options = { ...options, _file: manuscriptFile(i, sec), title: options.title || sec.title, _book: { rules: m.rules || options.rules, knowledge: m.knowledge, idea: sec.idea || options.idea, pageNotes: sec.pageNotes, design: m.design } };
+      options = { ...options, _file: manuscriptFile(i, sec), title: options.title || sec.title, _book: { rules: m.rules || options.rules, knowledge: m.knowledge, idea: typeof options.idea === "string" && options.idea.trim() ? options.idea : sec.idea, pageNotes: sec.pageNotes, design: m.design } };
       if (options.op === "compose" && USES_BOOK(options.approach) && thread.files.length === 0) return { status: 400, error: "Upload your book to this project first, so Claude can build on it." };
     }
     if (action === "tool" && options?.tool === "book-design") {

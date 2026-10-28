@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, BookOpen, Check, CircleDashed, Eye, FileText, Layers, Loader2, MessageSquare, NotebookPen, PanelRightClose, Plus, Quote, ScrollText, Search, Send, Sparkles, Square, Trash2, Wand2, Wrench, X } from "lucide-react";
+import { AlertTriangle, BookOpen, Check, ChevronDown, CircleDashed, Eye, FileText, Layers, Loader2, Maximize2, MessageSquare, NotebookPen, Paperclip, PanelRightClose, Plus, Quote, Route, ScrollText, Search, Send, ShieldCheck, SlidersHorizontal, Sparkles, Square, Trash2, Wand2, Wrench, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Markdown from "@/components/studio/Markdown";
-import { kindDef, type Manuscript, type PageNote, type Section } from "@/lib/manuscript";
+import { kindDef, words, type Manuscript, type PageNote, type Section } from "@/lib/manuscript";
+import { CITATION_LABEL, GOALS, SCOPE_LABEL, composeIdea, keepSettings, loadSettings, type CitationHandling, type GoalId, type ReviseSettings, type Scope } from "@/lib/revise-goals";
+import { findCitations } from "@/lib/section-citations";
 import type { RunOptions, StudioThread } from "@/lib/claude-studio";
 import type { EngineId } from "@/lib/studio-backend";
 import type { ToolId } from "@/lib/studio-tools";
@@ -15,14 +17,21 @@ import { LiveCard, MessageCard, ResultsList, type DialogAction, type Live } from
 import type { Proposal, Running, SectionOp } from "./useSectionRun";
 import { GRADIENT } from "./ui";
 
-// The Claude panel (design spec §5.2): one persistent, collapsible panel with
-// four modes. It remembers the last mode and never switches by itself.
-export type PanelMode = "ask" | "revise" | "research" | "notes";
+// The Claude panel (design spec §5.2, upgraded in §21): one persistent, collapsible panel with
+// Revise, Research, Notes and Citations, and Ask docked at its foot. It remembers the last mode
+// and never switches by itself.
+export type PanelMode = "ask" | "revise" | "research" | "notes" | "citations";
+// The tabs (§21): Ask is the box docked at the foot of the panel, which opens the whole conversation.
 const MODES: { id: PanelMode; label: string; icon: typeof Sparkles }[] = [
-  { id: "ask", label: "Ask", icon: MessageSquare }, { id: "revise", label: "Revise", icon: Wand2 },
-  { id: "research", label: "Research", icon: Search }, { id: "notes", label: "Notes", icon: NotebookPen },
+  { id: "revise", label: "Revise", icon: Wand2 }, { id: "research", label: "Research", icon: Search },
+  { id: "notes", label: "Notes", icon: NotebookPen }, { id: "citations", label: "Citations", icon: Quote },
 ];
-const LABEL = "text-[11px] font-semibold uppercase tracking-[0.12em] text-[#64748B] dark:text-[#94A3B8]";
+const GOAL_ICON: Record<GoalId, typeof Sparkles> = { flow: Route, clarify: FileText, preserve: ShieldCheck, develop: Plus };
+const LABEL = "text-[12px] font-semibold uppercase tracking-[0.12em] text-[#64748B] dark:text-[#94A3B8]";
+// Revise is three steps (§21): what the section says, the owner's idea, how Claude writes it.
+const Step = ({ n, children }: { n: number; children: React.ReactNode }) => (
+  <span className="flex items-center gap-2"><span aria-hidden className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#EEF2FF] text-[12px] font-semibold text-[#1D4ED8] dark:bg-[#1E3A8A]/40 dark:text-[#BFDBFE]">{n}</span><span className={LABEL}>{children}</span></span>
+);
 const IMPROVE: { id: NonNullable<RunOptions["improvementType"]>; label: string }[] = [
   { id: "enhance", label: "Quality" }, { id: "tighten", label: "Tighten" }, { id: "hooks", label: "Hooks" },
   { id: "examples", label: "Examples" }, { id: "consistency", label: "Consistency" }, { id: "expand", label: "More depth" },
@@ -41,6 +50,8 @@ function stages(steps: string[], line: string) {
 
 export default function ClaudePanel(p: {
   mode: PanelMode; onMode: (m: PanelMode) => void; onClose: () => void;
+  /** Book page view: back to the page design in this panel. */
+  onPageDesign?: () => void;
   thread: StudioThread; live: Live | null; onStopLive: () => void; onChat: (message: string) => void; chatBusy: boolean;
   onOpenResult: (path: string) => void; onAction: (a: DialogAction) => void; onTool: (t?: ToolId) => void; onJoin: () => void;
   m: Manuscript; section: Section | null; hasUploads: boolean; engine: EngineId | null; citationStyles: string[];
@@ -51,6 +62,12 @@ export default function ClaudePanel(p: {
   const { section, engine } = p;
   const [message, setMessage] = useState("");
   const [more, setMore] = useState<MoreOp>("expand");
+  const [choosing, setChoosing] = useState(false);
+  const chosen = APPROACH_CARDS.find((a) => a.id === p.approach);
+  const [settings, setSettingsState] = useState<ReviseSettings>(() => loadSettings());
+  const setSettings = (x: ReviseSettings) => { setSettingsState(x); keepSettings(x); };
+  const chapterNo = section && section.kind === "chapter" ? p.m.sections.filter((x) => x.kind === "chapter").findIndex((x) => x.id === section.id) + 1 : 0;
+  const [ask, setAsk] = useState("");
   const [factor, setFactor] = useState("2");
   const [instructions, setInstructions] = useState("");
   const [improve, setImprove] = useState<NonNullable<RunOptions["improvementType"]>>("enhance");
@@ -61,6 +78,13 @@ export default function ClaudePanel(p: {
   const feedEnd = useRef<HTMLDivElement>(null);
   useEffect(() => { if (p.mode === "ask") feedEnd.current?.scrollIntoView({ block: "end" }); }, [p.mode, p.thread.messages.length, p.live?.steps.length]);
 
+  const found = useMemo(() => findCitations(section?.body ?? ""), [section?.body]);
+  // A question about this section: it names the section, whose text Claude reads in ./manuscript/, then shows the conversation.
+  const sendAsk = () => {
+    if (!ask.trim() || p.chatBusy) return;
+    p.onChat(section ? `About the section “${section.title}”${chapterNo ? ` (chapter ${chapterNo})` : ""}: ${ask.trim()}` : ask.trim());
+    setAsk(""); p.onMode("ask");
+  };
   const busyHere = Boolean(p.running && section && p.running.sectionId === section.id);
   const card = APPROACH_CARDS.find((a) => a.id === p.approach)!;
   const empty = !section?.body.trim();
@@ -74,8 +98,10 @@ export default function ClaudePanel(p: {
   const generate = () => {
     if (!section) return;
     const base = { sectionId: section.id, title: section.title };
-    if ((p.approach === "polish" || p.approach === "mine") && !p.hasUploads) p.run({ ...base, op: "rewrite" });
-    else p.run({ ...base, op: "compose", approach: p.approach });
+    // The owner's own words first, then the goals and settings ticked (Claude follows them as the section's idea).
+    const idea = composeIdea(section.idea ?? "", settings);
+    if ((p.approach === "polish" || p.approach === "mine") && !p.hasUploads) p.run({ ...base, op: "rewrite", ...(idea ? { idea } : {}) });
+    else p.run({ ...base, op: "compose", approach: p.approach, ...(idea ? { idea } : {}) });
   };
   const blocked = !engine ? "No engine is available." : card.needsBook && !p.hasUploads ? "Upload your book in Sources first: this approach builds on it." : (p.approach === "polish" || p.approach === "mine") && empty && !p.hasUploads ? "This section is empty: write something, or upload your book in Sources." : null;
   const runMore = () => {
@@ -110,76 +136,132 @@ export default function ClaudePanel(p: {
 
   return (
     <aside aria-label="Claude" className="flex h-full w-full flex-col bg-white dark:bg-[#11151C]">
-      <div className="flex items-center gap-0.5 border-b border-[#E6E8ED] px-2 dark:border-white/10" role="tablist" aria-label="Claude panel">
-        {MODES.map((x) => (
-          <button key={x.id} type="button" role="tab" aria-selected={p.mode === x.id} onClick={() => p.onMode(x.id)}
-            className={`-mb-px flex h-12 items-center gap-1 border-b-2 px-2 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] ${p.mode === x.id ? "border-[#172033] font-semibold text-[#172033] dark:border-white dark:text-white" : "border-transparent font-medium text-[#64748B] hover:text-[#172033] dark:hover:text-white"}`}>
-{x.label}
-          </button>
-        ))}
-        <button type="button" onClick={p.onClose} aria-label="Close the Claude panel" className="ml-auto grid h-8 w-8 place-items-center rounded-md text-[#64748B] hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]"><PanelRightClose className="h-4 w-4" /></button>
+      <div className="border-b border-[#E6E8ED] px-4 pb-3 pt-3 dark:border-white/10">
+        <div className="mb-3 flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-[#4F46E5]" aria-hidden />
+          <p className="text-[16px] font-semibold">Claude</p>
+          {p.onPageDesign && <button type="button" onClick={p.onPageDesign} className="ml-auto h-8 rounded-md px-2 text-[13px] font-medium text-[#2563EB] hover:bg-muted">Page design</button>}
+          <button type="button" onClick={p.onClose} aria-label="Close the Claude panel" className={`${p.onPageDesign ? "" : "ml-auto "}grid h-8 w-8 place-items-center rounded-md text-[#64748B] hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]`}><PanelRightClose className="h-4 w-4" /></button>
+        </div>
+        <div role="tablist" aria-label="Claude panel" className="grid grid-cols-4 gap-1 rounded-[10px] bg-[#F1F5F9] p-1 dark:bg-white/5">
+          {MODES.map((x) => (
+            <button key={x.id} type="button" role="tab" aria-selected={p.mode === x.id} onClick={() => p.onMode(x.id)}
+              className={`h-9 rounded-[8px] text-[13.5px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] ${p.mode === x.id ? "bg-white font-semibold text-[#1D4ED8] shadow-sm dark:bg-[#1E293B] dark:text-white" : "font-medium text-[#475569] hover:text-[#172033] dark:text-[#94A3B8] dark:hover:text-white"}`}>{x.label}</button>
+          ))}
+        </div>
+        {p.mode === "ask" && <button type="button" onClick={() => p.onMode("revise")} className="mt-2 text-[13px] font-medium text-[#2563EB] hover:underline">← Back to Revise</button>}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 text-[14px] leading-relaxed">
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 text-[15px] leading-relaxed">
         {/* ── Revise ── */}
         {p.mode === "revise" && (!section ? <p className="text-[#64748B]">Choose a section in the manuscript to revise it with Claude.</p> : (
           <div className="space-y-6">
-            <section>
-              <div className="mb-2 flex items-center justify-between"><p className={LABEL}>What this section says</p>
-                <button type="button" disabled={!engine || empty || Boolean(p.running)} onClick={() => p.run({ sectionId: section.id, op: "explain", title: section.title })} className="inline-flex items-center gap-1 text-[12.5px] font-medium text-[#2563EB] hover:underline disabled:opacity-50">
+            {/* The section Claude works on, and what it says (Claude reads it without changing anything). */}
+            <section aria-label="Current section" className="rounded-[12px] border border-[#E6E8ED] p-4 dark:border-white/10">
+              <div className="flex items-start gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[#EEF2FF] text-[#4F46E5] dark:bg-[#1E3A8A]/40"><BookOpen className="h-4.5 w-4.5" /></span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12.5px] text-[#64748B]">Current section</p>
+                  <p className="truncate text-[15.5px] font-semibold">{section.title || kindDef(section.kind).label}</p>
+                  <p className="text-[12.5px] text-[#64748B]">{kindDef(section.kind).label}{chapterNo ? ` ${chapterNo}` : ""} · {words(section.body).toLocaleString()} words</p>
+                </div>
+                <button type="button" disabled={!engine || empty || Boolean(p.running)} onClick={() => p.run({ sectionId: section.id, op: "explain", title: section.title })} className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-[13.5px] font-medium text-[#2563EB] hover:underline disabled:opacity-50">
                   {p.running?.op === "explain" && busyHere ? <Loader2 className="h-3 w-3 animate-spin" /> : <Eye className="h-3 w-3" />}{section.summary ? "Read again" : "Read it"}
-                </button></div>
-              {section.summary ? <div className="font-['Newsreader',Georgia,serif] text-[15.5px] leading-[1.6]"><Markdown text={section.summary} /></div>
-                : <p className="text-[13px] text-[#64748B]">{empty ? "This section is empty." : "Claude reads the section and tells you its main teaching, key points and sources, without changing anything."}</p>}
+                </button>
+              </div>
+              {section.summary && <div className="mt-3 border-t border-[#F1F5F9] pt-3 font-['Newsreader',Georgia,serif] text-[15.5px] leading-[1.6] dark:border-white/10"><Markdown text={section.summary} /></div>}
             </section>
 
             <section>
-              <label htmlFor="idea" className={`${LABEL} mb-2 block`}>Your idea for this section</label>
-              <Textarea id="idea" value={section.idea ?? ""} onChange={(e) => p.patchSection(section.id, { idea: e.target.value })} rows={3}
+              <p className="mb-2.5 text-[15px] font-semibold">What would you like to do?</p>
+              <div className="grid grid-cols-2 gap-2">
+                {GOALS.map((g) => {
+                  const on = settings.goals.includes(g.id); const I = GOAL_ICON[g.id];
+                  return (
+                    <button key={g.id} type="button" aria-pressed={on} onClick={() => setSettings({ ...settings, goals: on ? settings.goals.filter((x) => x !== g.id) : [...settings.goals, g.id] })}
+                      className={`relative flex gap-2.5 rounded-[12px] border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] ${on ? "border-[#6366F1] bg-[#F5F7FF] dark:bg-[#1E1B4B]/40" : "border-[#E6E8ED] hover:border-[#C7D2FE] dark:border-white/10"}`}>
+                      <I className={`mt-0.5 h-4.5 w-4.5 shrink-0 ${on ? "text-[#4F46E5]" : "text-[#64748B]"}`} aria-hidden />
+                      <span className="min-w-0"><span className={`block text-[14px] font-semibold leading-snug ${on ? "text-[#4338CA] dark:text-[#C7D2FE]" : ""}`}>{g.label}</span><span className="mt-0.5 block text-[12.5px] leading-snug text-[#64748B]">{g.line}</span></span>
+                      {on && <Check className="absolute right-2 top-2 h-4 w-4 rounded-full bg-[#4F46E5] p-0.5 text-white" aria-hidden />}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section>
+              <label htmlFor="idea" className="mb-2 block text-[15px] font-semibold">Additional instructions <span className="font-normal text-[#64748B]">(optional)</span></label>
+              <Textarea id="idea" aria-label="Your idea for this section" value={section.idea ?? ""} onChange={(e) => p.patchSection(section.id, { idea: e.target.value })} rows={4}
                 onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && !blocked && !p.running) { e.preventDefault(); generate(); } }}
-                placeholder="What should it teach? What to keep, add, cut or reorder?" className="rounded-[8px] text-[13.5px]" />
+                placeholder="Tell Claude what to keep, change, add or avoid…" className="min-h-[110px] rounded-[10px] text-[15.5px] leading-relaxed" />
+              <p className={`mt-1 text-right text-[12px] ${(section.idea ?? "").length > 1000 ? "text-amber-700" : "text-[#94A3B8]"}`}>{(section.idea ?? "").length}/1000</p>
             </section>
 
-            <section>
-              <p className={`${LABEL} mb-2`}>How Claude writes it</p>
-              <div role="radiogroup" aria-label="Approach" className="grid gap-2">
+            {/* Source policy: the chosen approach in one row; "Change" opens the six. */}
+            <section className="rounded-[12px] border border-[#E6E8ED] dark:border-white/10">
+              <button type="button" onClick={() => setChoosing(!choosing)} aria-expanded={choosing} className="flex w-full items-center gap-3 px-3.5 py-3 text-left">
+                <BookOpen className="h-4.5 w-4.5 shrink-0 text-[#64748B]" aria-hidden />
+                <span className="min-w-0 flex-1"><span className="block text-[14px] font-semibold">Source policy</span>
+                  {chosen && <span className="block truncate text-[13px] text-[#475569] dark:text-[#94A3B8]"><span className="font-medium text-[#1D4ED8] dark:text-[#93C5FD]">{chosen.label}</span> · {chosen.line}</span>}</span>
+                <span className="text-[13px] font-medium text-[#2563EB]">{choosing ? "Done" : "Change"}</span>
+              </button>
+              {choosing && <div role="radiogroup" aria-label="Approach" className="grid gap-2 border-t border-[#F1F5F9] p-3 dark:border-white/10">
                 {APPROACH_CARDS.map((a) => (
-                  <button key={a.id} type="button" role="radio" aria-checked={p.approach === a.id} onClick={() => p.onApproach(a.id)}
-                    className={`rounded-[10px] border px-3.5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] ${p.approach === a.id ? "border-[#2563EB] bg-[#F5F8FF] dark:bg-[#0F1A33]" : "border-[#E6E8ED] hover:border-[#BFD0F5] dark:border-white/10"}`}>
-                    <span className="flex items-center justify-between gap-2"><span className="text-[13.5px] font-medium text-[#172033] dark:text-white">{a.label}</span>{p.approach === a.id && <Check className="h-4 w-4 text-[#2563EB]" />}</span>
-                    <span className="mt-0.5 block text-[12.5px] text-[#475569] dark:text-[#94A3B8]">{a.line}</span>
-                    <span className="mt-1 block text-[11.5px] text-[#64748B]">Source policy: {a.policy}</span>
+                  <button key={a.id} type="button" role="radio" aria-checked={p.approach === a.id} onClick={() => { p.onApproach(a.id); setChoosing(false); }}
+                    className={`rounded-[10px] border px-3.5 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] ${p.approach === a.id ? "border-[#2563EB] bg-[#F5F8FF] dark:bg-[#0F1A33]" : "border-[#E6E8ED] hover:border-[#BFD0F5] dark:border-white/10"}`}>
+                    <span className="flex items-center justify-between gap-2"><span className="text-[14.5px] font-medium text-[#172033] dark:text-white">{a.label}</span>{p.approach === a.id && <Check className="h-4 w-4 text-[#2563EB]" />}</span>
+                    <span className="mt-0.5 block text-[13px] text-[#475569] dark:text-[#94A3B8]">{a.line}</span>
+                    <span className="mt-0.5 block text-[12px] text-[#64748B]">Source policy: {a.policy}</span>
                   </button>
                 ))}
-              </div>
+              </div>}
             </section>
 
-            <section>
-              <p className={`${LABEL} mb-2`}>Also followed</p>
-              <div className="flex flex-wrap gap-1.5">
-                {rules.slice(0, 3).map((r) => <button key={r} type="button" onClick={p.onEditRules} title={r} className="max-w-full truncate rounded-full bg-[#F1F5F9] px-2.5 py-1 text-[12px] text-[#334155] hover:bg-[#E2E8F0] dark:bg-white/10 dark:text-[#CBD5E1]">{r}</button>)}
-                {rules.length > 3 && <button type="button" onClick={p.onEditRules} className="rounded-full bg-[#F1F5F9] px-2.5 py-1 text-[12px] text-[#334155] dark:bg-white/10 dark:text-[#CBD5E1]">+{rules.length - 3} rules</button>}
-                {!rules.length && <button type="button" onClick={p.onEditRules} className="rounded-full border border-dashed border-[#CBD5E1] px-2.5 py-1 text-[12px] text-[#475569]">+ Rules for the whole book</button>}
-                {pageNotes.length > 0 && <button type="button" onClick={() => p.onMode("notes")} className="rounded-full bg-[#FFFBEB] px-2.5 py-1 text-[12px] text-[#92400E] dark:bg-amber-500/10 dark:text-amber-300">{pageNotes.length} page {pageNotes.length === 1 ? "note" : "notes"}</button>}
+            {/* Advanced editorial settings: terminology (the book's rules), citation handling, rewrite scope. */}
+            <details className="group rounded-[12px] border border-[#E6E8ED] dark:border-white/10">
+              <summary className="flex cursor-pointer list-none items-center gap-3 px-3.5 py-3">
+                <SlidersHorizontal className="h-4.5 w-4.5 shrink-0 text-[#64748B]" aria-hidden />
+                <span className="min-w-0 flex-1"><span className="block text-[14px] font-semibold">Advanced editorial settings</span><span className="block truncate text-[13px] text-[#64748B]">Terminology, citation handling, rewrite scope</span></span>
+                <ChevronDown className="h-4 w-4 text-[#64748B] transition-transform group-open:rotate-180" aria-hidden />
+              </summary>
+              <div className="space-y-4 border-t border-[#F1F5F9] p-3.5 dark:border-white/10">
+                <div>
+                  <p className="mb-1.5 text-[13px] font-medium">Terminology (the book's rules, always followed)</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {rules.slice(0, 4).map((r) => <button key={r} type="button" onClick={p.onEditRules} title={r} className="max-w-full truncate rounded-full bg-[#F1F5F9] px-2.5 py-1 text-[12.5px] text-[#334155] hover:bg-[#E2E8F0] dark:bg-white/10 dark:text-[#CBD5E1]">{r}</button>)}
+                    {rules.length > 4 && <button type="button" onClick={p.onEditRules} className="rounded-full bg-[#F1F5F9] px-2.5 py-1 text-[12.5px] text-[#334155] dark:bg-white/10 dark:text-[#CBD5E1]">+{rules.length - 4} rules</button>}
+                    <button type="button" onClick={p.onEditRules} className="rounded-full border border-dashed border-[#CBD5E1] px-2.5 py-1 text-[12.5px] text-[#475569]">{rules.length ? "Edit the rules" : "+ Rules for the whole book"}</button>
+                    {pageNotes.length > 0 && <button type="button" onClick={() => p.onMode("notes")} className="rounded-full bg-[#FFFBEB] px-2.5 py-1 text-[12.5px] text-[#92400E] dark:bg-amber-500/10 dark:text-amber-300">{pageNotes.length} page {pageNotes.length === 1 ? "note" : "notes"}</button>}
+                  </div>
+                </div>
+                <label className="block"><span className="mb-1.5 block text-[13px] font-medium">Citation handling</span>
+                  <select value={settings.citations} onChange={(e) => setSettings({ ...settings, citations: e.target.value as CitationHandling })} className="h-10 w-full rounded-[8px] border border-input bg-background px-2.5 text-[14px]">
+                    {(Object.keys(CITATION_LABEL) as CitationHandling[]).map((k) => <option key={k} value={k}>{CITATION_LABEL[k]}</option>)}
+                  </select></label>
+                <label className="block"><span className="mb-1.5 block text-[13px] font-medium">Rewrite scope</span>
+                  <select value={settings.scope} onChange={(e) => setSettings({ ...settings, scope: e.target.value as Scope })} className="h-10 w-full rounded-[8px] border border-input bg-background px-2.5 text-[14px]">
+                    {(Object.keys(SCOPE_LABEL) as Scope[]).map((k) => <option key={k} value={k}>{SCOPE_LABEL[k]}</option>)}
+                  </select></label>
               </div>
-            </section>
+            </details>
 
+            {/* The action stays in view at the foot of the panel while the steps scroll. */}
             {progress ?? (
-              <div>
+              <div className="sticky -bottom-5 z-10 -mx-5 border-t border-[#E6E8ED] bg-white/95 px-5 pb-5 pt-3 backdrop-blur dark:border-white/10 dark:bg-[#11151C]/95">
                 <button type="button" onClick={generate} disabled={Boolean(blocked) || Boolean(p.running)}
-                  className={`flex h-11 w-full items-center justify-center gap-2 rounded-[10px] text-[14.5px] font-semibold transition-opacity disabled:opacity-50 ${GRADIENT}`}>
+                  className={`flex h-12 w-full items-center justify-center gap-2 rounded-[10px] text-[15.5px] font-semibold transition-opacity disabled:opacity-50 ${GRADIENT}`}>
                   <Sparkles className="h-4 w-4" /> {empty && p.approach !== "new" ? "Write it with Claude" : "Rewrite with my idea"}
                   <kbd className="ml-1 rounded border border-white/35 px-1.5 text-[11px] font-medium opacity-80">⌘↵</kbd>
                 </button>
-                <p className="mt-2 text-[12px] text-[#64748B]">{blocked ?? (billed ? "Runs on the API: billed per use." : "Runs on your Claude Code plan.")} You review every change before it's used.</p>
+                <p className="mt-2 text-[13px] text-[#64748B]">{blocked ?? (billed ? "Runs on the API: billed per use." : "Runs on your Claude Code plan.")} You review every change before it's used.</p>
               </div>
             )}
 
             {mine && !busyHere && (
               <div className="rounded-[10px] border border-[#E6E8ED] p-4 dark:border-white/10">
-                <p className="text-[13.5px] font-medium">{OP_LABEL[mine.op] ?? "Suggestion"} is ready</p>
-                {mine.approach && <p className="mt-0.5 text-[12px] text-[#64748B]">Source policy: {APPROACH_CARDS.find((a) => a.id === mine.approach)?.policy}</p>}
-                <button type="button" onClick={p.onReview} className="mt-2 text-[12.5px] font-medium text-[#2563EB] hover:underline">Show it on the page</button>
+                <p className="text-[14px] font-medium">{OP_LABEL[mine.op] ?? "Suggestion"} is ready</p>
+                {mine.approach && <p className="mt-0.5 text-[12.5px] text-[#64748B]">Source policy: {APPROACH_CARDS.find((a) => a.id === mine.approach)?.policy}</p>}
+                <button type="button" onClick={p.onReview} className="mt-2 text-[13px] font-medium text-[#2563EB] hover:underline">Show it on the page</button>
               </div>
             )}
 
@@ -207,17 +289,7 @@ export default function ClaudePanel(p: {
         {/* ── Research ── */}
         {p.mode === "research" && (
           <div className="space-y-6">
-            {section && (
-              <section>
-                <p className={`${LABEL} mb-2`}>This section</p>
-                <div className="flex gap-2">
-                  <Select value={style} onValueChange={setStyle}><SelectTrigger className="h-9 flex-1" aria-label="Citation style"><SelectValue /></SelectTrigger><SelectContent>{p.citationStyles.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select>
-                  <Button size="sm" variant="outline" className="h-9" disabled={!engine || empty || Boolean(p.running)} onClick={() => p.run({ sectionId: section.id, op: "cite", title: section.title, citationStyle: style })}><Quote className="h-4 w-4" /> Add citations</Button>
-                </div>
-                {busyHere && p.running?.op === "cite" && <div className="mt-3">{progress}</div>}
-                <p className="mt-2 text-[12px] text-[#64748B]">Claude cites only sources it opened, and marks unsupported claims [citation needed]. Citations stay unverified until you check them.</p>
-              </section>
-            )}
+            {section && <p className="text-[13.5px] text-[#64748B]">Citations for this section are in <button type="button" onClick={() => p.onMode("citations")} className="font-medium text-[#2563EB] hover:underline">Citations</button>.</p>}
             {mine?.ledger && mine.ledger.length > 0 && (
               <section>
                 <p className={`${LABEL} mb-2`}>What the run actually opened</p>
@@ -234,6 +306,33 @@ export default function ClaudePanel(p: {
             </section>
           </div>
         )}
+
+        {/* ── Citations ── */}
+        {p.mode === "citations" && (!section ? <p className="text-[#64748B]">Choose a section to see its citations.</p> : (
+          <div className="space-y-6">
+            <section>
+              <p className="mb-2 text-[15px] font-semibold">In this section</p>
+              <p className="mb-3 text-[13px] text-[#64748B]">Found in the text as it stands; nothing is changed.</p>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                {([["Scripture", found.scripture.length], ["Works cited", found.works.length], ["Quotations", found.quotations]] as const).map(([l, n]) => (
+                  <div key={l} className="rounded-[10px] border border-[#E6E8ED] px-2 py-2.5 dark:border-white/10"><p className="text-[20px] font-semibold tabular-nums">{n}</p><p className="text-[12px] text-[#64748B]">{l}</p></div>
+                ))}
+              </div>
+              {found.scripture.length > 0 && <><p className={`${LABEL} mb-1.5 mt-4`}>Scripture</p><div className="flex flex-wrap gap-1.5">{found.scripture.map((r) => <span key={r} className="rounded-full bg-[#F1F5F9] px-2.5 py-1 text-[12.5px] dark:bg-white/10">{r}</span>)}</div></>}
+              {found.works.length > 0 && <><p className={`${LABEL} mb-1.5 mt-4`}>Works cited</p><ul className="space-y-1 text-[13.5px]">{found.works.map((w) => <li key={w} className="flex gap-2"><FileText className="mt-1 h-3.5 w-3.5 shrink-0 text-[#64748B]" />{w}</li>)}</ul></>}
+            </section>
+            <section>
+              <p className="mb-2 text-[15px] font-semibold">Add citations to this section</p>
+              <div className="flex gap-2">
+                <Select value={style} onValueChange={setStyle}><SelectTrigger className="h-10 flex-1" aria-label="Citation style"><SelectValue /></SelectTrigger><SelectContent>{p.citationStyles.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select>
+                <Button variant="outline" className="h-10" disabled={!engine || empty || Boolean(p.running)} onClick={() => p.run({ sectionId: section.id, op: "cite", title: section.title, citationStyle: style })}><Quote className="h-4 w-4" /> Add citations</Button>
+              </div>
+              {busyHere && p.running?.op === "cite" && <div className="mt-3">{progress}</div>}
+              <p className="mt-2 text-[12.5px] text-[#64748B]">Claude cites only sources it opened, and marks unsupported claims [citation needed]. Citations stay unverified until you check them.</p>
+            </section>
+            <p className="text-[13px] text-[#64748B]">Citations and quotations across the whole book: <button type="button" onClick={() => p.onMode("research")} className="font-medium text-[#2563EB] hover:underline">Research</button>.</p>
+          </div>
+        ))}
 
         {/* ── Notes ── */}
         {p.mode === "notes" && (!section ? <p className="text-[#64748B]">Choose a section to see its notes.</p> : (
@@ -301,6 +400,22 @@ export default function ClaudePanel(p: {
             <Button type="submit" size="icon" aria-label="Send" disabled={!message.trim() || p.chatBusy} className="h-9 w-9 shrink-0 rounded-[8px] bg-[#172033] hover:bg-[#172033]/90"><Send className="h-4 w-4" /></Button>
           </div>
           {billed && <p className="mt-1.5 px-1 text-[11.5px] text-[#64748B]">Runs on the API: billed per use.</p>}
+        </form>
+      )}
+      {/* Ask Claude about this chapter: always at the foot of the panel; the section goes with the question. */}
+      {p.mode !== "ask" && (
+        <form onSubmit={(e) => { e.preventDefault(); sendAsk(); }} className="border-t border-[#E6E8ED] bg-[#F8F9FF] p-3 dark:border-white/10 dark:bg-white/5">
+          <div className="mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-[#4F46E5]" aria-hidden /><p className="text-[14px] font-semibold">Ask Claude about this {section?.kind === "chapter" ? "chapter" : "section"}</p>
+            <button type="button" onClick={() => p.onMode("ask")} aria-label="Open the whole conversation" className="ml-auto grid h-7 w-7 place-items-center rounded-md text-[#64748B] hover:bg-white dark:hover:bg-white/10"><Maximize2 className="h-3.5 w-3.5" /></button></div>
+          <div className="rounded-[10px] border border-[#E6E8ED] bg-white p-2 dark:border-white/10 dark:bg-[#11151C]">
+            <Textarea value={ask} onChange={(e) => setAsk(e.target.value)} rows={2} aria-label="Ask Claude about this section" placeholder="Ask a question, discuss this section, or request a revision…"
+              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); sendAsk(); } }}
+              className="min-h-[48px] resize-none border-0 bg-transparent p-1 text-[14px] shadow-none focus-visible:ring-0" />
+            <div className="flex items-center gap-2">
+              {section && <span className="inline-flex min-w-0 items-center gap-1 truncate text-[12.5px] text-[#64748B]"><Paperclip className="h-3.5 w-3.5 shrink-0" /> “{section.title}” attached</span>}
+              <Button type="submit" size="icon" aria-label="Send" disabled={!ask.trim() || p.chatBusy} className={`ml-auto h-9 w-9 shrink-0 rounded-full ${GRADIENT}`}><Send className="h-4 w-4" /></Button>
+            </div>
+          </div>
         </form>
       )}
       {!engine && <p role="alert" className="flex items-center gap-2 border-t border-amber-500/30 bg-amber-500/10 px-4 py-2 text-[12.5px] text-amber-800 dark:text-amber-300"><AlertTriangle className="h-3.5 w-3.5" /> No engine is available: see the engine menu at the bottom of the sidebar.</p>}

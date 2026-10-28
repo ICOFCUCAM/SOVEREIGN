@@ -28,7 +28,12 @@ export function getInteriorType(): InteriorType {
     };
   } catch { return DEFAULT_INTERIOR; }
 }
-export function setInteriorType(t: InteriorType) { try { localStorage.setItem(KEY, JSON.stringify(t)); } catch { /* private mode */ } }
+export function setInteriorType(t: InteriorType) {
+  try { localStorage.setItem(KEY, JSON.stringify(t)); } catch { /* private mode */ }
+  // Open book pages set themselves again in the new design.
+  try { window.dispatchEvent(new CustomEvent(INTERIOR_CHANGED)); } catch { /* no window */ }
+}
+export const INTERIOR_CHANGED = "pp:interior-changed";
 /** Choosing a style brings its own typefaces and size, which can then be changed. */
 export function withStyle(id: InteriorStyleId): InteriorType {
   const S = styleById(id);

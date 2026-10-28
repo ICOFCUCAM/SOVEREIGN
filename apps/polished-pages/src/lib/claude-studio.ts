@@ -26,7 +26,7 @@ export interface ClaudeStatus { state: "ok" | "unknown" | "signed_out" | "limit"
 export interface RunnerInfo { level: number; features: string[]; poppler: boolean; node?: string }
 export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; claude?: ClaudeStatus; busy: StudioJob | null; citationStyles: string[]; /** Absent on a runner older than level 3. */ runner?: RunnerInfo }
 /** The runner level this site relies on (runner src/version.mjs RUNNER_LEVEL; a test keeps it no higher). DESIGN-SPEC.md §21. */
-export const RUNNER_LEVEL_NEEDED = 4;
+export const RUNNER_LEVEL_NEEDED = 5;
 /** Why the runner is not right for this site, in the owner's words, or null when it is. */
 export function runnerProblem(me: StudioMe | null): string | null {
   if (!me) return null;

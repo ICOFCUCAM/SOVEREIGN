@@ -3,6 +3,7 @@ import { AlertTriangle, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import InteriorType from "@/components/book/InteriorType";
 import { TRIM_SIZES, getTrim } from "@/lib/print-sizes";
+import { INTERIOR_CHANGED } from "@/lib/typeset/prefs";
 import { GROUP_ORDER, compile, kindDef, type Manuscript, type Section } from "@/lib/manuscript";
 
 // The book as it will print (design spec §5.1 "Book page", §21): the whole manuscript set by the
@@ -18,10 +19,12 @@ export function openingIndex(m: Manuscript, section: Section): number {
   return ordered.findIndex((s) => s.id === section.id);
 }
 
-export default function BookPageView({ m, section, trimId, onTrim }: {
+export default function BookPageView({ m, section, trimId, onTrim, designInPanel }: {
   m: Manuscript; section: Section; trimId?: string;
   /** The book's format (trim size), kept with the book as Finish keeps it. */
   onTrim?: (id: string) => void;
+  /** The page design is in the panel beside the page, so the toolbar doesn't repeat it. */
+  designInPanel?: boolean;
 }) {
   const [pages, setPages] = useState<{ url: string; n: number }[] | null>(null);
   const [front, setFront] = useState<{ url: string; n: number }[] | null>(null);
@@ -36,6 +39,8 @@ export default function BookPageView({ m, section, trimId, onTrim }: {
   const trim = getTrim(trimId || "6x9");
   const md = useMemo(() => compile(m), [m]);
   const at = openingIndex(m, section);
+  // A change of design anywhere (this toolbar, the panel, Finish) sets the pages again.
+  useEffect(() => { const on = () => setDesign((d) => d + 1); window.addEventListener(INTERIOR_CHANGED, on); return () => window.removeEventListener(INTERIOR_CHANGED, on); }, []);
 
   const render = async (doc: NonNullable<typeof docRef.current>, from: number, to: number) => {
     const out: { url: string; n: number }[] = [];
@@ -98,12 +103,14 @@ export default function BookPageView({ m, section, trimId, onTrim }: {
   return (
     <div ref={holder} className="mx-auto w-full max-w-[720px] scroll-mt-4">
       <div className="mb-3 flex flex-wrap items-center gap-2 text-[12px]">
-        <label className="flex items-center gap-1.5 text-[#475569] dark:text-[#CBD5E1]">Format
-          <select aria-label="Book format" value={trim.id} onChange={(e) => onTrim?.(e.target.value)} disabled={!onTrim} className="h-8 max-w-[260px] rounded-md border border-input bg-background px-2 text-[12.5px]">
-            {TRIM_SIZES.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
-          </select>
-        </label>
-        <InteriorType compact onChange={() => setDesign((d) => d + 1)} />
+        {!designInPanel && <>
+          <label className="flex items-center gap-1.5 text-[#475569] dark:text-[#CBD5E1]">Format
+            <select aria-label="Book format" value={trim.id} onChange={(e) => onTrim?.(e.target.value)} disabled={!onTrim} className="h-8 max-w-[260px] rounded-md border border-input bg-background px-2 text-[12.5px]">
+              {TRIM_SIZES.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+            </select>
+          </label>
+          <InteriorType compact />
+        </>}
         {pdf && <Button size="sm" variant="ghost" className="ml-auto h-8 text-[12px]" onClick={() => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([pdf], { type: "application/pdf" })); a.download = `${(m.title || "book").replace(/_+/g, " ")}.pdf`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }}><Download className="h-3.5 w-3.5" /> The book as PDF</Button>}
       </div>
       <div className="mb-4 flex flex-wrap items-center gap-3 text-[12px] text-[#64748B]" aria-live="polite">

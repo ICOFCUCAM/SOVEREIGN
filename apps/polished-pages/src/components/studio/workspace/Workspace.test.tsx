@@ -59,6 +59,7 @@ describe("Claude Studio workspace", () => {
     expect(await within(panel).findByText("It traces belief in spirits.")).toBeTruthy();
 
     fireEvent.change(within(panel).getByLabelText("Your idea for this section"), { target: { value: "Open with Mesopotamia" } });
+    fireEvent.click(within(panel).getByRole("button", { name: /Source policy/ }));
     fireEvent.click(within(panel).getByRole("radio", { name: /My book \+ cited sources/ }));
     fireEvent.click(within(panel).getByRole("button", { name: /Rewrite with my idea/ }));
     await waitFor(() => expect(f.runs.at(-1)).toMatchObject({ sectionId: "c1", op: "compose", approach: "mine-and-research" }));
@@ -131,6 +132,19 @@ describe("Claude Studio workspace", () => {
     expect(within(shown).getByText("enemy").tagName).toBe("STRONG");
     fireEvent.click(shown);
     expect(screen.getByLabelText("One text")).toHaveValue("### The names\n\nThe **enemy** has names.");
+  });
+
+  it("shows the page design beside the Book page, and Claude when asked", async () => {
+    const f = fake();
+    localStorage.setItem("studio.view", "book");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const design = await screen.findByRole("complementary", { name: "Page design" });
+    expect(within(design).getByLabelText("Format")).toBeTruthy();
+    expect(within(design).getByText("Scripture study")).toBeTruthy();
+    fireEvent.click(within(design).getByRole("button", { name: /Ask Claude/ }));
+    const claude = await screen.findByRole("complementary", { name: "Claude" });
+    fireEvent.click(within(claude).getByRole("button", { name: "Page design" }));
+    expect(await screen.findByRole("complementary", { name: "Page design" })).toBeTruthy();
   });
 
   it("reviews changes from the keyboard: J moves, X rejects, ⌘↵ accepts", async () => {
@@ -313,6 +327,7 @@ describe("Claude Studio workspace", () => {
     const f = fake();
     render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
     const panel = await screen.findByRole("complementary", { name: "Claude" });
+    fireEvent.click(within(panel).getByRole("button", { name: /Source policy/ }));
     fireEvent.click(within(panel).getByRole("radio", { name: /My book \+ cited sources/ }));
     fireEvent.click(within(panel).getByRole("button", { name: /Rewrite with my idea/ }));
     fireEvent.click(await screen.findByRole("button", { name: "Review the changes" }));

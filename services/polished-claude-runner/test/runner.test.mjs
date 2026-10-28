@@ -52,7 +52,7 @@ async function streamUntilDone(jobId, threadId) {
 test("health needs no sign-in and reveals nothing", async () => {
   const r = await fetch(base + "/health");
   assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { ok: true, level: 4 });
+  assert.deepEqual(await r.json(), { ok: true, level: 5 });
 });
 
 test("only the listed owner who is also a Polished Pages admin gets in", async () => {
@@ -574,7 +574,7 @@ test("the rewrite control panel: plan first for approval, then the rewrite from 
 
 test("the runner says what it can do, so the Studio can tell an old runner", async () => {
   const me = await (await call("/v1/me")).json();
-  assert.equal(me.runner.level, 4);
+  assert.equal(me.runner.level, 5);
   assert.ok(me.runner.features.includes("organise"));
   assert.equal(typeof me.runner.poppler, "boolean");
 });

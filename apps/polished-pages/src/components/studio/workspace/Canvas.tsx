@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowDown, ArrowUp, Check, CornerDownLeft, PenLine, RotateCcw, Undo2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Bold, Check, CornerDownLeft, Italic, Link2, List, ListOrdered, PenLine, RotateCcw, TextQuote, Undo2, X } from "lucide-react";
+import { applyFormat, styleAt, type FormatKind } from "@/lib/markdown-format";
 import { Button } from "@/components/ui/button";
 import { SuggestionChecks } from "./EditorialCheck";
 import Markdown from "@/components/studio/Markdown";
@@ -26,8 +27,9 @@ const PROSE = "font-['Newsreader',Georgia,serif] text-[18px] leading-[1.7]";
 const COLUMN = "mx-auto w-full max-w-[720px]";
 
 /** A textarea that grows with its text, so the page reads as one continuous manuscript. */
-function GrowingText({ value, onChange, label, placeholder, className, min = 360, single }: { value: string; onChange: (v: string) => void; label: string; placeholder?: string; className?: string; min?: number; single?: boolean }) {
-  const ref = useRef<HTMLTextAreaElement>(null);
+function GrowingText({ value, onChange, label, placeholder, className, min = 360, single, inputRef }: { value: string; onChange: (v: string) => void; label: string; placeholder?: string; className?: string; min?: number; single?: boolean; inputRef?: React.RefObject<HTMLTextAreaElement> }) {
+  const own = useRef<HTMLTextAreaElement>(null);
+  const ref = inputRef ?? own;
   // Measured again when the text changes, when the book font has loaded and when the width changes.
   useLayoutEffect(() => {
     const t = ref.current; if (!t) return;
@@ -56,10 +58,10 @@ function numberChanges(blocks: DiffBlock[]) {
   }));
 }
 
-export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onTrim, onSection, onAppend }: {
+export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onTrim, designInPanel, onSection, onAppend }: {
   m: Manuscript; section: Section; view: CanvasView; proposal: Proposal | null; running: boolean;
   onBody: (t: string) => void; onTitle: (t: string) => void;
-  onAccept: (text: string) => void; onDiscard: () => void; onRedo: () => void; onRestoreOriginal: () => void; onView: (v: CanvasView) => void; bookTrim?: string; onTrim?: (id: string) => void;
+  onAccept: (text: string) => void; onDiscard: () => void; onRedo: () => void; onRestoreOriginal: () => void; onView: (v: CanvasView) => void; bookTrim?: string; onTrim?: (id: string) => void; designInPanel?: boolean;
   /** Moves to another section: the previous and next ones, for working through the book chapter by chapter. */
   onSection?: (id: string) => void;
   /** Adds Claude's text below the section's own, instead of replacing it (as the Manuscript editor offered). */
@@ -99,6 +101,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
   });
 
   const card = mine ? APPROACH_CARDS.find((a) => a.id === mine.approach) : null;
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
   // Writing shows the text formatted or as written (with its Markdown marks); the choice is kept on this device.
   const [formatted, setFormattedState] = useState(() => { try { return localStorage.getItem("studio.formatted") === "1"; } catch { return false; } });
   const setFormatted = (v: boolean) => { setFormattedState(v); try { localStorage.setItem("studio.formatted", v ? "1" : "0"); } catch { /* storage blocked */ } };
@@ -111,7 +114,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
     </header>
   );
 
-  if (view === "book") return <BookPageView m={m} section={section} trimId={bookTrim} onTrim={onTrim} />;
+  if (view === "book") return <BookPageView m={m} section={section} trimId={bookTrim} onTrim={onTrim} designInPanel={designInPanel} />;
 
   // Changes, side by side and clean need a proposal; without one they fall back to the writing view.
   const effective: CanvasView = (view === "changes" || view === "side") && !mine ? "writing" : view;
@@ -128,10 +131,11 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
 
       {effective === "writing" || effective === "mine" ? (
         <>
+          {!(formatted && section.body.trim()) && <FormatBar target={bodyRef} onChange={onBody} />}
           {formatted && section.body.trim()
             // Formatted (§21): headings, bold, lists and quotations as they will read; a click goes back to writing.
             ? <div role="button" tabIndex={0} aria-label={`${section.title} text, formatted: click to edit`} title="Click to edit" onClick={() => setFormatted(false)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setFormatted(false); } }} className={`${PROSE} cursor-text rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40`}><Markdown text={section.body} /></div>
-            : <GrowingText value={section.body} onChange={onBody} label={`${section.title} text`} className={PROSE}
+            : <GrowingText inputRef={bodyRef} value={section.body} onChange={onBody} label={`${section.title} text`} className={PROSE}
                 placeholder={`Write the ${def.label.toLowerCase()} here${effective === "writing" ? ", or ask Claude in the panel" : ""}.`} />}
           <p className="mt-6 flex flex-wrap items-center gap-3 text-[12px] text-[#64748B]">{words(section.body).toLocaleString()} words
             {section.body.trim() && <button type="button" aria-pressed={formatted} onClick={() => setFormatted(!formatted)} className="rounded-full border border-[#E6E8ED] px-2.5 py-0.5 hover:bg-muted dark:border-white/10">{formatted ? "Edit the text" : "Show formatted"}</button>}
@@ -230,5 +234,42 @@ function SectionSteps({ m, section, onSection }: { m: Manuscript; section: Secti
       {prev ? <button type="button" onClick={() => onSection(prev.id)} className="min-w-0 text-left text-[#475569] hover:text-[#1D4ED8] dark:text-[#CBD5E1]"><span className="block text-[11px] uppercase tracking-[0.12em] text-[#94A3B8]">Previous</span><span className="block truncate">← {prev.title}</span></button> : <span />}
       {next && <button type="button" onClick={() => onSection(next.id)} className="min-w-0 text-right font-medium text-[#1D4ED8] hover:underline dark:text-[#93C5FD]"><span className="block text-[11px] font-normal uppercase tracking-[0.12em] text-[#94A3B8]">{next.body.trim() ? "Next" : "Next · not written yet"}</span><span className="block truncate">{next.title} →</span></button>}
     </nav>
+  );
+}
+
+// The Writing toolbar (§21): paragraph style and formatting for the selected text, kept as the book's
+// own marks (## headings, **bold**, > quotations, lists) so every view and export shows them.
+const FMT_BTN = "grid h-8 w-8 place-items-center rounded-md text-[#334155] hover:bg-[#F1F5F9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] dark:text-[#CBD5E1] dark:hover:bg-white/10";
+function FormatBar({ target, onChange }: { target: React.RefObject<HTMLTextAreaElement>; onChange: (v: string) => void }) {
+  const [style, setStyle] = useState<ReturnType<typeof styleAt>>("paragraph");
+  useEffect(() => {
+    const t = target.current; if (!t) return;
+    const on = () => setStyle(styleAt(t.value, t.selectionStart));
+    t.addEventListener("keyup", on); t.addEventListener("mouseup", on); t.addEventListener("focus", on);
+    return () => { t.removeEventListener("keyup", on); t.removeEventListener("mouseup", on); t.removeEventListener("focus", on); };
+  }, [target]);
+  const apply = (kind: FormatKind) => {
+    const t = target.current; if (!t) return;
+    const url = kind === "link" ? window.prompt("Link address", "https://") : "";
+    if (kind === "link" && !url) return;
+    const r = applyFormat(t.value, t.selectionStart, t.selectionEnd, kind, url ?? "");
+    onChange(r.text);
+    requestAnimationFrame(() => { t.focus(); t.setSelectionRange(r.start, r.end); setStyle(styleAt(r.text, r.start)); });
+  };
+  const keep = (e: React.MouseEvent) => e.preventDefault(); // the text keeps its selection while a button is pressed
+  return (
+    <div role="toolbar" aria-label="Formatting" className="sticky top-0 z-10 -mx-2 mb-6 flex flex-wrap items-center gap-0.5 rounded-[12px] border border-[#E6E8ED] bg-white/95 px-2 py-1.5 shadow-sm backdrop-blur dark:border-white/10 dark:bg-[#11151C]/95">
+      <select aria-label="Paragraph style" value={style} onMouseDown={(e) => e.stopPropagation()} onChange={(e) => apply(e.target.value as FormatKind)} className="h-8 rounded-md border-0 bg-transparent px-1.5 text-[13.5px] font-medium hover:bg-[#F1F5F9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] dark:hover:bg-white/10">
+        <option value="paragraph">Paragraph</option><option value="heading">Heading</option><option value="subheading">Subheading</option><option value="quote">Quotation</option>
+      </select>
+      <span aria-hidden className="mx-1 h-5 w-px bg-[#E6E8ED] dark:bg-white/10" />
+      <button type="button" onMouseDown={keep} onClick={() => apply("bold")} aria-label="Bold" title="Bold" className={FMT_BTN}><Bold className="h-4 w-4" /></button>
+      <button type="button" onMouseDown={keep} onClick={() => apply("italic")} aria-label="Italic" title="Italic" className={FMT_BTN}><Italic className="h-4 w-4" /></button>
+      <span aria-hidden className="mx-1 h-5 w-px bg-[#E6E8ED] dark:bg-white/10" />
+      <button type="button" onMouseDown={keep} onClick={() => apply("bullets")} aria-label="Bulleted list" title="Bulleted list" className={FMT_BTN}><List className="h-4 w-4" /></button>
+      <button type="button" onMouseDown={keep} onClick={() => apply("numbers")} aria-label="Numbered list" title="Numbered list" className={FMT_BTN}><ListOrdered className="h-4 w-4" /></button>
+      <button type="button" onMouseDown={keep} onClick={() => apply("quote")} aria-label="Quotation" title="Quotation (set indented in the book)" className={FMT_BTN}><TextQuote className="h-4 w-4" /></button>
+      <button type="button" onMouseDown={keep} onClick={() => apply("link")} aria-label="Link" title="Link" className={FMT_BTN}><Link2 className="h-4 w-4" /></button>
+    </div>
   );
 }

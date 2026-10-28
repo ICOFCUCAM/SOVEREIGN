@@ -174,7 +174,7 @@ const API_IMPROVE: Record<string, string> = {
 /** What the owner has said about the book and this section, in priority order (the same order the runner uses). */
 export function sectionContext(m: Manuscript, sec: Manuscript["sections"][number], o: { idea?: string; rules?: string } = {}): string {
   const pages = (sec.pageNotes ?? []).filter((n) => n.text.trim()).map((n) => `- Page ${n.page}: ${n.text.replace(/\s+/g, " ")}`).join("\n");
-  const idea = (sec.idea || o.idea || "").trim();
+  const idea = (o.idea?.trim() ? o.idea : sec.idea || "").trim();
   const rules = (m.rules || o.rules || "").trim();
   const k = m.knowledge;
   const design = designBrief(m.design as DesignBriefInput | undefined);

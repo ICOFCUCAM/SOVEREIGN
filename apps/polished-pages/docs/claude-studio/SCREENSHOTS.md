@@ -273,3 +273,25 @@ The contents, filled with every section and its page.
 Page design: 14 interior styles, typefaces, size, line spacing and margins.
 
 ![Page design (§21)](screenshots/60-page-design.webp)
+
+## The Claude panel, upgraded (§21)
+
+Revise: the current section, what to do, instructions, source policy, the action pinned, and Ask docked at the foot; the formatting toolbar over the page.
+
+![Revise (§21)](screenshots/61-panel-revise.webp)
+
+Advanced editorial settings: the book's rules, citation handling, rewrite scope.
+
+![Advanced settings (§21)](screenshots/62-panel-advanced.webp)
+
+Citations found in the section, and adding citations to it.
+
+![Citations (§21)](screenshots/63-panel-citations.webp)
+
+Book page view: the page design at full size in the panel.
+
+![Page design panel (§21)](screenshots/64-page-design-panel.webp)
+
+On a laptop screen.
+
+![Laptop (§21)](screenshots/65-panel-laptop.webp)

@@ -25,6 +25,7 @@ import Canvas, { VIEWS, type CanvasView } from "./Canvas";
 import ClaudePanel, { type PanelMode } from "./ClaudePanel";
 import StudioPalette from "./StudioPalette";
 import FindReplaceDialog from "./FindReplaceDialog";
+import PageDesignPanel from "./PageDesignPanel";
 import SourcesStage from "./SourcesStage";
 import PlanStage from "./PlanStage";
 import BookDesignDialog from "./BookDesignDialog";
@@ -55,7 +56,7 @@ import Onboarding, { wasOnboarded } from "./Onboarding";
 const pref = <T extends string>(key: string, fallback: T, allowed: readonly T[]): T => { try { const v = localStorage.getItem(key) as T | null; return v && allowed.includes(v) ? v : fallback; } catch { return fallback; } };
 const keep = (key: string, v: string) => { try { localStorage.setItem(key, v); } catch { /* a per-browser preference */ } };
 const PLACES: readonly Place[] = ["sources", "plan", "write", "finish", "books", "voice"];
-const PANEL_MODES: readonly PanelMode[] = ["ask", "revise", "research", "notes"];
+const PANEL_MODES: readonly PanelMode[] = ["ask", "revise", "research", "notes", "citations"];
 const VIEW_IDS = VIEWS.map((v) => v.id);
 const APPROACH_IDS = APPROACH_CARDS.map((a) => a.id);
 
@@ -132,6 +133,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [pdfFile, setPdfFile] = useState<StudioThread["files"][number] | null>(null);
   // Organise into chapters and sections (§19).
   const [organising, setOrganising] = useState(false);
+  const [bookPanel, setBookPanelState] = useState<"design" | "claude">(() => { try { return localStorage.getItem("studio.bookPanel") === "claude" ? "claude" : "design"; } catch { return "design"; } });
+  const setBookPanel = (v: "design" | "claude") => { setBookPanelState(v); try { localStorage.setItem("studio.bookPanel", v); } catch { /* storage blocked */ } };
   // Find and replace across the book (§21).
   const [finding, setFinding] = useState(false);
   // A long job that stopped and can be continued (§21): the latest whole-book run's message says so.
@@ -361,14 +364,19 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const showPanel = place === "write" && !focus && view !== "mine" && (narrow ? sheet : panelOpen);
   const busy = Boolean(live) || Boolean(sr.running);
 
-  const panel = section && m ? (
-    <ClaudePanel mode={panelMode} onMode={setPanelMode} onClose={() => (narrow ? setSheet(false) : setPanelOpen(false))}
+  // Book page view: the panel holds the page design unless the owner asks for Claude there (remembered).
+  const designPanel = view === "book" && bookPanel === "design";
+  const setTrim = (id: string) => m && update({ ...m, meta: { ...(m.meta ?? {}), trimSize: id } });
+  const panel = section && m ? (designPanel ? (
+    <PageDesignPanel trimId={String(m.meta?.trimSize ?? "")} onTrim={setTrim} onClaude={() => setBookPanel("claude")} onClose={() => (narrow ? setSheet(false) : setPanelOpen(false))} />
+  ) : (
+    <ClaudePanel onPageDesign={view === "book" ? () => setBookPanel("design") : undefined} mode={panelMode} onMode={setPanelMode} onClose={() => (narrow ? setSheet(false) : setPanelOpen(false))}
       thread={thread} live={live} onStopLive={() => { if (live) void backend.cancel(live.job); }} onChat={(message) => start("chat", { message })} chatBusy={busy || !engineId}
       onOpenResult={setViewing} onAction={setDialog} onTool={(t) => setTool({ initial: t })} onJoin={() => setJoining(true)}
       m={m} section={section} hasUploads={hasUploads} engine={engineId} citationStyles={p.citationStyles}
       run={(o) => { void runSection(o); }} running={sr.running} onCancel={sr.cancel} proposal={proposal} onReview={() => setView("changes")}
       patchSection={patchSection} onEditRules={() => { setPlace("sources"); setTimeout(() => rulesRef.current?.focus(), 250); }} approach={approach} onApproach={setApproach} />
-  ) : null;
+  )) : null;
 
   const stage = (() => {
     if (place === "books" || place === "voice") return <Library place={place} p={p} onBooks={() => setPlace("books")} />;
@@ -407,7 +415,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}
       projectId={id} outputs={thread.outputs} onOpenResult={setViewing} onTool={(t) => setTool({ initial: t, target: "manuscript" })} />;
     if (!section) return <EmptyWrite onAdd={() => { const r = insertSection(m, "chapter"); update(r.manuscript); setSectionId(r.id); }} onPlan={() => setPlace("plan")} />;
-    return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")} onTrim={(id) => update({ ...m, meta: { ...(m.meta ?? {}), trimSize: id } })} onSection={openSection}
+    return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")} onTrim={setTrim} designInPanel={showPanel && designPanel} onSection={openSection}
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
       onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); const next = m.sections[m.sections.findIndex((s) => s.id === section.id) + 1]; toast({ title: "Accepted", description: `Your previous text is kept in Version history.${next ? ` Next: “${next.title}”, at the end of the page.` : ""}` }); }}
       onDiscard={() => { sr.decide(section.id, "discard"); setView("writing"); }}
@@ -519,7 +527,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           </form>
         </DialogContent>
       </Dialog>
-      {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[320px] p-0 sm:max-w-[320px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
+      {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[min(400px,92vw)] p-0 sm:max-w-[400px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
 
       <Onboarding open={tour} onClose={() => setTour(false)} onGo={setPlace} />
       {organising && <OrganiseDialog hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} hasUploads={hasUploads} engineLabel={bookEngine?.label}
@@ -577,6 +585,9 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
 }
 
 /** Frame + header + stage + optional Claude panel, laid out for the screen size (spec §3). */
+const PANEL_MIN = 320, PANEL_MAX = 520;
+const clampPanel = (v: number) => Math.round(Math.min(PANEL_MAX, Math.max(PANEL_MIN, v)));
+
 function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, reduce, onRename, onDelete, onBackup, children }: {
   p: WorkspaceProps; place: Place; setPlace: (x: Place) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; drawer: boolean; setDrawer: (v: boolean) => void;
   m: Manuscript | null | undefined; sectionId: string | null; onSection: (id: string) => void; pending: string | null; title: string;
@@ -587,6 +598,17 @@ function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer,
       onNewProject={() => { setDrawer(false); void p.onNewProject(); }} ready={p.ready} title={title} m={m} sectionId={sectionId} onSection={(x) => { setDrawer(false); onSection(x); }} pending={pending}
       decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} onRename={onRename} onDelete={onDelete} onBackup={onBackup} />
   );
+  // The panel's width: 400px on a wide screen, 360px on a laptop, 320px below; dragged between 320 and 520; remembered.
+  const [panelW, setPanelW] = useState(() => { try { const v = Number(localStorage.getItem("studio.panelWidth")); if (v) return clampPanel(v); } catch { /* storage blocked */ } const w = typeof window !== "undefined" ? window.innerWidth : 0; return w >= 1600 ? 400 : w >= 1366 ? 360 : PANEL_MIN; });
+  const [dragging, setDragging] = useState(false);
+  const keepPanelW = (v: number) => { const w = clampPanel(v); setPanelW(w); try { localStorage.setItem("studio.panelWidth", String(w)); } catch { /* storage blocked */ } };
+  const startDrag = (e: React.PointerEvent) => {
+    const x0 = e.clientX, w0 = panelW;
+    setDragging(true);
+    const move = (ev: PointerEvent) => setPanelW(clampPanel(w0 + (x0 - ev.clientX)));
+    const up = (ev: PointerEvent) => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); setDragging(false); keepPanelW(w0 + (x0 - ev.clientX)); };
+    window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+  };
   return (
     <div className="fixed inset-0 z-40 flex bg-[#F7F6F2] text-[#172033] dark:bg-[#0D1016] dark:text-[#E5E7EB]">
       <div className="hidden h-full shrink-0 lg:block">{frame(collapsed)}</div>
@@ -594,12 +616,18 @@ function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer,
       <div className="flex min-w-0 flex-1 flex-col">
         {header ?? <header className="flex h-14 shrink-0 items-center gap-3 border-b border-[#E6E8ED] px-4 dark:border-white/10"><button type="button" onClick={() => setDrawer(true)} aria-label="Open the sidebar" className="grid h-9 w-9 place-items-center rounded-md hover:bg-muted lg:hidden"><Menu className="h-5 w-5" /></button><span className="text-[13px] text-[#64748B]">Claude Studio</span></header>}
         {p.notice}
-        <div className="flex min-h-0 flex-1">
-          <main id="studio-main" className="min-w-0 flex-1 overflow-y-auto px-5 pb-24 pt-10 sm:px-10 xl:px-16">{children}</main>
+        {/* The page and the Claude panel sit together, centred, rather than the panel at the far edge (§21). */}
+        <div className={`flex min-h-0 flex-1 ${side ? "justify-center" : ""}`}>
+          <main id="studio-main" className={`min-w-0 flex-1 overflow-y-auto px-5 pb-24 pt-10 sm:px-10 xl:px-16 ${side ? "2xl:max-w-[980px]" : ""}`}>{children}</main>
           <AnimatePresence initial={false}>
             {side && (
-              <motion.div key="panel" initial={reduce ? false : { width: 0, opacity: 0 }} animate={{ width: 320, opacity: 1 }} exit={reduce ? undefined : { width: 0, opacity: 0 }} transition={{ duration: 0.2 }}
-                className="h-full shrink-0 overflow-hidden border-l border-[#E6E8ED] dark:border-white/10"><div className="h-full w-[320px]">{side}</div></motion.div>
+              <motion.div key="panel" initial={reduce ? false : { width: 0, opacity: 0 }} animate={{ width: panelW + 16, opacity: 1 }} exit={reduce ? undefined : { width: 0, opacity: 0 }} transition={{ duration: dragging ? 0 : 0.2 }}
+                className="relative h-full shrink-0 overflow-hidden py-3 pr-4">
+                <div role="separator" aria-orientation="vertical" aria-label="Resize the Claude panel" aria-valuemin={PANEL_MIN} aria-valuemax={PANEL_MAX} aria-valuenow={panelW} tabIndex={0}
+                  onPointerDown={startDrag} onKeyDown={(e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); keepPanelW(panelW + (e.key === "ArrowLeft" ? 20 : -20)); } }}
+                  className="absolute inset-y-3 left-0 z-10 w-2 cursor-col-resize rounded-full hover:bg-[#2563EB]/25 focus-visible:bg-[#2563EB]/40 focus-visible:outline-none" />
+                <div className="h-full overflow-hidden rounded-[12px] border border-[#E6E8ED] dark:border-white/10" style={{ width: panelW }}>{side}</div>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>

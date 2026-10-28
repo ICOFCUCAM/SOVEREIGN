@@ -100,3 +100,18 @@ describe("page makeup", () => {
     expect(pages[r.sections[2].page - 1]).toMatch(/The Nature of Yahuah/);
   }, 60_000);
 });
+
+describe("quotations", () => {
+  it("sets a quotation apart: a '>' line, or one introduced with a colon and closed by its source", async () => {
+    const md = `# The Nature of Yahuah\n\nA trinitarian scholar summed up the predominant view:\n\nIn the Old Testament the angel of the LORD might be only a messenger of God, distinct from God himself, or he might be identified with the LORD himself speaking in the first person. (Dyrness, 1979, pp. 41-42)\n\nMany regard Melchizedek as a theophany, and this paragraph is the author's own words again, set at the full measure of the page.\n\n> Hear, O Israel: Yahuah our Elohim is one Yahuah.`;
+    const { bytes } = await typesetBook(md, { title: "B", trim: getTrim("6x9"), style: "devotional", fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: bytes.slice(), useSystemFonts: false }).promise;
+    const items: { str: string; x: number }[] = [];
+    for (let n = 1; n <= doc.numPages; n++) for (const it of (await (await doc.getPage(n)).getTextContent()).items) if ("str" in it && it.str.trim()) items.push({ str: it.str, x: it.transform[4] });
+    const xOf = (w: string) => items.find((i) => i.str.includes(w))!.x;
+    expect(xOf("Melchizedek") - xOf("trinitarian")).toBeLessThan(2); // the author's own paragraphs share a margin
+    expect(xOf("Testament") - xOf("Melchizedek")).toBeGreaterThan(10);
+    expect(xOf("Israel") - xOf("Melchizedek")).toBeGreaterThan(10);
+  }, 60_000);
+});
