@@ -36,3 +36,20 @@ export function styleAt(text: string, at: number): "paragraph" | "heading" | "su
   const line = text.slice(text.lastIndexOf("\n", at - 1) + 1).split("\n")[0];
   return /^###\s/.test(line) ? "subheading" : /^##?\s/.test(line) ? "heading" : /^>\s?/.test(line) ? "quote" : "paragraph";
 }
+
+/** A footnote at the cursor: the next number in the text, and its note line at the end, ready to write. */
+export function insertFootnote(text: string, at: number): Edit {
+  const used = [...text.matchAll(/\[\^(\d+)\]/g)].map((m) => Number(m[1]));
+  const n = (used.length ? Math.max(...used) : 0) + 1;
+  const withRef = `${text.slice(0, at)}[^${n}]${text.slice(at)}`;
+  const tail = `${withRef.replace(/\s+$/, "")}\n\n[^${n}]: `;
+  return { text: tail, start: tail.length, end: tail.length };
+}
+
+/** A block (an image, a quotation) inserted on its own lines at the cursor. */
+export function insertBlock(text: string, at: number, block: string): Edit {
+  const before = text.slice(0, at).replace(/\s+$/, ""), after = text.slice(at).replace(/^\s+/, "");
+  const out = `${before}${before ? "\n\n" : ""}${block}${after ? `\n\n${after}` : ""}`;
+  const end = (before ? before.length + 2 : 0) + block.length;
+  return { text: out, start: end, end };
+}

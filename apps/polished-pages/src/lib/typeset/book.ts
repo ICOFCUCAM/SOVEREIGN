@@ -97,7 +97,7 @@ const UNNUMBERED = /^(preface|foreword|introduction|prologue|acknowledge?ments?|
 /** "{-}" after a chapter heading (as in Pandoc) sets it without a number. */
 export const unnumbered = (title: string) => `${title} {-}`;
 
-interface Block { kind: "h1" | "h2" | "h3" | "li" | "p" | "quote" | "gap" | "toc"; text: string; plain?: boolean }
+interface Block { kind: "h1" | "h2" | "h3" | "li" | "p" | "quote" | "gap" | "toc" | "fn" | "img"; text: string; plain?: boolean; id?: string; src?: string }
 /** A quotation the author introduces with a colon and closes with its source, "(Dyrness, 1979, pp. 41-42)". */
 const CITED_END = /\((?:[^()]*\b(?:1[5-9]|20)\d\d\b[^()]*|[^()]*\bp{1,2}\.\s*\d[^()]*)\)\s*\.?$/;
 function parse(markdown: string): Block[] {
@@ -112,6 +112,10 @@ function parse(markdown: string): Block[] {
     }
     if (/^##\s+/.test(t)) return { kind: "h2", text: strip(t.replace(/^##\s+/, "")) };
     if (/^###\s+/.test(t)) return { kind: "h3", text: strip(t.replace(/^###\s+/, "")) };
+    const img = /^!\[([^\]]*)\]\((data:image\/(?:png|jpe?g);base64,[A-Za-z0-9+/=]+)\)$/.exec(t);
+    if (img) return { kind: "img", text: strip(img[1]), src: img[2] };
+    const fn = /^\[\^([^\]\s]+)\]:\s*(.*)$/.exec(t);
+    if (fn) return { kind: "fn", id: fn[1], text: strip(fn[2]) };
     if (/^[-*]\s+/.test(t)) return { kind: "li", text: strip(t.replace(/^[-*]\s+/, "")) };
     if (/^>\s?/.test(t)) return { kind: "quote", text: strip(t.replace(/^>\s?/, "")) };
     if (!t) return { kind: "gap", text: "" };
@@ -309,8 +313,31 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     dropNext = S.dropCap > 0;
   };
 
+  // Footnotes ([^1] in the text, "[^1]: …" below): numbered per chapter in order of use, set as notes
+  // at the end of their chapter, with a raised number in the text.
+  const SUP = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+  const sup = (n: number) => String(n).split("").map((d) => SUP[Number(d)]).join("");
+  let notes: { n: number; text: string }[] = [];
+  let noteNo = new Map<string, number>();
+  let defs = new Map<string, string>();
+  const chapterDefs = (from: number) => { const m = new Map<string, string>(); for (let i = from + 1; i < blocks.length && blocks[i].kind !== "h1"; i++) if (blocks[i].kind === "fn") m.set(blocks[i].id!, blocks[i].text); return m; };
+  const marks = (text: string) => text.replace(/\[\^([^\]\s]+)\]/g, (_m, id: string) => {
+    if (!defs.has(id)) return "";
+    if (!noteNo.has(id)) { noteNo.set(id, noteNo.size + 1); notes.push({ n: noteNo.size, text: defs.get(id)! }); }
+    return sup(noteNo.get(id)!);
+  });
+  const flushNotes = () => {
+    if (!notes.length) return;
+    para("Notes", { kind: "heading", style: "bold", size: Math.round(size * 1.05) }, "start", { before: lead * 1.2, after: lead * 0.3, keep: lead * 2 });
+    for (const x of notes) para(`${x.n}. ${x.text}`, { kind: "body", style: "regular", size: Math.max(8, size * 0.85) }, "start", { hang: size * 1.2, after: lead * 0.1, lh: size * 0.85 * leading });
+    notes = []; noteNo = new Map();
+  };
+  defs = chapterDefs(-1);
   let first = true;
-  for (const b of blocks) {
+  for (const [bi, b] of blocks.entries()) {
+    if (b.kind === "fn") continue;
+    if (b.kind === "h1") { flushNotes(); defs = chapterDefs(bi); }
+    if (b.kind === "p" || b.kind === "li" || b.kind === "quote") b.text = marks(b.text);
     if (b.kind === "toc") {
       if (!tocCount) continue;
       if (!first || dirty) nextPage();
@@ -347,6 +374,21 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       const qSize = Math.max(8, size * 0.92);
       para(b.text, { kind: "body", style: "regular", size: qSize }, S.justify ? "justify" : "start", { hang: size * 1.8, right: size * 1.8, before: lead * 0.45, after: lead * 0.55, lh: qSize * leading });
       afterHeading = true;
+    } else if (b.kind === "img" && b.src) {
+      // A figure: scaled to the text width (and at most 60% of the page's height), its caption below.
+      const raw = Uint8Array.from(atob(b.src.split(",")[1]), (c) => c.charCodeAt(0));
+      const image = /^data:image\/png/.test(b.src) ? await doc.embedPng(raw) : await doc.embedJpg(raw);
+      const k = Math.min(colW / image.width, (textH * 0.6) / image.height, 1.5);
+      const w = image.width * k, h = image.height * k;
+      const capSt: TextStyle = { kind: "body", style: "italic", size: Math.max(8, size * 0.85), gray: 0.3 };
+      const capLines = b.text ? ts.wrap(b.text, capSt, colW) : [];
+      room(h + lead * 0.8 + capLines.length * capSt.size * 1.3);
+      y -= lead * 0.4;
+      pc.page.drawImage(image, { x: colX(pageNo()) + (colW - w) / 2, y: y - h, width: w, height: h });
+      y -= h + lead * 0.35;
+      for (const l of capLines) { ts.drawLine(pc, l, colX(pageNo()), y - capSt.size, colW, capSt, "center"); y -= capSt.size * 1.3; }
+      y -= lead * 0.4;
+      dirty = true; afterHeading = true;
     } else if (b.kind === "gap") {
       if (S.paragraphs === "block") y -= lead * 0.15;
     } else {
@@ -355,6 +397,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       afterHeading = false; dropNext = false;
     }
   }
+  flushNotes();
   closePage();
 
   // Running heads and folios, now that every page's chapter is known.

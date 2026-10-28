@@ -1,7 +1,10 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowDown, ArrowUp, Bold, Check, CornerDownLeft, Italic, Link2, List, ListOrdered, PenLine, RotateCcw, TextQuote, Undo2, X } from "lucide-react";
-import { applyFormat, styleAt, type FormatKind } from "@/lib/markdown-format";
+import { ArrowDown, ArrowUp, Bold, BookOpenText, Check, CornerDownLeft, Image as ImageIcon, Italic, Link2, List, ListOrdered, MessageSquarePlus, PenLine, RotateCcw, Superscript, TextQuote, Undo2, X } from "lucide-react";
+import { applyFormat, insertBlock, insertFootnote, styleAt, type FormatKind } from "@/lib/markdown-format";
+import { prepareImage } from "@/lib/figures";
+import { TRANSLATIONS, fetchVerse, verseBlock } from "@/lib/scripture-insert";
+import { fixHits, parseRules, ruleHits } from "@/lib/rule-check";
 import { Button } from "@/components/ui/button";
 import { SuggestionChecks } from "./EditorialCheck";
 import Markdown from "@/components/studio/Markdown";
@@ -58,10 +61,12 @@ function numberChanges(blocks: DiffBlock[]) {
   }));
 }
 
-export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onTrim, designInPanel, showContents, select, onSection, onAppend }: {
+export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onTrim, designInPanel, showContents, select, onFigure, onComment, onSection, onAppend }: {
   m: Manuscript; section: Section; view: CanvasView; proposal: Proposal | null; running: boolean;
   onBody: (t: string) => void; onTitle: (t: string) => void;
   onAccept: (text: string) => void; onDiscard: () => void; onRedo: () => void; onRestoreOriginal: () => void; onView: (v: CanvasView) => void; bookTrim?: string; onTrim?: (id: string) => void; designInPanel?: boolean; showContents?: number;
+  /** An image placed at the cursor (kept with the book), and a comment on the selected words (§21). */
+  onFigure?: (dataUrl: string, caption: string, at: number) => void; onComment?: (quote: string, text: string) => void;
   /** Words to select in the text (a search hit, a comment), with when it was asked. */
   select?: { start: number; end: number; at: number } | null;
   /** Moves to another section: the previous and next ones, for working through the book chapter by chapter. */
@@ -145,7 +150,8 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
 
       {effective === "writing" || effective === "mine" ? (
         <>
-          {!(formatted && section.body.trim()) && <FormatBar target={bodyRef} onChange={onBody} />}
+          {!(formatted && section.body.trim()) && <FormatBar target={bodyRef} onChange={onBody} onFigure={onFigure} onComment={onComment} />}
+          <RuleBar text={section.body} rules={m.rules ?? ""} onFix={onBody} onShow={(a, b) => { const el = bodyRef.current; if (el) { el.focus(); el.setSelectionRange(a, b); } }} />
           {formatted && section.body.trim()
             // Formatted (§21): headings, bold, lists and quotations as they will read; a click goes back to writing.
             ? <div role="button" tabIndex={0} aria-label={`${section.title} text, formatted: click to edit`} title="Click to edit" onClick={() => setFormatted(false)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setFormatted(false); } }} className={`${PROSE} cursor-text rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40`}><Markdown text={section.body} /></div>
@@ -254,8 +260,29 @@ function SectionSteps({ m, section, onSection }: { m: Manuscript; section: Secti
 // The Writing toolbar (§21): paragraph style and formatting for the selected text, kept as the book's
 // own marks (## headings, **bold**, > quotations, lists) so every view and export shows them.
 const FMT_BTN = "grid h-8 w-8 place-items-center rounded-md text-[#334155] hover:bg-[#F1F5F9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] dark:text-[#CBD5E1] dark:hover:bg-white/10";
-function FormatBar({ target, onChange }: { target: React.RefObject<HTMLTextAreaElement>; onChange: (v: string) => void }) {
+function FormatBar({ target, onChange, onFigure, onComment }: { target: React.RefObject<HTMLTextAreaElement>; onChange: (v: string) => void; onFigure?: (dataUrl: string, caption: string, at: number) => void; onComment?: (quote: string, text: string) => void }) {
   const [style, setStyle] = useState<ReturnType<typeof styleAt>>("paragraph");
+  const [form, setForm] = useState<null | "verse" | "comment">(null);
+  const [ref, setRef] = useState(""); const [tr, setTr] = useState("kjv"); const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false); const [err, setErr] = useState<string | null>(null);
+  const sel = useRef<{ start: number; end: number }>({ start: 0, end: 0 });
+  const file = useRef<HTMLInputElement>(null);
+  const remember = () => { const t = target.current; if (t) sel.current = { start: t.selectionStart, end: t.selectionEnd }; };
+  const put = (r: { text: string; start: number; end: number }) => { const t = target.current; onChange(r.text); requestAnimationFrame(() => { t?.focus(); t?.setSelectionRange(r.start, r.end); }); };
+  const footnote = () => { const t = target.current; if (!t) return; put(insertFootnote(t.value, t.selectionEnd)); };
+  const verse = async () => {
+    const t = target.current; if (!t) return;
+    setBusy(true); setErr(null);
+    try { const v = await fetchVerse(ref, tr); put(insertBlock(t.value, sel.current.end, verseBlock(v))); setForm(null); setRef(""); }
+    catch (e) { setErr(e instanceof Error ? e.message : "The verse couldn't be fetched."); }
+    finally { setBusy(false); }
+  };
+  const picture = async (f: File | undefined) => {
+    if (!f || !onFigure) return;
+    try { const url = await prepareImage(f); const caption = window.prompt("Caption for the image (optional)", f.name.replace(/\.[^.]+$/, "")) ?? ""; onFigure(url, caption, sel.current.end); }
+    catch (e) { setErr(e instanceof Error ? e.message : "The image couldn't be added."); }
+  };
+  const comment = () => { const t = target.current; if (!t || !onComment) return; const quote = t.value.slice(sel.current.start, sel.current.end).trim(); if (!quote || !note.trim()) return; onComment(quote, note.trim()); setNote(""); setForm(null); };
   useEffect(() => {
     const t = target.current; if (!t) return;
     const on = () => setStyle(styleAt(t.value, t.selectionStart));
@@ -284,6 +311,47 @@ function FormatBar({ target, onChange }: { target: React.RefObject<HTMLTextAreaE
       <button type="button" onMouseDown={keep} onClick={() => apply("numbers")} aria-label="Numbered list" title="Numbered list" className={FMT_BTN}><ListOrdered className="h-4 w-4" /></button>
       <button type="button" onMouseDown={keep} onClick={() => apply("quote")} aria-label="Quotation" title="Quotation (set indented in the book)" className={FMT_BTN}><TextQuote className="h-4 w-4" /></button>
       <button type="button" onMouseDown={keep} onClick={() => apply("link")} aria-label="Link" title="Link" className={FMT_BTN}><Link2 className="h-4 w-4" /></button>
+      <span aria-hidden className="mx-1 h-5 w-px bg-[#E6E8ED] dark:bg-white/10" />
+      <button type="button" onMouseDown={keep} onClick={footnote} aria-label="Footnote" title="Footnote (set as a note at the end of the chapter)" className={FMT_BTN}><Superscript className="h-4 w-4" /></button>
+      {onFigure && <button type="button" onMouseDown={keep} onClick={() => { remember(); file.current?.click(); }} aria-label="Image" title="Image or figure, with a caption" className={FMT_BTN}><ImageIcon className="h-4 w-4" /></button>}
+      <input ref={file} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(e) => { void picture(e.target.files?.[0]); e.target.value = ""; }} />
+      <button type="button" onMouseDown={keep} onClick={() => { remember(); setForm(form === "verse" ? null : "verse"); setErr(null); }} aria-pressed={form === "verse"} aria-label="Insert a scripture verse" title="Insert a scripture verse, word for word" className={FMT_BTN}><BookOpenText className="h-4 w-4" /></button>
+      {onComment && <button type="button" onMouseDown={keep} onClick={() => { remember(); setForm(form === "comment" ? null : "comment"); setErr(null); }} aria-pressed={form === "comment"} aria-label="Comment on the selected words" title="Comment on the selected words" className={FMT_BTN}><MessageSquarePlus className="h-4 w-4" /></button>}
+      {form === "verse" && (
+        <form onSubmit={(e) => { e.preventDefault(); void verse(); }} className="flex w-full flex-wrap items-center gap-2 border-t border-[#F1F5F9] pt-2 dark:border-white/5">
+          <input autoFocus value={ref} onChange={(e) => setRef(e.target.value)} aria-label="Scripture reference" placeholder="e.g. Malachi 3:6 or Psalm 23:1-3" className="h-8 min-w-[200px] flex-1 rounded-md border border-input bg-background px-2 text-[13.5px]" />
+          <select value={tr} onChange={(e) => setTr(e.target.value)} aria-label="Translation" className="h-8 rounded-md border border-input bg-background px-1.5 text-[13px]">{TRANSLATIONS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}</select>
+          <button type="submit" disabled={!ref.trim() || busy} className="h-8 rounded-md bg-[#172033] px-3 text-[13px] font-medium text-white disabled:opacity-50">{busy ? "Fetching…" : "Insert"}</button>
+          <span className="w-full text-[12px] text-[#64748B]">Inserted word for word as a quotation, with its reference. The book's naming rules apply to your words, not to quoted scripture.</span>
+        </form>
+      )}
+      {form === "comment" && (
+        <form onSubmit={(e) => { e.preventDefault(); comment(); }} className="flex w-full flex-wrap items-center gap-2 border-t border-[#F1F5F9] pt-2 dark:border-white/5">
+          <input autoFocus value={note} onChange={(e) => setNote(e.target.value)} aria-label="Comment" placeholder={sel.current.end > sel.current.start ? "Your comment on the selected words" : "Select some words in the text first"} className="h-8 min-w-[200px] flex-1 rounded-md border border-input bg-background px-2 text-[13.5px]" />
+          <button type="submit" disabled={!note.trim() || sel.current.end <= sel.current.start} className="h-8 rounded-md bg-[#172033] px-3 text-[13px] font-medium text-white disabled:opacity-50">Add comment</button>
+        </form>
+      )}
+      {err && <p role="alert" className="w-full pt-1 text-[12.5px] text-[#B91C1C]">{err}</p>}
+    </div>
+  );
+}
+
+// The live rule checker (§21): words in this section that break the book's rules, outside quotations,
+// each shown on request, all fixed with one click (Undo puts them back).
+function RuleBar({ text, rules, onFix, onShow }: { text: string; rules: string; onFix: (v: string) => void; onShow: (start: number, end: number) => void }) {
+  const parsed = useMemo(() => parseRules(rules), [rules]);
+  const hits = useMemo(() => (parsed.length ? ruleHits(text, parsed) : []), [text, parsed]);
+  if (!hits.length) return null;
+  const n = hits.reduce((k, h) => k + h.matches.length, 0);
+  return (
+    <div role="status" className="-mt-3 mb-6 flex flex-wrap items-center gap-2 rounded-[10px] border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[13px]">
+      <span className="font-medium">{n} {n === 1 ? "word doesn't" : "words don't"} follow the book's rules:</span>
+      {hits.map((h) => (
+        <button key={h.rule.wrong} type="button" onClick={() => onShow(h.matches[0].index, h.matches[0].index + h.matches[0].length)} title="Show it in the text" className="rounded-full bg-white/70 px-2 py-0.5 text-[12.5px] hover:bg-white dark:bg-white/10">
+          {h.rule.wrong} ×{h.matches.length} → {h.rule.right}
+        </button>
+      ))}
+      <button type="button" onClick={() => onFix(fixHits(text, hits))} className="ml-auto rounded-md bg-[#172033] px-2.5 py-1 text-[12.5px] font-medium text-white hover:bg-[#172033]/90">Fix outside quotations</button>
     </div>
   );
 }

@@ -133,3 +133,39 @@ describe("front matter in order", () => {
     expect(r.sections.map((s) => s.title)).toEqual(["Dedication", "Preface", "Introduction", "Spirits"]);
   }, 60_000);
 });
+
+describe("footnotes", () => {
+  it("numbers the notes per chapter in order of use and sets them at the end of the chapter", async () => {
+    const md = "# One\n\nAngels are messengers[^a] of Yahuah, sent to men[^b].\n\n[^b]: Hebrews 1:14.\n[^a]: The Hebrew word means messenger.\n\n# Two\n\nAnother chapter[^x].\n\n[^x]: Its own note.";
+    const r = await typesetBook(md, { title: "B", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: r.bytes.slice(), useSystemFonts: false }).promise;
+    let all = "";
+    for (let n = 1; n <= doc.numPages; n++) all += " | " + (await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ");
+    all = all.replace(/\s+/g, " ");
+    expect(all).toMatch(/messengers\s?¹/);
+    expect(all).toMatch(/men\s?²/);
+    expect(all).toMatch(/Notes 1\. The Hebrew word means messenger\. 2\. Hebrews 1:14\./);
+    expect(all).toMatch(/chapter\s?¹[\s\S]*Notes 1\. Its own note\./);
+    expect(all).not.toMatch(/\[\^/);
+  }, 60_000);
+});
+
+describe("figures", () => {
+  it("places an image at the text width with its caption below", async () => {
+    // A 4×2 white PNG.
+    const png = "iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAIAAAASFvFNAAAAEUlEQVR4nGP4//8/AwwgswA1xQX7T9vM1AAAAABJRU5ErkJggg==";
+    const md = `# One\n\nBefore the figure.\n\n![The tabernacle in the wilderness](data:image/png;base64,${png})\n\nAfter the figure.`;
+    const r = await typesetBook(md, { title: "B", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: r.bytes.slice(), useSystemFonts: false }).promise;
+    let text = ""; let images = 0;
+    for (let n = 1; n <= doc.numPages; n++) {
+      const pg = await doc.getPage(n);
+      text += (await pg.getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ");
+      images += (await pg.getOperatorList()).fnArray.filter((f) => f === pdfjs.OPS.paintImageXObject).length;
+    }
+    expect(images).toBe(1);
+    expect(text.replace(/\s+/g, " ")).toMatch(/figure\.[\s\S]*The tabernacle in the wilderness[\s\S]*After/);
+  }, 60_000);
+});

@@ -4,6 +4,8 @@
 
 export type SectionGroup = "front" | "body" | "back";
 
+import { figuresOf, resolveFigures } from "./figures";
+
 export interface SectionKindDef {
   kind: string;
   label: string;
@@ -59,7 +61,10 @@ export interface Section {
   pageNotes?: PageNote[];
   /** Version history: snapshots, autosaved revisions and the text before each accepted change or restore. */
   versions?: SectionVersion[];
+  /** Comments on words of the text (§21), found again by the words they quote. */
+  comments?: SectionComment[];
 }
+export interface SectionComment { id: string; quote: string; text: string; at: string; done?: boolean }
 export interface PageNote { page: string; text: string }
 export type VersionKind = "snapshot" | "autosave" | "before-accept" | "before-restore";
 export interface SectionVersion { id: string; at: string; kind: VersionKind; title: string; body: string; label?: string }
@@ -174,7 +179,8 @@ export function compile(m: Manuscript, opts: { contents?: boolean } = {}): strin
     out.push(`## ${s.title}${s.body.trim() ? `\n\n${s.body.trim()}` : ""}`);
   }
   if (!contentsDone) out.push(`## Contents\n\n${listed.map((x) => `- ${x.title}`).join("\n")}`);
-  return out.join("\n\n") + "\n";
+  // Figures are kept with the book and placed by id in the text; the finished book carries the images.
+  return resolveFigures(out.join("\n\n") + "\n", figuresOf(m));
 }
 
 /** A plain record of what Claude did and what the author accepted. */

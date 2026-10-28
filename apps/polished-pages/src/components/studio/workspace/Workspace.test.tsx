@@ -147,6 +147,20 @@ describe("Claude Studio workspace", () => {
     expect(await screen.findByRole("complementary", { name: "Page design" })).toBeTruthy();
   });
 
+  it("shows words that break the book's rules and fixes them outside quotations; comments on words are listed in Notes", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: unknown }).manuscript = async () => ({ title: "B", rules: "Write Yahuah instead of God", history: [], sections: [
+      { id: "c1", kind: "chapter", title: "One", body: "God is one.\n\nAs it is written, “God is a Spirit.”", comments: [{ id: "k1", quote: "is one", text: "Add the Shema here", at: "2026-10-28T10:00:00Z" }] },
+    ] });
+    localStorage.setItem("studio.panelMode", "notes");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    expect(await screen.findByText(/1 word doesn't follow the book's rules/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Fix outside quotations" }));
+    await waitFor(() => expect(f.saved().sections[0].body).toBe("Yahuah is one.\n\nAs it is written, “God is a Spirit.”"), { timeout: 3000 });
+    expect(screen.getByText("Add the Shema here")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Show in the text" })).toBeTruthy();
+  });
+
   it("reviews changes from the keyboard: J moves, X rejects, ⌘↵ accepts", async () => {
     const f = fake();
     render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);

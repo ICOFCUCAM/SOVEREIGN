@@ -34,6 +34,8 @@ import OpenPdfDialog from "./OpenPdfDialog";
 import OrganiseDialog from "./OrganiseDialog";
 import { claudeOrganise, claudeResearch, pdfInStudio } from "@/lib/claude-studio";
 import { searchSources } from "@/lib/research";
+import { figuresOf } from "@/lib/figures";
+import { insertBlock } from "@/lib/markdown-format";
 import { buildBackup } from "@/lib/project-backup";
 import { saveFile } from "@/lib/book-export";
 import { manuscriptText, organisedToManuscript } from "@/lib/organise";
@@ -377,6 +379,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     <PageDesignPanel trimId={String(m.meta?.trimSize ?? "")} onTrim={setTrim} onClaude={() => setBookPanel("claude")} onClose={() => (narrow ? setSheet(false) : setPanelOpen(false))} />
   ) : (
     <ClaudePanel onPageDesign={view === "book" ? () => setBookPanel("design") : undefined}
+      onShowText={(a, b) => { setView("writing"); setSelectReq({ sectionId: section.id, start: a, end: b, at: Date.now() }); }}
       research={(q, scope) => (engineId === "claude-code" && backend === runnerBackend ? claudeResearch(id, `## ${section.title}\n\n${section.body}`, q, scope) : apiResearch(`## ${section.title}\n\n${section.body}`, q, scope))}
       mySources={async (q) => searchSources([...(await Promise.all(thread.files.filter((f) => f.kind === "text" || /\.(txt|md)$/i.test(f.storedAs)).map(async (f) => ({ name: f.name, text: (await backend.source(id, f.storedAs).catch(() => null)) ?? "" })))), ...m.sections.map((x) => ({ name: `Manuscript · ${x.title}`, text: x.body }))], q)} mode={panelMode} onMode={setPanelMode} onClose={() => (narrow ? setSheet(false) : setPanelOpen(false))}
       thread={thread} live={live} onStopLive={() => { if (live) void backend.cancel(live.job); }} onChat={(message) => start("chat", { message })} chatBusy={busy || !engineId}
@@ -431,7 +434,9 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}
       projectId={id} outputs={thread.outputs} onOpenResult={setViewing} onTool={(t) => setTool({ initial: t, target: "manuscript" })} />;
     if (!section) return <EmptyWrite onAdd={() => { const r = insertSection(m, "chapter"); update(r.manuscript); setSectionId(r.id); }} onPlan={() => setPlace("plan")} />;
-    return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")} onTrim={setTrim} designInPanel={showPanel && designPanel} showContents={showContents} select={selectReq?.sectionId === section.id ? selectReq : null} onSection={openSection}
+    return <Canvas m={m} section={section} view={view} proposal={proposal} running={Boolean(sr.running)} onView={setView} bookTrim={String(m.meta?.trimSize ?? "")} onTrim={setTrim} designInPanel={showPanel && designPanel} showContents={showContents}
+      onFigure={(url, caption, at) => { const fid = `f${Date.now().toString(36)}`; update({ ...m, meta: { ...(m.meta ?? {}), figures: { ...figuresOf(m), [fid]: url } }, sections: m.sections.map((x) => (x.id === section.id ? { ...x, body: insertBlock(x.body, at, `![${caption.replace(/[[\]]/g, "")}](figure:${fid})`).text } : x)) }); toast({ title: "Image added", description: "It is kept with the book and printed at the text width with its caption." }); }}
+      onComment={(quote, text) => patchSection(section.id, { comments: [...(section.comments ?? []), { id: `c${Date.now().toString(36)}`, quote, text, at: new Date().toISOString() }] })} select={selectReq?.sectionId === section.id ? selectReq : null} onSection={openSection}
       onBody={(t) => patchSection(section.id, { body: t })} onTitle={(t) => patchSection(section.id, { title: t })}
       onAccept={(t) => { sr.decide(section.id, "replace", t); setView("writing"); const next = m.sections[m.sections.findIndex((s) => s.id === section.id) + 1]; toast({ title: "Accepted", description: `Your previous text is kept in Version history.${next ? ` Next: “${next.title}”, at the end of the page.` : ""}` }); }}
       onDiscard={() => { sr.decide(section.id, "discard"); setView("writing"); }}

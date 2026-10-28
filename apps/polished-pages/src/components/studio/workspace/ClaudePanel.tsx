@@ -63,6 +63,8 @@ export default function ClaudePanel(p: {
   /** Research this section (§21): Claude's research, and a search of the owner's own sources. */
   research?: (query: string, scope: ResearchScope) => Promise<ResearchResult>;
   mySources?: (query: string) => Promise<{ name: string; excerpt: string }[]>;
+  /** Select words in the Writing text (a comment's words). */
+  onShowText?: (start: number, end: number) => void;
 }) {
   const { section, engine } = p;
   const [message, setMessage] = useState("");
@@ -336,6 +338,28 @@ export default function ClaudePanel(p: {
         {/* ── Notes ── */}
         {p.mode === "notes" && (!section ? <p className="text-[#64748B]">Choose a section to see its notes.</p> : (
           <div className="space-y-6">
+            {/* Comments on words of the text (§21): kept with the section and found again by the words they quote. */}
+            <section>
+              <p className={`${LABEL} mb-2`}>Comments on the text</p>
+              {!(section.comments ?? []).length && <p className="text-[13px] text-[#64748B]">None yet. Select words in the text and use the comment button in the toolbar.</p>}
+              <ul className="space-y-2">
+                {(section.comments ?? []).map((c) => {
+                  const at = section.body.indexOf(c.quote);
+                  return (
+                    <li key={c.id} className={`rounded-[10px] border px-3 py-2 text-[13.5px] ${c.done ? "border-[#E6E8ED] opacity-60 dark:border-white/10" : "border-[#C7D2FE] bg-[#F8F9FF] dark:border-[#312E81] dark:bg-[#1E1B4B]/30"}`}>
+                      <p className="line-clamp-2 font-serif italic text-[#475569] dark:text-[#CBD5E1]">“{c.quote}”</p>
+                      <p className="mt-1">{c.text}</p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[12.5px]">
+                        <span className="text-[#94A3B8]">{new Date(c.at).toLocaleDateString()}</span>
+                        {at >= 0 ? (p.onShowText && <button type="button" onClick={() => p.onShowText!(at, at + c.quote.length)} className="font-medium text-[#2563EB] hover:underline">Show in the text</button>) : <span className="text-amber-700">Its words have changed</span>}
+                        <button type="button" onClick={() => p.patchSection(section.id, { comments: (section.comments ?? []).map((x) => (x.id === c.id ? { ...x, done: !x.done } : x)) })} className="font-medium text-[#2563EB] hover:underline">{c.done ? "Reopen" : "Resolve"}</button>
+                        <button type="button" onClick={() => p.patchSection(section.id, { comments: (section.comments ?? []).filter((x) => x.id !== c.id) })} aria-label="Delete the comment" className="ml-auto opacity-60 hover:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
             <section>
               <p className={`${LABEL} mb-2`}>Notes on pages of your book</p>
               <p className="mb-3 text-[12.5px] text-[#64748B]">Claude follows these first, then your idea for the section, then the rules for the whole book. Page numbers refer to your uploaded book.</p>
