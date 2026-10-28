@@ -47,7 +47,7 @@ export const SECTION_KINDS: SectionKindDef[] = [
 
 export const kindDef = (k: string) => SECTION_KINDS.find((d) => d.kind === k) ?? SECTION_KINDS.find((d) => d.kind === "chapter")!;
 const rank = (k: string) => SECTION_KINDS.findIndex((d) => d.kind === k);
-const GROUP_ORDER: Record<SectionGroup, number> = { front: 0, body: 1, back: 2 };
+export const GROUP_ORDER: Record<SectionGroup, number> = { front: 0, body: 1, back: 2 };
 
 export interface Section {
   id: string; kind: string; title: string; body: string;
@@ -183,3 +183,9 @@ export function authorshipNotes(m: Manuscript): string {
 /** A chapter this long is better split (DESIGN-SPEC.md §21): Claude works on it less reliably and readers expect shorter chapters. */
 export const LARGE_CHAPTER_WORDS = 15_000;
 export const largeSections = (m: Manuscript) => m.sections.filter((s) => words(s.body) > LARGE_CHAPTER_WORDS);
+
+/** A book's title from its file's name: "The_Oneness_of_Yahuah.pdf" → "The Oneness of Yahuah". */
+export const titleFromFileName = (name: string) => {
+  const base = name.replace(/\.[^.]+$/, "").trim();
+  return (/\s/.test(base) ? base : base.replace(/[_]+|(?<=\p{L})-(?=\p{L})/gu, " ")).replace(/\s+/g, " ").trim() || base;
+};

@@ -40,7 +40,16 @@ export interface BookTypeOptions {
   fetchFont?: FetchFont;
   /** Number of the first chapter (a single chapter set on its own, e.g. a preview of chapter 4). */
   chapterStart?: number;
+  /** Line spacing (a multiple of the type size); defaults to the style's. */
+  leading?: number;
+  /** Page margins around the text. */
+  margins?: Margins;
 }
+export type Margins = "narrow" | "normal" | "wide";
+const MARGIN_SCALE: Record<Margins, number> = { narrow: 0.72, normal: 1, wide: 1.3 };
+
+/** A title written as a file name ("The_Oneness_of_Yahuah") is set with spaces. */
+export const displayTitle = (t: string) => (/_/.test(t) && !/\s/.test(t.trim()) ? t.replace(/_+/g, " ").trim() : t);
 
 /** Whether most of the book's letters run right to left. */
 export function bookDirection(text: string): Dir {
@@ -114,16 +123,19 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   const main = dominantScript(markdown, cjkFromLanguage(o.language));
   const latin = main === "latin";
   const doc = await PDFDocument.create();
-  doc.setTitle(strip(o.title)); if (o.author) doc.setAuthor(o.author);
+  doc.setTitle(displayTitle(strip(o.title))); if (o.author) doc.setAuthor(o.author);
   doc.setCreator(o.producedWith ?? "Polished Pages"); doc.setProducer("Polished Pages typesetter");
   const ts = await Typesetter.create(doc, { body: o.body ?? S.faces.body, heading: o.heading ?? S.faces.heading, scripts, fetchFont: o.fetchFont });
 
   const W = o.trim.wmm * PT, H = o.trim.hmm * PT;
   const size = o.size ?? S.size;
   const body: TextStyle = { kind: "body", style: "regular", size };
-  const lead = size * S.leading;
-  const top = (ingram ? 14 : 16) * PT, bottom = (ingram ? 16 : 18) * PT;
-  const inside = (ingram ? gutterMm : 18) * PT, outside = (ingram ? INGRAM_OUTSIDE_MM : 15) * PT;
+  const leading = o.leading && o.leading >= 1 && o.leading <= 2.5 ? o.leading : S.leading;
+  const lead = size * leading;
+  // Margins scale with the choice; IngramSpark's minimums are never undercut.
+  const ms = MARGIN_SCALE[o.margins ?? "normal"] ?? 1;
+  const top = (ingram ? Math.max(14, 14 * ms) : 16 * ms) * PT, bottom = (ingram ? Math.max(16, 16 * ms) : 18 * ms) * PT;
+  const inside = (ingram ? Math.max(gutterMm, gutterMm * ms) : 18 * ms) * PT, outside = (ingram ? Math.max(INGRAM_OUTSIDE_MM, INGRAM_OUTSIDE_MM * ms) : 15 * ms) * PT;
   const colW = W - inside - outside;
   const textH = H - top - bottom;
 
@@ -137,8 +149,12 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
 
   // ── Title page ──
   let pc = add();
-  const titleSt: TextStyle = { kind: "heading", style: S.titleStyle === "italic" ? "italic" : "bold", size: ingram ? 26 : 24 };
-  const tLines = ts.wrap(strip(o.title), titleSt, colW);
+  const bookTitle = displayTitle(strip(o.title));
+  // The title is made smaller until every line fits the page (a long word cannot wrap).
+  let titleSt: TextStyle = { kind: "heading", style: S.titleStyle === "italic" ? "italic" : "bold", size: ingram ? 26 : 24 };
+  let tLines = ts.wrap(bookTitle, titleSt, colW);
+  const widest = (ls: typeof tLines) => Math.max(0, ...ls.map((l) => l.widths.reduce((a, b) => a + b, 0)));
+  while (titleSt.size > 12 && widest(tLines) > colW) { titleSt = { ...titleSt, size: titleSt.size - 2 }; tLines = ts.wrap(bookTitle, titleSt, colW); }
   let ty = H / 2 + (tLines.length * titleSt.size * 1.2) / 2;
   for (const l of tLines) { ts.drawLine(pc, l, colX(1), ty, colW, titleSt, "center"); ty -= titleSt.size * 1.2; }
   if (S.ornament !== "none") { ty -= 4; ornament(pc, colX(1) + colW / 2, ty + 6); ty -= 10; }
@@ -159,7 +175,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     pc = add();
     const year = o.year ?? new Date().getFullYear();
     const cSt: TextStyle = { kind: "body", style: "regular", size: 10, gray: 0.24 };
-    const cl = [strip(o.title), o.author ? `Copyright © ${year} ${o.author}.` : `Copyright © ${year}.`, "All rights reserved.", "", `Produced with ${o.producedWith ?? "Polished Pages"}.`];
+    const cl = [bookTitle, o.author ? `Copyright © ${year} ${o.author}.` : `Copyright © ${year}.`, "All rights reserved.", "", `Produced with ${o.producedWith ?? "Polished Pages"}.`];
     let cy = bottom + cl.length * 14;
     for (const l of cl) { if (l) for (const line of ts.wrap(l, cSt, colW)) ts.drawLine(pc, line, colX(2), cy, colW, cSt, "start"); cy -= 14; }
   }
@@ -193,8 +209,8 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   const room = (h: number) => { if (y - h < bottom) nextPage(); };
 
   /** Sets a paragraph. indent: first-line indent; bullet; drop cap on the first letter. */
-  const para = (text: string, st: TextStyle, align: "justify" | "center" | "start", o2: { before?: number; after?: number; indent?: number; hang?: number; bullet?: string; drop?: number; lh?: number } = {}) => {
-    const lh = o2.lh ?? st.size * (st.kind === "heading" ? 1.25 : S.leading);
+  const para = (text: string, st: TextStyle, align: "justify" | "center" | "start", o2: { before?: number; after?: number; indent?: number; hang?: number; bullet?: string; drop?: number; lh?: number; keep?: number } = {}) => {
+    const lh = o2.lh ?? st.size * (st.kind === "heading" ? 1.25 : leading);
     const pDir = paragraphDir(text);
     const hang = o2.hang ?? 0;
     let rest = text, cap = "", capW = 0, capSize = 0;
@@ -211,9 +227,14 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     const indent = o2.indent ?? 0;
     const firstW = colW - hang - indent;
     const lines = ts.wrap(rest, st, colW - hang, (i) => (cap && i < (o2.drop ?? 0) ? colW - hang - capW : i === 0 ? firstW : colW - hang));
-    y -= o2.before ?? 0;
+    // A heading stays with at least two lines of what follows it; a paragraph never leaves
+    // its first line alone at the foot of a page (orphan) or its last line alone at the top (widow).
+    if (o2.keep !== undefined) { if (y - (o2.before ?? 0) - lines.length * lh - (o2.after ?? 0) - o2.keep < bottom) nextPage(); else y -= o2.before ?? 0; }
+    else y -= o2.before ?? 0;
     if (cap) room(lh * (o2.drop ?? 1));
+    else if (lines.length >= 2) room(lh * 2);
     lines.forEach((l, i) => {
+      if (lines.length >= 3 && i === lines.length - 2 && i >= 2 && y - lh * 2 < bottom && y - lh >= bottom) nextPage();
       room(lh);
       const base = y - st.size * 1.02;
       const n = pageNo();
@@ -274,11 +295,10 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       chapterOpening(b.text, b.plain);
     } else if (b.kind === "h2") {
       h2No++;
-      if (y < bottom + textH * 0.22) nextPage();
-      para(S.numberedHeadings && chapterNo ? `${chapterNo}.${h2No}  ${b.text}` : b.text, { kind: "heading", style: "bold", size: Math.round(size * 1.35) }, S.titleAlign === "center" && S.paragraphs === "block" ? "center" : "start", { before: lead * 0.9, after: lead * 0.35 });
+      para(S.numberedHeadings && chapterNo ? `${chapterNo}.${h2No}  ${b.text}` : b.text, { kind: "heading", style: "bold", size: Math.round(size * 1.35) }, S.titleAlign === "center" && S.paragraphs === "block" ? "center" : "start", { before: lead * 0.9, after: lead * 0.35, keep: lead * 3 });
       afterHeading = true;
     } else if (b.kind === "h3") {
-      para(b.text, { kind: "heading", style: S.numberedHeadings ? "bold" : "italic", size: Math.round(size * 1.12) }, "start", { before: lead * 0.6, after: lead * 0.2 });
+      para(b.text, { kind: "heading", style: S.numberedHeadings ? "bold" : "italic", size: Math.round(size * 1.12) }, "start", { before: lead * 0.6, after: lead * 0.2, keep: lead * 2.5 });
       afterHeading = true;
     } else if (b.kind === "li") {
       para(b.text, body, "start", { hang: size * 1.4, bullet: "•", after: lead * 0.15 });
@@ -305,7 +325,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       ts.text(p, f, right ? W - outside : outside, 9 * PT, fSt, right ? "right" : "left");
     } else ts.text(p, f, colX(h.n) + colW / 2, (ingram ? 9 : 10) * PT, fSt, "center");
     if (h.open || S.runningHead === "none") continue;
-    const text = ingram ? (h.n % 2 === 1 ? h.chapter || strip(o.title) : strip(o.title)) : h.chapter || strip(o.title);
+    const text = ingram ? (h.n % 2 === 1 ? h.chapter || bookTitle : bookTitle) : h.chapter || bookTitle;
     const hy = H - (ingram ? 9 : 10) * PT;
     const cx = colX(h.n) + colW / 2;
     if (S.runningHead === "caps" && latin) ts.tracked(p, text.toUpperCase().slice(0, 60), cx, hy, { kind: "body", style: "regular", size: 7.5, gray: 0.45 }, "center", 1.2);
@@ -355,19 +375,21 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   }
 
   ts.finish();
-  return { doc, pages: pages.length };
+  // Where each chapter (and front or back matter section) opens, as a physical page number.
+  return { doc, pages: pages.length, sections: starts.map((x) => ({ title: x.title, page: x.folio + bodyFirst - 1 })), bodyFirst };
 }
+export interface SetSection { title: string; page: number }
 
 /** Typesets a Markdown book into a print-ready PDF and returns its bytes and page count. */
-export async function typesetBook(markdown: string, o: BookTypeOptions): Promise<{ bytes: Uint8Array; pages: number }> {
+export async function typesetBook(markdown: string, o: BookTypeOptions): Promise<{ bytes: Uint8Array; pages: number; sections: SetSection[]; bodyFirst: number }> {
   if (o.layout === "ingram") {
     // Measure once with a provisional gutter, then set it for the real page count.
     const probe = await build(markdown, o, 15.875);
     const final = await build(markdown, o, ingramGutterMm(probe.pages));
-    return { bytes: await final.doc.save(), pages: final.pages };
+    return { bytes: await final.doc.save(), pages: final.pages, sections: final.sections, bodyFirst: final.bodyFirst };
   }
   const r = await build(markdown, o, 0);
-  return { bytes: await r.doc.save(), pages: r.pages };
+  return { bytes: await r.doc.save(), pages: r.pages, sections: r.sections, bodyFirst: r.bodyFirst };
 }
 
 export function downloadPdf(bytes: Uint8Array, filename: string) {

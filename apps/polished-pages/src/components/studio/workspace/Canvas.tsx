@@ -56,10 +56,10 @@ function numberChanges(blocks: DiffBlock[]) {
   }));
 }
 
-export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onSection, onAppend }: {
+export default function Canvas({ m, section, view, proposal, running, onBody, onTitle, onAccept, onDiscard, onRedo, onRestoreOriginal, onView, bookTrim, onTrim, onSection, onAppend }: {
   m: Manuscript; section: Section; view: CanvasView; proposal: Proposal | null; running: boolean;
   onBody: (t: string) => void; onTitle: (t: string) => void;
-  onAccept: (text: string) => void; onDiscard: () => void; onRedo: () => void; onRestoreOriginal: () => void; onView: (v: CanvasView) => void; bookTrim?: string;
+  onAccept: (text: string) => void; onDiscard: () => void; onRedo: () => void; onRestoreOriginal: () => void; onView: (v: CanvasView) => void; bookTrim?: string; onTrim?: (id: string) => void;
   /** Moves to another section: the previous and next ones, for working through the book chapter by chapter. */
   onSection?: (id: string) => void;
   /** Adds Claude's text below the section's own, instead of replacing it (as the Manuscript editor offered). */
@@ -111,8 +111,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
     </header>
   );
 
-  if (view === "book") return <BookPageView bookTitle={m.title} author={m.author} chapterTitle={section.title} text={section.body} trimId={bookTrim}
-    plain={section.kind !== "chapter"} chapterNumber={section.kind === "chapter" ? m.sections.filter((s) => s.kind === "chapter").findIndex((s) => s.id === section.id) + 1 : undefined} />;
+  if (view === "book") return <BookPageView m={m} section={section} trimId={bookTrim} onTrim={onTrim} />;
 
   // Changes, side by side and clean need a proposal; without one they fall back to the writing view.
   const effective: CanvasView = (view === "changes" || view === "side") && !mine ? "writing" : view;

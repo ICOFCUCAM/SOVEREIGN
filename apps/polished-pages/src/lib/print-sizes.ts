@@ -11,6 +11,13 @@ export const TRIM_SIZES: TrimSize[] = [
   { id: "7x10", label: "7 × 10 in — workbook", wmm: 177.8, hmm: 254 },
   { id: "8x10", label: "8 × 10 in — children's / textbook", wmm: 203.2, hmm: 254 },
   { id: "a5", label: "A5", wmm: 148, hmm: 210 },
+  { id: "b5", label: "B5 — textbook", wmm: 176, hmm: 250 },
+  { id: "royal", label: "Royal (156 × 234 mm) — UK hardback", wmm: 156, hmm: 234 },
+  { id: "demy", label: "Demy (138 × 216 mm) — UK paperback", wmm: 138, hmm: 216 },
+  { id: "5.25x8", label: "5.25 × 8 in — novel", wmm: 133.35, hmm: 203.2 },
+  { id: "4.25x6.87", label: "4.25 × 6.87 in — mass-market paperback", wmm: 107.95, hmm: 174.5 },
+  { id: "kindle", label: "Kindle screen (6 in) — how the ebook reads", wmm: 90.6, hmm: 122.4 },
+  { id: "phone", label: "Phone screen — how the ebook reads", wmm: 68, hmm: 140 },
 ];
 
 export const getTrim = (id: string): TrimSize => TRIM_SIZES.find((t) => t.id === id) ?? TRIM_SIZES[0];

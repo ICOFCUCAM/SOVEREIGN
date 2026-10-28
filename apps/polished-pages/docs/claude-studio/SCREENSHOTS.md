@@ -261,3 +261,15 @@ Writing shown formatted.
 The project menu's backup of the whole project.
 
 ![Project backup (§21)](screenshots/57-project-backup.webp)
+
+Book page: the whole book as it will print, opened at the section, with the format and page design above it.
+
+![Book page (§21)](screenshots/58-book-page-whole-book.webp)
+
+The contents, filled with every section and its page.
+
+![Contents (§21)](screenshots/59-book-page-contents.webp)
+
+Page design: 14 interior styles, typefaces, size, line spacing and margins.
+
+![Page design (§21)](screenshots/60-page-design.webp)

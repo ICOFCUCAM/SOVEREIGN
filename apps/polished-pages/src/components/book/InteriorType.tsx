@@ -41,9 +41,10 @@ function StyleThumb({ s }: { s: InteriorStyle }) {
 }
 
 /** Interior design for the print PDFs (style, typefaces, size); remembered and used by every interior export. */
-export default function InteriorType({ compact }: { compact?: boolean }) {
+export default function InteriorType({ compact, onChange }: { compact?: boolean; onChange?: (t: InteriorType) => void }) {
   const [t, setT] = useState<InteriorType>(() => getInteriorType());
-  const update = (x: Partial<InteriorType>) => { const n = { ...t, ...x }; setT(n); setInteriorType(n); };
+  const save = (n: InteriorType) => { setT(n); setInteriorType(n); onChange?.(n); };
+  const update = (x: Partial<InteriorType>) => save({ ...t, ...x });
   const pick = (label: string, list: BookFaceId[], value: BookFaceId, on: (v: BookFaceId) => void, sample: string) => (
     <div className="space-y-1.5">
       <Label className="font-sans text-xs">{label}</Label>
@@ -70,7 +71,7 @@ export default function InteriorType({ compact }: { compact?: boolean }) {
           <Label className="font-sans text-xs">Interior style</Label>
           <div className="grid grid-cols-3 gap-2">
             {INTERIOR_STYLES.map((s) => (
-              <button key={s.id} type="button" onClick={() => { const n = withStyle(s.id); setT(n); setInteriorType(n); }} aria-pressed={t.style === s.id} data-style={s.id}
+              <button key={s.id} type="button" onClick={() => save({ ...withStyle(s.id), ...(t.margins ? { margins: t.margins } : {}) })} aria-pressed={t.style === s.id} data-style={s.id}
                 className={`rounded-xl border p-1.5 text-left transition ${t.style === s.id ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}>
                 <StyleThumb s={s} />
                 <span className="mt-1 block text-xs font-semibold">{s.label}</span>
@@ -86,6 +87,18 @@ export default function InteriorType({ compact }: { compact?: boolean }) {
           <Label className="font-sans text-xs">Size</Label>
           {[10, 10.5, 11, 11.5, 12, 14].map((s) => (
             <button key={s} type="button" onClick={() => update({ size: s })} className={`rounded-full border px-2 py-0.5 text-xs ${t.size === s ? "border-primary bg-primary/10" : "border-border"}`}>{s} pt</button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Label className="font-sans text-xs">Line spacing</Label>
+          {([[undefined, "Style's own"], [1.3, "Tight"], [1.45, "Normal"], [1.6, "Relaxed"], [1.8, "Open"], [2, "Double"]] as const).map(([v, label]) => (
+            <button key={label} type="button" onClick={() => update({ leading: v })} aria-pressed={t.leading === v} className={`rounded-full border px-2 py-0.5 text-xs ${t.leading === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Label className="font-sans text-xs">Margins</Label>
+          {([["narrow", "Narrow"], ["normal", "Normal"], ["wide", "Wide"]] as const).map(([v, label]) => (
+            <button key={v} type="button" onClick={() => update({ margins: v })} aria-pressed={(t.margins ?? "normal") === v} className={`rounded-full border px-2 py-0.5 text-xs ${(t.margins ?? "normal") === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
           ))}
         </div>
       </PopoverContent>

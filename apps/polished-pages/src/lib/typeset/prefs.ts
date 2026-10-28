@@ -5,7 +5,10 @@ import type { BookFaceId } from "@/lib/typeset/font-files";
 import { BODY_FACES, HEADING_FACES } from "@/lib/typeset/font-files";
 import { INTERIOR_STYLES, styleById, type InteriorStyleId } from "@/lib/typeset/styles";
 
-export interface InteriorType { style: InteriorStyleId; body: BookFaceId; heading: BookFaceId; size: number }
+import type { Margins } from "@/lib/typeset/book";
+export interface InteriorType { style: InteriorStyleId; body: BookFaceId; heading: BookFaceId; size: number;
+  /** Line spacing (a multiple of the type size) and page margins; unset means the style's own. */
+  leading?: number; margins?: Margins }
 const KEY = "pp.interiorType";
 const classic = styleById("classic");
 export const DEFAULT_INTERIOR: InteriorType = { style: "classic", body: classic.faces.body, heading: classic.faces.heading, size: classic.size };
@@ -20,6 +23,8 @@ export function getInteriorType(): InteriorType {
       body: v?.body && BODY_FACES.includes(v.body) ? v.body : S.faces.body,
       heading: v?.heading && HEADING_FACES.includes(v.heading) ? v.heading : S.faces.heading,
       size: typeof v?.size === "number" && v.size >= 9 && v.size <= 16 ? v.size : S.size,
+      ...(typeof v?.leading === "number" && v.leading >= 1 && v.leading <= 2.5 ? { leading: v.leading } : {}),
+      ...(v?.margins === "narrow" || v?.margins === "normal" || v?.margins === "wide" ? { margins: v.margins } : {}),
     };
   } catch { return DEFAULT_INTERIOR; }
 }

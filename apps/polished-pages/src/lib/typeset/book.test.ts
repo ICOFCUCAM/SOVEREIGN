@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { PDFDocument } from "pdf-lib";
 import { typesetBook, bookDirection, asChapters } from "@/lib/typeset/book";
 import { getTrim } from "@/lib/print-sizes";
+import { INTERIOR_STYLES } from "@/lib/typeset/styles";
 import { nodeFetchFont } from "@/lib/typeset/test-fonts";
 
 const para = (s: string, n: number) => Array.from({ length: n }, () => s).join(" ");
@@ -17,7 +18,7 @@ const BOOKS: Record<string, string> = {
 };
 
 describe("interior styles", () => {
-  for (const style of ["classic", "literary", "modern", "devotional", "academic", "large"] as const) {
+  for (const style of INTERIOR_STYLES.map((x) => x.id)) {
     it(style, async () => {
       const { bytes, pages } = await typesetBook(BOOKS.english, { title: "The Long Road Home", author: "Chama Meyembi", trim: getTrim("5.5x8.5"), layout: "ingram", style, fetchFont: nodeFetchFont, year: 2026 });
       expect(pages).toBeGreaterThan(4);
@@ -68,5 +69,34 @@ describe("front and back matter", () => {
     expect(pages[at("hy.")]).not.toMatch(/CHAPTER/);
     expect(pages[at("ext.")]).toMatch(/C\s*H\s*A\s*P\s*T\s*E\s*R\s*T\s*W\s*O/);
     expect(pages[at("ooks.")]).not.toMatch(/CHAPTER/);
+  }, 60_000);
+});
+
+describe("page makeup", () => {
+  const pagesOf = async (bytes: Uint8Array) => {
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: bytes.slice(), useSystemFonts: false }).promise;
+    const out: string[] = [];
+    for (let n = 1; n <= doc.numPages; n++) out.push((await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ").replace(/\s+/g, " "));
+    return out;
+  };
+  it("never leaves a heading alone at the foot of a page", async () => {
+    for (let k = 1; k <= 14; k++) {
+      const md = `# The Nature of Yahuah\n\n${Array.from({ length: k }, (_, i) => `${para("Yahuah is eternal, immortal and everlasting, the first and the last.", 3 + (i % 3))}`).join("\n\n")}\n\n### Yahuah Is Immutable\n\n${para("The character and attributes of Yahuah never change.", 12)}`;
+      const { bytes } = await typesetBook(md, { title: "The Oneness", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+      const pages = await pagesOf(bytes);
+      const p = pages.findIndex((t) => t.includes("Yahuah Is Immutable") && !/Contents/.test(t));
+      const after = pages[p].split("Yahuah Is Immutable")[1].trim().split(" ").length;
+      expect(after, `with ${k} paragraphs before it`).toBeGreaterThan(8);
+    }
+  }, 120_000);
+  it("sets a title written as a file name with spaces, small enough to fit, and says where each section opens", async () => {
+    const md = `# Preface {-}\n\nWhy this book.\n\n# One Yahuah\n\nFirst.\n\n# The Nature of Yahuah\n\nSecond.`;
+    const r = await typesetBook(md, { title: "The_Oneness_of_Yahuah_Complete_Manuscript", trim: getTrim("5x8"), fetchFont: nodeFetchFont, year: 2026, leading: 1.8, margins: "wide" });
+    const pages = await pagesOf(r.bytes);
+    expect(pages[0]).toMatch(/The Oneness of Yahuah/);
+    expect(pages[0]).not.toMatch(/_/);
+    expect(r.sections.map((s) => s.title)).toEqual(["Preface", "One Yahuah", "The Nature of Yahuah"]);
+    expect(pages[r.sections[2].page - 1]).toMatch(/The Nature of Yahuah/);
   }, 60_000);
 });
