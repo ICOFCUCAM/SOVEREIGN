@@ -120,6 +120,19 @@ describe("Claude Studio workspace", () => {
     expect(f.saved().sections[0].versions?.at(-1)?.body).toBe("Jesus taught them.\n\nHe said, “Jesus wept.”");
   });
 
+  it("shows the writing formatted when asked, and goes back to the text with a click", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: unknown }).manuscript = async () => ({ title: "B", history: [], sections: [{ id: "c1", kind: "chapter", title: "One", body: "### The names\n\nThe **enemy** has names." }] });
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    expect(await screen.findByLabelText("One text")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show formatted" }));
+    const shown = screen.getByRole("button", { name: /One text, formatted/ });
+    expect(within(shown).getByRole("heading", { name: "The names" })).toBeTruthy();
+    expect(within(shown).getByText("enemy").tagName).toBe("STRONG");
+    fireEvent.click(shown);
+    expect(screen.getByLabelText("One text")).toHaveValue("### The names\n\nThe **enemy** has names.");
+  });
+
   it("reviews changes from the keyboard: J moves, X rejects, ⌘↵ accepts", async () => {
     const f = fake();
     render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
