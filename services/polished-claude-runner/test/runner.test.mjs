@@ -69,6 +69,8 @@ test("only the listed owner who is also a Polished Pages admin gets in", async (
 test("CORS answers only the configured site", async () => {
   const ok = await fetch(base + "/v1/me", { method: "OPTIONS", headers: { Origin: "https://pages.example" } });
   assert.equal(ok.headers.get("access-control-allow-origin"), "https://pages.example");
+  // The Studio saves the manuscript, results and the voice profile with PUT: without it the browser blocks every save.
+  for (const m of ["GET", "POST", "PUT", "PATCH", "DELETE"]) assert.ok(ok.headers.get("access-control-allow-methods").split(/,\s*/).includes(m), m);
   const no = await fetch(base + "/v1/me", { method: "OPTIONS", headers: { Origin: "https://evil.example" } });
   assert.equal(no.headers.get("access-control-allow-origin"), null);
 });
