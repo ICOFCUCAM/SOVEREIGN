@@ -245,6 +245,7 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "book-design.json": "Design of the professional book",
   "organise.json": "Chapters and sections found by Claude",
   "rewrite-plan.md": "Rewrite · plan for your approval",
+  "rewrite-plan.claude.md": "Rewrite · Claude's first plan (before your changes)",
   "rewrite-audit.md": "Audit · summary",
   "rewrite-contents.md": "Rewrite · contents",
   "rewrite-traceability.md": "Rewrite · traceability",

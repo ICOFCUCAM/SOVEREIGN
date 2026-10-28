@@ -52,6 +52,19 @@ describe("result viewer", () => {
     expect(screen.getByText(/· edited/)).toBeInTheDocument();
   });
 
+  it("lets the owner change the plan before approving it, saving the change first", async () => {
+    const b = fakeBackend("# Plan\n\n1. Chapter one: the names.");
+    const approved = vi.fn();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(<ResultViewer backend={b} threadId="t1" path="rewrite-plan.md" projectTitle="Demonology" onClose={() => {}} onUseAsTarget={() => {}} onApprovePlan={approved} />);
+    fireEvent.click(await screen.findByRole("button", { name: /Edit the plan/ }));
+    fireEvent.change(screen.getByLabelText("Edit the result"), { target: { value: "# Plan\n\n1. Chapter one: the names of the enemy." } });
+    fireEvent.click(screen.getByRole("button", { name: /Approve this plan and rewrite the book/ }));
+    await waitFor(() => expect(approved).toHaveBeenCalled());
+    expect((b as unknown as { saves: { text: string }[] }).saves.at(-1)?.text).toContain("names of the enemy");
+    vi.restoreAllMocks();
+  });
+
   it("goes from a finding to its passage in the text", async () => {
     render(<ResultViewer backend={backend} threadId="t1" path="rewrite.md" projectTitle="Demonology" onClose={() => {}} onUseAsTarget={() => {}} check={{ rules: "", original: async () => ORIGINAL }} />);
     fireEvent.click(await screen.findByRole("button", { name: "See the check" }));

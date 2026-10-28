@@ -447,6 +447,16 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       if (sub === "outputs" && req.method === "PUT" && rest.length) {
         // A new version of a book result: the owner's edits, a restored version or a restored paragraph.
         const rel = rest.join("/");
+        // The editorial plan waiting for approval: the owner may change it first; Claude's own plan is kept beside it (§21).
+        if (rel === "rewrite-plan.md") {
+          if (running?.threadId === id) return fail(res, 409, "Claude is working in this project right now; save again when it finishes.");
+          const b = JSON.parse((await body(req, 5 * 1024 * 1024)).toString("utf8") || "{}");
+          const mine = await store.readOutput(id, "rewrite-plan.claude.md");
+          if (mine == null) { const first = await store.readOutput(id, rel); if (first != null) await store.writeOutput(id, "rewrite-plan.claude.md", first); }
+          if (!(await store.writeOutput(id, rel, String(b.text ?? "")))) return fail(res, 400, "The plan can't be written.");
+          const t = await store.read(id); t.outputs = await store.scanOutputs(id); await store.write(t);
+          return send(res, 200, { history: null });
+        }
         if (!isBookResult(rel)) return fail(res, 400, "Only whole-book results keep versions.");
         if (running?.threadId === id) return fail(res, 409, "Claude is working in this project right now; save again when it finishes.");
         const b = JSON.parse((await body(req, 30 * 1024 * 1024)).toString("utf8") || "{}");

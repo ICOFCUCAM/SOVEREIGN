@@ -620,3 +620,16 @@ test("a rewrite that stopped can be continued: finished chapters are kept and th
   assert.match(run.prompt, /Do not rewrite chapters that are complete/);
 });
 
+
+test("the plan waiting for approval can be changed by the owner; Claude's first plan is kept", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Plan" } })).json();
+  const out = path.join(dataDir, "threads", thread.id, "work", "out");
+  await fs.mkdir(out, { recursive: true });
+  await fs.writeFile(path.join(out, "rewrite-plan.md"), "# Plan\n\n1. One.");
+  const r = await call(`/v1/threads/${thread.id}/outputs/rewrite-plan.md`, { method: "PUT", body: { text: "# Plan\n\n1. One, renamed." } });
+  assert.equal(r.status, 200);
+  await call(`/v1/threads/${thread.id}/outputs/rewrite-plan.md`, { method: "PUT", body: { text: "# Plan\n\n1. Third try." } });
+  assert.equal(await fs.readFile(path.join(out, "rewrite-plan.md"), "utf8"), "# Plan\n\n1. Third try.");
+  assert.equal(await fs.readFile(path.join(out, "rewrite-plan.claude.md"), "utf8"), "# Plan\n\n1. One.", "Claude's own proposal stays as it was");
+  assert.match(buildRun("rewrite", { instructions: "x", approval: true, planApproved: true }).prompt, /the owner's version decides/);
+});

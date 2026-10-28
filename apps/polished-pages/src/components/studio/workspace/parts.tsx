@@ -368,6 +368,14 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
     finally { setSavingVersion(false); }
   };
 
+  // The plan waiting for approval can be changed first (§21); Claude's own proposal is kept beside it.
+  const [planSaving, setPlanSaving] = useState(false);
+  const savePlan = async () => {
+    setPlanSaving(true);
+    try { await backend.saveOutput(threadId, path, text ?? "", { op: "Plan edited by the owner" }); setEdited(false); toast({ title: "Plan saved", description: "Claude will follow your version. Its first proposal is kept as rewrite-plan.claude.md." }); return true; }
+    catch (e) { toast({ title: "The plan was not saved", description: e instanceof Error ? e.message : "", variant: "destructive" }); return false; }
+    finally { setPlanSaving(false); }
+  };
   const bookTitle = text ? titleOf(text, projectTitle) : projectTitle;
   const save = async () => {
     if (!text) return;
@@ -477,9 +485,10 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
           <div className="ml-auto flex gap-1">
             {checkable && <Button size="sm" variant={checking ? "secondary" : "outline"} className="rounded-full" onClick={() => view(checking ? "text" : "check")} aria-pressed={checking} aria-label={checking ? "Back to the text" : "Editorial check"}><ScanSearch className="h-4 w-4" /> {checking ? "Text" : "Check"}</Button>}
             {comparable && <Button size="sm" variant={comparing ? "secondary" : "outline"} className="rounded-full" onClick={() => view(comparing ? "text" : "compare")} aria-pressed={comparing} aria-label={comparing ? "Back to the text" : "Compare with original"}><Columns2 className="h-4 w-4" /> {comparing ? "Text" : "Compare"}</Button>}
-            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => { view("text"); setEditing((v) => !v); }}><PenLine className="h-4 w-4" /> {editing ? "Preview" : versioned ? "Edit" : "Edit before saving"}</Button>}
+            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => { view("text"); setEditing((v) => !v); }}><PenLine className="h-4 w-4" /> {editing ? "Preview" : versioned ? "Edit" : path === "rewrite-plan.md" ? "Edit the plan" : "Edit before saving"}</Button>}
             {versioned && history && <Button size="sm" variant={versionsOpen ? "secondary" : "outline"} className="rounded-full" onClick={() => view(versionsOpen ? "text" : "versions")} aria-pressed={versionsOpen} aria-label={versionsOpen ? "Back to the text" : `Versions (${history.versions.length})`}><History className="h-4 w-4" /> {versionsOpen ? "Text" : `Versions (${history.versions.length})`}</Button>}
-            {path === "rewrite-plan.md" && onApprovePlan && <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text} onClick={() => { if (window.confirm("Approve this plan and rewrite the whole book from it?\n\nClaude rewrites every chapter of the plan from your original, then integrates and audits the book. Your original is not changed.")) { onApprovePlan(); onClose(); } }}><Check className="h-4 w-4" /> Approve this plan and rewrite the book</Button>}
+            {path === "rewrite-plan.md" && edited && <Button size="sm" variant="outline" className="rounded-full" disabled={!text || planSaving} onClick={() => void savePlan()}>{planSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save the plan</Button>}
+            {path === "rewrite-plan.md" && onApprovePlan && <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || planSaving} onClick={async () => { if (!window.confirm(`Approve this plan${edited ? " with your changes" : ""} and rewrite the whole book from it?\n\nClaude rewrites every chapter of the plan from your original, then integrates and audits the book. Your original is not changed.`)) return; if (edited && !(await savePlan())) return; onApprovePlan(); onClose(); }}><Check className="h-4 w-4" /> Approve this plan and rewrite the book</Button>}
             {path === "series-plan.md" && <SeriesActions backend={backend} threadId={threadId} onDone={onClose} />}
             {path === "voice-profile.md" && <Button size="sm" variant="ghost" disabled={!text} onClick={async () => { try { await backend.saveVoice(text ?? ""); toast({ title: "Saved as your voice profile", description: "“In my voice” and “Rewrite in my voice” now follow it." }); } catch (e) { toast({ title: "Couldn't save", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}><PenLine className="h-4 w-4" /> Use as my voice profile</Button>}
             <DropdownMenu>

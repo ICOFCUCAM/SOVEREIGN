@@ -180,7 +180,7 @@ Then stop. Do not rewrite any chapter: the owner reads and approves the plan fir
         instructions: lines.join("\n") + "\n",
         output: "rewrite.md",
         title: "Rewrite · from the approved plan",
-        prompt: `Rewrite ${tgt} following ./INSTRUCTIONS.md strictly. The owner has approved the editorial plan in ./out/rewrite-plan.md (with the analysis in ./out/rewrite-analysis.md): follow it.
+        prompt: `Rewrite ${tgt} following ./INSTRUCTIONS.md strictly. The owner has approved the editorial plan in ./out/rewrite-plan.md (with the analysis in ./out/rewrite-analysis.md): follow it. The owner may have changed the plan before approving it; where it differs from ./out/rewrite-plan.claude.md (your first proposal, if present), the owner's version decides.
 1. Read ./INSTRUCTIONS.md, ./out/rewrite-analysis.md, ./out/rewrite-plan.md and the whole original.
 2. Controlled rewriting, one chapter of the plan at a time: re-read ./INSTRUCTIONS.md and the plan, rewrite that chapter in full from the original material it draws on (re-expressed in professional prose, not copied), and write it to ./out/rewrite/NN-short-title.md (NN = 01, 02, …). Keep ./out/rewrite-progress.md up to date.
 3. Assemble the complete book in ./out/rewrite.md: "# Title" first, then the chapters in the plan's order.
