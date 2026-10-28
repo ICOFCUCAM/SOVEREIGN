@@ -18,12 +18,14 @@ export interface SectionKindDef {
 
 export const SECTION_KINDS: SectionKindDef[] = [
   // Front matter, in conventional order
+  { kind: "half-title", label: "Half-title page", group: "front", single: true, guidance: "The book's title alone, on the page before the title page. Nothing to write: the layout sets it." },
   { kind: "title-page", label: "Title page", group: "front", single: true, guidance: "The book's title, subtitle and author name only, centred conventions handled by layout." },
   { kind: "copyright", label: "Copyright page", group: "front", single: true, guidance: "Standard copyright page: © year and author, all rights reserved notice, scripture permission notices for any Bible translations quoted (use the publishers' standard wording with [placeholders] to confirm), ISBN [placeholder], publisher [placeholder], edition, a short disclaimer if appropriate. Never invent an ISBN." },
   { kind: "dedication", label: "Dedication", group: "front", single: true, guidance: "One to three short lines. Use [name] placeholders; never invent the people it is dedicated to." },
   { kind: "epigraph", label: "Epigraph", group: "front", single: true, guidance: "One short quotation (a scripture verse or a line from a known author) that frames the book, with exact attribution. Only quote what you can verify." },
   { kind: "foreword", label: "Foreword", group: "front", single: true, guidance: "A foreword is written by someone other than the author. Draft a brief for the foreword writer: what the book is, why it matters, points they might speak to, and suggested length — not the foreword itself." },
   { kind: "preface", label: "Preface", group: "front", single: true, wholeBook: true, guidance: "The author's own note: why and how the book came to be written, who it is for, how to read it. First person, the author's voice. 400–900 words. Mark personal facts you don't know as [[YOURS: …]]." },
+  { kind: "author-note", label: "Author's note", group: "front", single: true, wholeBook: true, guidance: "A short note from the author before the book begins: why it was written, how to read it, anything the reader should know first. First person, the author's voice. Mark personal facts you don't know as [[YOURS: …]]." },
   { kind: "acknowledgments", label: "Acknowledgements", group: "front", single: true, guidance: "Warm thanks with [name] placeholders for the people, church, family, editors and readers the author will name. Never invent names." },
   { kind: "introduction", label: "Introduction", group: "front", single: true, wholeBook: true, guidance: "Introduce the book's subject, the problem it addresses, what the reader will gain, and a short map of the chapters. 800–1,500 words." },
   { kind: "prologue", label: "Prologue", group: "front", single: true, wholeBook: true, guidance: "A short scene or story that opens the book and leads into chapter one, in the book's voice." },
@@ -157,12 +159,15 @@ export function compile(m: Manuscript, opts: { contents?: boolean } = {}): strin
   const out: string[] = [`# ${m.title || "Untitled book"}`];
   if (m.subtitle) out.push(`*${m.subtitle}*`);
   if (m.author) out.push(`by ${m.author}`);
-  const listed = ordered.filter((s) => s.kind !== "title-page" && s.kind !== "copyright" && s.kind !== "dedication" && s.kind !== "epigraph");
+  const listed = ordered.filter((s) => s.kind !== "half-title" && s.kind !== "title-page" && s.kind !== "copyright" && s.kind !== "dedication" && s.kind !== "epigraph");
   let contentsDone = !opts.contents;
   for (const s of ordered) {
     if (s.kind === "title-page") continue;
+    // The half-title page is the title alone (the typesetter sets it before the title page).
+    if (s.kind === "half-title") { out.push(`## ${m.title || "Untitled book"}`); continue; }
     const d = kindDef(s.kind);
-    if (!contentsDone && (d.group !== "front" || rank(s.kind) > rank("epigraph"))) {
+    // The contents come after the preface and before the introduction (the professional order of the front matter).
+    if (!contentsDone && (d.group !== "front" || rank(s.kind) >= rank("introduction"))) {
       out.push(`## Contents\n\n${listed.map((x) => `- ${x.title}`).join("\n")}`);
       contentsDone = true;
     }

@@ -61,7 +61,8 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
   onOpenResult?: (path: string) => void;
 }) {
   const { toast } = useToast();
-  const [tab, setTab] = useState<Tab>("preview");
+  // The sidebar's "Book cover" opens Finish at the cover.
+  const [tab, setTab] = useState<Tab>(() => { try { const t = sessionStorage.getItem("studio.finish.tab"); sessionStorage.removeItem("studio.finish.tab"); return t === "cover" ? "cover" : "preview"; } catch { return "preview"; } });
   const [shelf, setShelf] = useState("");
   const [complete, setComplete] = useState(false);
   const [contents, setContents] = useState(true);

@@ -49,7 +49,7 @@ describe("book typesetting", () => {
 describe("whole books compiled with \"# Title\" and \"## Chapter\"", () => {
   it("sets the sections as chapters, with the title and by-line on the title page and the typeset contents", () => {
     const compiled = "# Demonology\n\n*A study*\n\nby T\n\n## Contents\n\n- Preface\n- Spirits\n\n## Preface\n\nWhy.\n\n## Spirits\n\nText.\n\n### Names\n\nMore.";
-    expect(asChapters(compiled)).toBe("# Preface\n\nWhy.\n\n# Spirits\n\nText.\n\n## Names\n\nMore.");
+    expect(asChapters(compiled)).toBe("# Contents {toc}\n# Preface\n\nWhy.\n\n# Spirits\n\nText.\n\n## Names\n\nMore.");
   });
   it("leaves a manuscript that already uses \"# \" for its chapters alone", () => {
     expect(asChapters(BOOKS.english)).toBe(BOOKS.english);
@@ -113,5 +113,23 @@ describe("quotations", () => {
     expect(xOf("Melchizedek") - xOf("trinitarian")).toBeLessThan(2); // the author's own paragraphs share a margin
     expect(xOf("Testament") - xOf("Melchizedek")).toBeGreaterThan(10);
     expect(xOf("Israel") - xOf("Melchizedek")).toBeGreaterThan(10);
+  }, 60_000);
+});
+
+describe("front matter in order", () => {
+  it("sets a half-title page before the title page, and the contents where the book places them (before the introduction)", async () => {
+    const md = "# Demonology\n\n## Demonology\n\n## Dedication\n\nTo the church.\n\n## Preface\n\nWhy this book.\n\n## Contents\n\n- Preface\n- Introduction\n\n## Introduction\n\nThe subject.\n\n## Spirits\n\nText.";
+    const r = await typesetBook(md, { title: "Demonology", author: "T", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: r.bytes.slice(), useSystemFonts: false }).promise;
+    const pages: string[] = [];
+    for (let n = 1; n <= doc.numPages; n++) pages.push((await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ").replace(/\s+/g, " ").trim());
+    expect(pages[0]).toBe("Demonology"); // the half-title: the title alone
+    expect(pages[1]).toMatch(/Demonology[\s\S]*T/); // the title page with the author
+    const at = (w: string) => pages.findIndex((t) => t.includes(w));
+    expect(at("this book")).toBeLessThan(r.contents![0] - 1);
+    expect(pages[r.contents![0] - 1]).toMatch(/Contents/);
+    expect(r.contents![0] - 1).toBeLessThan(at("subject"));
+    expect(r.sections.map((s) => s.title)).toEqual(["Dedication", "Preface", "Introduction", "Spirits"]);
   }, 60_000);
 });

@@ -21,7 +21,7 @@ const MODES: { id: BookMode; label: string; line: string }[] = [
   { id: "quick", label: "Quick", line: "A complete outline, bold decisions" },
   { id: "publish", label: "Publish-ready", line: "With positioning, keywords and categories" },
 ];
-const GROUPS = [{ id: "front", label: "Front matter" }, { id: "body", label: "Chapters" }, { id: "back", label: "Back matter" }] as const;
+const GROUPS = [{ id: "front", label: "Front Matter" }, { id: "body", label: "Main Matter" }, { id: "back", label: "Back Matter" }] as const;
 
 // Plan (design spec §2): the book's contents, with the plan and notes for each
 // chapter, its order, Claude's outline, and turning the book into a series.

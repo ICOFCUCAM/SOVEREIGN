@@ -1,3 +1,4 @@
+import { parseResearch, type ResearchResult, type ResearchScope } from "./research";
 import { supabase } from "@/integrations/supabase/client";
 import { extractFileText } from "@/lib/extract-file-text";
 import type { BookEngine } from "@/lib/book-engine";
@@ -344,6 +345,11 @@ export async function claudeAskInLibrary(i: { title: string; book: string; quest
 /** Organise into chapters and sections on the owner's Claude Code (the book's text goes with the request). */
 export async function claudeOrganise(threadId: string, text: string, o: OrganiseOptions): Promise<OrganisePlan> {
   return parseOrganise(await runToFile(threadId, "tool", { tool: "organise", text, titles: o.titles, instructions: o.instructions }));
+}
+
+/** Research this section on Claude Code (§21): scripture, topics and scholars, checked on the web. */
+export async function claudeResearch(threadId: string, text: string, query: string, scope: ResearchScope): Promise<ResearchResult> {
+  return parseResearch(await runToFile(threadId, "tool", { tool: "research", text, query, scope }));
 }
 
 export function claudeBookEngine(threadId: string, onOutline?: (o: BookOutline) => void): BookEngine {

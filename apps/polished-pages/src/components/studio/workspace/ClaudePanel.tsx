@@ -9,6 +9,8 @@ import Markdown from "@/components/studio/Markdown";
 import { kindDef, words, type Manuscript, type PageNote, type Section } from "@/lib/manuscript";
 import { CITATION_LABEL, GOALS, SCOPE_LABEL, composeIdea, keepSettings, loadSettings, type CitationHandling, type GoalId, type ReviseSettings, type Scope } from "@/lib/revise-goals";
 import { findCitations } from "@/lib/section-citations";
+import type { ResearchResult, ResearchScope } from "@/lib/research";
+import ResearchBox from "./ResearchBox";
 import type { RunOptions, StudioThread } from "@/lib/claude-studio";
 import type { EngineId } from "@/lib/studio-backend";
 import type { ToolId } from "@/lib/studio-tools";
@@ -58,6 +60,9 @@ export default function ClaudePanel(p: {
   run: (o: RunOptions & { sectionId: string; op: SectionOp }) => void; running: Running | null; onCancel: () => void;
   proposal: Proposal | null; onReview: () => void; patchSection: (id: string, patch: Partial<Section>) => void; onEditRules: () => void;
   approach: ApproachId; onApproach: (a: ApproachId) => void;
+  /** Research this section (§21): Claude's research, and a search of the owner's own sources. */
+  research?: (query: string, scope: ResearchScope) => Promise<ResearchResult>;
+  mySources?: (query: string) => Promise<{ name: string; excerpt: string }[]>;
 }) {
   const { section, engine } = p;
   const [message, setMessage] = useState("");
@@ -282,6 +287,7 @@ export default function ClaudePanel(p: {
         {/* ── Research ── */}
         {p.mode === "research" && (
           <div className="space-y-6">
+            {p.research && p.mySources && <ResearchBox research={p.research} mySources={p.mySources} disabled={!engine ? "No engine is available." : null} onAsk={(q) => { p.onChat(section ? `About the section “${section.title}”: ${q}` : q); p.onMode("ask"); }} />}
             {section && <p className="text-[13.5px] text-[#64748B]">Citations for this section are in <button type="button" onClick={() => p.onMode("citations")} className="font-medium text-[#2563EB] hover:underline">Citations</button>.</p>}
             {mine?.ledger && mine.ledger.length > 0 && (
               <section>

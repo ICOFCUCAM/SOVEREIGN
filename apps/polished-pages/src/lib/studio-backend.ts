@@ -1,3 +1,4 @@
+import { parseResearch, researchPrompt, type ResearchResult, type ResearchScope } from "./research";
 import { authHeader } from "@/lib/session";
 import { splitBook } from "@/lib/book-split";
 import { extractFileText } from "@/lib/extract-file-text";
@@ -69,6 +70,12 @@ export async function apiOrganise(text: string, o: OrganiseOptions): Promise<Org
   const book = text.length <= 600_000 ? text : text.slice(0, 600_000);
   const r = await callApi(`The book:\n\n${book}\n\n---\n\n${organisePrompt(o, "the book above")}\nReply with the JSON only.`, { maxTokens: 16000 });
   return parseOrganise(r.text);
+}
+
+/** Research this section on the API (billed per use; it has no web access, so scholars come only from what it knows and are marked unchecked). */
+export async function apiResearch(text: string, query: string, scope: ResearchScope): Promise<ResearchResult> {
+  const r = await callApi(`The section:\n\n${text.slice(0, 200_000)}\n\n---\n\n${researchPrompt(query, scope, "the section above")}\nYou cannot open web pages here: give no URL, and list a scholar only when you are certain the work exists.`, { maxTokens: 6000 });
+  return parseResearch(r.text);
 }
 
 /** The design of a rebuilt book on the API (DESIGN-SPEC.md §17): the same brief and shape as Claude Code, the material in one request. */

@@ -635,3 +635,11 @@ test("the plan waiting for approval can be changed by the owner; Claude's first 
   assert.equal(await fs.readFile(path.join(out, "rewrite-plan.claude.md"), "utf8"), "# Plan\n\n1. One.", "Claude's own proposal stays as it was");
   assert.match(buildRun("rewrite", { instructions: "x", approval: true, planApproved: true }).prompt, /the owner's version decides/);
 });
+
+test("research this section: Claude researches the question for the section it is sent, checked and never invented", () => {
+  const r = buildRun("tool", { tool: "research", query: "angel of the LORD", scope: "scripture", text: "## The Nature of Yahuah\n\nText." });
+  assert.equal(r.output, "research.json");
+  assert.equal(r.files["research/section.md"], "## The Nature of Yahuah\n\nText.");
+  assert.match(r.prompt, /"angel of the LORD"[\s\S]*Find scripture\.[\s\S]*never invent/);
+  assert.match(buildRun("tool", { tool: "research", query: "x", scope: "everything" }).prompt, /Find scripture, topics and scholars/);
+});

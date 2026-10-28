@@ -15,29 +15,32 @@ const MAX_PAGES = 60;
 
 /** The section's place among the openings the typesetter makes (title page aside). */
 export function openingIndex(m: Manuscript, section: Section): number {
-  const ordered = [...m.sections].sort((a, b) => GROUP_ORDER[kindDef(a.kind).group] - GROUP_ORDER[kindDef(b.kind).group]).filter((s) => s.kind !== "title-page");
+  const ordered = [...m.sections].sort((a, b) => GROUP_ORDER[kindDef(a.kind).group] - GROUP_ORDER[kindDef(b.kind).group]).filter((s) => s.kind !== "title-page" && s.kind !== "half-title");
   return ordered.findIndex((s) => s.id === section.id);
 }
 
-export default function BookPageView({ m, section, trimId, onTrim, designInPanel }: {
+export default function BookPageView({ m, section, trimId, onTrim, designInPanel, showContents }: {
   m: Manuscript; section: Section; trimId?: string;
   /** The book's format (trim size), kept with the book as Finish keeps it. */
   onTrim?: (id: string) => void;
   /** The page design is in the panel beside the page, so the toolbar doesn't repeat it. */
   designInPanel?: boolean;
+  /** When the sidebar asks for the contents: show the front pages. */
+  showContents?: number;
 }) {
   const [pages, setPages] = useState<{ url: string; n: number }[] | null>(null);
   const [front, setFront] = useState<{ url: string; n: number }[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [setting, setSetting] = useState(true);
   const [pdf, setPdf] = useState<Uint8Array | null>(null);
-  const [info, setInfo] = useState<{ total: number; from: number; to: number; bodyFirst: number } | null>(null);
+  const [info, setInfo] = useState<{ total: number; from: number; to: number; bodyFirst: number; contents: [number, number] | null } | null>(null);
   const [design, setDesign] = useState(0);
-  const [showFront, setShowFront] = useState(false);
+  const [showFront, setShowFront] = useState(Boolean(showContents));
+  useEffect(() => { if (showContents) setShowFront(true); }, [showContents]);
   const holder = useRef<HTMLDivElement>(null);
   const docRef = useRef<{ getPage: (n: number) => Promise<unknown> } | null>(null);
   const trim = getTrim(trimId || "6x9");
-  const md = useMemo(() => compile(m), [m]);
+  const md = useMemo(() => compile(m, { contents: true }), [m]);
   const at = openingIndex(m, section);
   // A change of design anywhere (this toolbar, the panel, Finish) sets the pages again.
   useEffect(() => { const on = () => setDesign((d) => d + 1); window.addEventListener(INTERIOR_CHANGED, on); return () => window.removeEventListener(INTERIOR_CHANGED, on); }, []);
@@ -74,7 +77,7 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
         const to = at < 0 ? Math.max(1, r.bodyFirst - 1) : Math.min(((r.sections[at + 1]?.page ?? r.pages + 1) - 1), from + MAX_PAGES - 1);
         const out = await render(doc as never, from, Math.max(from, to));
         if (!live) return;
-        setPdf(r.bytes); setPages(out); setInfo({ total: r.pages, from, to: Math.max(from, to), bodyFirst: r.bodyFirst }); setFront(null); setError(null);
+        setPdf(r.bytes); setPages(out); setInfo({ total: r.pages, from, to: Math.max(from, to), bodyFirst: r.bodyFirst, contents: r.contents }); setFront(null); setError(null);
       } catch (e) { if (live) setError(e instanceof Error ? e.message : "The pages couldn't be set."); }
       finally { if (live) setSetting(false); }
     }, 900);
@@ -85,14 +88,20 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
   useEffect(() => {
     if (!showFront || front || !info || !docRef.current || info.from <= 1) return;
     let live = true;
-    void render(docRef.current, 1, info.bodyFirst - 1).then((p) => { if (live) setFront(p); });
+    // The pages before the first section (half-title, title, copyright) and the contents, wherever they stand.
+    const doc = docRef.current;
+    void (async () => {
+      const head = info.bodyFirst > 1 ? await render(doc, 1, info.bodyFirst - 1) : [];
+      const toc = info.contents && info.contents[0] >= info.bodyFirst ? await render(doc, info.contents[0], info.contents[1]) : [];
+      if (live) setFront([...head, ...toc]);
+    })();
     return () => { live = false; };
   }, [showFront, front, info]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { holder.current?.scrollIntoView?.({ block: "start" }); }, [pages]);
 
   // Pages carry the numbers printed on them (as the contents lists them); the front pages are named.
-  const label = (n: number) => (!info || n >= info.bodyFirst ? `Page ${info ? n - info.bodyFirst + 1 : n}` : n === 1 ? "Title page" : "Contents");
+  const label = (n: number) => (info?.contents && n >= info.contents[0] && n <= info.contents[1] ? "Contents" : !info || n >= info.bodyFirst ? `Page ${info ? n - info.bodyFirst + 1 : n}` : "Front page");
   const sheet = (p: { url: string; n: number }) => (
     <figure key={p.n} className="mx-auto" style={{ maxWidth: `${Math.round((trim.wmm / trim.hmm) * 860)}px` }}>
       <img src={p.url} alt={label(p.n)} className="w-full rounded-[2px] bg-white shadow-[0_1px_2px_rgba(15,23,42,.08),0_24px_48px_-28px_rgba(15,23,42,.35)]" />
