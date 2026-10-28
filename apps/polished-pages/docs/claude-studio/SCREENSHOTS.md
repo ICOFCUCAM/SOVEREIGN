@@ -231,3 +231,33 @@ The Rewrite dialog opens the control panel.
 Project, workflow, presets, every operation by group, and the instruction Claude will follow.
 
 ![Control panel (§20)](screenshots/49-rewrite-control-panel.webp)
+
+## Closing the gaps (§21)
+
+A rewrite that stopped partway: what was done is kept, and it continues from where Claude stopped.
+
+![Continue where Claude stopped (§21)](screenshots/50-continue-where-stopped.webp)
+
+The plan in Approval mode can be changed before it is approved.
+
+![Edit the plan (§21)](screenshots/51-edit-the-plan.webp)
+
+Plan marks a section too long to work on well and offers Organise.
+
+![A very long chapter (§21)](screenshots/52-long-chapter.webp)
+
+Find and replace across the book, every match chosen one by one.
+
+![Find and replace (§21)](screenshots/54-find-and-replace.webp)
+
+Exporting a result shows what the checks found first.
+
+![Export checks (§21)](screenshots/55-export-checks.webp)
+
+Writing shown formatted.
+
+![Formatted writing (§21)](screenshots/56-formatted-writing.webp)
+
+The project menu's backup of the whole project.
+
+![Project backup (§21)](screenshots/57-project-backup.webp)

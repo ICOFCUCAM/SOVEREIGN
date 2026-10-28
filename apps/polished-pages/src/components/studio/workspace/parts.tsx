@@ -437,7 +437,7 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
   // A rewrite that came back very short, or that says the source couldn't be read, is not a book yet.
   const warning = !text || isJson ? null
     : /\b(could ?n[o']t|can ?not|unable to|was not able to) (read|open|decode|extract)\b|\b(garbled|unreadable|not readable|encoding (problem|issue|error))\b/i.test(text) ? "Claude says it couldn't read part of the source, so this may be incomplete."
-    : words < 300 && /book|rewrite|draft|manuscript/i.test(path + projectTitle) ? `Only ${words.toLocaleString()} words came back. The source file may not have been read properly: upload the original PDF or Word file and run it again.`
+    : words < 300 && (WHOLE_BOOK(path) || BOOK_RESULT(path)) ? `Only ${words.toLocaleString()} words came back. The source file may not have been read properly: upload the original PDF or Word file and run it again.`
     : null;
 
   return (

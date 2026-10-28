@@ -58,6 +58,7 @@ describe("result viewer", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     render(<ResultViewer backend={b} threadId="t1" path="rewrite-plan.md" projectTitle="Demonology" onClose={() => {}} onUseAsTarget={() => {}} onApprovePlan={approved} />);
     fireEvent.click(await screen.findByRole("button", { name: /Edit the plan/ }));
+    expect(screen.queryByText(/words came back/)).toBeNull(); // a short plan is not a book that failed to read
     fireEvent.change(screen.getByLabelText("Edit the result"), { target: { value: "# Plan\n\n1. Chapter one: the names of the enemy." } });
     fireEvent.click(screen.getByRole("button", { name: /Approve this plan and rewrite the book/ }));
     await waitFor(() => expect(approved).toHaveBeenCalled());
