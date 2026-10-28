@@ -31,6 +31,7 @@ import OpenPdfDialog from "./OpenPdfDialog";
 import OrganiseDialog from "./OrganiseDialog";
 import { claudeOrganise } from "@/lib/claude-studio";
 import { manuscriptText, organisedToManuscript } from "@/lib/organise";
+import { announce, askToNotify } from "@/lib/notify";
 // The Book Creator wizard, run inside the project on the engine in use (loaded on demand).
 const BookCreator = lazy(() => import("@/pages/BookCreator"));
 import FinishStage from "./FinishStage";
@@ -164,6 +165,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     backend.follow(job, (e: StudioEvent) => {
       if (e.type === "done") {
         setLive(null);
+        if (e.status === "done" || e.status === "failed") announce(e.status === "done", job.label, e.status === "failed" ? e.error ?? "" : "The result is open in Claude Studio.");
         reload().then(({ thread: t }) => {
           const outs = e.outputs ?? [];
           const pick = (e.output && outs.includes(e.output) ? e.output : null) ?? ["rewrite.md", "cited.md", "summary.md", "series-plan.md"].find((x) => outs.includes(x)) ?? outs.find((x) => !x.includes("/") && !x.endsWith(".json")) ?? outs[0];
@@ -203,6 +205,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (!(await cost.confirm({ what: action === "chat" ? "Your message to Claude" : action === "tool" ? "This tool" : "This whole-book run", words: bookWords || undefined }, use))) return;
     try {
       setRetry(null); lastRun.current = { action, options };
+      if (action !== "chat") askToNotify();
       // A run on the manuscript reads the saved one.
       if (options.target === "manuscript") await persist();
       const job = await backend.run(id, action, options, use);
