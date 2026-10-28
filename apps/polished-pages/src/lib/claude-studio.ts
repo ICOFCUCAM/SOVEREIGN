@@ -1,3 +1,4 @@
+import { parseResearch, type ResearchResult, type ResearchScope } from "./research";
 import { supabase } from "@/integrations/supabase/client";
 import { extractFileText } from "@/lib/extract-file-text";
 import type { BookEngine } from "@/lib/book-engine";
@@ -26,7 +27,7 @@ export interface ClaudeStatus { state: "ok" | "unknown" | "signed_out" | "limit"
 export interface RunnerInfo { level: number; features: string[]; poppler: boolean; node?: string }
 export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; claude?: ClaudeStatus; busy: StudioJob | null; citationStyles: string[]; /** Absent on a runner older than level 3. */ runner?: RunnerInfo }
 /** The runner level this site relies on (runner src/version.mjs RUNNER_LEVEL; a test keeps it no higher). DESIGN-SPEC.md §21. */
-export const RUNNER_LEVEL_NEEDED = 4;
+export const RUNNER_LEVEL_NEEDED = 5;
 /** Why the runner is not right for this site, in the owner's words, or null when it is. */
 export function runnerProblem(me: StudioMe | null): string | null {
   if (!me) return null;
@@ -144,6 +145,8 @@ export const studio = {
   cancel: (jobId: string) => call<{ job: StudioJob }>(`/v1/jobs/${jobId}/cancel`, { method: "POST" }),
   history: (id: string, path: string) => call<{ history: ResultHistory }>(`/v1/threads/${id}/history/${encPath(path)}`).then((r) => r.history),
   version: (id: string, path: string, n: number) => call<{ text: string }>(`/v1/threads/${id}/history/${encPath(path)}?n=${n}`).then((r) => r.text),
+  /** A result put back into a project restored from its backup (never over an existing one). */
+  restoreOutput: (id: string, path: string, text: string) => call<{ thread: StudioThread }>(`/v1/threads/${id}/restore/${encPath(path)}`, { method: "PUT", body: JSON.stringify({ text }) }).then((r) => r.thread),
   saveOutput: (id: string, path: string, text: string, o: SaveVersion) => call<{ history: ResultHistory }>(`/v1/threads/${id}/outputs/${encPath(path)}`, { method: "PUT", body: JSON.stringify({ text, ...o }) }).then((r) => r.history),
   approve: (id: string, path: string, a: { version: number; summary: ApprovalSummary }) => call<{ history: ResultHistory }>(`/v1/threads/${id}/approve/${encPath(path)}`, { method: "POST", body: JSON.stringify(a) }).then((r) => r.history),
 };
@@ -344,6 +347,11 @@ export async function claudeAskInLibrary(i: { title: string; book: string; quest
 /** Organise into chapters and sections on the owner's Claude Code (the book's text goes with the request). */
 export async function claudeOrganise(threadId: string, text: string, o: OrganiseOptions): Promise<OrganisePlan> {
   return parseOrganise(await runToFile(threadId, "tool", { tool: "organise", text, titles: o.titles, instructions: o.instructions }));
+}
+
+/** Research this section on Claude Code (§21): scripture, topics and scholars, checked on the web. */
+export async function claudeResearch(threadId: string, text: string, query: string, scope: ResearchScope): Promise<ResearchResult> {
+  return parseResearch(await runToFile(threadId, "tool", { tool: "research", text, query, scope }));
 }
 
 export function claudeBookEngine(threadId: string, onOutline?: (o: BookOutline) => void): BookEngine {

@@ -643,6 +643,26 @@ Write the JSON to ./out/organise.json, then re-read it and make sure it parses.`
   }),
 };
 
+// Research this section (DESIGN-SPEC.md §21): scripture, topics and scholars for what the owner asks about.
+export function researchPrompt(query, scope, where) {
+  const want = scope === "all" ? "scripture, topics and scholars" : scope;
+  return `Research "${query}" for the section of the book in ${where}. Find ${want}.
+- scripture: passages that bear on it, as references (e.g. "Genesis 16:7-13") with one line on what each says, and the translation you checked ("KJV" when you read it there). Check every reference exists and says that; never invent one.
+- topics: related topics a reader of this section would want to follow, each with one line.
+- scholars: published works by scholars that discuss it, only ones you found and opened on the web (WebSearch, WebFetch), with the URL you opened; none rather than an unverified one.
+Do not rewrite or judge the section. Up to 12 scripture passages, 8 topics and 8 scholars.
+Reply with valid JSON only, exactly this shape: {"scripture":[{"ref":"","note":"","translation":""}],"topics":[{"title":"","line":""}],"scholars":[{"name":"","work":"","line":"","url":""}]}`;
+}
+TOOLS.research = {
+  title: "Research this section",
+  build: (o) => ({
+    output: "research.json",
+    files: { "research/section.md": String(o.text || "") },
+    prompt: `${researchPrompt(String(o.query || "").slice(0, 300), ["all", "scripture", "topics", "scholars"].includes(o.scope) ? o.scope : "all", "./research/section.md")}
+Write the JSON to ./out/research.json, then re-read it and make sure it parses.`,
+  }),
+};
+
 // Voice: a profile from the owner's own writing, and rewriting in it.
 TOOLS["voice-profile"] = {
   title: "Learn my voice",

@@ -28,9 +28,9 @@ function StyleThumb({ s }: { s: InteriorStyle }) {
       {s.ornament === "diamond" && <div className="mx-auto my-1 flex items-center gap-0.5"><span className="h-px w-3 bg-[#777]" /><span className="h-1 w-1 rotate-45 bg-[#777]" /><span className="h-px w-3 bg-[#777]" /></div>}
       {s.ornament === "rule" && <div className={`my-1 h-px w-5 bg-[#555] ${center ? "mx-auto" : ""}`} />}
       {s.ornament === "none" && <div className="h-1.5" />}
-      <div className="flex gap-0.5">
+      <div className="flex min-w-0 gap-0.5 overflow-hidden">
         {s.dropCap > 0 && <span className="text-[13px] leading-[0.8]" style={{ fontFamily: CSS[s.faces.body] }}>E</span>}
-        <div className="flex-1 space-y-[2.5px] pt-px">
+        <div className="min-w-0 flex-1 space-y-[2.5px] overflow-hidden pt-px">
           {Array.from({ length: lines }, (_, i) => (
             <div key={i} className="h-[1.5px] rounded bg-[#9a9a9a]" style={{ width: !s.justify ? `${70 + ((i * 37) % 30)}%` : i === lines - 1 ? "55%" : "100%", marginLeft: s.paragraphs === "indent" && i === 4 ? "12%" : 0, marginTop: s.paragraphs === "block" && i === 4 ? 3 : 0 }} />
           ))}
@@ -40,10 +40,11 @@ function StyleThumb({ s }: { s: InteriorStyle }) {
   );
 }
 
-/** Interior design for the print PDFs (style, typefaces, size); remembered and used by every interior export. */
-export default function InteriorType({ compact }: { compact?: boolean }) {
+/** The interior design controls (style, typefaces, size, line spacing, margins); shown in a pop-up or, large, in the Studio's panel. */
+export function InteriorTypeEditor({ onChange, large }: { onChange?: (t: InteriorType) => void; large?: boolean }) {
   const [t, setT] = useState<InteriorType>(() => getInteriorType());
-  const update = (x: Partial<InteriorType>) => { const n = { ...t, ...x }; setT(n); setInteriorType(n); };
+  const save = (n: InteriorType) => { setT(n); setInteriorType(n); onChange?.(n); };
+  const update = (x: Partial<InteriorType>) => save({ ...t, ...x });
   const pick = (label: string, list: BookFaceId[], value: BookFaceId, on: (v: BookFaceId) => void, sample: string) => (
     <div className="space-y-1.5">
       <Label className="font-sans text-xs">{label}</Label>
@@ -51,7 +52,7 @@ export default function InteriorType({ compact }: { compact?: boolean }) {
         {list.map((id) => (
           <button key={id} type="button" onClick={() => on(id)} aria-pressed={value === id}
             className={`flex items-baseline justify-between gap-3 rounded-lg border px-2.5 py-1.5 text-left ${value === id ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
-            <span className="text-[15px]" style={{ fontFamily: CSS[id] }}>{sample}</span>
+            <span className={large ? "text-[17px]" : "text-[15px]"} style={{ fontFamily: CSS[id] }}>{sample}</span>
             <span className="shrink-0 text-[10px] text-muted-foreground">{BOOK_FACES[id].label}{NOTES[id] ? ` · ${NOTES[id]}` : ""}</span>
           </button>
         ))}
@@ -59,18 +60,12 @@ export default function InteriorType({ compact }: { compact?: boolean }) {
     </div>
   );
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="heroOutline" size="sm" className={compact ? "h-8 text-xs" : ""} title="Interior style and typefaces for the print PDFs">
-          <Type className="mr-1 h-4 w-4" /> {styleById(t.style).label} · {BOOK_FACES[t.body].label}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent side="bottom" align="start" collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(440px,94vw)] space-y-3 overflow-y-auto">
+    <div className="space-y-3">
         <div className="space-y-1.5">
           <Label className="font-sans text-xs">Interior style</Label>
           <div className="grid grid-cols-3 gap-2">
             {INTERIOR_STYLES.map((s) => (
-              <button key={s.id} type="button" onClick={() => { const n = withStyle(s.id); setT(n); setInteriorType(n); }} aria-pressed={t.style === s.id} data-style={s.id}
+              <button key={s.id} type="button" onClick={() => save({ ...withStyle(s.id), ...(t.margins ? { margins: t.margins } : {}) })} aria-pressed={t.style === s.id} data-style={s.id}
                 className={`rounded-xl border p-1.5 text-left transition ${t.style === s.id ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}>
                 <StyleThumb s={s} />
                 <span className="mt-1 block text-xs font-semibold">{s.label}</span>
@@ -88,6 +83,34 @@ export default function InteriorType({ compact }: { compact?: boolean }) {
             <button key={s} type="button" onClick={() => update({ size: s })} className={`rounded-full border px-2 py-0.5 text-xs ${t.size === s ? "border-primary bg-primary/10" : "border-border"}`}>{s} pt</button>
           ))}
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Label className="font-sans text-xs">Line spacing</Label>
+          {([[undefined, "Style's own"], [1.3, "Tight"], [1.45, "Normal"], [1.6, "Relaxed"], [1.8, "Open"], [2, "Double"]] as const).map(([v, label]) => (
+            <button key={label} type="button" onClick={() => update({ leading: v })} aria-pressed={t.leading === v} className={`rounded-full border px-2 py-0.5 text-xs ${t.leading === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Label className="font-sans text-xs">Margins</Label>
+          {([["narrow", "Narrow"], ["normal", "Normal"], ["wide", "Wide"]] as const).map(([v, label]) => (
+            <button key={v} type="button" onClick={() => update({ margins: v })} aria-pressed={(t.margins ?? "normal") === v} className={`rounded-full border px-2 py-0.5 text-xs ${(t.margins ?? "normal") === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
+          ))}
+        </div>
+      </div>
+  );
+}
+
+/** Interior design for the print PDFs, in a pop-up; remembered and used by every interior export. */
+export default function InteriorType({ compact, onChange }: { compact?: boolean; onChange?: (t: InteriorType) => void }) {
+  const [t, setT] = useState<InteriorType>(() => getInteriorType());
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="heroOutline" size="sm" className={compact ? "h-8 text-xs" : ""} title="Interior style and typefaces for the print PDFs">
+          <Type className="mr-1 h-4 w-4" /> {styleById(t.style).label} · {BOOK_FACES[t.body].label}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent side="bottom" align="start" collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(440px,94vw)] overflow-y-auto">
+        <InteriorTypeEditor onChange={(n) => { setT(n); onChange?.(n); }} />
       </PopoverContent>
     </Popover>
   );

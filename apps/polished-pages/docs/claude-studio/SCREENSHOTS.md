@@ -261,3 +261,63 @@ Writing shown formatted.
 The project menu's backup of the whole project.
 
 ![Project backup (§21)](screenshots/57-project-backup.webp)
+
+Book page: the whole book as it will print, opened at the section, with the format and page design above it.
+
+![Book page (§21)](screenshots/58-book-page-whole-book.webp)
+
+The contents, filled with every section and its page.
+
+![Contents (§21)](screenshots/59-book-page-contents.webp)
+
+Page design: 14 interior styles, typefaces, size, line spacing and margins.
+
+![Page design (§21)](screenshots/60-page-design.webp)
+
+## The Claude panel, upgraded (§21)
+
+Revise: the current section, what to do, instructions, source policy, the action pinned, and Ask docked at the foot; the formatting toolbar over the page.
+
+![Revise (§21)](screenshots/61-panel-revise.webp)
+
+Advanced editorial settings: the book's rules, citation handling, rewrite scope.
+
+![Advanced settings (§21)](screenshots/62-panel-advanced.webp)
+
+Citations found in the section, and adding citations to it.
+
+![Citations (§21)](screenshots/63-panel-citations.webp)
+
+Book page view: the page design at full size in the panel.
+
+![Page design panel (§21)](screenshots/64-page-design-panel.webp)
+
+On a laptop screen.
+
+![Laptop (§21)](screenshots/65-panel-laptop.webp)
+
+## The second mockup and the ten additions (§21)
+
+The chat docked at the foot of the page area, the panel with a gap at the right edge, Front, Main and Back Matter in the sidebar.
+
+![Chat docked (§21)](screenshots/66-chat-docked.webp)
+
+Search in book (⌘K).
+
+![Search in book (§21)](screenshots/67-search-in-book.webp)
+
+Research this section, with My sources.
+
+![Research (§21)](screenshots/68-research.webp)
+
+The toolbar: footnote, image, scripture verse, comment.
+
+![Toolbar (§21)](screenshots/69-toolbar-verse.webp)
+
+Edit on the Book page.
+
+![Edit on the page (§21)](screenshots/70-edit-on-page.webp)
+
+The publishing package for KDP and IngramSpark.
+
+![Publishing package (§21)](screenshots/71-publishing-package.webp)

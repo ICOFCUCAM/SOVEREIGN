@@ -59,6 +59,7 @@ describe("Claude Studio workspace", () => {
     expect(await within(panel).findByText("It traces belief in spirits.")).toBeTruthy();
 
     fireEvent.change(within(panel).getByLabelText("Your idea for this section"), { target: { value: "Open with Mesopotamia" } });
+    fireEvent.click(within(panel).getByRole("button", { name: /Source policy/ }));
     fireEvent.click(within(panel).getByRole("radio", { name: /My book \+ cited sources/ }));
     fireEvent.click(within(panel).getByRole("button", { name: /Rewrite with my idea/ }));
     await waitFor(() => expect(f.runs.at(-1)).toMatchObject({ sectionId: "c1", op: "compose", approach: "mine-and-research" }));
@@ -131,6 +132,33 @@ describe("Claude Studio workspace", () => {
     expect(within(shown).getByText("enemy").tagName).toBe("STRONG");
     fireEvent.click(shown);
     expect(screen.getByLabelText("One text")).toHaveValue("### The names\n\nThe **enemy** has names.");
+  });
+
+  it("shows the page design beside the Book page, and Claude when asked", async () => {
+    const f = fake();
+    localStorage.setItem("studio.view", "book");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    const design = await screen.findByRole("complementary", { name: "Page design" });
+    expect(within(design).getByLabelText("Format")).toBeTruthy();
+    expect(within(design).getByText("Scripture study")).toBeTruthy();
+    fireEvent.click(within(design).getByRole("button", { name: /Ask Claude/ }));
+    const claude = await screen.findByRole("complementary", { name: "Claude" });
+    fireEvent.click(within(claude).getByRole("button", { name: "Page design" }));
+    expect(await screen.findByRole("complementary", { name: "Page design" })).toBeTruthy();
+  });
+
+  it("shows words that break the book's rules and fixes them outside quotations; comments on words are listed in Notes", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: unknown }).manuscript = async () => ({ title: "B", rules: "Write Yahuah instead of God", history: [], sections: [
+      { id: "c1", kind: "chapter", title: "One", body: "God is one.\n\nAs it is written, “God is a Spirit.”", comments: [{ id: "k1", quote: "is one", text: "Add the Shema here", at: "2026-10-28T10:00:00Z" }] },
+    ] });
+    localStorage.setItem("studio.panelMode", "notes");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    expect(await screen.findByText(/1 word doesn't follow the book's rules/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Fix outside quotations" }));
+    await waitFor(() => expect(f.saved().sections[0].body).toBe("Yahuah is one.\n\nAs it is written, “God is a Spirit.”"), { timeout: 3000 });
+    expect(screen.getByText("Add the Shema here")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Show in the text" })).toBeTruthy();
   });
 
   it("reviews changes from the keyboard: J moves, X rejects, ⌘↵ accepts", async () => {
@@ -313,6 +341,7 @@ describe("Claude Studio workspace", () => {
     const f = fake();
     render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
     const panel = await screen.findByRole("complementary", { name: "Claude" });
+    fireEvent.click(within(panel).getByRole("button", { name: /Source policy/ }));
     fireEvent.click(within(panel).getByRole("radio", { name: /My book \+ cited sources/ }));
     fireEvent.click(within(panel).getByRole("button", { name: /Rewrite with my idea/ }));
     fireEvent.click(await screen.findByRole("button", { name: "Review the changes" }));

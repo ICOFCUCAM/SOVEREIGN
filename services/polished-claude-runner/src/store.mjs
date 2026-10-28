@@ -186,7 +186,7 @@ export function createStore(dataDir) {
     },
     async writeOutput(id, rel, text) {
       const p = inside(path.join(workDir(id), "out"), rel);
-      if (!p || !/\.(md|txt)$/i.test(rel)) return false;
+      if (!p || !/\.(md|txt|json)$/i.test(rel)) return false;
       await fs.mkdir(path.dirname(p), { recursive: true });
       await fs.writeFile(p + ".tmp", String(text));
       await fs.rename(p + ".tmp", p);

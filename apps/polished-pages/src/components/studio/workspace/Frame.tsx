@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  AudioLines, BookMarked, Check, Pencil, Trash2, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Cpu, FolderOpen, Library, ListTree, Loader2, PenLine, Plus, Rocket, Sparkles, Download,
+  AudioLines, BookMarked, Check, Pencil, Trash2, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Cpu, FolderOpen, Library, ListTree, Loader2, PenLine, Plus, Rocket, Sparkles, Download, Upload,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -25,7 +25,7 @@ const MODE_LABEL: Record<EngineMode, string> = { auto: "Automatic", claude: "Cla
 
 export default function Frame({
   collapsed, onCollapse, place, onPlace, threads, activeId, onProject, onNewProject, ready, title,
-  m, sectionId, onSection, pending, decision, mode, onMode, onCheckEngine, busy, onRename, onDelete, onBackup,
+  m, sectionId, onSection, pending, decision, mode, onMode, onCheckEngine, busy, onRename, onDelete, onBackup, onRestore, onCover, onContents,
 }: {
   collapsed: boolean; onCollapse: (v: boolean) => void;
   place: Place; onPlace: (p: Place) => void;
@@ -36,6 +36,10 @@ export default function Frame({
   onRename?: () => void; onDelete?: () => void;
   /** Downloads a complete copy of the project (§21). */
   onBackup?: () => void;
+  /** A new project from a backup .zip (§21). */
+  onRestore?: () => void;
+  /** The front matter's book cover (made in Finish, apart from the interior) and the contents (made automatically). */
+  onCover?: () => void; onContents?: () => void;
 }) {
   const [tree, setTree] = useState(true);
   const [checking, setChecking] = useState(false);
@@ -81,6 +85,7 @@ export default function Frame({
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onNewProject}><Plus className="mr-2 h-4 w-4" /> New project</DropdownMenuItem>
+          {onRestore && <DropdownMenuItem onClick={onRestore}><Upload className="mr-2 h-4 w-4" /> Restore a project from a backup</DropdownMenuItem>}
           {onRename && <DropdownMenuItem onClick={onRename}><Pencil className="mr-2 h-4 w-4" /> Rename this project</DropdownMenuItem>}
           {onBackup && <DropdownMenuItem onClick={onBackup}><Download className="mr-2 h-4 w-4" /> Download a backup of this project</DropdownMenuItem>}
           {onDelete && <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete this project</DropdownMenuItem>}
@@ -109,12 +114,17 @@ export default function Frame({
             {tree ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />} Manuscript
           </button>
           {tree && groups.map(({ g, list }) => (
-            <ol key={g} aria-label={g === "front" ? "Front matter" : g === "back" ? "Back matter" : "Chapters"} className={`space-y-px ${g !== "front" ? "mt-2" : ""}`}>
-              {list.map((s) => {
+            <ol key={g} aria-label={GROUP_LABEL[g]} className={`space-y-px ${g !== "front" ? "mt-3" : "mt-1"}`}>
+              {/* The book's three areas (§21): Front Matter (cover to introduction), Main Matter, Back Matter. */}
+              <li aria-hidden className="px-2.5 pb-0.5 pt-1 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#64748B]">{GROUP_LABEL[g]}</li>
+              {g === "front" && onCover && <li><button type="button" onClick={onCover} className="flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-left text-[13px] text-[#CBD5E1] hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"><span aria-hidden className="h-2 w-2 shrink-0 rounded-[2px] border border-[#94A3B8]" /><span className="min-w-0 flex-1 truncate">Book cover</span><span className="text-[10.5px] text-[#64748B]">Finish</span></button></li>}
+              {list.map((s, i) => {
+                const tocHere = g === "front" && onContents && (CONTENTS_BEFORE.includes(s.kind) && !list.slice(0, i).some((x) => CONTENTS_BEFORE.includes(x.kind)));
                 const n = words(s.body);
                 const state = pending === s.id ? "suggestion waiting" : n ? `${n.toLocaleString()} words` : "empty";
                 return (
                   <li key={s.id}>
+                    {tocHere && <ContentsItem onClick={onContents!} />}
                     <button type="button" onClick={() => onSection(s.id)} aria-current={sectionId === s.id && place === "write" ? "true" : undefined}
                       className={`flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-left text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD] ${sectionId === s.id && place === "write" ? "bg-white/[0.09] text-white" : "text-[#CBD5E1] hover:bg-white/[0.05]"}`}>
                       <span aria-hidden className={`h-2 w-2 shrink-0 rounded-full ${pending === s.id ? "bg-[#93C5FD]" : n ? "bg-[#6EE7B7]" : "border border-[#64748B]"}`} />
@@ -124,6 +134,7 @@ export default function Frame({
                   </li>
                 );
               })}
+              {g === "front" && onContents && !list.some((x) => CONTENTS_BEFORE.includes(x.kind)) && <li><ContentsItem onClick={onContents} /></li>}
             </ol>
           ))}
         </div>
@@ -165,5 +176,16 @@ export default function Frame({
         </PopoverContent>
       </Popover>
     </nav>
+  );
+}
+
+const GROUP_LABEL = { front: "Front Matter", body: "Main Matter", back: "Back Matter" } as const;
+// The contents stand before the introduction (or the prologue), as the book is set.
+const CONTENTS_BEFORE = ["introduction", "prologue"];
+function ContentsItem({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-left text-[13px] text-[#CBD5E1] hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]">
+      <span aria-hidden className="h-2 w-2 shrink-0 rounded-[2px] bg-[#64748B]" /><span className="min-w-0 flex-1 truncate">Table of contents</span><span className="text-[10.5px] text-[#64748B]">automatic</span>
+    </button>
   );
 }

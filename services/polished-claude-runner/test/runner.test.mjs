@@ -52,7 +52,7 @@ async function streamUntilDone(jobId, threadId) {
 test("health needs no sign-in and reveals nothing", async () => {
   const r = await fetch(base + "/health");
   assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { ok: true, level: 4 });
+  assert.deepEqual(await r.json(), { ok: true, level: 5 });
 });
 
 test("only the listed owner who is also a Polished Pages admin gets in", async () => {
@@ -69,6 +69,8 @@ test("only the listed owner who is also a Polished Pages admin gets in", async (
 test("CORS answers only the configured site", async () => {
   const ok = await fetch(base + "/v1/me", { method: "OPTIONS", headers: { Origin: "https://pages.example" } });
   assert.equal(ok.headers.get("access-control-allow-origin"), "https://pages.example");
+  // The Studio saves the manuscript, results and the voice profile with PUT: without it the browser blocks every save.
+  for (const m of ["GET", "POST", "PUT", "PATCH", "DELETE"]) assert.ok(ok.headers.get("access-control-allow-methods").split(/,\s*/).includes(m), m);
   const no = await fetch(base + "/v1/me", { method: "OPTIONS", headers: { Origin: "https://evil.example" } });
   assert.equal(no.headers.get("access-control-allow-origin"), null);
 });
@@ -572,7 +574,7 @@ test("the rewrite control panel: plan first for approval, then the rewrite from 
 
 test("the runner says what it can do, so the Studio can tell an old runner", async () => {
   const me = await (await call("/v1/me")).json();
-  assert.equal(me.runner.level, 4);
+  assert.equal(me.runner.level, 5);
   assert.ok(me.runner.features.includes("organise"));
   assert.equal(typeof me.runner.poppler, "boolean");
 });
@@ -632,4 +634,21 @@ test("the plan waiting for approval can be changed by the owner; Claude's first 
   assert.equal(await fs.readFile(path.join(out, "rewrite-plan.md"), "utf8"), "# Plan\n\n1. Third try.");
   assert.equal(await fs.readFile(path.join(out, "rewrite-plan.claude.md"), "utf8"), "# Plan\n\n1. One.", "Claude's own proposal stays as it was");
   assert.match(buildRun("rewrite", { instructions: "x", approval: true, planApproved: true }).prompt, /the owner's version decides/);
+});
+
+test("research this section: Claude researches the question for the section it is sent, checked and never invented", () => {
+  const r = buildRun("tool", { tool: "research", query: "angel of the LORD", scope: "scripture", text: "## The Nature of Yahuah\n\nText." });
+  assert.equal(r.output, "research.json");
+  assert.equal(r.files["research/section.md"], "## The Nature of Yahuah\n\nText.");
+  assert.match(r.prompt, /"angel of the LORD"[\s\S]*Find scripture\.[\s\S]*never invent/);
+  assert.match(buildRun("tool", { tool: "research", query: "x", scope: "everything" }).prompt, /Find scripture, topics and scholars/);
+});
+
+test("a project restored from its backup gets its results back, never over an existing one", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Restored" } })).json();
+  const r = await call(`/v1/threads/${thread.id}/restore/rewrite/01-one.md`, { method: "PUT", body: { text: "## One\n\nText." } });
+  assert.equal(r.status, 200);
+  assert.ok((await r.json()).thread.outputs.some((o) => o.path === "rewrite/01-one.md"));
+  assert.equal((await call(`/v1/threads/${thread.id}/restore/rewrite/01-one.md`, { method: "PUT", body: { text: "other" } })).status, 409);
+  assert.equal((await call(`/v1/threads/${thread.id}/restore/../escape.md`, { method: "PUT", body: { text: "x" } })).status === 200, false);
 });

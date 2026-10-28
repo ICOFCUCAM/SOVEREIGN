@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { PDFDocument } from "pdf-lib";
 import { typesetBook, bookDirection, asChapters } from "@/lib/typeset/book";
 import { getTrim } from "@/lib/print-sizes";
+import { INTERIOR_STYLES } from "@/lib/typeset/styles";
 import { nodeFetchFont } from "@/lib/typeset/test-fonts";
 
 const para = (s: string, n: number) => Array.from({ length: n }, () => s).join(" ");
@@ -17,7 +18,7 @@ const BOOKS: Record<string, string> = {
 };
 
 describe("interior styles", () => {
-  for (const style of ["classic", "literary", "modern", "devotional", "academic", "large"] as const) {
+  for (const style of INTERIOR_STYLES.map((x) => x.id)) {
     it(style, async () => {
       const { bytes, pages } = await typesetBook(BOOKS.english, { title: "The Long Road Home", author: "Chama Meyembi", trim: getTrim("5.5x8.5"), layout: "ingram", style, fetchFont: nodeFetchFont, year: 2026 });
       expect(pages).toBeGreaterThan(4);
@@ -48,7 +49,7 @@ describe("book typesetting", () => {
 describe("whole books compiled with \"# Title\" and \"## Chapter\"", () => {
   it("sets the sections as chapters, with the title and by-line on the title page and the typeset contents", () => {
     const compiled = "# Demonology\n\n*A study*\n\nby T\n\n## Contents\n\n- Preface\n- Spirits\n\n## Preface\n\nWhy.\n\n## Spirits\n\nText.\n\n### Names\n\nMore.";
-    expect(asChapters(compiled)).toBe("# Preface\n\nWhy.\n\n# Spirits\n\nText.\n\n## Names\n\nMore.");
+    expect(asChapters(compiled)).toBe("# Contents {toc}\n# Preface\n\nWhy.\n\n# Spirits\n\nText.\n\n## Names\n\nMore.");
   });
   it("leaves a manuscript that already uses \"# \" for its chapters alone", () => {
     expect(asChapters(BOOKS.english)).toBe(BOOKS.english);
@@ -68,5 +69,103 @@ describe("front and back matter", () => {
     expect(pages[at("hy.")]).not.toMatch(/CHAPTER/);
     expect(pages[at("ext.")]).toMatch(/C\s*H\s*A\s*P\s*T\s*E\s*R\s*T\s*W\s*O/);
     expect(pages[at("ooks.")]).not.toMatch(/CHAPTER/);
+  }, 60_000);
+});
+
+describe("page makeup", () => {
+  const pagesOf = async (bytes: Uint8Array) => {
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: bytes.slice(), useSystemFonts: false }).promise;
+    const out: string[] = [];
+    for (let n = 1; n <= doc.numPages; n++) out.push((await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ").replace(/\s+/g, " "));
+    return out;
+  };
+  it("never leaves a heading alone at the foot of a page", async () => {
+    for (let k = 1; k <= 14; k++) {
+      const md = `# The Nature of Yahuah\n\n${Array.from({ length: k }, (_, i) => `${para("Yahuah is eternal, immortal and everlasting, the first and the last.", 3 + (i % 3))}`).join("\n\n")}\n\n### Yahuah Is Immutable\n\n${para("The character and attributes of Yahuah never change.", 12)}`;
+      const { bytes } = await typesetBook(md, { title: "The Oneness", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+      const pages = await pagesOf(bytes);
+      const p = pages.findIndex((t) => t.includes("Yahuah Is Immutable") && !/Contents/.test(t));
+      const after = pages[p].split("Yahuah Is Immutable")[1].trim().split(" ").length;
+      expect(after, `with ${k} paragraphs before it`).toBeGreaterThan(8);
+    }
+  }, 120_000);
+  it("sets a title written as a file name with spaces, small enough to fit, and says where each section opens", async () => {
+    const md = `# Preface {-}\n\nWhy this book.\n\n# One Yahuah\n\nFirst.\n\n# The Nature of Yahuah\n\nSecond.`;
+    const r = await typesetBook(md, { title: "The_Oneness_of_Yahuah_Complete_Manuscript", trim: getTrim("5x8"), fetchFont: nodeFetchFont, year: 2026, leading: 1.8, margins: "wide" });
+    const pages = await pagesOf(r.bytes);
+    expect(pages[0]).toMatch(/The Oneness of Yahuah/);
+    expect(pages[0]).not.toMatch(/_/);
+    expect(r.sections.map((s) => s.title)).toEqual(["Preface", "One Yahuah", "The Nature of Yahuah"]);
+    expect(pages[r.sections[2].page - 1]).toMatch(/The Nature of Yahuah/);
+  }, 60_000);
+});
+
+describe("quotations", () => {
+  it("sets a quotation apart: a '>' line, or one introduced with a colon and closed by its source", async () => {
+    const md = `# The Nature of Yahuah\n\nA trinitarian scholar summed up the predominant view:\n\nIn the Old Testament the angel of the LORD might be only a messenger of God, distinct from God himself, or he might be identified with the LORD himself speaking in the first person. (Dyrness, 1979, pp. 41-42)\n\nMany regard Melchizedek as a theophany, and this paragraph is the author's own words again, set at the full measure of the page.\n\n> Hear, O Israel: Yahuah our Elohim is one Yahuah.`;
+    const { bytes } = await typesetBook(md, { title: "B", trim: getTrim("6x9"), style: "devotional", fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: bytes.slice(), useSystemFonts: false }).promise;
+    const items: { str: string; x: number }[] = [];
+    for (let n = 1; n <= doc.numPages; n++) for (const it of (await (await doc.getPage(n)).getTextContent()).items) if ("str" in it && it.str.trim()) items.push({ str: it.str, x: it.transform[4] });
+    const xOf = (w: string) => items.find((i) => i.str.includes(w))!.x;
+    expect(xOf("Melchizedek") - xOf("trinitarian")).toBeLessThan(2); // the author's own paragraphs share a margin
+    expect(xOf("Testament") - xOf("Melchizedek")).toBeGreaterThan(10);
+    expect(xOf("Israel") - xOf("Melchizedek")).toBeGreaterThan(10);
+  }, 60_000);
+});
+
+describe("front matter in order", () => {
+  it("sets a half-title page before the title page, and the contents where the book places them (before the introduction)", async () => {
+    const md = "# Demonology\n\n## Demonology\n\n## Dedication\n\nTo the church.\n\n## Preface\n\nWhy this book.\n\n## Contents\n\n- Preface\n- Introduction\n\n## Introduction\n\nThe subject.\n\n## Spirits\n\nText.";
+    const r = await typesetBook(md, { title: "Demonology", author: "T", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: r.bytes.slice(), useSystemFonts: false }).promise;
+    const pages: string[] = [];
+    for (let n = 1; n <= doc.numPages; n++) pages.push((await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ").replace(/\s+/g, " ").trim());
+    expect(pages[0]).toBe("Demonology"); // the half-title: the title alone
+    expect(pages[1]).toMatch(/Demonology[\s\S]*T/); // the title page with the author
+    const at = (w: string) => pages.findIndex((t) => t.includes(w));
+    expect(at("this book")).toBeLessThan(r.contents![0] - 1);
+    expect(pages[r.contents![0] - 1]).toMatch(/Contents/);
+    expect(r.contents![0] - 1).toBeLessThan(at("subject"));
+    expect(r.sections.map((s) => s.title)).toEqual(["Dedication", "Preface", "Introduction", "Spirits"]);
+  }, 60_000);
+});
+
+describe("footnotes", () => {
+  it("numbers the notes per chapter in order of use and sets them at the end of the chapter", async () => {
+    const md = "# One\n\nAngels are messengers[^a] of Yahuah, sent to men[^b].\n\n[^b]: Hebrews 1:14.\n[^a]: The Hebrew word means messenger.\n\n# Two\n\nAnother chapter[^x].\n\n[^x]: Its own note.";
+    const r = await typesetBook(md, { title: "B", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: r.bytes.slice(), useSystemFonts: false }).promise;
+    let all = "";
+    for (let n = 1; n <= doc.numPages; n++) all += " | " + (await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ");
+    all = all.replace(/\s+/g, " ");
+    expect(all).toMatch(/messengers\s?¹/);
+    expect(all).toMatch(/men\s?²/);
+    expect(all).toMatch(/Notes 1\. The Hebrew word means messenger\. 2\. Hebrews 1:14\./);
+    expect(all).toMatch(/chapter\s?¹[\s\S]*Notes 1\. Its own note\./);
+    expect(all).not.toMatch(/\[\^/);
+  }, 60_000);
+});
+
+describe("figures", () => {
+  it("places an image at the text width with its caption below", async () => {
+    // A 4×2 white PNG.
+    const png = "iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAIAAAASFvFNAAAAEUlEQVR4nGP4//8/AwwgswA1xQX7T9vM1AAAAABJRU5ErkJggg==";
+    const md = `# One\n\nBefore the figure.\n\n![The tabernacle in the wilderness](data:image/png;base64,${png})\n\nAfter the figure.`;
+    const r = await typesetBook(md, { title: "B", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: r.bytes.slice(), useSystemFonts: false }).promise;
+    let text = ""; let images = 0;
+    for (let n = 1; n <= doc.numPages; n++) {
+      const pg = await doc.getPage(n);
+      text += (await pg.getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ");
+      images += (await pg.getOperatorList()).fnArray.filter((f) => f === pdfjs.OPS.paintImageXObject).length;
+    }
+    expect(images).toBe(1);
+    expect(text.replace(/\s+/g, " ")).toMatch(/figure\.[\s\S]*The tabernacle in the wilderness[\s\S]*After/);
   }, 60_000);
 });

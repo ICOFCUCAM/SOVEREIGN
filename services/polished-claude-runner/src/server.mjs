@@ -96,7 +96,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       res.setHeader("Access-Control-Allow-Origin", origin);
       res.setHeader("Vary", "Origin");
       res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Content-Encoding");
-      res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
+      res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
       res.setHeader("Access-Control-Max-Age", "600");
     }
   };
@@ -160,7 +160,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       if (i < 0) return { status: 400, error: "Save the manuscript first, then try again." };
       const sec = m.sections[i];
       // The owner's notes and rules come from the saved manuscript, so every action sees the same ones.
-      options = { ...options, _file: manuscriptFile(i, sec), title: options.title || sec.title, _book: { rules: m.rules || options.rules, knowledge: m.knowledge, idea: sec.idea || options.idea, pageNotes: sec.pageNotes, design: m.design } };
+      options = { ...options, _file: manuscriptFile(i, sec), title: options.title || sec.title, _book: { rules: m.rules || options.rules, knowledge: m.knowledge, idea: typeof options.idea === "string" && options.idea.trim() ? options.idea : sec.idea, pageNotes: sec.pageNotes, design: m.design } };
       if (options.op === "compose" && USES_BOOK(options.approach) && thread.files.length === 0) return { status: 400, error: "Upload your book to this project first, so Claude can build on it." };
     }
     if (action === "tool" && options?.tool === "book-design") {
@@ -184,7 +184,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     if (action === "chat" && !String(options?.message || "").trim()) return { status: 400, error: "Write a message first." };
     if (action === "rewrite" && !options?.continueRun && !String(options?.instructions || "").trim()) return { status: 400, error: "Give the rewrite instructions." };
     if (isBook && action !== "book-improve" && ["polish", "mine", "mine-and-research", "research"].includes(options?.approach) && thread.files.length === 0) return { status: 400, error: "Upload your book to this project first, so Claude can build on it." };
-    if (action !== "chat" && action !== "section" && !isBook && thread.files.length === 0 && !options?.target && !(action === "tool" && options?.tool === "compare" && options?.a) && !(action === "tool" && ["cover-copy", "library-revise", "library-ask", "organise"].includes(options?.tool) && String(options?.text || "").trim()) && !(action === "tool" && options?.tool === "book-design")) return { status: 400, error: "Upload a document first." };
+    if (action !== "chat" && action !== "section" && !isBook && thread.files.length === 0 && !options?.target && !(action === "tool" && options?.tool === "compare" && options?.a) && !(action === "tool" && ["cover-copy", "library-revise", "library-ask", "organise", "research"].includes(options?.tool) && String(options?.text || "").trim()) && !(action === "tool" && options?.tool === "book-design")) return { status: 400, error: "Upload a document first." };
     if (options?.target === "manuscript" && !(await store.readManuscript(thread.id))?.sections?.some((x) => String(x.body || "").trim())) return { status: 400, error: "The manuscript is empty: write or import it first." };
     if (options?.target && options.target !== "source" && options.target !== "manuscript" && !inside(path.join(store.workDir(thread.id), "out"), options.target)) return { status: 400, error: "That file isn't in this project." };
     if (action === "tool" && options?.tool === "compare") {
@@ -443,6 +443,15 @@ export function createServer(cfg = loadConfig(), deps = {}) {
         t.messages.push({ id: randomUUID(), role: "assistant", engine: "api", action: String(b.action || "chat"), text: String(b.text || "").slice(0, 200000), at, jobId, status: b.status === "failed" ? "failed" : "done", outputs: files.map(([rel]) => rel) });
         t.outputs = await store.scanOutputs(id);
         return send(res, 200, { thread: await store.write(t) });
+      }
+      // A project restored from its backup (DESIGN-SPEC.md §21): a result goes back only where none exists yet.
+      if (sub === "restore" && req.method === "PUT" && rest.length) {
+        const rel = rest.join("/");
+        if ((await store.readOutput(id, rel)) != null) return fail(res, 409, "That result already exists in this project.");
+        const b = JSON.parse((await body(req, 30 * 1024 * 1024)).toString("utf8") || "{}");
+        if (!(await store.writeOutput(id, rel, String(b.text ?? "")))) return fail(res, 400, "That result can't be restored.");
+        const t = await store.read(id); t.outputs = await store.scanOutputs(id); await store.write(t);
+        return send(res, 200, { thread: t });
       }
       if (sub === "outputs" && req.method === "PUT" && rest.length) {
         // A new version of a book result: the owner's edits, a restored version or a restored paragraph.

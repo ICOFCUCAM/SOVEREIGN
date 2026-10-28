@@ -4,6 +4,8 @@
 
 export type SectionGroup = "front" | "body" | "back";
 
+import { figuresOf, resolveFigures } from "./figures";
+
 export interface SectionKindDef {
   kind: string;
   label: string;
@@ -18,12 +20,14 @@ export interface SectionKindDef {
 
 export const SECTION_KINDS: SectionKindDef[] = [
   // Front matter, in conventional order
+  { kind: "half-title", label: "Half-title page", group: "front", single: true, guidance: "The book's title alone, on the page before the title page. Nothing to write: the layout sets it." },
   { kind: "title-page", label: "Title page", group: "front", single: true, guidance: "The book's title, subtitle and author name only, centred conventions handled by layout." },
   { kind: "copyright", label: "Copyright page", group: "front", single: true, guidance: "Standard copyright page: © year and author, all rights reserved notice, scripture permission notices for any Bible translations quoted (use the publishers' standard wording with [placeholders] to confirm), ISBN [placeholder], publisher [placeholder], edition, a short disclaimer if appropriate. Never invent an ISBN." },
   { kind: "dedication", label: "Dedication", group: "front", single: true, guidance: "One to three short lines. Use [name] placeholders; never invent the people it is dedicated to." },
   { kind: "epigraph", label: "Epigraph", group: "front", single: true, guidance: "One short quotation (a scripture verse or a line from a known author) that frames the book, with exact attribution. Only quote what you can verify." },
   { kind: "foreword", label: "Foreword", group: "front", single: true, guidance: "A foreword is written by someone other than the author. Draft a brief for the foreword writer: what the book is, why it matters, points they might speak to, and suggested length — not the foreword itself." },
   { kind: "preface", label: "Preface", group: "front", single: true, wholeBook: true, guidance: "The author's own note: why and how the book came to be written, who it is for, how to read it. First person, the author's voice. 400–900 words. Mark personal facts you don't know as [[YOURS: …]]." },
+  { kind: "author-note", label: "Author's note", group: "front", single: true, wholeBook: true, guidance: "A short note from the author before the book begins: why it was written, how to read it, anything the reader should know first. First person, the author's voice. Mark personal facts you don't know as [[YOURS: …]]." },
   { kind: "acknowledgments", label: "Acknowledgements", group: "front", single: true, guidance: "Warm thanks with [name] placeholders for the people, church, family, editors and readers the author will name. Never invent names." },
   { kind: "introduction", label: "Introduction", group: "front", single: true, wholeBook: true, guidance: "Introduce the book's subject, the problem it addresses, what the reader will gain, and a short map of the chapters. 800–1,500 words." },
   { kind: "prologue", label: "Prologue", group: "front", single: true, wholeBook: true, guidance: "A short scene or story that opens the book and leads into chapter one, in the book's voice." },
@@ -47,7 +51,7 @@ export const SECTION_KINDS: SectionKindDef[] = [
 
 export const kindDef = (k: string) => SECTION_KINDS.find((d) => d.kind === k) ?? SECTION_KINDS.find((d) => d.kind === "chapter")!;
 const rank = (k: string) => SECTION_KINDS.findIndex((d) => d.kind === k);
-const GROUP_ORDER: Record<SectionGroup, number> = { front: 0, body: 1, back: 2 };
+export const GROUP_ORDER: Record<SectionGroup, number> = { front: 0, body: 1, back: 2 };
 
 export interface Section {
   id: string; kind: string; title: string; body: string;
@@ -57,7 +61,10 @@ export interface Section {
   pageNotes?: PageNote[];
   /** Version history: snapshots, autosaved revisions and the text before each accepted change or restore. */
   versions?: SectionVersion[];
+  /** Comments on words of the text (§21), found again by the words they quote. */
+  comments?: SectionComment[];
 }
+export interface SectionComment { id: string; quote: string; text: string; at: string; done?: boolean }
 export interface PageNote { page: string; text: string }
 export type VersionKind = "snapshot" | "autosave" | "before-accept" | "before-restore";
 export interface SectionVersion { id: string; at: string; kind: VersionKind; title: string; body: string; label?: string }
@@ -157,19 +164,23 @@ export function compile(m: Manuscript, opts: { contents?: boolean } = {}): strin
   const out: string[] = [`# ${m.title || "Untitled book"}`];
   if (m.subtitle) out.push(`*${m.subtitle}*`);
   if (m.author) out.push(`by ${m.author}`);
-  const listed = ordered.filter((s) => s.kind !== "title-page" && s.kind !== "copyright" && s.kind !== "dedication" && s.kind !== "epigraph");
+  const listed = ordered.filter((s) => s.kind !== "half-title" && s.kind !== "title-page" && s.kind !== "copyright" && s.kind !== "dedication" && s.kind !== "epigraph");
   let contentsDone = !opts.contents;
   for (const s of ordered) {
     if (s.kind === "title-page") continue;
+    // The half-title page is the title alone (the typesetter sets it before the title page).
+    if (s.kind === "half-title") { out.push(`## ${m.title || "Untitled book"}`); continue; }
     const d = kindDef(s.kind);
-    if (!contentsDone && (d.group !== "front" || rank(s.kind) > rank("epigraph"))) {
+    // The contents come after the preface and before the introduction (the professional order of the front matter).
+    if (!contentsDone && (d.group !== "front" || rank(s.kind) >= rank("introduction"))) {
       out.push(`## Contents\n\n${listed.map((x) => `- ${x.title}`).join("\n")}`);
       contentsDone = true;
     }
     out.push(`## ${s.title}${s.body.trim() ? `\n\n${s.body.trim()}` : ""}`);
   }
   if (!contentsDone) out.push(`## Contents\n\n${listed.map((x) => `- ${x.title}`).join("\n")}`);
-  return out.join("\n\n") + "\n";
+  // Figures are kept with the book and placed by id in the text; the finished book carries the images.
+  return resolveFigures(out.join("\n\n") + "\n", figuresOf(m));
 }
 
 /** A plain record of what Claude did and what the author accepted. */
@@ -183,3 +194,9 @@ export function authorshipNotes(m: Manuscript): string {
 /** A chapter this long is better split (DESIGN-SPEC.md §21): Claude works on it less reliably and readers expect shorter chapters. */
 export const LARGE_CHAPTER_WORDS = 15_000;
 export const largeSections = (m: Manuscript) => m.sections.filter((s) => words(s.body) > LARGE_CHAPTER_WORDS);
+
+/** A book's title from its file's name: "The_Oneness_of_Yahuah.pdf" → "The Oneness of Yahuah". */
+export const titleFromFileName = (name: string) => {
+  const base = name.replace(/\.[^.]+$/, "").trim();
+  return (/\s/.test(base) ? base : base.replace(/[_]+|(?<=\p{L})-(?=\p{L})/gu, " ")).replace(/\s+/g, " ").trim() || base;
+};

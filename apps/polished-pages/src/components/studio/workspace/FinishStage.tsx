@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import PublishingPackage from "./PublishingPackage";
 import { Link } from "react-router-dom";
 import { AlertTriangle, BookOpen, Box, Check, Download, FileText, Info, Library, Loader2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,8 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
   onOpenResult?: (path: string) => void;
 }) {
   const { toast } = useToast();
-  const [tab, setTab] = useState<Tab>("preview");
+  // The sidebar's "Book cover" opens Finish at the cover.
+  const [tab, setTab] = useState<Tab>(() => { try { const t = sessionStorage.getItem("studio.finish.tab"); sessionStorage.removeItem("studio.finish.tab"); return t === "cover" ? "cover" : "preview"; } catch { return "preview"; } });
   const [shelf, setShelf] = useState("");
   const [complete, setComplete] = useState(false);
   const [contents, setContents] = useState(true);
@@ -212,7 +214,10 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
             buildEdition={async ({ language, mode, culture, onProgress }) => markdownEdition(title, await localizeMarkdown(md, { language, mode, culture, onProgress }), language, mode, culture)} />}
           {tab === "repurpose" && <BookRepurposePanel bookTitle={title} fullContent={md} />}
           {tab === "production" && <ProductionPanel meta={meta} setMeta={(x) => onUpdate({ ...m, meta: x as Record<string, unknown> })} bookTitle={title} manuscriptComplete={chapters.length > 0 && chapters.every((s) => s.body.trim())} coverDone={Boolean(cover)} parentId={m.libraryId ?? null} content={md} />}
-          {tab === "publish" && <BookPublishingPackage outline={outline} />}
+          {tab === "publish" && <>
+            <PublishingPackage markdown={md} input={{ title, subtitle: m.subtitle, author: m.author, isbn: meta.isbn ? String(meta.isbn) : undefined, publisher: String(meta.publisher || meta.imprint || "") || undefined, paper: meta.paper ? String(meta.paper) : undefined, trim, language: meta.language ? String(meta.language) : null, coverUrl: cover }} />
+            <BookPublishingPackage outline={outline} />
+          </>}
           {(tab === "marketing" || tab === "studyguide") && (() => {
             const t = TOOL_TABS[tab];
             const done = outputs?.find((o) => o.path === t.output);
