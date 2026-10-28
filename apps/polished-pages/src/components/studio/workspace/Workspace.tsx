@@ -643,12 +643,12 @@ function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer,
           </div>
           <AnimatePresence initial={false}>
             {side && (
-              <motion.div key="panel" initial={reduce ? false : { width: 0, opacity: 0 }} animate={{ width: panelW + 8, opacity: 1 }} exit={reduce ? undefined : { width: 0, opacity: 0 }} transition={{ duration: dragging ? 0 : 0.2 }}
-                className="relative h-full shrink-0 overflow-hidden py-2 pr-2">
+              <motion.div key="panel" initial={reduce ? false : { width: 0, opacity: 0 }} animate={{ width: panelW + 14, opacity: 1 }} exit={reduce ? undefined : { width: 0, opacity: 0 }} transition={{ duration: dragging ? 0 : 0.2 }}
+                className="relative h-full shrink-0 overflow-hidden py-3.5 pr-3.5">
                 <div role="separator" aria-orientation="vertical" aria-label="Resize the Claude panel" aria-valuemin={PANEL_MIN} aria-valuemax={PANEL_MAX} aria-valuenow={panelW} tabIndex={0}
                   onPointerDown={startDrag} onKeyDown={(e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); keepPanelW(panelW + (e.key === "ArrowLeft" ? 20 : -20)); } }}
-                  className="absolute inset-y-2 left-0 z-10 w-1.5 cursor-col-resize rounded-full hover:bg-[#2563EB]/25 focus-visible:bg-[#2563EB]/40 focus-visible:outline-none" />
-                <div className="h-full overflow-hidden rounded-[12px] border border-[#E6E8ED] dark:border-white/10" style={{ width: panelW }}>{side}</div>
+                  className="absolute inset-y-3.5 left-0 z-10 w-1.5 cursor-col-resize rounded-full hover:bg-[#2563EB]/25 focus-visible:bg-[#2563EB]/40 focus-visible:outline-none" />
+                <div className="h-full overflow-hidden rounded-[14px] border border-[#E6E8ED] shadow-[0_1px_2px_rgba(15,23,42,.05),0_12px_32px_-18px_rgba(15,23,42,.28)] dark:border-white/10" style={{ width: panelW }}>{side}</div>
               </motion.div>
             )}
           </AnimatePresence>

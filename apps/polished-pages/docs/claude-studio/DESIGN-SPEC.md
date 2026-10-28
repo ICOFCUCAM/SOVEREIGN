@@ -22,7 +22,7 @@ Four stages in the frame — **Sources → Plan → Write → Finish** — as th
 |---|---|
 | Frame (navigation) | 248px expanded; 64px icon rail collapsed; soft navy `#172033` |
 | Top bar | 56–60px |
-| Claude panel | 460px on screens 1600px and wider, 380px from 1366px, 320px below; the owner drags it between 320 and 640px (remembered); **collapsible**; full height against the right edge of the window with a small 8px gap (deviation approved by the owner, 28 October 2026: "GO", then "extend it to the end of the right", "leave just a small gap for design", see §21) |
+| Claude panel | 460px on screens 1600px and wider, 380px from 1366px, 320px below; the owner drags it between 320 and 640px (remembered); **collapsible**; full height against the right edge of the window with a small 14px gap and a soft shadow (deviation approved by the owner, 28 October 2026: "GO", then "extend it to the end of the right", "leave just a small gap for design", see §21) |
 | Manuscript | 640–720px target, responsive; measure 65–80 characters |
 | Page padding | 64–80px horizontal where space permits |
 | Panel padding | 20–24px |
