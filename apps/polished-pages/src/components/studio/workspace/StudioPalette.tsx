@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { BookOpen, Eye, FileText, Focus, HelpCircle, History, Layers, ListTree, Moon, PanelRight, PenLine, Quote, Redo2, ScrollText, Undo2, Wand2, Wrench } from "lucide-react";
+import { BookOpen, Eye, FileText, Focus, HelpCircle, History, Layers, ListTree, Moon, PanelRight, PenLine, Quote, Redo2, ScrollText, Undo2, Wand2, Wrench, Replace } from "lucide-react";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from "@/components/ui/command";
 import { STUDIO_TOOLS, type ToolId } from "@/lib/studio-tools";
 import { kindDef, type Manuscript } from "@/lib/manuscript";
@@ -10,9 +10,9 @@ import { VIEWS } from "./Canvas";
 import type { DialogAction } from "./parts";
 
 // ⌘K (design spec §6): search tools, chapters, results and actions from anywhere in the Studio.
-export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, onSection, onTool, onAction, onJoin, onResult, onView, onFocus, onPanel, onTheme, onUndo, onRedo, onHistory, onTour, hasProposal }: {
+export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, onSection, onTool, onAction, onJoin, onFind, onResult, onView, onFocus, onPanel, onTheme, onUndo, onRedo, onHistory, onTour, hasProposal }: {
   open: boolean; onOpenChange: (v: boolean) => void; m: Manuscript | null | undefined; thread: StudioThread | null;
-  onPlace: (p: Place) => void; onSection: (id: string) => void; onTool: (t: ToolId) => void; onAction: (a: DialogAction) => void; onJoin: () => void;
+  onPlace: (p: Place) => void; onSection: (id: string) => void; onTool: (t: ToolId) => void; onAction: (a: DialogAction) => void; onJoin: () => void; onFind?: () => void;
   onResult: (path: string) => void; onView: (v: CanvasView) => void; onFocus: () => void; onPanel: () => void; onTheme: () => void;
   /** Present only when there is something to undo or redo, or a section whose history to open. */
   onUndo?: () => void; onRedo?: () => void; onHistory?: () => void;
@@ -52,8 +52,9 @@ export default function StudioPalette({ open, onOpenChange, m, thread, onPlace, 
           {STUDIO_TOOLS.map((t) => <CommandItem key={t.id} value={`tool ${t.title} ${t.line}`} onSelect={run(() => onTool(t.id))}><Wrench className="mr-2" /><span className="shrink-0">{t.title}</span><span className="ml-2 truncate text-xs opacity-70">{t.line}</span></CommandItem>)}
         </CommandGroup>
         <CommandSeparator />
-        {(onUndo || onRedo || onHistory) && (
+        {(onUndo || onRedo || onHistory || onFind) && (
           <CommandGroup heading="Edit">
+            {onFind && <CommandItem onSelect={run(onFind)}><Replace className="mr-2" />Find and replace in the book<CommandShortcut>⌘⇧H</CommandShortcut></CommandItem>}
             {onUndo && <CommandItem onSelect={run(onUndo)}><Undo2 className="mr-2" />Undo<CommandShortcut>⌘Z</CommandShortcut></CommandItem>}
             {onRedo && <CommandItem onSelect={run(onRedo)}><Redo2 className="mr-2" />Redo<CommandShortcut>⌘⇧Z</CommandShortcut></CommandItem>}
             {onHistory && <CommandItem onSelect={run(onHistory)}><History className="mr-2" />Version history of this section</CommandItem>}

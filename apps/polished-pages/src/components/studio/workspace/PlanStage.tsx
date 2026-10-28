@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { ArrowDown, ArrowUp, BookOpen, ChevronDown, History, Layers3, ListTree, Loader2, PenLine, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BookOpen, ChevronDown, History, Layers3, ListTree, Loader2, PenLine, Plus, Replace, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { SECTION_KINDS, insertSection, kindDef, moveSection, words, type Manuscript } from "@/lib/manuscript";
+import { LARGE_CHAPTER_WORDS, SECTION_KINDS, insertSection, kindDef, largeSections, moveSection, words, type Manuscript } from "@/lib/manuscript";
 import { outlineToManuscript } from "@/lib/studio-merge";
 import type { BookEngine } from "@/lib/book-engine";
 import type { BookDepth, BookMode } from "@/types/book";
@@ -25,7 +25,7 @@ const GROUPS = [{ id: "front", label: "Front matter" }, { id: "body", label: "Ch
 
 // Plan (design spec §2): the book's contents, with the plan and notes for each
 // chapter, its order, Claude's outline, and turning the book into a series.
-export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard, onResplit }: {
+export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard, onResplit, onOrganise, onFind }: {
   m: Manuscript; onUpdate: (m: Manuscript) => void; onOpen: (id: string) => void; engine: BookEngine | null; approach: ApproachId; hasUploads: boolean;
   onWriteAll: (ids: string[]) => void; queue: { done: number; total: number } | null; onSeries: () => void; busy: boolean;
   /** Finish joins every chapter into one book. */
@@ -39,6 +39,10 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
   onWizard?: () => void;
   /** Splits the uploaded manuscript into chapters again (when the first split found the wrong headings). */
   onResplit?: () => void;
+  /** Organise a book (uploaded here, in Sources, or the manuscript as it is) into chapters and sections. */
+  onOrganise?: () => void;
+  /** Find and replace across the book (§21). */
+  onFind?: () => void;
 }) {
   const { toast } = useToast();
   const [open, setOpen] = useState<string | null>(null);
@@ -52,6 +56,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
   // After a rebuild every designed section with a plan is written (chapters first); otherwise the empty chapters.
   const empty = sectionsToWrite(m);
   const written = m.sections.filter((s) => s.kind === "chapter" && s.body.trim());
+  const large = largeSections(m);
 
   const outline = async () => {
     if (!engine) return;
@@ -87,6 +92,13 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
     <div className="mx-auto flex w-full max-w-[1080px] flex-wrap items-start justify-center gap-10">
       <article className={`min-w-0 flex-[1_1_620px] px-6 py-12 sm:px-16 ${PAPER}`}>
         <h1 className={`${SERIF} mb-10 text-center text-[36px] font-medium`}>Contents</h1>
+        {large.length > 0 && (
+          <div role="status" className="mb-8 rounded-[10px] border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-[13.5px]">
+            <p className="font-medium">{large.length === 1 ? `“${large[0].title || "One section"}” is` : `${large.length} sections are`} very long (over {LARGE_CHAPTER_WORDS.toLocaleString()} words{large.length === 1 ? `: ${words(large[0].body).toLocaleString()}` : ""}).</p>
+            <p className="mt-1 text-[12.5px] opacity-90">Claude works less reliably on a section this long, and readers expect shorter chapters. Organise finds the chapters and sections inside it and titles them, without changing a word.</p>
+            {onOrganise && <Button size="sm" variant="outline" className="mt-2" disabled={busy} onClick={onOrganise}><ListTree className="h-4 w-4" /> Organise into chapters and sections</Button>}
+          </div>
+        )}
         {!m.sections.length && <p className="text-center text-[14px] text-[#64748B]">No sections yet. Outline the book with Claude, or add sections yourself.</p>}
         {GROUPS.map((g) => {
           const list = m.sections.filter((s) => kindDef(s.kind).group === g.id);
@@ -104,7 +116,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
                         <span className={`${SERIF} w-6 shrink-0 text-[16px] tabular-nums text-[#64748B]`}>{n || ""}</span>
                         <button type="button" onClick={() => setOpen(isOpen ? null : s.id)} aria-expanded={isOpen} className={`${SERIF} min-w-0 text-left text-[18px] text-[#172033] hover:text-[#1D4ED8] dark:text-[#E5E7EB]`}>{s.title || kindDef(s.kind).label}</button>
                         <span aria-hidden className="mb-1 min-w-[24px] flex-1 border-b border-dotted border-[#CBD5E1] dark:border-white/15" />
-                        <span className="shrink-0 text-[12px] text-[#64748B]">{words(s.body) ? `${words(s.body).toLocaleString()} words` : "not written"}</span>
+                        <span className={`shrink-0 text-[12px] ${words(s.body) > LARGE_CHAPTER_WORDS ? "font-medium text-[#B45309] dark:text-amber-300" : "text-[#64748B]"}`}>{words(s.body) ? `${words(s.body).toLocaleString()} words` : "not written"}</span>
                       </div>
                       <div className="ml-9 mt-1 flex flex-wrap gap-x-3 text-[12px]">
                         <span className="text-[#475569] dark:text-[#94A3B8]">{s.idea?.trim() ? `Plan: ${s.idea.split("\n")[0].slice(0, 90)}${s.idea.length > 90 ? "…" : ""}` : "+ Chapter notes"}</span>
@@ -129,7 +141,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
             </section>
           );
         })}
-        <div className="mt-6">{addMenu}</div>
+        <div className="mt-6 flex flex-wrap gap-2">{addMenu}{onFind && m.sections.length > 0 && <Button size="sm" variant="outline" onClick={onFind}><Replace className="h-4 w-4" /> Find and replace</Button>}</div>
       </article>
 
       <aside className="flex-[0_1_280px] space-y-8">
@@ -152,6 +164,14 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
               className="flex w-full items-center gap-1.5 text-left text-[12.5px] font-medium text-[#2563EB] hover:underline"><History className="h-3.5 w-3.5 shrink-0" /> Restore: {a.label.toLowerCase()} ({new Date(a.at).toLocaleDateString()}, {a.sections.length} sections)</button>
           ))}
         </div>
+
+        {onOrganise && (
+          <div className="space-y-2 rounded-[10px] border border-[#E6E8ED] bg-white p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="flex items-center gap-2 text-[14px] font-semibold"><ListTree className="h-4 w-4 text-[#2563EB]" /> Organise into chapters and sections</p>
+            <p className="text-[12.5px] text-[#64748B]">Upload a book here, or use the manuscript as it is (a rewritten book too): Claude finds its chapters and sections and titles them. Not a word of the text changes.</p>
+            <Button variant="outline" className="h-9 w-full" disabled={busy || Boolean(queue)} onClick={onOrganise}><ListTree className="h-4 w-4" /> Organise the book</Button>
+          </div>
+        )}
 
         <div className="space-y-2">
           <Button className={`h-11 w-full ${GRADIENT}`} disabled={!empty.length || Boolean(queue) || busy || (approach !== "new" && !hasUploads)}

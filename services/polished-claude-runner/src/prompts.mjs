@@ -138,6 +138,56 @@ Write ./out/summary.md with: the title; a one-paragraph overview; the key points
         "## Faithfulness and editorial standard (this is editing a book, not polishing sentences)",
         ...REWRITE_POLICY.map((l) => `- ${l}`),
       ].filter((l) => l !== null);
+      // The Book Rewrite Control Panel (DESIGN-SPEC.md §20): an audit with no rewriting, or the plan first for the owner's approval.
+      if (opts.auditOnly) return {
+        instructions: lines.join("\n") + "\n",
+        output: "rewrite-audit.md",
+        title: "Audit (no rewriting)",
+        prompt: `Audit ${tgt} following ./INSTRUCTIONS.md strictly. This is an audit: do not rewrite the book or change its structure, and do not write ./out/rewrite.md.
+1. Read ./INSTRUCTIONS.md and the whole document.
+2. Do every check the instructions list and write every report they list under ./out/.
+3. Write ./out/rewrite-audit.md: a summary of what you checked (and what you could not), the main findings, and which report holds the details.`,
+      };
+      // Continue a rewrite that stopped (DESIGN-SPEC.md §21): the instructions of the run that stopped stay, finished chapters are kept.
+      if (opts.continueRun) {
+        const done = opts._done || [];
+        return {
+          instructions: lines.join("\n") + "\n",
+          keepInstructions: true,
+          output: "rewrite.md",
+          title: "Rewrite · continued",
+          prompt: `Continue the rewrite of ${tgt} following ./INSTRUCTIONS.md strictly. An earlier run stopped before it finished; do not start again.
+${done.length ? `Already written in ./out/rewrite/: ${done.map((d) => `${d.name} (${d.words} words)`).join(", ")}.` : "No chapter file was written yet."}
+1. Read ./INSTRUCTIONS.md, ./out/rewrite-analysis.md and ./out/rewrite-plan.md (if either is missing, write it first, as the instructions describe), ./out/rewrite-progress.md if it exists, and the whole original.
+2. Check the last chapter file written: if it is cut off, complete it from the original. Do not rewrite chapters that are complete.
+3. Rewrite the remaining chapters of the plan one at a time, in full, writing each to ./out/rewrite/NN-short-title.md with the next numbers. Keep ./out/rewrite-progress.md up to date.
+4. Assemble the complete book in ./out/rewrite.md ("# Title" first, then every chapter in order), replacing any earlier, incomplete one.
+5. Integration and audit: numbering, transitions, cross-references, terminology; compare with the original so that no argument, testimony or reference is lost and nothing unsupported is added; correct only what fails.
+6. Write every report ./INSTRUCTIONS.md lists, and ./out/rewrite-notes.md with "### Instructions I could not follow", "### Claims that need a source", "### Promised but missing", "### Sensitive claims for the author", "### Additions", "### Structure and numbering changes" and "### For you to check".
+Do not stop early and do not skip chapters.`,
+        };
+      }
+      if (opts.approval && !opts.planApproved) return {
+        instructions: lines.join("\n") + "\n",
+        output: "rewrite-plan.md",
+        title: "Rewrite · plan for your approval",
+        prompt: `Prepare the rewrite of ${tgt} following ./INSTRUCTIONS.md strictly, and stop for the owner's approval before rewriting anything.
+1. Source analysis. Read ./INSTRUCTIONS.md and the whole document. Write ./out/rewrite-analysis.md: its purpose and central thesis, its position, the chapters and sections in order with their headings and numbers exactly as found (marking duplicate or missing numbers), the major arguments with their evidence, the testimonies, repeated and overlapping material, incomplete sections and missing references, what the front matter promises and whether the book contains it, its terms and names.
+2. Editorial plan. Write ./out/rewrite-plan.md: the proposed table of contents (parts, chapters and main sections, with new titles), and for each chapter a short explanation of its purpose and which parts of the original it draws on; then the numbering scheme, the terminology policy, what you will consolidate or remove and why, and the gaps you will report, not fill.
+Then stop. Do not rewrite any chapter: the owner reads and approves the plan first.`,
+      };
+      if (opts.planApproved) return {
+        instructions: lines.join("\n") + "\n",
+        output: "rewrite.md",
+        title: "Rewrite · from the approved plan",
+        prompt: `Rewrite ${tgt} following ./INSTRUCTIONS.md strictly. The owner has approved the editorial plan in ./out/rewrite-plan.md (with the analysis in ./out/rewrite-analysis.md): follow it. The owner may have changed the plan before approving it; where it differs from ./out/rewrite-plan.claude.md (your first proposal, if present), the owner's version decides.
+1. Read ./INSTRUCTIONS.md, ./out/rewrite-analysis.md, ./out/rewrite-plan.md and the whole original.
+2. Controlled rewriting, one chapter of the plan at a time: re-read ./INSTRUCTIONS.md and the plan, rewrite that chapter in full from the original material it draws on (re-expressed in professional prose, not copied), and write it to ./out/rewrite/NN-short-title.md (NN = 01, 02, …). Keep ./out/rewrite-progress.md up to date.
+3. Assemble the complete book in ./out/rewrite.md: "# Title" first, then the chapters in the plan's order.
+4. Integration and audit: numbering, transitions, cross-references, terminology; compare with the original so that no argument, testimony or reference is lost and nothing unsupported is added; correct only what fails.
+5. Write every report ./INSTRUCTIONS.md lists, and ./out/rewrite-notes.md with "### Instructions I could not follow", "### Claims that need a source", "### Promised but missing", "### Sensitive claims for the author", "### Additions", "### Structure and numbering changes" and "### For you to check".
+Do not stop early and do not skip chapters.`,
+      };
       return {
         instructions: lines.join("\n") + "\n",
         prompt: `Rewrite ${tgt} following ./INSTRUCTIONS.md strictly. Work in stages; do not skip any.
@@ -302,7 +352,22 @@ Keep the "## " chapter heading and Markdown structure. Write the complete improv
 
 const LONG = "If the document is long, work one chapter or major section at a time and keep going until the whole document is done; never stop early or sample.";
 
-export const TOOLS = {
+export // One batch of a long scan (DESIGN-SPEC.md §21): a short run reads a few pages and adds them to what is already read.
+function scanBatch(b) {
+  const where = b.images
+    ? `the page images ./source/${b.base}-p${String(b.from).padStart(3, "0")}.jpg to ./source/${b.base}-p${String(b.to).padStart(3, "0")}.jpg (the Studio rendered and unlocked them from ${b.name})`
+    : `./source/${b.storedAs}, pages ${b.from} to ${b.to} (open it with the Read tool's pages parameter: "${b.from}-${b.to}")`;
+  return {
+    output: `scanned/${b.base}.txt`,
+    title: `Read scanned pages · ${b.name} · pages ${b.from}–${b.to} of ${b.total}`,
+    prompt: `Read pages ${b.from} to ${b.to} (of ${b.total}) of the scanned document ${b.name}: ${where}. Read only these pages in this run.
+Transcribe the text exactly, keeping headings, paragraphs, lists and verse numbers. Mark anything unreadable as [illegible] and uncertain words as [word?]. Do not correct or modernise the text.
+${b.from > 1 ? `./out/scanned/${b.base}.txt already holds pages 1 to ${b.from - 1}: keep everything in it and add the new pages at its end.` : `Write ./out/scanned/${b.base}.txt (replace any earlier file).`} Put "<!-- page N -->" (the page's number in the document) on its own line before each page's text. Write after every few pages, so the pages read are kept.
+If the document cannot be opened at all (for example it is password-protected), do not change ./out/scanned/; write ./out/scanned-text.md saying which file and the exact error, and that the owner can open it in Sources with "open it (password or scanned pages)".`,
+  };
+}
+
+const TOOLS = {
   proofread: {
     title: "Proofread & copy-edit",
     build: (o, tgt) => ({
@@ -402,10 +467,10 @@ Write ./out/readability.md: the estimated reading level with your reasoning; ave
   },
   ocr: {
     title: "Read scanned pages",
-    build: () => ({
+    build: (o) => o._batch ? scanBatch(o._batch) : ({
       output: "scanned-text.md",
       prompt: `The documents in ./source/ include scanned pages or images (PDFs without a text layer, JPG or PNG). Read each one directly, page by page, in file order (open a PDF with the Read tool's pages parameter, at most 20 pages at a time, until the last page; where ./source/ has page images named <file name without extension>-p001.jpg, -p002.jpg and so on, those are that PDF's pages, already opened and unlocked by the Studio: read those images in order instead of the PDF), and transcribe the text exactly, keeping headings, paragraphs, lists and verse numbers. Mark anything unreadable as [illegible] and uncertain words as [word?]. Do not correct or modernise the text.
-Write ./out/scanned-text.md with "# <file name>" before each file's text and "<!-- page N -->" before each page. Also write each file's text on its own to ./out/scanned/<the file's name without its extension>.txt (for example ./out/scanned/onenessofgod.txt for ./source/onenessofgod.pdf), so it becomes that document's text in the Studio. Write the files as you go, so the pages read so far are kept. If a file cannot be opened at all (for example it is password-protected), do not write ./out/scanned/ for it; write ./out/scanned-text.md saying which file and the exact error, and that the owner can open it in Sources with "open it (password or scanned pages)". ${LONG}`,
+Write ./out/scanned-text.md with "# <file name>" before each file's text and "<!-- page N -->" before each page. Also write each file's text on its own, with the same "<!-- page N -->" markers, to ./out/scanned/<the file's name without its extension>.txt (for example ./out/scanned/onenessofgod.txt for ./source/onenessofgod.pdf), so it becomes that document's text in the Studio. Write the files as you go, so the pages read so far are kept. If a file cannot be opened at all (for example it is password-protected), do not write ./out/scanned/ for it; write ./out/scanned-text.md saying which file and the exact error, and that the owner can open it in Sources with "open it (password or scanned pages)". ${LONG}`,
     }),
   },
   "cover-copy": {
@@ -436,7 +501,7 @@ function tool(o) {
   const t = TOOLS[o.tool];
   if (!t) return { error: "Unknown tool." };
   const built = t.build(o, target(o));
-  return { ...built, title: t.title };
+  return { ...built, title: built.title || t.title };
 }
 
 // ── Manuscript sections ──────────────────────────────────────────────────────
@@ -550,6 +615,31 @@ TOOLS["library-ask"] = {
     prompt: `The book "${String(o.title || "Untitled").replace(/"/g, "'")}" is ./library/book.md. Read all of it.
 ${String(o.rules || "").trim() ? `The book's rules: ${String(o.rules).trim()}\n` : ""}The owner asks: ${String(o.message || "").trim()}
 Answer from the book; quote it where that helps, and say where (heading). Do not rewrite the book. Write the answer to ./out/library/answer.md.`,
+  }),
+};
+
+// Organise into chapters and sections (DESIGN-SPEC.md §19): Claude finds where each part of the
+// book begins and names it; the Studio splits the text there itself, so no word of the book changes.
+export const ORGANISE_SHAPE = `{"sections": [{"kind": "chapter", "title": "", "starts": "", "headings": [{"title": "", "starts": ""}]}], "notes": ""}`;
+export function organisePrompt(o, where) {
+  const improve = o.titles === "improve";
+  return `Organise ${where} into a book's chapters and sections. Do not change, add or remove any text of the book: you only say where each part begins and what it is called.
+1. Read all of it. Find the front matter (title page, copyright, dedication, contents, foreword, preface, acknowledgements, introduction), the parts (if the book has parts), every chapter, and the back matter (conclusion, epilogue, appendices, notes, bibliography, glossary, index, about the author).
+2. Within each chapter, find its sections: places where a new subject begins, with or without a heading in the text.
+3. For each one give "starts": the first 8 to 15 words where it begins, copied character for character from the book (with its punctuation and capitals), so the place can be found again. If it begins with a heading line, start "starts" at that heading line.
+4. Titles: ${improve ? "write clear, professional titles that say what each chapter and section is about, in the book's own terms; for a chapter the author already titled, keep the author's title unless it is only a number." : "use the author's own heading text where there is one (without the word \"Chapter\" and its number); where there is none, write a short title from the content."}${o.instructions ? `\n5. The owner adds: ${String(o.instructions).trim()}` : ""}
+"kind" is one of: title-page, copyright, dedication, epigraph, foreword, preface, acknowledgments, introduction, prologue, part, chapter, epilogue, afterword, conclusion, appendix, notes, bibliography, glossary, index, about-author. List them in the order of the book; leave out a table of contents page (it is made from the chapters).
+Valid JSON only (no comments, no code fences), exactly this shape:
+${ORGANISE_SHAPE}
+"notes": anything the owner should know (duplicated text, a chapter that seems missing, numbering the book skips).`;
+}
+TOOLS.organise = {
+  title: "Organise into chapters and sections",
+  build: (o) => ({
+    output: "organise.json",
+    files: { "organise/book.md": String(o.text || "") },
+    prompt: `${organisePrompt(o, "the book in ./organise/book.md")}
+Write the JSON to ./out/organise.json, then re-read it and make sure it parses.`,
   }),
 };
 

@@ -99,6 +99,9 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
   });
 
   const card = mine ? APPROACH_CARDS.find((a) => a.id === mine.approach) : null;
+  // Writing shows the text formatted or as written (with its Markdown marks); the choice is kept on this device.
+  const [formatted, setFormattedState] = useState(() => { try { return localStorage.getItem("studio.formatted") === "1"; } catch { return false; } });
+  const setFormatted = (v: boolean) => { setFormattedState(v); try { localStorage.setItem("studio.formatted", v ? "1" : "0"); } catch { /* storage blocked */ } };
   const header = (
     <header className="mb-10">
       <p className="mb-2 text-[12px] font-medium text-[#64748B]">{def.label}</p>
@@ -126,9 +129,14 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
 
       {effective === "writing" || effective === "mine" ? (
         <>
-          <GrowingText value={section.body} onChange={onBody} label={`${section.title} text`} className={PROSE}
-            placeholder={`Write the ${def.label.toLowerCase()} here${effective === "writing" ? ", or ask Claude in the panel" : ""}.`} />
-          <p className="mt-6 text-[12px] text-[#64748B]">{words(section.body).toLocaleString()} words</p>
+          {formatted && section.body.trim()
+            // Formatted (§21): headings, bold, lists and quotations as they will read; a click goes back to writing.
+            ? <div role="button" tabIndex={0} aria-label={`${section.title} text, formatted: click to edit`} title="Click to edit" onClick={() => setFormatted(false)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setFormatted(false); } }} className={`${PROSE} cursor-text rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40`}><Markdown text={section.body} /></div>
+            : <GrowingText value={section.body} onChange={onBody} label={`${section.title} text`} className={PROSE}
+                placeholder={`Write the ${def.label.toLowerCase()} here${effective === "writing" ? ", or ask Claude in the panel" : ""}.`} />}
+          <p className="mt-6 flex flex-wrap items-center gap-3 text-[12px] text-[#64748B]">{words(section.body).toLocaleString()} words
+            {section.body.trim() && <button type="button" aria-pressed={formatted} onClick={() => setFormatted(!formatted)} className="rounded-full border border-[#E6E8ED] px-2.5 py-0.5 hover:bg-muted dark:border-white/10">{formatted ? "Edit the text" : "Show formatted"}</button>}
+          </p>
           {onSection && <SectionSteps m={m} section={section} onSection={onSection} />}
         </>
       ) : effective === "original" ? (

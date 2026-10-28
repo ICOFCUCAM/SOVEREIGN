@@ -5,6 +5,7 @@ import { bookExcerpt, parseCoverCopy, type CoverCopyWriter } from "@/lib/cover-c
 import type { BookOutline } from "@/types/book";
 import type { Manuscript } from "@/lib/manuscript";
 import { parseDesign } from "@/lib/book-design";
+import { parseOrganise, type OrganiseOptions, type OrganisePlan } from "@/lib/organise";
 
 // Client for the Claude Studio runner (services/polished-claude-runner): the
 // owner's own Claude Code, reached over HTTPS. Every call carries the signed-in
@@ -15,21 +16,35 @@ export type StudioAction = "chat" | "summarize" | "rewrite" | "cite" | "tool" | 
 
 export interface StudioFile { name: string; storedAs: string; kind: "original" | "text" | "page"; bytes: number; at: string }
 export interface StudioOutput { path: string; bytes: number; modifiedAt: string }
-export interface StudioMessage { id: string; role: "user" | "assistant"; engine?: "claude-code" | "api"; action: StudioAction; text: string; at: string; jobId: string; status?: "done" | "failed" | "cancelled"; outputs?: string[] }
+export interface StudioMessage { id: string; role: "user" | "assistant"; engine?: "claude-code" | "api"; action: StudioAction; text: string; at: string; jobId: string; status?: "done" | "failed" | "cancelled"; outputs?: string[];
+  /** A long job that stopped: how to continue it where it stopped (DESIGN-SPEC.md §21). */
+  resume?: { action: StudioAction; options: RunOptions; what: string } | null }
 export interface StudioThread { id: string; title: string; createdAt: string; updatedAt: string; sessionId: string | null; files: StudioFile[]; messages: StudioMessage[]; outputs: StudioOutput[]; runningJobId?: string }
 export interface StudioThreadSummary { id: string; title: string; createdAt: string; updatedAt: string; files: number; outputs: number }
-export interface StudioJob { id: string; threadId: string; action: StudioAction; label: string; output: string | null; status: "running" | "done" | "failed" | "cancelled"; startedAt: string; endedAt: string | null; error: string | null }
+export interface StudioJob { id: string; threadId: string; action: StudioAction; label: string; output: string | null; status: "queued" | "running" | "done" | "failed" | "cancelled"; startedAt: string; endedAt: string | null; error: string | null }
 export interface ClaudeStatus { state: "ok" | "unknown" | "signed_out" | "limit" | "not_configured"; at: string | null; resetsAt: string | null; message: string | null }
-export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; claude?: ClaudeStatus; busy: StudioJob | null; citationStyles: string[] }
+export interface RunnerInfo { level: number; features: string[]; poppler: boolean; node?: string }
+export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; claude?: ClaudeStatus; busy: StudioJob | null; citationStyles: string[]; /** Absent on a runner older than level 3. */ runner?: RunnerInfo }
+/** The runner level this site relies on (runner src/version.mjs RUNNER_LEVEL; a test keeps it no higher). DESIGN-SPEC.md §21. */
+export const RUNNER_LEVEL_NEEDED = 4;
+/** Why the runner is not right for this site, in the owner's words, or null when it is. */
+export function runnerProblem(me: StudioMe | null): string | null {
+  if (!me) return null;
+  if (!me.runner || me.runner.level < RUNNER_LEVEL_NEEDED) return `Your Claude Code runner is older than the Studio${me.runner ? ` (level ${me.runner.level}, the Studio needs ${RUNNER_LEVEL_NEEDED})` : ""}, so newer features fail on it. In DeployPro, open Claude Studio Runner and press Deploy main (not Redeploy on an old deployment).`;
+  if (!me.runner.poppler) return "Your Claude Code runner can't read PDF pages (poppler is missing from its image). Rebuild it from main in DeployPro. Until then, open PDFs with “open it (password or scanned pages)” on their card in Sources.";
+  return null;
+}
 export type StudioEvent =
   | { type: "status"; status: string; line: string; at: string }
   | { type: "text"; text: string; at: string }
   | { type: "tool"; name: string; line: string; at: string }
   | { type: "denied"; line: string; at: string }
   | { type: "notice"; line: string; at: string }
-  | { type: "done"; status: StudioJob["status"] | "unknown"; error?: string | null; errorKind?: "auth" | "limit" | "other" | "stopped" | null; outputs?: string[]; output?: string | null; at: string };
+  | { type: "done"; status: StudioJob["status"] | "unknown"; error?: string | null; errorKind?: "auth" | "limit" | "other" | "stopped" | null; outputs?: string[]; output?: string | null; next?: StudioJob; at: string };
 
 export interface RunOptions {
+  /** Continue a rewrite or a scan that stopped, keeping what is done (DESIGN-SPEC.md §21). */
+  continueRun?: boolean;
   /** rewrite: a targeted correction of the editorial check's findings, not a new rewrite (DESIGN-SPEC.md §15). */
   correct?: boolean;
   tool?: string;
@@ -52,6 +67,10 @@ export interface RunOptions {
   length?: string;
   focus?: string;
   instructions?: string;
+  /** rewrite (control panel, DESIGN-SPEC.md §20): the plan first for approval; the rewrite from the approved plan; reports only. */
+  approval?: boolean;
+  planApproved?: boolean;
+  auditOnly?: boolean;
   keepStructure?: boolean;
   keepVoice?: boolean;
   audience?: string;
@@ -93,6 +112,9 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
     else r = await send(init.body, false);
   } catch (e) {
     if (e instanceof StudioError) throw e;
+    // Tell "the runner is down" from "this request was refused on the way" (the runner answers /health).
+    const up = await fetch(`${RUNNER_URL}/health`, { signal: AbortSignal.timeout?.(6000) }).then((r) => r.ok).catch(() => false);
+    if (up) throw new StudioError(`The runner is running, but this ${json ? `${(json.length / 1024 / 1024).toFixed(1)} MB ` : ""}request didn't get through: it may have restarted midway, or something in front of it (the hosting's proxy) refused it. Your changes are kept on this device; press Retry. If it keeps failing, tell Claude what this says.`, 0);
     const mb = json ? json.length / 1024 / 1024 : 0;
     throw new StudioError(mb > 0.9 ? `The Claude Studio runner didn't answer this ${mb.toFixed(1)} MB save: it may be restarting, or something in front of it refuses large requests. Your changes are kept on this device; press Retry in a minute.` : "The Claude Studio runner can't be reached. Check that it is running.", 0);
   }
@@ -221,6 +243,17 @@ export function titleOf(markdown: string, fallback: string): string {
 
 export const OUTPUT_NAMES: Record<string, string> = {
   "book-design.json": "Design of the professional book",
+  "organise.json": "Chapters and sections found by Claude",
+  "rewrite-plan.md": "Rewrite · plan for your approval",
+  "rewrite-plan.claude.md": "Rewrite · Claude's first plan (before your changes)",
+  "rewrite-audit.md": "Audit · summary",
+  "rewrite-contents.md": "Rewrite · contents",
+  "rewrite-traceability.md": "Rewrite · traceability",
+  "rewrite-style-sheet.md": "Rewrite · style sheet",
+  "rewrite-citations.md": "Rewrite · citations and Scripture",
+  "rewrite-queries.md": "Rewrite · queries for the author",
+  "rewrite-fidelity.md": "Rewrite · fidelity and completeness",
+  "rewrite-progress.md": "Rewrite · progress record",
   "library/revised.md": "Library book · Claude's correction",
   "library/answer.md": "Library book · Claude's answer",
   "book-design-inventory.md": "Design · inventory of your material",
@@ -248,7 +281,6 @@ export const OUTPUT_NAMES: Record<string, string> = {
   "rewrite.md": "Rewritten book",
   "rewrite-notes.md": "Rewrite notes",
   "rewrite-analysis.md": "Rewrite · source analysis",
-  "rewrite-plan.md": "Rewrite · editorial plan",
   "corrected.md": "Corrected book",
   "editorial-review.md": "Editorial review (Claude's judgement)",
   "corrected-notes.md": "Correction notes",
@@ -307,6 +339,11 @@ export async function claudeReviseInLibrary(i: { title: string; passage: string;
 export async function claudeAskInLibrary(i: { title: string; book: string; question: string; rules?: string; project?: string }): Promise<string> {
   const id = await libraryProject(i.project);
   return (await runToFile(id, "tool", { tool: "library-ask", title: i.title, text: i.book, message: i.question, rules: i.rules })).trim();
+}
+
+/** Organise into chapters and sections on the owner's Claude Code (the book's text goes with the request). */
+export async function claudeOrganise(threadId: string, text: string, o: OrganiseOptions): Promise<OrganisePlan> {
+  return parseOrganise(await runToFile(threadId, "tool", { tool: "organise", text, titles: o.titles, instructions: o.instructions }));
 }
 
 export function claudeBookEngine(threadId: string, onOutline?: (o: BookOutline) => void): BookEngine {

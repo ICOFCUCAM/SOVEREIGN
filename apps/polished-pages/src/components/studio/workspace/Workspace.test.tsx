@@ -83,6 +83,56 @@ describe("Claude Studio workspace", () => {
     expect(f.saved().sections[0].versions?.at(-1)).toMatchObject({ kind: "before-restore", body: "Yahuah's people lived among nations.\n\nThese spirits had names." });
   }, 15_000); // walks the whole revision flow; slow under a full parallel run
 
+  it("offers to continue a rewrite that stopped, where it stopped", async () => {
+    const f = fake();
+    const stoppedThread = { ...thread, messages: [{ id: "m1", role: "assistant", action: "rewrite", text: "Stopped.", at: "", jobId: "j0", status: "failed", resume: { action: "rewrite", options: { continueRun: true }, what: "2 chapters written" } }] } as unknown as StudioThread;
+    (f.backend as unknown as { thread: unknown }).thread = async () => ({ thread: stoppedThread, job: null });
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    expect(await screen.findByText(/Claude stopped before finishing \(2 chapters written\)/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Continue where Claude stopped" }));
+    await waitFor(() => expect(f.runs.at(-1)).toEqual({ continueRun: true }));
+  });
+
+  it("warns in Plan about a very long chapter and offers to organise it", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: unknown }).manuscript = async () => ({ title: "Oneness", history: [], sections: [{ id: "c1", kind: "chapter", title: "The_Oneness_of_God", body: "word ".repeat(74_770) }] });
+    localStorage.setItem("studio.place", "plan");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    expect(await screen.findByText(/“The_Oneness_of_God” is very long \(over 15,000 words: 74,770\)/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Organise into chapters and sections/ }));
+    expect(await screen.findByRole("dialog")).toBeTruthy();
+  });
+
+  it("finds and replaces across the book from Plan, leaving quotations unless chosen, and keeps the earlier text", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: unknown }).manuscript = async () => ({ title: "B", history: [], sections: [
+      { id: "c1", kind: "chapter", title: "One", body: "Jesus taught them.\n\nHe said, “Jesus wept.”" },
+      { id: "c2", kind: "chapter", title: "Two", body: "And Jesus went on." },
+    ] });
+    localStorage.setItem("studio.place", "plan");
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: /Find and replace/ }));
+    fireEvent.change(screen.getByLabelText("Find"), { target: { value: "Jesus" } });
+    fireEvent.change(screen.getByLabelText("Replace with"), { target: { value: "Yahusha" } });
+    expect(screen.getByText(/3 matches · 2 chosen/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Replace 2 matches" }));
+    await waitFor(() => expect(f.saved().sections.map((s) => s.body)).toEqual(["Yahusha taught them.\n\nHe said, “Jesus wept.”", "And Yahusha went on."]), { timeout: 3000 });
+    expect(f.saved().sections[0].versions?.at(-1)?.body).toBe("Jesus taught them.\n\nHe said, “Jesus wept.”");
+  });
+
+  it("shows the writing formatted when asked, and goes back to the text with a click", async () => {
+    const f = fake();
+    (f.backend as unknown as { manuscript: unknown }).manuscript = async () => ({ title: "B", history: [], sections: [{ id: "c1", kind: "chapter", title: "One", body: "### The names\n\nThe **enemy** has names." }] });
+    render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);
+    expect(await screen.findByLabelText("One text")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show formatted" }));
+    const shown = screen.getByRole("button", { name: /One text, formatted/ });
+    expect(within(shown).getByRole("heading", { name: "The names" })).toBeTruthy();
+    expect(within(shown).getByText("enemy").tagName).toBe("STRONG");
+    fireEvent.click(shown);
+    expect(screen.getByLabelText("One text")).toHaveValue("### The names\n\nThe **enemy** has names.");
+  });
+
   it("reviews changes from the keyboard: J moves, X rejects, ⌘↵ accepts", async () => {
     const f = fake();
     render(<MemoryRouter><Workspace {...props(f.backend)} /></MemoryRouter>);

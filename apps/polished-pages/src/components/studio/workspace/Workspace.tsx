@@ -12,7 +12,7 @@ import { importText, insertSection, kindDef, words, type Manuscript } from "@/li
 import { readWizardDraft, wizardDraftToManuscript } from "@/lib/studio-merge";
 import { apiBookEngine, type BookEngine } from "@/lib/book-engine";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
-import { apiCoverCopyWriter, apiDesignBook, runnerBackend, sourceText, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
+import { apiCoverCopyWriter, apiDesignBook, apiOrganise, runnerBackend, sourceText, type EngineDecision, type EngineMode, type StudioBackend } from "@/lib/studio-backend";
 import { StudioError, claudeBookEngine, setSectionTitles, type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioThread, type StudioThreadSummary } from "@/lib/claude-studio";
 import type { ToolId } from "@/lib/studio-tools";
 import { designToManuscript, parseDesign, restoreArchived, resultToManuscript, type BookDesign, type BookTypeId, type DesignApproach, type DesignBriefInput } from "@/lib/book-design";
@@ -24,10 +24,17 @@ import Frame, { STAGES, type Place } from "./Frame";
 import Canvas, { VIEWS, type CanvasView } from "./Canvas";
 import ClaudePanel, { type PanelMode } from "./ClaudePanel";
 import StudioPalette from "./StudioPalette";
+import FindReplaceDialog from "./FindReplaceDialog";
 import SourcesStage from "./SourcesStage";
 import PlanStage from "./PlanStage";
 import BookDesignDialog from "./BookDesignDialog";
 import OpenPdfDialog from "./OpenPdfDialog";
+import OrganiseDialog from "./OrganiseDialog";
+import { claudeOrganise, pdfInStudio } from "@/lib/claude-studio";
+import { buildBackup } from "@/lib/project-backup";
+import { saveFile } from "@/lib/book-export";
+import { manuscriptText, organisedToManuscript } from "@/lib/organise";
+import { announce, askToNotify } from "@/lib/notify";
 // The Book Creator wizard, run inside the project on the engine in use (loaded on demand).
 const BookCreator = lazy(() => import("@/pages/BookCreator"));
 import FinishStage from "./FinishStage";
@@ -123,6 +130,13 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [rebuilding, setRebuilding] = useState(false);
   // A PDF opened in the browser (password-protected or scanned), §18b.
   const [pdfFile, setPdfFile] = useState<StudioThread["files"][number] | null>(null);
+  // Organise into chapters and sections (§19).
+  const [organising, setOrganising] = useState(false);
+  // Find and replace across the book (§21).
+  const [finding, setFinding] = useState(false);
+  // A long job that stopped and can be continued (§21): the latest whole-book run's message says so.
+  const [dismissed, setDismissed] = useState<string | null>(null);
+  const stopped = useMemo(() => { const last = [...(thread?.messages ?? [])].reverse().find((x) => x.role === "assistant" && x.action !== "chat"); return last?.resume && last.id !== dismissed ? last : null; }, [thread?.messages, dismissed]);
   const lastRun = useRef<{ action: StudioAction; options: RunOptions } | null>(null);
   const abort = useRef<AbortController | null>(null);
   const rulesRef = useRef<HTMLTextAreaElement>(null);
@@ -158,7 +172,10 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     setLive({ job, steps: [], text: [] });
     backend.follow(job, (e: StudioEvent) => {
       if (e.type === "done") {
+        // The next batch of a long scan starts by itself: follow it.
+        if (e.next) { reload().catch(() => {}); p.onChanged(); follow(e.next); return; }
         setLive(null);
+        if (e.status === "done" || e.status === "failed") announce(e.status === "done", job.label, e.status === "failed" ? e.error ?? "" : "The result is open in Claude Studio.");
         reload().then(({ thread: t }) => {
           const outs = e.outputs ?? [];
           const pick = (e.output && outs.includes(e.output) ? e.output : null) ?? ["rewrite.md", "cited.md", "summary.md", "series-plan.md"].find((x) => outs.includes(x)) ?? outs.find((x) => !x.includes("/") && !x.endsWith(".json")) ?? outs[0];
@@ -177,9 +194,21 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   }, [backend, reload, toast, p]);
 
   useEffect(() => {
-    reload().then(({ job }) => { if (job?.status === "running") follow(job); }).catch((e) => toast({ title: "Could not open the project", description: e instanceof Error ? e.message : "", variant: "destructive" }));
+    reload().then(({ job }) => { if (job?.status === "running" || job?.status === "queued") follow(job); }).catch((e) => toast({ title: "Could not open the project", description: e instanceof Error ? e.message : "", variant: "destructive" }));
     return () => abort.current?.abort();
   }, [reload, follow, toast]);
+
+  // A complete copy of the project on the owner's computer (§21).
+  const backup = async () => {
+    toast({ title: "Preparing the backup…", description: "The manuscript, documents and every result, with their versions." });
+    try {
+      await persist();
+      const { blob, report } = await buildBackup(backend, id, backend === runnerBackend ? (s) => pdfInStudio.bytes(id, s) : undefined);
+      const name = (thread?.title || "project").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 60) || "project";
+      saveFile(blob, `${name}-backup-${new Date().toISOString().slice(0, 10)}.zip`);
+      toast({ title: "Backup downloaded", description: report.skipped.length ? `${report.files} files. Not included (see README.txt): ${report.skipped.length}.` : `${report.files} files.` });
+    } catch (e) { toast({ title: "The backup couldn't be made", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+  };
 
   const start = useCallback(async (action: StudioAction, options: RunOptions, force?: "api") => {
     const use = force ?? engineId;
@@ -198,6 +227,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (!(await cost.confirm({ what: action === "chat" ? "Your message to Claude" : action === "tool" ? "This tool" : "This whole-book run", words: bookWords || undefined }, use))) return;
     try {
       setRetry(null); lastRun.current = { action, options };
+      if (action !== "chat") askToNotify();
       // A run on the manuscript reads the saved one.
       if (options.target === "manuscript") await persist();
       const job = await backend.run(id, action, options, use);
@@ -247,15 +277,15 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   };
 
   /** The uploaded manuscripts' text, in order (their text copies, or the files themselves when they are text). */
-  const uploadsText = async (): Promise<string | null> => {
-    if (!thread) return null;
+  const uploadsText = async (files = thread?.files, quiet = false): Promise<string | null> => {
+    if (!files) return null;
     const texts: string[] = [];
-    for (const f of thread.files.filter((x) => x.kind === "original")) {
-      const copy = thread.files.find((x) => x.kind === "text" && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt");
+    for (const f of files.filter((x) => x.kind === "original")) {
+      const copy = files.find((x) => x.kind === "text" && x.storedAs === f.storedAs.replace(/\.[^.]+$/, "") + ".txt");
       const t = copy ? await backend.source(id, copy.storedAs) : /\.(txt|md|markdown)$/i.test(f.storedAs) ? await backend.source(id, f.storedAs) : null;
       if (t?.trim()) texts.push(t);
     }
-    if (!texts.length) { toast({ title: "No readable text in the manuscripts", description: "On the PDF's card in Sources, use “open it (password or scanned pages)” first.", variant: "destructive" }); return null; }
+    if (!texts.length) { if (quiet) return null; toast({ title: "No readable text in the manuscripts", description: "On the PDF's card in Sources, use “open it (password or scanned pages)” first.", variant: "destructive" }); return null; }
     return texts.join("\n\n");
   };
   /** Splits the uploads into chapters again (the current chapters are kept to restore). */
@@ -305,6 +335,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       const typing = Boolean(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)));
       // ⌘Z / ⌘⇧Z undo and redo book changes; inside a text field the field's own undo applies.
       if ((e.metaKey || e.ctrlKey) && !typing && (e.key.toLowerCase() === "z" || e.key.toLowerCase() === "y")) { e.preventDefault(); if (e.shiftKey || e.key.toLowerCase() === "y") redo(); else undo(); }
+      else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "h") { e.preventDefault(); if (m) setFinding(true); }
       else if ((e.metaKey || e.ctrlKey) && e.key === ".") { e.preventDefault(); setFocus(!focus); }
       else if ((e.metaKey || e.ctrlKey) && e.key === "\\") { e.preventDefault(); setPanelOpen(!panelOpen); }
       else if (e.key === "Escape" && focus) setFocus(false);
@@ -356,7 +387,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
     if (m === null && (place === "plan" || place === "write" || place === "finish")) return (
       <NoBookYet place={place} hasUploads={hasUploads} wizardChapters={wizard?.chapters?.length ?? 0} busy={busy}
         onSplit={() => void startBook("uploads")} onBlank={() => void startBook("blank")} onBringWizard={() => void startBook("wizard")} onWizard={() => setWizardOpen(true)} onSources={() => setPlace("sources")}
-        onRebuild={bookEngine && hasUploads ? () => setRebuilding(true) : undefined} />
+        onRebuild={bookEngine && hasUploads ? () => setRebuilding(true) : undefined} onOrganise={engineId ? () => setOrganising(true) : undefined} />
     );
     if (place === "sources" || m === null) {
       return <SourcesStage thread={thread} m={m} uploading={uploading} onUpload={upload} onRemove={removeFile} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)} onWizard={() => setWizardOpen(true)} onOpenPdf={backend === runnerBackend ? setPdfFile : undefined}
@@ -370,7 +401,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           queue={sr.queue} onSeries={() => setTool({ initial: "series" })} onFinish={() => setPlace("finish")}
           onDesign={bookEngine ? designBook : undefined}
           onApplyDesign={(d, b) => { update(designToManuscript(d, m, b)); setApproach(b.approach); }}
-          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} onResplit={hasUploads ? () => void resplit() : undefined} />
+          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} onResplit={hasUploads ? () => void resplit() : undefined} onOrganise={engineId ? () => setOrganising(true) : undefined} onFind={() => setFinding(true)} />
       </>;
     }
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}
@@ -446,6 +477,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
         <Shell p={p} place={place} setPlace={setPlace} collapsed={collapsed} setCollapsed={setCollapsed} drawer={drawer} setDrawer={setDrawer}
           m={m} sectionId={sectionId} onSection={openSection} pending={pendingIds[0] ?? null} title={thread.title}
           onRename={() => setRenaming(thread.title)}
+          onBackup={() => void backup()}
           onDelete={busy ? undefined : async () => { if (!window.confirm(`Delete “${thread.title}” with its documents and results? Anything saved to your Library stays.`)) return; try { await backend.remove(id); p.onDeleted(); } catch (e) { toast({ title: "Could not delete", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}
           header={top} side={showPanel && !narrow ? panel : null} reduce={reduce}>
           {recovery && <RecoveryBanner r={recovery} onRestore={() => void recover(true)} onDiscard={() => { if (window.confirm(`Discard the changes from ${new Date(recovery.at).toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}? They exist only on this device and cannot be recovered afterwards.`)) void recover(false); }} />}
@@ -457,6 +489,13 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           {!online && (
             <div role="status" className="mx-auto mb-6 flex w-full max-w-[720px] items-center gap-3 rounded-[10px] border border-[#E6E8ED] bg-white px-4 py-3 text-[13.5px] text-[#475569] dark:border-white/10 dark:bg-white/5 dark:text-[#CBD5E1]">
               <WifiOff className="h-4 w-4" /><span className="flex-1">You're offline. Keep writing: changes stay on this device and are saved when the connection returns. Claude can't run until then.</span>
+            </div>
+          )}
+          {stopped && !live && (
+            <div role="status" className="mx-auto mb-6 flex w-full max-w-[720px] flex-wrap items-center gap-3 rounded-[10px] border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-[13.5px]">
+              <AlertTriangle className="h-4 w-4 text-amber-600" /><span className="flex-1">Claude stopped before finishing ({stopped.resume!.what}). What was done is kept.</span>
+              <Button size="sm" className={GRADIENT} disabled={engineId !== "claude-code"} title={engineId !== "claude-code" ? "Continuing runs on Claude Code" : undefined} onClick={() => void start(stopped.resume!.action, stopped.resume!.options)}>Continue where Claude stopped</Button>
+              <Button size="sm" variant="ghost" onClick={() => setDismissed(stopped.id)}>Dismiss</Button>
             </div>
           )}
           {retry && (
@@ -483,6 +522,14 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[320px] p-0 sm:max-w-[320px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
 
       <Onboarding open={tour} onClose={() => setTour(false)} onGo={setPlace} />
+      {organising && <OrganiseDialog hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} hasUploads={hasUploads} engineLabel={bookEngine?.label}
+        readText={async (s) => (s === "manuscript" ? (m ? manuscriptText(m) : null) : uploadsText((await backend.thread(id)).thread.files, true))}
+        organise={(text, o) => (engineId === "claude-code" && backend === runnerBackend ? claudeOrganise(id, text, o) : apiOrganise(text, o))}
+        upload={async (files) => { await upload(files); }}
+        onClose={() => setOrganising(false)}
+        onApply={async (o) => { const next = organisedToManuscript(o, m ?? { title: thread.title === "Untitled project" ? "" : thread.title, sections: [], history: [] }); if (m) update(next); else await replace(next); setOrganising(false); setPlace("plan"); toast({ title: "Organised into chapters and sections", description: `${o.sections.length} parts. The earlier chapters can be restored from Plan.` }); }} />}
+      {finding && m && <FindReplaceDialog m={m} onClose={() => setFinding(false)} onOpenSection={(sid) => { setFinding(false); openSection(sid); }}
+        onApply={(next, n) => { update(next); setFinding(false); toast({ title: `Replaced ${n} ${n === 1 ? "match" : "matches"}`, description: "Undo puts it back; each changed section keeps its earlier text in its version history." }); }} />}
       {pdfFile && <OpenPdfDialog threadId={id} file={pdfFile} onClose={() => setPdfFile(null)} onChanged={() => { reload().catch(() => {}); p.onChanged(); }} onReadPages={() => void start("tool", { tool: "ocr" } as RunOptions)} />}
       {rebuilding && <BookDesignDialog sections={0} design={designBook} engineLabel={bookEngine?.label} onClose={() => setRebuilding(false)}
         onApply={async (d, b) => { const next = designToManuscript(d, { title: thread.title === "Untitled project" ? "" : thread.title, sections: [], history: [] }, b); await replace(next); setApproach(b.approach); setRebuilding(false); setPlace("plan"); toast({ title: "The new book is laid out", description: `${d.sections.length} sections, each with its plan. Next: write them (chapters first).` }); }} />}
@@ -500,16 +547,22 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       </Sheet>
       {m && section && <VersionsSheet open={versions} onOpenChange={setVersions} m={m} section={section} onUpdate={update} />}
       <StudioPalette open={palette} onOpenChange={setPalette} m={m} thread={thread} hasProposal={Boolean(proposal)}
-        onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onTour={() => setTour(true)} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)}
+        onUndo={canUndo ? undo : undefined} onRedo={canRedo ? redo : undefined} onHistory={section ? () => { setPlace("write"); setVersions(true); } : undefined} onTour={() => setTour(true)} onPlace={setPlace} onSection={openSection} onTool={(t) => setTool({ initial: t })} onAction={setDialog} onJoin={() => setJoining(true)} onFind={m?.sections.length ? () => setFinding(true) : undefined}
         onResult={setViewing} onView={(v) => { setPlace("write"); setView(v); }} onFocus={() => { setPlace("write"); setFocus(true); }} onPanel={() => setPanelOpen(!panelOpen)} onTheme={toggleTheme} />
       {tool && <ToolsDialog thread={thread} engine={engineId} initial={tool.initial} initialTarget={tool.target} hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} onClose={() => setTool(null)} onRun={(o) => start("tool", o)} />}
       <JoinFiles open={joining} onClose={() => setJoining(false)} onAddToProject={(f) => upload([f])} />
-      {dialog && <ActionDialog action={dialog} thread={thread} styles={p.citationStyles} onClose={() => setDialog(null)} onRun={(o) => start(dialog, o)} />}
+      {dialog && <ActionDialog action={dialog} thread={thread} styles={p.citationStyles} rules={[m?.rules, m?.knowledge?.terminology].filter(Boolean).join("\n")} claudeCode={engineId === "claude-code"} onClose={() => setDialog(null)}
+        onRun={(o) => { if (dialog === "rewrite" && o.approval && !o.planApproved) { try { localStorage.setItem(`studio.rewrite.pending.${id}`, JSON.stringify(o)); } catch { /* storage blocked */ } } void start(dialog, o); }} />}
       {viewing && <ResultViewer backend={backend} threadId={id} path={viewing} projectTitle={thread.title} onClose={() => { setViewing(null); p.onChanged(); }} onUseAsTarget={(x, o) => { setViewing(null); setPendingTarget(x, o ?? null); setDialog("rewrite"); }} check={check}
         onReview={(x) => { setViewing(null); setTool({ initial: "editorial-review", target: x }); }} reviewAt={thread.outputs.find((o) => o.path === "editorial-review.md")?.modifiedAt ?? null}
         onUseAsManuscript={(text, label) => {
           try { update(resultToManuscript(text, m ?? { title: thread.title, sections: [], history: [] }, label)); setPlace("plan"); toast({ title: "This is now the book's manuscript", description: "Finish works on it: cover, interior, production, audiobook and more. The earlier manuscript can be restored from Plan." }); }
           catch (e) { toast({ title: "Couldn't use it", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
+        }}
+        onApprovePlan={() => {
+          let pending: RunOptions | null = null;
+          try { pending = JSON.parse(localStorage.getItem(`studio.rewrite.pending.${id}`) ?? "null") as RunOptions | null; } catch { /* none */ }
+          void start("rewrite", { ...(pending ?? { instructions: "Rewrite the book following the approved editorial plan in ./out/rewrite-plan.md, under the Studio's rewriting standard.", keepStructure: false }), approval: true, planApproved: true });
         }}
         onUseDesign={(raw) => {
           try {
@@ -524,15 +577,15 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
 }
 
 /** Frame + header + stage + optional Claude panel, laid out for the screen size (spec §3). */
-function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, reduce, onRename, onDelete, children }: {
+function Shell({ p, place, setPlace, collapsed, setCollapsed, drawer, setDrawer, m, sectionId, onSection, pending, title, header, side, reduce, onRename, onDelete, onBackup, children }: {
   p: WorkspaceProps; place: Place; setPlace: (x: Place) => void; collapsed: boolean; setCollapsed: (v: boolean) => void; drawer: boolean; setDrawer: (v: boolean) => void;
   m: Manuscript | null | undefined; sectionId: string | null; onSection: (id: string) => void; pending: string | null; title: string;
-  header?: React.ReactNode; side?: React.ReactNode; reduce?: boolean; onRename?: () => void; onDelete?: () => void; children: React.ReactNode;
+  header?: React.ReactNode; side?: React.ReactNode; reduce?: boolean; onRename?: () => void; onDelete?: () => void; onBackup?: () => void; children: React.ReactNode;
 }) {
   const frame = (rail: boolean) => (
     <Frame collapsed={rail} onCollapse={setCollapsed} place={place} onPlace={setPlace} threads={p.threads} activeId={p.id} onProject={(x) => { setDrawer(false); p.onProject(x); }}
       onNewProject={() => { setDrawer(false); void p.onNewProject(); }} ready={p.ready} title={title} m={m} sectionId={sectionId} onSection={(x) => { setDrawer(false); onSection(x); }} pending={pending}
-      decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} onRename={onRename} onDelete={onDelete} />
+      decision={p.decision} mode={p.mode} onMode={p.onMode} onCheckEngine={p.onCheckEngine} busy={p.busy} onRename={onRename} onDelete={onDelete} onBackup={onBackup} />
   );
   return (
     <div className="fixed inset-0 z-40 flex bg-[#F7F6F2] text-[#172033] dark:bg-[#0D1016] dark:text-[#E5E7EB]">
@@ -650,9 +703,9 @@ const NO_BOOK: Record<"plan" | "write" | "finish", { title: string; line: string
 };
 
 /** Plan, Write and Finish before there is a manuscript: what the stage is for and every way to start. */
-function NoBookYet({ place, hasUploads, wizardChapters, busy, onSplit, onBlank, onBringWizard, onWizard, onRebuild, onSources }: {
+function NoBookYet({ place, hasUploads, wizardChapters, busy, onSplit, onBlank, onBringWizard, onWizard, onRebuild, onSources, onOrganise }: {
   place: "plan" | "write" | "finish"; hasUploads: boolean; wizardChapters: number; busy: boolean;
-  onSplit: () => void; onBlank: () => void; onBringWizard: () => void; onWizard: () => void; onRebuild?: () => void; onSources: () => void;
+  onSplit: () => void; onBlank: () => void; onBringWizard: () => void; onWizard: () => void; onRebuild?: () => void; onSources: () => void; onOrganise?: () => void;
 }) {
   const t = NO_BOOK[place];
   const card = "rounded-[10px] border border-[#E6E8ED] bg-white p-4 dark:border-white/10 dark:bg-white/5";
@@ -663,6 +716,7 @@ function NoBookYet({ place, hasUploads, wizardChapters, busy, onSplit, onBlank, 
       <p className="mt-2 max-w-[640px] text-[14px] text-[#475569] dark:text-[#CBD5E1]">{t.line}</p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {onRebuild && <div className={`${card} border-[#BFD3FF] bg-[#F5F8FF] dark:bg-[#1E3A8A]/20`}><p className="text-[14px] font-semibold">Rebuild as a professional book</p><p className="mt-1 text-[12.5px] text-[#64748B]">Tell Claude what the book must become; it designs it from your whole manuscript, you review the design, then it writes it.</p><Button size="sm" className="mt-3" disabled={busy} onClick={onRebuild}>Rebuild the book</Button></div>}
+        {onOrganise && <div className={card}><p className="text-[14px] font-semibold">Organise into chapters and sections</p><p className="mt-1 text-[12.5px] text-[#64748B]">Upload a book (or use the one in Sources): Claude finds its chapters and sections and titles them, without changing a word.</p><Button size="sm" variant="outline" className="mt-3" disabled={busy} onClick={onOrganise}>Organise the book</Button></div>}
         <div className={card}><p className="text-[14px] font-semibold">Split into chapters</p><p className="mt-1 text-[12.5px] text-[#64748B]">Your uploaded manuscript becomes the chapters, as written; then Claude works chapter by chapter.</p><Button size="sm" variant="outline" className="mt-3" disabled={busy || !hasUploads} onClick={onSplit}>Split into chapters</Button>{!hasUploads && <p className="mt-2 text-[12px] text-[#64748B]">Upload a manuscript in <button type="button" onClick={onSources} className="font-medium text-[#2563EB] hover:underline">Sources</button> first.</p>}</div>
         <div className={card}><p className="text-[14px] font-semibold">Book wizard</p><p className="mt-1 text-[12.5px] text-[#64748B]">Quick, guided, restructure, improve or publishing-ready: outline, then write chapter by chapter, with your book's depth and voice.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" variant="outline" disabled={busy} onClick={onWizard}>Open the Book wizard</Button>{wizardChapters > 0 && <Button size="sm" variant="ghost" onClick={onBringWizard}>Bring in its {wizardChapters} chapters</Button>}</div></div>
         <div className={card}><p className="text-[14px] font-semibold">A blank book</p><p className="mt-1 text-[12.5px] text-[#64748B]">Start with an empty first chapter and write it yourself or with Claude.</p><Button size="sm" variant="ghost" className="mt-3" disabled={busy} onClick={onBlank}>Start a blank book</Button></div>

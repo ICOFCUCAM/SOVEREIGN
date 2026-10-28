@@ -5,6 +5,7 @@ import type { RunOptions, StudioEvent, StudioJob } from "@/lib/claude-studio";
 import type { EngineId, StudioBackend } from "@/lib/studio-backend";
 import { addVersion } from "@/lib/section-versions";
 import { OP_LABEL } from "./approaches";
+import { announce } from "@/lib/notify";
 
 export type SectionOp = NonNullable<RunOptions["op"]>;
 export interface Proposal {
@@ -58,6 +59,7 @@ export function useSectionRun({ backend, id, engine, persist, patchSection, late
         if (e.type !== "done") return;
         setRunning(null);
         onChanged();
+        if (e.status === "done" || e.status === "failed") announce(e.status === "done", job.label, e.status === "failed" ? e.error ?? "" : "Claude's suggestion is waiting for you.");
         if (e.status !== "done") { if (e.status !== "cancelled") toast({ title: "Claude couldn't finish", description: e.error ?? "Your text is unchanged. Try again, or switch engine.", variant: "destructive" }); return; }
         const sid = options.sectionId;
         if (options.op === "explain") {

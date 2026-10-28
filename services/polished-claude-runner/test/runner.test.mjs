@@ -52,7 +52,7 @@ async function streamUntilDone(jobId, threadId) {
 test("health needs no sign-in and reveals nothing", async () => {
   const r = await fetch(base + "/health");
   assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { ok: true });
+  assert.deepEqual(await r.json(), { ok: true, level: 4 });
 });
 
 test("only the listed owner who is also a Polished Pages admin gets in", async () => {
@@ -137,16 +137,25 @@ test("projects, uploads, summarise, rewrite with chapter merge, chat resume, out
   assert.equal((await call(`/v1/threads/${thread.id}/outputs/..%2F..%2Fthread.json`)).status, 404);
 });
 
-test("one run at a time, and a running job can be stopped", async () => {
+test("one run at a time: the next waits in the queue, a waiting job can be cancelled, a running job can be stopped", async () => {
   const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Slow" } })).json();
   const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "SLOW please" } } })).json();
-  const busy = await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "hello" } } });
-  assert.equal(busy.status, 409);
+  const waiting = await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "hello" } } });
+  assert.equal(waiting.status, 202);
+  const next = (await waiting.json()).job;
+  assert.equal(next.status, "queued");
+  const { job: dropped } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "never mind" } } })).json();
+  const droppedEvents = streamUntilDone(dropped.id, thread.id);
+  assert.equal((await call(`/v1/jobs/${dropped.id}/cancel`, { method: "POST" })).status, 202);
+  assert.equal((await droppedEvents).at(-1).status, "cancelled");
   assert.equal((await call(`/v1/threads/${thread.id}`, { method: "DELETE" })).status, 409);
+  const nextEvents = streamUntilDone(next.id, thread.id);
   const pending = streamUntilDone(job.id, thread.id);
   assert.equal((await call(`/v1/jobs/${job.id}/cancel`, { method: "POST" })).status, 202);
-  const events = await pending;
-  assert.equal(events.at(-1).status, "cancelled");
+  assert.equal((await pending).at(-1).status, "cancelled");
+  const ev = await nextEvents;
+  assert.ok(ev.some((e) => e.status === "queued"), "the waiting job said it was waiting");
+  assert.equal(ev.at(-1).status, "done", "then it ran");
   assert.equal((await call(`/v1/threads/${thread.id}`, { method: "DELETE" })).status, 200);
 });
 
@@ -545,4 +554,82 @@ test("a large save may arrive gzipped and is read the same", async () => {
   assert.equal((await r.json()).manuscript.sections[0].body.length, 1_000_000);
   const bad = await call(`/v1/threads/${thread.id}/manuscript`, { method: "PUT", raw: Buffer.from("not gzip"), headers: { "Content-Encoding": "gzip" } });
   assert.equal(bad.status, 400);
+});
+
+test("the rewrite control panel: plan first for approval, then the rewrite from the approved plan; or an audit only", () => {
+  const plan = buildRun("rewrite", { instructions: "Complete Book Transformation", approval: true });
+  assert.equal(plan.output, "rewrite-plan.md");
+  assert.match(plan.prompt, /stop for the owner's approval/);
+  assert.doesNotMatch(plan.prompt, /\.\/out\/rewrite\.md/);
+  const go = buildRun("rewrite", { instructions: "Complete Book Transformation", approval: true, planApproved: true });
+  assert.equal(go.output, "rewrite.md");
+  assert.match(go.prompt, /approved the editorial plan in \.\/out\/rewrite-plan\.md/);
+  const audit = buildRun("rewrite", { instructions: "Scripture audit", auditOnly: true });
+  assert.equal(audit.output, "rewrite-audit.md");
+  assert.match(audit.prompt, /do not write \.\/out\/rewrite\.md/);
+  assert.match(audit.instructions, /Scripture audit/);
+});
+
+test("the runner says what it can do, so the Studio can tell an old runner", async () => {
+  const me = await (await call("/v1/me")).json();
+  assert.equal(me.runner.level, 4);
+  assert.ok(me.runner.features.includes("organise"));
+  assert.equal(typeof me.runner.poppler, "boolean");
+});
+
+test("a long scan is read in batches of pages, each batch queuing the next, and the text grows as it goes", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Long scan" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=bigscan.pdf&kind=original`, { method: "POST", raw: Buffer.from("%PDF-1.4\n" + "<< /Type /Page >>\n".repeat(45) + "<< /Type /Pages >>") });
+  let { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "ocr" } } })).json();
+  assert.equal(job.output, "scanned/bigscan.txt");
+  const labels = [job.label];
+  for (;;) {
+    const done = (await streamUntilDone(job.id, thread.id)).at(-1);
+    assert.equal(done.status, "done");
+    if (!done.next) break;
+    job = done.next; labels.push(job.label);
+  }
+  assert.deepEqual(labels, ["Read scanned pages · bigscan.pdf · pages 1–20 of 45", "Read scanned pages · bigscan.pdf · pages 21–40 of 45", "Read scanned pages · bigscan.pdf · pages 41–45 of 45"]);
+  const text = await fs.readFile(path.join(dataDir, "threads", thread.id, "work", "source", "bigscan.txt"), "utf8");
+  assert.match(text, /Page 1 of/); assert.match(text, /Page 45 of/);
+  assert.doesNotMatch(text, /<!-- page/, "the page markers stay out of the document's text");
+  const again = await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "tool", options: { tool: "ocr", continueRun: true } } });
+  assert.equal(again.status, 400, "nothing left to continue");
+});
+
+test("a rewrite that stopped can be continued: finished chapters are kept and the book is completed", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Stopped rewrite" } })).json();
+  await call(`/v1/threads/${thread.id}/files?name=book.txt&kind=original`, { method: "POST", raw: Buffer.from("# The Long Road\n\nOne. Two. Three.") });
+  const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "rewrite", options: { instructions: "STOPAFTERTWO make it modern" } } })).json();
+  assert.equal((await streamUntilDone(job.id, thread.id)).at(-1).status, "failed");
+  let t = (await (await call(`/v1/threads/${thread.id}`)).json()).thread;
+  const resume = t.messages.at(-1).resume;
+  assert.deepEqual(resume, { action: "rewrite", options: { continueRun: true }, what: "2 chapters written" });
+  const work = path.join(dataDir, "threads", thread.id, "work");
+  const instructions = await fs.readFile(path.join(work, "INSTRUCTIONS.md"), "utf8");
+  const next = (await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "rewrite", options: resume.options } })).json()).job;
+  assert.equal(next.label, "Rewrite · continued");
+  assert.equal((await streamUntilDone(next.id, thread.id)).at(-1).status, "done");
+  assert.equal(await fs.readFile(path.join(work, "INSTRUCTIONS.md"), "utf8"), instructions, "the stopped run's instructions are kept");
+  const book = await fs.readFile(path.join(work, "out", "rewrite.md"), "utf8");
+  assert.match(book, /Beginnings[\s\S]*Journey[\s\S]*Home/);
+  t = (await (await call(`/v1/threads/${thread.id}`)).json()).thread;
+  assert.equal(t.messages.at(-1).resume, null);
+  const run = buildRun("rewrite", { continueRun: true, _done: [{ name: "01-a.md", words: 900 }] });
+  assert.match(run.prompt, /01-a\.md \(900 words\)/);
+  assert.match(run.prompt, /Do not rewrite chapters that are complete/);
+});
+
+
+test("the plan waiting for approval can be changed by the owner; Claude's first plan is kept", async () => {
+  const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Plan" } })).json();
+  const out = path.join(dataDir, "threads", thread.id, "work", "out");
+  await fs.mkdir(out, { recursive: true });
+  await fs.writeFile(path.join(out, "rewrite-plan.md"), "# Plan\n\n1. One.");
+  const r = await call(`/v1/threads/${thread.id}/outputs/rewrite-plan.md`, { method: "PUT", body: { text: "# Plan\n\n1. One, renamed." } });
+  assert.equal(r.status, 200);
+  await call(`/v1/threads/${thread.id}/outputs/rewrite-plan.md`, { method: "PUT", body: { text: "# Plan\n\n1. Third try." } });
+  assert.equal(await fs.readFile(path.join(out, "rewrite-plan.md"), "utf8"), "# Plan\n\n1. Third try.");
+  assert.equal(await fs.readFile(path.join(out, "rewrite-plan.claude.md"), "utf8"), "# Plan\n\n1. One.", "Claude's own proposal stays as it was");
+  assert.match(buildRun("rewrite", { instructions: "x", approval: true, planApproved: true }).prompt, /the owner's version decides/);
 });

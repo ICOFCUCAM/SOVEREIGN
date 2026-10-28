@@ -52,6 +52,33 @@ describe("result viewer", () => {
     expect(screen.getByText(/· edited/)).toBeInTheDocument();
   });
 
+  it("lets the owner change the plan before approving it, saving the change first", async () => {
+    const b = fakeBackend("# Plan\n\n1. Chapter one: the names.");
+    const approved = vi.fn();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(<ResultViewer backend={b} threadId="t1" path="rewrite-plan.md" projectTitle="Demonology" onClose={() => {}} onUseAsTarget={() => {}} onApprovePlan={approved} />);
+    fireEvent.click(await screen.findByRole("button", { name: /Edit the plan/ }));
+    expect(screen.queryByText(/words came back/)).toBeNull(); // a short plan is not a book that failed to read
+    fireEvent.change(screen.getByLabelText("Edit the result"), { target: { value: "# Plan\n\n1. Chapter one: the names of the enemy." } });
+    fireEvent.click(screen.getByRole("button", { name: /Approve this plan and rewrite the book/ }));
+    await waitFor(() => expect(approved).toHaveBeenCalled());
+    expect((b as unknown as { saves: { text: string }[] }).saves.at(-1)?.text).toContain("names of the enemy");
+    vi.restoreAllMocks();
+  });
+
+  it("shows what the checks found before exporting Word, and leads to the check", async () => {
+    render(<ResultViewer backend={backend} threadId="t1" path="rewrite.md" projectTitle="Demonology" onClose={() => {}} onUseAsTarget={() => {}} check={{ rules: "", original: async () => ORIGINAL }} />);
+    await screen.findByText(/to fix before publishing/);
+    const more = screen.getByRole("button", { name: "More actions" });
+    fireEvent.keyDown(more, { key: "Enter" });
+    fireEvent.click(await screen.findByRole("menuitem", { name: /Export Word/ }));
+    const dlg = await screen.findByRole("dialog", { name: /Export Word/ });
+    expect(dlg).toHaveTextContent(/The editorial check found \d+ problems? to fix before publishing/);
+    expect(dlg).toHaveTextContent(/named as a draft/);
+    fireEvent.click(screen.getByRole("button", { name: "See the check" }));
+    expect(await screen.findByText(/2 headings share the number 20/)).toBeInTheDocument();
+  });
+
   it("goes from a finding to its passage in the text", async () => {
     render(<ResultViewer backend={backend} threadId="t1" path="rewrite.md" projectTitle="Demonology" onClose={() => {}} onUseAsTarget={() => {}} check={{ rules: "", original: async () => ORIGINAL }} />);
     fireEvent.click(await screen.findByRole("button", { name: "See the check" }));

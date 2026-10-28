@@ -99,14 +99,18 @@ const DESIGN = JSON.stringify({
 });
 
 function previewBackend(): StudioBackend {
+  // ?scene=stopped shows a rewrite that stopped partway; ?scene=long a chapter too long to work on well (§21).
+  const scene = new URLSearchParams(location.search).get("scene");
   let m: Manuscript = JSON.parse(JSON.stringify(SAMPLE));
+  if (scene === "long") m.sections = m.sections.map((x, i) => (i === m.sections.findIndex((y) => y.kind === "chapter") ? { ...x, body: `${x.body}\n\n${"The spirits of the nations are named and described throughout the ancient texts. ".repeat(1400)}` } : x));
   const thread: StudioThread = {
     id: "demo", title: "Demonology", createdAt: "", updatedAt: "",
     files: [{ name: "DEMONOLOGY.pdf", storedAs: "DEMONOLOGY.pdf", kind: "original", bytes: 2_400_000, at: "2026-10-20T09:12:00Z" }, { name: "DEMONOLOGY.txt", storedAs: "DEMONOLOGY.txt", kind: "text", bytes: 600_000, at: "2026-10-20T09:13:00Z" }, { name: "Demonology notes.docx", storedAs: "Demonology notes.docx", kind: "original", bytes: 84_000, at: "2026-10-24T16:40:00Z" }],
-    outputs: [{ path: "rewrite.md", bytes: 3100, modifiedAt: new Date().toISOString() }, { path: "summary.md", bytes: 4200, modifiedAt: new Date().toISOString() }, { path: "quotes-check.md", bytes: 9800, modifiedAt: new Date().toISOString() }],
-    messages: [{ id: "m1", role: "user", action: "chat", text: "List every scripture quoted in chapter 3.", at: "" }, { id: "m2", role: "assistant", action: "chat", text: "Saved as **Scripture in chapter 3**: 23 references, with the page of each.", at: "", engine: "claude-code", status: "done" }],
+    outputs: [{ path: "rewrite-plan.md", bytes: 900, modifiedAt: new Date().toISOString() }, { path: "rewrite.md", bytes: 3100, modifiedAt: new Date().toISOString() }, { path: "summary.md", bytes: 4200, modifiedAt: new Date().toISOString() }, { path: "quotes-check.md", bytes: 9800, modifiedAt: new Date().toISOString() }],
+    messages: [{ id: "m1", role: "user", action: "chat", text: "List every scripture quoted in chapter 3.", at: "" }, { id: "m2", role: "assistant", action: "chat", text: "Saved as **Scripture in chapter 3**: 23 references, with the page of each.", at: "", engine: "claude-code", status: "done" },
+      ...(scene === "stopped" ? [{ id: "m3", role: "assistant", action: "rewrite", text: "Claude's plan limit was reached.", at: "", engine: "claude-code", status: "failed", resume: { action: "rewrite", options: { continueRun: true }, what: "7 chapters written" } }] : [])],
   } as unknown as StudioThread;
-  const out: Record<string, string> = { "rewrite.md": SAMPLE_REWRITE, "summary.md": "# Demonology — Summary\n\nA faithful overview of the book.", "quotes-check.md": "# Quotations check\n\nAll quotations verified." };
+  const out: Record<string, string> = { "rewrite-plan.md": "# Editorial plan\n\n## Proposed contents\n\n**Part One — The Unseen War**\n\n1. **The Two Kingdoms** — the book's thesis; draws on the original's chapters 1–2.\n2. **Names of the Enemy** — consolidates the two lists of names (pp. 14–22, 61).\n3. **Spirits in the Ancient Near East** — keeps every scripture reference.\n\n**Part Two — Authority of the Believer**\n\n4. **Given Authority** — the testimonies of chapter 9, kept in full.\n\n## Terminology\n\nYahusha for Jesus and Yahuah for God, outside quotations.\n\n## Gaps to report, not fill\n\n- The preface promises a course schedule the material does not contain.", "rewrite.md": SAMPLE_REWRITE, "summary.md": "# Demonology — Summary\n\nA faithful overview of the book.", "quotes-check.md": "# Quotations check\n\nAll quotations verified." };
   const runs: RunOptions[] = [];
   const hist: Record<string, ResultHistory> = { "rewrite.md": { path: "rewrite.md", versions: [
     { n: 1, at: "2026-10-26T18:02:00Z", op: "Rewrite", bytes: 3000, words: 210 }, { n: 2, at: "2026-10-27T09:40:00Z", op: "Rewrite", bytes: 3100, words: 215 }], approval: null } };

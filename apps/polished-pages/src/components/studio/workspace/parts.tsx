@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle, ArrowLeft, BadgeCheck, BookOpen, Check, Columns2, Copy, Download, FileText, Globe, History, Languages, Layers, Library, Loader2, MessageSquare, MoreHorizontal,
-  PenLine, Plus, Quote, Rocket, ScanSearch, ScrollText, Search, ShieldAlert, Sparkles, Square, Wand2, Wrench,
+  PenLine, Plus, Quote, Rocket, ScanSearch, ScrollText, Search, ShieldAlert, SlidersHorizontal, Sparkles, Square, Wand2, Wrench,
 } from "lucide-react";
+import RewriteControlPanel from "./RewriteControlPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -163,13 +164,14 @@ export function LiveCard({ live, onStop }: { live: Live; onStop: () => void }) {
 
 // Results: main files first; by-products folded into named groups (as the Studio listed them before the redesign).
 const RESULT_GROUPS: { prefix: string; label: string }[] = [
-  { prefix: "rewrite/", label: "Rewritten chapters" }, { prefix: "volumes/", label: "Series volumes" }, { prefix: "planned/", label: "Planned books" },
+  { prefix: "rewrite/", label: "Rewritten chapters" }, { prefix: "rewrite-earlier-", label: "Earlier rewritten chapters" }, { prefix: "scanned/", label: "Scanned pages, as text" }, { prefix: "scanned-earlier-", label: "Earlier readings of scanned pages" }, { prefix: "volumes/", label: "Series volumes" }, { prefix: "planned/", label: "Planned books" },
   { prefix: "book/", label: "Book wizard" }, { prefix: "translation/", label: "Translated chapters" }, { prefix: "sections/", label: "Manuscript suggestions" },
 ];
 /** The project's results, newest first, with chapter files, volumes, wizard files and suggestions grouped. */
 export function ResultsList({ outputs, onOpen }: { outputs: StudioThread["outputs"]; onOpen: (p: string) => void }) {
   const sorted = [...outputs].sort((a, b) => b.modifiedAt.localeCompare(a.modifiedAt));
   const grouped = (p: string) => p === "series.json" || RESULT_GROUPS.some((g) => p.startsWith(g.prefix));
+  // (rewrite-earlier-<time>/: chapters set aside when a rewrite started from an approved plan.)
   const groups = RESULT_GROUPS.map((g) => ({ ...g, items: outputs.filter((o) => o.path.startsWith(g.prefix)).sort((a, b) => a.path.localeCompare(b.path)) })).filter((g) => g.items.length);
   return (
     <div className="space-y-1">
@@ -195,11 +197,14 @@ export function OutputRow({ path, bytes, at, onOpen, compact }: { path: string; 
 }
 
 
-export function ActionDialog({ action, thread, styles, onClose, onRun }: { action: DialogAction; thread: StudioThread; styles: string[]; onClose: () => void; onRun: (o: RunOptions) => void }) {
+export function ActionDialog({ action, thread, styles, onClose, onRun, rules, claudeCode = true }: { action: DialogAction; thread: StudioThread; styles: string[]; onClose: () => void; onRun: (o: RunOptions) => void;
+  /** The book's rules, the control panel's default terminology. */ rules?: string; /** The engine is Claude Code (approval mode and audits need it). */ claudeCode?: boolean }) {
   const [initial] = useState(() => { const t = pendingTarget, x = pendingOptions; setPendingTarget(null); return { target: t, options: x }; });
   const [target, setTarget] = useState<string>(initial.target ?? (thread.files.length ? "source" : thread.outputs[0]?.path ?? "source"));
   const [o, setO] = useState<RunOptions>({ length: action === "rewrite" ? "same" : "standard", keepStructure: true, keepVoice: true, addCitations: false, citationStyle: styles[0] ?? "APA 7", scope: "claims", ...(initial.options ?? {}) });
   const correcting = action === "rewrite" && Boolean(o.correct);
+  const [panel, setPanel] = useState(false);
+  const targetLabel = (v: string) => (v === "source" ? "My uploaded documents" : `Result · ${outputLabel(v)}`);
   const [sending, setSending] = useState(false);
   const set = (p: Partial<RunOptions>) => setO((x) => ({ ...x, ...p }));
   const meta = ACTIONS.find((a) => a.id === action)!;
@@ -236,6 +241,11 @@ export function ActionDialog({ action, thread, styles, onClose, onRun }: { actio
             </div>
           )}
           {action === "rewrite" && !correcting && (<>
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-[10px] border border-primary/25 bg-primary/5 px-3 py-2.5">
+              <span className="text-[13px]"><span className="font-medium">Book Rewrite Control Panel</span><span className="block text-[12px] text-muted-foreground">Tick the editorial operations, pick a preset (or your Demonology transformation instruction) and approval or autonomous mode; it writes the instructions.</span></span>
+              <Button size="sm" variant="outline" onClick={() => setPanel(true)}><SlidersHorizontal className="h-4 w-4" /> Open the control panel</Button>
+            </div>
+            {(o.approval || o.auditOnly) && <p className="rounded-[10px] bg-muted/50 px-3 py-2 text-[12.5px]">{o.auditOnly ? "Audit only: Claude checks the book and writes the reports; the prose is not rewritten." : "Approval mode: Claude analyses the book and proposes the new contents and plan, then stops. Open “Rewrite · plan for your approval” in Results and approve it to start the rewrite."}{!claudeCode && <span className="block text-[#B45309]">This needs Claude Code: switch the engine first.</span>}</p>}
             <div className="space-y-1.5">
               <Label htmlFor="ins">Your instructions <span className="text-destructive">*</span></Label>
               <Textarea id="ins" rows={7} value={o.instructions ?? ""} onChange={(e) => set({ instructions: e.target.value })} autoFocus
@@ -272,6 +282,9 @@ export function ActionDialog({ action, thread, styles, onClose, onRun }: { actio
           </Button>
         </DialogFooter>
       </DialogContent>
+      {panel && <RewriteControlPanel projectId={thread.id} defaults={{ title: thread.title === "Untitled project" ? "" : thread.title, terminology: rules }} sourceLabel={targetLabel(target)} claudeCode={claudeCode}
+        onClose={() => setPanel(false)}
+        onUse={(r) => { set({ instructions: r.instructions, keepStructure: r.keepStructure, approval: r.approval, auditOnly: r.auditOnly, ...(r.language ? { language: r.language } : {}), ...(r.audience ? { audience: r.audience } : {}) }); setPanel(false); }} />}
     </Dialog>
   );
 }
@@ -307,7 +320,7 @@ const libraryCopy = {
   set(t: string, p: string, id: string) { try { localStorage.setItem(this.key(t, p), id); } catch { /* storage blocked */ } },
 };
 
-export function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsTarget, check, onReview, reviewAt, onUseAsManuscript, onUseDesign }: {
+export function ResultViewer({ backend, threadId, path, projectTitle, onClose, onUseAsTarget, check, onReview, reviewAt, onUseAsManuscript, onUseDesign, onApprovePlan }: {
   backend: StudioBackend; threadId: string; path: string; projectTitle: string; onClose: () => void;
   /** Rewrite this result, or correct it with the editorial check's findings filled in. */
   onUseAsTarget: (p: string, o?: Partial<RunOptions>) => void;
@@ -319,6 +332,8 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
   onUseAsManuscript?: (text: string, label: string) => void;
   /** Lays the manuscript out to a saved design of the rebuilt book. */
   onUseDesign?: (raw: string) => void;
+  /** Approval mode: approve the proposed plan and start the rewrite from it. */
+  onApprovePlan?: () => void;
 }) {
   const { toast } = useToast();
   const [text, setText] = useState<string | null>(null);
@@ -353,6 +368,14 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
     finally { setSavingVersion(false); }
   };
 
+  // The plan waiting for approval can be changed first (§21); Claude's own proposal is kept beside it.
+  const [planSaving, setPlanSaving] = useState(false);
+  const savePlan = async () => {
+    setPlanSaving(true);
+    try { await backend.saveOutput(threadId, path, text ?? "", { op: "Plan edited by the owner" }); setEdited(false); toast({ title: "Plan saved", description: "Claude will follow your version. Its first proposal is kept as rewrite-plan.claude.md." }); return true; }
+    catch (e) { toast({ title: "The plan was not saved", description: e instanceof Error ? e.message : "", variant: "destructive" }); return false; }
+    finally { setPlanSaving(false); }
+  };
   const bookTitle = text ? titleOf(text, projectTitle) : projectTitle;
   const save = async () => {
     if (!text) return;
@@ -383,6 +406,8 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
     catch (e) { toast({ title: "Export failed", description: e instanceof Error ? e.message : "", variant: "destructive" }); }
     finally { setExporting(null); }
   };
+  // Word and EPUB exports show what the checks found first (§21), the same checks as Finish.
+  const [exportAsk, setExportAsk] = useState<BookFormat | null>(null);
   const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
   const isJson = path.endsWith(".json");
   const [checking, setChecking] = useState(false);
@@ -412,7 +437,7 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
   // A rewrite that came back very short, or that says the source couldn't be read, is not a book yet.
   const warning = !text || isJson ? null
     : /\b(could ?n[o']t|can ?not|unable to|was not able to) (read|open|decode|extract)\b|\b(garbled|unreadable|not readable|encoding (problem|issue|error))\b/i.test(text) ? "Claude says it couldn't read part of the source, so this may be incomplete."
-    : words < 300 && /book|rewrite|draft|manuscript/i.test(path + projectTitle) ? `Only ${words.toLocaleString()} words came back. The source file may not have been read properly: upload the original PDF or Word file and run it again.`
+    : words < 300 && (WHOLE_BOOK(path) || BOOK_RESULT(path)) ? `Only ${words.toLocaleString()} words came back. The source file may not have been read properly: upload the original PDF or Word file and run it again.`
     : null;
 
   return (
@@ -462,8 +487,10 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
           <div className="ml-auto flex gap-1">
             {checkable && <Button size="sm" variant={checking ? "secondary" : "outline"} className="rounded-full" onClick={() => view(checking ? "text" : "check")} aria-pressed={checking} aria-label={checking ? "Back to the text" : "Editorial check"}><ScanSearch className="h-4 w-4" /> {checking ? "Text" : "Check"}</Button>}
             {comparable && <Button size="sm" variant={comparing ? "secondary" : "outline"} className="rounded-full" onClick={() => view(comparing ? "text" : "compare")} aria-pressed={comparing} aria-label={comparing ? "Back to the text" : "Compare with original"}><Columns2 className="h-4 w-4" /> {comparing ? "Text" : "Compare"}</Button>}
-            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => { view("text"); setEditing((v) => !v); }}><PenLine className="h-4 w-4" /> {editing ? "Preview" : versioned ? "Edit" : "Edit before saving"}</Button>}
+            {!isJson && !savedId && <Button size="sm" variant={editing ? "secondary" : "outline"} className="rounded-full" disabled={!text} onClick={() => { view("text"); setEditing((v) => !v); }}><PenLine className="h-4 w-4" /> {editing ? "Preview" : versioned ? "Edit" : path === "rewrite-plan.md" ? "Edit the plan" : "Edit before saving"}</Button>}
             {versioned && history && <Button size="sm" variant={versionsOpen ? "secondary" : "outline"} className="rounded-full" onClick={() => view(versionsOpen ? "text" : "versions")} aria-pressed={versionsOpen} aria-label={versionsOpen ? "Back to the text" : `Versions (${history.versions.length})`}><History className="h-4 w-4" /> {versionsOpen ? "Text" : `Versions (${history.versions.length})`}</Button>}
+            {path === "rewrite-plan.md" && edited && <Button size="sm" variant="outline" className="rounded-full" disabled={!text || planSaving} onClick={() => void savePlan()}>{planSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Save the plan</Button>}
+            {path === "rewrite-plan.md" && onApprovePlan && <Button size="sm" className={`rounded-full ${GRADIENT}`} disabled={!text || planSaving} onClick={async () => { if (!window.confirm(`Approve this plan${edited ? " with your changes" : ""} and rewrite the whole book from it?\n\nClaude rewrites every chapter of the plan from your original, then integrates and audits the book. Your original is not changed.`)) return; if (edited && !(await savePlan())) return; onApprovePlan(); onClose(); }}><Check className="h-4 w-4" /> Approve this plan and rewrite the book</Button>}
             {path === "series-plan.md" && <SeriesActions backend={backend} threadId={threadId} onDone={onClose} />}
             {path === "voice-profile.md" && <Button size="sm" variant="ghost" disabled={!text} onClick={async () => { try { await backend.saveVoice(text ?? ""); toast({ title: "Saved as your voice profile", description: "“In my voice” and “Rewrite in my voice” now follow it." }); } catch (e) { toast({ title: "Couldn't save", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }}><PenLine className="h-4 w-4" /> Use as my voice profile</Button>}
             <DropdownMenu>
@@ -473,14 +500,32 @@ export function ResultViewer({ backend, threadId, path, projectTitle, onClose, o
                 <DropdownMenuItem className="gap-2" onSelect={() => { navigator.clipboard.writeText(text ?? ""); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /> Copy</DropdownMenuItem>
                 {versioned && onReview && <DropdownMenuItem className="gap-2" onSelect={() => onReview(path)}><ScanSearch className="h-4 w-4" /> Editorial review by Claude (judgement)</DropdownMenuItem>}
                 <DropdownMenuItem className="gap-2" onSelect={() => download("md")}><Download className="h-4 w-4" /> Download Markdown (.md)</DropdownMenuItem>
-                {!isJson && <DropdownMenuItem className="gap-2" disabled={exporting !== null} onSelect={() => download("docx")}><FileText className="h-4 w-4" /> {exporting === "docx" ? "Exporting Word…" : "Export Word (.docx)"}</DropdownMenuItem>}
-                {!isJson && <DropdownMenuItem className="gap-2" disabled={exporting !== null} onSelect={() => download("epub")}><BookOpen className="h-4 w-4" /> {exporting === "epub" ? "Exporting EPUB…" : "Export EPUB"}</DropdownMenuItem>}
+                {!isJson && <DropdownMenuItem className="gap-2" disabled={exporting !== null} onSelect={() => setExportAsk("docx")}><FileText className="h-4 w-4" /> {exporting === "docx" ? "Exporting Word…" : "Export Word (.docx)"}</DropdownMenuItem>}
+                {!isJson && <DropdownMenuItem className="gap-2" disabled={exporting !== null} onSelect={() => setExportAsk("epub")}><BookOpen className="h-4 w-4" /> {exporting === "epub" ? "Exporting EPUB…" : "Export EPUB"}</DropdownMenuItem>}
                 {versioned && !approvedNow && <p className="px-2 py-1.5 text-[11.5px] text-muted-foreground">Exports are named “draft” until this version is approved.</p>}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </DialogContent>
+      {exportAsk && text && (
+        <Dialog open onOpenChange={(v) => { if (!v) setExportAsk(null); }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader><DialogTitle>Export {exportAsk === "docx" ? "Word (.docx)" : "EPUB"}</DialogTitle><DialogDescription>“{bookTitle}”, {words.toLocaleString()} words. What the checks found before you export:</DialogDescription></DialogHeader>
+            <ul className="space-y-1.5 text-[13.5px]">
+              {warning && <li className="flex gap-2 text-amber-800 dark:text-amber-200"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />{warning}</li>}
+              {audit ? <li className="flex gap-2">{audit.blockers ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" /> : <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />}{audit.blockers ? `The editorial check found ${audit.blockers} ${audit.blockers === 1 ? "problem" : "problems"} to fix before publishing.` : "The editorial check found nothing that blocks publishing."}{audit.reviews ? ` ${audit.reviews} for your decision.` : ""}</li>
+                : <li className="text-muted-foreground">The editorial check runs on whole books of 200 words or more.</li>}
+              {versioned && <li className="flex gap-2">{approvedNow ? <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /> : <History className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />}{approvedNow ? `Version ${latest?.n} is approved for publication.` : "This version is not approved for publication, so the file is named as a draft."}</li>}
+              {edited && <li className="text-muted-foreground">Your unsaved edits are included in the export.</li>}
+            </ul>
+            <DialogFooter className="gap-2 sm:gap-0">
+              {audit && audit.blockers > 0 && <Button variant="ghost" onClick={() => { setExportAsk(null); view("check"); }}>See the check</Button>}
+              <Button className={`rounded-full ${GRADIENT}`} onClick={() => { const f = exportAsk; setExportAsk(null); void download(f); }}>{audit?.blockers || warning ? "Export anyway" : "Export"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
       {approving && text && latest && <ApproveDialog text={text} rules={check?.rules} original={check && REWRITE_RESULT(path) ? check.original : undefined} version={latest.n}
         dismissedKey={`studio.review.${threadId}.${path}`} aiReview={aiReview} onReview={onReview ? () => { setApproving(false); onReview(path); } : undefined} onClose={() => setApproving(false)}
         onApprove={async (summary) => { try { const h = await backend.approve(threadId, path, { version: latest.n, summary }); setHistory(h); setApproving(false); toast({ title: `Version ${latest.n} approved for publication`, description: "Recorded with your name and the time. It lapses if a newer version is saved." }); } catch (e) { toast({ title: "Not approved", description: e instanceof Error ? e.message : "", variant: "destructive" }); } }} />}

@@ -179,3 +179,7 @@ export function authorshipNotes(m: Manuscript): string {
   const total = m.sections.reduce((n, s) => n + words(s.body), 0);
   return `# Authorship notes: ${m.title || "Untitled book"}\n\n${total.toLocaleString()} words in ${m.sections.length} sections.\n\nAI assistance used while writing (Claude), section by section:\n\n| Date | Section | What Claude did | Engine | Outcome |\n| --- | --- | --- | --- | --- |\n${rows.join("\n") || "| — | — | none | — | — |"}\n`;
 }
+
+/** A chapter this long is better split (DESIGN-SPEC.md §21): Claude works on it less reliably and readers expect shorter chapters. */
+export const LARGE_CHAPTER_WORDS = 15_000;
+export const largeSections = (m: Manuscript) => m.sections.filter((s) => words(s.body) > LARGE_CHAPTER_WORDS);
