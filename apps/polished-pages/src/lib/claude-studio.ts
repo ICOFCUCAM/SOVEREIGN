@@ -19,7 +19,7 @@ export interface StudioOutput { path: string; bytes: number; modifiedAt: string 
 export interface StudioMessage { id: string; role: "user" | "assistant"; engine?: "claude-code" | "api"; action: StudioAction; text: string; at: string; jobId: string; status?: "done" | "failed" | "cancelled"; outputs?: string[] }
 export interface StudioThread { id: string; title: string; createdAt: string; updatedAt: string; sessionId: string | null; files: StudioFile[]; messages: StudioMessage[]; outputs: StudioOutput[]; runningJobId?: string }
 export interface StudioThreadSummary { id: string; title: string; createdAt: string; updatedAt: string; files: number; outputs: number }
-export interface StudioJob { id: string; threadId: string; action: StudioAction; label: string; output: string | null; status: "running" | "done" | "failed" | "cancelled"; startedAt: string; endedAt: string | null; error: string | null }
+export interface StudioJob { id: string; threadId: string; action: StudioAction; label: string; output: string | null; status: "queued" | "running" | "done" | "failed" | "cancelled"; startedAt: string; endedAt: string | null; error: string | null }
 export interface ClaudeStatus { state: "ok" | "unknown" | "signed_out" | "limit" | "not_configured"; at: string | null; resetsAt: string | null; message: string | null }
 export interface RunnerInfo { level: number; features: string[]; poppler: boolean; node?: string }
 export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; claude?: ClaudeStatus; busy: StudioJob | null; citationStyles: string[]; /** Absent on a runner older than level 3. */ runner?: RunnerInfo }

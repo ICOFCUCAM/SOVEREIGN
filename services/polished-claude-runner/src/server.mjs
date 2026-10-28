@@ -48,6 +48,25 @@ export function createServer(cfg = loadConfig(), deps = {}) {
   const home = path.join(cfg.dataDir, "home");
   const jobs = new Map(); // id → job (kept in memory for streaming; logs on disk)
   let running = null;
+  // Jobs asked for while Claude is busy wait here, in order, and start when it is free (DESIGN-SPEC.md §21).
+  const queue = [];
+  const QUEUE_MAX = 12;
+  const tellQueue = () => queue.forEach((q, i) => emit(q.job, { type: "status", status: "queued", line: i === 0 ? "Next: waiting for the job before it to finish." : `Waiting: ${i} ${i === 1 ? "job" : "jobs"} ahead of this one.` }));
+  async function nextInQueue() {
+    while (!running && queue.length) {
+      const q = queue.shift();
+      tellQueue();
+      if (q.job.cancelled) continue;
+      const thread = await store.read(q.threadId);
+      const r = thread ? await startRun(thread, q.action, q.options, q.job).catch((e) => ({ status: 500, error: e?.message || "Couldn't start." })) : { status: 404, error: "The project is gone." };
+      if (r.status !== 202) {
+        q.job.status = "failed"; q.job.error = r.error; q.job.endedAt = new Date().toISOString();
+        emit(q.job, { type: "done", status: "failed", error: r.error, outputs: [], output: q.job.output });
+        for (const s of q.job.subscribers) s.end();
+        q.job.subscribers.clear();
+      }
+    }
+  }
 
   // Whether the owner's Claude Code worked last time: the page's engine switch
   // reads this to decide between Claude Code and the API.
@@ -131,7 +150,8 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     }
   }
 
-  async function startRun(thread, action, options) {
+  async function startRun(thread, action, options, queued = null) {
+    const asked = options;
     if (action === "section") {
       const m = await store.readManuscript(thread.id);
       const i = m?.sections?.findIndex((x) => x.id === options?.sectionId) ?? -1;
@@ -160,7 +180,14 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     if (action === "tool" && options?.tool === "compare") {
       for (const k of ["a", "b"]) if (options[k] && !inside(store.workDir(thread.id), options[k])) return { status: 400, error: "Pick files from this project to compare." };
     }
-    if (running) return { status: 409, error: "Claude is already working on something. Wait for it to finish or stop it." };
+    if (running) {
+      if (queue.length >= QUEUE_MAX) return { status: 409, error: `Claude already has ${queue.length} jobs waiting. Wait for some to finish.` };
+      const job = { id: randomUUID(), threadId: thread.id, action, label: spec.title || LABEL[action], output: spec.output || null, status: "queued", startedAt: new Date().toISOString(), events: [], subscribers: new Set(), text: [] };
+      jobs.set(job.id, job);
+      queue.push({ job, threadId: thread.id, action, options: asked });
+      tellQueue();
+      return { status: 202, job: publicJob(job) };
+    }
     if (!cfg.claudeToken) return { status: 503, error: "Claude Code is not connected yet: set CLAUDE_CODE_OAUTH_TOKEN on the runner." };
     if (tokenShape(cfg.claudeToken) === "api-key") return { status: 503, error: TOKEN_HELP["api-key"] };
 
@@ -181,7 +208,8 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     }
     await fs.mkdir(home, { recursive: true });
 
-    const job = { id: randomUUID(), threadId: thread.id, action, label: spec.title || LABEL[action], output: spec.output || null, status: "running", startedAt: new Date().toISOString(), events: [], subscribers: new Set(), text: [] };
+    const job = queued ?? { id: randomUUID(), threadId: thread.id, action, label: spec.title || LABEL[action], output: spec.output || null, events: [], subscribers: new Set(), text: [] };
+    Object.assign(job, { status: "running", startedAt: new Date().toISOString(), label: spec.title || LABEL[action], output: spec.output || null });
     jobs.set(job.id, job);
     running = job;
 
@@ -239,6 +267,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
       running = null;
       // Finished jobs stay replayable from disk; free the memory after a while.
       setTimeout(() => jobs.delete(job.id), 10 * 60_000).unref();
+      void nextInQueue();
     });
     return { status: 202, job: publicJob(job) };
   }
@@ -258,7 +287,7 @@ export function createServer(cfg = loadConfig(), deps = {}) {
     res.writeHead(200, { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-store", Connection: "keep-alive", "X-Accel-Buffering": "no" });
     if (job) {
       for (const e of job.events) res.write(`data: ${JSON.stringify(e)}\n\n`);
-      if (job.status !== "running") return res.end();
+      if (job.status !== "running" && job.status !== "queued") return res.end();
       job.subscribers.add(res);
       const beat = setInterval(() => res.write(": keep-alive\n\n"), 20_000);
       req.on("close", () => { clearInterval(beat); job.subscribers.delete(res); });
@@ -432,6 +461,16 @@ export function createServer(cfg = loadConfig(), deps = {}) {
         return stream(req, res, id, threadId);
       }
       if (sub === "cancel" && req.method === "POST") {
+        // A waiting job just leaves the queue.
+        if (job?.status === "queued") {
+          job.cancelled = true; job.status = "cancelled"; job.endedAt = new Date().toISOString();
+          const at = queue.findIndex((q) => q.job === job); if (at >= 0) queue.splice(at, 1);
+          emit(job, { type: "done", status: "cancelled", error: null, outputs: [], output: job.output });
+          for (const s of job.subscribers) s.end();
+          job.subscribers.clear();
+          tellQueue();
+          return send(res, 202, { job: publicJob(job) });
+        }
         if (!job || job.status !== "running") return fail(res, 409, "Nothing is running.");
         job.cancelled = true; job.stop?.();
         emit(job, { type: "status", status: "stopping", line: "Stopping…" });

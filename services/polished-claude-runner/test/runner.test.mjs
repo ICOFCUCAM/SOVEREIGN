@@ -137,16 +137,25 @@ test("projects, uploads, summarise, rewrite with chapter merge, chat resume, out
   assert.equal((await call(`/v1/threads/${thread.id}/outputs/..%2F..%2Fthread.json`)).status, 404);
 });
 
-test("one run at a time, and a running job can be stopped", async () => {
+test("one run at a time: the next waits in the queue, a waiting job can be cancelled, a running job can be stopped", async () => {
   const { thread } = await (await call("/v1/threads", { method: "POST", body: { title: "Slow" } })).json();
   const { job } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "SLOW please" } } })).json();
-  const busy = await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "hello" } } });
-  assert.equal(busy.status, 409);
+  const waiting = await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "hello" } } });
+  assert.equal(waiting.status, 202);
+  const next = (await waiting.json()).job;
+  assert.equal(next.status, "queued");
+  const { job: dropped } = await (await call(`/v1/threads/${thread.id}/run`, { method: "POST", body: { action: "chat", options: { message: "never mind" } } })).json();
+  const droppedEvents = streamUntilDone(dropped.id, thread.id);
+  assert.equal((await call(`/v1/jobs/${dropped.id}/cancel`, { method: "POST" })).status, 202);
+  assert.equal((await droppedEvents).at(-1).status, "cancelled");
   assert.equal((await call(`/v1/threads/${thread.id}`, { method: "DELETE" })).status, 409);
+  const nextEvents = streamUntilDone(next.id, thread.id);
   const pending = streamUntilDone(job.id, thread.id);
   assert.equal((await call(`/v1/jobs/${job.id}/cancel`, { method: "POST" })).status, 202);
-  const events = await pending;
-  assert.equal(events.at(-1).status, "cancelled");
+  assert.equal((await pending).at(-1).status, "cancelled");
+  const ev = await nextEvents;
+  assert.ok(ev.some((e) => e.status === "queued"), "the waiting job said it was waiting");
+  assert.equal(ev.at(-1).status, "done", "then it ran");
   assert.equal((await call(`/v1/threads/${thread.id}`, { method: "DELETE" })).status, 200);
 });
 
