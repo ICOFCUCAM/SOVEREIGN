@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { frontMatterChecks } from "./front-matter-check";
+import { frontMatterChecks, putInOrder } from "./front-matter-check";
 import type { Manuscript } from "./manuscript";
 
 const S = "This sentence about the oneness of Yahuah is long enough to count as one.";
@@ -34,5 +34,19 @@ describe("front matter check before the book is complete", () => {
   it("ignores a page the author left out", () => {
     const m = base(); m.sections.push({ id: "d", kind: "dedication", title: "Dedication", body: "", omit: true });
     expect(failing(m)).toEqual([]);
+  });
+});
+
+describe("putting the book in order", () => {
+  it("moves front and back matter to their places, keeps the chapters' order, and the check then passes", () => {
+    const m = base();
+    m.sections = [m.sections[4], m.sections[2], m.sections[0], m.sections[3], m.sections[1]];
+    const fixed = putInOrder(m);
+    expect(fixed.sections.map((s) => s.id)).toEqual(["p", "i", "1", "2", "g"]);
+    expect(failing(fixed)).toEqual([]);
+  });
+  it("says when a given ISBN isn't a real one", () => {
+    expect(failing({ ...base(), meta: { isbn: "978-0-00-000000-1" } }).join(" ")).toMatch(/isn't a valid ISBN/);
+    expect(failing({ ...base(), meta: { isbn: "978-0-306-40615-7" } })).toEqual([]);
   });
 });

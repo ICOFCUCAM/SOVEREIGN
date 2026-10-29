@@ -21,9 +21,12 @@ export interface MatterStep {
   standard?: boolean;
   /** Claude may draft it from the book itself when the author writes nothing (no personal facts needed). */
   fromBook?: boolean;
+  /** Words that are someone else's and stay exactly as given (endorsements): no rewrite. */
+  verbatim?: boolean;
 }
 
 export const MATTER_STEPS: MatterStep[] = [
+  { kind: "praise", group: "front", ask: "Endorsements you have received, word for word, each followed by a line with the person's name and role (start it with a dash). They open the book, before the title. Leave this page out until you have them.", hint: "“A clear and careful study…”\n— Name, role", verbatim: true },
   { kind: "half-title", group: "front", ask: "The book's title alone, on the first page. Nothing to write: switch it on or off.", hint: "", auto: true, standard: true },
   { kind: "title-page", group: "front", ask: "The title, subtitle and author as they should be printed, and the publisher if there is one.", hint: "", facts: "title", standard: true },
   { kind: "copyright", group: "front", ask: "The copyright facts. The standard rights wording is added for you; leave a field empty when you don't have it yet.", hint: "", facts: "copyright", standard: true },
@@ -42,6 +45,7 @@ export const MATTER_STEPS: MatterStep[] = [
   { kind: "discussion", group: "back", ask: "Questions for study groups, chapter by chapter.", hint: "", fromBook: true },
   { kind: "glossary", group: "back", ask: "The terms the book uses, each with its meaning as the book uses it.", hint: "e.g. Shema: the confession of Deuteronomy 6:4…", fromBook: true },
   { kind: "bibliography", group: "back", ask: "The works the book quotes or relies on.", hint: "", fromBook: true },
+  { kind: "scripture-index", group: "back", ask: "Every scripture reference in the book (book, chapter and verse), with the pages it is printed on, made when the book is set. Nothing to write: switch it on or off. (An index you wrote yourself is kept as you wrote it.)", hint: "", auto: true },
   { kind: "about-author", group: "back", ask: "About you: your work, background and where readers can find you. Only what you write here is used.", hint: "e.g. Teacher of the scriptures for twenty years at…, lives in…", standard: true },
   { kind: "also-by", group: "back", ask: "Your other books, one per line.", hint: "" },
   { kind: "resources", group: "back", ask: "Where readers can go next: website, ministry, newsletter, contact.", hint: "" },

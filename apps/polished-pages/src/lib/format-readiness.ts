@@ -6,9 +6,10 @@ import { kindDef, words, type Manuscript } from "@/lib/manuscript";
 import { SPINE_TEXT_MIN_PAGES } from "@/lib/cover-design";
 import { coverSpec, getTrim } from "@/lib/print-sizes";
 import { frontMatterChecks } from "@/lib/front-matter-check";
+import { joinedWords, vocabulary } from "@/lib/joined-words";
 
 export type FormatId = "epub" | "print" | "paperback" | "audiobook";
-export type FixTarget = "cover" | "export" | "production" | "audio" | "section" | "check";
+export type FixTarget = "cover" | "export" | "production" | "audio" | "section" | "check" | "order";
 export interface FormatCheck { ok: boolean; level: "required" | "advised"; text: string; fix?: FixTarget; sectionId?: string }
 export interface FormatReport { id: FormatId; label: string; line: string; facts: string[]; checks: FormatCheck[]; ready: boolean }
 
@@ -90,6 +91,13 @@ export function formatReport(id: FormatId, m: Manuscript, opts: { cover: boolean
 
   // Front and back matter in order, none twice, none empty, chapters in sequence (§22).
   if (id !== "audiobook") for (const c of frontMatterChecks(m)) add(c);
+  // Words the import joined ("Yahushaand"): for the author to look at, in Write (§22).
+  {
+    const vocab = vocabulary(m.sections.map((s) => s.body).join("\n"));
+    const joined = m.sections.map((s) => ({ s, n: joinedWords(s.body, vocab).length })).filter((x) => x.n);
+    const total = joined.reduce((a, x) => a + x.n, 0);
+    if (total) add({ ok: false, level: "advised", text: `${plural(total, "word looks", "words look")} joined by the import (a space lost at a line break)`, fix: "section", sectionId: joined[0].s.id });
+  }
 
   if (id === "audiobook") {
     const hours = totalWords / WORDS_PER_HOUR;

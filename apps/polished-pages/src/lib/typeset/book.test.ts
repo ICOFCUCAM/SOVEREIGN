@@ -202,3 +202,84 @@ describe("front matter conventions", () => {
     expect(ch2).not.toMatch(/Chapter 2/);
   }, 60_000);
 });
+
+describe("emphasis inside paragraphs", () => {
+  it("sets **bold** and *italic* words in their own faces, with no asterisks printed", async () => {
+    const md = `# Glossary\n\n**Shema**: the confession of *Deuteronomy 6:4*, recited _daily_ by Israel.\n\nA plain paragraph with 2 * 3 = 6 and file_name_here left as they are.`;
+    const { bytes } = await typesetBook(md, { title: "B", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: bytes.slice(), useSystemFonts: false }).promise;
+    const items: { str: string; font: string }[] = [];
+    for (let n = 1; n <= doc.numPages; n++) for (const x of (await (await doc.getPage(n)).getTextContent()).items) if ("str" in x && x.str.trim()) items.push({ str: x.str, font: x.fontName });
+    const fontOf = (w: string) => items.find((x) => x.str.includes(w))?.font;
+    const all = items.map((x) => x.str).join(" ");
+    expect(all).not.toMatch(/\*\*|\*Deut|_daily_/);
+    expect(fontOf("Shema")).not.toBe(fontOf("confession"));
+    expect(fontOf("Deuteronomy")).not.toBe(fontOf("confession"));
+    expect(fontOf("daily")).toBe(fontOf("Deuteronomy"));
+    expect(fontOf("Deuteronomy")).not.toBe(fontOf("Shema"));
+    expect(all).toMatch(/2 \* 3 = 6/);
+    expect(all).toMatch(/file_name_here/);
+  }, 60_000);
+});
+
+describe("praise for the book", () => {
+  it("opens the book with the endorsements, word for word, before the half-title and title page", async () => {
+    const md = `# The Oneness of Yahuah\n\n## Praise for The Oneness of Yahuah {praise}\n\n“A clear and careful study of the scriptures.”\n\n— A. Reader, Pastor\n\n## The Oneness of Yahuah\n\n## Introduction\n\nText of the introduction.`;
+    const r = await typesetBook(md, { title: "The Oneness of Yahuah", author: "A. Author", trim: getTrim("6x9"), layout: "ingram", fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: r.bytes.slice(), useSystemFonts: false }).promise;
+    const pages: string[] = [];
+    for (let n = 1; n <= doc.numPages; n++) pages.push((await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ").replace(/\s+/g, " "));
+    expect(pages[0]).toMatch(/A clear and careful study of the scriptures/);
+    expect(pages[0]).toMatch(/A\. Reader, Pastor/);
+    const title = pages.findIndex((t) => /A\. Author/.test(t));
+    expect(title).toBeGreaterThan(1);
+    expect(pages[title - 2]).toMatch(/The Oneness of Yahuah/); // the half-title, a recto before the title page
+    expect(r.sections.map((s) => s.title)).not.toContain("Praise for The Oneness of Yahuah");
+  }, 60_000);
+});
+
+describe("index of scripture", () => {
+  it("lists every chapter-and-verse reference by book in canonical order, with the pages it is printed on", async () => {
+    const filler = Array.from({ length: 30 }, () => "Both testaments confess that Yahuah is one, and Israel was called to hear and to obey him.").join("\n\n");
+    const md = `# Introduction\n\nAs Deuteronomy 6:4 says, Yahuah is one; compare Mark 12:29.\n\n# One Yahuah\n\n${filler}\n\nThe Shema (Deut. 6:4) and Isaiah 45:5-6 agree, and Genesis 1:1 opens the canon.\n\n# Index of Scripture {scripture-index}`;
+    const r = await typesetBook(md, { title: "B", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: r.bytes.slice(), useSystemFonts: false }).promise;
+    const pages: string[] = [];
+    for (let n = 1; n <= doc.numPages; n++) pages.push((await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ").replace(/\s+/g, " "));
+    const at = r.sections.find((s) => s.title === "Index of Scripture")!.page;
+    const index = pages.slice(at - 1).join(" ");
+    const order = ["Genesis", "Deuteronomy", "Isaiah", "Mark"].map((b) => index.indexOf(b));
+    expect(order.every((x, i) => x >= 0 && (i === 0 || x > order[i - 1]))).toBe(true);
+    const intro = r.folios[r.sections.find((s) => s.title === "Introduction")!.page - 1];
+    const later = pages.findIndex((t, i) => i < at - 1 && /Deut\. 6:4/.test(t));
+    expect(index).toMatch(new RegExp(`6:4\\s+${intro}, ${r.folios[later]}`));
+    expect(index).toMatch(/45:5–6/);
+  }, 60_000);
+});
+
+describe("short last pages", () => {
+  it("reports a chapter that ends with only a line or two on its last page", async () => {
+    const line = "Both testaments confess that Yahuah is one, and Israel was called to hear and to obey him always.";
+    let found: { title: string; lines: number }[] = [];
+    // Grow the chapter a sentence at a time until its last page holds a single short line.
+    for (let k = 20; k < 60 && !found.length; k++) {
+      const md = `# One Yahuah\n\n${Array.from({ length: k }, () => line).join("\n\n")}\n\n# The Nature of Yahuah\n\nText.`;
+      const r = await typesetBook(md, { title: "B", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+      found = r.runts;
+    }
+    expect(found[0]).toMatchObject({ title: "One Yahuah" });
+    expect(found[0].lines).toBeLessThanOrEqual(2);
+  }, 120_000);
+});
+
+describe("where page 1 is", () => {
+  it("can start Arabic numbering at Chapter 1, the Introduction then numbered in Roman", async () => {
+    const md = `# Introduction\n\nIntro text.\n\n# One Yahuah\n\nChapter text.`;
+    const r = await typesetBook(md, { title: "B", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026, arabicFrom: "chapter" });
+    expect(r.folios[r.sections.find((s) => s.title === "Introduction")!.page - 1]).toMatch(/^[ivx]+$/);
+    expect(r.folios[r.sections.find((s) => s.title === "One Yahuah")!.page - 1]).toBe("1");
+  }, 60_000);
+});

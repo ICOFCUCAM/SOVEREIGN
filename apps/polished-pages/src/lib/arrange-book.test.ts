@@ -72,7 +72,7 @@ describe("conventional order", () => {
   it("recognises back matter headings in the book's own list", () => {
     const text = `A Book\nContents\n1. First Things\nAppendix A: Hebrew Names\nGlossary of Terms\nScripture Index\nAbout the Author\n1. First Things\nThe opening words of the first chapter are here and they run on for a while.\nAppendix A: Hebrew Names\nThe names in Hebrew with their meanings are set out in the table below this line.\nGlossary of Terms\nAtonement: the reconciliation of the people with Yahuah through the offering made.\nScripture Index\nGenesis 1:1 appears in the first chapter and again in the second one of this book.\nAbout the Author\nThe author has taught the scriptures for many years in the church and beyond it.`;
     const a = arrangeFromContents(text)!;
-    expect(a.plan.sections.map((s) => s.kind)).toEqual(["chapter", "appendix", "glossary", "index", "about-author"]);
+    expect(a.plan.sections.map((s) => s.kind)).toEqual(["chapter", "appendix", "glossary", "scripture-index", "about-author"]);
   });
 });
 

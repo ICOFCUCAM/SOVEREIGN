@@ -20,6 +20,7 @@ export interface SectionKindDef {
 
 export const SECTION_KINDS: SectionKindDef[] = [
   // Front matter, in conventional order
+  { kind: "praise", label: "Praise for the book", group: "front", single: true, guidance: "Endorsements the author has received, word for word, each with the name and role of the person who gave it. Never write or improve an endorsement." },
   { kind: "half-title", label: "Half-title page", group: "front", single: true, guidance: "The book's title alone, on the page before the title page. Nothing to write: the layout sets it." },
   { kind: "title-page", label: "Title page", group: "front", single: true, guidance: "The book's title, subtitle and author name only, centred conventions handled by layout." },
   { kind: "copyright", label: "Copyright page", group: "front", single: true, guidance: "Standard copyright page: © year and author, all rights reserved notice, scripture permission notices for any Bible translations quoted (use the publishers' standard wording with [placeholders] to confirm), ISBN [placeholder], publisher [placeholder], edition, a short disclaimer if appropriate. Never invent an ISBN." },
@@ -43,6 +44,7 @@ export const SECTION_KINDS: SectionKindDef[] = [
   { kind: "glossary", label: "Glossary", group: "back", single: true, wholeBook: true, guidance: "Alphabetical list of the specialised terms the book uses, each defined in one or two sentences as the book uses it." },
   { kind: "notes", label: "Notes", group: "back", single: true, wholeBook: true, guidance: "Endnotes grouped by chapter, gathered from the citations and references in the text, numbered in order." },
   { kind: "bibliography", label: "Bibliography", group: "back", single: true, wholeBook: true, guidance: "Every work cited or quoted in the manuscript, in the owner's chosen citation style, alphabetised. Include only sources that actually appear in the text or that you verified; mark incomplete details [check]." },
+  { kind: "scripture-index", label: "Index of scripture", group: "back", single: true, guidance: "Made from the scripture references in the text, by book, chapter and verse, with the pages they are on. Nothing to write." },
   { kind: "index", label: "Index", group: "back", single: true, wholeBook: true, guidance: "Back-of-book index of names, places, subjects, terms and scripture references, with chapter numbers (page numbers depend on layout), sub-entries and see-also links." },
   { kind: "about-author", label: "About the author", group: "back", single: true, wholeBook: true, guidance: "A 120–200-word third-person bio. Use only facts the owner has given; everything else as [placeholders]." },
   { kind: "also-by", label: "Also by the author", group: "back", single: true, guidance: "A list of the author's other books with [placeholders] for titles the owner will fill in." },
@@ -172,6 +174,11 @@ export function compile(m: Manuscript, opts: { contents?: boolean } = {}): strin
     // The title and copyright pages are set from the book's details (bookFacts), so they appear once.
     if (s.kind === "title-page" || s.kind === "copyright") continue;
     // A dedication or epigraph is a page of its own: the words alone, no heading, not in the contents.
+    // Endorsements open the book, before the half-title (the typesetter sets them there).
+    // The index of scripture is made by the typesetter from the references in the text, with their pages.
+    // An index the author wrote is kept as written; an empty one is made from the text.
+    if (s.kind === "scripture-index" && !s.body.trim()) { out.push(`## ${s.title || "Index of Scripture"} {scripture-index}`); continue; }
+    if (s.kind === "praise") { if (s.body.trim()) out.push(`## Praise for ${m.title || "this book"} {praise}\n\n${s.body.trim()}`); continue; }
     if (s.kind === "dedication" || s.kind === "epigraph") { if (s.body.trim()) out.push(`## ${s.title} {display}\n\n${s.body.trim()}`); continue; }
     // The half-title page is the title alone (the typesetter sets it before the title page).
     if (s.kind === "half-title") { out.push(`## ${m.title || "Untitled book"}`); continue; }

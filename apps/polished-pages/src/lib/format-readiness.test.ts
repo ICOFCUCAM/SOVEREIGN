@@ -32,7 +32,7 @@ describe("format readiness", () => {
     const thin = formatReport("paperback", book({}, "A few words."), { cover: true });
     expect(thin.checks.find((c) => c.text.includes(`at least ${MIN_PAPERBACK_PAGES}`))?.ok).toBe(false);
     expect(thin.facts.some((f) => /No spine text below 80 pages/.test(f))).toBe(true);
-    const r = formatReport("paperback", book({ meta: { isbn: "978-1-23", trimSize: "6x9", pageCount: "300", paper: "Cream" } }), { cover: true });
+    const r = formatReport("paperback", book({ meta: { isbn: "978-0-306-40615-7", trimSize: "6x9", pageCount: "300", paper: "Cream" } }), { cover: true });
     expect(r.ready).toBe(true);
     expect(r.facts.find((f) => f.startsWith("Spine"))).toBe("Spine 19.1 mm on cream paper; full wrap 13.00 × 9.25 in with bleed.");
     expect(r.facts).toContain("Spine text allowed.");

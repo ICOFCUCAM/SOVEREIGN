@@ -13,7 +13,7 @@ describe("front and back matter, page by page", () => {
   });
   it("goes through the pages in the order a book prints them, front then back", () => {
     const k = MATTER_STEPS.map((s) => s.kind);
-    expect(k.slice(0, 3)).toEqual(["half-title", "title-page", "copyright"]);
+    expect(k.slice(0, 4)).toEqual(["praise", "half-title", "title-page", "copyright"]);
     expect(k.indexOf("dedication")).toBeLessThan(k.indexOf("preface"));
     expect(k.indexOf("contents")).toBeLessThan(k.indexOf("introduction"));
     expect(k.indexOf("introduction")).toBeLessThan(k.indexOf("conclusion"));

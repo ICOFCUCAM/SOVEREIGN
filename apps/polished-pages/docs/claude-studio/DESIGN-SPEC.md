@@ -400,4 +400,15 @@ Owner's brief: "Review and implement a complete, professionally structured front
 - **Checked before the book is complete.** In Finish readiness (print, paperback, EPUB) and beside the pages in the guide: front matter, chapters and back matter in the usual order; no page twice; no included page empty or with something still to fill in; title and author; the Preface not repeating the Introduction; the Introduction followed by Chapter 1 and chapter titles that carry a number matching their place. The contents are made from the headings, so they always match.
 - [x] Implemented: arrange from contents, conventional order, page-by-page guide (both engines), typesetter front matter, Roman folios, contents levels and numbers, page-design fixes, front matter checks.
 - [x] Tested: `arrange-book.test.ts`, `matter-guide.test.ts` (same prompt on both engines, order, status, setting and leaving out pages), `MatterGuide.test.tsx`, `manuscript.test.ts` (copyright once, omitted pages, display pages), `front-matter-check.test.ts`, typesetter "front matter conventions"; runner "front and back matter".
-- [ ] Not yet: inline bold and italic in the typeset text (they are set as plain text today); a choice in Page design of where Arabic numbering starts and of the contents depth (defaults: the Introduction; chapters only).
+- **The ten further upgrades** (owner: "build them", 29 October 2026):
+  1. Bold and italic inside paragraphs are set in their own faces in the print interior (italic inside italic text is set roman); a definition ("**Term**: meaning") starts at the margin.
+  2. Page design: "Page 1 is" the Introduction or Chapter 1, and "Contents list" chapters or chapters and sections; used by the Book page and every export.
+  3. "Put them in order" (Finish readiness and the guide) moves the front and back matter to their usual places; the chapters keep their order; Undo puts it back.
+  4. One ISBN for the book: the guide, the copyright page and the cover's barcode share it (changed on the cover, it changes for the book); the guide and Finish say when it isn't a valid ISBN.
+  5. Praise for the book: endorsements word for word (never rewritten), set before the half-title with each attribution to the right.
+  6. The EPUB has the same front matter as the print book: endorsements, title page, copyright page, dedication and epigraph as pages of their own, a linked contents page, chapter numbers, block quotes, figures, footnotes as linked notes, and no markers.
+  7. Index of scripture: every chapter-and-verse reference, by book in canonical order, with the pages it is printed on (in the EPUB, links to its chapters); an index the author wrote is kept as written.
+  8. Short last pages: the Book page says which chapters end with only a line or two on their last page.
+  9. Words joined by the import ("Yahushaand"): shown in Write for review, each with "Fix", and in Finish readiness; nothing changes until the author agrees.
+  10. The copyright page previewed beside its fields, from the same lines the print interior and the EPUB use.
+- [x] Tested: typesetter "emphasis inside paragraphs", "praise for the book", "index of scripture", "short last pages", "where page 1 is"; `export-epub.test.ts`; `joined-words.test.ts`; `front-matter-check.test.ts` ("putting the book in order", ISBN); `MatterGuide.test.tsx` (copyright preview).

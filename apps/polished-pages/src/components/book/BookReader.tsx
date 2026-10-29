@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { elementToPdf } from "@/lib/export-pdf";
 import { markdownToEpub } from "@/lib/export-epub";
+import type { BookFactsOpts } from "@/lib/copyright-page";
 import { markdownToPrintPdf } from "@/lib/export-print-pdf";
 import { markdownToIngramSparkPdf } from "@/lib/export-ingramspark-pdf";
 import InteriorType from "@/components/book/InteriorType";
@@ -19,8 +20,10 @@ import BookPaper from "@/components/book/BookPaper";
 // designed PDF. When onContentChange is provided, edits flow back to the parent
 // (used for export and saving the final copy).
 const BookReader = ({
-  content, title, onContentChange, author: initialAuthor, trim: initialTrim, epub: showEpub = true,
+  content, title, onContentChange, author: initialAuthor, trim: initialTrim, epub: showEpub = true, facts = {},
 }: {
+  /** The book's title-page and copyright facts (a Studio book). */
+  facts?: BookFactsOpts;
   content: string;
   title: string;
   onContentChange?: (s: string) => void;
@@ -57,7 +60,7 @@ const BookReader = ({
   const printInterior = async () => {
     setPrinting(true);
     try {
-      await markdownToPrintPdf(content, { title: title || "Book", trim: getTrim(trimId) }, `${title || "book"}-interior`);
+      await markdownToPrintPdf(content, { ...facts, title: title || "Book", author: author.trim() || undefined, trim: getTrim(trimId) }, `${title || "book"}-interior`);
     } catch (e) {
       toast({ title: "Print PDF failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {
@@ -69,7 +72,7 @@ const BookReader = ({
   const ingramInterior = async () => {
     setIngram(true);
     try {
-      await markdownToIngramSparkPdf(content, { title: title || "Book", author: author.trim() || undefined, trim: getTrim(trimId) }, `${title || "book"}-ingramspark`);
+      await markdownToIngramSparkPdf(content, { ...facts, title: title || "Book", author: author.trim() || undefined, trim: getTrim(trimId) }, `${title || "book"}-ingramspark`);
     } catch (e) {
       toast({ title: "IngramSpark PDF failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {
@@ -81,7 +84,7 @@ const BookReader = ({
   const exportEpub = async () => {
     setEpub(true);
     try {
-      await markdownToEpub(content, { title }, title || "book");
+      await markdownToEpub(content, { ...facts, title, author: author.trim() || undefined }, title || "book");
     } catch (e) {
       toast({ title: "EPUB export failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
     } finally {

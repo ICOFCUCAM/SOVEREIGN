@@ -83,6 +83,8 @@ const wordCount = (s: string) => (s.match(/\S+/g) ?? []).length;
 // Cover design is a Pro-plan capability.
 const CoverGenerator = (props: {
   title?: string; subtitle?: string; author?: string; isbn?: string; publisher?: string; pageCount?: string; paper?: string; trimSize?: string;
+  /** The ISBN changed on the cover: the book keeps the same one (its copyright page and barcode). */
+  onIsbn?: (isbn: string) => void;
   onGenerated?: () => void;
   /** The book's text, for "Write with Claude" and the page estimate. */
   bookText?: () => Promise<string> | string;
@@ -113,6 +115,8 @@ const CoverGenerator = (props: {
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchPlanStatus().then(setStatus); }, []);
+  // An ISBN given later (in the book's details) reaches the barcode too.
+  useEffect(() => { if (props.isbn !== undefined && props.isbn !== d.isbn) setD((x) => ({ ...x, isbn: props.isbn ?? "" })); }, [props.isbn]); // eslint-disable-line react-hooks/exhaustive-deps
   const isPro = !!status?.plan && status.plan !== "free"; // any paid tier
 
   // Reopen the cover saved for this book.
@@ -435,7 +439,7 @@ const CoverGenerator = (props: {
             {field("category", "Category line", { ph: "e.g. Religion / Christian Living", max: 80 })}
             <div className="space-y-1.5">
               <Label htmlFor="cv-isbn" className="font-sans text-xs">ISBN (paperback)</Label>
-              <Input id="cv-isbn" value={d.isbn} onChange={(e) => set("isbn", e.target.value)} placeholder="978…" aria-invalid={!isbnOk} className={isbnOk ? "" : "border-destructive"} />
+              <Input id="cv-isbn" value={d.isbn} onChange={(e) => { set("isbn", e.target.value); props.onIsbn?.(e.target.value); }} placeholder="978…" aria-invalid={!isbnOk} className={isbnOk ? "" : "border-destructive"} />
               <p className="text-[11px] text-muted-foreground">{d.isbn.trim() ? (isbnOk ? "A real EAN-13 barcode is drawn from it." : "Not a valid ISBN-10 or ISBN-13.") : "No ISBN: leave the barcode area clear and KDP adds a free barcode there."}</p>
             </div>
             <label className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2.5 text-sm"><span>Keep the barcode area clear</span><Switch checked={d.reserveBarcode} onCheckedChange={(v) => set("reserveBarcode", v)} /></label>

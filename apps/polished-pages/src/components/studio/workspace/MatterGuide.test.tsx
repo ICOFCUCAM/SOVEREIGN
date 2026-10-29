@@ -43,6 +43,9 @@ describe("front and back matter, page by page", () => {
     render(<Harness rewrite={vi.fn()} start="copyright" onChange={(m) => changes.push(m)} />);
     fireEvent.change(screen.getByLabelText(/ISBN/), { target: { value: "978-1-23456-789-0" } });
     expect(changes.at(-1)!.meta?.isbn).toBe("978-1-23456-789-0");
+    // The preview shows the page as it will print, the ISBN included once it is given.
+    expect(screen.getByLabelText("Copyright page preview").textContent).toMatch(/Copyright © \d{4} A\. Author\.All rights reserved/);
+    expect(screen.getByLabelText("Copyright page preview").textContent).toMatch(/ISBN 978-1-23456-789-0/);
     expect(screen.getByText(/never filled with a guess/)).toBeTruthy();
   });
 });

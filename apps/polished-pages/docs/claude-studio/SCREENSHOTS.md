@@ -341,3 +341,15 @@ The typeset front matter: half-title, title page with subtitle, copyright page, 
 A whole book in the Classic style after the page-design fixes.
 
 ![Classic, whole book (§22)](screenshots/76-classic-whole-book.webp)
+
+The copyright page previewed beside its fields, from the lines the book prints (a placeholder author is left off).
+
+![Copyright preview (§22)](screenshots/77-copyright-preview.webp)
+
+Praise for the book before the half-title, the title page with subtitle, bold and italic inside paragraphs, the glossary and the index of scripture with page numbers.
+
+![Praise, emphasis, index of scripture (§22)](screenshots/78-praise-emphasis-scripture-index.webp)
+
+The glossary's definitions at the margin, and the index of scripture with the verse and its pages in columns.
+
+![Glossary and index detail (§22)](screenshots/79-glossary-index-detail.webp)

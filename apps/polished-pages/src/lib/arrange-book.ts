@@ -8,20 +8,21 @@ import { applyOrganise, type Organised, type OrganisePlan } from "./organise";
 import { SECTION_KINDS, type Section } from "./manuscript";
 
 const norm = (s: string) => s.toLowerCase().replace(/^(chapter|part)\s+[\divxlc]+[.:)]?\s*/i, "").replace(/^\d+[.)]\s*/, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
-const FRONT: Record<string, string> = { introduction: "introduction", preface: "preface", foreword: "foreword", prologue: "prologue", dedication: "dedication", epigraph: "epigraph", acknowledgements: "acknowledgments", acknowledgments: "acknowledgments", "author s note": "author-note", "a note to the reader": "author-note" };
+const FRONT: Record<string, string> = { introduction: "introduction", preface: "preface", foreword: "foreword", prologue: "prologue", dedication: "dedication", epigraph: "epigraph", acknowledgements: "acknowledgments", acknowledgments: "acknowledgments", "author s note": "author-note", "a note to the reader": "author-note", praise: "praise", "advance praise": "praise", endorsements: "praise" };
 const BACK: Record<string, string> = {
   conclusion: "conclusion", "concluding remarks": "conclusion", "final thoughts": "conclusion", epilogue: "epilogue", afterword: "afterword",
   appendix: "appendix", appendices: "appendix", "discussion questions": "discussion", "study questions": "discussion", "questions for reflection": "discussion",
   glossary: "glossary", "glossary of terms": "glossary", references: "bibliography", bibliography: "bibliography", "works cited": "bibliography", "select bibliography": "bibliography", sources: "bibliography",
-  index: "index", "scripture index": "index", "subject index": "index", notes: "notes", endnotes: "notes",
+  index: "index", "scripture index": "scripture-index", "index of scripture": "scripture-index", "index of scriptures": "scripture-index", "subject index": "index", notes: "notes", endnotes: "notes",
   "about the author": "about-author", "also by the author": "also-by", resources: "resources", "further reading": "resources",
 };
 /** Back matter in the order books conventionally print it. */
-const BACK_ORDER = ["conclusion", "epilogue", "afterword", "acknowledgments", "appendix", "discussion", "notes", "glossary", "bibliography", "index", "about-author", "also-by", "resources"];
+const BACK_ORDER = ["conclusion", "epilogue", "afterword", "acknowledgments", "appendix", "discussion", "notes", "glossary", "bibliography", "scripture-index", "index", "about-author", "also-by", "resources"];
 const kindOf = (line: string, key: string) =>
   /^\s*(chapter\s+)?\d+[.):]\s*\S/i.test(line) || /^chapter\s+[\divxlc]+\b/i.test(line) ? "chapter"
   : /^part\s+[\divxlc]+\b/i.test(line) ? "part"
   : /^appendix\b/i.test(line) ? "appendix"
+  : /^(advance\s+)?praise\b|^endorsements\b|^what (readers|others) are saying\b/i.test(line) ? "praise"
   : FRONT[key] ?? BACK[key] ?? null;
 
 /** Front matter, chapters, back matter in conventional order (DESIGN-SPEC.md §21); chapters and

@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { kindDef, type Manuscript } from "@/lib/manuscript";
+import { bookFacts, kindDef, type Manuscript } from "@/lib/manuscript";
+import { copyrightLines } from "@/lib/copyright-page";
 import { MATTER_STEPS, bookForMatter, given, matterProgress, sectionFor, setIncluded, setPage, stepLabel, stepStatus, type MatterStep } from "@/lib/matter-guide";
 import type { MatterInput } from "@/lib/claude-studio";
-import { frontMatterChecks } from "@/lib/front-matter-check";
+import { frontMatterChecks, putInOrder } from "@/lib/front-matter-check";
+import { toIsbn13 } from "@/lib/cover-design";
 import { EYEBROW, GRADIENT } from "./ui";
 
 // Front and back matter, page by page (DESIGN-SPEC.md §21): for each page in printing order, the author
@@ -58,7 +60,7 @@ export default function MatterGuide({ m, onUpdate, rewrite, engineLabel, onClose
               <ul className="mt-1.5 space-y-1 text-[12px]">
                 {frontMatterChecks(m).map((c) => (
                   <li key={c.text} className={`flex items-start gap-1.5 ${c.ok ? "text-[#475569] dark:text-[#94A3B8]" : c.level === "required" ? "text-[#B91C1C] dark:text-red-300" : "text-[#92400E] dark:text-amber-300"}`}>
-                    {c.ok ? <Check className="mt-0.5 h-3 w-3 shrink-0 text-[#16A34A]" /> : <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />}{c.text}
+                    {c.ok ? <Check className="mt-0.5 h-3 w-3 shrink-0 text-[#16A34A]" /> : <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />}<span>{c.text}{!c.ok && c.fix === "order" && <> <button type="button" className="font-medium text-[#2563EB] underline" onClick={() => onUpdate(putInOrder(m))}>Put them in order</button></>}</span>
                   </li>
                 ))}
               </ul>
@@ -130,7 +132,7 @@ function StepBody({ step, m, onUpdate, rewrite, engineLabel, onNext }: { step: M
     finally { setBusy(false); }
   };
   const accept = (text: string) => { onUpdate(setPage(m, step.kind, text)); setProposal(null); setEditing(false); onNext(); };
-  const canAsk = Boolean(rewrite) && (notes.trim() || (step.fromBook && m.sections.some((s) => kindDef(s.kind).group === "body" && s.body.trim())));
+  const canAsk = Boolean(rewrite) && !step.verbatim && (notes.trim() || (step.fromBook && m.sections.some((s) => kindDef(s.kind).group === "body" && s.body.trim())));
 
   // The page as the manuscript has it: read, then edit by hand or with Claude.
   if (!editing && sec?.body.trim() && !proposal) return (
@@ -140,7 +142,7 @@ function StepBody({ step, m, onUpdate, rewrite, engineLabel, onNext }: { step: M
       <div className="max-h-[42vh] overflow-y-auto whitespace-pre-wrap rounded-[10px] border border-[#E6E8ED] bg-white px-4 py-3 font-serif text-[15px] leading-relaxed dark:border-white/10 dark:bg-white/5">{sec.body}</div>
       <div className="mt-3 flex flex-wrap gap-2">
         <Button variant="outline" onClick={() => { setNotes(sec.body); setEditing(true); }}><PenLine className="h-4 w-4" /> Edit it myself</Button>
-        {rewrite && <Button variant="outline" onClick={() => { setNotes(sec.body); setEditing(true); void (async () => { setBusy(true); setError(null); try { setProposal(await rewrite({ kind: step.kind, label: stepLabel(step.kind), notes: sec.body, title: m.title, subtitle: m.subtitle, author: m.author, rules: m.rules, guidance, fromBook: Boolean(step.fromBook), book: step.fromBook ? bookForMatter(m) : undefined })); } catch (e) { setError(e instanceof Error ? e.message : "Claude couldn't rewrite the page."); } finally { setBusy(false); } })(); }}><Sparkles className="h-4 w-4" /> Improve it with Claude</Button>}
+        {rewrite && !step.verbatim && <Button variant="outline" onClick={() => { setNotes(sec.body); setEditing(true); void (async () => { setBusy(true); setError(null); try { setProposal(await rewrite({ kind: step.kind, label: stepLabel(step.kind), notes: sec.body, title: m.title, subtitle: m.subtitle, author: m.author, rules: m.rules, guidance, fromBook: Boolean(step.fromBook), book: step.fromBook ? bookForMatter(m) : undefined })); } catch (e) { setError(e instanceof Error ? e.message : "Claude couldn't rewrite the page."); } finally { setBusy(false); } })(); }}><Sparkles className="h-4 w-4" /> Improve it with Claude</Button>}
       </div>
     </div>
   );
@@ -152,9 +154,9 @@ function StepBody({ step, m, onUpdate, rewrite, engineLabel, onNext }: { step: M
         <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={9} aria-label={`Your words for the ${stepLabel(step.kind)}`} placeholder={step.hint || "Write what you want on this page, in your own words."} className="font-serif text-[15px] leading-relaxed" />
         {step.fromBook && !notes.trim() && <p className="text-[12.5px] text-[#64748B]">Nothing written yet: Claude can draft this page from the book itself. It adds no facts about you; anything it would need is marked for you to fill in.</p>}
         <div className="flex flex-wrap items-center gap-2">
-          <Button className={`rounded-full ${GRADIENT}`} disabled={!canAsk || busy} onClick={() => void ask()}>
+          {step.verbatim ? <p className="w-full text-[12.5px] text-[#64748B]">These are other people's words: they are printed exactly as you give them, never rewritten.</p> : <Button className={`rounded-full ${GRADIENT}`} disabled={!canAsk || busy} onClick={() => void ask()}>
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} {notes.trim() ? "Rewrite it professionally" : "Draft it from the book"}
-          </Button>
+          </Button>}
           <Button variant="outline" disabled={!notes.trim() || busy} onClick={() => accept(notes)}><Check className="h-4 w-4" /> Use my words as they are</Button>
           {sec?.body.trim() && <Button variant="ghost" disabled={busy} onClick={() => { setEditing(false); setNotes(sec.body); }}>Cancel</Button>}
         </div>
@@ -200,13 +202,21 @@ function Facts({ step, m, onUpdate }: { step: MatterStep; m: Manuscript; onUpdat
       <div className="grid gap-3 sm:grid-cols-2">
         {field("Copyright holder", str(meta.copyrightHolder), (v) => setMeta("copyrightHolder", v), given(m.author) ? `${given(m.author)} (when empty)` : "The author, or a ministry or company")}
         {field("Year of publication", str(meta.copyrightYear), (v) => setMeta("copyrightYear", v.replace(/[^\d]/g, "").slice(0, 4)), String(new Date().getFullYear()))}
-        {field("ISBN (optional)", str(meta.isbn), (v) => setMeta("isbn", v), "Leave empty until you have one")}
+        <div>
+          {field("ISBN (optional)", str(meta.isbn), (v) => setMeta("isbn", v), "Leave empty until you have one")}
+          {/* The same ISBN prints on this page and as the barcode on the back cover. */}
+          {str(meta.isbn).trim() && <p className={`mt-1 text-[12px] ${toIsbn13(str(meta.isbn)) ? "text-[#15803D]" : "text-[#B91C1C]"}`}>{toIsbn13(str(meta.isbn)) ? "A valid ISBN: its barcode is drawn on the back cover." : "Not a valid ISBN-10 or ISBN-13: check the digits."}</p>}
+        </div>
         {field("Edition (optional)", str(meta.edition), (v) => setMeta("edition", v), "e.g. First edition 2026")}
       </div>
       <label className="block text-[13px] font-medium">Scripture permission notices (one per line)
         <Textarea value={str(meta.scriptureNotices)} onChange={(e) => setMeta("scriptureNotices", e.target.value)} rows={3} placeholder="e.g. Scripture quotations are from the King James Version (public domain)." className="mt-1 font-normal" />
       </label>
       <p className="text-[12.5px] text-[#64748B]">The standard rights wording ("All rights reserved. No part of this book may be reproduced…") is added for you. Empty fields are left off the page, never filled with a guess.</p>
+      {/* The page as it will print, from the same lines the typesetter and the EPUB use. */}
+      <figure aria-label="Copyright page preview" className="mx-auto mt-2 flex aspect-[2/3] w-full max-w-[300px] flex-col justify-end rounded-[6px] border border-[#E6E8ED] bg-white p-5 shadow-sm dark:border-white/10">
+        {copyrightLines({ title: m.title || "Untitled book", author: m.author, ...bookFacts(m) }).map((l, i) => <p key={i} className="mb-1.5 font-serif text-[8.5px] leading-snug text-[#334155]">{l}</p>)}
+      </figure>
     </div>
   );
 }

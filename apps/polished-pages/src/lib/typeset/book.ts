@@ -10,15 +10,24 @@
 // Right-to-left books (Arabic, Hebrew) are laid out for right-hand binding:
 // the gutter and folios mirror, and paragraphs run from the right.
 import { PDFDocument } from "pdf-lib";
+import { copyrightLines } from "@/lib/copyright-page";
+import { scriptureBookName, scriptureBookOrder, scriptureRefs } from "@/lib/teacher/scripture";
 import type { TrimSize } from "@/lib/print-sizes";
 import { ingramGutterMm, INGRAM_OUTSIDE_MM } from "@/lib/print-sizes";
-import { Typesetter, type FetchFont, type PageCtx, type TextStyle } from "@/lib/typeset/pdf-text";
+import { EM_BOLD, EM_ITALIC, EM_MARKS, Typesetter, type FetchFont, type PageCtx, type TextStyle } from "@/lib/typeset/pdf-text";
 import type { BookFaceId } from "@/lib/typeset/font-files";
 import { charDir, cjkFromLanguage, dominantScript, paragraphDir, scriptsIn, type Dir, type ScriptId } from "@/lib/typeset/scripts";
 import { numberWord, styleById, type InteriorStyleId } from "@/lib/typeset/styles";
 
 const PT = 72 / 25.4;
 const strip = (s: string) => s.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1").replace(/`/g, "");
+/** Paragraph text keeps its emphasis: **bold** and *italic* (or _italic_) become marks the typesetter sets in those faces. */
+const inline = (s: string) => s
+  .replace(/\*\*(?=\S)(.+?)\*\*/g, `${EM_BOLD}$1${EM_BOLD}`)
+  .replace(/(^|[^*\p{L}\p{N}])\*(?=\S)(.+?)\*(?![\p{L}\p{N}])/gu, `$1${EM_ITALIC}$2${EM_ITALIC}`)
+  .replace(/(^|[^\p{L}\p{N}_])_(?=\S)(.+?)_(?![\p{L}\p{N}_])/gu, `$1${EM_ITALIC}$2${EM_ITALIC}`)
+  .replace(/`/g, "");
+const plainText = (s: string) => s.replace(EM_MARKS, "");
 
 export interface BookTypeOptions {
   title: string;
@@ -59,6 +68,8 @@ export interface BookTypeOptions {
   /** Contents depth: chapters only (1), or chapters with their sections (2). */
   tocDepth?: 1 | 2;
 }
+/** A chapter that ends with only a line or two on its last page. */
+export interface Runt { title: string; page: number; folio: string; lines: number }
 /** Lower-case Roman numerals for preliminary pages (i, ii, iii…). */
 export function roman(n: number): string {
   const R: [number, string][] = [[1000, "m"], [900, "cm"], [500, "d"], [400, "cd"], [100, "c"], [90, "xc"], [50, "l"], [40, "xl"], [10, "x"], [9, "ix"], [5, "v"], [4, "iv"], [1, "i"]];
@@ -113,11 +124,11 @@ export function asChapters(markdown: string): string {
 }
 
 // Sections that open like chapters but carry no chapter number.
-const UNNUMBERED = /^(preface|foreword|introduction|prologue|acknowledge?ments?|dedication|epigraph|conclusion|epilogue|afterword|bibliography|references|works cited|sources|glossary|index|appendix(\s.*)?|notes|endnotes|about the author|also by .*|author'?s note|a note on .*|contents)$/i;
+export const UNNUMBERED = /^(preface|foreword|introduction|prologue|acknowledge?ments?|dedication|epigraph|conclusion|epilogue|afterword|bibliography|references|works cited|sources|glossary|index|appendix(\s.*)?|notes|endnotes|about the author|also by .*|author'?s note|a note on .*|contents)$/i;
 /** "{-}" after a chapter heading (as in Pandoc) sets it without a number. */
 export const unnumbered = (title: string) => `${title} {-}`;
 
-interface Block { kind: "h1" | "h2" | "h3" | "li" | "p" | "quote" | "gap" | "toc" | "fn" | "img"; text: string; plain?: boolean; id?: string; src?: string; display?: boolean }
+interface Block { kind: "h1" | "h2" | "h3" | "li" | "p" | "quote" | "gap" | "toc" | "fn" | "img"; text: string; plain?: boolean; id?: string; src?: string; display?: boolean; praise?: boolean; scriptureIndex?: boolean }
 /** A quotation the author introduces with a colon and closes with its source, "(Dyrness, 1979, pp. 41-42)". */
 const CITED_END = /\((?:[^()]*\b(?:1[5-9]|20)\d\d\b[^()]*|[^()]*\bp{1,2}\.\s*\d[^()]*)\)\s*\.?$/;
 function parse(markdown: string): Block[] {
@@ -127,6 +138,8 @@ function parse(markdown: string): Block[] {
       const raw = t.replace(/^#\s+/, "");
       if (/\s\{toc\}\s*$/.test(raw)) return { kind: "toc", text: "" };
       // "{display}": a page of its own with no heading, no contents entry and no folio (a dedication, an epigraph).
+      if (/\s\{scripture-index\}\s*$/.test(raw)) return { kind: "h1", text: strip(raw.replace(/\s\{scripture-index\}\s*$/, "")), plain: true, scriptureIndex: true };
+      if (/\s\{praise\}\s*$/.test(raw)) return { kind: "h1", text: strip(raw.replace(/\s\{praise\}\s*$/, "")), plain: true, praise: true };
       if (/\s\{display\}\s*$/.test(raw)) return { kind: "h1", text: strip(raw.replace(/\s\{display\}\s*$/, "")), plain: true, display: true };
       const plain = /\s\{-\}\s*$/.test(raw);
       const text = strip(raw.replace(/\s\{-\}\s*$/, ""));
@@ -137,15 +150,15 @@ function parse(markdown: string): Block[] {
     const img = /^!\[([^\]]*)\]\((data:image\/(?:png|jpe?g);base64,[A-Za-z0-9+/=]+)\)$/.exec(t);
     if (img) return { kind: "img", text: strip(img[1]), src: img[2] };
     const fn = /^\[\^([^\]\s]+)\]:\s*(.*)$/.exec(t);
-    if (fn) return { kind: "fn", id: fn[1], text: strip(fn[2]) };
-    if (/^[-*]\s+/.test(t)) return { kind: "li", text: strip(t.replace(/^[-*]\s+/, "")) };
-    if (/^>\s?/.test(t)) return { kind: "quote", text: strip(t.replace(/^>\s?/, "")) };
+    if (fn) return { kind: "fn", id: fn[1], text: inline(fn[2]) };
+    if (/^[-*]\s+/.test(t)) return { kind: "li", text: inline(t.replace(/^[-*]\s+/, "")) };
+    if (/^>\s?/.test(t)) return { kind: "quote", text: inline(t.replace(/^>\s?/, "")) };
     if (!t) return { kind: "gap", text: "" };
-    return { kind: "p", text: strip(t) };
+    return { kind: "p", text: inline(t) };
   }).map((b, i, all) => {
-    if (b.kind !== "p" || !CITED_END.test(b.text)) return b;
+    if (b.kind !== "p" || !CITED_END.test(plainText(b.text))) return b;
     let j = i - 1; while (j >= 0 && all[j].kind === "gap") j--;
-    return j >= 0 && all[j].kind === "p" && /:\s*$/.test(all[j].text) && b.text.length > 80 ? { ...b, kind: "quote" as const } : b;
+    return j >= 0 && all[j].kind === "p" && /:\s*$/.test(plainText(all[j].text)) && b.text.length > 80 ? { ...b, kind: "quote" as const } : b;
   });
 }
 
@@ -153,6 +166,14 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   const S = styleById(o.style);
   const ingram = (o.layout ?? "standard") === "ingram";
   let blocks = parse(asChapters(markdown));
+  // Endorsements ("Praise for the book") are taken out of the flow: they open the book, before the half-title.
+  const praiseAt = blocks.findIndex((b) => b.kind === "h1" && b.praise);
+  let praise: Block[] = [];
+  if (praiseAt >= 0) {
+    let end = praiseAt + 1; while (end < blocks.length && blocks[end].kind !== "h1" && blocks[end].kind !== "toc") end++;
+    praise = blocks.slice(praiseAt, end);
+    blocks = [...blocks.slice(0, praiseAt), ...blocks.slice(end)];
+  }
   // A half-title page: a first section that is only the book's title (the Studio's "Half-title page").
   const firstBlock = blocks.findIndex((b) => b.kind !== "gap");
   const nextBlock = blocks.findIndex((b, i) => i > firstBlock && b.kind !== "gap");
@@ -188,6 +209,29 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   const contentsLabel = (!latin && CONTENTS[main as ScriptId]) || "Contents";
 
   let pc: PageCtx;
+  if (praise.length) {
+    // Each endorsement in italic, its attribution ("— Name, role") set right; more pages when they run on.
+    pc = add();
+    const hSt: TextStyle = { kind: "heading", style: "regular", size: 13 };
+    const qSt: TextStyle = { kind: "body", style: "italic", size: Math.max(9.5, size * 0.95) };
+    const aSt: TextStyle = { kind: "body", style: "regular", size: Math.max(8.5, size * 0.85), gray: 0.3 };
+    let py = H - top;
+    const pgN = () => pages.length;
+    if (latin) ts.tracked(pc, strip(praise[0].text).toUpperCase(), colX(pgN()) + colW / 2, py - 13, hSt, "center", 1.6);
+    else ts.text(pc, strip(praise[0].text), colX(pgN()) + colW / 2, py - 13, hSt, "center");
+    py -= 13 + 26;
+    for (const b of praise.slice(1)) {
+      if (b.kind === "gap" || !b.text.trim()) continue;
+      const attrib = /^\s*[—–-]{1,2}\s*\S/.test(plainText(b.text));
+      const st = attrib ? aSt : qSt;
+      const lines = ts.wrap(b.text, st, colW * (attrib ? 0.9 : 1));
+      const lh = st.size * 1.45;
+      if (py - lines.length * lh < bottom) { if (ingram) add(); pc = add(); py = H - top; }
+      for (const l of lines) { ts.drawLine(pc, l, colX(pgN()) + (attrib ? colW * 0.1 : 0), py - st.size, colW * (attrib ? 0.9 : 1), st, attrib ? "right" : S.justify ? "justify" : "start"); py -= lh; }
+      py -= attrib ? lh * 1.1 : lh * 0.25;
+    }
+    if (ingram) add(); // the half-title stays a recto
+  }
   if (halfTitle) {
     pc = add();
     const hSt: TextStyle = { kind: "heading", style: S.titleStyle === "italic" ? "italic" : "regular", size: 16 };
@@ -236,19 +280,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     const year = o.year ?? new Date().getFullYear();
     const copyN = pages.length;
     const cSt: TextStyle = { kind: "body", style: "regular", size: 9, gray: 0.24 };
-    // A placeholder ("[ISBN]") is not a fact: it isn't printed.
-    const fact = (v?: string) => (v?.trim() && !/\[[^\]]*\]/.test(v) ? v.trim() : "");
-    const owner = fact(o.rightsHolder) || fact(o.author);
-    const cl = [
-      [bookTitle, o.subtitle?.trim() ? strip(o.subtitle.trim()) : ""].filter(Boolean).join(": "),
-      owner ? `Copyright © ${year} ${owner}.` : `Copyright © ${year}.`,
-      "All rights reserved. No part of this book may be reproduced, stored in a retrieval system or transmitted in any form or by any means, electronic, mechanical, photocopying, recording or otherwise, without the prior written permission of the copyright holder, except for brief quotations in reviews and critical articles.",
-      ...(o.notices ?? []).map(fact).filter(Boolean),
-      ...(fact(o.edition) ? [fact(o.edition)] : []),
-      ...(fact(o.isbn) ? [`ISBN ${fact(o.isbn).replace(/^isbn[:\s]*/i, "")}`] : []),
-      ...(fact(o.publisher) ? [`Published by ${fact(o.publisher)}`] : []),
-      ...(ingram ? [`Produced with ${o.producedWith ?? "Polished Pages"}.`] : []),
-    ];
+    const cl = copyrightLines({ title: bookTitle, subtitle: o.subtitle ? strip(o.subtitle) : undefined, author: o.author, rightsHolder: o.rightsHolder, year, notices: o.notices, edition: o.edition, isbn: o.isbn, publisher: o.publisher, ...(ingram ? { producedWith: o.producedWith ?? "Polished Pages" } : {}) });
     const wrapped = cl.map((l) => ts.wrap(l, cSt, colW));
     const lh = 12.5;
     let cy = bottom + wrapped.reduce((a, w) => a + w.length * lh + 6, 0);
@@ -281,6 +313,17 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   let dropNext = false;    // the next paragraph opens a chapter: drop cap
   const starts: { title: string; n: number; level: 1 | 2; no?: number; hidden?: boolean }[] = [];
   let display = false;      // setting a display page (dedication, epigraph): centred, no heading
+  // The index of scripture: every reference with the pages it is on, set where the book places the index.
+  const wantRefs = blocks.some((b) => b.scriptureIndex);
+  // A chapter whose last page holds only a line or two (a "short page"), reported so the author can tighten it.
+  const runts: { title: string; page: number; lines: number }[] = [];
+  let chapterPage = 0;
+  const checkRunt = () => {
+    if (!chapter || display || pageNo() <= chapterPage) return;
+    const used = Math.round((H - top - y) / lead);
+    if (used > 0 && used <= 2) runts.push({ title: chapter, page: pageNo(), lines: used });
+  };
+  const refsAt: { ref: ReturnType<typeof scriptureRefs>[number]; page: number }[] = [];
   const blind: number[] = []; // pages that carry no folio
   const pageNo = () => pages.length;
   // Preliminary pages take lower-case Roman numerals, counted from the first page of the book; Arabic
@@ -308,7 +351,9 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     // Drop caps only for left-to-right alphabetic text that starts with a letter, and never deeper
     // than the paragraph itself: a cap taller than its paragraph would run into the text below, so a
     // short paragraph takes a smaller cap (two lines) or none (one line).
-    const m = o2.drop && pDir === "ltr" && latin ? /^(\p{L})(.*)$/su.exec(text) : null;
+    // The capital is the first letter (any emphasis marks before it stay with the rest of the text).
+    const mm = o2.drop && pDir === "ltr" && latin ? /^([\uE000\uE001]*)(\p{L})(.*)$/su.exec(text) : null;
+    const m = mm ? [mm[0], mm[2], mm[1] + mm[3]] : null;
     for (let d = m ? (o2.drop ?? 0) : 0; d >= 2; d--) {
       // Top of the cap level with the first line's capitals, foot on the last line's baseline (cap height ≈ 0.66 em).
       const size2 = (lh * (d - 1) + st.size * 0.66) / 0.66;
@@ -324,11 +369,13 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     if (cap) room(lh * drop);
     else if (lines.length === 3) room(lh * 3); // a three-line paragraph can't be split without leaving one line alone
     else if (lines.length >= 2) room(lh * 2);
+    const linePages: number[] = [];
     lines.forEach((l, i) => {
       if (lines.length >= 3 && i === lines.length - 2 && i >= 2 && y - lh * 2 < bottom && y - lh >= bottom) nextPage();
       room(lh);
       const base = y - st.size * 1.02;
       const n = pageNo();
+      linePages.push(n);
       let x = colX(n) + (pDir === "rtl" ? right : hang);
       let w = inner;
       if (cap && i < drop) { if (i === 0) ts.text(pc, cap, x, base - lh * (drop - 1), { kind: "heading", style: "regular", size: capSize }, "left"); x += capW; w -= capW; }
@@ -338,7 +385,45 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       y -= lh;
       dirty = true;
     });
+    // Scripture references in the text, with the page each one is printed on (for the index of scripture).
+    if (st.kind === "body" && wantRefs) {
+      const texts = lines.map((l) => (cap && l === lines[0] ? cap : "") + l.tokens.map((t) => t.text + (t.space ? " " : "")).join(""));
+      const starts = texts.reduce<number[]>((a, t, i) => [...a, i ? a[i - 1] + texts[i - 1].length : 0], []);
+      for (const r of scriptureRefs(texts.join(""))) {
+        if (r.verse === undefined) continue;
+        let li = 0; while (li + 1 < starts.length && starts[li + 1] <= r.index) li++;
+        refsAt.push({ ref: r, page: linePages[li] });
+      }
+    }
     y -= o2.after ?? 0;
+  };
+
+  /** By book in canonical order, then chapter and verse: each reference with the pages it is printed on. */
+  const setScriptureIndex = () => {
+    const by = new Map<string, Map<string, { chapter: number; verse: number; pages: Set<number> }>>();
+    for (const { ref, page } of refsAt) {
+      const book = by.get(ref.book) ?? new Map(); by.set(ref.book, book);
+      const key = `${ref.chapter}:${ref.verse}${ref.verseEnd ? `–${ref.verseEnd}` : ""}`;
+      const e = book.get(key) ?? { chapter: ref.chapter, verse: ref.verse ?? 0, pages: new Set<number>() }; e.pages.add(page); book.set(key, e);
+    }
+    const bookSt: TextStyle = { kind: "heading", style: "bold", size: Math.round(size * 1.05) };
+    const entrySt: TextStyle = { kind: "body", style: "regular", size: Math.max(8.5, size * 0.9) };
+    if (!by.size) { para("No scripture references with chapter and verse were found in the text.", { ...body, style: "italic" }, "start", {}); return; }
+    for (const code of [...by.keys()].sort((a, b) => scriptureBookOrder(a) - scriptureBookOrder(b))) {
+      para(scriptureBookName(code), bookSt, "start", { before: lead * 0.7, after: lead * 0.15, keep: lead * 2 });
+      const entries = [...by.get(code)!.entries()].sort((a, b) => a[1].chapter - b[1].chapter || a[1].verse - b[1].verse);
+      // The verse in its own column, the pages after it (wrapping under themselves when there are many).
+      const keyW = Math.max(...entries.map(([k]) => ts.measure(k, entrySt))) + size * 1.4;
+      const elh = entrySt.size * 1.4;
+      for (const [key, e] of entries) {
+        const ls = ts.wrap([...e.pages].sort((a, b) => a - b).map(folioOf).join(", "), entrySt, colW - keyW - size);
+        room(elh * Math.min(ls.length, 2));
+        ts.text(pc, key, colX(pageNo()) + size, y - entrySt.size, entrySt, "left");
+        for (const l of ls) { room(elh); ts.drawLine(pc, l, colX(pageNo()) + size + keyW, y - entrySt.size, colW - keyW - size, entrySt, "start"); y -= elh; }
+        dirty = true;
+      }
+    }
+    afterHeading = true;
   };
 
   const chapterOpening = (title: string, plain = false) => {
@@ -402,7 +487,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     const p0 = pageNo(), y0 = y;
     set();
     const p1 = pageNo();
-    for (let n = p0; n <= p1; n++) placed.push({ page: n, top: n === p0 ? y0 : H - top, bottom: n === p1 ? y : bottom, text });
+    for (let n = p0; n <= p1; n++) placed.push({ page: n, top: n === p0 ? y0 : H - top, bottom: n === p1 ? y : bottom, text: plainText(text) });
   };
   for (const [bi, b] of blocks.entries()) {
     if (b.kind === "fn") continue;
@@ -410,6 +495,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     if (b.kind === "p" || b.kind === "li" || b.kind === "quote") b.text = marks(b.text);
     if (b.kind === "toc") {
       if (!tocCount) continue;
+      checkRunt();
       if (!first || dirty) nextPage();
       if (ingram && pageNo() % 2 === 0) nextPage();
       first = false; display = false;
@@ -420,12 +506,14 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       continue;
     }
     if (b.kind === "h1") {
+      checkRunt();
       if (!first || dirty) {
         nextPage();
         if (ingram && pageNo() % 2 === 0) nextPage(); // chapters open on a recto
       }
       first = false;
       opening = true;
+      chapterPage = pageNo();
       display = Boolean(b.display);
       if (display) {
         // A third of the way down the page, the text alone; listed for the Book page, not in the contents.
@@ -436,6 +524,12 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
         continue;
       }
       chapter = b.text;
+      if (b.scriptureIndex) {
+        starts.push({ title: b.text, n: pageNo(), level: 1 });
+        chapterOpening(b.text, true);
+        setScriptureIndex();
+        continue;
+      }
       if (!mainFirst && (!b.plain || ((o.arabicFrom ?? "introduction") === "introduction" && /^introduction$/i.test(strip(b.text).trim())))) mainFirst = pageNo();
       starts.push({ title: b.text, n: pageNo(), level: 1, ...(b.plain ? {} : { no: chapterNo + 1 }) });
       chapterOpening(b.text, b.plain);
@@ -476,12 +570,14 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     } else if (display) {
       track(b.text, () => para(b.text, { ...body, style: "italic", size: size * 1.05 }, "center", { after: lead * 0.6 }));
     } else {
-      const indented = S.paragraphs === "indent" && !afterHeading;
+      // A definition ("**Term**: meaning", as in a glossary) starts at the margin like the ones around it.
+      const indented = S.paragraphs === "indent" && !afterHeading && !b.text.startsWith(EM_BOLD);
       track(b.text, () => para(b.text, body, S.justify ? "justify" : "start", { indent: indented ? size * 1.5 : 0, drop: dropNext ? S.dropCap : 0, after: S.paragraphs === "block" ? lead * 0.5 : 0 }));
       afterHeading = false; dropNext = false;
     }
   }
   flushNotes();
+  checkRunt();
   closePage();
 
   // Running heads and folios, now that every page's chapter is known.
@@ -556,22 +652,22 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
 
   ts.finish();
   // Where each chapter (and front or back matter section) opens, as a physical page number.
-  return { doc, pages: pages.length, sections: starts.filter((x) => x.level === 1).map((x) => ({ title: x.title, page: x.n })), folios: pages.map((_, i) => (i + 1 >= bodyFirst && !tocPages.includes(i + 1) && !blind.includes(i + 1) ? folioOf(i + 1) : "")), bodyFirst, contents: tocCount ? [tocFirst, tocFirst + tocCount - 1] as [number, number] : null, placed, pageHeight: H };
+  return { doc, pages: pages.length, sections: starts.filter((x) => x.level === 1).map((x) => ({ title: x.title, page: x.n })), runts: runts.map((r) => ({ ...r, folio: folioOf(r.page) })), folios: pages.map((_, i) => (i + 1 >= bodyFirst && !tocPages.includes(i + 1) && !blind.includes(i + 1) ? folioOf(i + 1) : "")), bodyFirst, contents: tocCount ? [tocFirst, tocFirst + tocCount - 1] as [number, number] : null, placed, pageHeight: H };
 }
 export interface SetSection { title: string; page: number }
 /** A paragraph's place on a page (PDF points from the bottom), with its text as set. */
 export interface Placed { page: number; top: number; bottom: number; text: string }
 
 /** Typesets a Markdown book into a print-ready PDF and returns its bytes and page count. */
-export async function typesetBook(markdown: string, o: BookTypeOptions): Promise<{ bytes: Uint8Array; pages: number; sections: SetSection[]; bodyFirst: number; contents: [number, number] | null; placed: Placed[]; pageHeight: number; folios: string[] }> {
+export async function typesetBook(markdown: string, o: BookTypeOptions): Promise<{ bytes: Uint8Array; pages: number; sections: SetSection[]; bodyFirst: number; contents: [number, number] | null; placed: Placed[]; pageHeight: number; folios: string[]; runts: Runt[] }> {
   if (o.layout === "ingram") {
     // Measure once with a provisional gutter, then set it for the real page count.
     const probe = await build(markdown, o, 15.875);
     const final = await build(markdown, o, ingramGutterMm(probe.pages));
-    return { bytes: await final.doc.save(), pages: final.pages, sections: final.sections, bodyFirst: final.bodyFirst, contents: final.contents, placed: final.placed, pageHeight: final.pageHeight, folios: final.folios };
+    return { bytes: await final.doc.save(), pages: final.pages, sections: final.sections, bodyFirst: final.bodyFirst, contents: final.contents, placed: final.placed, pageHeight: final.pageHeight, folios: final.folios, runts: final.runts };
   }
   const r = await build(markdown, o, 0);
-  return { bytes: await r.doc.save(), pages: r.pages, sections: r.sections, bodyFirst: r.bodyFirst, contents: r.contents, placed: r.placed, pageHeight: r.pageHeight, folios: r.folios };
+  return { bytes: await r.doc.save(), pages: r.pages, sections: r.sections, bodyFirst: r.bodyFirst, contents: r.contents, placed: r.placed, pageHeight: r.pageHeight, folios: r.folios, runts: r.runts };
 }
 
 export function downloadPdf(bytes: Uint8Array, filename: string) {

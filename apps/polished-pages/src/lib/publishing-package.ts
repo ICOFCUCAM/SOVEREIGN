@@ -23,12 +23,12 @@ export function packageChecks(i: PackageInput, pages: number | null): Check[] {
 export async function buildPackage(markdown: string, i: PackageInput, fetchCover: (url: string) => Promise<Blob> = async (u) => (await fetch(u)).blob()): Promise<{ blob: Blob; pages: number; checks: Check[] }> {
   const [{ typesetBook }, { getInteriorType }, { markdownToEpubBlob }] = await Promise.all([import("./typeset/book"), import("./typeset/prefs"), import("./export-epub")]);
   const pref = getInteriorType();
-  const interior = await typesetBook(markdown, { title: i.title, author: i.author, subtitle: i.subtitle, isbn: i.isbn, publisher: i.publisher, trim: i.trim, layout: "ingram", style: pref.style, body: pref.body, heading: pref.heading, size: pref.size, leading: pref.leading, margins: pref.margins, language: i.language });
+  const interior = await typesetBook(markdown, { title: i.title, author: i.author, subtitle: i.subtitle, isbn: i.isbn, publisher: i.publisher, trim: i.trim, layout: "ingram", style: pref.style, body: pref.body, heading: pref.heading, size: pref.size, leading: pref.leading, margins: pref.margins, arabicFrom: pref.arabicFrom, tocDepth: pref.tocDepth, language: i.language });
   const checks = packageChecks(i, interior.pages);
   const spec = coverSpec(i.trim, interior.pages, i.paper || "Cream");
   const zip = new JSZip();
   zip.file("interior-print.pdf", interior.bytes);
-  zip.file("book.epub", await markdownToEpubBlob(markdown, { title: i.title, author: i.author, language: i.language ?? undefined }));
+  zip.file("book.epub", await markdownToEpubBlob(markdown, { title: i.title, author: i.author, subtitle: i.subtitle, isbn: i.isbn, publisher: i.publisher, language: i.language ?? undefined }));
   if (i.coverUrl) { try { zip.file("cover-front.jpg", await fetchCover(i.coverUrl)); } catch { /* the sheet says the cover is missing */ } }
   const mm = (x: number) => `${x.toFixed(1)} mm (${(x / 25.4).toFixed(3)} in)`;
   zip.file("metadata.txt", [

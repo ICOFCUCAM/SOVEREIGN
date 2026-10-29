@@ -28,16 +28,20 @@ const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/
 const NAMES = [...NAME_TO_CODE.keys()].sort((a, b) => b.length - a.length).map(escape).join("|");
 const REF = new RegExp(`(?<![\\p{L}\\d])(${NAMES})\\.?\\s+(\\d{1,3})(?::(\\d{1,3})(?:\\s*[-–]\\s*(\\d{1,3}))?)?(?![\\d:])`, "giu");
 
+/** The book's name as an index prints it ("Deuteronomy"), and its place in the canon (for ordering). */
+export const scriptureBookName = (code: string) => BOOKS.find(([c]) => c === code)?.[1][0] ?? code;
+export const scriptureBookOrder = (code: string) => BOOKS.findIndex(([c]) => c === code);
+
 /** Every reference in the text, in order, normalised ("GEN 6:1-4") with the original wording kept. */
-export function scriptureRefs(text: string): ScriptureRef[] {
-  const out: ScriptureRef[] = [];
+export function scriptureRefs(text: string): (ScriptureRef & { index: number })[] {
+  const out: (ScriptureRef & { index: number })[] = [];
   for (const x of text.matchAll(REF)) {
     const book = NAME_TO_CODE.get(x[1].toLowerCase().replace(/\s+/g, " "));
     if (!book) continue;
     const chapter = Number(x[2]), verse = x[3] ? Number(x[3]) : undefined, verseEnd = x[4] ? Number(x[4]) : undefined;
     // A bare "Mark 3" or "Job 2" is only a reference when the name is capitalised as a book.
     if (verse === undefined && x[1][0] !== x[1][0].toUpperCase()) continue;
-    out.push({ book, chapter, verse, verseEnd, normalized: `${book} ${chapter}${verse ? `:${verse}` : ""}${verseEnd ? `-${verseEnd}` : ""}`, original: x[0] });
+    out.push({ book, chapter, verse, verseEnd, normalized: `${book} ${chapter}${verse ? `:${verse}` : ""}${verseEnd ? `-${verseEnd}` : ""}`, original: x[0], index: x.index ?? 0 });
   }
   return out;
 }

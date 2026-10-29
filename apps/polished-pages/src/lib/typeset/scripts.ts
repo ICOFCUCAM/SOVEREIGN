@@ -80,7 +80,7 @@ export const isRtl = (text: string) => paragraphDir(text) === "rtl";
 
 // ── Line-break tokens ────────────────────────────────────────────────────────
 
-export interface Token { text: string; space: boolean; dir: "R" | "L" | "D" | "N"; /** A line may break after this token even without a space (CJK). */ breakAfter?: boolean }
+export interface Token { text: string; space: boolean; dir: "R" | "L" | "D" | "N"; /** A line may break after this token even without a space (CJK). */ breakAfter?: boolean; /** Emphasis inside the paragraph (bold, italic): the face this word is set in. */ style?: "regular" | "italic" | "bold" | "boldItalic" }
 
 const CJK_CHAR = /[\u3040-\u30FF\u3400-\u9FFF\uF900-\uFAFF\uAC00-\uD7AF\u3000-\u303F\uFF00-\uFFEF]/;
 // CJK punctuation that must not start a line (kinsoku), kept with the character before it.
