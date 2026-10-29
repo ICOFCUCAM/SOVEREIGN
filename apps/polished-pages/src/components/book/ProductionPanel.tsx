@@ -16,6 +16,7 @@ import { TRIM_SIZES, PAPER_MM_PER_PAGE, getTrim } from "@/lib/print-sizes";
 import { markdownToPrintPdf } from "@/lib/export-print-pdf";
 import { markdownToIngramSparkPdf } from "@/lib/export-ingramspark-pdf";
 import { markdownToEpub } from "@/lib/export-epub";
+import type { BookFactsOpts } from "@/lib/copyright-page";
 import InteriorType from "@/components/book/InteriorType";
 import { getPublishingAdvice, type PublishingAdvice } from "@/lib/publishing-advisor";
 
@@ -52,8 +53,10 @@ const DIST_STATUS = ["Not submitted", "Submitted", "Live"];
 // The Book Production Center: a project-centric readiness view + the publishing
 // metadata that turns a manuscript into a distributable book.
 const ProductionPanel = ({
-  meta, setMeta, bookTitle, manuscriptComplete, coverDone, parentId, content,
+  meta, setMeta, bookTitle, manuscriptComplete, coverDone, parentId, content, facts = {},
 }: {
+  /** The book's title-page and copyright facts (a Studio book), so every export has the same front matter. */
+  facts?: BookFactsOpts;
   meta: BookMeta;
   setMeta: (m: BookMeta) => void;
   bookTitle: string;
@@ -77,9 +80,9 @@ const ProductionPanel = ({
     setExporting(fmt);
     const base = bookTitle || "book";
     try {
-      if (fmt === "kdp" || fmt === "all") await markdownToPrintPdf(content, { title: bookTitle, trim }, `${base}-kdp-interior`);
-      if (fmt === "ingram" || fmt === "all") await markdownToIngramSparkPdf(content, { title: bookTitle, author: meta.author?.trim() || undefined, trim }, `${base}-ingramspark`);
-      if (fmt === "epub" || fmt === "all") await markdownToEpub(content, { title: bookTitle }, base);
+      if (fmt === "kdp" || fmt === "all") await markdownToPrintPdf(content, { ...facts, title: bookTitle, author: meta.author?.trim() || undefined, trim }, `${base}-kdp-interior`);
+      if (fmt === "ingram" || fmt === "all") await markdownToIngramSparkPdf(content, { ...facts, title: bookTitle, author: meta.author?.trim() || undefined, trim }, `${base}-ingramspark`);
+      if (fmt === "epub" || fmt === "all") await markdownToEpub(content, { ...facts, title: bookTitle, author: meta.author?.trim() || undefined }, base);
       if (fmt === "all") toast({ title: "Store bundle exported", description: "KDP + IngramSpark interiors + EPUB downloaded." });
     } catch (e) {
       toast({ title: "Export failed", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });

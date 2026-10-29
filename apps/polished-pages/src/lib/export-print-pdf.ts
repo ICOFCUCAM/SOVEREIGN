@@ -6,14 +6,15 @@
 // character). See src/lib/typeset/.
 import type { TrimSize } from "@/lib/print-sizes";
 import type { BookFaceId } from "@/lib/typeset/font-files";
+import type { BookFactsOpts } from "@/lib/copyright-page";
 
 export async function markdownToPrintPdf(
   markdown: string,
-  opts: { title: string; author?: string; trim: TrimSize; body?: BookFaceId; heading?: BookFaceId; size?: number; language?: string | null },
+  opts: { title: string; author?: string; trim: TrimSize; body?: BookFaceId; heading?: BookFaceId; size?: number; language?: string | null } & BookFactsOpts,
   filename: string,
 ): Promise<void> {
   const [{ typesetBook, downloadPdf }, { getInteriorType }] = await Promise.all([import("@/lib/typeset/book"), import("@/lib/typeset/prefs")]);
   const pref = getInteriorType();
-  const { bytes } = await typesetBook(markdown, { ...opts, layout: "standard", style: pref.style, body: opts.body ?? pref.body, heading: opts.heading ?? pref.heading, size: opts.size ?? pref.size, leading: pref.leading, margins: pref.margins });
+  const { bytes } = await typesetBook(markdown, { ...opts, layout: "standard", style: pref.style, body: opts.body ?? pref.body, heading: opts.heading ?? pref.heading, size: opts.size ?? pref.size, leading: pref.leading, margins: pref.margins, arabicFrom: pref.arabicFrom, tocDepth: pref.tocDepth });
   downloadPdf(bytes, filename);
 }

@@ -65,7 +65,7 @@ export function InteriorTypeEditor({ onChange, large }: { onChange?: (t: Interio
           <Label className="font-sans text-xs">Interior style</Label>
           <div className="grid grid-cols-3 gap-2">
             {INTERIOR_STYLES.map((s) => (
-              <button key={s.id} type="button" onClick={() => save({ ...withStyle(s.id), ...(t.margins ? { margins: t.margins } : {}) })} aria-pressed={t.style === s.id} data-style={s.id}
+              <button key={s.id} type="button" onClick={() => save({ ...withStyle(s.id), ...(t.margins ? { margins: t.margins } : {}), ...(t.arabicFrom ? { arabicFrom: t.arabicFrom } : {}), ...(t.tocDepth ? { tocDepth: t.tocDepth } : {}) })} aria-pressed={t.style === s.id} data-style={s.id}
                 className={`rounded-xl border p-1.5 text-left transition ${t.style === s.id ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}>
                 <StyleThumb s={s} />
                 <span className="mt-1 block text-xs font-semibold">{s.label}</span>
@@ -93,6 +93,19 @@ export function InteriorTypeEditor({ onChange, large }: { onChange?: (t: Interio
           <Label className="font-sans text-xs">Margins</Label>
           {([["narrow", "Narrow"], ["normal", "Normal"], ["wide", "Wide"]] as const).map(([v, label]) => (
             <button key={v} type="button" onClick={() => update({ margins: v })} aria-pressed={(t.margins ?? "normal") === v} className={`rounded-full border px-2 py-0.5 text-xs ${(t.margins ?? "normal") === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Label className="font-sans text-xs">Page 1 is</Label>
+          {([["introduction", "The Introduction"], ["chapter", "Chapter 1"]] as const).map(([v, label]) => (
+            <button key={v} type="button" onClick={() => update({ arabicFrom: v })} aria-pressed={(t.arabicFrom ?? "introduction") === v} className={`rounded-full border px-2 py-0.5 text-xs ${(t.arabicFrom ?? "introduction") === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
+          ))}
+          <span className="text-[11px] text-muted-foreground">Pages before it: i, ii, iii…</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Label className="font-sans text-xs">Contents list</Label>
+          {([[1, "Chapters"], [2, "Chapters and sections"]] as const).map(([v, label]) => (
+            <button key={v} type="button" onClick={() => update({ tocDepth: v })} aria-pressed={(t.tocDepth ?? 1) === v} className={`rounded-full border px-2 py-0.5 text-xs ${(t.tocDepth ?? 1) === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
           ))}
         </div>
       </div>

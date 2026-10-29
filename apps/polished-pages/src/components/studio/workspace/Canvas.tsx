@@ -5,6 +5,7 @@ import { applyFormat, insertBlock, insertFootnote, styleAt, type FormatKind } fr
 import { prepareImage } from "@/lib/figures";
 import { TRANSLATIONS, fetchVerse, verseBlock } from "@/lib/scripture-insert";
 import { fixHits, parseRules, ruleHits } from "@/lib/rule-check";
+import { joinedWords, separate, vocabulary } from "@/lib/joined-words";
 import { Button } from "@/components/ui/button";
 import { SuggestionChecks } from "./EditorialCheck";
 import Markdown from "@/components/studio/Markdown";
@@ -153,6 +154,7 @@ export default function Canvas({ m, section, view, proposal, running, onBody, on
         <>
           {!(formatted && section.body.trim()) && <FormatBar target={bodyRef} onChange={onBody} onFigure={onFigure} onComment={onComment} />}
           <RuleBar text={section.body} rules={m.rules ?? ""} onFix={onBody} onShow={(a, b) => { const el = bodyRef.current; if (el) { el.focus(); el.setSelectionRange(a, b); } }} />
+          <JoinedBar m={m} text={section.body} onFix={onBody} onShow={(a, b) => { const el = bodyRef.current; if (el) { el.focus(); el.setSelectionRange(a, b); } }} />
           {formatted && section.body.trim()
             // Formatted (§21): headings, bold, lists and quotations as they will read; a click goes back to writing.
             ? <div role="button" tabIndex={0} aria-label={`${section.title} text, formatted: click to edit`} title="Click to edit" onClick={() => setFormatted(false)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setFormatted(false); } }} className={`${PROSE} cursor-text rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/40`}><Markdown text={section.body} /></div>
@@ -333,6 +335,26 @@ function FormatBar({ target, onChange, onFigure, onComment }: { target: React.Re
         </form>
       )}
       {err && <p role="alert" className="w-full pt-1 text-[12.5px] text-[#B91C1C]">{err}</p>}
+    </div>
+  );
+}
+
+// Words joined at import (§22): "Yahushaand" where a line break lost its space. Each is shown for
+// review; the spaces go in only when the author asks (Undo puts them back).
+function JoinedBar({ m, text, onFix, onShow }: { m: Manuscript; text: string; onFix: (v: string) => void; onShow: (start: number, end: number) => void }) {
+  const vocab = useMemo(() => vocabulary(m.sections.map((s) => s.body).join("\n")), [m.sections]);
+  const hits = useMemo(() => joinedWords(text, vocab), [text, vocab]);
+  if (!hits.length) return null;
+  return (
+    <div role="status" className="-mt-3 mb-6 flex flex-wrap items-center gap-2 rounded-[10px] border border-sky-500/40 bg-sky-500/10 px-3 py-2 text-[13px]">
+      <span className="font-medium">{hits.length} {hits.length === 1 ? "word looks" : "words look"} joined by the import:</span>
+      {hits.slice(0, 8).map((h) => (
+        <span key={h.index} className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5 text-[12.5px] dark:bg-white/10">
+          <button type="button" onClick={() => onShow(h.index, h.index + h.length)} title="Show it in the text" className="hover:underline">{h.text} → {h.fix}</button>
+          <button type="button" onClick={() => onFix(separate(text, [h]))} className="font-medium text-[#2563EB] hover:underline" aria-label={`Put the space in ${h.text}`}>Fix</button>
+        </span>
+      ))}
+      {hits.length > 1 && <button type="button" onClick={() => onFix(separate(text, hits))} className="ml-auto rounded-md bg-[#172033] px-2.5 py-1 text-[12.5px] font-medium text-white hover:bg-[#172033]/90">Put the spaces in all {hits.length}</button>}
     </div>
   );
 }

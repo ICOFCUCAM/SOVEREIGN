@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import InteriorType from "@/components/book/InteriorType";
 import { TRIM_SIZES, getTrim } from "@/lib/print-sizes";
 import { INTERIOR_CHANGED } from "@/lib/typeset/prefs";
-import { GROUP_ORDER, compile, kindDef, type Manuscript, type Section } from "@/lib/manuscript";
+import { GROUP_ORDER, bookFacts, compile, kindDef, type Manuscript, type Section } from "@/lib/manuscript";
 
 // The book as it will print (design spec §5.1 "Book page", §21): the whole manuscript set by the
 // same typesetter that makes the print PDF (title page, filled contents, every section in order),
@@ -36,7 +36,7 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
   const [setting, setSetting] = useState(true);
   const [pdf, setPdf] = useState<Uint8Array | null>(null);
   const placed = useRef<{ list: { page: number; top: number; bottom: number; text: string }[]; H: number }>({ list: [], H: 0 });
-  const [info, setInfo] = useState<{ total: number; from: number; to: number; bodyFirst: number; contents: [number, number] | null } | null>(null);
+  const [info, setInfo] = useState<{ total: number; from: number; to: number; bodyFirst: number; contents: [number, number] | null; folios: string[]; runts: { title: string; folio: string; lines: number }[] } | null>(null);
   const [design, setDesign] = useState(0);
   const [showFront, setShowFront] = useState(Boolean(showContents));
   useEffect(() => { if (showContents) setShowFront(true); }, [showContents]);
@@ -70,7 +70,7 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
           import("@/lib/typeset/book"), import("@/lib/typeset/prefs"), import("pdfjs-dist"), import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
         ]);
         const pref = getInteriorType();
-        const r = await typesetBook(md, { title: m.title || "Untitled book", author: m.author, trim, layout: "standard", style: pref.style, body: pref.body, heading: pref.heading, size: pref.size, leading: pref.leading, margins: pref.margins });
+        const r = await typesetBook(md, { title: m.title || "Untitled book", author: m.author, ...bookFacts(m), trim, layout: "standard", style: pref.style, body: pref.body, heading: pref.heading, size: pref.size, leading: pref.leading, margins: pref.margins, arabicFrom: pref.arabicFrom, tocDepth: pref.tocDepth });
         if (!live) return;
         pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
         const doc = await pdfjs.getDocument({ data: r.bytes.slice() }).promise;
@@ -81,12 +81,12 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
         const out = await render(doc as never, from, Math.max(from, to));
         if (!live) return;
         placed.current = { list: r.placed, H: r.pageHeight };
-        setPdf(r.bytes); setPages(out); setInfo({ total: r.pages, from, to: Math.max(from, to), bodyFirst: r.bodyFirst, contents: r.contents }); setFront(null); setError(null);
+        setPdf(r.bytes); setPages(out); setInfo({ total: r.pages, from, to: Math.max(from, to), bodyFirst: r.bodyFirst, contents: r.contents, folios: r.folios, runts: r.runts }); setFront(null); setError(null);
       } catch (e) { if (live) setError(e instanceof Error ? e.message : "The pages couldn't be set."); }
       finally { if (live) setSetting(false); }
     }, 900);
     return () => { live = false; window.clearTimeout(t); };
-  }, [md, m.title, m.author, trim, at, design]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [md, m.title, m.author, m.subtitle, m.meta, trim, at, design]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The title page and contents, on request (they are the same for every section).
   useEffect(() => {
@@ -105,7 +105,9 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
   useEffect(() => { holder.current?.scrollIntoView?.({ block: "start" }); }, [pages]);
 
   // Pages carry the numbers printed on them (as the contents lists them); the front pages are named.
-  const label = (n: number) => (info?.contents && n >= info.contents[0] && n <= info.contents[1] ? "Contents" : !info || n >= info.bodyFirst ? `Page ${info ? n - info.bodyFirst + 1 : n}` : "Front page");
+  // Preliminary pages carry Roman numerals (i, ii…), the main text Arabic, as printed.
+  const folio = (n: number) => info?.folios[n - 1] || String(n);
+  const label = (n: number) => (info?.contents && n >= info.contents[0] && n <= info.contents[1] ? "Contents" : !info || n >= info.bodyFirst ? `Page ${folio(n)}` : "Front page");
   const sheet = (p: { url: string; n: number }) => (
     <figure key={p.n} className="mx-auto" style={{ maxWidth: `${Math.round((trim.wmm / trim.hmm) * 860)}px` }}>
       <img src={p.url} alt={label(p.n)} title={onEditParagraph ? "Click a paragraph to correct it" : undefined}
@@ -136,7 +138,9 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
       </div>
       <div className="mb-4 flex flex-wrap items-center gap-3 text-[12px] text-[#64748B]" aria-live="polite">
         {setting ? <span className="inline-flex items-center gap-1.5"><Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> Setting the book…</span>
-          : info && <span>The whole book as it will print, {trim.label}: {info.total} pages. {at < 0 ? "Title page and contents." : info.to > info.from ? `This section: pages ${info.from - info.bodyFirst + 1}–${info.to - info.bodyFirst + 1}.` : `This section: page ${info.from - info.bodyFirst + 1}.`}</span>}
+          : info && <span>The whole book as it will print, {trim.label}: {info.total} pages. {at < 0 ? "Title page and contents." : info.to > info.from ? `This section: pages ${folio(info.from)}–${folio(info.to)}.` : `This section: page ${folio(info.from)}.`}</span>}
+        {/* Chapters ending with only a line or two on their last page (§22): worth tightening by a line. */}
+        {info && info.runts.length > 0 && <span className="w-full text-[#92400E] dark:text-amber-300">{info.runts.length === 1 ? "A chapter ends" : `${info.runts.length} chapters end`} with only a line or two on the last page: {info.runts.slice(0, 3).map((x) => `“${x.title}” (page ${x.folio}, ${x.lines} ${x.lines === 1 ? "line" : "lines"})`).join("; ")}{info.runts.length > 3 ? "…" : ""}. Shorten the chapter by a few words, or choose a slightly tighter line spacing in Page design.</span>}
         {info && at >= 0 && info.from > 1 && <button type="button" className="underline" onClick={() => setShowFront((v) => !v)} aria-pressed={showFront}>{showFront ? "Hide the title page and contents" : "Show the title page and contents"}</button>}
       </div>
       {error ? (

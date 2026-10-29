@@ -65,12 +65,15 @@ function renderBook(content: string, t: BookTheme, rtl: boolean): string {
     const first = chapterFirstPara;
     chapterFirstPara = false;
 
-    if (first && t.dropCap && /\w/.test(tr[0] ?? "")) {
+    // A drop cap only on a paragraph long enough to carry it, and kept inside its own paragraph
+    // (flow-root), so a short opening line never lets the capital run into the text below.
+    const capped = first && t.dropCap && /\w/.test(tr[0] ?? "") && tr.length >= 160;
+    if (capped) {
       const ch = tr[0];
       html = `<span style="float:left;font-family:${disp};font-size:${t.size * 3.2}px;line-height:.72;padding:.02em .08em 0 0;font-weight:700;color:${t.heading}">${esc(ch)}</span>${inline(tr.slice(1))}`;
     }
     const indent = !first && t.indent ? `text-indent:${t.size * 1.6}px;` : "";
-    out.push(`<p style="font-family:${body};color:${t.ink};font-size:${t.size}px;line-height:${t.leading};text-align:${align};margin:0 0 ${first ? "1em" : ".2em"};${indent}">${html}</p>`);
+    out.push(`<p style="font-family:${body};color:${t.ink};font-size:${t.size}px;line-height:${t.leading};text-align:${align};margin:0 0 ${first ? "1em" : ".2em"};${indent}${capped ? "display:flow-root;" : ""}">${html}</p>`);
   }
   closeList();
   return out.join("");

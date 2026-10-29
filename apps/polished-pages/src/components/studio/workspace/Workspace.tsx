@@ -12,7 +12,7 @@ import { importText, insertSection, kindDef, titleFromFileName, words, type Manu
 import { readWizardDraft, wizardDraftToManuscript } from "@/lib/studio-merge";
 import { apiBookEngine, type BookEngine } from "@/lib/book-engine";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
-import { apiCoverCopyWriter, apiDesignBook, apiOrganise, runnerBackend, sourceText, type EngineDecision, type EngineMode, type StudioBackend, apiResearch } from "@/lib/studio-backend";
+import { apiCoverCopyWriter, apiDesignBook, apiMatter, apiOrganise, runnerBackend, sourceText, type EngineDecision, type EngineMode, type StudioBackend, apiResearch } from "@/lib/studio-backend";
 import { StudioError, claudeBookEngine, setSectionTitles, type RunOptions, type StudioAction, type StudioEvent, type StudioJob, type StudioThread, type StudioThreadSummary } from "@/lib/claude-studio";
 import type { ToolId } from "@/lib/studio-tools";
 import { designToManuscript, parseDesign, restoreArchived, resultToManuscript, type BookDesign, type BookTypeId, type DesignApproach, type DesignBriefInput } from "@/lib/book-design";
@@ -33,7 +33,8 @@ import PlanStage from "./PlanStage";
 import BookDesignDialog from "./BookDesignDialog";
 import OpenPdfDialog from "./OpenPdfDialog";
 import OrganiseDialog from "./OrganiseDialog";
-import { claudeOrganise, claudeResearch, pdfInStudio, studio } from "@/lib/claude-studio";
+import MatterGuide from "./MatterGuide";
+import { claudeMatter, claudeOrganise, claudeResearch, pdfInStudio, studio } from "@/lib/claude-studio";
 import { readBackup, splitDocuments } from "@/lib/project-restore";
 import { findParagraph, type Found } from "@/lib/page-edit";
 import { Textarea } from "@/components/ui/textarea";
@@ -141,6 +142,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [pdfFile, setPdfFile] = useState<StudioThread["files"][number] | null>(null);
   // Organise into chapters and sections (§19).
   const [organising, setOrganising] = useState(false);
+  // Front and back matter, page by page (§21): the page to open, or null.
+  const [matter, setMatter] = useState<string | null>(null);
   const [bookPanel, setBookPanelState] = useState<"design" | "claude">(() => { try { return localStorage.getItem("studio.bookPanel") === "claude" ? "claude" : "design"; } catch { return "design"; } });
   const setBookPanel = (v: "design" | "claude") => { setBookPanelState(v); try { localStorage.setItem("studio.bookPanel", v); } catch { /* storage blocked */ } };
   // Find and replace across the book (§21).
@@ -456,7 +459,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
           queue={sr.queue} onSeries={() => setTool({ initial: "series" })} onFinish={() => setPlace("finish")}
           onDesign={bookEngine ? designBook : undefined}
           onApplyDesign={(d, b) => { update(designToManuscript(d, m, b)); setApproach(b.approach); }}
-          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} onResplit={hasUploads ? () => void resplit() : undefined} onOrganise={engineId ? () => setOrganising(true) : undefined} onFind={() => setFinding(true)} />
+          onRestore={(i) => update(restoreArchived(m, i))} onWizard={() => setWizardOpen(true)} onResplit={hasUploads ? () => void resplit() : undefined} onOrganise={engineId ? () => setOrganising(true) : undefined} onFind={() => setFinding(true)} onMatter={(kind) => setMatter(kind ?? "")} />
       </>;
     }
     if (place === "finish") return <FinishStage m={m} onUpdate={update} onOpen={openSection} coverWriter={p.coverWriter} findCover={p.findCover}
@@ -584,6 +587,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       {narrow && <Sheet open={showPanel} onOpenChange={setSheet}><SheetContent side="right" className="w-[min(400px,92vw)] p-0 sm:max-w-[400px]"><SheetTitle className="sr-only">Claude</SheetTitle>{panel}</SheetContent></Sheet>}
 
       <Onboarding open={tour} onClose={() => setTour(false)} onGo={setPlace} />
+      {matter !== null && m && <MatterGuide m={m} onUpdate={update} start={matter || undefined} engineLabel={bookEngine?.label} onClose={() => setMatter(null)}
+        rewrite={engineId ? (i) => (engineId === "claude-code" && backend === runnerBackend ? claudeMatter(id, i) : apiMatter(i)) : null} />}
       {organising && <OrganiseDialog hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} hasUploads={hasUploads} engineLabel={bookEngine?.label}
         readText={async (s) => (s === "manuscript" ? (m ? manuscriptText(m) : null) : uploadsText((await backend.thread(id)).thread.files, true))}
         organise={(text, o) => (engineId === "claude-code" && backend === runnerBackend ? claudeOrganise(id, text, o) : apiOrganise(text, o))}

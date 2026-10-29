@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowDown, ArrowUp, BookOpen, ChevronDown, History, Layers3, ListTree, Loader2, PenLine, Plus, Replace, Sparkles, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BookOpen, BookOpenCheck, ChevronDown, History, Layers3, ListTree, Loader2, PenLine, Plus, Replace, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { LARGE_CHAPTER_WORDS, SECTION_KINDS, insertSection, kindDef, largeSections, moveSection, words, type Manuscript } from "@/lib/manuscript";
+import { matterProgress } from "@/lib/matter-guide";
 import { outlineToManuscript } from "@/lib/studio-merge";
 import type { BookEngine } from "@/lib/book-engine";
 import type { BookDepth, BookMode } from "@/types/book";
@@ -25,7 +26,7 @@ const GROUPS = [{ id: "front", label: "Front Matter" }, { id: "body", label: "Ma
 
 // Plan (design spec §2): the book's contents, with the plan and notes for each
 // chapter, its order, Claude's outline, and turning the book into a series.
-export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard, onResplit, onOrganise, onFind }: {
+export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUploads, onWriteAll, queue, onSeries, busy, onFinish, onDesign, onApplyDesign, onRestore, onWizard, onResplit, onOrganise, onFind, onMatter }: {
   m: Manuscript; onUpdate: (m: Manuscript) => void; onOpen: (id: string) => void; engine: BookEngine | null; approach: ApproachId; hasUploads: boolean;
   onWriteAll: (ids: string[]) => void; queue: { done: number; total: number } | null; onSeries: () => void; busy: boolean;
   /** Finish joins every chapter into one book. */
@@ -43,6 +44,8 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
   onOrganise?: () => void;
   /** Find and replace across the book (§21). */
   onFind?: () => void;
+  /** Front and back matter, page by page (§21), opened at a page or the first one still to do. */
+  onMatter?: (kind?: string) => void;
 }) {
   const { toast } = useToast();
   const [open, setOpen] = useState<string | null>(null);
@@ -105,7 +108,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
           if (!list.length) return null;
           return (
             <section key={g.id} aria-label={g.label} className="mb-6">
-              {g.id !== "body" && <p className="mb-1 text-[12px] font-medium text-[#64748B]">{g.label}</p>}
+              {g.id !== "body" && <p className="mb-1 flex items-baseline justify-between gap-2 text-[12px] font-medium text-[#64748B]">{g.label}{onMatter && <button type="button" className="font-medium text-[#2563EB] hover:underline" onClick={() => onMatter()}>Go through it page by page</button>}</p>}
               <ol>
                 {list.map((s) => {
                   const n = g.id === "body" ? m.sections.filter((x) => x.kind === "chapter").indexOf(s) + 1 : 0;
@@ -128,6 +131,7 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
                           <Textarea value={s.idea ?? ""} rows={3} onChange={(e) => onUpdate({ ...m, sections: m.sections.map((x) => (x.id === s.id ? { ...x, idea: e.target.value } : x)) })} aria-label="Chapter notes and plan" placeholder="What this chapter should teach, keep, add or cut." className="text-[13.5px]" />
                           <div className="flex flex-wrap gap-1.5">
                             <Button size="sm" variant="outline" className="h-8" onClick={() => onOpen(s.id)}><PenLine className="h-3.5 w-3.5" /> Write</Button>
+                            {onMatter && g.id !== "body" && <Button size="sm" variant="outline" className="h-8" onClick={() => onMatter(s.kind)}><Sparkles className="h-3.5 w-3.5" /> Edit with Claude</Button>}
                             <Button size="sm" variant="ghost" className="h-8" aria-label="Move up" onClick={() => onUpdate(moveSection(m, s.id, -1))}><ArrowUp className="h-3.5 w-3.5" /></Button>
                             <Button size="sm" variant="ghost" className="h-8" aria-label="Move down" onClick={() => onUpdate(moveSection(m, s.id, 1))}><ArrowDown className="h-3.5 w-3.5" /></Button>
                             <Button size="sm" variant="ghost" className="h-8 text-[#B91C1C]" onClick={() => { if (window.confirm(`Delete “${s.title}” and its text?`)) onUpdate({ ...m, sections: m.sections.filter((x) => x.id !== s.id) }); }}><Trash2 className="h-3.5 w-3.5" /> Delete</Button>
@@ -165,6 +169,17 @@ export default function PlanStage({ m, onUpdate, onOpen, engine, approach, hasUp
           ))}
         </div>
 
+        {onMatter && (() => {
+          const p = matterProgress(m);
+          return (
+            <div className="space-y-2 rounded-[10px] border border-[#E6E8ED] bg-white p-4 dark:border-white/10 dark:bg-white/5">
+              <p className="flex items-center gap-2 text-[14px] font-semibold"><BookOpenCheck className="h-4 w-4 text-[#2563EB]" /> Front and back matter</p>
+              <p className="text-[12.5px] text-[#64748B]">Title, copyright, dedication, preface, introduction… then conclusion, glossary, about the author: page by page, in the order a book prints them. Write what you want; Claude rewrites it professionally; accept and go on.</p>
+              <p className="text-[12px] text-[#64748B]">{p.done} of {p.total} pages ready</p>
+              <Button variant="outline" className="h-9 w-full" onClick={() => onMatter()}><BookOpenCheck className="h-4 w-4" /> {p.done ? "Continue the pages" : "Start the pages"}</Button>
+            </div>
+          );
+        })()}
         {onOrganise && (
           <div className="space-y-2 rounded-[10px] border border-[#E6E8ED] bg-white p-4 dark:border-white/10 dark:bg-white/5">
             <p className="flex items-center gap-2 text-[14px] font-semibold"><ListTree className="h-4 w-4 text-[#2563EB]" /> Organise into chapters and sections</p>

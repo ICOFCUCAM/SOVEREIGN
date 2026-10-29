@@ -1,3 +1,4 @@
+import { putInOrder } from "@/lib/front-matter-check";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import PublishingPackage from "./PublishingPackage";
 import { Link } from "react-router-dom";
@@ -9,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { COMPLETE, DEFAULT_SHELVES, SHELF } from "@/lib/bookshelf";
 import { saveDocument, setTags, updateDocument } from "@/lib/documents";
 import { findBookCover } from "@/lib/book-covers";
-import { authorshipNotes, compile, kindDef, words, type Manuscript } from "@/lib/manuscript";
+import { authorshipNotes, bookFacts, compile, kindDef, words, type Manuscript } from "@/lib/manuscript";
 import { localizeMarkdown, markdownEdition } from "@/lib/localize";
 import type { CoverCopyWriter } from "@/lib/cover-copy";
 import type { BookOutline } from "@/types/book";
@@ -80,7 +81,12 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
   useEffect(() => { let live = true; if (m.libraryId) findCover(m.libraryId).then((c) => { if (live) setCover(c); }).catch(() => {}); return () => { live = false; }; }, [m.libraryId, tab, findCover]);
   const trim = getTrim(String(meta.trimSize || "6x9"));
   const spineMm = coverSpec(trim, Number(meta.pageCount) || estimatePages(m, trim.id), String(meta.paper || "Cream")).spineMm;
-  const fix = (t?: FixTarget, sectionId?: string) => { if (t === "section") { if (sectionId) onOpen(sectionId); } else if (t) setTab(t); };
+  const fix = (t?: FixTarget, sectionId?: string) => {
+    if (t === "section") { if (sectionId) onOpen(sectionId); }
+    // The front and back matter put in the usual order (§22); undo puts it back.
+    else if (t === "order") onUpdate(putInOrder(m));
+    else if (t) setTab(t);
+  };
 
   /** Saves the book to the Library (updating the same book after the first time) and returns its id. */
   const ensureSaved = async (): Promise<string | null> => {
@@ -204,16 +210,16 @@ export default function FinishStage({ m, onUpdate, onOpen, coverWriter, findCove
 
       <div className="mt-6 min-h-[40vh]">
         <Suspense fallback={<div className="grid min-h-[30vh] place-items-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
-          {tab === "preview" && <BookReader content={md} title={title} />}
+          {tab === "preview" && <BookReader content={md} title={title} author={m.author} facts={bookFacts(m)} />}
           {tab === "check" && <EditorialCheck text={plain} rules={bookRules} title="Editorial check of the book" placeLabel="Open the section" onPlace={(p) => { const sid = sectionAt(p.line); if (sid) onOpen(sid); }} />}
-          {tab === "cover" && <CoverGenerator title={title} subtitle={m.subtitle} author={m.author} isbn={meta.isbn} publisher={meta.publisher || meta.imprint} pageCount={meta.pageCount} paper={meta.paper} trimSize={meta.trimSize}
+          {tab === "cover" && <CoverGenerator title={title} subtitle={m.subtitle} author={m.author} isbn={meta.isbn ? String(meta.isbn) : ""} onIsbn={(v) => onUpdate({ ...m, meta: { ...meta, isbn: v } })} publisher={meta.publisher || meta.imprint} pageCount={meta.pageCount} paper={meta.paper} trimSize={meta.trimSize}
             bookText={() => compile(m, { contents: false })} copyWriter={coverWriter} bookId={m.libraryId ?? null} ensureSaved={ensureSaved} onSaved={() => m.libraryId && findCover(m.libraryId).then(setCover)} />}
           {tab === "export" && <BookExportPanel bookTitle={title} fullContent={md} chapterCount={chapters.filter((s) => s.body.trim()).length} />}
           {tab === "audio" && <AudiobookPanel chapters={chapters.filter((s) => s.body.trim()).map((s) => ({ title: s.title, content: s.body }))} bookTitle={title} parentId={m.libraryId ?? null} ensureSaved={ensureSaved} />}
           {tab === "translate" && <LocalizePanel parentId={m.libraryId ?? null} ensureSaved={ensureSaved} kind="book" sourceTitle={title} hasContent={chapters.some((s) => s.body.trim())}
             buildEdition={async ({ language, mode, culture, onProgress }) => markdownEdition(title, await localizeMarkdown(md, { language, mode, culture, onProgress }), language, mode, culture)} />}
           {tab === "repurpose" && <BookRepurposePanel bookTitle={title} fullContent={md} />}
-          {tab === "production" && <ProductionPanel meta={meta} setMeta={(x) => onUpdate({ ...m, meta: x as Record<string, unknown> })} bookTitle={title} manuscriptComplete={chapters.length > 0 && chapters.every((s) => s.body.trim())} coverDone={Boolean(cover)} parentId={m.libraryId ?? null} content={md} />}
+          {tab === "production" && <ProductionPanel facts={bookFacts(m)} meta={meta} setMeta={(x) => onUpdate({ ...m, meta: x as Record<string, unknown> })} bookTitle={title} manuscriptComplete={chapters.length > 0 && chapters.every((s) => s.body.trim())} coverDone={Boolean(cover)} parentId={m.libraryId ?? null} content={md} />}
           {tab === "publish" && <>
             <PublishingPackage markdown={md} input={{ title, subtitle: m.subtitle, author: m.author, isbn: meta.isbn ? String(meta.isbn) : undefined, publisher: String(meta.publisher || meta.imprint || "") || undefined, paper: meta.paper ? String(meta.paper) : undefined, trim, language: meta.language ? String(meta.language) : null, coverUrl: cover }} />
             <BookPublishingPackage outline={outline} />

@@ -5,9 +5,11 @@
 import { kindDef, words, type Manuscript } from "@/lib/manuscript";
 import { SPINE_TEXT_MIN_PAGES } from "@/lib/cover-design";
 import { coverSpec, getTrim } from "@/lib/print-sizes";
+import { frontMatterChecks } from "@/lib/front-matter-check";
+import { joinedWords, vocabulary } from "@/lib/joined-words";
 
 export type FormatId = "epub" | "print" | "paperback" | "audiobook";
-export type FixTarget = "cover" | "export" | "production" | "audio" | "section" | "check";
+export type FixTarget = "cover" | "export" | "production" | "audio" | "section" | "check" | "order";
 export interface FormatCheck { ok: boolean; level: "required" | "advised"; text: string; fix?: FixTarget; sectionId?: string }
 export interface FormatReport { id: FormatId; label: string; line: string; facts: string[]; checks: FormatCheck[]; ready: boolean }
 
@@ -75,7 +77,6 @@ export function formatReport(id: FormatId, m: Manuscript, opts: { cover: boolean
     const pages = Number(meta.pageCount) || estimatePages(m, trimId);
     const estimated = !Number(meta.pageCount);
     add({ ok: Boolean(meta.trimSize), level: "required", text: meta.trimSize ? `Trim size ${trim.label}` : "No trim size chosen (6 × 9 in is assumed)", fix: meta.trimSize ? undefined : "production" });
-    add({ ok: m.sections.some((s) => kindDef(s.kind).group === "front"), level: "advised", text: m.sections.some((s) => kindDef(s.kind).group === "front") ? "Front matter present" : "No front matter (title page, copyright…)", fix: "section", sectionId: m.sections[0]?.id });
     facts.push(`${estimated ? "About " : ""}${pages.toLocaleString()} pages${estimated ? " (estimated until typeset)" : ""}`, "Fonts are embedded; chapters open on a new page with running heads and page numbers.");
     if (id === "paperback") {
       const paper = meta.paper || "Cream";
@@ -86,6 +87,16 @@ export function formatReport(id: FormatId, m: Manuscript, opts: { cover: boolean
       facts.push(`Spine ${spec.spineMm.toFixed(1)} mm on ${paper.toLowerCase()} paper; full wrap ${spec.fullWin.toFixed(2)} × ${spec.fullHin.toFixed(2)} in with bleed.`,
         pages >= SPINE_TEXT_MIN_PAGES ? "Spine text allowed." : `No spine text below ${SPINE_TEXT_MIN_PAGES} pages; the spine stays plain.`);
     }
+  }
+
+  // Front and back matter in order, none twice, none empty, chapters in sequence (§22).
+  if (id !== "audiobook") for (const c of frontMatterChecks(m)) add(c);
+  // Words the import joined ("Yahushaand"): for the author to look at, in Write (§22).
+  {
+    const vocab = vocabulary(m.sections.map((s) => s.body).join("\n"));
+    const joined = m.sections.map((s) => ({ s, n: joinedWords(s.body, vocab).length })).filter((x) => x.n);
+    const total = joined.reduce((a, x) => a + x.n, 0);
+    if (total) add({ ok: false, level: "advised", text: `${plural(total, "word looks", "words look")} joined by the import (a space lost at a line break)`, fix: "section", sectionId: joined[0].s.id });
   }
 
   if (id === "audiobook") {

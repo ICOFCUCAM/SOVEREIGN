@@ -1,3 +1,5 @@
+import { matterPrompt } from "./matter-guide";
+import type { MatterInput } from "./claude-studio";
 import { parseResearch, researchPrompt, type ResearchResult, type ResearchScope } from "./research";
 import { authHeader } from "@/lib/session";
 import { splitBook } from "@/lib/book-split";
@@ -76,6 +78,13 @@ export async function apiOrganise(text: string, o: OrganiseOptions): Promise<Org
 export async function apiResearch(text: string, query: string, scope: ResearchScope): Promise<ResearchResult> {
   const r = await callApi(`The section:\n\n${text.slice(0, 200_000)}\n\n---\n\n${researchPrompt(query, scope, "the section above")}\nYou cannot open web pages here: give no URL, and list a scholar only when you are certain the work exists.`, { maxTokens: 6000 });
   return parseResearch(r.text);
+}
+
+/** A front or back matter page (§21) on the API: the same question as on Claude Code. */
+export async function apiMatter(i: MatterInput): Promise<string> {
+  const book = i.fromBook && i.book ? `The book:\n\n${i.book.slice(0, 400_000)}\n\n---\n\n` : "";
+  const r = await callApi(`${book}The author's words for this page:\n\n${i.notes.trim() || "(The author wrote nothing for this page.)"}\n\n---\n\n${matterPrompt(i, { notes: "the author's words above", book: book ? "the book above" : undefined })}`, { maxTokens: 4000 });
+  return r.text.trim();
 }
 
 /** The design of a rebuilt book on the API (DESIGN-SPEC.md §17): the same brief and shape as Claude Code, the material in one request. */

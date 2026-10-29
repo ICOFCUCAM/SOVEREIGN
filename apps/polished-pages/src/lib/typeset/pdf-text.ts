@@ -96,6 +96,31 @@ class PdfFont {
   }
 }
 
+/** Emphasis marks carried in paragraph text (private-use characters; never printed). */
+export const EM_ITALIC = "\uE000", EM_BOLD = "\uE001";
+export const EM_MARKS = /[\uE000\uE001]/g;
+/** Words between emphasis marks take the italic or bold face; italic inside italic text is set roman, as books do. */
+function emphasise(tokens: Token[], base: Style): Token[] {
+  if (!tokens.some((t) => /[\uE000\uE001]/.test(t.text))) return tokens;
+  let it = false, bd = false;
+  const face = (): Style => {
+    const i = it !== (base === "italic" || base === "boldItalic"), b = bd || base === "bold" || base === "boldItalic";
+    return i && b ? "boldItalic" : i ? "italic" : b ? "bold" : "regular";
+  };
+  const out: Token[] = [];
+  for (const t of tokens) {
+    let run = "";
+    const flush = (last: boolean) => { if (run) out.push({ ...t, text: run, space: last ? t.space : false, breakAfter: last ? t.breakAfter : false, style: face() }); run = ""; };
+    for (const ch of t.text) {
+      if (ch === EM_ITALIC || ch === EM_BOLD) { flush(false); if (ch === EM_ITALIC) it = !it; else bd = !bd; }
+      else run += ch;
+    }
+    if (run) flush(true);
+    else if (t.space && out.length) out[out.length - 1] = { ...out[out.length - 1], space: true };
+  }
+  return out;
+}
+
 export type FaceKind = "body" | "heading";
 export interface TextStyle { kind: FaceKind; style: Style; size: number; gray?: number }
 export type Align = "start" | "end" | "center" | "justify" | "left" | "right";
@@ -208,17 +233,19 @@ export class Typesetter {
     pc.ops.push(`q ${num(gray)} g ${num(cx)} ${num(cy + r)} m ${num(cx + r)} ${num(cy)} l ${num(cx)} ${num(cy - r)} l ${num(cx - r)} ${num(cy)} l h f Q`);
   }
 
-  /** Breaks a paragraph into lines no wider than width (points); widthFor narrows given lines (a drop cap, an indent). */
+  /** Breaks a paragraph into lines no wider than width (points); widthFor narrows given lines (a drop cap, an indent).
+   *  Emphasis marks in the text (EM_ITALIC, EM_BOLD, each opening and closing a run) set those words in italic or bold. */
   wrap(text: string, st: TextStyle, width: number, widthFor?: (line: number) => number): Line[] {
-    const dir = paragraphDir(text);
+    const dir = paragraphDir(text.replace(EM_MARKS, ""));
     const sp = this.spaceWidth(st);
     const toks: Token[] = [];
-    for (const t of tokenize(text)) {
-      if (this.measure(t.text, st) <= width) { toks.push(t); continue; }
+    for (const t of emphasise(tokenize(text), st.style)) {
+      const tst = t.style ? { ...st, style: t.style } : st;
+      if (this.measure(t.text, tst) <= width) { toks.push(t); continue; }
       // A single word wider than the line (a long URL): break it by character.
       let piece = "";
       for (const ch of t.text) {
-        if (piece && this.measure(piece + ch, st) > width) { toks.push({ ...t, text: piece, space: false }); piece = ""; }
+        if (piece && this.measure(piece + ch, tst) > width) { toks.push({ ...t, text: piece, space: false }); piece = ""; }
         piece += ch;
       }
       toks.push({ ...t, text: piece });
@@ -232,7 +259,7 @@ export class Typesetter {
     const lines: Line[] = [];
     let cur: Token[] = [], widths: number[] = [], w = 0;
     for (const g of groups) {
-      const gw = g.map((t) => this.measure(t.text, st));
+      const gw = g.map((t) => this.measure(t.text, t.style ? { ...st, style: t.style } : st));
       const inner = g.slice(0, -1).reduce((a, t) => a + (t.space ? sp : 0), 0);
       const total = gw.reduce((a, b) => a + b, 0) + inner;
       const gap = cur.length && cur[cur.length - 1].space ? sp : 0;
@@ -260,9 +287,10 @@ export class Typesetter {
     let cx = justify ? x : a === "center" ? x + (width - natural) / 2 : atRight ? x + width - natural : x;
     order.forEach((ti, i) => {
       const t = line.tokens[ti];
-      let segs = this.segments(t.text, st);
+      const tst = t.style ? { ...st, style: t.style } : st;
+      let segs = this.segments(t.text, tst);
       if (t.dir === "R" && segs.length > 1) segs = segs.reverse();
-      for (const s of segs) cx = this.emit(pc, s, cx, y, st);
+      for (const s of segs) cx = this.emit(pc, s, cx, y, tst);
       if (slot[i]) cx += gapAfter[i] + extra;
     });
     return natural;
