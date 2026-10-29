@@ -65,7 +65,7 @@ export function InteriorTypeEditor({ onChange, large }: { onChange?: (t: Interio
           <Label className="font-sans text-xs">Interior style</Label>
           <div className="grid grid-cols-3 gap-2">
             {INTERIOR_STYLES.map((s) => (
-              <button key={s.id} type="button" onClick={() => save({ ...withStyle(s.id), ...(t.margins ? { margins: t.margins } : {}), ...(t.arabicFrom ? { arabicFrom: t.arabicFrom } : {}), ...(t.tocDepth ? { tocDepth: t.tocDepth } : {}) })} aria-pressed={t.style === s.id} data-style={s.id}
+              <button key={s.id} type="button" onClick={() => save({ ...withStyle(s.id), ...(t.margins ? { margins: t.margins } : {}), ...(t.arabicFrom ? { arabicFrom: t.arabicFrom } : {}), ...(t.tocDepth ? { tocDepth: t.tocDepth } : {}), ...(t.numberSections !== undefined ? { numberSections: t.numberSections } : {}) })} aria-pressed={t.style === s.id} data-style={s.id}
                 className={`rounded-xl border p-1.5 text-left transition ${t.style === s.id ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}>
                 <StyleThumb s={s} />
                 <span className="mt-1 block text-xs font-semibold">{s.label}</span>
@@ -106,6 +106,12 @@ export function InteriorTypeEditor({ onChange, large }: { onChange?: (t: Interio
           <Label className="font-sans text-xs">Contents list</Label>
           {([[1, "Chapters"], [2, "Chapters and sections"]] as const).map(([v, label]) => (
             <button key={v} type="button" onClick={() => update({ tocDepth: v })} aria-pressed={(t.tocDepth ?? 2) === v} className={`rounded-full border px-2 py-0.5 text-xs ${(t.tocDepth ?? 2) === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Label className="font-sans text-xs">Section numbers</Label>
+          {([[true, "1.1, 1.2…"], [false, "None"]] as const).map(([v, label]) => (
+            <button key={String(v)} type="button" onClick={() => update({ numberSections: v })} aria-pressed={(t.numberSections ?? true) === v} className={`rounded-full border px-2 py-0.5 text-xs ${(t.numberSections ?? true) === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
           ))}
         </div>
       </div>

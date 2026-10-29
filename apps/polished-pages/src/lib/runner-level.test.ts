@@ -10,8 +10,8 @@ describe("which runner the Studio talks to", () => {
   });
   it("says plainly when the deployed runner is old or can't read PDFs", () => {
     expect(runnerProblem(me())).toMatch(/older than the Studio.*Deploy main/);
-    expect(runnerProblem(me({ level: 2, features: [], poppler: true }))).toMatch(/level 2, the Studio needs 6/);
-    expect(runnerProblem(me({ level: 6, features: [], poppler: false }))).toMatch(/can't read PDF pages/);
-    expect(runnerProblem(me({ level: 6, features: [], poppler: true }))).toBeNull();
+    expect(runnerProblem(me({ level: 2, features: [], poppler: true }))).toMatch(/level 2, the Studio needs 7/);
+    expect(runnerProblem(me({ level: 7, features: [], poppler: false }))).toMatch(/can't read PDF pages/);
+    expect(runnerProblem(me({ level: 7, features: [], poppler: true }))).toBeNull();
   });
 });

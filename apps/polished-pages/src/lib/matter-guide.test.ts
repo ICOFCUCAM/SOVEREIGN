@@ -5,11 +5,12 @@ import type { Manuscript } from "./manuscript";
 
 describe("front and back matter, page by page", () => {
   it("asks the same question on Claude Code and the API, and never lets Claude add a fact", () => {
-    const o = { kind: "preface", label: "Preface", notes: "why i wrote it", title: "The Oneness of Yahuah", subtitle: "S", author: "A", rules: "Yahusha, not Jesus", guidance: "The author's note.", fromBook: true };
+    const o = { kind: "preface", label: "Preface", notes: "why i wrote it", title: "The Oneness of Yahuah", subtitle: "S", author: "A", rules: "Yahusha, not Jesus", guidance: "The author's note.", fromBook: true, instructions: "Warm, for new believers", words: 300 };
     const where = { notes: "./matter/notes.md", book: "./matter/book.md" };
     expect(matterPrompt(o, where)).toBe(runner.matterPrompt(o, where));
     expect(matterPrompt(o, where)).toMatch(/Add no facts of your own/);
     expect(matterPrompt(o, where)).toMatch(/Yahusha, not Jesus/);
+    expect(matterPrompt(o, where)).toMatch(/The author asks: Warm, for new believers\nLength: about 300 words\./);
   });
   it("goes through the pages in the order a book prints them, front then back", () => {
     const k = MATTER_STEPS.map((s) => s.kind);

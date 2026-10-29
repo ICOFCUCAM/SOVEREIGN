@@ -52,7 +52,7 @@ async function streamUntilDone(jobId, threadId) {
 test("health needs no sign-in and reveals nothing", async () => {
   const r = await fetch(base + "/health");
   assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { ok: true, level: 6 });
+  assert.deepEqual(await r.json(), { ok: true, level: 7 });
 });
 
 test("only the listed owner who is also a Polished Pages admin gets in", async () => {
@@ -574,7 +574,7 @@ test("the rewrite control panel: plan first for approval, then the rewrite from 
 
 test("the runner says what it can do, so the Studio can tell an old runner", async () => {
   const me = await (await call("/v1/me")).json();
-  assert.equal(me.runner.level, 6);
+  assert.equal(me.runner.level, 7);
   assert.ok(me.runner.features.includes("organise"));
   assert.equal(typeof me.runner.poppler, "boolean");
 });
@@ -663,4 +663,6 @@ test("front and back matter: the author's words for a page rewritten professiona
   const p = buildRun("tool", { tool: "matter", label: "Preface", bookTitle: "B", text: "", book: "## One\n\nText.", fromBook: true });
   assert.equal(p.files["matter/book.md"], "## One\n\nText.");
   assert.match(p.prompt, /draft the page from what the book itself says/);
+  const c = buildRun("tool", { tool: "matter", label: "Foreword", bookTitle: "B", text: "", instructions: "A brief for the foreword writer", words: 300 });
+  assert.match(c.prompt, /The author asks: A brief for the foreword writer\nLength: about 300 words\./);
 });

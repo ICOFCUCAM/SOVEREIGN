@@ -669,7 +669,7 @@ export function matterPrompt(o, where) {
   const book = o.fromBook && where.book ? ` You may also read the book (${where.book}) to make the page fit it${String(o.notes || "").trim() ? "" : ", and, since the author wrote nothing, draft the page from what the book itself says"}.` : "";
   return `Write the ${o.label} of the book "${o.title}"${o.subtitle ? `: ${o.subtitle}` : ""}${o.author ? ` by ${o.author}` : ""}, ready to print.
 The author's own words for it are in ${where.notes}. Rewrite them professionally, in the author's voice (first person where the author speaks as themselves), clear and well ordered.${book}
-What this page is: ${o.guidance}
+What this page is: ${o.guidance}${String(o.instructions || "").trim() ? `\nThe author asks: ${String(o.instructions).trim()}` : ""}${o.words && o.words > 0 ? `\nLength: about ${Math.round(o.words)} words.` : ""}
 Rules:
 - Keep every fact the author gives, exactly. Add no facts of your own: no names, dates, places, credentials, endorsements, publishers or numbers the author didn't give. Where the page would need one, write [[YOURS: what is needed]] instead.
 - Keep quotations and scripture word for word, with their sources.
@@ -682,7 +682,7 @@ TOOLS.matter = {
   build: (o) => {
     const str = (v, n) => String(v || "").slice(0, n);
     const fromBook = Boolean(o.fromBook) && Boolean(String(o.book || "").trim());
-    const opts = { label: str(o.label, 80) || "page", title: str(o.bookTitle, 300), subtitle: str(o.subtitle, 300), author: str(o.author, 200), rules: str(o.rules, 4000), guidance: str(o.guidance, 2000), notes: str(o.text, 40000), fromBook };
+    const opts = { label: str(o.label, 80) || "page", title: str(o.bookTitle, 300), subtitle: str(o.subtitle, 300), author: str(o.author, 200), rules: str(o.rules, 4000), guidance: str(o.guidance, 2000), notes: str(o.text, 40000), fromBook, instructions: str(o.instructions, 1000), words: Math.min(20000, Math.max(0, Number(o.words) || 0)) };
     return {
       title: `${opts.label}`,
       output: "matter.md",

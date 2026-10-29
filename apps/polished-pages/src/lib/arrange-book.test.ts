@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { arrangeBook, arrangeFromContents, conventionalOrder, titleCase } from "./arrange-book";
+import { arrangeBook, arrangeFromContents, arrangeLeftover, conventionalOrder, leftoverContents, titleCase } from "./arrange-book";
+import type { Manuscript } from "./manuscript";
 import { applyOrganise } from "./organise";
 
 const BOOK = `THE ONENESS OF YAHUAH
@@ -108,5 +109,37 @@ describe("a contents list where a section has its chapter's name", () => {
     expect(o.sections.find((s) => s.title === "Theophanies")!.body).toMatch(/^A theophany[\s\S]*### Theophanies\n\nThe appearances[\s\S]*### Theophanies: The Appearance to Abraham[\s\S]*### The Angel of Yahuah/);
     expect(o.sections.some((s) => s.title === "Opening pages")).toBe(false);
     expect(o.missed).toEqual([]);
+  });
+});
+
+describe("putting back a contents list left in the book as 'Opening pages'", () => {
+  const P = (s: string) => `${s} is set out here at length, with the scriptures that bear on it, so the reader can follow it closely.`;
+  const m: Manuscript = { title: "The Oneness of Yahuah", history: [], sections: [
+    { id: "e", kind: "epigraph", title: "Epigraph", body: "Hear, O Israel: Yahuah our Elohim, Yahuah is one." },
+    { id: "i", kind: "introduction", title: "Introduction", body: `${P("This book")}\n\n### The Aim of This Book\n\n${P("The aim")}` },
+    { id: "o", kind: "chapter", title: "Opening pages", body: "Theophanies\nTheophanies: The Appearance to Abraham\nThe Angel of Yahuah\n8. Reading the Gospels Rightly\nFour Aids to Understanding" },
+    { id: "1", kind: "chapter", title: "One Yahuah", body: `${P("Both testaments")}\n\n### What Monotheism Means\n\n${P("Monotheism")}` },
+    { id: "7", kind: "chapter", title: "Reading the Old Testament Rightly", body: `7. Reading the Old Testament Rightly\n\n${P("The Old Testament")}\n\nTheophanies\n\n${P("A theophany")}\n\nTheophanies: The Appearance to Abraham\n\n${P("Abraham")}\n\nThe Angel of Yahuah\n\n${P("The angel")}\n\n8. Reading the Gospels Rightly\n\n${P("The gospels")}\n\nFour Aids to Understanding\n\n${P("Four aids")}` },
+  ] };
+  it("finds the leftover list and places every chapter and section from it, without losing a word", () => {
+    expect(leftoverContents(m)?.id).toBe("o");
+    const o = arrangeLeftover(m)!;
+    expect(o.sections.map((s) => [s.kind, s.title])).toEqual([["epigraph", "Epigraph"], ["introduction", "Introduction"], ["chapter", "One Yahuah"], ["chapter", "Reading the Old Testament Rightly"], ["chapter", "Reading the Gospels Rightly"]]);
+    const ot = o.sections.find((s) => s.title === "Reading the Old Testament Rightly")!.body;
+    expect(ot).toMatch(/^The Old Testament[\s\S]*### Theophanies\n\nA theophany[\s\S]*### Theophanies: The Appearance to Abraham[\s\S]*### The Angel of Yahuah/);
+    expect(ot).not.toMatch(/Reading the Gospels|^7\./m);
+    expect(o.sections.find((s) => s.title === "Reading the Gospels Rightly")!.body).toMatch(/^The gospels[\s\S]*### Four Aids to Understanding/);
+    expect(o.sections.find((s) => s.title === "Introduction")!.body).toMatch(/### The Aim of This Book/);
+    expect(o.missed).toEqual([]);
+    for (const w of ["This book", "Both testaments", "A theophany", "Four aids", "Hear, O Israel"]) expect(o.sections.some((s) => s.body.includes(w))).toBe(true);
+  });
+  it("places the leftover entries where they stand, also inside a chapter that isn't the last", () => {
+    const mid: Manuscript = { ...m, sections: [m.sections[0], m.sections[1], m.sections[2], m.sections[4], m.sections[3]] };
+    const o = arrangeLeftover(mid)!;
+    expect(o.missed).toEqual([]);
+    expect(o.sections.map((s) => s.title)).toEqual(["Epigraph", "Introduction", "Reading the Old Testament Rightly", "Reading the Gospels Rightly", "One Yahuah"]);
+  });
+  it("leaves a book alone that has no leftover list", () => {
+    expect(leftoverContents({ ...m, sections: m.sections.filter((s) => s.id !== "o") })).toBeNull();
   });
 });

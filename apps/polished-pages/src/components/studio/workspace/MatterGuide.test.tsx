@@ -48,4 +48,19 @@ describe("front and back matter, page by page", () => {
     expect(screen.getByLabelText("Copyright page preview").textContent).toMatch(/ISBN 978-1-23456-789-0/);
     expect(screen.getByText(/never filled with a guess/)).toBeTruthy();
   });
+  it("has a small chat to tell Claude what to compose, and about how many words", async () => {
+    const rewrite = vi.fn().mockResolvedValue("A foreword brief of about three hundred words.");
+    render(<Harness rewrite={rewrite} start="foreword" onChange={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Ask Claude"), { target: { value: "A brief for the foreword writer on why this study matters" } });
+    fireEvent.change(screen.getByLabelText("Number of words"), { target: { value: "300" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+    await screen.findByLabelText("Claude's version");
+    expect(rewrite.mock.calls[0][0]).toMatchObject({ kind: "foreword", instructions: "A brief for the foreword writer on why this study matters", words: 300, notes: "" });
+    // On Claude's version, the same box asks for changes to it.
+    fireEvent.change(screen.getByLabelText("Ask Claude"), { target: { value: "Shorter" } });
+    fireEvent.change(screen.getByLabelText("Number of words"), { target: { value: "150" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+    await waitFor(() => expect(rewrite).toHaveBeenCalledTimes(2));
+    expect(rewrite.mock.calls[1][0]).toMatchObject({ notes: "A foreword brief of about three hundred words.", instructions: "Shorter", words: 150 });
+  });
 });

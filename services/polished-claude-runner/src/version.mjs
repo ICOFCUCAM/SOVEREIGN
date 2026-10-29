@@ -3,8 +3,8 @@
 // the site's RUNNER_LEVEL_NEEDED (src/lib/claude-studio.ts) must not be higher (a test checks).
 import fs from "node:fs";
 
-export const RUNNER_LEVEL = 6;
-export const FEATURES = ["gzip-bodies", "page-images", "raw-files", "library-tools", "organise", "rewrite-approval", "rewrite-audit", "scan-adopt","scan-batches","continue-runs","section-goals", "matter-pages"];
+export const RUNNER_LEVEL = 7;
+export const FEATURES = ["gzip-bodies", "page-images", "raw-files", "library-tools", "organise", "rewrite-approval", "rewrite-audit", "scan-adopt","scan-batches","continue-runs","section-goals", "matter-pages", "matter-chat"];
 
 /** pdftoppm (poppler-utils) is what Claude Code needs to read PDF pages. */
 export function capabilities() {

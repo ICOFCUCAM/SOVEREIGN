@@ -283,3 +283,25 @@ describe("where page 1 is", () => {
     expect(r.folios[r.sections.find((s) => s.title === "One Yahuah")!.page - 1]).toBe("1");
   }, 60_000);
 });
+
+describe("section numbers", () => {
+  it("numbers a chapter's sections 1.1, 1.2 in the text and the contents, not the Introduction's", async () => {
+    const md = `# B\n\n## Contents\n\n## Introduction\n\nIntro.\n\n### The Aim of This Book\n\nAim.\n\n## One Yahuah\n\nText.\n\n### What Monotheism Means\n\nText.\n\n### The Witness of the Old Testament\n\nText.\n\n## Opening pages\n\nLeft over.`;
+    const r = await typesetBook(asChapters(md), { title: "B", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026 });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: r.bytes.slice(), useSystemFonts: false }).promise;
+    const pages: string[] = [];
+    for (let n = 1; n <= doc.numPages; n++) pages.push((await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ").replace(/\s+/g, " "));
+    const toc = pages[r.contents![0] - 1];
+    expect(toc).toMatch(/1\.\s+One Yahuah/);
+    expect(toc).toMatch(/1\.1\s+What Monotheism Means/);
+    expect(toc).toMatch(/1\.2\s+The Witness of the Old Testament/);
+    expect(toc).not.toMatch(/\d\.\d\s+The Aim of This Book/);
+    // Text left over is never set as a numbered chapter.
+    expect(toc).not.toMatch(/2\.\s+Opening pages/);
+    const r2 = await typesetBook(asChapters(md), { title: "B", trim: getTrim("6x9"), fetchFont: nodeFetchFont, year: 2026, numberSections: false });
+    const d2 = await pdfjs.getDocument({ data: r2.bytes.slice(), useSystemFonts: false }).promise;
+    const t2 = (await (await d2.getPage(r2.contents![0])).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ");
+    expect(t2).not.toMatch(/1\.1/);
+  }, 60_000);
+});

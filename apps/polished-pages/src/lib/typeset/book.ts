@@ -65,6 +65,8 @@ export interface BookTypeOptions {
   /** Where Arabic page numbers begin (preliminary pages before it take lower-case Roman numerals):
    *  at the Introduction (when the book has one before Chapter 1) or at Chapter 1. */
   arabicFrom?: "introduction" | "chapter";
+  /** Sections of numbered chapters numbered 1.1, 1.2… in the text and the contents (default on). */
+  numberSections?: boolean;
   /** Contents depth: chapters only (1), or chapters with their sections (2, the default). */
   tocDepth?: 1 | 2;
 }
@@ -124,7 +126,7 @@ export function asChapters(markdown: string): string {
 }
 
 // Sections that open like chapters but carry no chapter number.
-export const UNNUMBERED = /^(preface|foreword|introduction|prologue|acknowledge?ments?|dedication|epigraph|conclusion|epilogue|afterword|bibliography|references|works cited|sources|glossary|index|appendix(\s.*)?|notes|endnotes|about the author|also by .*|author'?s note|a note on .*|contents)$/i;
+export const UNNUMBERED = /^(opening pages|preface|foreword|introduction|prologue|acknowledge?ments?|dedication|epigraph|conclusion|epilogue|afterword|bibliography|references|works cited|sources|glossary|index|appendix(\s.*)?|notes|endnotes|about the author|also by .*|author'?s note|a note on .*|contents)$/i;
 /** "{-}" after a chapter heading (as in Pandoc) sets it without a number. */
 export const unnumbered = (title: string) => `${title} {-}`;
 
@@ -308,6 +310,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   let y = H - top;
   let chapter = "";
   let chapterNo = Math.max(0, (o.chapterStart ?? 1) - 1), h2No = 0;
+  let chapterPlain = true; // the current part is front or back matter (its sections aren't numbered)
   let opening = true;   // current page opens a chapter: no running head
   let dirty = false;
   let afterHeading = true; // the next paragraph isn't indented
@@ -430,6 +433,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   const chapterOpening = (title: string, plain = false) => {
     if (!plain) chapterNo++;
     h2No = 0;
+    chapterPlain = plain;
     const n = pageNo();
     const x = colX(n), cx = x + colW / 2;
     const center = S.titleAlign === "center";
@@ -536,7 +540,8 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       chapterOpening(b.text, b.plain);
     } else if (b.kind === "h2") {
       h2No++;
-      const h2Label = S.numberedHeadings && chapterNo ? `${chapterNo}.${h2No}  ${b.text}` : b.text;
+      // Sections of a numbered chapter are numbered 1.1, 1.2… (the academic styles always; the others unless the author turns it off).
+      const h2Label = chapterNo && !chapterPlain && (S.numberedHeadings || (o.numberSections ?? true)) ? `${chapterNo}.${h2No}  ${b.text}` : b.text;
       para(h2Label, { kind: "heading", style: "bold", size: Math.round(size * 1.35) }, S.titleAlign === "center" && S.paragraphs === "block" ? "center" : "start", { before: lead * 0.9, after: lead * 0.35, keep: lead * 3 });
       if (depth === 2) starts.push({ title: h2Label, n: pageNo(), level: 2 });
       afterHeading = true;

@@ -27,7 +27,7 @@ export interface ClaudeStatus { state: "ok" | "unknown" | "signed_out" | "limit"
 export interface RunnerInfo { level: number; features: string[]; poppler: boolean; node?: string }
 export interface StudioMe { user: { id: string; email: string | null }; claudeConnected: boolean; claude?: ClaudeStatus; busy: StudioJob | null; citationStyles: string[]; /** Absent on a runner older than level 3. */ runner?: RunnerInfo }
 /** The runner level this site relies on (runner src/version.mjs RUNNER_LEVEL; a test keeps it no higher). DESIGN-SPEC.md §21. */
-export const RUNNER_LEVEL_NEEDED = 6;
+export const RUNNER_LEVEL_NEEDED = 7;
 /** Why the runner is not right for this site, in the owner's words, or null when it is. */
 export function runnerProblem(me: StudioMe | null): string | null {
   if (!me) return null;
@@ -356,9 +356,9 @@ export async function claudeResearch(threadId: string, text: string, query: stri
 
 /** A front or back matter page (§21), the author's words rewritten professionally on Claude Code. */
 export async function claudeMatter(threadId: string, i: MatterInput): Promise<string> {
-  return (await runToFile(threadId, "tool", { tool: "matter", label: i.label, bookTitle: i.title, subtitle: i.subtitle, author: i.author, rules: i.rules, guidance: i.guidance, text: i.notes, fromBook: i.fromBook, book: i.fromBook ? i.book : undefined })).trim();
+  return (await runToFile(threadId, "tool", { tool: "matter", label: i.label, bookTitle: i.title, subtitle: i.subtitle, author: i.author, rules: i.rules, guidance: i.guidance, text: i.notes, fromBook: i.fromBook, book: i.fromBook ? i.book : undefined, instructions: i.instructions, words: i.words })).trim();
 }
-export interface MatterInput { kind: string; label: string; notes: string; title: string; subtitle?: string; author?: string; rules?: string; guidance: string; fromBook: boolean; book?: string }
+export interface MatterInput { kind: string; label: string; notes: string; title: string; subtitle?: string; author?: string; rules?: string; guidance: string; fromBook: boolean; book?: string; /** What the author asks Claude to write or change, and about how many words. */ instructions?: string; words?: number }
 
 export function claudeBookEngine(threadId: string, onOutline?: (o: BookOutline) => void): BookEngine {
   return {

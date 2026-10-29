@@ -71,11 +71,11 @@ export function stepStatus(m: Manuscript, step: MatterStep): StepStatus {
 }
 
 /** The question to Claude, the same on Claude Code and the API: the author's notes rewritten professionally. */
-export function matterPrompt(o: { kind: string; label: string; notes: string; title: string; subtitle?: string; author?: string; rules?: string; guidance: string; fromBook: boolean }, where: { notes: string; book?: string }): string {
+export function matterPrompt(o: { kind: string; label: string; notes: string; title: string; subtitle?: string; author?: string; rules?: string; guidance: string; fromBook: boolean; instructions?: string; words?: number }, where: { notes: string; book?: string }): string {
   const book = o.fromBook && where.book ? ` You may also read the book (${where.book}) to make the page fit it${o.notes.trim() ? "" : ", and, since the author wrote nothing, draft the page from what the book itself says"}.` : "";
   return `Write the ${o.label} of the book "${o.title}"${o.subtitle ? `: ${o.subtitle}` : ""}${o.author ? ` by ${o.author}` : ""}, ready to print.
 The author's own words for it are in ${where.notes}. Rewrite them professionally, in the author's voice (first person where the author speaks as themselves), clear and well ordered.${book}
-What this page is: ${o.guidance}
+What this page is: ${o.guidance}${o.instructions?.trim() ? `\nThe author asks: ${o.instructions.trim()}` : ""}${o.words && o.words > 0 ? `\nLength: about ${Math.round(o.words)} words.` : ""}
 Rules:
 - Keep every fact the author gives, exactly. Add no facts of your own: no names, dates, places, credentials, endorsements, publishers or numbers the author didn't give. Where the page would need one, write [[YOURS: what is needed]] instead.
 - Keep quotations and scripture word for word, with their sources.
