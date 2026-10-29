@@ -5,6 +5,7 @@
 import { kindDef, words, type Manuscript } from "@/lib/manuscript";
 import { SPINE_TEXT_MIN_PAGES } from "@/lib/cover-design";
 import { coverSpec, getTrim } from "@/lib/print-sizes";
+import { frontMatterChecks } from "@/lib/front-matter-check";
 
 export type FormatId = "epub" | "print" | "paperback" | "audiobook";
 export type FixTarget = "cover" | "export" | "production" | "audio" | "section" | "check";
@@ -75,7 +76,6 @@ export function formatReport(id: FormatId, m: Manuscript, opts: { cover: boolean
     const pages = Number(meta.pageCount) || estimatePages(m, trimId);
     const estimated = !Number(meta.pageCount);
     add({ ok: Boolean(meta.trimSize), level: "required", text: meta.trimSize ? `Trim size ${trim.label}` : "No trim size chosen (6 × 9 in is assumed)", fix: meta.trimSize ? undefined : "production" });
-    add({ ok: m.sections.some((s) => kindDef(s.kind).group === "front"), level: "advised", text: m.sections.some((s) => kindDef(s.kind).group === "front") ? "Front matter present" : "No front matter (title page, copyright…)", fix: "section", sectionId: m.sections[0]?.id });
     facts.push(`${estimated ? "About " : ""}${pages.toLocaleString()} pages${estimated ? " (estimated until typeset)" : ""}`, "Fonts are embedded; chapters open on a new page with running heads and page numbers.");
     if (id === "paperback") {
       const paper = meta.paper || "Cream";
@@ -87,6 +87,9 @@ export function formatReport(id: FormatId, m: Manuscript, opts: { cover: boolean
         pages >= SPINE_TEXT_MIN_PAGES ? "Spine text allowed." : `No spine text below ${SPINE_TEXT_MIN_PAGES} pages; the spine stays plain.`);
     }
   }
+
+  // Front and back matter in order, none twice, none empty, chapters in sequence (§22).
+  if (id !== "audiobook") for (const c of frontMatterChecks(m)) add(c);
 
   if (id === "audiobook") {
     const hours = totalWords / WORDS_PER_HOUR;

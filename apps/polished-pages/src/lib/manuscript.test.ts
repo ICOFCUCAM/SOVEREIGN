@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { authorshipNotes, compile, importText, insertSection, moveSection, type Manuscript } from "./manuscript";
+import { authorshipNotes, bookFacts, compile, importText, insertSection, moveSection, type Manuscript } from "./manuscript";
 
 const base = (): Manuscript => ({ title: "Walking by Faith", author: "T. Chamer", history: [], sections: [
   { id: "c1", kind: "chapter", title: "The First Step", body: "One." },
@@ -41,8 +41,20 @@ describe("manuscript", () => {
     const md = compile(m, { contents: true });
     expect(md.split("\n")[0]).toBe("# Walking by Faith");
     const order = [...md.matchAll(/^## (.+)$/gm)].map((x) => x[1]);
-    expect(order).toEqual(["Dedication", "Contents", "The First Step", "The Long Road", "Bibliography"]);
+    expect(order).toEqual(["Dedication {display}", "Contents", "The First Step", "The Long Road", "Bibliography"]);
     expect(md).toMatch(/## Contents\n\n- The First Step\n- The Long Road\n- Bibliography/);
+  });
+
+  it("sets the copyright page once (from the book's details), and leaves out a page the author turned off", () => {
+    let m = base();
+    m = insertSection(m, "copyright").manuscript;
+    m = insertSection(m, "epigraph").manuscript;
+    const cp = m.sections.find((s) => s.kind === "copyright")!; cp.body = "Copyright © 2026 A.\n\nScripture taken from the King James Version.\n\nISBN [placeholder]";
+    const ep = m.sections.find((s) => s.kind === "epigraph")!; ep.body = "Hear, O Israel."; ep.omit = true;
+    const md = compile(m, { contents: true });
+    expect(md).not.toMatch(/## Copyright/);
+    expect(md).not.toMatch(/Hear, O Israel/);
+    expect(bookFacts(m).notices).toEqual(["Scripture taken from the King James Version."]);
   });
 
   it("writes authorship notes from the history", () => {

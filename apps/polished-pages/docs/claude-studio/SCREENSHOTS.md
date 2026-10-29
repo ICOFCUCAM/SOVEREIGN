@@ -321,3 +321,23 @@ Edit on the Book page.
 The publishing package for KDP and IngramSpark.
 
 ![Publishing package (§21)](screenshots/71-publishing-package.webp)
+
+Plan with Front and back matter (page by page) and "Go through it page by page" on the Front and Back matter headings (§22).
+
+![Plan: front and back matter (§22)](screenshots/72-plan-front-back-matter.webp)
+
+The page-by-page guide: the author's words for the Dedication, then "Rewrite it professionally" or "Use my words as they are"; every page with its status, and the checks.
+
+![Front and back matter guide (§22)](screenshots/73-matter-guide-write.webp)
+
+The copyright page asks for the facts; empty fields are left off, never guessed.
+
+![Copyright facts (§22)](screenshots/74-matter-guide-copyright.webp)
+
+The typeset front matter: half-title, title page with subtitle, copyright page, dedication (display page), Preface on vii, Contents with chapter numbers, sections and Roman references, Introduction on page 1.
+
+![Typeset front matter (§22)](screenshots/75-typeset-front-matter.webp)
+
+A whole book in the Classic style after the page-design fixes.
+
+![Classic, whole book (§22)](screenshots/76-classic-whole-book.webp)

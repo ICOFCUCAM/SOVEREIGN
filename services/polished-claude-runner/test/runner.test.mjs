@@ -52,7 +52,7 @@ async function streamUntilDone(jobId, threadId) {
 test("health needs no sign-in and reveals nothing", async () => {
   const r = await fetch(base + "/health");
   assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { ok: true, level: 5 });
+  assert.deepEqual(await r.json(), { ok: true, level: 6 });
 });
 
 test("only the listed owner who is also a Polished Pages admin gets in", async () => {
@@ -574,7 +574,7 @@ test("the rewrite control panel: plan first for approval, then the rewrite from 
 
 test("the runner says what it can do, so the Studio can tell an old runner", async () => {
   const me = await (await call("/v1/me")).json();
-  assert.equal(me.runner.level, 5);
+  assert.equal(me.runner.level, 6);
   assert.ok(me.runner.features.includes("organise"));
   assert.equal(typeof me.runner.poppler, "boolean");
 });
@@ -651,4 +651,16 @@ test("a project restored from its backup gets its results back, never over an ex
   assert.ok((await r.json()).thread.outputs.some((o) => o.path === "rewrite/01-one.md"));
   assert.equal((await call(`/v1/threads/${thread.id}/restore/rewrite/01-one.md`, { method: "PUT", body: { text: "other" } })).status, 409);
   assert.equal((await call(`/v1/threads/${thread.id}/restore/../escape.md`, { method: "PUT", body: { text: "x" } })).status === 200, false);
+});
+
+test("front and back matter: the author's words for a page rewritten professionally, never a fact added", () => {
+  const r = buildRun("tool", { tool: "matter", label: "Dedication", bookTitle: "The Oneness of Yahuah", text: "to my wife ann", guidance: "One to three short lines." });
+  assert.equal(r.output, "matter.md");
+  assert.equal(r.files["matter/notes.md"], "to my wife ann");
+  assert.equal(r.files["matter/book.md"], undefined, "the book is sent only for a page drafted from it");
+  assert.match(r.prompt, /Add no facts of your own/);
+  assert.match(r.prompt, /\[\[YOURS: what is needed\]\]/);
+  const p = buildRun("tool", { tool: "matter", label: "Preface", bookTitle: "B", text: "", book: "## One\n\nText.", fromBook: true });
+  assert.equal(p.files["matter/book.md"], "## One\n\nText.");
+  assert.match(p.prompt, /draft the page from what the book itself says/);
 });

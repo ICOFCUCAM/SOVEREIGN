@@ -117,7 +117,7 @@ const UNNUMBERED = /^(preface|foreword|introduction|prologue|acknowledge?ments?|
 /** "{-}" after a chapter heading (as in Pandoc) sets it without a number. */
 export const unnumbered = (title: string) => `${title} {-}`;
 
-interface Block { kind: "h1" | "h2" | "h3" | "li" | "p" | "quote" | "gap" | "toc" | "fn" | "img"; text: string; plain?: boolean; id?: string; src?: string }
+interface Block { kind: "h1" | "h2" | "h3" | "li" | "p" | "quote" | "gap" | "toc" | "fn" | "img"; text: string; plain?: boolean; id?: string; src?: string; display?: boolean }
 /** A quotation the author introduces with a colon and closes with its source, "(Dyrness, 1979, pp. 41-42)". */
 const CITED_END = /\((?:[^()]*\b(?:1[5-9]|20)\d\d\b[^()]*|[^()]*\bp{1,2}\.\s*\d[^()]*)\)\s*\.?$/;
 function parse(markdown: string): Block[] {
@@ -126,6 +126,8 @@ function parse(markdown: string): Block[] {
     if (/^#\s+/.test(t)) {
       const raw = t.replace(/^#\s+/, "");
       if (/\s\{toc\}\s*$/.test(raw)) return { kind: "toc", text: "" };
+      // "{display}": a page of its own with no heading, no contents entry and no folio (a dedication, an epigraph).
+      if (/\s\{display\}\s*$/.test(raw)) return { kind: "h1", text: strip(raw.replace(/\s\{display\}\s*$/, "")), plain: true, display: true };
       const plain = /\s\{-\}\s*$/.test(raw);
       const text = strip(raw.replace(/\s\{-\}\s*$/, ""));
       return { kind: "h1", text, plain: plain || UNNUMBERED.test(text) };
@@ -210,7 +212,8 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     for (const l of ts.wrap(strip(o.subtitle.trim()), sSt, colW * 0.86)) { ts.drawLine(pc, l, colX(1) + colW * 0.07, ty, colW * 0.86, sSt, "center"); ty -= sSt.size * 1.3; }
     ty -= 8;
   }
-  if (o.author) {
+  // A placeholder ("[Author name]") is not printed.
+  if (o.author?.trim() && !/\[[^\]]*\]/.test(o.author)) {
     const aSt: TextStyle = { kind: "body", style: "italic", size: 13 };
     for (const l of ts.wrap(o.author, aSt, colW)) { ty -= 6; ts.drawLine(pc, l, colX(1), ty, colW, aSt, "center"); ty -= 16; }
   }
@@ -254,7 +257,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
 
   // ── Reserve the contents ──
   const depth = o.tocDepth ?? 1;
-  const chapters = blocks.filter((b) => b.kind === "h1" || (depth === 2 && b.kind === "h2"));
+  const chapters = blocks.filter((b) => (b.kind === "h1" && !b.display) || (depth === 2 && b.kind === "h2"));
   // The contents follow the book's type size (a large-print book has large-print contents).
   const tocSize = Math.max(11, Math.round(size * 0.95));
   const tocLine = Math.round(tocSize * 1.8);
@@ -276,7 +279,9 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   let dirty = false;
   let afterHeading = true; // the next paragraph isn't indented
   let dropNext = false;    // the next paragraph opens a chapter: drop cap
-  const starts: { title: string; n: number; level: 1 | 2; no?: number }[] = [];
+  const starts: { title: string; n: number; level: 1 | 2; no?: number; hidden?: boolean }[] = [];
+  let display = false;      // setting a display page (dedication, epigraph): centred, no heading
+  const blind: number[] = []; // pages that carry no folio
   const pageNo = () => pages.length;
   // Preliminary pages take lower-case Roman numerals, counted from the first page of the book; Arabic
   // numbering starts at 1 where the main text begins (the Introduction or Chapter 1, by convention).
@@ -407,7 +412,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       if (!tocCount) continue;
       if (!first || dirty) nextPage();
       if (ingram && pageNo() % 2 === 0) nextPage();
-      first = false;
+      first = false; display = false;
       // The contents pages carry no running head or folio; they are filled once every page is known.
       tocFirst = pageNo();
       for (let i = 1; i < tocCount; i++) { closePage(); pc = add(); }
@@ -421,6 +426,15 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       }
       first = false;
       opening = true;
+      display = Boolean(b.display);
+      if (display) {
+        // A third of the way down the page, the text alone; listed for the Book page, not in the contents.
+        starts.push({ title: b.text, n: pageNo(), level: 1, hidden: true });
+        blind.push(pageNo());
+        y = H - top - textH * 0.3;
+        afterHeading = true; dropNext = false;
+        continue;
+      }
       chapter = b.text;
       if (!mainFirst && (!b.plain || ((o.arabicFrom ?? "introduction") === "introduction" && /^introduction$/i.test(strip(b.text).trim())))) mainFirst = pageNo();
       starts.push({ title: b.text, n: pageNo(), level: 1, ...(b.plain ? {} : { no: chapterNo + 1 }) });
@@ -459,6 +473,8 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       dirty = true; afterHeading = true;
     } else if (b.kind === "gap") {
       if (S.paragraphs === "block") y -= lead * 0.15;
+    } else if (display) {
+      track(b.text, () => para(b.text, { ...body, style: "italic", size: size * 1.05 }, "center", { after: lead * 0.6 }));
     } else {
       const indented = S.paragraphs === "indent" && !afterHeading;
       track(b.text, () => para(b.text, body, S.justify ? "justify" : "start", { indent: indented ? size * 1.5 : 0, drop: dropNext ? S.dropCap : 0, after: S.paragraphs === "block" ? lead * 0.5 : 0 }));
@@ -470,7 +486,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
 
   // Running heads and folios, now that every page's chapter is known.
   for (const h of heads) {
-    if (h.n < bodyFirst || !h.used || tocPages.includes(h.n)) continue;
+    if (h.n < bodyFirst || !h.used || tocPages.includes(h.n) || blind.includes(h.n)) continue;
     const p = pages[h.n - 1];
     const fSt: TextStyle = { kind: "body", style: "regular", size: 9, gray: 0.45 };
     const f = S.folio === "dashes" ? `— ${folioOf(h.n)} —` : String(folioOf(h.n));
@@ -499,6 +515,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     const dotW = ts.measure(".", tSt);
     const sp = ts.measure(" ", tSt);
     let idx = 0;
+    const listed = starts.filter((x) => !x.hidden);
     for (let p = 0; p < tocCount; p++) {
       const n = tocFirst + p;
       const page = pages[n - 1];
@@ -509,8 +526,8 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
         else ts.text(page, contentsLabel, W / 2, cy, cSt, "center");
         cy -= 46;
       }
-      for (let k = 0; k < perToc && idx < starts.length; k++, idx++) {
-        const e = starts[idx];
+      for (let k = 0; k < perToc && idx < listed.length; k++, idx++) {
+        const e = listed[idx];
         const numStr = folioOf(e.n);
         const eSt: TextStyle = e.level === 2 ? { ...tSt, size: tocSize - 1, gray: 0.3 } : tSt;
         const numW = ts.measure(numStr, eSt);
@@ -532,14 +549,14 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
         while (count > 2 && ts.measure(".".repeat(count), { ...dots, size: eSt.size }) > to - from) count--;
         if (count > 2) ts.text(page, ".".repeat(count), from, cy, { ...dots, size: eSt.size }, "left");
         // Sections sit close under their chapter; the next chapter stands a full line below.
-        cy -= starts[idx + 1]?.level === 2 ? tocLine * 0.8 : tocLine;
+        cy -= listed[idx + 1]?.level === 2 ? tocLine * 0.8 : tocLine;
       }
     }
   }
 
   ts.finish();
   // Where each chapter (and front or back matter section) opens, as a physical page number.
-  return { doc, pages: pages.length, sections: starts.filter((x) => x.level === 1).map((x) => ({ title: x.title, page: x.n })), folios: pages.map((_, i) => (i + 1 >= bodyFirst && !tocPages.includes(i + 1) ? folioOf(i + 1) : "")), bodyFirst, contents: tocCount ? [tocFirst, tocFirst + tocCount - 1] as [number, number] : null, placed, pageHeight: H };
+  return { doc, pages: pages.length, sections: starts.filter((x) => x.level === 1).map((x) => ({ title: x.title, page: x.n })), folios: pages.map((_, i) => (i + 1 >= bodyFirst && !tocPages.includes(i + 1) && !blind.includes(i + 1) ? folioOf(i + 1) : "")), bodyFirst, contents: tocCount ? [tocFirst, tocFirst + tocCount - 1] as [number, number] : null, placed, pageHeight: H };
 }
 export interface SetSection { title: string; page: number }
 /** A paragraph's place on a page (PDF points from the bottom), with its text as set. */
