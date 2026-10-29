@@ -105,7 +105,7 @@ export function InteriorTypeEditor({ onChange, large }: { onChange?: (t: Interio
         <div className="flex flex-wrap items-center gap-2">
           <Label className="font-sans text-xs">Contents list</Label>
           {([[1, "Chapters"], [2, "Chapters and sections"]] as const).map(([v, label]) => (
-            <button key={v} type="button" onClick={() => update({ tocDepth: v })} aria-pressed={(t.tocDepth ?? 1) === v} className={`rounded-full border px-2 py-0.5 text-xs ${(t.tocDepth ?? 1) === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
+            <button key={v} type="button" onClick={() => update({ tocDepth: v })} aria-pressed={(t.tocDepth ?? 2) === v} className={`rounded-full border px-2 py-0.5 text-xs ${(t.tocDepth ?? 2) === v ? "border-primary bg-primary/10" : "border-border"}`}>{label}</button>
           ))}
         </div>
       </div>

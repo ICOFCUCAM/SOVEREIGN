@@ -67,12 +67,21 @@ export function arrangeFromContents(text: string): Arrangement | null {
   // The list: short lines after "Contents", until an entry comes round again (the text begins).
   const entries: { line: string; at: number }[] = [];
   let i = ci + 1;
+  const clean = (l: string) => l.replace(/^#+\s*/, "").replace(/\s*\.{2,}\s*[\divxlc]+\s*$/i, "").trim();
+  // A sentence means the text has begun (a chapter number "1." is not a sentence end).
+  // Contents entries don't end in a full stop; a line of nine or more words that does is text.
+  const prose = (t: string) => {
+    const u = t.replace(/^\s*(chapter\s+|part\s+|appendix\s+)?[\divxlc]+[.):]\s*/i, "");
+    return t.length > 110 || /[.!?]["”’]?\s+\S/.test(u) || (/\.["”’]?$/.test(u) && u.split(/\s+/).length >= 9);
+  };
+  const nextLine = (from: number) => { for (let j = from; j < lines.length; j++) { const t = clean(lines[j]); if (t) return t; } return ""; };
   for (; i < lines.length; i++) {
-    const t = lines[i].replace(/^#+\s*/, "").replace(/\s*\.{2,}\s*[\divxlc]+\s*$/i, "").trim();
+    const t = clean(lines[i]);
     if (!t) continue;
-    // A sentence means the text has begun (a chapter number "1." is not a sentence end).
-    if (t.length > 110 || /[.!?]["”’]?\s+\S/.test(t.replace(/^\s*(chapter\s+|part\s+|appendix\s+)?[\divxlc]+[.):]\s*/i, ""))) break;
-    if (entries.some((e) => norm(e.line) === norm(t))) break;
+    if (prose(t)) break;
+    // An entry coming round again is where the text begins, when prose follows it. A section may have
+    // its chapter's name ("2. Theophanies", then "Theophanies"): followed by another entry, it is still the list.
+    if (entries.some((e) => norm(e.line) === norm(t)) && prose(nextLine(i + 1))) break;
     entries.push({ line: t, at: i });
   }
   if (entries.length < 3) return null;
@@ -121,6 +130,7 @@ export function arrangeBook(text: string): Organised | null {
     ...(a.title ? [`The title block, used as the title${a.subtitle ? " and subtitle" : ""}.`] : []),
     ...(a.workingLabel ? [`"${a.workingLabel}", a working label rather than part of the book.`] : []),
   ];
-  const notes = [a.plan.notes, moved.length ? `Put in the conventional order of a book: ${moved.join("; ")}.` : ""].filter(Boolean).join(" ");
+  const leftover = o.sections.find((s) => s.title === "Opening pages");
+  const notes = [a.plan.notes, leftover ? `Some text before the first heading couldn't be placed and is kept as "Opening pages" (${leftover.body.split(/\s+/).length} words): look at it before applying, and join it to the part it belongs to or change its kind.` : "", moved.length ? `Put in the conventional order of a book: ${moved.join("; ")}.` : ""].filter(Boolean).join(" ");
   return { ...o, sections, notes, title: a.title, subtitle: a.subtitle, setAside };
 }

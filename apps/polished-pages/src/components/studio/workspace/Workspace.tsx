@@ -590,7 +590,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       {matter !== null && m && <MatterGuide m={m} onUpdate={update} start={matter || undefined} engineLabel={bookEngine?.label} onClose={() => setMatter(null)}
         rewrite={engineId ? (i) => (engineId === "claude-code" && backend === runnerBackend ? claudeMatter(id, i) : apiMatter(i)) : null} />}
       {organising && <OrganiseDialog hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} hasUploads={hasUploads} engineLabel={bookEngine?.label}
-        readText={async (s) => (s === "manuscript" ? (m ? manuscriptText(m) : null) : uploadsText((await backend.thread(id)).thread.files, true))}
+        hasEarlier={Boolean(m?.archive?.length)}
+        readText={async (s) => (s === "manuscript" ? (m ? manuscriptText(m) : null) : s === "earlier" ? (m?.archive?.length ? manuscriptText({ ...m, sections: m.archive[m.archive.length - 1].sections }) : null) : uploadsText((await backend.thread(id)).thread.files, true))}
         organise={(text, o) => (engineId === "claude-code" && backend === runnerBackend ? claudeOrganise(id, text, o) : apiOrganise(text, o))}
         upload={async (files) => { await upload(files); }}
         onClose={() => setOrganising(false)}

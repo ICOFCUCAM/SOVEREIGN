@@ -50,3 +50,10 @@ describe("putting the book in order", () => {
     expect(failing({ ...base(), meta: { isbn: "978-0-306-40615-7" } })).toEqual([]);
   });
 });
+
+describe("text left unplaced", () => {
+  it("says so when 'Opening pages' holds text the organising couldn't place", () => {
+    const m = base(); m.sections.splice(2, 0, { id: "o", kind: "chapter", title: "Opening pages", body: "Theophanies\nThe Angel of Yahuah" });
+    expect(failing(m).join(" ")).toMatch(/Opening pages.*couldn't place/);
+  });
+});

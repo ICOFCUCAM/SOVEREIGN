@@ -14,10 +14,12 @@ import { EYEBROW, GRADIENT } from "./ui";
 // Organise into chapters and sections (DESIGN-SPEC.md §19): a book uploaded here, the uploaded
 // manuscript, or the manuscript as it stands (a rewritten book too). Claude says where each part
 // begins and what it is called; the text is split there unchanged; the owner reviews, then applies.
-export type OrganiseSource = "manuscript" | "uploads";
+export type OrganiseSource = "manuscript" | "uploads" | "earlier";
 
-export default function OrganiseDialog({ hasManuscript, hasUploads, readText, organise, upload, onApply, onClose, engineLabel }: {
+export default function OrganiseDialog({ hasManuscript, hasUploads, hasEarlier = false, readText, organise, upload, onApply, onClose, engineLabel }: {
   hasManuscript: boolean; hasUploads: boolean;
+  /** The manuscript has a version from before it was last organised (kept in Plan's archive), to organise again. */
+  hasEarlier?: boolean;
   /** The text of the chosen source (null when it has none). */
   readText: (s: OrganiseSource) => Promise<string | null>;
   organise: (text: string, o: OrganiseOptions) => Promise<OrganisePlan>;
@@ -72,7 +74,7 @@ export default function OrganiseDialog({ hasManuscript, hasUploads, readText, or
             <fieldset className="space-y-1.5">
               <legend className="mb-1.5 text-sm font-medium">The book to organise</legend>
               <div role="radiogroup" className="grid gap-2 sm:grid-cols-3">
-                {([["manuscript", "The manuscript as it is now", "Also a rewritten book you made the manuscript", hasManuscript], ["uploads", "My uploaded book", "The book in Sources, as uploaded", hasUploads]] as const).map(([id, label, line, ok]) => (
+                {([["manuscript", "The manuscript as it is now", "Also a rewritten book you made the manuscript", hasManuscript], ...(hasEarlier ? [["earlier", "As it was before the last organising", "To organise it again from the start; the current chapters are kept to restore", true] as const] : []), ["uploads", "My uploaded book", "The book in Sources, as uploaded", hasUploads]] as const).map(([id, label, line, ok]) => (
                   <button key={id} type="button" role="radio" aria-checked={source === id} disabled={!ok} onClick={() => setSource(id)}
                     className={`rounded-[10px] border px-3 py-2.5 text-left disabled:opacity-40 ${source === id ? "border-[#2563EB] bg-[#EAF1FF] dark:bg-[#1E3A8A]/30" : "border-border hover:bg-muted/50"}`}>
                     <span className="block text-[13.5px] font-medium">{label}</span><span className="mt-0.5 block text-[12px] text-[#64748B]">{line}</span>
@@ -160,7 +162,7 @@ export default function OrganiseDialog({ hasManuscript, hasUploads, readText, or
         <DialogFooter className="gap-2 sm:gap-0">
           {!result ? (<>
             <Button variant="ghost" onClick={onClose} disabled={Boolean(busy)}>Cancel</Button>
-            <Button className={`rounded-full ${GRADIENT}`} disabled={Boolean(busy) || (source === "manuscript" ? !hasManuscript : !hasUploads)} onClick={() => void run()}>
+            <Button className={`rounded-full ${GRADIENT}`} disabled={Boolean(busy) || (source === "manuscript" ? !hasManuscript : source === "earlier" ? !hasEarlier : !hasUploads)} onClick={() => void run()}>
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListTree className="h-4 w-4" />} Organise the book{engineLabel && method === "claude" ? ` · ${engineLabel}` : ""}
             </Button>
           </>) : (<>
