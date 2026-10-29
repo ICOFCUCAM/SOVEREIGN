@@ -353,3 +353,15 @@ Praise for the book before the half-title, the title page with subtitle, bold an
 The glossary's definitions at the margin, and the index of scripture with the verse and its pages in columns.
 
 ![Glossary and index detail (§22)](screenshots/79-glossary-index-detail.webp)
+
+A contents list left in the book as "Opening pages" is recognised in Plan and Write (preview: `?scene=leftover`).
+
+![Leftover contents notice (§22)](screenshots/80-leftover-contents-notice.webp)
+
+Its chapters and sections put in their places, for review before applying.
+
+![Leftover contents review (§22)](screenshots/81-leftover-contents-review.webp)
+
+The small chat on a front or back matter page: what to compose, and about how many words.
+
+![Front matter chat (§22)](screenshots/82-matter-chat.webp)

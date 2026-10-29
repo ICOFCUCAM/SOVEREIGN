@@ -102,6 +102,12 @@ function previewBackend(): StudioBackend {
   // ?scene=stopped shows a rewrite that stopped partway; ?scene=long a chapter too long to work on well (§21).
   const scene = new URLSearchParams(location.search).get("scene");
   let m: Manuscript = JSON.parse(JSON.stringify(SAMPLE));
+  // ?scene=leftover: the rest of a contents list left in the book as "Opening pages" (§22).
+  if (scene === "leftover") {
+    const c2 = m.sections.find((x) => x.id === "c2")!;
+    c2.body = `${c2.body}\n\nThe Gods of Babylon\n\nThe Babylonians named their gods and spirits and set them in order beneath the high gods of the cities.\n\nThe Gods of Canaan\n\nCanaan's gods are known from Ugarit, where the texts describe the council of El and the deeds of Baal.\n\nThe Angel of Yahuah\n\nIn Israel the angel of Yahuah speaks as Yahuah himself and is worshipped where no angel would be.\n\n5. Spirits in the Gospels\n\nThe gospels show Yahusha casting out spirits by a word, with no ritual and no name but his own.`;
+    m.sections.splice(1, 0, { id: "o1", kind: "chapter", title: "Opening pages", body: "The Gods of Babylon\nThe Gods of Canaan\nThe Angel of Yahuah\n5. Spirits in the Gospels" });
+  }
   if (scene === "long") m.sections = m.sections.map((x, i) => (i === m.sections.findIndex((y) => y.kind === "chapter") ? { ...x, body: `${x.body}\n\n${"The spirits of the nations are named and described throughout the ancient texts. ".repeat(1400)}` } : x));
   const thread: StudioThread = {
     id: "demo", title: "Demonology", createdAt: "", updatedAt: "",

@@ -16,6 +16,6 @@ export interface IngramOpts extends BookFactsOpts { title: string; author?: stri
 export async function markdownToIngramSparkPdf(markdown: string, opts: IngramOpts, filename: string): Promise<void> {
   const [{ typesetBook, downloadPdf }, { getInteriorType }] = await Promise.all([import("@/lib/typeset/book"), import("@/lib/typeset/prefs")]);
   const pref = getInteriorType();
-  const { bytes } = await typesetBook(markdown, { ...opts, layout: "ingram", producedWith: BRAND, style: pref.style, body: opts.body ?? pref.body, heading: opts.heading ?? pref.heading, size: opts.size ?? pref.size, leading: pref.leading, margins: pref.margins, arabicFrom: pref.arabicFrom, tocDepth: pref.tocDepth });
+  const { bytes } = await typesetBook(markdown, { ...opts, layout: "ingram", producedWith: BRAND, style: pref.style, body: opts.body ?? pref.body, heading: opts.heading ?? pref.heading, size: opts.size ?? pref.size, leading: pref.leading, margins: pref.margins, arabicFrom: pref.arabicFrom, tocDepth: pref.tocDepth, numberSections: pref.numberSections });
   downloadPdf(bytes, filename);
 }

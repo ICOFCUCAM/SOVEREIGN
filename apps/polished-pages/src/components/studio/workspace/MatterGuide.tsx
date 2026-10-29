@@ -107,6 +107,9 @@ function StepBody({ step, m, onUpdate, rewrite, engineLabel, onNext }: { step: M
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const guidance = useMemo(() => kindDef(step.kind).guidance, [step.kind]);
+  // The small chat (§22): what to compose or change, and about how many words.
+  const [ins, setIns] = useState("");
+  const [len, setLen] = useState("");
 
   if (step.facts) return <Facts step={step} m={m} onUpdate={onUpdate} />;
   // Shown once the page is in the book (accepting a page adds it); the contents are always in.
@@ -123,16 +126,24 @@ function StepBody({ step, m, onUpdate, rewrite, engineLabel, onNext }: { step: M
     </p></div>
   );
 
-  const ask = async () => {
+  const ask = async (from = notes) => {
     if (!rewrite) return;
     setBusy(true); setError(null);
     try {
-      setProposal(await rewrite({ kind: step.kind, label: stepLabel(step.kind), notes, title: m.title, subtitle: m.subtitle, author: m.author, rules: m.rules, guidance, fromBook: Boolean(step.fromBook), book: step.fromBook ? bookForMatter(m) : undefined }));
+      setProposal(await rewrite({ kind: step.kind, label: stepLabel(step.kind), notes: from, title: m.title, subtitle: m.subtitle, author: m.author, rules: m.rules, guidance, fromBook: Boolean(step.fromBook), book: step.fromBook ? bookForMatter(m) : undefined, instructions: ins.trim() || undefined, words: Number(len) || undefined }));
     } catch (e) { setError(e instanceof Error ? e.message : "Claude couldn't rewrite the page."); }
     finally { setBusy(false); }
   };
   const accept = (text: string) => { onUpdate(setPage(m, step.kind, text)); setProposal(null); setEditing(false); onNext(); };
-  const canAsk = Boolean(rewrite) && !step.verbatim && (notes.trim() || (step.fromBook && m.sections.some((s) => kindDef(s.kind).group === "body" && s.body.trim())));
+  const canAsk = Boolean(rewrite) && !step.verbatim && (notes.trim() || ins.trim() || (step.fromBook && m.sections.some((s) => kindDef(s.kind).group === "body" && s.body.trim())));
+  const chat = (onSend: () => void, placeholder: string) => rewrite && !step.verbatim ? (
+    <form onSubmit={(e) => { e.preventDefault(); onSend(); }} className="flex items-center gap-2 rounded-[12px] border border-[#E6E8ED] bg-white px-2 py-1.5 shadow-sm dark:border-white/10 dark:bg-white/5">
+      <Sparkles className="ml-1 h-4 w-4 shrink-0 text-[#7C3AED]" />
+      <input value={ins} onChange={(e) => setIns(e.target.value)} aria-label="Ask Claude" placeholder={placeholder} className="min-w-0 flex-1 bg-transparent px-1 py-1 text-[13.5px] outline-none" />
+      <label className="flex shrink-0 items-center gap-1 text-[12px] text-[#64748B]">about<input value={len} onChange={(e) => setLen(e.target.value.replace(/\D/g, "").slice(0, 5))} inputMode="numeric" aria-label="Number of words" placeholder="300" className="w-14 rounded-md border border-input bg-background px-1.5 py-1 text-right text-[12.5px]" />words</label>
+      <Button type="submit" size="sm" className="h-8 shrink-0 rounded-full" disabled={busy || (!ins.trim() && !len && !notes.trim() && !proposal)}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Ask"}</Button>
+    </form>
+  ) : null;
 
   // The page as the manuscript has it: read, then edit by hand or with Claude.
   if (!editing && sec?.body.trim() && !proposal) return (
@@ -160,6 +171,7 @@ function StepBody({ step, m, onUpdate, rewrite, engineLabel, onNext }: { step: M
           <Button variant="outline" disabled={!notes.trim() || busy} onClick={() => accept(notes)}><Check className="h-4 w-4" /> Use my words as they are</Button>
           {sec?.body.trim() && <Button variant="ghost" disabled={busy} onClick={() => { setEditing(false); setNotes(sec.body); }}>Cancel</Button>}
         </div>
+        {chat(() => void ask(), notes.trim() ? "Tell Claude how to rewrite it (e.g. warmer, for new believers)" : `Tell Claude what to compose for the ${stepLabel(step.kind).toLowerCase()}`)}
         {rewrite && engineLabel && <p className="text-[12px] text-[#64748B]">{engineLabel}</p>}
         {!rewrite && <p className="text-[12.5px] text-[#64748B]">Set up Claude Code or the API to have pages rewritten; you can still write them yourself.</p>}
       </>) : (<>
@@ -170,9 +182,10 @@ function StepBody({ step, m, onUpdate, rewrite, engineLabel, onNext }: { step: M
         )}
         <div className="flex flex-wrap items-center gap-2">
           <Button className={`rounded-full ${GRADIENT}`} disabled={busy} onClick={() => accept(proposal)}><Check className="h-4 w-4" /> Accept and go to the next page</Button>
-          <Button variant="outline" disabled={busy} onClick={() => void ask()}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} Rewrite again</Button>
+          <Button variant="outline" disabled={busy} onClick={() => void ask(notes)}>{busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} Rewrite again</Button>
           <Button variant="ghost" disabled={busy} onClick={() => setProposal(null)}>Back to my words</Button>
         </div>
+        {chat(() => void ask(proposal), "Ask for changes (e.g. shorter, add a closing prayer)")}
         <details className="text-[12.5px] text-[#64748B]"><summary className="cursor-pointer">My words</summary><p className="mt-1 whitespace-pre-wrap">{notes || "(none)"}</p></details>
       </>)}
       {busy && <p role="status" className="text-[13px] text-[#64748B]"><Loader2 className="mr-2 inline h-4 w-4 animate-spin" />Claude is writing the page…</p>}

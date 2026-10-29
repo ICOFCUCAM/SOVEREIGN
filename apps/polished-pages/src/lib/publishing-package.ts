@@ -23,7 +23,7 @@ export function packageChecks(i: PackageInput, pages: number | null): Check[] {
 export async function buildPackage(markdown: string, i: PackageInput, fetchCover: (url: string) => Promise<Blob> = async (u) => (await fetch(u)).blob()): Promise<{ blob: Blob; pages: number; checks: Check[] }> {
   const [{ typesetBook }, { getInteriorType }, { markdownToEpubBlob }] = await Promise.all([import("./typeset/book"), import("./typeset/prefs"), import("./export-epub")]);
   const pref = getInteriorType();
-  const interior = await typesetBook(markdown, { title: i.title, author: i.author, subtitle: i.subtitle, isbn: i.isbn, publisher: i.publisher, trim: i.trim, layout: "ingram", style: pref.style, body: pref.body, heading: pref.heading, size: pref.size, leading: pref.leading, margins: pref.margins, arabicFrom: pref.arabicFrom, tocDepth: pref.tocDepth, language: i.language });
+  const interior = await typesetBook(markdown, { title: i.title, author: i.author, subtitle: i.subtitle, isbn: i.isbn, publisher: i.publisher, trim: i.trim, layout: "ingram", style: pref.style, body: pref.body, heading: pref.heading, size: pref.size, leading: pref.leading, margins: pref.margins, arabicFrom: pref.arabicFrom, tocDepth: pref.tocDepth, numberSections: pref.numberSections, language: i.language });
   const checks = packageChecks(i, interior.pages);
   const spec = coverSpec(i.trim, interior.pages, i.paper || "Cream");
   const zip = new JSZip();

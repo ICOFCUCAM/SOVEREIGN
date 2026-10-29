@@ -10,7 +10,9 @@ export interface InteriorType { style: InteriorStyleId; body: BookFaceId; headin
   /** Line spacing (a multiple of the type size) and page margins; unset means the style's own. */
   leading?: number; margins?: Margins;
   /** Where page 1 is (preliminary pages before it in Roman numerals), and how deep the contents go. */
-  arabicFrom?: "introduction" | "chapter"; tocDepth?: 1 | 2 }
+  arabicFrom?: "introduction" | "chapter"; tocDepth?: 1 | 2;
+  /** Sections numbered 1.1, 1.2… (unset means yes). */
+  numberSections?: boolean }
 const KEY = "pp.interiorType";
 const classic = styleById("classic");
 export const DEFAULT_INTERIOR: InteriorType = { style: "classic", body: classic.faces.body, heading: classic.faces.heading, size: classic.size };
@@ -29,6 +31,7 @@ export function getInteriorType(): InteriorType {
       ...(v?.margins === "narrow" || v?.margins === "normal" || v?.margins === "wide" ? { margins: v.margins } : {}),
       ...(v?.arabicFrom === "chapter" || v?.arabicFrom === "introduction" ? { arabicFrom: v.arabicFrom } : {}),
       ...(v?.tocDepth === 1 || v?.tocDepth === 2 ? { tocDepth: v.tocDepth } : {}),
+      ...(typeof v?.numberSections === "boolean" ? { numberSections: v.numberSections } : {}),
     };
   } catch { return DEFAULT_INTERIOR; }
 }

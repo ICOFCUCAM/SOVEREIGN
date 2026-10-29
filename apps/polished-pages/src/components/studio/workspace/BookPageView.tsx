@@ -70,7 +70,7 @@ export default function BookPageView({ m, section, trimId, onTrim, designInPanel
           import("@/lib/typeset/book"), import("@/lib/typeset/prefs"), import("pdfjs-dist"), import("pdfjs-dist/build/pdf.worker.min.mjs?url"),
         ]);
         const pref = getInteriorType();
-        const r = await typesetBook(md, { title: m.title || "Untitled book", author: m.author, ...bookFacts(m), trim, layout: "standard", style: pref.style, body: pref.body, heading: pref.heading, size: pref.size, leading: pref.leading, margins: pref.margins, arabicFrom: pref.arabicFrom, tocDepth: pref.tocDepth });
+        const r = await typesetBook(md, { title: m.title || "Untitled book", author: m.author, ...bookFacts(m), trim, layout: "standard", style: pref.style, body: pref.body, heading: pref.heading, size: pref.size, leading: pref.leading, margins: pref.margins, arabicFrom: pref.arabicFrom, tocDepth: pref.tocDepth, numberSections: pref.numberSections });
         if (!live) return;
         pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
         const doc = await pdfjs.getDocument({ data: r.bytes.slice() }).promise;

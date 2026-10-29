@@ -5,7 +5,7 @@
 // changing a word: the split itself is Organise's (applyOrganise). The title block becomes the book's
 // title and subtitle; a working label ("COMPLETE MANUSCRIPT") is set aside, not printed.
 import { applyOrganise, type Organised, type OrganisePlan } from "./organise";
-import { SECTION_KINDS, type Section } from "./manuscript";
+import { SECTION_KINDS, kindDef, type Manuscript, type Section } from "./manuscript";
 
 const norm = (s: string) => s.toLowerCase().replace(/^(chapter|part)\s+[\divxlc]+[.:)]?\s*/i, "").replace(/^\d+[.)]\s*/, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 const FRONT: Record<string, string> = { introduction: "introduction", preface: "preface", foreword: "foreword", prologue: "prologue", dedication: "dedication", epigraph: "epigraph", acknowledgements: "acknowledgments", acknowledgments: "acknowledgments", "author s note": "author-note", "a note to the reader": "author-note", praise: "praise", "advance praise": "praise", endorsements: "praise" };
@@ -133,4 +133,44 @@ export function arrangeBook(text: string): Organised | null {
   const leftover = o.sections.find((s) => s.title === "Opening pages");
   const notes = [a.plan.notes, leftover ? `Some text before the first heading couldn't be placed and is kept as "Opening pages" (${leftover.body.split(/\s+/).length} words): look at it before applying, and join it to the part it belongs to or change its kind.` : "", moved.length ? `Put in the conventional order of a book: ${moved.join("; ")}.` : ""].filter(Boolean).join(" ");
   return { ...o, sections, notes, title: a.title, subtitle: a.subtitle, setAside };
+}
+
+const shortLine = (l: string) => l.length <= 110 && !/[.!?]["”’]?\s+\S/.test(l.replace(/^\s*(chapter\s+)?[\divxlc]+[.):]\s*/i, "")) && !(/\.["”’]?$/.test(l) && l.split(/\s+/).length >= 9);
+/** A section that is really the rest of the book's contents list, left in the book by an arrangement that
+ *  stopped reading the list early ("Opening pages"): short heading lines, most of them found again as
+ *  lines in the other sections. Null when there is none. */
+export function leftoverContents(m: Manuscript): Section | null {
+  const elsewhere = (s: Section) => new Set(m.sections.filter((x) => x !== s).flatMap((x) => [x.title, ...x.body.split("\n")]).map((l) => norm(l.replace(/^#+\s*/, ""))).filter(Boolean));
+  for (const s of m.sections) {
+    const lines = s.body.split("\n").map((l) => l.replace(/^#+\s*/, "").trim()).filter(Boolean);
+    if (lines.length < 4 || lines.filter(shortLine).length < lines.length * 0.85) continue;
+    const seen = elsewhere(s);
+    const found = lines.filter((l) => seen.has(norm(l))).length;
+    if (found >= lines.length * 0.5 || (s.title === "Opening pages" && found >= 2)) return s;
+  }
+  return null;
+}
+
+/** The book arranged again with that leftover list put back where it belongs: the list the earlier
+ *  arrangement read (the sections and their headings) followed by the leftover entries is the whole
+ *  contents list, and the book is split from it as when it was first arranged. The other sections
+ *  keep their kinds; a front or back page the list doesn't name is kept as it is. */
+export function arrangeLeftover(m: Manuscript): Organised | null {
+  const left = leftoverContents(m);
+  if (!left) return null;
+  const listed = (s: Section) => kindDef(s.kind).group === "body" || kindOf(s.title, norm(s.title)) === s.kind;
+  const into = m.sections.filter((s) => s !== left && listed(s));
+  const kept = m.sections.filter((s) => s !== left && !listed(s));
+  let n = 0;
+  const leftLines = left.body.split("\n").map((l) => l.replace(/^#+\s*/, "").trim()).filter(Boolean);
+  // The leftover entries go into the list after the part whose text holds the first of them (usually the last part).
+  const holds = (sec: Section) => sec.body.split("\n").some((l) => norm(l.replace(/^#+\s*/, "")) === norm(leftLines[0]));
+  const at = Math.max(0, into.findIndex(holds));
+  const list = into.flatMap((s, i) => [s.kind === "chapter" ? `${++n}. ${s.title}` : s.title, ...[...s.body.matchAll(/^###\s+(.+)$/gm)].map((x) => x[1].trim()), ...(i === (into.some(holds) ? at : into.length - 1) ? leftLines : [])]);
+  const text = ["Contents", ...list, "", into.map((s) => `${s.title}\n\n${s.body}`).join("\n\n")].join("\n");
+  const o = arrangeBook(text);
+  if (!o) return null;
+  const kindOfTitle = new Map(into.map((s) => [norm(s.title), s.kind]));
+  const sections = conventionalOrder([...kept, ...o.sections.map((s) => ({ ...s, kind: kindOfTitle.get(norm(s.title)) ?? s.kind }))]).sections;
+  return { ...o, sections, title: m.title, subtitle: m.subtitle, setAside: [`“${left.title}”: the rest of the book's contents list, now used to place every chapter and section.`], notes: o.notes };
 }

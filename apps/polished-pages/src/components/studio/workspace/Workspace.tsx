@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, Check, CloudOff, FileText, Library as LibraryIcon, Cpu, Focus, History, LifeBuoy, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Redo2, Search, Sparkles, Undo2, WifiOff, X } from "lucide-react";
+import { AlertTriangle, Check, CloudOff, FileText, Library as LibraryIcon, Cpu, Focus, History, LifeBuoy, Loader2, Menu, MessageSquare, Moon, PanelRightOpen, Plus, Redo2, Search, Sparkles, Undo2, WifiOff, X, ListTree } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,8 @@ import { figuresOf } from "@/lib/figures";
 import { insertBlock } from "@/lib/markdown-format";
 import { buildBackup } from "@/lib/project-backup";
 import { saveFile } from "@/lib/book-export";
-import { manuscriptText, organisedToManuscript } from "@/lib/organise";
+import { manuscriptText, organisedToManuscript, type Organised } from "@/lib/organise";
+import { arrangeLeftover, leftoverContents } from "@/lib/arrange-book";
 import { announce, askToNotify } from "@/lib/notify";
 // The Book Creator wizard, run inside the project on the engine in use (loaded on demand).
 const BookCreator = lazy(() => import("@/pages/BookCreator"));
@@ -144,6 +145,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const [organising, setOrganising] = useState(false);
   // Front and back matter, page by page (§21): the page to open, or null.
   const [matter, setMatter] = useState<string | null>(null);
+  // The arrangement offered for a leftover contents list (§22), shown for review in the Organise dialog.
+  const [repair, setRepair] = useState<Organised | null>(null);
   const [bookPanel, setBookPanelState] = useState<"design" | "claude">(() => { try { return localStorage.getItem("studio.bookPanel") === "claude" ? "claude" : "design"; } catch { return "design"; } });
   const setBookPanel = (v: "design" | "claude") => { setBookPanelState(v); try { localStorage.setItem("studio.bookPanel", v); } catch { /* storage blocked */ } };
   // Find and replace across the book (§21).
@@ -164,6 +167,7 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
   const rulesRef = useRef<HTMLTextAreaElement>(null);
   const titleRef = useRef("");
   const { m, update, patchSection, replace, persist, saving, latest, undo, redo, canUndo, canRedo, recovery, recover, kept, saveError } = useManuscript(backend, id);
+  const leftover = useMemo(() => (m ? leftoverContents(m) : null), [m]);
   const [versions, setVersions] = useState(false);
   // First project: a short walkthrough, once per browser (spec §7).
   const [tour, setTour] = useState(() => !wasOnboarded());
@@ -551,6 +555,14 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
               <AlertTriangle className="h-4 w-4 shrink-0" /><span className="flex-1">This browser could not keep a backup copy (its storage is full or blocked). Your work is safe only once it shows “Saved”; don't close this tab before then.</span>
             </div>
           )}
+          {/* A contents list left in the book as a chapter ("Opening pages", §22): offered back to its places, reviewed first. */}
+          {leftover && (place === "plan" || place === "write") && (
+            <div role="status" className="mx-auto mb-6 flex w-full max-w-[1120px] flex-wrap items-center gap-3 rounded-[10px] border border-[#BFD3FF] bg-[#F5F8FF] px-4 py-3 text-[13.5px] dark:border-[#1E3A8A] dark:bg-[#1E3A8A]/20">
+              <ListTree className="h-4 w-4 shrink-0 text-[#2563EB]" />
+              <span className="min-w-[240px] flex-1">“{leftover.title}” is not a chapter: it is the rest of your book's contents list. Its chapters and sections can be put in their places, and the Contents then list them all. Nothing changes until you apply it.</span>
+              <Button size="sm" onClick={() => { const r = m ? arrangeLeftover(m) : null; if (r) setRepair(r); else toast({ title: "Couldn't place the list", description: "Organise the book again from Plan: “As it was before the last organising”.", variant: "destructive" }); }}>Put the chapters and sections in place</Button>
+            </div>
+          )}
           {!online && (
             <div role="status" className="mx-auto mb-6 flex w-full max-w-[720px] items-center gap-3 rounded-[10px] border border-[#E6E8ED] bg-white px-4 py-3 text-[13.5px] text-[#475569] dark:border-white/10 dark:bg-white/5 dark:text-[#CBD5E1]">
               <WifiOff className="h-4 w-4" /><span className="flex-1">You're offline. Keep writing: changes stay on this device and are saved when the connection returns. Claude can't run until then.</span>
@@ -589,6 +601,8 @@ function Project({ p, place, setPlace, view, setView, panelMode, setPanelMode, p
       <Onboarding open={tour} onClose={() => setTour(false)} onGo={setPlace} />
       {matter !== null && m && <MatterGuide m={m} onUpdate={update} start={matter || undefined} engineLabel={bookEngine?.label} onClose={() => setMatter(null)}
         rewrite={engineId ? (i) => (engineId === "claude-code" && backend === runnerBackend ? claudeMatter(id, i) : apiMatter(i)) : null} />}
+      {repair && m && <OrganiseDialog hasManuscript hasUploads={false} initial={repair} readText={async () => null} organise={async () => { throw new Error("Not used"); }} upload={async () => {}} onClose={() => setRepair(null)}
+        onApply={(o) => { update(organisedToManuscript(o, m)); setRepair(null); toast({ title: "Chapters and sections in place", description: `${o.sections.length} parts. The earlier arrangement can be restored from Plan.` }); }} />}
       {organising && <OrganiseDialog hasManuscript={Boolean(m?.sections.some((s) => s.body.trim()))} hasUploads={hasUploads} engineLabel={bookEngine?.label}
         hasEarlier={Boolean(m?.archive?.length)}
         readText={async (s) => (s === "manuscript" ? (m ? manuscriptText(m) : null) : s === "earlier" ? (m?.archive?.length ? manuscriptText({ ...m, sections: m.archive[m.archive.length - 1].sections }) : null) : uploadsText((await backend.thread(id)).thread.files, true))}

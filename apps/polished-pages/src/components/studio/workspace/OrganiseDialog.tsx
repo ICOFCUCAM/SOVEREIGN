@@ -16,7 +16,9 @@ import { EYEBROW, GRADIENT } from "./ui";
 // begins and what it is called; the text is split there unchanged; the owner reviews, then applies.
 export type OrganiseSource = "manuscript" | "uploads" | "earlier";
 
-export default function OrganiseDialog({ hasManuscript, hasUploads, hasEarlier = false, readText, organise, upload, onApply, onClose, engineLabel }: {
+export default function OrganiseDialog({ initial, hasManuscript, hasUploads, hasEarlier = false, readText, organise, upload, onApply, onClose, engineLabel }: {
+  /** An arrangement already made (a leftover contents list put back, §22), opened straight at its review. */
+  initial?: Organised;
   hasManuscript: boolean; hasUploads: boolean;
   /** The manuscript has a version from before it was last organised (kept in Plan's archive), to organise again. */
   hasEarlier?: boolean;
@@ -36,7 +38,7 @@ export default function OrganiseDialog({ hasManuscript, hasUploads, hasEarlier =
   const [instructions, setInstructions] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<Organised | null>(null);
+  const [result, setResult] = useState<Organised | null>(initial ?? null);
   const file = useRef<HTMLInputElement>(null);
 
   const run = async (from = source) => {
