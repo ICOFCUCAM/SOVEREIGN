@@ -200,3 +200,14 @@ export const titleFromFileName = (name: string) => {
   const base = name.replace(/\.[^.]+$/, "").trim();
   return (/\s/.test(base) ? base : base.replace(/[_]+|(?<=\p{L})-(?=\p{L})/gu, " ")).replace(/\s+/g, " ").trim() || base;
 };
+
+/** The book's facts for its title and copyright pages, as the author supplied them in the production
+ *  details (Finish). A placeholder ("[ISBN]") or an empty field counts as not supplied: nothing is printed for it. */
+export function bookFacts(m: Pick<Manuscript, "subtitle" | "meta">): { subtitle?: string; publisher?: string; rightsHolder?: string; isbn?: string; edition?: string; notices?: string[]; year?: number } {
+  const meta = m.meta ?? {};
+  const given = (v: unknown) => { const t = typeof v === "string" || typeof v === "number" ? String(v).trim() : ""; return t && !/\[[^\]]*\]/.test(t) ? t : undefined; };
+  const year = Number(given(meta.copyrightYear) ?? given(meta.year));
+  const notices = String(meta.scriptureNotices ?? "").split(/\n+/).map((x) => x.trim()).filter((x) => x && !/\[[^\]]*\]/.test(x));
+  const out = { subtitle: given(m.subtitle), publisher: given(meta.publisher) ?? given(meta.imprint), rightsHolder: given(meta.copyrightHolder), isbn: given(meta.isbn), edition: given(meta.edition), notices: notices.length ? notices : undefined, year: year > 1000 ? year : undefined };
+  return Object.fromEntries(Object.entries(out).filter(([, v]) => v !== undefined)) as ReturnType<typeof bookFacts>;
+}

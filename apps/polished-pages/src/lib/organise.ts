@@ -62,7 +62,13 @@ function dropHeading(text: string, title: string): { text: string; removed: numb
   return { text: rest.trim(), removed };
 }
 
-export interface Organised { sections: Section[]; missed: string[]; notes: string; totalWords: number; keptWords: number; removedHeadingWords: number }
+export interface Organised {
+  sections: Section[]; missed: string[]; notes: string; totalWords: number; keptWords: number; removedHeadingWords: number;
+  /** Arranged from the book's own contents (arrange-book.ts): the title block, read as the book's title and subtitle. */
+  title?: string; subtitle?: string;
+  /** What was taken out of the text and why (the typed contents list, a working label), shown before applying. */
+  setAside?: string[];
+}
 
 /** The book split where Claude's plan says each part begins; nothing of the text is changed or lost. */
 export function applyOrganise(text: string, plan: OrganisePlan): Organised {
@@ -119,7 +125,7 @@ export function manuscriptText(m: Manuscript): string {
 /** The manuscript laid out as organised; the sections it replaces are kept in the archive to restore. */
 export function organisedToManuscript(o: Organised, m: Manuscript, at = new Date().toISOString()): Manuscript {
   const archive = m.sections.length ? [...(m.archive ?? []), { at, label: "Before organising into chapters", sections: m.sections.map(({ id, kind, title, body, idea }) => ({ id, kind, title, body, ...(idea ? { idea } : {}) })) }].slice(-5) : m.archive;
-  return { ...m, sections: o.sections, ...(archive ? { archive } : {}) };
+  return { ...m, sections: o.sections, ...(o.title ? { title: o.title } : {}), ...(o.subtitle ? { subtitle: o.subtitle } : {}), ...(archive ? { archive } : {}) };
 }
 
 /** The owner's corrections to Claude's division (DESIGN-SPEC.md §21): a part's title or kind. */

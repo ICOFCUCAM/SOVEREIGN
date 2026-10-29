@@ -169,3 +169,36 @@ describe("figures", () => {
     expect(text.replace(/\s+/g, " ")).toMatch(/figure\.[\s\S]*The tabernacle in the wilderness[\s\S]*After/);
   }, 60_000);
 });
+
+describe("front matter conventions", () => {
+  const pagesOf = async (bytes: Uint8Array) => {
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const doc = await pdfjs.getDocument({ data: bytes.slice(), useSystemFonts: false }).promise;
+    const out: string[] = [];
+    for (let n = 1; n <= doc.numPages; n++) out.push((await (await doc.getPage(n)).getTextContent()).items.map((x) => ("str" in x ? x.str : "")).join(" ").replace(/\s+/g, " "));
+    return out;
+  };
+  const P = (n: number) => Array.from({ length: n }, () => "Both testaments confess that Yahuah is one, and the Shema stands at the centre of that confession. Israel was called to hear and to obey.").join("\n\n");
+  const md = `# B\n\n## Preface\n\n${P(2)}\n\n## Contents\n\n## Introduction\n\n${P(2)}\n\n### The Aim of This Book\n\n${P(1)}\n\n## One Yahuah\n\n${P(2)}\n\n## Chapter 2\n\n${P(1)}\n\n## Glossary\n\nShema: the confession.`;
+  it("numbers preliminary pages in Roman numerals, starts Arabic at the Introduction, and lists chapters with numbers and sections", async () => {
+    const r = await typesetBook(asChapters(md), { title: "B", subtitle: "A Subtitle Here", author: "A. Author", isbn: "[ISBN]", publisher: "", trim: getTrim("6x9"), layout: "ingram", tocDepth: 2, fetchFont: nodeFetchFont, year: 2026 });
+    const pages = await pagesOf(r.bytes);
+    const intro = r.sections.find((s) => s.title === "Introduction")!.page;
+    const preface = r.sections.find((s) => s.title === "Preface")!.page;
+    expect(r.folios[intro - 1]).toBe("1");
+    expect(r.folios[preface - 1]).toMatch(/^[ivx]+$/);
+    const toc = pages[r.contents![0] - 1];
+    expect(toc).toMatch(/1\.\s+One Yahuah/);
+    expect(toc).toMatch(/The Aim of This Book/);
+    expect(toc).toMatch(new RegExp(`Preface[ .]*${r.folios[preface - 1]}`));
+    // Title page with subtitle; copyright page with the rights wording and no placeholder printed.
+    expect(pages.some((t) => /A Subtitle Here/.test(t) && /A\. Author/.test(t))).toBe(true);
+    const copy = pages.find((t) => /Copyright ©/.test(t))!;
+    expect(copy).toMatch(/All rights reserved\. No part of this book may be reproduced/);
+    expect(copy).not.toMatch(/ISBN|\[/);
+    // A chapter titled only "Chapter 2" under a "CHAPTER TWO" label isn't said twice.
+    const ch2 = pages[r.sections.find((s) => s.title === "Chapter 2")!.page - 1];
+    expect(ch2.replace(/\s/g, "")).toMatch(/CHAPTERTWO/);
+    expect(ch2).not.toMatch(/Chapter 2/);
+  }, 60_000);
+});

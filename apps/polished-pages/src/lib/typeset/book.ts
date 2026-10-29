@@ -44,6 +44,26 @@ export interface BookTypeOptions {
   leading?: number;
   /** Page margins around the text. */
   margins?: Margins;
+  /** Title page and copyright page facts, as the author supplied them; nothing is printed for a fact not given. */
+  subtitle?: string;
+  publisher?: string;
+  /** The copyright owner, when not the author. */
+  rightsHolder?: string;
+  isbn?: string;
+  edition?: string;
+  /** Permission notices for quoted scripture versions, one per line. */
+  notices?: string[];
+  /** Where Arabic page numbers begin (preliminary pages before it take lower-case Roman numerals):
+   *  at the Introduction (when the book has one before Chapter 1) or at Chapter 1. */
+  arabicFrom?: "introduction" | "chapter";
+  /** Contents depth: chapters only (1), or chapters with their sections (2). */
+  tocDepth?: 1 | 2;
+}
+/** Lower-case Roman numerals for preliminary pages (i, ii, iii…). */
+export function roman(n: number): string {
+  const R: [number, string][] = [[1000, "m"], [900, "cm"], [500, "d"], [400, "cd"], [100, "c"], [90, "xc"], [50, "l"], [40, "xl"], [10, "x"], [9, "ix"], [5, "v"], [4, "iv"], [1, "i"]];
+  let out = ""; for (const [v, r] of R) while (n >= v) { out += r; n -= v; }
+  return out;
 }
 export type Margins = "narrow" | "normal" | "wide";
 const MARGIN_SCALE: Record<Margins, number> = { narrow: 0.72, normal: 1, wide: 1.3 };
@@ -184,9 +204,19 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   let ty = H / 2 + (tLines.length * titleSt.size * 1.2) / 2;
   for (const l of tLines) { ts.drawLine(pc, l, colX(1), ty, colW, titleSt, "center"); ty -= titleSt.size * 1.2; }
   if (S.ornament !== "none") { ty -= 4; ornament(pc, colX(1) + colW / 2, ty + 6); ty -= 10; }
+  if (o.subtitle?.trim()) {
+    const sSt: TextStyle = { kind: "heading", style: S.titleStyle === "italic" ? "regular" : "italic", size: Math.max(11, Math.round(titleSt.size * 0.55)) };
+    ty -= 4;
+    for (const l of ts.wrap(strip(o.subtitle.trim()), sSt, colW * 0.86)) { ts.drawLine(pc, l, colX(1) + colW * 0.07, ty, colW * 0.86, sSt, "center"); ty -= sSt.size * 1.3; }
+    ty -= 8;
+  }
   if (o.author) {
     const aSt: TextStyle = { kind: "body", style: "italic", size: 13 };
     for (const l of ts.wrap(o.author, aSt, colW)) { ty -= 6; ts.drawLine(pc, l, colX(1), ty, colW, aSt, "center"); ty -= 16; }
+  }
+  if (o.publisher?.trim()) {
+    const pSt: TextStyle = { kind: "body", style: "regular", size: 10, gray: 0.35 };
+    for (const l of ts.wrap(o.publisher.trim(), pSt, colW)) ts.drawLine(pc, l, colX(1), bottom + 6, colW, pSt, "center");
   }
 
   function ornament(p: PageCtx, cx: number, y: number) {
@@ -196,20 +226,38 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     }
   }
 
-  // ── Copyright page (Ingram) ──
-  if (ingram) {
+  // ── Copyright page (the title page's back) ──
+  // Facts the author supplied, then the standard rights wording; a fact not supplied is left out, never made up.
+  {
     pc = add();
     const year = o.year ?? new Date().getFullYear();
     const copyN = pages.length;
-    const cSt: TextStyle = { kind: "body", style: "regular", size: 10, gray: 0.24 };
-    const cl = [bookTitle, o.author ? `Copyright © ${year} ${o.author}.` : `Copyright © ${year}.`, "All rights reserved.", "", `Produced with ${o.producedWith ?? "Polished Pages"}.`];
-    let cy = bottom + cl.length * 14;
-    for (const l of cl) { if (l) for (const line of ts.wrap(l, cSt, colW)) ts.drawLine(pc, line, colX(copyN), cy, colW, cSt, "start"); cy -= 14; }
+    const cSt: TextStyle = { kind: "body", style: "regular", size: 9, gray: 0.24 };
+    // A placeholder ("[ISBN]") is not a fact: it isn't printed.
+    const fact = (v?: string) => (v?.trim() && !/\[[^\]]*\]/.test(v) ? v.trim() : "");
+    const owner = fact(o.rightsHolder) || fact(o.author);
+    const cl = [
+      [bookTitle, o.subtitle?.trim() ? strip(o.subtitle.trim()) : ""].filter(Boolean).join(": "),
+      owner ? `Copyright © ${year} ${owner}.` : `Copyright © ${year}.`,
+      "All rights reserved. No part of this book may be reproduced, stored in a retrieval system or transmitted in any form or by any means, electronic, mechanical, photocopying, recording or otherwise, without the prior written permission of the copyright holder, except for brief quotations in reviews and critical articles.",
+      ...(o.notices ?? []).map(fact).filter(Boolean),
+      ...(fact(o.edition) ? [fact(o.edition)] : []),
+      ...(fact(o.isbn) ? [`ISBN ${fact(o.isbn).replace(/^isbn[:\s]*/i, "")}`] : []),
+      ...(fact(o.publisher) ? [`Published by ${fact(o.publisher)}`] : []),
+      ...(ingram ? [`Produced with ${o.producedWith ?? "Polished Pages"}.`] : []),
+    ];
+    const wrapped = cl.map((l) => ts.wrap(l, cSt, colW));
+    const lh = 12.5;
+    let cy = bottom + wrapped.reduce((a, w) => a + w.length * lh + 6, 0);
+    for (const w of wrapped) { for (const line of w) { ts.drawLine(pc, line, colX(copyN), cy, colW, cSt, "start"); cy -= lh; } cy -= 6; }
   }
 
   // ── Reserve the contents ──
-  const chapters = blocks.filter((b) => b.kind === "h1");
-  const tocLine = 20;
+  const depth = o.tocDepth ?? 1;
+  const chapters = blocks.filter((b) => b.kind === "h1" || (depth === 2 && b.kind === "h2"));
+  // The contents follow the book's type size (a large-print book has large-print contents).
+  const tocSize = Math.max(11, Math.round(size * 0.95));
+  const tocLine = Math.round(tocSize * 1.8);
   const perToc = Math.max(1, Math.floor((textH - 46) / tocLine));
   const tocCount = chapters.length ? Math.ceil(chapters.length / perToc) : 0;
   // The contents stand where the book places them (before the introduction), or after the title page.
@@ -228,9 +276,12 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   let dirty = false;
   let afterHeading = true; // the next paragraph isn't indented
   let dropNext = false;    // the next paragraph opens a chapter: drop cap
-  const starts: { title: string; folio: number }[] = [];
+  const starts: { title: string; n: number; level: 1 | 2; no?: number }[] = [];
   const pageNo = () => pages.length;
-  const folioOf = (n: number) => n - bodyFirst + 1;
+  // Preliminary pages take lower-case Roman numerals, counted from the first page of the book; Arabic
+  // numbering starts at 1 where the main text begins (the Introduction or Chapter 1, by convention).
+  let mainFirst = 0;
+  const folioOf = (n: number) => (mainFirst && n < mainFirst ? roman(n) : String(n - (mainFirst || bodyFirst) + 1));
 
   const heads: { n: number; chapter: string; open: boolean; used: boolean }[] = [];
   const tocPages: number[] = [];
@@ -243,27 +294,30 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
     const lh = o2.lh ?? st.size * (st.kind === "heading" ? 1.25 : leading);
     const pDir = paragraphDir(text);
     const hang = o2.hang ?? 0;
-    let rest = text, cap = "", capW = 0, capSize = 0;
-    // Drop caps only for left-to-right alphabetic text that starts with a letter.
-    if (o2.drop && pDir === "ltr" && latin) {
-      const m = /^(\p{L})(.*)$/su.exec(text);
-      if (m) {
-        cap = m[1]; rest = m[2];
-        // Top of the cap level with the first line's capitals, foot on the last line's baseline (cap height ≈ 0.66 em).
-        capSize = (lh * (o2.drop - 1) + st.size * 0.66) / 0.66;
-        capW = ts.measure(cap, { kind: "heading", style: "regular", size: capSize }) + st.size * 0.35;
-      }
-    }
     const indent = o2.indent ?? 0;
     const right = o2.right ?? 0;
     const inner = colW - hang - right;
     const firstW = inner - indent;
-    const lines = ts.wrap(rest, st, inner, (i) => (cap && i < (o2.drop ?? 0) ? inner - capW : i === 0 ? firstW : inner));
+    let rest = text, cap = "", capW = 0, capSize = 0, drop = 0;
+    let lines: ReturnType<typeof ts.wrap> = [];
+    // Drop caps only for left-to-right alphabetic text that starts with a letter, and never deeper
+    // than the paragraph itself: a cap taller than its paragraph would run into the text below, so a
+    // short paragraph takes a smaller cap (two lines) or none (one line).
+    const m = o2.drop && pDir === "ltr" && latin ? /^(\p{L})(.*)$/su.exec(text) : null;
+    for (let d = m ? (o2.drop ?? 0) : 0; d >= 2; d--) {
+      // Top of the cap level with the first line's capitals, foot on the last line's baseline (cap height ≈ 0.66 em).
+      const size2 = (lh * (d - 1) + st.size * 0.66) / 0.66;
+      const w2 = ts.measure(m![1], { kind: "heading", style: "regular", size: size2 }) + st.size * 0.35;
+      const l2 = ts.wrap(m![2], st, inner, (i) => (i < d ? inner - w2 : inner));
+      if (l2.length >= d) { cap = m![1]; rest = m![2]; capSize = size2; capW = w2; drop = d; lines = l2; break; }
+    }
+    if (!cap) lines = ts.wrap(rest, st, inner, (i) => (i === 0 ? firstW : inner));
     // A heading stays with at least two lines of what follows it; a paragraph never leaves
     // its first line alone at the foot of a page (orphan) or its last line alone at the top (widow).
     if (o2.keep !== undefined) { if (y - (o2.before ?? 0) - lines.length * lh - (o2.after ?? 0) - o2.keep < bottom) nextPage(); else y -= o2.before ?? 0; }
     else y -= o2.before ?? 0;
-    if (cap) room(lh * (o2.drop ?? 1));
+    if (cap) room(lh * drop);
+    else if (lines.length === 3) room(lh * 3); // a three-line paragraph can't be split without leaving one line alone
     else if (lines.length >= 2) room(lh * 2);
     lines.forEach((l, i) => {
       if (lines.length >= 3 && i === lines.length - 2 && i >= 2 && y - lh * 2 < bottom && y - lh >= bottom) nextPage();
@@ -272,7 +326,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       const n = pageNo();
       let x = colX(n) + (pDir === "rtl" ? right : hang);
       let w = inner;
-      if (cap && i < (o2.drop ?? 0)) { if (i === 0) ts.text(pc, cap, x, base - lh * ((o2.drop ?? 1) - 1), { kind: "heading", style: "regular", size: capSize }, "left"); x += capW; w -= capW; }
+      if (cap && i < drop) { if (i === 0) ts.text(pc, cap, x, base - lh * (drop - 1), { kind: "heading", style: "regular", size: capSize }, "left"); x += capW; w -= capW; }
       else if (i === 0 && indent) { if (pDir === "rtl") w -= indent; else { x += indent; w -= indent; } }
       if (o2.bullet && i === 0) ts.text(pc, o2.bullet, pDir === "rtl" ? colX(n) + colW - hang + 5 : colX(n) + 3, base, st, "left");
       ts.drawLine(pc, l, x, base, w, st, align);
@@ -304,8 +358,11 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       y -= 14;
     }
     const tSt: TextStyle = { kind: "heading", style: S.titleStyle === "italic" ? "italic" : S.titleStyle === "bold" ? "bold" : "regular", size: S.titleSize };
-    const label = S.numberedHeadings && !plain ? `${chapterNo}  ${title}` : title;
-    para(label, tSt, center ? "center" : "start", { lh: S.titleSize * 1.2 });
+    // The number goes in the title only when no chapter label above it carries it already.
+    const label = S.numberedHeadings && !plain && S.chapterLabel === "none" ? `${chapterNo}  ${title}` : title;
+    // A chapter titled only "Chapter 1" (or "Chapter One") under a "CHAPTER ONE" label would say it twice.
+    const bare = !plain && S.chapterLabel !== "none" && /^chapter\s+([\divxlc]+|[a-z-]+)\.?$/i.test(strip(title).trim());
+    if (!bare) para(label, tSt, center ? "center" : "start", { lh: S.titleSize * 1.2 });
     if (S.ornament === "diamond") { y -= 8; ornament(pc, cx, y); y -= 22; }
     else if (S.ornament === "rule") { y -= 6; if (center) ts.rule(pc, cx - 28, y, cx + 28, y, 0.8); else ts.rule(pc, dir === "rtl" ? x + colW - 56 : x, y, dir === "rtl" ? x + colW : x + 56, y, 1.2, 0.2); y -= 22; }
     else y -= 20;
@@ -365,11 +422,14 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       first = false;
       opening = true;
       chapter = b.text;
-      starts.push({ title: S.numberedHeadings && !b.plain ? `${chapterNo + 1}  ${b.text}` : b.text, folio: folioOf(pageNo()) });
+      if (!mainFirst && (!b.plain || ((o.arabicFrom ?? "introduction") === "introduction" && /^introduction$/i.test(strip(b.text).trim())))) mainFirst = pageNo();
+      starts.push({ title: b.text, n: pageNo(), level: 1, ...(b.plain ? {} : { no: chapterNo + 1 }) });
       chapterOpening(b.text, b.plain);
     } else if (b.kind === "h2") {
       h2No++;
-      para(S.numberedHeadings && chapterNo ? `${chapterNo}.${h2No}  ${b.text}` : b.text, { kind: "heading", style: "bold", size: Math.round(size * 1.35) }, S.titleAlign === "center" && S.paragraphs === "block" ? "center" : "start", { before: lead * 0.9, after: lead * 0.35, keep: lead * 3 });
+      const h2Label = S.numberedHeadings && chapterNo ? `${chapterNo}.${h2No}  ${b.text}` : b.text;
+      para(h2Label, { kind: "heading", style: "bold", size: Math.round(size * 1.35) }, S.titleAlign === "center" && S.paragraphs === "block" ? "center" : "start", { before: lead * 0.9, after: lead * 0.35, keep: lead * 3 });
+      if (depth === 2) starts.push({ title: h2Label, n: pageNo(), level: 2 });
       afterHeading = true;
     } else if (b.kind === "h3") {
       para(b.text, { kind: "heading", style: S.numberedHeadings ? "bold" : "italic", size: Math.round(size * 1.12) }, "start", { before: lead * 0.6, after: lead * 0.2, keep: lead * 2.5 });
@@ -434,7 +494,7 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
 
   // ── Fill the contents ──
   if (tocCount) {
-    const tSt: TextStyle = { kind: "body", style: "regular", size: 11, gray: 0.16 };
+    const tSt: TextStyle = { kind: "body", style: "regular", size: tocSize, gray: 0.16 };
     const dots: TextStyle = { ...tSt, gray: 0.7 };
     const dotW = ts.measure(".", tSt);
     const sp = ts.measure(" ", tSt);
@@ -451,42 +511,50 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
       }
       for (let k = 0; k < perToc && idx < starts.length; k++, idx++) {
         const e = starts[idx];
-        const numStr = String(e.folio);
-        const numW = ts.measure(numStr, tSt);
-        const x = colX(n);
-        const line = ts.wrap(e.title, tSt, colW - numW - 30)[0];
+        const numStr = folioOf(e.n);
+        const eSt: TextStyle = e.level === 2 ? { ...tSt, size: tocSize - 1, gray: 0.3 } : tSt;
+        const numW = ts.measure(numStr, eSt);
+        const ind = e.level === 2 ? size * 1.8 : 0;
+        const x = colX(n) + (dir === "rtl" ? 0 : ind);
+        const w0 = colW - ind;
+        // Chapters carry their number (the academic styles number them in the title already).
+        const label = e.no && !S.numberedHeadings ? `${e.no}.  ${e.title}` : e.no && S.numberedHeadings ? `${e.no}  ${e.title}` : e.title;
+        const line = ts.wrap(label, eSt, w0 - numW - 30)[0];
         if (!line) continue;
         const tw = line.widths.reduce((a, b) => a + b, 0) + line.tokens.slice(0, -1).reduce((a, t) => a + (t.space ? sp : 0), 0);
         const rtl = dir === "rtl";
-        ts.drawLine(page, line, rtl ? x + numW + 12 : x, cy, colW - numW - 12, tSt, rtl ? "right" : "left");
-        if (rtl) ts.text(page, numStr, x, cy, tSt, "left"); else ts.text(page, numStr, x + colW, cy, tSt, "right");
-        const from = rtl ? x + numW + 4 : x + tw + 4;
-        const to = rtl ? x + colW - tw - 4 : x + colW - numW - 4;
-        const count = Math.floor((to - from) / dotW);
-        if (count > 2) ts.text(page, ".".repeat(count), from, cy, dots, "left");
-        cy -= tocLine;
+        ts.drawLine(page, line, rtl ? x + numW + 12 : x, cy, w0 - numW - 12, eSt, rtl ? "right" : "left");
+        if (rtl) ts.text(page, numStr, x, cy, eSt, "left"); else ts.text(page, numStr, x + w0, cy, eSt, "right");
+        const from = rtl ? x + numW + 6 : x + tw + 6;
+        const to = rtl ? x + w0 - tw - 6 : x + w0 - numW - 6;
+        // The leader is measured as set (a run of dots can be wider than dots counted one by one), so it never runs into the number.
+        let count = Math.floor((to - from) / dotW);
+        while (count > 2 && ts.measure(".".repeat(count), { ...dots, size: eSt.size }) > to - from) count--;
+        if (count > 2) ts.text(page, ".".repeat(count), from, cy, { ...dots, size: eSt.size }, "left");
+        // Sections sit close under their chapter; the next chapter stands a full line below.
+        cy -= starts[idx + 1]?.level === 2 ? tocLine * 0.8 : tocLine;
       }
     }
   }
 
   ts.finish();
   // Where each chapter (and front or back matter section) opens, as a physical page number.
-  return { doc, pages: pages.length, sections: starts.map((x) => ({ title: x.title, page: x.folio + bodyFirst - 1 })), bodyFirst, contents: tocCount ? [tocFirst, tocFirst + tocCount - 1] as [number, number] : null, placed, pageHeight: H };
+  return { doc, pages: pages.length, sections: starts.filter((x) => x.level === 1).map((x) => ({ title: x.title, page: x.n })), folios: pages.map((_, i) => (i + 1 >= bodyFirst && !tocPages.includes(i + 1) ? folioOf(i + 1) : "")), bodyFirst, contents: tocCount ? [tocFirst, tocFirst + tocCount - 1] as [number, number] : null, placed, pageHeight: H };
 }
 export interface SetSection { title: string; page: number }
 /** A paragraph's place on a page (PDF points from the bottom), with its text as set. */
 export interface Placed { page: number; top: number; bottom: number; text: string }
 
 /** Typesets a Markdown book into a print-ready PDF and returns its bytes and page count. */
-export async function typesetBook(markdown: string, o: BookTypeOptions): Promise<{ bytes: Uint8Array; pages: number; sections: SetSection[]; bodyFirst: number; contents: [number, number] | null; placed: Placed[]; pageHeight: number }> {
+export async function typesetBook(markdown: string, o: BookTypeOptions): Promise<{ bytes: Uint8Array; pages: number; sections: SetSection[]; bodyFirst: number; contents: [number, number] | null; placed: Placed[]; pageHeight: number; folios: string[] }> {
   if (o.layout === "ingram") {
     // Measure once with a provisional gutter, then set it for the real page count.
     const probe = await build(markdown, o, 15.875);
     const final = await build(markdown, o, ingramGutterMm(probe.pages));
-    return { bytes: await final.doc.save(), pages: final.pages, sections: final.sections, bodyFirst: final.bodyFirst, contents: final.contents, placed: final.placed, pageHeight: final.pageHeight };
+    return { bytes: await final.doc.save(), pages: final.pages, sections: final.sections, bodyFirst: final.bodyFirst, contents: final.contents, placed: final.placed, pageHeight: final.pageHeight, folios: final.folios };
   }
   const r = await build(markdown, o, 0);
-  return { bytes: await r.doc.save(), pages: r.pages, sections: r.sections, bodyFirst: r.bodyFirst, contents: r.contents, placed: r.placed, pageHeight: r.pageHeight };
+  return { bytes: await r.doc.save(), pages: r.pages, sections: r.sections, bodyFirst: r.bodyFirst, contents: r.contents, placed: r.placed, pageHeight: r.pageHeight, folios: r.folios };
 }
 
 export function downloadPdf(bytes: Uint8Array, filename: string) {

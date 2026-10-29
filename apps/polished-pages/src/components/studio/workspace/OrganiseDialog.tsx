@@ -8,6 +8,7 @@ import { applyOrganise, editPart, joinToPrevious, type Organised, type OrganiseO
 import { SECTION_KINDS, kindDef, words } from "@/lib/manuscript";
 import { Input } from "@/components/ui/input";
 import { STUDIO_ACCEPT } from "@/lib/claude-studio";
+import { arrangeBook } from "@/lib/arrange-book";
 import { EYEBROW, GRADIENT } from "./ui";
 
 // Organise into chapters and sections (DESIGN-SPEC.md §19): a book uploaded here, the uploaded
@@ -28,6 +29,8 @@ export default function OrganiseDialog({ hasManuscript, hasUploads, readText, or
 }) {
   const [source, setSource] = useState<OrganiseSource>(hasManuscript ? "manuscript" : "uploads");
   const [titles, setTitles] = useState<OrganiseOptions["titles"]>("keep");
+  // The book's own typed contents list is its author's map: used first when the book has one (no Claude needed).
+  const [method, setMethod] = useState<"contents" | "claude">("contents");
   const [instructions, setInstructions] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +43,8 @@ export default function OrganiseDialog({ hasManuscript, hasUploads, readText, or
       setBusy("Reading the book…");
       const text = await readText(from);
       if (!text?.trim()) throw new Error(from === "uploads" ? "The uploaded book has no text yet. On its card in Sources, use “open it (password or scanned pages)” first." : "The manuscript is empty.");
+      const own = method === "contents" ? arrangeBook(text) : null;
+      if (own) { setResult(own); return; }
       setBusy(`Claude is finding the chapters and sections of ${words(text).toLocaleString()} words. A long book can take a few minutes.`);
       const plan = await organise(text, { titles, instructions: instructions.trim() || undefined });
       setResult(applyOrganise(text, plan));
@@ -80,6 +85,17 @@ export default function OrganiseDialog({ hasManuscript, hasUploads, readText, or
               </div>
             </fieldset>
             <fieldset className="space-y-1.5">
+              <legend className="mb-1.5 text-sm font-medium">How to find the chapters</legend>
+              <div role="radiogroup" className="grid gap-2 sm:grid-cols-2">
+                {([["contents", "From the book's own contents", "When the book has a typed contents list, it is the map: each entry is found where it begins. Claude reads the book only when there is no list"], ["claude", "Claude reads the book", "Claude finds the front matter, chapters, sections and back matter itself"]] as const).map(([id, label, line]) => (
+                  <button key={id} type="button" role="radio" aria-checked={method === id} onClick={() => setMethod(id)}
+                    className={`rounded-[10px] border px-3 py-2.5 text-left ${method === id ? "border-[#2563EB] bg-[#EAF1FF] dark:bg-[#1E3A8A]/30" : "border-border hover:bg-muted/50"}`}>
+                    <span className="block text-[13.5px] font-medium">{label}</span><span className="mt-0.5 block text-[12px] text-[#64748B]">{line}</span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset className="space-y-1.5">
               <legend className="mb-1.5 text-sm font-medium">Titles</legend>
               <div role="radiogroup" className="grid gap-2 sm:grid-cols-2">
                 {([["keep", "Keep the author's titles", "Where the book has a heading, it stays; untitled parts get a short title"], ["improve", "Write clear titles", "Professional titles that say what each chapter and section is about"]] as const).map(([id, label, line]) => (
@@ -103,7 +119,18 @@ export default function OrganiseDialog({ hasManuscript, hasUploads, readText, or
             {(result.missed.length > 0 || result.notes) && (
               <div className="space-y-1 rounded-[10px] border border-amber-200 bg-[#FFFBEB] px-3 py-2 text-[13px] dark:border-amber-500/30 dark:bg-amber-500/10">
                 {result.missed.length > 0 && <p className="flex items-start gap-1.5"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#92400E]" /> Not found in the text, so their words stay with the part before: {result.missed.join("; ")}</p>}
-                {result.notes && <p><span className="font-medium">Claude notes: </span>{result.notes}</p>}
+                {result.notes && <p><span className="font-medium">{result.setAside ? "Notes: " : "Claude notes: "}</span>{result.notes}</p>}
+              </div>
+            )}
+            {result.setAside && (
+              <div className="space-y-2 rounded-[10px] border border-[#E6E8ED] px-3 py-2.5 text-[13px] dark:border-white/10">
+                <p className="font-medium">Arranged from the book's own contents list</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <label className="block text-[12px] text-[#64748B]">Title<Input value={result.title ?? ""} onChange={(e) => setResult({ ...result, title: e.target.value })} className="mt-1 h-8 text-[13px] text-foreground" /></label>
+                  <label className="block text-[12px] text-[#64748B]">Subtitle<Input value={result.subtitle ?? ""} onChange={(e) => setResult({ ...result, subtitle: e.target.value })} className="mt-1 h-8 text-[13px] text-foreground" /></label>
+                </div>
+                <p className="text-[12.5px] text-[#475569] dark:text-[#CBD5E1]">Taken out of the text, not lost (the manuscript as it was can be restored from Plan):</p>
+                <ul className="list-disc space-y-0.5 pl-5 text-[12.5px] text-[#475569] dark:text-[#CBD5E1]">{result.setAside.map((x) => <li key={x}>{x}</li>)}</ul>
               </div>
             )}
             <p className={EYEBROW}>Contents</p>
@@ -134,7 +161,7 @@ export default function OrganiseDialog({ hasManuscript, hasUploads, readText, or
           {!result ? (<>
             <Button variant="ghost" onClick={onClose} disabled={Boolean(busy)}>Cancel</Button>
             <Button className={`rounded-full ${GRADIENT}`} disabled={Boolean(busy) || (source === "manuscript" ? !hasManuscript : !hasUploads)} onClick={() => void run()}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListTree className="h-4 w-4" />} Organise the book{engineLabel ? ` · ${engineLabel}` : ""}
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListTree className="h-4 w-4" />} Organise the book{engineLabel && method === "claude" ? ` · ${engineLabel}` : ""}
             </Button>
           </>) : (<>
             <Button variant="ghost" onClick={() => setResult(null)}>Change the options</Button>
