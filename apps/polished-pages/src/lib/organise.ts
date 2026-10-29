@@ -46,7 +46,8 @@ const folded = (t: string) => fold(t).s;
 /** A short line that is a heading (not a sentence of the book). */
 function headingLine(line: string, title: string): boolean {
   const l = line.trim();
-  if (!l || l.length > 90 || l.split(/\s+/).length > 14 || /[.!?]\s+\S/.test(l)) return false;
+  // "2. Theophanies" is a numbered heading, not a sentence: the number's full stop doesn't count.
+  if (!l || l.length > 90 || l.split(/\s+/).length > 14 || /[.!?]\s+\S/.test(l.replace(/^(chapter\s+|part\s+)?[\divxlc]+[.):]\s+/i, ""))) return false;
   const fl = folded(l), ft = folded(title);
   return isChapterLine(l) || /^#{1,6}\s/.test(l) || (l === l.toUpperCase() && /\p{L}/u.test(l)) || (fl.length > 0 && (fl === ft || ft.includes(fl) || fl.includes(ft)));
 }

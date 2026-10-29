@@ -45,4 +45,16 @@ describe("organise dialog", () => {
     fireEvent.click(screen.getByRole("button", { name: /Organise the book/ }));
     expect(await screen.findByRole("alert")).toHaveTextContent("no text yet");
   });
+
+  it("organises the manuscript again from the version before the last organising, from the book's own contents", async () => {
+    const readText = vi.fn(async () => "Contents\nIntroduction\n1. One Yahuah\n2. The Nature of Yahuah\nIntroduction\nThis book sets out what the scriptures teach about the one Yahuah, chapter by chapter, in order.\n1. One Yahuah\nBoth testaments confess that Yahuah is one, and the Shema stands at the centre of that confession.\n2. The Nature of Yahuah\nYahuah is spirit, eternal and holy; he does not change, and his word stands for ever and ever.");
+    const organise = vi.fn();
+    render(<OrganiseDialog hasManuscript hasUploads={false} hasEarlier readText={readText} organise={organise} upload={async () => {}} onApply={() => {}} onClose={() => {}} />);
+    fireEvent.click(screen.getByRole("radio", { name: /As it was before the last organising/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Organise the book/ }));
+    expect(await screen.findByText(/Arranged from the book's own contents list/)).toBeTruthy();
+    expect(readText).toHaveBeenCalledWith("earlier");
+    expect(organise).not.toHaveBeenCalled();
+    expect(screen.getByText(/Chapter 2 ·/)).toBeTruthy();
+  });
 });

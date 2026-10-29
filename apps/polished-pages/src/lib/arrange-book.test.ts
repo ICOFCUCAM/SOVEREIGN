@@ -85,3 +85,28 @@ describe("arrangeBook", () => {
     expect(o.sections[1].body).not.toMatch(/COMPLETE MANUSCRIPT|^Contents/m);
   });
 });
+
+describe("a contents list where a section has its chapter's name", () => {
+  // The Oneness of Yahuah: chapter 5 "Theophanies" opens with a section also called "Theophanies".
+  const P = (s: string) => `${s} is set out here at length, with the scriptures that bear on it, so the reader can follow it closely.`;
+  const book = [
+    "THE ONENESS OF YAHUAH", "The Biblical Identity of Yahusha and the Doctrine of the Godhead", "COMPLETE MANUSCRIPT", "Contents",
+    "Introduction", "The Aim of This Book",
+    "1. One Yahuah: The Faith of Both Testaments", "What Monotheism Means",
+    "2. Theophanies", "Theophanies", "Theophanies: The Appearance to Abraham", "The Angel of Yahuah",
+    "3. Reading the Gospels Rightly", "Four Aids to Understanding",
+    "Conclusion",
+    "Introduction", P("This book"), "The Aim of This Book", P("The aim"),
+    "1. One Yahuah: The Faith of Both Testaments", P("Both testaments"), "What Monotheism Means", P("Monotheism"),
+    "2. Theophanies", P("A theophany"), "Theophanies", P("The appearances"), "Theophanies: The Appearance to Abraham", P("Abraham"), "The Angel of Yahuah", P("The angel"),
+    "3. Reading the Gospels Rightly", P("The gospels"), "Four Aids to Understanding", P("Four aids"),
+    "Conclusion", P("In conclusion"),
+  ].join("\n");
+  it("reads the whole list, so every chapter is split out and nothing is left over as 'Opening pages'", () => {
+    const o = arrangeBook(book)!;
+    expect(o.sections.map((s) => s.title)).toEqual(["Introduction", "One Yahuah: The Faith of Both Testaments", "Theophanies", "Reading the Gospels Rightly", "Conclusion"]);
+    expect(o.sections.find((s) => s.title === "Theophanies")!.body).toMatch(/^A theophany[\s\S]*### Theophanies\n\nThe appearances[\s\S]*### Theophanies: The Appearance to Abraham[\s\S]*### The Angel of Yahuah/);
+    expect(o.sections.some((s) => s.title === "Opening pages")).toBe(false);
+    expect(o.missed).toEqual([]);
+  });
+});

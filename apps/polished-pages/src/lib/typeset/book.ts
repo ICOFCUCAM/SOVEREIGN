@@ -65,7 +65,7 @@ export interface BookTypeOptions {
   /** Where Arabic page numbers begin (preliminary pages before it take lower-case Roman numerals):
    *  at the Introduction (when the book has one before Chapter 1) or at Chapter 1. */
   arabicFrom?: "introduction" | "chapter";
-  /** Contents depth: chapters only (1), or chapters with their sections (2). */
+  /** Contents depth: chapters only (1), or chapters with their sections (2, the default). */
   tocDepth?: 1 | 2;
 }
 /** A chapter that ends with only a line or two on its last page. */
@@ -288,7 +288,8 @@ async function build(markdown: string, o: BookTypeOptions, gutterMm: number) {
   }
 
   // ── Reserve the contents ──
-  const depth = o.tocDepth ?? 1;
+  // The contents list chapters and their sections unless the author chooses chapters only.
+  const depth = o.tocDepth ?? 2;
   const chapters = blocks.filter((b) => (b.kind === "h1" && !b.display) || (depth === 2 && b.kind === "h2"));
   // The contents follow the book's type size (a large-print book has large-print contents).
   const tocSize = Math.max(11, Math.round(size * 0.95));

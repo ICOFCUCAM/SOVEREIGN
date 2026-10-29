@@ -19,6 +19,9 @@ export function frontMatterChecks(m: Manuscript): FormatCheck[] {
   const out: FormatCheck[] = [];
   const live = m.sections.filter((s) => !s.omit);
   const matter = live.filter((s) => kindDef(s.kind).group !== "body");
+  // Text an organising left unplaced ("Opening pages") is not a chapter of the book.
+  const leftover = live.find((s) => s.title === "Opening pages");
+  if (leftover) out.push({ ok: false, level: "required", text: "“Opening pages” holds text the organising couldn't place (it would print as a chapter): look at it, or organise the book again", fix: "section", sectionId: leftover.id });
   // Order.
   const { moved } = conventionalOrder(live);
   out.push(moved.length
